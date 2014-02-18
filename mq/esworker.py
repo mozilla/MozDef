@@ -1,0 +1,251 @@
+#!/usr/bin/env python
+import time
+import pyes
+from datetime import datetime
+from dateutil.parser import parse
+import pytz
+import sys
+import json
+from configlib import getConfig,OptionParser
+from kombu import Connection,Queue,Exchange
+from kombu.mixins import ConsumerMixin
+import kombu
+
+def toUTC(suspectedDate,localTimeZone=None):
+    '''make a UTC date out of almost anything'''
+    utc=pytz.UTC
+    objDate=None
+    if localTimeZone is None:
+        localTimeZone=options.defaultTimeZone
+    if type(suspectedDate) in (str,unicode):
+        objDate=parse(suspectedDate,fuzzy=True)
+    elif type(suspectedDate)==datetime:
+        objDate=suspectedDate
+    
+    if objDate.tzinfo is None:
+        objDate=pytz.timezone(localTimeZone).localize(objDate)
+        objDate=utc.normalize(objDate)
+    else:
+        objDate=utc.normalize(objDate)
+    if objDate is not None:
+        objDate=utc.normalize(objDate)
+        
+    return objDate.isoformat()
+
+def removeDictAt(aDict):
+    '''remove the @ symbol from any field/key names'''
+    returndict=dict()
+    for k,v in aDict.iteritems():
+        k=k.replace('@','')
+        returndict[k]=v
+    return returndict
+
+def removeAt(astring):
+    '''remove the leading @ from a string'''
+    return astring.replace('@','')
+
+def isCEF(aDict):
+    #determine if this is a CEF event
+    #could be an event posted to the /cef http endpoint
+    if 'endpoint' in aDict.keys() and aDict['endpoint']=='cef':
+        return True
+    #maybe it snuck in some other way
+    #check some key CEF indicators (the header fields)
+    if 'fields' in aDict.keys():
+    
+        lowerKeys=[s.lower() for s in aDict['fields'].keys()]
+        if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
+            return True
+    return False
+
+def keyMapping(aDict):
+    '''map common key/fields to a normalized structure,
+       explicitly typed when possible to avoid schema changes for upsteam consumers
+       Special accomodations made for logstash,nxlog, beaver, heka and CEF
+       Some shippers attempt to conform to logstash-style @fieldname convention.
+       This strips the leading at symbol since it breaks some elastic search libraries like elasticutils.
+    '''
+    returndict=dict()
+
+    #save the source event for chain of custody/forensics
+    #returndict['original']=aDict
+    
+    if 'utctimestamp' not in returndict.keys():
+        #default in case we don't find a reasonable timestamp
+        returndict['utctimestamp']=toUTC(datetime.now())
+    
+    #set the timestamp when we received it, i.e. now
+    returndict['receivedtimestatmp']=toUTC(datetime.now())
+    try: 
+        for k,v in aDict.iteritems():
+            
+            if removeAt(k.lower()) in ('message','summary'):
+                returndict[u'summary']=str(v)
+                
+            if removeAt(k.lower()) in ('eventtime','timestamp'):
+                returndict[u'utctimestamp']=toUTC(v)
+                returndict[u'timestamp']=parse(v,fuzzy=True).isoformat()
+                
+            if removeAt(k.lower()) in ('hostname','source_host','host'):
+                returndict[u'hostname']=str(v)
+            
+    
+            if removeAt(k.lower()) in ('tags'):
+                if len(v)>0:
+                    returndict[u'tags']=v
+    
+            #nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
+            if removeAt(k.lower()) in ('syslogseverity','severity','severityvalue','level'):
+                returndict[u'severity']=str(v).upper()
+                
+            if removeAt(k.lower()) in ('facility','syslogfacility'):
+                returndict[u'facility']=str(v)
+    
+            if removeAt(k.lower()) in ('pid','processid'):
+                returndict[u'processid']=str(v)
+            
+            #nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
+            if removeAt(k.lower()) in ('pname','processname','sourcename'):
+                returndict[u'processname']=str(v)
+            
+            #the file, or source
+            if removeAt(k.lower()) in ('path','logger','file'):
+                returndict[u'eventsource']=str(v)
+    
+            if removeAt(k.lower()) in ('type','eventtype','category'):
+                returndict[u'eventtype']=str(v)
+    
+            #custom fields as a list/array
+            if removeAt(k.lower()) in ('fields','details'):
+                if len(v)>0:
+                    returndict[u'details']=v
+            
+            #custom fields/details as a one off, not in an array fields.something=value or details.something=value
+            if removeAt(k.lower()).startswith('fields.') or removeAt(k.lower()).startswith('details.'):
+                #custom/parsed field
+                returndict[unicode(k.lower().replace('fields','details'))]=str(v)
+    except Exception as e:
+        sys.stderr.write('esworker exception normalizing the message %r\n'%e)
+        return None
+
+    return returndict
+
+def esConnect(conn):
+    '''open or re-open a connection to elastic search'''
+    if isinstance(conn,pyes.es.ES):
+        return pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+    else:
+        return pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+
+class taskConsumer(ConsumerMixin):
+
+    def __init__(self, mqConnection,taskQueue,topicExchange,esConnection):
+        self.connection = mqConnection
+        self.esConnection=esConnection
+        self.taskQueue=taskQueue
+        self.topicExchange=topicExchange
+        self.mqproducer = self.connection.Producer(serializer='json')
+
+    def get_consumers(self, Consumer, channel):
+        #return [
+        #    Consumer(self.taskQueue, callbacks=[self.on_message], accept=['json']),
+        #]
+        consumer=Consumer(self.taskQueue, callbacks=[self.on_message], accept=['json'])
+        consumer.qos(prefetch_count=options.prefetch)
+        return [consumer]
+
+    def on_message(self, body, message):
+        #print("RECEIVED MESSAGE: %r" % (body, ))
+        try:
+            #just to be safe..check what we were sent.
+            if isinstance(body,dict):
+                bodyDict=body
+            elif isinstance(body,str) or isinstance(body,unicode):
+                try: 
+                    bodyDict=json.loads(body)   #lets assume it's json
+                except ValueError as e:
+                    #not json..ack but log the message
+                    sys.stderr.write("esworker exception: unknown body type received %r\n"%body)
+                    message.ack()
+                    return
+            else:
+                sys.stderr.write("esworker exception: unknown body type received %r\n"%body)
+            #normalize the dict
+            normalizedDict=keyMapping(bodyDict)
+            
+            #send the dict to elastic search and to the events task queue
+            if normalizedDict is not None and isinstance(normalizedDict,dict) and normalizedDict.keys():       #could be empty,or invalid
+                #make a json version for posting to elastic search
+                jbody=json.JSONEncoder().encode(normalizedDict)
+                
+                #figure out what type of document we are indexing and post to the elastic search index.
+                doctype='event'
+                if isCEF(bodyDict):
+                    #cef records are set to the 'deviceproduct' field value.
+                    doctype='cef'
+                    if 'deviceproduct' in bodyDict['fields'].keys():
+                        #don't create strange doc types..
+                        if ' ' not in bodyDict['fields']['deviceproduct'] and '.' not in bodyDict['fields']['deviceproduct']:
+                            doctype=bodyDict['fields']['deviceproduct']
+                try:
+                    res=self.esConnection.index(index='events',doc_type=doctype,doc=jbody)
+                except (pyes.exceptions.NoServerAvailable,pyes.exceptions.InvalidIndexNameException) as e:
+                    #handle loss of server or race condition with index rotation/creation/aliasing
+                    try:
+                        self.esConnection=esConnect(None)
+                        message.requeue()
+                        return
+                    except kombu.exceptions.MessageStateError:
+                        #state may be already set.
+                        return
+                #print(' [*] elasticsearch:{0}'.format(res))
+                #post the dict (kombu serializes it to json) to the events topic queue
+                #using the ensure function to shortcut connection/queue drops/stalls, etc.
+                ensurePublish=self.connection.ensure(self.mqproducer,self.mqproducer.publish,max_retries=10)
+                ensurePublish(normalizedDict,exchange=self.topicExchange,routing_key='mozdef.event')
+                
+            message.ack()
+        except ValueError as e:
+            sys.stderr.write("esworker exception in events queue %r\n"%e)
+
+def main():    
+    #connect and declare the message queue/kombu objects.
+    connString='amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,options.mqpassword,options.mqserver,options.mqport)
+    mqConn=Connection(connString)
+    #Task Exchange for events sent via http for us to normalize and post to elastic search
+    eventTaskExchange=Exchange(name=options.taskexchange,type='direct',durable=True)
+    eventTaskExchange(mqConn).declare()
+    #Queue for the exchange
+    eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange,routing_key=options.taskexchange)
+    eventTaskQueue(mqConn).declare()
+    
+    #topic exchange for anyone who wants to queue and listen for mozdef.event
+    eventTopicExchange=Exchange(name=options.eventexchange,type='topic',durable=False,delivery_mode=1)
+    eventTopicExchange(mqConn).declare()
+    
+    #consume our queue and publish on the topic exchange
+    taskConsumer(mqConn,eventTaskQueue,eventTopicExchange,es).run()
+    
+
+def initConfig():
+    #change this to your default zone for when it's not specified
+    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
+    options.mqserver=getConfig('mqserver','localhost',options.configfile)
+    options.taskexchange=getConfig('taskexchange','eventtask',options.configfile)
+    options.eventexchange=getConfig('eventexchange','events',options.configfile)
+    options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
+    #how many messages to ask for at once.
+    options.prefetch=getConfig('prefetch',50,options.configfile)
+    options.mquser=getConfig('mquser','guest',options.configfile)
+    options.mqpassword=getConfig('mqpassword','guest',options.configfile)
+    options.mqport=getConfig('mqport',5672,options.configfile)    
+
+if __name__ == '__main__':
+    parser=OptionParser()
+    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
+    (options,args) = parser.parse_args()
+    initConfig()
+    #open ES connection globally so we don't waste time opening it per message
+    #es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+    es=esConnect(None)
+    main()
