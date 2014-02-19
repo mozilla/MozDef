@@ -1,0 +1,44 @@
+<!--new incident form -->
+<template name="addincidentform">
+    <form id="addincidentform" class="form-horizontal" style="margin: 0px 30% 20px;">
+        <legend>New Incident</legend>
+        <fieldset>
+            <!-- Summary -->        
+            <div class="control-group">
+              <label class="control-label" for="incidentSummary">Incident Summary</label>
+              <div class="controls">
+                <input id="incidentSummary" name="incidentSummary" placeholder="summary" class="input-xlarge incidentSummary" required="" type="text">
+              </div>
+            </div>            
+            <!-- date Opened -->
+            <div class="control-group">
+                <label class="control-label" for="dateOpened">Date Opened</label>
+                <div class="controls">
+                    <input class="input-xlarge dateOpened" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{now}}">
+                </div>
+
+            </div>
+            <!-- Phase -->
+            <div class="control-group">
+              <label class="control-label" for="phase">Phase</label>
+              <div class="controls">
+                <select id="phase" name="phase" class="input-xlarge">
+                  <option >Identification</option>
+                  <option>Containment</option>
+                  <option>Eradication</option>
+                  <option>Recovery</option>
+                  <option>Lessons Learned</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Button -->
+            <div class="control-group">
+              <label class="control-label" for="submit"></label>
+              <div class="controls">
+                <button id="submit" type="submit" name="submit" class="btn btn-primary submit">Save</button>
+              </div>
+            </div>            
+        </fieldset>
+    </form>
+</template>

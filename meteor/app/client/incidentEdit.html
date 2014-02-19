@@ -1,0 +1,116 @@
+<!--edit incident form -->
+<template name="editincidentform">
+<style>
+.controls .remove {
+    position: absolute;
+    top: 0;
+    right: 4px;
+    bottom: 0;
+    width: 16px;
+    background: url("/images/close_16.png") no-repeat 0 center;
+}
+.incidenttag{
+
+      border-radius: 10px ;
+    
+}
+
+.daterangepicker td{
+    color:black;
+}
+
+</style>
+    {{>veristags}}
+    {{#with incident}}
+    <form id="editincidentform" class="form-horizontal editincidentform" style="margin: 0px 30% 20px;">
+        <legend>Edit Incident</legend>
+        <fieldset>            
+            <div class="control-group">
+              <label class="control-label" for="incidentSummary">Summary</label>
+              <div class="controls">
+                <input id="incidentSummary" name="incidentSummary" placeholder="name" class="input-xlarge incidentSummary" required=""
+                type="text" value="{{summary}}">
+              </div>
+            </div>            
+
+            <div class="control-group">
+                <label class="control-label" for="dateOpened">Date Opened</label>
+                <div class="controls">
+                    <div class="input-prepend input-group">
+                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <input class="input dateOpened" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{dateOpened}}">
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="dateClosed">Date Closed</label>
+                <div class="controls">
+                    <div class="input-prepend input-group">
+                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <input class="form-control dateClosed" name="dateClosed" id="dateClosed" type="text" value="{{dateClosed}}">
+                    </div>
+                </div>
+            </div>                
+            <!-- Phase -->
+            <div class="control-group">
+              <label class="control-label" for="phase">Phase</label>
+              <div class="controls">
+                <select id="phase" name="phase" class="input-xlarge">
+                  <option {{ isselected 'Identification' phase }}>Identification</option>
+                  <option {{ isselected 'Containment' phase }}>Containment</option>
+                  <option {{ isselected 'Eradication' phase }}>Eradication</option>
+                  <option {{ isselected 'Recovery' phase }}>Recovery</option>
+                  <option {{ isselected 'Lessons Learned' phase }}>Lessons Learned</option>
+                </select>
+              </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="tags">Tags</label>
+                <div class="controls" id="tags">
+                    {{#each tags}}
+                        <div class="incidenttag">{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
+                    {{/each}}                      
+                    <div class="tags">drag to add a tag</div>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="dateReported">Timeline</label>
+                <div class="controls">
+                    <div class="input-prepend input-group input-append">
+                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <input class="form-control dateReported" name="dateReported" id="dateReported" type="text" value="{{dateReported}}">
+                        <span class="add-on" style="padding-right:12px">Reported</span>
+                    </div>
+                    <div class="input-prepend input-group input-append">
+                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <input class="form-control dateVerified" name="dateVerified" id="dateVerified" type="text" value="{{dateVerified}}"><span class="add-on" style="padding-right: 20px">Verified</span>
+                    </div>
+                    <div class="input-prepend input-group input-append">
+                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <input class="form-control dateMitigated" name="dateMitigated" id="dateMitigated" type="text" value="{{dateMitigated}}"><span class="add-on" style="padding-right:10px">Mitigated</span> 
+                    </div>                            
+                    <div class="input-prepend input-group input-append">
+                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <input class="form-control dateContained" name="dateContained" id="dateContained" type="text" value="{{dateContained}}"><span class="add-on" style="padding-right:7px">Contained</span> 
+                    </div>                            
+                </div>
+                    
+            </div>
+
+            
+            
+            
+            <!-- Button -->
+            <div class="control-group">
+              <label class="control-label" for="submit"></label>
+              <div class="controls">
+                <button id="submit" type="submit" name="submit" class="btn btn-primary submit">Save</button>
+              </div>
+            </div>            
+        </fieldset>
+    </form>
+
+    {{/with}}
+
+
+</template>

@@ -1,0 +1,33 @@
+<!--a striped table of incidents-->
+<template name="incidents">
+
+	<div class="incidents container">
+	<table class="table table-striped table-bordered table-hover table-condensed">
+		<thead>
+			<tr>             
+                <td>Summary</td>
+                <td>Phase</td>
+                <td>Opened</td>
+                <td>Closed</td>
+            </tr>
+		</thead>
+		<tbody>	
+		{{#each incident}}
+			{{>incident}}
+		{{/each}}
+		</tbody>
+	</table>
+    </div>
+</template>
+
+<!--each individual incident -->
+<template name="incident">
+
+			<tr>
+				<td>{{summary}}</td>
+                <td>{{phase}}</td>
+				<td>{{dateOpened}}</td>
+				<td>{{dateClosed}}</td>
+			</tr>
+
+</template>

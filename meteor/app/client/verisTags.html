@@ -1,0 +1,29 @@
+<template name="veristags">
+<style>
+.veristags{
+    position: relative;
+    float: right;
+    margin: 5px;
+    padding: 2px 7px;
+    font-size: 80%;
+    font-weight: bold;
+    background: #999;
+    color: #fff;    
+}
+.tag{
+    cursor: pointer;
+}
+
+</style>
+<form class="veristags form-search" role="form">
+    <div class="form-group">
+      <input type="search" class="form-control search-query tagfilter" id="tagfilter" placeholder="tag filter">
+    </div>
+    <div class="veristags">
+          {{#each veris}}
+              <div class="tag" draggable="true">{{tag}}</div>
+          {{/each}}    
+    </div>
+</form>
+
+</template>
