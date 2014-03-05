@@ -35,6 +35,13 @@ Router.map(function () {
         template: 'editincidentform',
         layoutTemplate: 'layout'
     });
+
+    this.route('attackers', {
+        path: '/incidents/attackers',
+        template: 'attackers',
+        layoutTemplate: 'layout'
+    });
+    
     
     this.route('logincounts', {
         path: '/logincounts',
