@@ -1,11 +1,15 @@
 if (Meteor.isClient) {
     //defaults: 
     Session.set('verisfilter','filter')
+    Session.set('rotate',.001)
+    sceneCamera=''
+    sceneObjects=[]
     
     //debug/testing functions
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')
             console.log("mozdef starting");
+            console.log("meteor sees: " + THREE.REVISION)
         return "mozdef: the mozilla defense platform";
     };
 
@@ -21,6 +25,10 @@ if (Meteor.isClient) {
         return new Date();
     });
 
+    Handlebars.registerHelper('mozdef',function(){
+        //return the mozdef server settings object.    
+        return mozdef 
+    });
     Handlebars.registerHelper('isselected',function(optionvalue,datavalue){
         if (optionvalue==datavalue){
             return 'selected="true"'
@@ -231,10 +239,132 @@ if (Meteor.isClient) {
             Session.set('displayMessage', null);
         }
     });
- 
+
+    Template.attackers.events({
+        "click": function(event,template){
+            console.log('attacker click event')
+            //console.log(sceneCamera)
+            camera=sceneCamera
+            //var objects = [];
+            var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+            projector = new THREE.Projector();
+            projector.unprojectVector( vector, camera );
+
+            var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+            var intersects = raycaster.intersectObjects( sceneObjects );
+
+            if ( intersects.length > 0 ) {
+                for ( var i = 0; i < intersects.length; i ++ ) {
+                    intersects[ i ].object.material.color.setHex( Math.random() * 0xffffff );
+                    console.log(intersects[i].object.name)
+                }
+            }
+        }
+    });
+  
+  //three.js code to render attackers visualization
+
+    
+    Template.attackers.rendered=function(){
+        container=document.getElementById('attackers-wrapper')
+        sceneObjects=[]
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(35, window.innerWidth/window.innerHeight, 0.1, 1000);
+        //var renderer = new THREE.WebGLRenderer();
+        //renderer.setSize(window.innerWidth, window.innerHeight);
+        var renderer = new THREE.WebGLRenderer( { antialias: false ,precision: 'lowp'} );
+        renderer.setSize( window.innerWidth,window.innerHeight );
+        //renderer.setClearColor( scene.fog.color, .1 );
+        //renderer.setClearColor(0xffffff,.1)
+        renderer.setClearColor(0x205799,.0005)
+
+
+        renderer.gammaInput = true;
+        renderer.gammaOutput = true;
+        renderer.shadowMapEnabled = true;
+
+        renderer.shadowMapCascade = true;
+        //renderer.shadowMapType = THREE.PCFSoftShadowMap;
+        renderer.shadowMapType = THREE.BasicShadowMap        
+        
+        
+        
+        //container=document.createElement('div');
+		//document.body.appendChild( container );
+        
+        // SCENE
+        scene = new THREE.Scene();
+//				// LIGHTS
+        //scene.add( new THREE.AmbientLight( 0x222222 ) );
+        scene.add( new THREE.AmbientLight( 0xffffff ) );
+
+        var light = new THREE.DirectionalLight( 0xffffff, 2 );
+        light.position.set( 200, 450, 500 );
+
+        light.castShadow = true;
+        light.shadowMapWidth = 1024;
+        light.shadowMapHeight = 1024;
+        light.shadowMapDarkness = 0.20;
+        //light.shadowCameraVisible = true;
+
+        light.shadowCascade = false;
+        light.shadowCascadeCount = 3;
+        light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
+        light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
+        light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
+        light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
+
+        scene.add( light );
+        //  GROUND
+
+        var gt = THREE.ImageUtils.loadTexture( "/images/concrete.jpg" );
+        //var gg = new THREE.PlaneGeometry( 16000, 16000 );
+        //var gm = new THREE.MeshPhongMaterial( { color: 0xffffff, map: gt } );
+        var gg = new THREE.PlaneGeometry( 120, 120 );
+        var gm = new THREE.MeshPhongMaterial( { color: 0xffffff, map: gt } );
+
+        var ground = new THREE.Mesh( gg, gm );
+        ground.rotation.x = - Math.PI / 2;
+        //ground.material.map.repeat.set( 64, 64 );
+        //ground.material.map.repeat.set( 2, 2 );
+        //ground.material.map.wrapS = ground.material.map.wrapT = THREE.RepeatWrapping;
+        ground.receiveShadow = true;
+
+        //scene.add( ground );
+        
+        //document.body.appendChild(renderer.domElement);
+        
+        var geometry = new THREE.CubeGeometry(1,1,1);
+        var material = new THREE.MeshBasicMaterial({color: 0xFFF8DC});
+		var ct = THREE.ImageUtils.loadTexture( "/images/concrete.jpg" );
+        //var cg = new THREE.PlaneGeometry( 120, 120 );
+        var cm = new THREE.MeshPhongMaterial( { color: 0xffffff, map: gt } );
+
+		//var cubeTexture = new THREE.Mesh( cg, cm );
+        
+        var cube = new THREE.Mesh(geometry, cm);
+        cube.name='bad attacker'
+        scene.add(cube);
+        sceneObjects.push(cube)
+        camera.position.z = 10;
+        var render = function () { requestAnimationFrame(render);
+            //cube.rotation.x += 0.001;
+            cube.rotation.x += Session.get('rotate');
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        };
+        container.appendChild( renderer.domElement );
+        sceneCamera=camera
+        render();        
+    }
+    
+
+  
   //d3 code to animate login counts
   Template.logincounts.rendered = function () {
-    
+    container=document.getElementById('logins-wrapper')
+    container.style.cursor='wait'
     var margin = {top: 0, right: 0, bottom: 0, left: 0},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom,
@@ -270,7 +400,7 @@ if (Meteor.isClient) {
         .range([0, maxRadius]);
     
         
-    d3.json("http://mozdefserver:restportnumber/ldapLogins/", function(error, jsondata) {
+    d3.json("https://mozdef1.private.scl3.mozilla.com:8444/ldapLogins/", function(error, jsondata) {
         //console.log(jsondata)
         r.domain([0, d3.max(jsondata, function(d) { return d.success+ d.failures; })])
         jsondata.forEach(function(d){
@@ -285,7 +415,7 @@ if (Meteor.isClient) {
     });
     
     function start() {
-    
+        container.style.cursor='auto'
         node = node.data(force.nodes(), function(d) { return d.id;});
         //console.log(node)
         //make a node for each entry
@@ -403,7 +533,8 @@ if (Meteor.isClient) {
 
   //d3 code to animate login counts
   Template.alertssummary.rendered = function () {
-
+    container=document.getElementById('alerts-wrapper')
+    container.style.cursor='wait'
     var margin = {top: 0, right: 0, bottom: 0, left: 0},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom,
@@ -439,7 +570,7 @@ if (Meteor.isClient) {
         .range([0, maxRadius]);
     
         
-    d3.json("http://mozdefserver:restportnumber/alerts/", function(error, jsondata) {
+    d3.json("https://mozdef1.private.scl3.mozilla.com:8444/alerts/", function(error, jsondata) {
         console.log(error)
         r.domain([0, d3.max(jsondata, function(d) { return d.count; })])
         jsondata.forEach(function(d){
@@ -452,7 +583,7 @@ if (Meteor.isClient) {
     });
     
     function start() {
-    
+        container.style.cursor='auto'
         node = node.data(force.nodes(), function(d) { return d.id;});
         //make a node for each entry
         node.enter()
