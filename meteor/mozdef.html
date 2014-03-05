@@ -14,9 +14,6 @@
       s.parentNode.insertBefore(t, s);
     })();
   </script>
-
-
-    
 <title>mozdef::mozilla defense platform</title>
 </head>
 <body>
@@ -27,20 +24,20 @@
                 <li class="first"><a href="/events/">Events</a>
                     <ul>
                         <li class="first"><a href="/logincounts/">logincounts</a></li>
-                        <li><a target=" _blank" href="http://pathtokibana">ldap kibana</a></li>
-                        <li class="last"><a target=" _blank" href={{>mozdef.eventsKibana }}</a>>events kibana</a></li>
+                        <li><a target=" _blank" href="{{{mozdef.ldapKibana}}}">ldap kibana</a></li>
+                        <li class="last"><a target=" _blank" href="{{{mozdef.eventsKibana}}}">events kibana</a></li>
                     </ul>
                 </li>
                  <li ><a href="/alerts/">Alerts</a>
                     <ul>
-                        <li class="first"><a target="_blank" href="http://pathtokibana">alerts kibana</a></li>
+                        <li class="first"><a target="_blank" href="{{{mozdef.alertsKibana}}}">alerts kibana</a></li>
                         <li class="last"><a href="/alerts/setup">setup</a></li>
                     </ul>
                 </li>   
                 <li><a href="/Incidents">Incidents</a>
                     <ul>
                         <li class="first"><a href="/incidents/new/">new incident</a></li>
-                        <li class="last"><a href="/incidents/weekly">placeholder</a></li>
+                        <li class="last"><a href="/incidents/attackers">attackers</a></li>
                     </ul>
                 </li>
                 <li><a href="/about">About</a></li>
@@ -69,7 +66,6 @@
 
   
 </body> 
-
 <!--begin layout templates-->
 <!--the main, simple layout for the router to target-->
 <template name="layout">
