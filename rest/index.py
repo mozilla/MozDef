@@ -176,7 +176,7 @@ def initConfig():
     options.esport=getConfig('esport',9200,options.configfile)
     
 if __name__ == "__main__":
-    qparser=OptionParser()
+    parser=OptionParser()
     parser.add_option("-c", dest='configfile' , default='index.conf', help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
