@@ -51,7 +51,6 @@ def bulkindex():
                     bottlelog('value error {0}'.format(i))
     return
 
-
 @route('/_status')
 @route('/_status/')
 @route('/nxlog/', method=['POST','PUT'])
@@ -76,6 +75,7 @@ def eventsindex():
         ensurePublish(eventDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
 
     return
+
 @route('/cef', method=['POST','PUT'])
 @route('/cef/',method=['POST','PUT'])
 #debug(True)
@@ -95,7 +95,8 @@ def cefindex():
         #post to eventtask exchange
         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
         ensurePublish(cefDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
-    return    
+    return
+
 def initConfig():
     #change this to your default zone for when it's not specified
     options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)

@@ -11,7 +11,6 @@ from logging.handlers import SysLogHandler
 import logging
 import re
 import datetime
-#from dateutil.parser import parser,parse
 import dateutil.parser
 import pyes
 
