@@ -83,7 +83,7 @@ def keyMapping(aDict):
     try: 
         for k,v in aDict.iteritems():
             
-            if removeAt(k.lower()) in ('message','summary'):
+            if removeAt(k.lower()) in ('message','summary','payload'):
                 returndict[u'summary']=str(v)
                 
             if removeAt(k.lower()) in ('eventtime','timestamp'):
