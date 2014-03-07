@@ -278,16 +278,7 @@
       "query": "*",
       "pinned": true,
       "history": [
-        "*",
-        "psackl",
-        "psacl",
-        "lars",
-        "justdave",
-        "vpn",
-        "mv-vpn01",
-        "ringring",
-        "sstorey",
-        "tfairfield"
+        "*"
       ],
       "remember": 10,
       "enable": true
