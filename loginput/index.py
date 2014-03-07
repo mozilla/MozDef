@@ -33,14 +33,11 @@ def bulkindex():
             for i in bulkpost.splitlines():
                 eventlist.append(i)
                 
-            if connection is None or connection.is_open==False:
-                openMQConnection()
-                
             for i in eventlist:
                 try:
                     #valid json?
                     try:
-                        eventDict=json.loads(anevent)
+                        eventDict=json.loads(i)
                     except ValueError as e:
                         response.status=500
                         return
