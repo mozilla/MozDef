@@ -216,8 +216,6 @@ if (Meteor.isClient) {
             incidents.insert({
                 summary: template.find("#incidentSummary").value,
                 dateOpened: template.find("#dateOpened").value,
-                dateClosed: template.find("#dateClosed").value,
-                
                 phase: template.find("#phase").value
             });
             Router.go('/incidents/')
