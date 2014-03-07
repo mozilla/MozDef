@@ -18,8 +18,13 @@ Meteor.methods({
             esDocStatsRequest=HTTP.get(elasticsearch.address + elasticsearch.docstatsurl)
             if (esDocStatsRequest.statusCode==200 && esDocStatsRequest.data ) {
               //set the current doc stats
-              esHealthRequest["data"]["total_docs"]=esDocStatsRequest["data"]["_all"]["total"]["docs"].count
-              console.log('Total Docs: '+ esDocStatsRequest["data"]["_all"]["total"]["docs"].count)
+              if (esDocStatsRequest["data"]["_all"]["total"]["docs"]) {
+                esHealthRequest["data"]["total_docs"]=esDocStatsRequest["data"]["_all"]["total"]["docs"].count
+              }
+              else {
+                esHealthRequest["data"]["total_docs"] = 0
+              }
+              console.log('Total Docs: '+ esHealthRequest["data"]["total_docs"])
             }
 
             //set current status of the elastic search cluster
