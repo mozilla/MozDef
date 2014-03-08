@@ -16,7 +16,7 @@ def esRotateIndexes():
     print('[*]\tcurrent indexes: {0}'.format(indexes))
     
     #set index names events-MMYYDD, etc.
-    dtNow=datetime.now()
+    dtNow=datetime.utcnow()
     indexSuffix=date.strftime(dtNow,'%Y%m%d')
     eventsIndexName='events-{0}'.format(indexSuffix)
     alertsIndexName='alerts-{0}'.format(indexSuffix)
