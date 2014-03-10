@@ -1,9 +1,9 @@
 if (Meteor.isClient) {
     //defaults: 
-    Session.set('verisfilter','filter')
-    Session.set('rotate',.001)
-    sceneCamera=''
-    sceneObjects=[]
+    Session.set('verisfilter','');
+    Session.set('rotate',.001);
+    sceneCamera='';
+    sceneObjects=[];
     
     //debug/testing functions
     Template.hello.greeting = function () {
