@@ -29,5 +29,9 @@ License
 
 :doc:`license`
 
-Credits
+Contact
 =======
+
+* opsec INSERTAT mozilla.com
+* Jeff Bryner, jbryner INSERTAT mozilla.com
+* Anthony Verez, averez INSERTAT mozilla.com
