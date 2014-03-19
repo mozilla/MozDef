@@ -1,9 +1,9 @@
 if (Meteor.isClient) {
     //defaults: 
-    Session.set('verisfilter','filter')
-    Session.set('rotate',.001)
-    sceneCamera=''
-    sceneObjects=[]
+    Session.set('verisfilter','');
+    Session.set('rotate',.001);
+    sceneCamera='';
+    sceneObjects=[];
     
     //debug/testing functions
     Template.hello.greeting = function () {
@@ -56,7 +56,7 @@ if (Meteor.isClient) {
             //console.log('dragging ' + this.tag)
             e.dataTransfer.setData("text/plain",this.tag);
         },
-        'load': function(){
+	'load': function(e, template){
             template.find("#tagfilter").value=Session.get('verisfilter');
         }
     });
@@ -472,12 +472,13 @@ if (Meteor.isClient) {
         //size circle clips  
         node.selectAll("rect")
           .attr("y", function(d) { return -d.r - clipPadding; })
-          .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; });
+          .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; })
+          .attr("width", function(d) { return 2 * d.r + 2 * clipPadding; });
     
         node.select(".g-success rect")
           .style("display", function(d) { return d.k > 0 ? null : "none" })
           .attr("x", function(d) { return -d.r - clipPadding; })
-          .attr("width", function(d) { return 2 * d.r * d.k + clipPadding; });      
+          .attr("width", function(d) { return 2 * d.r + 2 * clipPadding; });      
        
         node.select(".g-success circle")
           .attr("clip-path", function(d) { return d.k < 1 ? "url(#g-clip-success-" + d.dn + ")" : null; });      
@@ -619,12 +620,13 @@ if (Meteor.isClient) {
         //size circle clips  
         node.selectAll("rect")
           .attr("y", function(d) { return -d.r - clipPadding; })
-          .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; });
+          .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; })
+          .attr("width", function(d) { return 2 * d.r + 2 * clipPadding; });
     
         node.select(".g-success rect")
           .style("display", function(d) { return d.k > 0 ? null : "none" })
           .attr("x", function(d) { return -d.r - clipPadding; })
-          .attr("width", function(d) { return 2 * d.r * d.k + clipPadding; });      
+          .attr("width", function(d) { return 2 * d.r + 2 * clipPadding; });
        
         node.select(".g-success circle")
           .attr("clip-path", function(d) { return d.k < 1 ? "url(#g-clip-success-" + d.dn + ")" : null; });      

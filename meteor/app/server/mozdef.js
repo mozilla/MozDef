@@ -20,12 +20,16 @@ if (Meteor.isServer) {
         
         
         //update veris if missing:
-        console.log("checking the veris framework reference enumeration")
-        console.log('tags: ' + veris.find().count())
+        console.log("checking the veris framework reference enumeration");
+        console.log('tags: ' + veris.find().count());
         if (veris.find().count()==0) {
-            console.log("updating the veris collection")
-            //verisRawJson=Assets.getText("verisc-enum.json")
-            //veris.insert(EJSON.parse(verisRawJson))
+            console.log("updating the veris collection");
+            var verisFile = Assets.getText("veris.dotformat.txt");
+            var verisObject = verisFile.split("\n");
+            verisObject.forEach(function(verisItem) {
+               //console.log({tag: verisItem});
+               veris.insert({tag: verisItem});
+            });
         }
         //delete/refresh incidents
         incidents.remove({});
