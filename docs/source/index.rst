@@ -3,16 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to MozDef's documentation!
-==================================
-
-Contents:
+Table of Contents
+=================
 
 .. toctree::
   :maxdepth: 2
 
-  meteor
-
+  overview
+  introduction
+  installation
+  usage
+  advanced_settings
+  public_api
+  code
 
 Indices and tables
 ==================
@@ -21,3 +24,10 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+License
+=======
+
+:doc:`license`
+
+Credits
+=======
