@@ -3,9 +3,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import os
 import time
 import pyes
-from datetime import datetime
+from datetime import datetime,timedelta
 from dateutil.parser import parse
 import pytz
 import sys
@@ -14,6 +15,8 @@ from configlib import getConfig,OptionParser
 from kombu import Connection,Queue,Exchange
 from kombu.mixins import ConsumerMixin
 import kombu
+import pynsive
+from operator import itemgetter
 
 def toUTC(suspectedDate,localTimeZone=None):
     '''make a UTC date out of almost anything'''
@@ -117,7 +120,7 @@ def keyMapping(aDict):
                 returndict[u'eventsource']=str(v)
     
             if removeAt(k.lower()) in ('type','eventtype','category'):
-                returndict[u'eventtype']=str(v)
+                returndict[u'category']=str(v)
     
             #custom fields as a list/array
             if removeAt(k.lower()) in ('fields','details'):
@@ -179,6 +182,10 @@ class taskConsumer(ConsumerMixin):
             
             #send the dict to elastic search and to the events task queue
             if normalizedDict is not None and isinstance(normalizedDict,dict) and normalizedDict.keys():       #could be empty,or invalid
+                #pass the event to any plug-ins we have registered
+                checkPlugins(pluginList,lastPluginCheck)
+                sendEventToPlugins(normalizedDict,pluginList)
+
                 #make a json version for posting to elastic search
                 jbody=json.JSONEncoder().encode(normalizedDict)
                 
@@ -212,6 +219,46 @@ class taskConsumer(ConsumerMixin):
         except ValueError as e:
             sys.stderr.write("esworker exception in events queue %r\n"%e)
 
+def registerPlugins():
+    pluginList=list()   #tuple of module,registration dict,priority
+    plugin_manager=pynsive.PluginManager()
+    if os.path.exists('plugins'):
+        modules=pynsive.list_modules('plugins')
+        for mname in modules:
+            module = pynsive.import_module(mname)
+            reload(module)
+            if not module:
+                raise ImportError('Unable to load module {}'.format(mname))
+            else:
+                if 'message' in dir(module):
+                    mclass=module.message()
+                    mreg=mclass.registration
+                    if 'priority' in dir(mclass):
+                        mpriority=mclass.priority
+                    else:
+                        mpriority=100
+                    if isinstance(mreg,dict):
+                        print('[*] plugin {0} registered to receive messages with {1}'.format(mname,mreg))
+                    pluginList.append((mclass,mreg,mpriority))
+    return pluginList
+
+def checkPlugins(pluginList,lastPluginCheck):
+    if abs(datetime.now()-lastPluginCheck).seconds>options.plugincheckfrequency:
+        #print('[*] checking plugins')
+        lastPluginCheck=datetime.now()
+        pluginList=registerPlugins()
+        return pluginList,lastPluginCheck
+    else:
+        return pluginList,lastPluginCheck
+
+def sendEventToPlugins(anevent,pluginList):
+    if not isinstance(anevent,dict):
+        raise TypeError('[-] event is type {0}, should be a dict'.format(type(anevent)))
+    #expecting tuple of module,criteria,priority in pluginList
+    for plugin in sorted(pluginList, key=itemgetter(2),reverse=False):
+        anevent=plugin[0].onMessage(anevent)
+    return anevent    
+
 def main():    
     #connect and declare the message queue/kombu objects.
     connString='amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,options.mqpassword,options.mqserver,options.mqport)
@@ -242,14 +289,26 @@ def initConfig():
     options.prefetch=getConfig('prefetch',50,options.configfile)
     options.mquser=getConfig('mquser','guest',options.configfile)
     options.mqpassword=getConfig('mqpassword','guest',options.configfile)
-    options.mqport=getConfig('mqport',5672,options.configfile)    
+    options.mqport=getConfig('mqport',5672,options.configfile)
+    
+    #plugin options
+    #secs to pass before checking for new/updated plugins
+    options.plugincheckfrequency=getConfig('plugincheckfrequency',120,options.configfile)
+    
 
 if __name__ == '__main__':
+    #configure ourselves
     parser=OptionParser()
     parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
+    
     #open ES connection globally so we don't waste time opening it per message
-    #es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
     es=esConnect(None)
+    
+    #force a check for plugins and establish the plugin list
+    pluginList=list()
+    lastPluginCheck=datetime.now()-timedelta(minutes=60)
+    pluginList,lastPluginCheck=checkPlugins(pluginList,lastPluginCheck)
+    
     main()
