@@ -102,7 +102,8 @@ def esAlertsSummary(begindateUTC=None, enddateUTC=None):
         #f=q.facet_raw(alerttype={"terms" : {"script_field" : "_source.type","size" : 500}})
         
         #get all alerts
-        q= S().es(urls=['http://{0}:{1}'.format(options.esserver,options.esport)]).query(_type='alert')
+        #q= S().es(urls=['http://{0}:{1}'.format(options.esserver,options.esport)]).query(_type='alert')
+        q= S().es(urls=list('{0}'.format(s) for s in options.esservers)).query(_type='alert')
         #create a facet field using the entire 'type' field  (not the sub terms) and filter it by date. 
         f=q.facet_raw(\
             alerttype={"terms" : {"script_field" : "_source.category"},\
@@ -124,7 +125,7 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         enddateUTC= datetime.now()
         enddateUTC= toUTC(enddateUTC)
     try:
-        es=pyes.ES(("http",options.esserver,options.esport))
+        es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
         #qDate=e=pyes.MatchQuery("message",options.datePhrase,"phrase")
         qDate=pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',from_value=begindateUTC,to_value=enddateUTC))
         q = pyes.MatchAllQuery()
@@ -172,18 +173,17 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
 def initConfig():
     #change this to your default zone for when it's not specified
     options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
-    options.esserver=getConfig('esserver','localhost',options.configfile)
-    options.esport=getConfig('esport',9200,options.configfile)
-    
+    options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
+    print(options)
 if __name__ == "__main__":
     parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default='index.conf', help="configuration file to use")
+    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
     run(host="localhost", port=8081)
 else:
     parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default='index.conf', help="configuration file to use")
+    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()    
     application = default_app()
