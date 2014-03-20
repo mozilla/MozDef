@@ -1,9 +1,14 @@
+Jinja2==2.7.2
+MarkupSafe==0.19
+Pygments==1.6
+Sphinx==1.2.2
 amqp==1.4.4
 anyjson==0.3.3
 boto==2.26.1
 bottle==0.12.4
 configlib==1.0.0
 configparser==3.3.0r2
+docutils==0.11
 elasticutils==0.8.2
 futures==2.1.6
 glob2==0.4.1
@@ -21,4 +26,5 @@ s3cmd==1.0.1
 simplejson==3.3.3
 six==1.5.2
 urllib3==1.7.1
+virtualenv==1.11.4
 wsgiref==0.1.2
