@@ -133,7 +133,7 @@ def createAlerts(es,esResults):
 def main():
     logger.debug('starting')
     logger.debug(options)
-    es=pyes.ES(("http",options.esserver,options.esport))
+    es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
     results=esCloudTrailSearch(es)
     createAlerts(es,results)
     logger.debug('finished')
@@ -150,8 +150,7 @@ def initConfig():
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)   #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
     #elastic search server settings
-    options.esserver=getConfig('esserver','localhost',options.configfile)
-    options.esport=getConfig('esport',9200,options.configfile)
+    options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     
 if __name__ == '__main__':
     parser=OptionParser()

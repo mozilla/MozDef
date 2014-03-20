@@ -55,7 +55,7 @@ def main():
     logger.debug('started')
     #logger.debug(options)
     try:
-        es=pyes.ES(("http",options.esserver,options.esport))
+        es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
         boto.connect_cloudtrail(aws_access_key_id=options.aws_access_key_id,aws_secret_access_key=options.aws_secret_access_key)
         #capture the time we start running so next time we catch any files created while we run.
         lastrun=toUTC(datetime.now()).isoformat()
@@ -109,8 +109,7 @@ def initConfig():
     options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to cloudtrail
     options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
-    options.esserver=getConfig('esserver','localhost',options.configfile)
-    options.esport=getConfig('esport',9200,options.configfile)
+    options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(hours=1)),options.configfile))
     options.purge=getConfig('purge',False,options.configfile)
  
