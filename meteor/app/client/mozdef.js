@@ -9,7 +9,6 @@ if (Meteor.isClient) {
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')
             console.log("mozdef starting");
-            console.log("meteor sees: " + THREE.REVISION)
         return "mozdef: the mozilla defense platform";
     };
 
@@ -56,7 +55,7 @@ if (Meteor.isClient) {
             //console.log('dragging ' + this.tag)
             e.dataTransfer.setData("text/plain",this.tag);
         },
-	'load': function(e, template){
+        'load': function(e, template){
             template.find("#tagfilter").value=Session.get('verisfilter');
         }
     });
@@ -398,7 +397,7 @@ if (Meteor.isClient) {
         .range([0, maxRadius]);
     
         
-    d3.json("https://mozdef1.private.scl3.mozilla.com:8444/ldapLogins/", function(error, jsondata) {
+    d3.json(mozdef.ldapLoginDataURL, function(error, jsondata) {
         //console.log(jsondata)
         r.domain([0, d3.max(jsondata, function(d) { return d.success+ d.failures; })])
         jsondata.forEach(function(d){
@@ -472,13 +471,12 @@ if (Meteor.isClient) {
         //size circle clips  
         node.selectAll("rect")
           .attr("y", function(d) { return -d.r - clipPadding; })
-          .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; })
-          .attr("width", function(d) { return 2 * d.r + 2 * clipPadding; });
+          .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; });
     
         node.select(".g-success rect")
           .style("display", function(d) { return d.k > 0 ? null : "none" })
           .attr("x", function(d) { return -d.r - clipPadding; })
-          .attr("width", function(d) { return 2 * d.r + 2 * clipPadding; });      
+          .attr("width", function(d) { return 2 * d.r * d.k + clipPadding; });      
        
         node.select(".g-success circle")
           .attr("clip-path", function(d) { return d.k < 1 ? "url(#g-clip-success-" + d.dn + ")" : null; });      
@@ -569,12 +567,13 @@ if (Meteor.isClient) {
         .range([0, maxRadius]);
     
         
-    d3.json("https://mozdef1.private.scl3.mozilla.com:8444/alerts/", function(error, jsondata) {
+    d3.json(mozdef.alertDataURL, function(error, jsondata) {
         console.log(error)
         r.domain([0, d3.max(jsondata, function(d) { return d.count; })])
         jsondata.forEach(function(d){
             d.id=d.term;
             d.r = r(d.count);
+            d.k = fraction(1, 0);//usually success/failure to make the circle all one color, set to 1,0
             d.cr = Math.max(minRadius, d.r);
             nodes.push(d)
             });
@@ -620,13 +619,12 @@ if (Meteor.isClient) {
         //size circle clips  
         node.selectAll("rect")
           .attr("y", function(d) { return -d.r - clipPadding; })
-          .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; })
-          .attr("width", function(d) { return 2 * d.r + 2 * clipPadding; });
+          .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; });
     
         node.select(".g-success rect")
           .style("display", function(d) { return d.k > 0 ? null : "none" })
           .attr("x", function(d) { return -d.r - clipPadding; })
-          .attr("width", function(d) { return 2 * d.r + 2 * clipPadding; });
+          .attr("width", function(d) { return 2 * d.r * d.k + clipPadding; });      
        
         node.select(".g-success circle")
           .attr("clip-path", function(d) { return d.k < 1 ? "url(#g-clip-success-" + d.dn + ")" : null; });      
