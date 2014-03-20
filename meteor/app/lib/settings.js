@@ -1,16 +1,18 @@
 //configuration settings
 
 elasticsearch={
-address:"http://localhost:9200/",
+address:"http://servername:9200/",
 healthurl:"_cluster/health",
 docstatsurl:"_stats/docs"
 }
 
 
 mozdef={
-    rootURL:"http://localhost",
-    port:"3000",
+    rootURL:"https://servername",
+    port:"443",
     ldapKibana:"http://servername:9090/#/dashboard/elasticsearch/mozdef%20ldap%20dashboard",
     eventsKibana:"http://servername:9090/index.html#/dashboard/elasticsearch/Logstash%20Style%20Search",
-    alertsKibana:"http://servername:9090/index.html#/dashboard/elasticsearch/Alerts"
+    alertsKibana:"http://servername:9090/index.html#/dashboard/elasticsearch/Alerts",
+    ldapLoginDataURL:"https://rest.servername:8444/ldapLogins/",
+    alertDataURL:"https://rest.servername:8444/alerts/"    
 }
