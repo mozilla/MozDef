@@ -31,6 +31,9 @@
 # Module usage:
 # import mozdef
 # msg = mozdef.MozDefMsg('https://127.0.0.1:8443/events')
+# msg.verify_certificate = False # not recommended, security issue.
+# msg.verify_certificate = True # uses default certs from /etc/ssl/certs
+# msg.verify_certificate = '/etc/path/to/custom/cert'
 # msg.send('hello there')
 # msg.send('hello again', details={'uid': 0})
 # another_msg = mozdef.MozDefMsg('https://127.0.0.1:8443/events', tags=['bro'])
@@ -44,6 +47,7 @@
 # and introduces a security issue. Use it for testing only.
 
 # TODO:
+# - Could report to syslog when fire_and_forget_mode is True and we fail
 # - Might be nicer to store the log msg as an object rather than a dict (such as MozDefLog.timestamp, MozDefLog.tags, etc.)
 # - Might want to limit category to well-known default categories instead of a string (such as "authentication", "daemon", etc.)
 # - Might want to limit severities to well-known default severities instead of a string (such as INFO, DEBUG, WARNING, CRITICAL, etc.)
@@ -68,10 +72,12 @@ class MozDefError(Exception):
 
 class MozDefMsg():
     httpsession = FuturesSession(max_workers=20)
-#turns off needless and repetitive .netrc check for creds
+#Turns off needless and repetitive .netrc check for creds
     httpsession.trust_env = False
     debug = False
     verify_certificate = True
+#Never fail (ie no unexcepted exceptions sent to user, such as server/network not responding)
+    fire_and_forget_mode = True
     log = {}
     log['timestamp']   = pytz.timezone('UTC').localize(datetime.now()).isoformat()
     log['hostname']    = socket.getfqdn()
@@ -120,15 +126,21 @@ class MozDefMsg():
            print(json.dumps(log_msg, sort_keys=True, indent=4))
            return
 
-        r = httpsession.post(self.mozdef_hostname, json.dumps(log_msg, sort_keys=True, indent=4), verify=self.verify_certificate)
-        if r.result().status_code != 200:
-            raise MozDefError("HTTP POST failed with code %r" % p.result().status_code)
+        try:
+            r = self.httpsession.post(self.mozdef_hostname, json.dumps(log_msg, sort_keys=True, indent=4), verify=self.verify_certificate, background_callback=self.httpsession_cb)
+        except Exception as e:
+            if not self.fire_and_forget_mode:
+                raise e
+
+    def httpsession_cb(self, session, response):
+        if response.result().status_code != 200:
+            if not self.fire_and_forget_mode:
+                raise MozDefError("HTTP POST failed with code %r" % response.result().status_code)
 
 if __name__ == "__main__":
     print("Testing the MozDef logging module (no msg sent over the network)")
-
     print("Simple msg:")
-    msg = MozDefMsg('127.0.0.1')
+    msg = MozDefMsg('https://127.0.0.1/events')
     msg.debug = True
     msg.send('test msg')
 
