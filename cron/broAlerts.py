@@ -51,6 +51,12 @@ def toUTC(suspectedDate,localTimeZone="US/Pacific"):
         
     return objDate
 
+def flattenDict(dictIn):
+    sout=''
+    for k,v in dictIn.iteritems():
+        sout+='{0}: {1} '.format(k,v)
+    return sout
+
 def alertToMessageQueue(alertDict):
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=options.mqserver))
@@ -107,7 +113,6 @@ def esSearch(es,begindateUTC=None, enddateUTC=None):
         #copy the hits.hits list as our resusts, which is the same as the official elastic search library returns.
         results=pyesresults._search_raw()['hits']['hits']
         for r in results:
-            print(r)
             resultsIndicators.append(r['_source']['details']['seenindicator'])
 
         #use the list of tuples ('indicator',count) to create a dictionary with:
@@ -142,12 +147,14 @@ def createAlerts(es,indicatorCounts):
                     alert['events'].append(dict(index=e['_index'],type=e['_type'],id=e['_id']))
                 alert['severity']='NOTICE'
                 alert['summary']=('{0} matches for indicator {1} '.format(i['count'],i['indicator']))
-                #for e in i['events']:
-                #    alert['eventsource'].append(json.loads(e))
-                alert['eventsource']=i['events']
+                for e in i['events']:
+                    #append the relevant events in text format to avoid errant ES issues.
+                    #should be able to just set eventsource to i['events'] but different versions of ES 1.0 complain
+                    alert['eventsource'].append(flattenDict(e))
+                #alert['eventsource']=i['events']
                 logger.debug(alert['summary'])
                 logger.debug(alert['events'])
-                #logger.debug(alert)
+                logger.debug(alert)
                 
                 #save alert to alerts index, update events index with alert ID for cross reference
                 alertResult=alertToES(es,alert)
@@ -156,7 +163,6 @@ def createAlerts(es,indicatorCounts):
                 #for each event in this list of indicatorCounts
                 #update with the alertid/index
                 #and update the alerttimestamp on the event itself so it's not re-alerted
-                
                 for e in i['events']:
                     if 'alerts' not in e['_source'].keys():
                         e['_source']['alerts']=[]
@@ -164,12 +170,6 @@ def createAlerts(es,indicatorCounts):
                     e['_source']['alerttimestamp']=toUTC(datetime.now()).isoformat()
                     es.update(e['_index'],e['_type'],e['_id'],document=e['_source'])
                 
-                #if 'alerts' not in r.keys():
-                #    r['alerts']=[]
-                #r['alerts'].append(dict(index=alertResult['_index'],type=alertResult['_type'],id=alertResult['_id']))
-                #r['alerttimestamp']=toUTC(datetime.now()).isoformat()
-                
-                #es.update(r.get_meta()['index'],r.get_meta()['type'],r.get_meta()['id'],document=r)
                 alertToMessageQueue(alert)
     except ValueError as e:
         logger.error("Exception %r when creating alerts "%e)
@@ -180,8 +180,6 @@ def main():
     es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
     #see if we have matches.
     indicatorCounts=esSearch(es)
-    #print(indicatorCounts,results[0])
-
     createAlerts(es,indicatorCounts)
     logger.debug('finished')
 
