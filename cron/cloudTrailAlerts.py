@@ -58,7 +58,7 @@ def alertToMessageQueue(alertDict):
         channel.exchange_declare(exchange=options.alertexchange,type='topic')
         
         #cherry pick items from the alertDict to send to the alerts messageQueue
-        mqAlert=dict(severity='INFO',type='')
+        mqAlert=dict(severity='INFO',category='')
         if 'severity' in alertDict.keys():
             mqAlert['severity']=alertDict['severity']
         if 'category' in alertDict.keys():
