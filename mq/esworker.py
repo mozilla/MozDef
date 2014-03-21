@@ -86,8 +86,16 @@ def keyMapping(aDict):
     try: 
         for k,v in aDict.iteritems():
             
-            if removeAt(k.lower()) in ('message','summary','payload'):
+            if removeAt(k.lower()) in ('message','summary'):
                 returndict[u'summary']=str(v)
+                
+            if removeAt(k.lower()) in ('payload') and 'summary' not in aDict.keys():
+                #special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
+                returndict[u'summary']=str(v)
+            elif removeAt(k.lower()) in ('payload'):
+                if 'details' not in returndict.keys():
+                    returndict[u'details']=dict()
+                returndict[u'details']['payload']=v
                 
             if removeAt(k.lower()) in ('eventtime','timestamp'):
                 returndict[u'utctimestamp']=toUTC(v)
@@ -127,10 +135,17 @@ def keyMapping(aDict):
                 if len(v)>0:
                     returndict[u'details']=v
             
-            #custom fields/details as a one off, not in an array fields.something=value or details.something=value
+            #custom fields/details as a one off, not in an array
+            #i.e. fields.something=value or details.something=value
+            #move them to a dict for consistency in querying
             if removeAt(k.lower()).startswith('fields.') or removeAt(k.lower()).startswith('details.'):
-                #custom/parsed field
-                returndict[unicode(k.lower().replace('fields','details'))]=str(v)
+                newName=k.lower().replace('fields.','')
+                newName=newName.lower().replace('details.','')
+                #add a dict to hold the details if it doesn't exist
+                if 'details' not in returndict.keys():
+                    returndict[u'details']=dict()                
+                #add field
+                returndict[u'details'][unicode(newName)]=str(v)
     except Exception as e:
         sys.stderr.write('esworker exception normalizing the message %r\n'%e)
         return None
