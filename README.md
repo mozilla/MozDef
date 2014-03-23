@@ -22,3 +22,7 @@ Goals:
 Status:
 --------
 MozDef is in early proof of concept phases at Mozilla.
+
+DOCS:
+-----
+http://mozdef.readthedocs.org/en/latest/
