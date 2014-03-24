@@ -198,8 +198,8 @@ class taskConsumer(ConsumerMixin):
             #send the dict to elastic search and to the events task queue
             if normalizedDict is not None and isinstance(normalizedDict,dict) and normalizedDict.keys():       #could be empty,or invalid
                 #pass the event to any plug-ins we have registered
-                checkPlugins(pluginList,lastPluginCheck)
-                sendEventToPlugins(normalizedDict,pluginList)
+                #checkPlugins(pluginList,lastPluginCheck)
+                #sendEventToPlugins(normalizedDict,pluginList)
 
                 #make a json version for posting to elastic search
                 jbody=json.JSONEncoder().encode(normalizedDict)
