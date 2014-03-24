@@ -53,7 +53,7 @@ MozDef is based on open source technologies including:
 * Nginx (http(s) based log input)
 * Rabbit-MQ (message queue)
 * UWSGI (supervisory control of python-based workers)
-* bottle.py (simple pyhon interface for web request handling)
+* bottle.py (simple python interface for web request handling)
 * Elastic Search (scalable indexing and searching of JSON documents)
 * Meteor (responsive framework for Node.js enabling real-time data sharing)
 * Mongo DB (scalable data store, tightly integrated to Meteor)
