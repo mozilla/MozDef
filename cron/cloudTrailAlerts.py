@@ -50,6 +50,12 @@ def toUTC(suspectedDate,localTimeZone="US/Pacific"):
         
     return objDate
 
+def flattenDict(dictIn):
+    sout=''
+    for k,v in dictIn.iteritems():
+        sout+='{0}: {1} '.format(k,v)
+    return sout
+
 def alertToMessageQueue(alertDict):
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=options.mqserver))
@@ -104,11 +110,11 @@ def createAlerts(es,esResults):
         if len(esResults)>0:
             for r in esResults:
                 alert=dict(utctimestamp=toUTC(datetime.now()).isoformat(),severity='INFO',summary='',category='AWSCloudtrail',tags=['cloudtrail','aws'],eventsource=[],events=[])
-                alert['events'].append(dict(index=r.get_meta()['index'],category=r.get_meta()['category'],id=r.get_meta()['id']))
+                alert['events'].append(dict(index=r.get_meta()['index'],type=r.get_meta()['type'],id=r.get_meta()['id']))
                 alert['eventtimestamp']=r['eventTime']
                 alert['severity']='INFO'
                 alert['summary']=('{0} called {1} from {2}'.format(r['userIdentity']['userName'],r['eventName'],r['sourceIPAddress']))
-                alert['eventsource']=r
+                alert['eventsource']=flattenDict(r)
                 if r['eventName']=='RunInstances':
                     for i in r['responseElements']['instancesSet']['items']:
                         alert['summary'] += (' running {0} '.format(i['privateDnsName']))
