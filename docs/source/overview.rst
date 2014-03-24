@@ -39,6 +39,7 @@ MozDef is based on open source technologies including:
 * Elastic Search (scalable indexing and searching of JSON documents)
 * Meteor (responsive framework for Node.js enabling real-time data sharing)
 * Mongo DB (scalable data store, tightly integrated to Meteor)
+* VERIS from verizon (open source taxonomy of security incident categorizations)
 
 Status
 ------
