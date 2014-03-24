@@ -27,11 +27,18 @@ Technical
 *********
 
 * Replace a SIEM
-* Scalable, should be able to insert more than 5,000 events/s and to provide fast searching.
+* Scalable, should be able to handle thousands of events/s, provide fast searching, alerting and correlations and handle interactions between teams of incident handlers.
 
 
 Architecture
 ------------
+MozDef is based on open source technologies including:
+1) Nginx (http(s) based log input)
+2) Rabbit-MQ (message queue)
+3) UWSGI (supervisory control of python-based workers)
+4) Elastic Search (scalable indexing and searching of JSON documents)
+5) Meteor (responsive framework for Node.js enabling real-time data sharing)
+6) Mongo DB (scalable data store, tightly integrated to Meteor)
 
 Status
 ------
