@@ -33,6 +33,7 @@ Technical
 Architecture
 ------------
 MozDef is based on open source technologies including:
+
 * Nginx (http(s) based log input)
 * Rabbit-MQ (message queue)
 * UWSGI (supervisory control of python-based workers)
