@@ -29,6 +29,22 @@ Technical
 * Replace a SIEM
 * Scalable, should be able to handle thousands of events/s, provide fast searching, alerting and correlations and handle interactions between teams of incident handlers.
 
+MozDef aims to provide traditional SIEM functionality including: 
+
+* Accepts events/logs from your systems
+* Stores the events/logs
+* Facilitate searches
+* Facilitate alerting
+* Facilitate log management (archiving,restoration)
+
+It is non-traditional in that it:
+
+* Accepts only JSON input
+* Provides you open access to your data
+* Integrates with a variety of log shippers including  heka, logstash, beaver, nxlog and any shipper that can send JSON to either rabbit-mq or an HTTP endpoint. 
+* Provides easy python plugins to manipulate your data in transit
+* Provides realtime access to teams of incident responders to allow each other to see their work simultaneously
+
 
 Architecture
 ------------
@@ -37,10 +53,13 @@ MozDef is based on open source technologies including:
 * Nginx (http(s) based log input)
 * Rabbit-MQ (message queue)
 * UWSGI (supervisory control of python-based workers)
+* bottle.py (simple python interface for web request handling)
 * Elastic Search (scalable indexing and searching of JSON documents)
 * Meteor (responsive framework for Node.js enabling real-time data sharing)
 * Mongo DB (scalable data store, tightly integrated to Meteor)
 * VERIS from verizon (open source taxonomy of security incident categorizations)
+* d3 (javascript library for data driven documents)
+* three.js (javascript library for 3d visualizations)
 
 Status
 ------
