@@ -11,6 +11,7 @@ Events/Logs are accepted as json over http(s) or over rabbit-mq. Most modern log
 * nxlog ( http://nxlog-ce.sourceforge.net/ )
 * logstash ( http://logstash.net/ )
 * native python code ( https://github.com/jeffbryner/MozDef/blob/master/lib/mozdef.py or  https://github.com/jeffbryner/MozDef/blob/master/test/json2Mozdef.py )
+* AWS cloudtrail (via native python)
 
 
 Web Interface
@@ -20,12 +21,16 @@ For authentication, MozDef ships with native support for Persona ( https://login
 Meteor (the underlying UI framework) also supports many authentication options ( http://docs.meteor.com/#accounts_api ) including google, github, twitter, facebook, oath, native accounts, etc.
 
 
-
-Events visualization
+Events visualizations
 ********************
+Since the backend of MozDef is Elastic Search, you get all the goodness of Kibana with little configuration.
+The MozDef UI is focused on incident handling and adding security-specific visualizations of SIEM data to help you weed through the noise.
+
 
 Alerts
 ******
+Alerts are generally implemented as Elastic Search searches, or realtime examination of the incoming message queues. MozDef provides a plugin interface to allow open access to event data for enrichment, hooks into other systems, etc. 
+
 
 Incident handling
 *****************
