@@ -33,12 +33,12 @@ Technical
 Architecture
 ------------
 MozDef is based on open source technologies including:
-1) Nginx (http(s) based log input)
-2) Rabbit-MQ (message queue)
-3) UWSGI (supervisory control of python-based workers)
-4) Elastic Search (scalable indexing and searching of JSON documents)
-5) Meteor (responsive framework for Node.js enabling real-time data sharing)
-6) Mongo DB (scalable data store, tightly integrated to Meteor)
+* Nginx (http(s) based log input)
+* Rabbit-MQ (message queue)
+* UWSGI (supervisory control of python-based workers)
+* Elastic Search (scalable indexing and searching of JSON documents)
+* Meteor (responsive framework for Node.js enabling real-time data sharing)
+* Mongo DB (scalable data store, tightly integrated to Meteor)
 
 Status
 ------
