@@ -100,7 +100,7 @@ def esSearch(es,begindateUTC=None, enddateUTC=None):
         qalerted=pyes.ExistsFilter('alerttimestamp')
         qdetails=pyes.ExistsFilter('details')
         qindicator=pyes.ExistsFilter('seenindicator')
-        pyesresults=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qType,qDate,qEvents,qdetails,qindicator],must_not=[qalerted])))
+        pyesresults=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qType,qDate,qEvents,qdetails,qindicator],must_not=[qalerted])),size=1000)
         #uncomment for debugging to recreate alerts for events that already have an alerttimestamp
         #results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents])))
         #logger.debug(results.count())
