@@ -1,6 +1,6 @@
 #!/bin/bash
-# herein we backup our indexes! this script should run at like 6pm or something, after logstash
-# rotates to a new ES index and theres no new data coming in to the old one. we create a snapshot,
+# herein we backup our indexes! this script should run at like 6pm or something, after you
+# rotate indexes to a new ES date index and theres no new data coming in to the old one. we create a snapshot,
 # create a restore script, and push it all up to S3.
 
 # Usage: ./backupES10.sh <esserverhostname> [index]
