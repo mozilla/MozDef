@@ -60,11 +60,34 @@ MozDef is based on open source technologies including:
 * VERIS from verizon (open source taxonomy of security incident categorizations)
 * d3 (javascript library for data driven documents)
 * three.js (javascript library for 3d visualizations)
+* Firefox (a snappy little web browser)
 
 Status
 ------
 
-MozDef is in early proof of concept phases at Mozilla.
+MozDef is in early proof of concept phases at Mozilla where we are using it to replace our current SIEM.
 
 Roadmap
 -------
+
+Near term: 
+
+* Replace base SIEM functionality including log input, event management, search, alerts, basic correlations. 
+* Enhance the incident workflow UI to enable realtime collaboration
+* Enable basic plug-ins to the event input stream for meta data, additional parsing, categorization and basic machine learning
+* Support as many common event/log shippers as possible with repeatable recipies
+
+Mid term:  
+
+* Repeatable installation guides
+* Ready-made AMIs/downloadable ISOs
+* Correlation through machine learning, AI
+* 3D visualizations of threat actors
+* Base integration into Mozilla's defense mechanisms for automation
+
+Long term: 
+
+* Integration into common defense mechanisms used outside Mozilla
+* Enhanced visualizations and interactions including alternative interfaces (myo,omnidirectional treadmills, oculus rift)
+
+
