@@ -117,7 +117,12 @@ def createAlerts(es,esResults):
                 alert['eventsource']=flattenDict(r)
                 if r['eventName']=='RunInstances':
                     for i in r['responseElements']['instancesSet']['items']:
-                        alert['summary'] += (' running {0} '.format(i['privateDnsName']))
+                        if 'privateDnsName' in i.keys():
+                            alert['summary'] += (' running {0} '.format(i['privateDnsName']))
+                        elif 'instanceId' in i.keys():
+                            alert['summary'] += (' running {0} '.format(i['instanceId']))
+                        else:
+                            alert['summary'] += (' running {0} '.format(flattenDict(i)))
                 if r['eventName']=='StartInstances':
                     for i in r['requestParameters']['instancesSet']['items']:
                         alert['summary'] += (' starting {0} '.format(i['instanceId']))                
