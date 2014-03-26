@@ -224,12 +224,19 @@ class taskConsumer(ConsumerMixin):
                     except kombu.exceptions.MessageStateError:
                         #state may be already set.
                         return
-                #print(' [*] elasticsearch:{0}'.format(res))
+                except pyes.exceptions.ElasticSearchException as e:
+                    #exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
+                    try:
+                        sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
+                        message.requeue()
+                        return
+                    except kombu.exceptions.MessageStateError:
+                        #state may be already set.
+                        return
                 #post the dict (kombu serializes it to json) to the events topic queue
                 #using the ensure function to shortcut connection/queue drops/stalls, etc.
                 ensurePublish=self.connection.ensure(self.mqproducer,self.mqproducer.publish,max_retries=10)
                 ensurePublish(normalizedDict,exchange=self.topicExchange,routing_key='mozdef.event')
-                
             message.ack()
         except ValueError as e:
             sys.stderr.write("esworker exception in events queue %r\n"%e)
