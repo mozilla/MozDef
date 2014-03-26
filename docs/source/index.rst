@@ -16,6 +16,7 @@ Table of Contents
   advanced_settings
   public_api
   code
+  benchmarking
 
 Indices and tables
 ==================
