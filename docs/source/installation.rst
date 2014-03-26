@@ -196,5 +196,5 @@ Kibana
 
 Import dashboards from `MozDef/kibana/dashboards` into the kibana webUI
 
-.. _Kibana: www.elasticsearch.org/overview/kibana
+.. _Kibana: http://www.elasticsearch.org/overview/kibana
 
