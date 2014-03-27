@@ -22,9 +22,6 @@ import pika
 import json
 import select 
 
-channelKeys={}
-channelKeys['#channelnamegoeshere']="channelkeygoeshere"
-
 greetz=["mozdef bot in da house",
         "mozdef here..what's up",
         "mozdef has joined the room..no one panic",
@@ -63,34 +60,6 @@ keywords = {'INFORMATIONAL': colors['green'],
             'CRITICAL': colors['red'],
             'mozdef': colors['blue'],
 }
-
-jlFacePalm=r'''
-
-            .--yy+/-`````  `s:``.
-           -.-: :...-::-````:-.:+/:  
-           :/+---:-/-.-:--:s/:oyhys: 
-           .o`.:---.--.-///:o-sdhhhy 
-           `-.::--:---:/-::++: `.--. 
-            `-/::.:/::-.-..:::    .  
-            `:/--..-/-.` ``.-: `:o:  
-           .+ss+--...-.````.-:os/`   
-     `-:/oyhyyso++/:/+++/++:o+- 
-  :ydyso+syysso+oso+++osyy+s+   
-`osyyyo+/+sssoo//+s:--ssyy+so.  
--osyhyso//sysoo++s/-/osysss++   
-/osyhyso+/+oooooosoooosooo+//   
-+osyyyso+/sosoooo+oo++++//:::   
-ossyyyso+:osyhddhsso+++//++/:   
-dyooyyso+/dNNNmhysoo+-:+oo+/:.  
-mmdyssss+/mmmmysyoo+:/o+sso+/.  
-dmhhyo+oo/smdssso+///oo:sss++:` 
-dddhhy++o/:yosso+///ooo-oys++/: 
-hdddhyso/:/osso+/:/ooo:`/soo+/: 
-dddhhso/-/oso++/:/ossys+.ooo+/. 
-ddddho../oo+//::+yhdddys::/o+:` 
-mdhdhy/.-////:odmmNdmmdhys+-`   
-mdddyy+--:::/ydmmmmmddddddhs-   
-'''
 
 
 def colorify(data):
@@ -176,28 +145,6 @@ def ipLocation(ip):
         location=""
     return location
         
-def esSearchFail2ban(begindateUTC,enddateUTC=None):
-    resultMessages=[] 
-    try:
-        es=pyes.ES(("http",options.esserver,9200))
-        nowDatePhrase=datetime.now().strftime("%b %d")
-        if enddateUTC is None:
-            enddateUTC=toUTC(nowDatePhrase).isoformat()
-        qDate=pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',from_value=begindateUTC,to_value=enddateUTC))
-        qFail2ban=pyes.MatchQuery("message","fail2ban.actions","phrase")
-        q=pyes.BoolQuery(must=[qDate,qFail2ban])
-        
-        
-        results = es.search(query=q)    
-        sys.stderr.write('{0} results found\n'.format(len(results)))
-           
-        for r in results:
-            sys.stderr.write('{0}\n'.format(r['message']))
-            resultMessages.append(r['message'])
-        return resultMessages
-    except Exception as e:
-        self.client.root_logger.error("Exception {0} while searching for fail2ban alerts.".format(e))
-        return resultMessages
 
 def formatAlert(jsonDictIn):
     #defaults
@@ -213,38 +160,6 @@ def formatAlert(jsonDictIn):
         
     return colorify('{0}: {1} {2}'.format(severity,colors['blue']+ category +colors['normal'],summary))
 
-#@run_async   
-#def consumealerts(client):
-#    try: 
-#        def alertsCallback(ch, method, properties, bodyin):
-#            client.root_logger.debug(" [x]event %r:%r" % (method.routing_key, bodyin))
-#            try:
-#                jbody=json.loads(bodyin)
-#                client.msg(options.alertircchannel,formatAlertMessage(jbody))
-#    
-#            except Exception as e:
-#                client.root_logger.error('Exception on message queue callback {0}'.format(e))    
-#        connection = pika.BlockingConnection(pika.ConnectionParameters(host=options.mqserver))
-#        client.root_logger.info('opening message queue channel')
-#        channel = connection.channel()
-#        client.mqconnection=connection
-#        channel.exchange_declare(exchange=options.alertexchange,type='topic')
-#        result = channel.queue_declare(exclusive=False)
-#        queue_name = result.method.queue
-#        channel.queue_bind(exchange=options.alertexchange, queue=queue_name,routing_key=options.alertqueue)
-#        channel.basic_consume(alertsCallback,queue=queue_name,no_ack=True)
-#        client.root_logger.debug('starting consuming')
-#        channel.start_consuming()
-#    except IOError:
-#        #Connection closed by us or something else
-#        if not connection is None:
-#            connection.close()
-#    except pika.exceptions.ConnectionClosed:
-#        pass
-#    except Exception as e:
-#        sys.stderr.write('%r'%e.message)
-        
-            
 class alertsListener(threading.Thread):
     def __init__(self,client):
         threading.Thread.__init__(self)
@@ -400,18 +315,20 @@ class mozdefBot():
                 if not options.join:
                     return
                 for chan in options.join.split(","):
-                    if chan in channelKeys.keys():
-                        client.join(chan,channelKeys[chan])
+                    if chan in options.channelkeys.keys():
+                        client.join(chan,options.channelkeys[chan])
                     else:
                         client.join(chan)
-                #t=alertsWorker(self.client)
                 t=alertsListener(self.client)
                 self.threads.append(t)
                 t.start()
-                #consumealerts(self.client)
             @self.client.handle('LINE')
             def line_handler(client,*params):
-                self.root_logger.debug('linegot:' + line)
+                try:
+                    self.root_logger.debug('linegot:' + line)
+                except AttributeError as e:
+                    #catch error in kitnrc : chan.remove(actor) where channel object has no attribute remove
+                    pass
             @self.client.handle('PRIVMSG')
             def priv_handler(client,actor,recipient,message):
                 self.root_logger.debug('privmsggot:' + message + ' from ' + actor)
@@ -422,15 +339,11 @@ class mozdefBot():
                     self.client.msg(recipient,"I just send alerts and taunt arcsight..for now..but try these:")
                     self.client.msg(recipient,"!quote  --get a quote from my buddy Mos Def")
                     self.client.msg(recipient,"!panic  --panic (or not )")
-                    self.client.msg(recipient,"!facepalm --jennifer lawrence face-palm as requested by fox2mike")
                     self.client.msg(recipient,"!ipinfo --do a geoip lookup on an ip address")
                 if "!quote" in message:
                     self.client.msg(recipient,getQuote())
                 if "!panic" in message:
                     self.client.msg(recipient,random.choice(panics))
-                if "!facepalm" in message:
-                    for line in jlFacePalm.split('\n'):
-                        self.client.msg(recipient,line)
                 if "!ipinfo" in message:
                     for i in message.split():
                         if isIP(i):
@@ -478,6 +391,7 @@ def initConfig():
     options.alertqueue=getConfig('alertqueue','mozdef.alert',options.configfile)
     options.alertexchange=getConfig('alertexchange','alerts',options.configfile)
     options.alertircchannel=getConfig('alertircchannel','',options.configfile)
+    options.channelkeys=json.loads(getConfig('channelkeys','{"#somechannel": "somekey"}',options.configfile))
     
     if options.alertircchannel=='':
         options.alertircchannel=options.join
