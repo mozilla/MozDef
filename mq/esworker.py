@@ -65,6 +65,24 @@ def isCEF(aDict):
             return True
     return False
 
+def safeString(aString):
+    '''return a safe string given a potentially unsafe, unicode, etc'''
+    returnString=''
+    if isinstance(aString,str):
+        returnString=aString
+    if isinstance(aString,unicode):
+        returnString=aString.encode('ascii','ignore')
+    return returnString
+
+def toUnicode(obj, encoding='utf-8'):
+    if type(obj) in [int,long,float,complex]: 
+        #likely a number, convert it to string to get to unicode
+        obj=str(obj)
+    if isinstance(obj, basestring):
+        if not isinstance(obj, unicode):
+            obj = unicode(obj, encoding)
+    return obj
+
 def keyMapping(aDict):
     '''map common key/fields to a normalized structure,
        explicitly typed when possible to avoid schema changes for upsteam consumers
@@ -87,22 +105,22 @@ def keyMapping(aDict):
         for k,v in aDict.iteritems():
             
             if removeAt(k.lower()) in ('message','summary'):
-                returndict[u'summary']=str(v)
+                returndict[u'summary']=toUnicode(v)
                 
             if removeAt(k.lower()) in ('payload') and 'summary' not in aDict.keys():
                 #special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
-                returndict[u'summary']=str(v)
+                returndict[u'summary']=toUnicode(v)
             elif removeAt(k.lower()) in ('payload'):
                 if 'details' not in returndict.keys():
                     returndict[u'details']=dict()
-                returndict[u'details']['payload']=v
+                returndict[u'details']['payload']=toUnicode(v)
                 
             if removeAt(k.lower()) in ('eventtime','timestamp'):
                 returndict[u'utctimestamp']=toUTC(v)
                 returndict[u'timestamp']=parse(v,fuzzy=True).isoformat()
                 
             if removeAt(k.lower()) in ('hostname','source_host','host'):
-                returndict[u'hostname']=str(v)
+                returndict[u'hostname']=toUnicode(v)
             
     
             if removeAt(k.lower()) in ('tags'):
@@ -111,24 +129,24 @@ def keyMapping(aDict):
     
             #nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
             if removeAt(k.lower()) in ('syslogseverity','severity','severityvalue','level'):
-                returndict[u'severity']=str(v).upper()
+                returndict[u'severity']=toUnicode(v).upper()
                 
             if removeAt(k.lower()) in ('facility','syslogfacility'):
-                returndict[u'facility']=str(v)
+                returndict[u'facility']=toUnicode(v)
     
             if removeAt(k.lower()) in ('pid','processid'):
-                returndict[u'processid']=str(v)
+                returndict[u'processid']=toUnicode(v)
             
             #nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
             if removeAt(k.lower()) in ('pname','processname','sourcename'):
-                returndict[u'processname']=str(v)
+                returndict[u'processname']=toUnicode(v)
             
             #the file, or source
             if removeAt(k.lower()) in ('path','logger','file'):
-                returndict[u'eventsource']=str(v)
+                returndict[u'eventsource']=toUnicode(v)
     
             if removeAt(k.lower()) in ('type','eventtype','category'):
-                returndict[u'category']=str(v)
+                returndict[u'category']=toUnicode(v)
     
             #custom fields as a list/array
             if removeAt(k.lower()) in ('fields','details'):
@@ -145,7 +163,7 @@ def keyMapping(aDict):
                 if 'details' not in returndict.keys():
                     returndict[u'details']=dict()                
                 #add field
-                returndict[u'details'][unicode(newName)]=str(v)
+                returndict[u'details'][unicode(newName)]=toUnicode(v)
     except Exception as e:
         sys.stderr.write('esworker exception normalizing the message %r\n'%e)
         return None
