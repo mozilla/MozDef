@@ -13,6 +13,6 @@ mozdef={
     ldapKibana:"http://localhost:9090/#/dashboard/elasticsearch/mozdef%20ldap%20dashboard",
     eventsKibana:"http://localhost:9090/index.html#/dashboard/elasticsearch/Logstash%20Style%20Search",
     alertsKibana:"http://localhost:9090/index.html#/dashboard/elasticsearch/Alerts",
-    ldapLoginDataURL:"https://localhost:8444/ldapLogins/", // rest server
-    alertDataURL:"https://localhost:8444/alerts/" // rest server
+    ldapLoginDataURL:"http://localhost:8081/ldapLogins/", // rest server
+    alertDataURL:"http://localhost:8081/alerts/" // rest server
 }
