@@ -172,10 +172,7 @@ def keyMapping(aDict):
 
 def esConnect(conn):
     '''open or re-open a connection to elastic search'''
-    if isinstance(conn,pyes.es.ES):
-        return pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-    else:
-        return pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+    return pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)),bulk_size=options.esbulksize)
 
 class taskConsumer(ConsumerMixin):
 
@@ -232,7 +229,11 @@ class taskConsumer(ConsumerMixin):
                         if ' ' not in bodyDict['fields']['deviceproduct'] and '.' not in bodyDict['fields']['deviceproduct']:
                             doctype=bodyDict['fields']['deviceproduct']
                 try:
-                    res=self.esConnection.index(index='events',doc_type=doctype,doc=jbody)
+                    if options.esbulksize != 0:
+                        res=self.esConnection.index(index='events',doc_type=doctype,doc=jbody,bulk=True)
+                    else:
+                        res=self.esConnection.index(index='events',doc_type=doctype,doc=jbody,bulk=False)
+                        
                 except (pyes.exceptions.NoServerAvailable,pyes.exceptions.InvalidIndexNameException) as e:
                     #handle loss of server or race condition with index rotation/creation/aliasing
                     try:
@@ -324,8 +325,12 @@ def initConfig():
     options.mqserver=getConfig('mqserver','localhost',options.configfile)
     options.taskexchange=getConfig('taskexchange','eventtask',options.configfile)
     options.eventexchange=getConfig('eventexchange','events',options.configfile)
+    
+    #elastic search options. set esbulksize to a non-zero value to enable bulk posting
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
-    #how many messages to ask for at once.
+    options.esbulksize=getConfig('esbulksize',0,options.configfile)
+    
+    #how many messages to ask for at once from the message queue
     options.prefetch=getConfig('prefetch',50,options.configfile)
     options.mquser=getConfig('mquser','guest',options.configfile)
     options.mqpassword=getConfig('mqpassword','guest',options.configfile)
