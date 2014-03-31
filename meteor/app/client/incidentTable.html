@@ -13,7 +13,7 @@
 		</thead>
 		<tbody>	
 		{{#each incident}}
-			{{>incident}}
+			{{>each_incident}}
 		{{/each}}
 		</tbody>
 	</table>
@@ -21,7 +21,7 @@
 </template>
 
 <!--each individual incident -->
-<template name="incident">
+<template name="each_incident">
 
 			<tr>
 				<td>{{summary}}</td>
