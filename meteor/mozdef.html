@@ -24,13 +24,13 @@
                 <li class="first"><a href="/events/">Events</a>
                     <ul>
                         <li class="first"><a href="/logincounts/">logincounts</a></li>
-                        <li><a target=" _blank" href="{{{mozdef.ldapKibana}}}">ldap kibana</a></li>
-                        <li class="last"><a target=" _blank" href="{{{mozdef.eventsKibana}}}">events kibana</a></li>
+                        <li><a target=" _blank" href="{{mozdef.ldapKibana}}">ldap kibana</a></li>
+                        <li class="last"><a target=" _blank" href="{{mozdef.eventsKibana}}">events kibana</a></li>
                     </ul>
                 </li>
                  <li ><a href="/alerts/">Alerts</a>
                     <ul>
-                        <li class="first"><a target="_blank" href="{{{mozdef.alertsKibana}}}">alerts kibana</a></li>
+                        <li class="first"><a target="_blank" href="{{mozdef.alertsKibana}}">alerts kibana</a></li>
                         <li class="last"><a href="/alerts/setup">setup</a></li>
                     </ul>
                 </li>   
@@ -55,12 +55,11 @@
                 Logout: {{currentUser.profile.email}}
             {{/if}}        
         {{/if}}
-        {{loginButtons align="right"}}
+        {{> loginButtons align="right"}}
 
     </div>    
     <div id="main-content">
 
-        {{>layout}}
     </div>           
 
 
@@ -73,7 +72,7 @@
     <div>
 
         {{#if currentUser}}
-            {{yield}}
+            {{>yield}}
         {{/if}}            
     </div>
 </template>
