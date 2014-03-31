@@ -148,13 +148,17 @@ if (Meteor.isClient) {
         },
         
         "readystatechange":function(e){
-            console.log('readystatechange')
-            console.log(e)
+            if (typeof console !== 'undefined') {
+              console.log('readystatechange')
+              console.log(e)
+            }
             
         },
         "load ": function(e){
-            console.log('load edit incident form')
-            console.log(e.type)
+            if (typeof console !== 'undefined') {
+              console.log('load edit incident form')
+              console.log(e.type)
+            }
             $('#dateClosed').daterangepicker({
                                                 singleDatePicker: true,
                                                 timePicker:true,
@@ -232,14 +236,16 @@ if (Meteor.isClient) {
             //  title : stringArray[0],
             //  content: stringArray[1]
             //});
-            console.log(message)
+            if (typeof console !== 'undefined')
+              console.log(message)
             Session.set('displayMessage', null);
         }
     });
 
     Template.attackers.events({
         "click": function(event,template){
-            console.log('attacker click event')
+            if (typeof console !== 'undefined')
+              console.log('attacker click event')
             //console.log(sceneCamera)
             camera=sceneCamera
             //var objects = [];
@@ -254,7 +260,8 @@ if (Meteor.isClient) {
             if ( intersects.length > 0 ) {
                 for ( var i = 0; i < intersects.length; i ++ ) {
                     intersects[ i ].object.material.color.setHex( Math.random() * 0xffffff );
-                    console.log(intersects[i].object.name)
+                    if (typeof console !== 'undefined')
+                      console.log(intersects[i].object.name)
                 }
             }
         }
@@ -568,7 +575,8 @@ if (Meteor.isClient) {
     
         
     d3.json(mozdef.alertDataURL, function(error, jsondata) {
-        console.log(error)
+        if (typeof console !== 'undefined')
+          console.log(error)
         r.domain([0, d3.max(jsondata, function(d) { return d.count; })])
         jsondata.forEach(function(d){
             d.id=d.term;
