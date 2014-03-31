@@ -97,8 +97,12 @@ class eventConsumer(ConsumerMixin):
             for rex in options.regexlist:
                 if 'tag' in rex.keys():
                     #we've been asked to limit scope to mq items with this tag
+                    if 'tags' not in bodyDict.keys():
+                        #no tags to compare
+                        return                    
                     if 'tags' in bodyDict.keys() and rex['tag'] not in bodyDict['tags']:
-                        return            
+                        #tags..but not one matching.
+                        return
                 if 'summary' in bodyDict.keys() and re.findall(rex['expression'],bodyDict['summary']):
                     if 'severity' in rex.keys():
                         bodyDict['severity']=rex['severity']
