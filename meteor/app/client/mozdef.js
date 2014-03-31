@@ -153,11 +153,12 @@ if (Meteor.isClient) {
               console.log(e)
             }
             
-        },
-        "load ": function(e){
+        }
+    });
+
+    Template.editincidentform.rendered = function() {
             if (typeof console !== 'undefined') {
               console.log('load edit incident form')
-              console.log(e.type)
             }
             $('#dateClosed').daterangepicker({
                                                 singleDatePicker: true,
@@ -179,7 +180,7 @@ if (Meteor.isClient) {
                                                 timePickerIncrement:1,
                                                 format: 'MM/DD/YYYY hh:mm:ss A',
                                                 startDate: moment()
-                                                });        
+                                                });
             $('#dateVerified').daterangepicker({
                                                 singleDatePicker: true,
                                                 timePicker:true,
@@ -200,10 +201,8 @@ if (Meteor.isClient) {
                                                 timePickerIncrement:1,
                                                 format: 'MM/DD/YYYY hh:mm:ss A',
                                                 startDate: moment()
-                                                });            
-        
-        }
-    });
+                                                });
+    }
 
     //add incident events
     Template.addincidentform.events({
@@ -211,7 +210,6 @@ if (Meteor.isClient) {
         "load": function(event,template){
             event.preventDefault();
             Session.set('displayMessage','Set date');
-            template.find("#dateOpened").value=new Date();
         },
 
         "submit form": function(event, template) {
