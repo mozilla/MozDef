@@ -20,23 +20,23 @@ if (Meteor.isClient) {
     });
 
     //helper functions for handlebars
-    Handlebars.registerHelper('now', function() {
+    UI.registerHelper('now', function() {
         return new Date();
     });
 
-    Handlebars.registerHelper('mozdef',function(){
+    UI.registerHelper('mozdef',function(){
         //return the mozdef server settings object.    
         return mozdef 
     });
-    Handlebars.registerHelper('isselected',function(optionvalue,datavalue){
+    UI.registerHelper('isselected',function(optionvalue,datavalue){
         if (optionvalue==datavalue){
-            return 'selected="true"'
+            return 'selected'
         }else{
             return ''
         }
     });
     
-    Handlebars.registerHelper('eachSorted',function(context,options){
+    UI.registerHelper('eachSorted',function(context,options){
             var ret = "";
           
             for(var i=0, j=context.length; i<j; i++) {
