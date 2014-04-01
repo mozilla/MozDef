@@ -3,20 +3,28 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import json
+import kombu
 import os
-import time
 import pyes
+import pytz
+import pynsive
+import sys
+import time
+from configlib import getConfig,OptionParser
 from datetime import datetime,timedelta
 from dateutil.parser import parse
-import pytz
-import sys
-import json
-from configlib import getConfig,OptionParser
+from operator import itemgetter
 from kombu import Connection,Queue,Exchange
 from kombu.mixins import ConsumerMixin
-import kombu
-import pynsive
-from operator import itemgetter
+from threading import Timer
+
+#running under uwsgi? 
+try:
+    import uwsgi
+    hasUWSGI=True
+except ImportError as e:
+    hasUWSGI=False
 
 def toUTC(suspectedDate,localTimeZone=None):
     '''make a UTC date out of almost anything'''
@@ -174,6 +182,8 @@ def esConnect(conn):
     '''open or re-open a connection to elastic search'''
     return pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)),bulk_size=options.esbulksize)
 
+
+
 class taskConsumer(ConsumerMixin):
 
     def __init__(self, mqConnection,taskQueue,topicExchange,esConnection):
@@ -182,6 +192,14 @@ class taskConsumer(ConsumerMixin):
         self.taskQueue=taskQueue
         self.topicExchange=topicExchange
         self.mqproducer = self.connection.Producer(serializer='json')
+        if hasUWSGI:
+            self.muleid=uwsgi.mule_id()
+        else:
+            self.muleid=0
+        if options.esbulksize!=0:
+            #if we are bulk posting enable a timer to occasionally flush the pyes bulker even if it's not full
+            #to prevent events from sticking around an idle worker
+            Timer(options.esbulktimeout,self.flush_es_bulk).start()
 
     def get_consumers(self, Consumer, channel):
         #return [
@@ -191,6 +209,17 @@ class taskConsumer(ConsumerMixin):
         consumer.qos(prefetch_count=options.prefetch)
         return [consumer]
 
+    def flush_es_bulk(self):
+        '''if we are bulk posting to elastic search force a bulk post even if we don't have
+           enough items to trigger a post normally.
+           This allows you to have lots of workers and not wait for events for too long if
+           there isn't a steady event stream while still retaining the throughput capacity
+           that bulk processing affords.
+        '''
+        #sys.stderr.write('mule {0} flushing bulk elastic search posts\n'.format(self.muleid))
+        self.esConnection.flush_bulk(True)
+        Timer(options.esbulktimeout,self.flush_es_bulk).start()        
+ 
     def on_message(self, body, message):
         #print("RECEIVED MESSAGE: %r" % (body, ))
         try:
@@ -315,6 +344,11 @@ def main():
     eventTopicExchange=Exchange(name=options.eventexchange,type='topic',durable=False,delivery_mode=1)
     eventTopicExchange(mqConn).declare()
     
+
+    if hasUWSGI:
+        sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+    else:
+        sys.stdout.write('started without uwsgi\n')
     #consume our queue and publish on the topic exchange
     taskConsumer(mqConn,eventTaskQueue,eventTopicExchange,es).run()
     
@@ -326,9 +360,10 @@ def initConfig():
     options.taskexchange=getConfig('taskexchange','eventtask',options.configfile)
     options.eventexchange=getConfig('eventexchange','events',options.configfile)
     
-    #elastic search options. set esbulksize to a non-zero value to enable bulk posting
-    options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
-    options.esbulksize=getConfig('esbulksize',0,options.configfile)
+    #elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
+    options.esservers = list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
+    options.esbulksize = getConfig('esbulksize',0,options.configfile)
+    options.esbulktimeout = getConfig('esbulktimeout',30,options.configfile)
     
     #how many messages to ask for at once from the message queue
     options.prefetch=getConfig('prefetch',50,options.configfile)
