@@ -70,10 +70,9 @@ def main():
                         details=[])
             
             healthlog['details']=dict(username='mozdef')
-            healthlog['tags']=['mozdef','status']            
-            #print(mq)
+            healthlog['details']['loadaverage']=list(os.getloadavg())
+            healthlog['tags']=['mozdef','status']
             for m in mq:
-                #print('\tqueue: {0}'.format(m['name']))
                 if 'message_stats' in m.keys():
                     healthlog['details'][m['name']]=dict(messages_ready=m['messages_ready'],messages_unacknowledged=m['messages_unacknowledged'])
                     #print(('\t\t{0} ready {1} unack'.format(m['messages_ready'], m['messages_unacknowledged'])))
@@ -84,8 +83,7 @@ def main():
                     if 'publish_details' in m['message_stats'].keys():
                         healthlog['details'][m['name']]['publish_eps']=m['message_stats']['publish_details']['rate']
                         #print('\t\t{0} in/sec, 0 out/sec'.format(m['message_stats']['publish_details']['rate']))
-                
-        
+
         #print(json.dumps(healthlog, sort_keys=True, indent=4))
         #post to elastic search servers directly without going through message queues
         es.index(index='events',doc_type='mozdefhealth',doc=json.dumps(healthlog),bulk=False)
@@ -96,7 +94,6 @@ def initConfig():
     options.output=getConfig('output','stdout',options.configfile)                      #output our log to stdout or syslog
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)   #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
-    
     
     #msg queue servers to check in on (list of servernames)
     options.mqservers=list(getConfig('mqservers','localhost',options.configfile).split(',')) #message queue server(s) hostname
