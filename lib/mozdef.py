@@ -123,11 +123,11 @@ class MozDefMsg():
             raise MozDefError('Summary is a required field')
 
         if self.debug:
-           print(json.dumps(log_msg, sort_keys=True, indent=4))
-           return
+            print(json.dumps(log_msg, sort_keys=True, indent=4))
+            return
 
         try:
-            r = self.httpsession.post(self.mozdef_hostname, json.dumps(log_msg, sort_keys=True, indent=4), verify=self.verify_certificate, background_callback=self.httpsession_cb)
+            self.httpsession.post(self.mozdef_hostname, json.dumps(log_msg, sort_keys=True, indent=4), verify=self.verify_certificate, background_callback=self.httpsession_cb)
         except Exception as e:
             if not self.fire_and_forget_mode:
                 raise e
