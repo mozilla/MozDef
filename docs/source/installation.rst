@@ -5,8 +5,52 @@ Installation
 
 The installation process has been tested on CentOS 6 and RHEL 6.
 
+Docker
+------
+
+You can quickly install MozDef with an automated build generation using `docker`_.
+
+Dockerfile
+***********
+
+After installing `docker`_, use this to build a new image::
+
+  cd docker && sudo make build 
+
+Running the container::
+
+  sudo make run
+
+You're done! Now go to:
+
+ * http://127.0.0.1:3000 < meteor (main web interface)
+ * http://127.0.0.1:9090 < kibana
+ * http://127.0.0.1:9200 < elasticsearch
+ * http://127.0.0.1:9200/\_plugin/marvel < marvel (monitoring for elasticsearch)
+ * http://127.0.0.1:8080 < loginput
+ * http://127.0.0.1:8081 < rest api
+
+Known issues
+*************
+
+* Marvel doesn't display node info: ` Oops! FacetPhaseExecutionException[Facet [fs.total.available_in_bytes]: failed to find mapping for fs.total.available_in_bytes]`
+
+Marvel uses techniques to gather system info that are not compatible with docker.
+See https://groups.google.com/forum/#!topic/elasticsearch/dhpxaOuoZWI
+
+Despite this issue, marvel runs fine.
+
+* I don't see any data or dashboards in Kibana
+
+We need to create some sample data, it's in our roadmap ;)
+
+.. _docker: https://www.docker.io/
+
+
 Elasticsearch nodes
 -------------------
+
+This section explains the manual installation process for Elasticsearch nodes (search and storage).
 
 ElasticSearch
 *************
@@ -34,6 +78,8 @@ You should now be able to access to Marvel at http://any-server-in-cluster:9200/
 
 Web and Workers nodes
 ---------------------
+
+This section explains the manual installation process for Web and Workers nodes.
 
 Python
 ******
