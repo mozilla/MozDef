@@ -4,9 +4,9 @@ Usage
 Sending logs to MozDef
 ----------------------
 
-Events/Logs are accepted as json over http(s) or over rabbit-mq. Most modern log shippers support json output. MozDef is tested with support for: 
+Events/Logs are accepted as json over http(s) or over rabbit-mq. Most modern log shippers support json output. MozDef is tested with support for:
 
-* heka ( https://github.com/mozilla-services/heka ) 
+* heka ( https://github.com/mozilla-services/heka )
 * beaver ( https://github.com/josegonzalez/beaver )
 * nxlog ( http://nxlog-ce.sourceforge.net/ )
 * logstash ( http://logstash.net/ )
@@ -16,8 +16,8 @@ Events/Logs are accepted as json over http(s) or over rabbit-mq. Most modern log
 
 Web Interface
 -------------
-MozDef uses the Meteor framework  ( https://www.meteor.com/ ) for the web interface and bottle.py for the REST API. 
-For authentication, MozDef ships with native support for Persona ( https://login.persona.org/about ). 
+MozDef uses the Meteor framework  ( https://www.meteor.com/ ) for the web interface and bottle.py for the REST API.
+For authentication, MozDef ships with native support for Persona ( https://login.persona.org/about ).
 Meteor (the underlying UI framework) also supports many authentication options ( http://docs.meteor.com/#accounts_api ) including google, github, twitter, facebook, oath, native accounts, etc.
 
 
@@ -29,8 +29,43 @@ The MozDef UI is focused on incident handling and adding security-specific visua
 
 Alerts
 ******
-Alerts are generally implemented as Elastic Search searches, or realtime examination of the incoming message queues. MozDef provides a plugin interface to allow open access to event data for enrichment, hooks into other systems, etc. 
+Alerts are generally implemented as Elastic Search searches, or realtime examination of the incoming message queues. MozDef provides a plugin interface to allow open access to event data for enrichment, hooks into other systems, etc.
 
 
 Incident handling
 *****************
+
+
+JSON format
+-----------
+
+This section describes the structure JSON objects we for MozDef.
+
+
+Description
+**********
+
+Examples
+********
+
+.. code-block:: javascript
+
+	{
+	    "timestamp": "2014-02-14T11:48:19.035762739-05:00",
+	    "hostname": "fedbox",
+	    "processname": "/tmp/go-build278925522/command-line-arguments/_obj/exe/log_json",
+	    "processid": 3380,
+	    "severity": "INFO",
+	    "summary": "joe login failed",
+	    "category": "authentication",
+	    "source": "",
+	    "tags": [
+	        "MySystem",
+	        "Authentication"
+	    ],
+	    "details": {
+	        "user": "joe",
+	        "task": "access to admin page /admin_secret_radioactiv",
+	        "result": "10 authentication failures in a row"
+	    }
+	}
