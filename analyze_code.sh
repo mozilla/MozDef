@@ -5,7 +5,6 @@ NOW=$(date +%Y%m%d_%H%M%S)
 
 echo "Creating folder $NOW"
 mkdir -p results/$NOW
-mkdir -p results/$NOW
 cd results/$NOW
 
 echo "Analyzing python code"
