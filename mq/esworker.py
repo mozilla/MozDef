@@ -67,10 +67,13 @@ def isCEF(aDict):
     #maybe it snuck in some other way
     #check some key CEF indicators (the header fields)
     if 'fields' in aDict.keys():
-    
         lowerKeys=[s.lower() for s in aDict['fields'].keys()]
         if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
             return True
+    if 'details' in aDict.keys():
+        lowerKeys=[s.lower() for s in aDict['details'].keys()]
+        if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
+            return True        
     return False
 
 def safeString(aString):
@@ -253,10 +256,15 @@ class taskConsumer(ConsumerMixin):
                 if isCEF(bodyDict):
                     #cef records are set to the 'deviceproduct' field value.
                     doctype='cef'
-                    if 'deviceproduct' in bodyDict['fields'].keys():
+                    if 'fields' in bodyDict.keys() and 'deviceproduct' in bodyDict['fields'].keys():
                         #don't create strange doc types..
                         if ' ' not in bodyDict['fields']['deviceproduct'] and '.' not in bodyDict['fields']['deviceproduct']:
                             doctype=bodyDict['fields']['deviceproduct']
+                    if 'details' in bodyDict.keys() and 'deviceproduct' in bodyDict['details'].keys():
+                        #don't create strange doc types..
+                        if ' ' not in bodyDict['details']['deviceproduct'] and '.' not in bodyDict['details']['deviceproduct']:
+                            doctype=bodyDict['details']['deviceproduct']
+                        
                 try:
                     if options.esbulksize != 0:
                         res=self.esConnection.index(index='events',doc_type=doctype,doc=jbody,bulk=True)
