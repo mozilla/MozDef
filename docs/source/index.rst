@@ -17,6 +17,7 @@ Table of Contents
   public_api
   code
   benchmarking
+  contributors
 
 Indices and tables
 ==================
