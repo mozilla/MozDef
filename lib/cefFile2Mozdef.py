@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import os
 import sys
 from configlib import getConfig,OptionParser
@@ -18,22 +15,18 @@ import time
 from requests_futures.sessions import FuturesSession
 from collections import deque
 import fcntl
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, JoinableQueue
+from Queue import Empty, Full
 import random
 import errno
 import select
 import glob2
 from os import stat
 
-#setting this globally to allow requests to establish a keep alive session with async workers.
-httpsession = FuturesSession(max_workers=10)
-httpsession.trust_env=False #turns off needless and repetitive .netrc check for creds
-
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
-
 
 def initLogger():
     logger.level = logging.DEBUG
@@ -45,7 +38,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
 
 #sample CEF record:
 #CEF:0|Unix|auditd|1|CHMOD|CHMOD failed|3|end=1391190619 fname="/var/log/nagios/rw/live" dhost=something.mozilla.com suser=someone suid=496 dproc=/usr/sbin/nagios msg=gid\\=496 euid\\=496 suid\\=496 fsuid\\=496 egid\\=496 sgid\\=496 fsgid\\=496 ses\\=20673 cwd\\="/" inode\\=00:00 dev\\=(null) mode\\=(null) ouid\\=(null) ogid\\=(null) rdev\\=(null) cn1Label=auid cn1=1579 cs1Label=Command cs1= cs2Label=Truncated cs2=No cs3Label=AuditKey cs3=(null) cs4Label=TTY cs4=(none) cs5Label=ParentProcess cs5=init cs6Label=MsgTruncated cs6=No
@@ -77,7 +69,8 @@ def toUTC(suspectedDate,localTimeZone=None):
         if type(suspectedDate)==datetime:
             objDate=suspectedDate
         elif isNumber(suspectedDate):   #epoch?
-            objDate=parse(time.ctime(float(suspectedDate)),fuzzy=True)
+            #objDate=parse(time.ctime(float(suspectedDate)),fuzzy=False)
+            objDate=datetime.fromtimestamp(float(suspectedDate))
         elif type(suspectedDate)==str:
             objDate=parse(suspectedDate,fuzzy=True)
         
@@ -238,134 +231,155 @@ class Pygtail(object):
 def postLogs(logcache):
     #post logs asynchronously with requests workers and check on the results
     #expects a queue object from the multiprocessing library
-    posts=[]
-    
-    while not logcache.empty():
-        postdata=logcache.get()
-        if len(postdata)>0:
-            url=random.choice(options.urls)
-            r=httpsession.post(url,data=postdata,stream=False)
-            posts.append((r,postdata,url))
-        for p,postdata,url in posts:
-            try:
-                if p.result().status_code >=500:
-                    logger.error("exception posting to %s %r [will retry]\n"%(url,p.result().status_code))
-                    #try again later when the next message in forces other attempts at posting.
-                    logcache.put(postdata)
-            except Exception as e:
-                    logger.fatal("exception posting to %s %r %r [will not retry]\n"%(url,e,postdata))
-                
+    #setting this within the processs to allow requests to establish a keep alive session with async workers.
+    httpsession = FuturesSession(max_workers=2)
+    httpsession.trust_env=False #turns off needless and repetitive .netrc check for creds
+    canQuit=False
 
+    def backgroundcallback(session, response):
+        #release the connection back to the pool
+        try: 
+            r=response.result()
+            response.close()
+        except Exception as e:
+            logger.error('Exception while posting message: %r'%e)
+
+    while True:
+        try:
+            #see if we have anything to post
+            #waiting a bit to not end until we are told we can stop.
+            postdata=logcache.get(False,30)
+            if postdata is None:
+                #signalled from parent process that it's ok to stop.
+                logcache.task_done()
+                canQuit=True
+                
+            elif len(postdata)>0:
+                url=random.choice(options.urls)
+                r=httpsession.post(url,data=postdata,stream=False)
+                logcache.task_done()
+        except Empty as e:
+            if canQuit:
+                logger.info('signaling shutdown for threadpool executor')
+                httpsession.executor.shutdown(wait=True)
+                break
+
+    logger.info('{0} done'.format('log posting task'))
 
 def parseCEF(acef):
+    '''parse a CEF record without regex to go as fast as possible
+       returns a dict of CEF headers and a ['details'] subdict with the individual CEF items
+    '''
+    rawcefdict = {}
+    cef={}
+    cef['version']=0
+    cef['details']={}
     fields=[]
-    rawfielddict={}
-    finalfielddict={}
-    cef=dict(version=0,fields={})
     
-    #some CEF records escape the equals with \= to cram extra fields in the 'msg' field. Undo that and get them as event.details
-    if re.search('msg=(\w+\\\\=)',acef):
-        acef=acef.replace('msg=','')
-        if '\\=' in acef:
-            acef=acef.replace('\\=','=')
-        
-    #logger.debug(line)    
+    headers=acef.split('|')
+    cef['details']['version']=headers[0].replace('CEF:','')
+    cef['details']['devicevendor']=headers[1]
+    cef['details']['deviceproduct']=headers[2]
+    cef['details']['deviceversion']=headers[3]
+    cef['details']['signatureid']=headers[4]
+    cef['details']['name']=headers[5]
+    cef['details']['severity']=headers[6]
+    cef['summary']=headers[5]
     
-    #get a list of the field names we will be handling
-    fields=ceffieldre.findall(acef)
+    #get the non header fields including any pipes in target commands, etc. 
+    mlist = '|'.join(acef.split('|')[7:]).decode('ascii','ignore')
+    #unescape any escaped field\\=value fields
+    mlist=mlist.replace('\\=', '=')
+    #no empty messages 
+    mlist=mlist.replace('msg= ','').split('=')
     
-    #for each field name, get the value of field=value including spaces
-    #by grabbing everything up to the next field=value
-    #logger.debug(fields)
-    for field in fields:
-        if fields.index(field)==len(fields)-1: #end of list
-            fieldvaluere=re.compile('{0}=(.*)'.format(field))
-        else:
-            nextfield=fields[(fields.index(field)+1)]
-            fieldvaluere=re.compile('{0}=(.*?) {1}='.format(field,nextfield))
-        fieldvalue=fieldvaluere.findall(acef)
-        if len(fieldvalue)>0:
-            #logger.debug('CEF {0} {1}'.format(field,fieldvalue[0]))
-            rawfielddict[field.lower()]=fieldvalue[0]   
-
-    #CEF includes the capability to label fields
-    #cs6Label MsgTruncated cs6 No
-    #figure these out and rename them accordingly.
-    #logger.debug(acef)
+    i=0
     try:
-        for field in fields:
-            if 'label' in field.lower():
-                #this is a label for another field..fix up our dict to have the label as key and data as value
-                if field.lower().replace('label','') in rawfielddict.keys():
-                    finalfielddict[rawfielddict[field.lower()]]=rawfielddict[field.lower().replace('label','')].decode('ascii','ignore')
-                    rawfielddict.pop(field.lower().replace('label',''))
-                rawfielddict.pop(field.lower(),'')
-    except KeyError as e:
-        logger.error('Key error while renaming cef labels: {0} {1}'.format(acef,e))
-    
-    try:         
-        #add whatever is left in the raw field dict to the final dict
-        for k,v in rawfielddict.iteritems():
-            finalfielddict[k]=v.decode('ascii','ignore')
-        cef['fields']=finalfielddict
-        #pick an eventtimestamp if one exists. 
-        if 'start' in rawfielddict.keys():
-            cef['timestamp']=toUTC(rawfielddict['start']).isoformat()
-        elif 'end' in rawfielddict.keys():
-            cef['timestamp']=toUTC(rawfielddict['end']).isoformat()
-        elif 'rt' in rawfielddict.keys():
-            cef['timestamp']=toUTC(rawfielddict['rt']).isoformat()
-        else:
-            cef['timestamp']=toUTC(datetime.now()).isoformat()
-        
-        #grab all the CEF headers and add them as fields
-        headers=cefheaderre.findall(acef)
-        cef['fields']['version']=headers[0].replace('CEF:','')
-        cef['fields']['devicevendor']=headers[1]
-        cef['fields']['deviceproduct']=headers[2]
-        cef['fields']['deviceversion']=headers[3]
-        cef['fields']['signatureid']=headers[4]
-        cef['fields']['name']=headers[5]
-        cef['fields']['severity']=headers[6]
-        
-        cef['summary']=headers[5]
-        return cef
-    except (IndexError,ValueError) as e:
-        logger.error('Exception while creating final dict: {0} {1}'.format(acef,e))
-    
+     for i,x in enumerate(reversed(mlist)):
+        i = i + 1
+        slast = mlist[-(i+1)]
+        cut = slast.split()
+        cut2 = cut[-1]
+        fields.insert(i,cut2)
+        rawcefdict.update({cut2.lower():x})
+        mlist[-(i+1)] = " ".join(cut[0:-1])
+    except IndexError as e:
+     pass
+    #fix up custom field names
+    #cs6Label MsgTruncated cs6 No
+    for field in fields:
+        if 'label' in field.lower():
+            #this is a label for another field..fix up our dict to have the label as key and data as value
+            if field.lower().replace('label','') in rawcefdict.keys():
+                cef['details'][rawcefdict[field.lower()]]=rawcefdict[field.lower().replace('label','')].decode('ascii','ignore')    
+                rawcefdict.pop(field.lower().replace('label',''))
+            rawcefdict.pop(field.lower(),'')
+    #add whatever is left (non label field or value) to the cef dictionary
+    for k,v in rawcefdict.iteritems():
+        cef['details'][k]=v.decode('ascii','ignore')
+    #pick an eventtimestamp if one exists. 
+    if 'start' in cef['details'].keys():
+        cef['timestamp']=toUTC(cef['details']['start']).isoformat()
+    elif 'end' in cef['details'].keys():
+        cef['timestamp']=toUTC(cef['details']['end']).isoformat()
+    elif 'rt' in cef['details'].keys():
+        cef['timestamp']=toUTC(cef['details']['rt']).isoformat()
+    else:
+        cef['timestamp']=toUTC(datetime.now()).isoformat()        
+    return cef
                 
+def readCEFFile(afile,pygtail):
+    if exists(afile): #sometimes files can move/archive while we iterate the list
+        try:
+            #start a process to post our stuff.
+            logcache=JoinableQueue()
+            postingProcess=Process(target=postLogs,args=(logcache,),name="cef2mozdefHTTPPost")
+            postingProcess.start()            
+            #have pygtail feed us lines 
+            for line in pygtail:
+                pygtail._update_offset_file()
+                cefDict=parseCEF(line)
+                #logger.debug(json.dumps(cefDict))
+                #append json to the list for posting
+                if cefDict is not None:
+                    logcache.put(json.dumps(cefDict))        
+            logger.info('{0} done'.format(afile))
+            logger.info('waiting for posting to finish')
+            logcache.put(None)
+            logcache.close()
+            #logger.info('posting done')
+        except KeyboardInterrupt:
+            sys.exit(1)
+        except ValueError as e:
+            logger.fatal('Exception while handling CEF message: %r'%e)
+            sys.exit(1)    
 def main():
-    #create a list of logs we can append json to and call for a post when we want.
-    logcache=Queue()
-    
     logger.info('started')
     notDone=True
-    while notDone: 
+    while notDone:
+        #anyone done?
+        for process,file in readers:
+            if not process.is_alive():
+                logger.info('{0}/{1} marked as done'.format(process,file))
+                readers.remove((process,file))
+        
         for afile in glob2.iglob(options.filemask):
-            if exists(afile): #sometimes files can move/archive while we iterate the list
-                try: 
-                    #have pygtail feed us lines 
-                    pt = Pygtail(afile,pretend=False)
-                    for line in pt:                
-                        for acef in cefre.findall(line):
-                            cefDict=parseCEF(acef)
-                            #logger.debug(json.dumps(cefDict))
-                        
-                            #append json to the list for posting
-                            if cefDict is not None:
-                                logcache.put(json.dumps(cefDict))        
-                        if not logcache.empty():
-                            #postLogs(logcache)
-                            postingProcess=Process(target=postLogs,args=(logcache,),name="cef2mozdefHTTPPost")
-                            postingProcess.start()
-                        pt._update_offset_file()
-                except KeyboardInterrupt:
-                    sys.exit(1)
-                except ValueError as e:
-                    logger.fatal('Exception while handling CEF message: %r'%e)
-                    sys.exit(1)
-        notDone=False
-        time.sleep(.001)
+            #if we aren't reading a file
+            #or at the end of the file
+            #spin up a process to read the file
+            activefiles=[]
+            for process,filename in readers:
+                activefiles.append(filename)
+            if afile not in activefiles:            
+                pygtail = Pygtail(afile,pretend=False)
+                if getsize(afile)> pygtail._offset:    
+                        logger.info('starting a reader for {0}'.format(afile))
+                        readingProcess=Process(target=readCEFFile,args=(afile,pygtail),name="cef2mozdefReadFile")
+                        readers.append((readingProcess,afile))
+                        readingProcess.start()
+        #change this if you want it to stop (cronjob, or debugging), else it will run forever (ala /etc/init service)
+        #notDone=False        
+        time.sleep(2)
     logger.info('finished')
 
 def initConfig():
@@ -382,5 +396,7 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
-    initLogger()    
+    initLogger()
+
+    readers=[]
     main()
