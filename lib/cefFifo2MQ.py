@@ -25,7 +25,22 @@ from Queue import Empty, Full
 logger = logging.getLogger(sys.argv[0])
 #sample CEF record:
 #CEF:0|Unix|auditd|1|CHMOD|CHMOD failed|3|end=1391190619 fname="/var/log/nagios/rw/live" dhost=something.mozilla.com suser=someone suid=496 dproc=/usr/sbin/nagios msg=gid\\=496 euid\\=496 suid\\=496 fsuid\\=496 egid\\=496 sgid\\=496 fsgid\\=496 ses\\=20673 cwd\\="/" inode\\=00:00 dev\\=(null) mode\\=(null) ouid\\=(null) ogid\\=(null) rdev\\=(null) cn1Label=auid cn1=1579 cs1Label=Command cs1= cs2Label=Truncated cs2=No cs3Label=AuditKey cs3=(null) cs4Label=TTY cs4=(none) cs5Label=ParentProcess cs5=init cs6Label=MsgTruncated cs6=No
-cefre=re.compile(r'''(CEF:[0-9]\|.*)''')                        #anything starting with CEF:integer
+#anything starting with CEF:integer is a cef record
+cefre=re.compile(r'''(CEF:[0-9]\|.*)''')
+#declare list of cef fields we are interested in
+validfields=[
+    'act','app','cat','cnt','dvc','dvchost',
+    'in','out','dst','dhost','dmac','dntdom',
+    'dpt','dproc','duid','dpriv','duser','end',
+    'fname','fsize','msg','rt','request','src',
+    'shost','smac','sntdom','spt','spriv','suid',
+    'suser','start','proto','cs1Label','cs2Label',
+    'cs3Label','cs4Label','cs5Label','cs6Label',
+    'cs1','cs2','cs3','cs4','cs5','cs6','cn1Label',
+    'cn2Label','cn3Label','cn1','cn2','cn3','cn4',
+    'request','requestClientApplication','requestMethod',
+    'gid','euid','fsuid','egid','sgid','fsgid','ses','cwd','inode','dev', 'mode','ouid','ogid','rdev' 
+]
 
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
@@ -35,7 +50,7 @@ def initLogger():
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     formatter.formatTime = loggerTimeStamp
     if options.output == 'syslog':
-        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport),facility=logging.handlers.SysLogHandler.LOG_LOCAL))
+        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport),facility=logging.handlers.SysLogHandler.LOG_LOCAL4))
     else:
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
@@ -145,26 +160,31 @@ def parseCEF(acef):
     '''
     rawcefdict = {}
     cef={}
-    cef['version']=0
-    cef['details']={}
+    cef[u'version']=0
+    cef[u'details']={}
     fields=[]
-    
+
     headers=acef.split('|')
-    cef['details']['version']=headers[0].replace('CEF:','')
-    cef['details']['devicevendor']=headers[1]
-    cef['details']['deviceproduct']=headers[2]
-    cef['details']['deviceversion']=headers[3]
-    cef['details']['signatureid']=headers[4]
-    cef['details']['name']=headers[5]
-    cef['details']['severity']=headers[6]
-    cef['summary']=headers[5]
-    
-    #get the non header fields including any pipes in target commands, etc. 
+    cef[u'details'][u'version']=headers[0].replace('CEF:','')
+    cef[u'details'][u'devicevendor']=headers[1]
+    cef[u'details'][u'deviceproduct']=headers[2]
+    cef[u'details'][u'deviceversion']=headers[3]
+    cef[u'details'][u'signatureid']=headers[4]
+    cef[u'details'][u'name']=headers[5]
+    cef[u'details'][u'severity']=headers[6]
+    cef[u'summary']=headers[5]
+
     mlist = '|'.join(acef.split('|')[7:]).decode('ascii','ignore')
     #unescape any escaped field\\=value fields
     mlist=mlist.replace('\\=', '=')
     #no empty messages 
-    mlist=mlist.replace('msg= ','').split('=')
+    #mlist=mlist.replace('msg= ','')
+    
+    #before splitting on field=value, change valid fields to a token splitter
+    for f in validfields: 
+        if ' {0}='.format(f) in mlist:
+            mlist=mlist.replace('{0}='.format(f),'{0}:=:'.format(f))
+    mlist=mlist.split(':=:')
     
     i=0
     try:
@@ -178,18 +198,21 @@ def parseCEF(acef):
             mlist[-(i+1)] = " ".join(cut[0:-1])
     except IndexError as e:
         pass
+    
     #fix up custom field names
     #cs6Label MsgTruncated cs6 No
     for field in fields:
         if 'label' in field.lower():
             #this is a label for another field..fix up our dict to have the label as key and data as value
             if field.lower().replace('label','') in rawcefdict.keys():
-                cef['details'][rawcefdict[field.lower()]]=rawcefdict[field.lower().replace('label','')].decode('ascii','ignore')    
+                cef['details'][rawcefdict[field.lower()].lower()]=rawcefdict[field.lower().replace('label','')].decode('ascii','ignore')    
                 rawcefdict.pop(field.lower().replace('label',''))
             rawcefdict.pop(field.lower(),'')
+    
     #add whatever is left (non label field or value) to the cef dictionary
     for k,v in rawcefdict.iteritems():
-        cef['details'][k]=v.decode('ascii','ignore')
+        cef['details'][k.decode('ascii','ignore').lower()]=v.decode('ascii','ignore')        
+    
     #pick an eventtimestamp if one exists. 
     if 'start' in cef['details'].keys():
         cef['timestamp']=toUTC(cef['details']['start']).isoformat()
@@ -198,9 +221,9 @@ def parseCEF(acef):
     elif 'rt' in cef['details'].keys():
         cef['timestamp']=toUTC(cef['details']['rt']).isoformat()
     else:
-        cef['timestamp']=toUTC(datetime.now()).isoformat()        
+        cef['timestamp']=toUTC(datetime.now()).isoformat()  
     return cef
-    
+   
 def nonBlockRead(fd):
     try:
         fl = fcntl.fcntl(fd, fcntl.F_GETFL)
