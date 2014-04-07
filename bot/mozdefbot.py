@@ -44,7 +44,7 @@ panics=["don't panic",
         ]
 
 if os.path.isfile('quotes.txt'):
-    quotes=quotes=open('quotes.txt').readlines()
+    quotes=open('quotes.txt').readlines()
 else:
     quotes=['nothing to say..add a quotes.txt file!']
 
@@ -174,7 +174,7 @@ class alertsListener(threading.Thread):
         self.channel = None
 
     def alertsCallback(self, ch, method, properties, bodyin):
-        self.client.root_logger.debug(" [x]event %r:%r" % (method.routing_key, bodyin))
+        self.client.root_logger.debug(" [x]event {0}:{1}".format(method.routing_key, bodyin))
         try:
             jbody=json.loads(bodyin)
             self.client.msg(options.alertircchannel,formatAlert(jbody))
