@@ -29,7 +29,7 @@ Technical
 * Replace a SIEM
 * Scalable, should be able to handle thousands of events/s, provide fast searching, alerting and correlations and handle interactions between teams of incident handlers.
 
-MozDef aims to provide traditional SIEM functionality including: 
+MozDef aims to provide traditional SIEM functionality including:
 
 * Accepts events/logs from your systems
 * Stores the events/logs
@@ -41,7 +41,7 @@ It is non-traditional in that it:
 
 * Accepts only JSON input
 * Provides you open access to your data
-* Integrates with a variety of log shippers including  heka, logstash, beaver, nxlog and any shipper that can send JSON to either rabbit-mq or an HTTP endpoint. 
+* Integrates with a variety of log shippers including  heka, logstash, beaver, nxlog and any shipper that can send JSON to either rabbit-mq or an HTTP endpoint.
 * Provides easy python plugins to manipulate your data in transit
 * Provides realtime access to teams of incident responders to allow each other to see their work simultaneously
 
@@ -70,14 +70,14 @@ MozDef is in early proof of concept phases at Mozilla where we are using it to r
 Roadmap
 -------
 
-Near term: 
+Near term:
 
-* Replace base SIEM functionality including log input, event management, search, alerts, basic correlations. 
+* Replace base SIEM functionality including log input, event management, search, alerts, basic correlations.
 * Enhance the incident workflow UI to enable realtime collaboration
 * Enable basic plug-ins to the event input stream for meta data, additional parsing, categorization and basic machine learning
 * Support as many common event/log shippers as possible with repeatable recipies
 
-Mid term:  
+Mid term:
 
 * Repeatable installation guides
 * Ready-made AMIs/downloadable ISOs
@@ -85,7 +85,7 @@ Mid term:
 * 3D visualizations of threat actors
 * Base integration into Mozilla's defense mechanisms for automation
 
-Long term: 
+Long term:
 
 * Integration into common defense mechanisms used outside Mozilla
 * Enhanced visualizations and interactions including alternative interfaces (myo,omnidirectional treadmills, oculus rift)
