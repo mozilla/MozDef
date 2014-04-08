@@ -39,7 +39,8 @@ validfields=[
     'cs1','cs2','cs3','cs4','cs5','cs6','cn1Label',
     'cn2Label','cn3Label','cn1','cn2','cn3','cn4',
     'request','requestClientApplication','requestMethod',
-    'gid','euid','fsuid','egid','sgid','fsgid','ses','cwd','inode','dev', 'mode','ouid','ogid','rdev' 
+    'gid','euid','fsuid','egid','sgid','fsgid','ses','cwd',
+    'inode','dev','mode','ouid','ogid','rdev' 
 ]
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -164,15 +165,19 @@ def parseCEF(acef):
     cef[u'details']={}
     fields=[]
 
-    headers=acef.split('|')
-    cef[u'details'][u'version']=headers[0].replace('CEF:','')
-    cef[u'details'][u'devicevendor']=headers[1]
-    cef[u'details'][u'deviceproduct']=headers[2]
-    cef[u'details'][u'deviceversion']=headers[3]
-    cef[u'details'][u'signatureid']=headers[4]
-    cef[u'details'][u'name']=headers[5]
-    cef[u'details'][u'severity']=headers[6]
-    cef[u'summary']=headers[5]
+    try: 
+        headers=acef.split('|')
+        cef[u'details'][u'version']=headers[0].replace('CEF:','')
+        cef[u'details'][u'devicevendor']=headers[1]
+        cef[u'details'][u'deviceproduct']=headers[2]
+        cef[u'details'][u'deviceversion']=headers[3]
+        cef[u'details'][u'signatureid']=headers[4]
+        cef[u'details'][u'name']=headers[5]
+        cef[u'details'][u'severity']=headers[6]
+        cef[u'summary']=headers[5]
+    except IndexError as e:
+        logger.error('Index error parsing CEF headers in {0}'.format(acef))
+        return None
 
     mlist = '|'.join(acef.split('|')[7:]).decode('ascii','ignore')
     #unescape any escaped field\\=value fields
@@ -267,7 +272,7 @@ def main():
                 for ffd,ev in events:
                     if ev & select.EPOLLIN:
                         try:
-                            buf = os.read(fd, 1024)
+                            buf = os.read(fd, options.fiforeadsize)
                         except OSError as e:
                             if e.errno == errno.EAGAIN or e.errno ==errno.EWOULDBLOCK:
                                 #try again, or would block    
@@ -321,7 +326,9 @@ def initConfig():
     options.taskexchange=getConfig('taskexchange','eventtask',options.configfile)
     options.mquser=getConfig('mquser','guest',options.configfile)
     options.mqpassword=getConfig('mqpassword','guest',options.configfile)
-    options.mqport=getConfig('mqport',5672,options.configfile)    
+    options.mqport=getConfig('mqport',5672,options.configfile)
+    #how much to read in a chunk from the fifo
+    options.fiforeadsize = getConfig('fiforeadsize', 2048, options.configfile)
     
 if __name__ == '__main__':
     parser=OptionParser()
