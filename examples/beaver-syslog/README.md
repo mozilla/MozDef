@@ -5,5 +5,5 @@ This configuration for [beaver](https://github.com/josegonzalez/beaver) ships sy
 To run it:
 
 ```
-beaver -c /etc/beaver/conf -t stdout
+beaver -c config.ini -t stdout
 ```
