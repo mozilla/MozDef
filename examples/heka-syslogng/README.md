@@ -1,4 +1,4 @@
-# beaver-syslog
+# heka-syslogng
 
 This configuration for [heka](http://hekad.readthedocs.org/en/latest/) ships syslog-ng logs stored in `/var/log/syslog/systems` to mozdef.
 
