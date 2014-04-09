@@ -22,10 +22,12 @@ details.hostname = "%hostname%"
 details.program = "%program%"
 details.processid = "%pid%"
 
+# Start commenting here if you don't want any stdout
 [stdout]
 type = "LogOutput"
 message_matcher = "FALSE"
 #payload_only = true
+# Finish commenting here
 
 [ElasticSearchOutput]
 message_matcher = "Type!='heka.all-report'"

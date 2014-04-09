@@ -20,10 +20,12 @@ RequestSize|B = "%RequestSize%"
 Referer = "%Referer%"
 Browser = "%Browser%"
 
+# Start commenting here if you don't want any stdout
 [stdout]
 type = "LogOutput"
 message_matcher = "TRUE"
 payload_only = true
+# Finish commenting here
 
 [ElasticSearchOutput]
 message_matcher = "Type!='heka.all-report'"
