@@ -34,6 +34,6 @@ License
 Contact
 =======
 
-* opsec INSERTAT mozilla.com
+* opsec+mozdef INSERTAT mozilla.com
 * Jeff Bryner, jbryner INSERTAT mozilla.com @0x7eff
 * Anthony Verez, averez INSERTAT mozilla.com @netantho
