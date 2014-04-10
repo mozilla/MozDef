@@ -1,0 +1,27 @@
+[bronotice]
+type = "LogstreamerInput"
+log_directory = "/nsm/bro/spool/manager"
+file_match = 'notice\.log'
+decoder = "bronotice_transform_decoder"
+
+[bronotice_transform_decoder]
+type = "SandboxDecoder"
+script_type = "lua"
+filename = "bronotice.lua"
+
+# Start commenting here if you don't want any stdout
+[stdout]
+type = "LogOutput"
+message_matcher = "FALSE"
+#payload_only = true
+# Finish commenting here
+
+[ElasticSearchOutput]
+message_matcher = "Type!='heka.all-report'"
+cluster = "mozdefqa"
+index = "events"
+type_name = "event"
+server = "http://mozdef.example.com:8080"
+format = "clean"
+flush_interval = 1000
+flush_count = 10
