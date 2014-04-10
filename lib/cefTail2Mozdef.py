@@ -21,8 +21,22 @@ import random
 import errno
 import select
 import glob2
+import glob
 from os import stat
+from collections import deque
 
+class Buffer(deque):
+    def put(self, iterable):
+        for i in iterable:
+            self.append(i)
+
+    def peek(self, how_many):
+        return ''.join([self[i] for i in xrange(how_many)])
+
+    def get(self, how_many):
+        return ''.join([self.popleft() for _ in xrange(how_many)])
+    
+    
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -175,7 +189,8 @@ class Pygtail(object):
         """
         if not self._fh or self._fh.closed:
             filename = self._rotated_logfile or self.filename
-            self._fh = open(filename, "r")
+            #self._fh = open(filename, "r")
+            self._fh = os.open(filename,os.O_RDONLY)
             self._fh.seek(self._offset)
 
         return self._fh
@@ -235,7 +250,7 @@ def postLogs(logcache):
     httpsession = FuturesSession(max_workers=2)
     httpsession.trust_env=False #turns off needless and repetitive .netrc check for creds
     canQuit=False
-
+    logger.info('started posting process')
     def backgroundcallback(session, response):
         #release the connection back to the pool
         try: 
@@ -295,16 +310,16 @@ def parseCEF(acef):
     
     i=0
     try:
-     for i,x in enumerate(reversed(mlist)):
-        i = i + 1
-        slast = mlist[-(i+1)]
-        cut = slast.split()
-        cut2 = cut[-1]
-        fields.insert(i,cut2)
-        rawcefdict.update({cut2.lower():x})
-        mlist[-(i+1)] = " ".join(cut[0:-1])
+        for i,x in enumerate(reversed(mlist)):
+            i = i + 1
+            slast = mlist[-(i+1)]
+            cut = slast.split()
+            cut2 = cut[-1]
+            fields.insert(i,cut2)
+            rawcefdict.update({cut2.lower():x})
+            mlist[-(i+1)] = " ".join(cut[0:-1])
     except IndexError as e:
-     pass
+        pass
     #fix up custom field names
     #cs6Label MsgTruncated cs6 No
     for field in fields:
@@ -327,22 +342,48 @@ def parseCEF(acef):
     else:
         cef['timestamp']=toUTC(datetime.now()).isoformat()        
     return cef
-                
-def readCEFFile(afile,pygtail):
+
+def nonBlockRead(fd):
+    try:
+        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+        out= os.read(fd,1024)
+        if out !=None:
+            return out
+        else:
+            return ''
+    except Exception as e:
+        logger.error('%r'%e)
+
+def readCEFFile(afile):
     if exists(afile): #sometimes files can move/archive while we iterate the list
         try:
             #start a process to post our stuff.
             logcache=JoinableQueue()
             postingProcess=Process(target=postLogs,args=(logcache,),name="cef2mozdefHTTPPost")
-            postingProcess.start()            
-            #have pygtail feed us lines 
-            for line in pygtail:
-                pygtail._update_offset_file()
-                cefDict=parseCEF(line)
-                #logger.debug(json.dumps(cefDict))
-                #append json to the list for posting
-                if cefDict is not None:
-                    logcache.put(json.dumps(cefDict))        
+            postingProcess.start()
+            #tail a file to feed us lines
+            #yielding a line on newline, buffering input in between
+            fh = os.open(afile, os.O_RDONLY | os.O_NONBLOCK)
+            os.lseek(fh, 0, os.SEEK_END)
+            bufa=Buffer()
+            bufb=Buffer()
+            while True:
+                time.sleep(0.001) # Wait a little
+                bufa.append(nonBlockRead(fh))
+                if '\n' in ''.join(bufa):  #new line/end of log is found
+                    for line in ''.join(bufa).splitlines(True):
+                        if '\n' in line:
+                            cefDict=parseCEF(line.strip())
+                            #logger.debug(json.dumps(cefDict))
+                            #append json to the list for posting
+                            if cefDict is not None:
+                                logcache.put(json.dumps(cefDict)) 
+                        else:
+                            bufb.append(line)
+                    bufa.clear()
+                    bufa.append(''.join(bufb))
+                    bufb.clear()
             logger.info('{0} done'.format(afile))
             logger.info('waiting for posting to finish')
             logcache.put(None)
@@ -364,21 +405,28 @@ def main():
                 readers.remove((process,file))
         
         for afile in glob2.iglob(options.filemask):
+            #logger.debug('noticed file {0}'.format(afile))
             #if we aren't reading a file
-            #or at the end of the file
             #spin up a process to read the file
             activefiles=[]
             for process,filename in readers:
                 activefiles.append(filename)
             if afile not in activefiles:            
-                pygtail = Pygtail(afile,pretend=False)
-                if getsize(afile)> pygtail._offset:    
-                        logger.info('starting a reader for {0}'.format(afile))
-                        readingProcess=Process(target=readCEFFile,args=(afile,pygtail),name="cef2mozdefReadFile")
-                        readers.append((readingProcess,afile))
-                        readingProcess.start()
+                logger.info('starting a reader for {0}'.format(afile))
+                readingProcess=Process(target=readCEFFile,args=(afile,),name="cef2mozdefReadFile")
+                readers.append((readingProcess,afile))
+                readingProcess.start()
+                
+        #if we are reading a file no longer in the list of active files (rotated, etc),
+        #tell it's reader it's ok to stop.
+        for process,filename in readers:
+            if filename not in glob2.iglob(options.filemask):
+                logger.info('{0} no longer valid, stopping file reader'.format(filename))
+                process.terminate()
+                process.join()
+            
         #change this if you want it to stop (cronjob, or debugging), else it will run forever (ala /etc/init service)
-        #notDone=False        
+        #notDone=False
         time.sleep(2)
     logger.info('finished')
 
