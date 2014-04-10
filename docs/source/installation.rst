@@ -15,7 +15,7 @@ Dockerfile
 
 After installing `docker`_, use this to build a new image::
 
-  cd docker && sudo make build 
+  cd docker && sudo make build
 
 Running the container::
 
@@ -84,18 +84,31 @@ This section explains the manual installation process for Web and Workers nodes.
 Python
 ******
 
-We need to install a python2.7 virtualenv::
+Create a mozdef user::
+
+  adduser mozdef
+
+We need to install a python2.7 virtualenv.
+
+On Yum-based systems::
 
   sudo yum install make zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel pcre-devel gcc gcc-c++
-  cd
+
+On APT-based systems::
+
+  sudo apt-get install make zlib1g-dev libbz2-dev libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev tk-dev libpcre3-dev libpcre++-dev build-essential g++
+
+Then::
+
+  su - mozdef
   wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
-  tar xvzf http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
+  tar xvzf Python-2.7.6.tgz
   ./configure --prefix=/home/mozdef/python2.7 --enable-shared
   make
   make install
 
   wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-  export LD_LIBRARY_PATH=/home/netantho/python2.7/lib/
+  export LD_LIBRARY_PATH=/home/mozdef/python2.7/lib/
   ./python2.7/bin/python get-pip.py
   ./python2.7/bin/pip install virtualenv
   mkdir ~/envs
