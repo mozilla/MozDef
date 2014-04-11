@@ -5,7 +5,7 @@ MAINTAINER Yohann Lepage <yohann@lepage.info>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Locales
-RUN (apt-key update \
+RUN (apt-key update --fix-missing \
 	&& apt-get -q -y update \
 	&& apt-get install -q -y apt-utils \
 	&& apt-get install -q -y locales)
