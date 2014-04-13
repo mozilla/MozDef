@@ -97,7 +97,7 @@ def esCloudTrailSearch(es,begindateUTC=None, enddateUTC=None):
         qcloud=pyes.TermFilter('_type','cloudtrail')
         qEvents=pyes.TermsFilter('eventName',['runinstances','stopinstances','startinstances'])
         qalerted=pyes.ExistsFilter('alerttimestamp')
-        results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents],must_not=[qalerted])))
+        results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents],must_not=[qalerted])), indices='events')
         #uncomment for debugging to recreate alerts for events that already have an alerttimestamp
         #results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents])))
         return(results)
