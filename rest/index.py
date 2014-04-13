@@ -104,7 +104,7 @@ def esAlertsSummary(begindateUTC=None, enddateUTC=None):
         #get all alerts
         #q= S().es(urls=['http://{0}:{1}'.format(options.esserver,options.esport)]).query(_type='alert')
         q= S().es(urls=list('{0}'.format(s) for s in options.esservers)).query(_type='alert')
-        #create a facet field using the entire 'type' field  (not the sub terms) and filter it by date. 
+        #create a facet field using the entire 'category' field  (not the sub terms) and filter it by date. 
         f=q.facet_raw(\
             alerttype={"terms" : {"script_field" : "_source.category"},\
             "facet_filter":{'range': {'utctimestamp': \
@@ -135,7 +135,7 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         q2=q.search()
         q2.facet.add_term_facet('details.result')
         q2.facet.add_term_facet('details.dn',size=20)
-        results=es.search(q2)
+        results=es.search(q2, indices='events')
         #sys.stdout.write('{0}\n'.format(results.facets))
     
         stoplist=('o','mozilla','dc','com','mozilla.com','mozillafoundation.org','org')
