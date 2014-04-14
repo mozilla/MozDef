@@ -17,7 +17,7 @@ message_matcher = "FALSE"
 # Finish commenting here
 
 [ElasticSearchOutput]
-message_matcher = "Type!='heka.all-report'"
+message_matcher = 'Type !~ /^heka\./'
 cluster = "mozdefqa"
 index = "events"
 type_name = "event"
