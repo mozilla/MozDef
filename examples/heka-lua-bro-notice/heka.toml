@@ -12,7 +12,7 @@ filename = "bronotice.lua"
 # Start commenting here if you don't want any stdout
 [stdout]
 type = "LogOutput"
-message_matcher = "FALSE"
+message_matcher = "TRUE"
 #payload_only = true
 # Finish commenting here
 
