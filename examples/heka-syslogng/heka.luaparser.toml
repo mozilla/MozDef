@@ -1,0 +1,30 @@
+[hekad]
+maxprocs=10
+
+[DashboardOutput]
+
+[systemslogs]
+type = "LogstreamerInput"
+log_directory = "/var/log/syslog/systems"
+file_match = '(?P<Year>\d+)-(?P<Month>\d+)-(?P<Day>\d+).log'
+priority = ["Year","Month","Day"]
+oldest_duration = "2h"
+decoder = "systemslogs_transform_decoder"
+
+[systemslogs_transform_decoder]
+type = "SandboxDecoder"
+script_type = "lua"
+filename = "syslog_tab_delimited.lua"
+
+[systemslogs_transform_decoder.config]
+type='syslog'
+
+[ElasticSearchOutput]
+message_matcher = "Type!='heka.all-report'"
+cluster = "mozdef"
+index = "events"
+type_name = "event"
+server = "http://localhost:8080"
+format = "clean"
+flush_interval = 1000
+flush_count = 1000
