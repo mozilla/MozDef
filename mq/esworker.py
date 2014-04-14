@@ -253,7 +253,7 @@ class taskConsumer(ConsumerMixin):
                 # disable periodic checking for new plugins
                 # because of memory leak
                 # checkPlugins(pluginList,lastPluginCheck)
-                sendEventToPlugins(normalizedDict,pluginList)
+                sendEventToPlugins(normalizedDict, pluginList)
 
                 # make a json version for posting to elastic search
                 jbody = json.JSONEncoder().encode(normalizedDict)
@@ -451,7 +451,7 @@ def initConfig():
     # seems to cause memory leaks..
     # regular updates are disabled for now,
     # though we set the frequency anyway.
-    options.plugincheckfrequency=getConfig('plugincheckfrequency',120,options.configfile)
+    options.plugincheckfrequency = getConfig('plugincheckfrequency', 120, options.configfile)
     
 
 if __name__ == '__main__':
