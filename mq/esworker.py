@@ -9,6 +9,7 @@ import os
 import pyes
 import pytz
 import pynsive
+import re
 import sys
 import time
 from configlib import getConfig, OptionParser
@@ -392,7 +393,7 @@ def sendEventToPlugins(anevent, pluginList):
         if isinstance(plugin[1], dict):
             # list of the plugin field requests. Will return key=None for keys registered without a particular value
             pluginRegistration = [entry for entry in flattenDict(plugin[1])]
-            print('plug in wants: {0}'.format(pluginRegistration))
+            #print('plug in wants: {0}'.format(pluginRegistration))
             for p in pluginRegistration:
                 if p.endswith('=None'):  # a request for a field, no specific value
                     if p.replace('=None', '') in eventWithoutValues:
