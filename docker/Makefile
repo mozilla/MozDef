@@ -6,7 +6,7 @@
 #	make debug	- debug run already created image by tag
 #	make try	- build and run in debug mode
 
-NAME=2xyo/MozDef
+NAME=mozdef
 VERSION=0.1
 
 
