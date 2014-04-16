@@ -1,4 +1,12 @@
 #!/bin/sh
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Contributors:
+# Björn Arnelid bjorn.arnelid@gmail.com
+
 # Automated static code analysis for Python and JavaScript
 # Python tools pylint, pep8, pyflakes
 NOW=$(date +%Y%m%d_%H%M%S)
