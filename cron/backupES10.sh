@@ -1,4 +1,13 @@
 #!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2014 Mozilla Corporation
+#
+# Contributors:
+# Anthony Verez averez@mozilla.com
+
 # herein we backup our indexes! this script should run at like 6pm or something, after you
 # rotate indexes to a new ES date index and theres no new data coming in to the old one. we create a snapshot,
 # create a restore script, and push it all up to S3.
