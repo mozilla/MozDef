@@ -4,7 +4,7 @@ Code
 Plugins
 -------
 
-The front-end event processing portion of MozDef supports python plugins to allow customization of the input chain. 
+The front-end event processing portion of MozDef supports python `plugins`_ to allow customization of the input chain. 
 Plugins are simple python modules than can register for events with a priority, so they only see events with certain
 dictionary items/values and will get them in a predefined order. 
 
@@ -42,7 +42,7 @@ To process a message, define an onMessage function within your class as follows:
 
 
 The plugin will receive a copy of the incoming event as a python dictionary in the 'message' variable. The plugin can do
-whatever it wants with this dictionary and return it to MozDef. Plugins will be called in priority order 1 to 100 if the 
+whatever it wants with this dictionary and return it to MozDef. Plugins will be called in priority order 0 to 100 if the 
 incoming event matches their registration criteria. i.e. If you register for sourceipaddress you will only get events containing
 the sourceipaddress field.
 
@@ -56,7 +56,7 @@ and it will recognize the plugin and pass it events as it sees them.
 
 
 
-
+.. _plugins: https://github.com/jeffbryner/MozDef/tree/master/mq/plugins
 
 
 
