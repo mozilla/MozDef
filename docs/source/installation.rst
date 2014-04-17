@@ -191,12 +191,12 @@ You may want to edit the app/lib/settings.js file to properly point to your elas
 Then start meteor with::
 
   meteor
-  
+
 
 Node
 ******
 
-Alternatively you can run the meteor UI in 'deployment' mode using a native node installation. 
+Alternatively you can run the meteor UI in 'deployment' mode using a native node installation.
 
 First install node::
 
@@ -206,31 +206,31 @@ First install node::
     cd node-v0.10.25
     python configure
     make
-    make install   
+    make install
 
 Then bundle the meteor portion of mozdef::
 
   cd <your meteor mozdef directory>
   meteor bundle mozdef.tgz
 
-You can then deploy the meteor UI for mozdef as necessary:: 
+You can then deploy the meteor UI for mozdef as necessary::
 
   scp mozdef.tgz to your target host
   tar -xvzf mozdef.tgz
-  
+
 This will create a 'bundle' directory with the entire UI code below that directory.
-  
+
 You will need to update the settings.js file to match your servername/port::
 
   vim bundle/programs/server/app/app/lib/settings.js
-  
+
 If your development OS is different than your production OS you will also need to update
-the fibers node module:: 
+the fibers node module::
 
   cd bundle/programs/server/node_modules
   rm -rf fibers
   sudo npm install fibers@1.0.1
-  
+
 Then run the mozdef UI via node::
 
   export MONGO_URL=mongodb://mongoservername:3002/meteor
@@ -273,6 +273,8 @@ We use `uwsgi`_ to interface python and nginx::
   cp uwsgi ~/envs/mozdef/bin/
 
   cd rest
+  # modify settings.py
+  vim settings.py
   # modify uwsgi.ini
   vim uwsgi.ini
   uwsgi --ini uwsgi.ini
