@@ -1,0 +1,55 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+
+Contributors:
+Jeff Bryner jbryner@mozilla.com
+Anthony Verez averez@mozilla.com
+-->
+
+<template name="menu">
+    <div id="header" role="banner">
+        <h2><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></h2>
+        <div id="nav-main" role="navigation">
+        <ul>
+            <li class="first"><a href="#">Kibana dashboards</a>
+                <ul>
+                    {{#each kibanadashboards as item}}
+                        {{>kibanaDashboardItem}}
+                    {{/each}}
+	        </ul>
+            </li>
+	    <li class="first"><a href="/events/">Events</a>
+	        <ul>
+	            <li class="first"><a href="/logincounts/">logincounts</a></li>
+		    <li><a target=" _blank" href="{{mozdef.ldapKibana}}">ldap kibana</a></li>
+		    <li class="last"><a target=" _blank" href="{{mozdef.eventsKibana}}">events kibana</a></li>
+                </ul>
+            </li>
+            <li><a href="/alerts/">Alerts</a>
+	        <ul>
+                    <li class="first"><a target="_blank" href="{{mozdef.alertsKibana}}">alerts kibana</a></li>
+		    <li class="last"><a href="/alerts/setup">setup</a></li>
+                </ul>
+	    </li>
+            <li><a href="/Incidents">Incidents</a>
+		<ul>
+		    <li class="first"><a href="/incidents/new/">new incident</a></li>
+		    <li class="last"><a href="/incidents/attackers">attackers</a></li>
+	        </ul>
+	   </li>
+           <li><a href="/about">About</a></li>
+        </ul>
+        <a class="mozilla" href="http://mozilla.org"><img src="/images/mozilla-tab.png"></a>
+        </div>
+    </div>
+</template>
+
+<template name="kibanaDashboardItem">
+   <li class="first">
+       <a href="{{url}}">{{name}}</a>
+   </li>
+</template>
+
