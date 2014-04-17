@@ -20,11 +20,6 @@ elasticsearch = {
 mozdef = {
   rootURL: "https://localhost",
   port: "443",
-  rootAPI: "http://localhost:8081",
-  ldapKibana: "http://localhost:9090/#/dashboard/elasticsearch/mozdef%20ldap%20dashboard",
-  eventsKibana: "http://localhost:9090/index.html#/dashboard/elasticsearch/Logstash%20Style%20Search",
-  alertsKibana: "http://localhost:9090/index.html#/dashboard/elasticsearch/Alerts",
-  ldapLoginDataURL: "http://localhost:8081/ldapLogins/", // rest server
-  alertDataURL: "http://localhost:8081/alerts/" // rest server
+  rootAPI: "http://localhost:8081"
 }
 

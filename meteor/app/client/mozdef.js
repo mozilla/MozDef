@@ -419,7 +419,7 @@ if (Meteor.isClient) {
         .range([0, maxRadius]);
     
         
-    d3.json(mozdef.ldapLoginDataURL, function(error, jsondata) {
+	d3.json(mozdef.rootAPI + '/ldapLogins/' , function(error, jsondata) {
         //console.log(jsondata)
         r.domain([0, d3.max(jsondata, function(d) { return d.success+ d.failures; })])
         jsondata.forEach(function(d){
@@ -589,7 +589,7 @@ if (Meteor.isClient) {
         .range([0, maxRadius]);
     
         
-    d3.json(mozdef.alertDataURL, function(error, jsondata) {
+    d3.json(mozdef.rootAPI + '/alerts/', function(error, jsondata) {
         if (typeof console !== 'undefined')
           console.log(error)
         r.domain([0, d3.max(jsondata, function(d) { return d.count; })])
