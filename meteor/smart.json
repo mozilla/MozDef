@@ -1,6 +1,6 @@
 {
   "packages": {
-    "iron-router": {},
-    "accounts-persona": {}
+    "accounts-persona": {},
+    "iron-router": {}
   }
 }

@@ -6,13 +6,12 @@
 standard-app-packages
 autopublish
 insecure
-preserve-inputs
 bootstrap
 accounts-ui
 accounts-password
 backbone
 
-iron-router
 http
 accounts-persona
 d3
+iron-router

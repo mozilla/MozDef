@@ -2,19 +2,24 @@
   "meteor": {},
   "dependencies": {
     "basePackages": {
-      "iron-router": {},
-      "accounts-persona": {}
+      "accounts-persona": {},
+      "iron-router": {}
     },
     "packages": {
-      "iron-router": {
-        "git": "https://github.com/EventedMind/iron-router.git",
-        "tag": "v0.6.2",
-        "commit": "ce56e58b45624dce992490f3a1c10f10d3948bae"
-      },
       "accounts-persona": {
         "git": "https://github.com/vladikoff/meteor-accounts-persona.git",
         "tag": "v0.1.6",
         "commit": "5b8110dad901a69f674e6a0381e074567fe1b4d9"
+      },
+      "iron-router": {
+        "git": "https://github.com/EventedMind/iron-router.git",
+        "tag": "v0.7.1",
+        "commit": "d1ffb3f06ea4c112132b030f2eb1a70b81675ecb"
+      },
+      "blaze-layout": {
+        "git": "https://github.com/EventedMind/blaze-layout.git",
+        "tag": "v0.2.4",
+        "commit": "b40e9b0612329288d75cf52ad14a7da64bb8618f"
       }
     }
   }
