@@ -18,7 +18,6 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
 import pytz
-import settings
 
 options = None
 # cors decorator for rest/ajax
@@ -211,7 +210,7 @@ def kibanaDashboards():
                 dashboardJson = json.loads(dashboard.dashboard)
                 resultsList.append({
                     'name': dashboardJson['title'],
-                    'url': "%s/%s/%s" % (settings.settings['kibanaURL'],
+                    'url': "%s/%s/%s" % (options.kibanaurl,
                         "index.html#/dashboard/elasticsearch",
                         dashboardJson['title'])
                 })
@@ -228,6 +227,8 @@ def initConfig():
         options.configfile)
     options.esservers = list(getConfig('esservers', 'http://localhost:9200',
         options.configfile).split(','))
+    options.kibanaurl = getConfig('kibanaurl', 'http://localhost:9090',
+        options.configfile)
     print(options)
 
 
