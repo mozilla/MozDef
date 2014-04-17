@@ -30,6 +30,12 @@ if (Meteor.isClient) {
         }
     });
 
+    // loads kibana dashboards
+    Template.menu.kibanadashboards = function() {
+      Meteor.call('loadKibanaDashboards');
+      return kibanadashboards.find();
+    }
+
     //helper functions for handlebars
     UI.registerHelper('now', function() {
         return new Date();

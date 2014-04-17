@@ -28,36 +28,7 @@ Anthony Verez averez@mozilla.com
 <title>mozdef::mozilla defense platform</title>
 </head>
 <body>
-    <div id="header" role="banner">
-        <h2><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></h2>
-        <div id="nav-main" role="navigation">
-            <ul>
-                <li class="first"><a href="/events/">Events</a>
-                    <ul>
-                        <li class="first"><a href="/logincounts/">logincounts</a></li>
-                        <li><a target=" _blank" href="{{mozdef.ldapKibana}}">ldap kibana</a></li>
-                        <li class="last"><a target=" _blank" href="{{mozdef.eventsKibana}}">events kibana</a></li>
-                    </ul>
-                </li>
-                 <li ><a href="/alerts/">Alerts</a>
-                    <ul>
-                        <li class="first"><a target="_blank" href="{{mozdef.alertsKibana}}">alerts kibana</a></li>
-                        <li class="last"><a href="/alerts/setup">setup</a></li>
-                    </ul>
-                </li>   
-                <li><a href="/Incidents">Incidents</a>
-                    <ul>
-                        <li class="first"><a href="/incidents/new/">new incident</a></li>
-                        <li class="last"><a href="/incidents/attackers">attackers</a></li>
-                    </ul>
-                </li>
-                <li><a href="/about">About</a></li>
-            </ul>
-            <a class="mozilla" href="http://mozilla.org"><img src="/images/mozilla-tab.png"></a>
-
-        </div>
-
-    </div>
+    {{> menu}}
     <div class="loginButtons" >
         {{#if loggingIn}}
                 Logging In
@@ -81,10 +52,9 @@ Anthony Verez averez@mozilla.com
 <template name="layout">
 
     <div>
-
         {{#if currentUser}}
             {{>yield}}
-        {{/if}}            
+        {{/if}}
     </div>
 </template>
 
