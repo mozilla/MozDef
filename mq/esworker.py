@@ -413,8 +413,14 @@ def sendEventToPlugins(anevent, pluginList):
 
 def main():
     # connect and declare the message queue/kombu objects.
-    connString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser, options.mqpassword, options.mqserver, options.mqport)
-    mqConn = Connection(connString)
+    # only py-amqp supports ssl and doesn't recognize amqps
+    # so fix up the connection string accordingly
+    connString = 'amqp://{0}:{1}@{2}:{3}/{4}'.format(options.mquser, options.mqpassword, options.mqserver, options.mqport, options.mqvhost)
+    if options.mqprotocol == 'amqps':
+        mqSSL = True
+    else:
+        mqSSL = False
+    mqConn = Connection(connString, ssl=mqSSL)
     # Task Exchange for events sent via http for us to normalize and post to elastic search
     eventTaskExchange = Exchange(name=options.taskexchange, type='direct', durable=True)
     eventTaskExchange(mqConn).declare()
@@ -437,20 +443,24 @@ def main():
 def initConfig():
     # change this to your default zone for when it's not specified
     options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
-    options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
-    options.taskexchange = getConfig('taskexchange', 'eventtask', options.configfile)
-    options.eventexchange = getConfig('eventexchange', 'events', options.configfile)
     
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
     options.esbulksize = getConfig('esbulksize', 0, options.configfile)
     options.esbulktimeout = getConfig('esbulktimeout', 30, options.configfile)
     
+    # message queue options
+    options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
+    options.taskexchange = getConfig('taskexchange', 'eventtask', options.configfile)
+    options.eventexchange = getConfig('eventexchange', 'events', options.configfile)    
     # how many messages to ask for at once from the message queue
     options.prefetch = getConfig('prefetch', 50, options.configfile)
     options.mquser = getConfig('mquser', 'guest', options.configfile)
     options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
     options.mqport = getConfig('mqport', 5672, options.configfile)
+    options.mqvhost = getConfig('mqvhost', '/', options.configfile)
+    # set to either amqp or amqps for ssl
+    options.mqprotocol = getConfig('mqprotocol', 'amqp', options.configfile)
     
     # plugin options
     # secs to pass before checking for new/updated plugins
