@@ -55,8 +55,8 @@ def createIndices(conn):
         pass
 
 
-def loadData(conn):
-    print('Loading sample data...')
+def loadDocs(conn):
+    print('Loading sample docs...')
     f = open('alerts.json')
     data = json.load(f)
     for l in data:
@@ -82,6 +82,48 @@ def loadData(conn):
     f.close()
 
 
+def loadDashboards(conn):
+    print('Loading sample dashboards...')
+
+    f = open('events-kibana.json')
+    dashboardjson = json.load(f)
+    url = '{0}/kibana-int/dashboard/{1}'.format(
+        options.esservers[0],
+        dashboardjson['title'])
+    dashboarddata = {
+        "user": "guest",
+        "group": "guest",
+        "title": dashboardjson['title'],
+        "dashboard": json.dumps(dashboardjson)
+    }
+    r = requests.put(url=url, data=json.dumps(dashboarddata))
+    if r.status_code < 220:
+        print('Successfully put events kibana dashboard')
+    else:
+        print r.json()
+        print('Problem putting events kibana dashboard %r' % r)
+    f.close()
+
+    f = open('alerts-kibana.json')
+    dashboardjson = json.load(f)
+    url = '{0}/kibana-int/dashboard/{1}'.format(
+        options.esservers[0],
+        dashboardjson['title'])
+    dashboarddata = {
+        "user": "guest",
+        "group": "guest",
+        "title": dashboardjson['title'],
+        "dashboard": json.dumps(dashboardjson)
+    }
+    r = requests.put(url=url, data=json.dumps(dashboarddata))
+    if r.status_code < 220:
+        print('Successfully put alerts kibana dashboard')
+    else:
+        print r.json()
+        print('Problem putting alerts kibana dashboard %r' % r)
+    f.close()
+
+
 def initConfig():
     options.esservers = list(getConfig(
         'esservers',
@@ -102,4 +144,5 @@ if __name__ == '__main__':
     deleteIndices(conn)
     setupTemplates(options)
     createIndices(conn)
-    loadData(conn)
+    loadDocs(conn)
+    loadDashboards(conn)
