@@ -1,0 +1,322 @@
+[
+  {
+    "category": "syslog",
+    "processid": "0",
+    "severity": "INFO",
+    "utctimestamp": "2014-04-17T06:06:54+00:00",
+    "timestamp": "2014-04-17T06:06:54+00:00",
+    "hostname": "syslog.example.com",
+    "receivedtimestatmp": "2014-04-17T06:06:54.618178+00:00",
+    "summary": "Did not receive identification string from 10.0.0.1\n",
+    "eventsource": "systemslogs",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "processid": "4846",
+      "program": "sshd",
+      "hostname": "proxy",
+      "payload": "",
+      "timestamp": "Apr 17 06:06:53"
+    }
+  },
+  {
+    "category": "syslog",
+    "processid": "0",
+    "severity": "INFO",
+    "utctimestamp": "2014-04-17T06:06:53+00:00",
+    "timestamp": "2014-04-17T06:06:53+00:00",
+    "hostname": "syslog.example.com",
+    "receivedtimestatmp": "2014-04-17T06:06:53.827106+00:00",
+    "summary": "Connection from 10.0.0.214 port 35783\n",
+    "eventsource": "systemslogs",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "processid": "2520",
+      "program": "sshd",
+      "hostname": "git",
+      "payload": "",
+      "timestamp": "Apr 17 06:06:52"
+    }
+  },
+  {
+    "category": "syslog",
+    "processid": "0",
+    "severity": "INFO",
+    "utctimestamp": "2014-04-17T06:06:52+00:00",
+    "timestamp": "2014-04-17T06:06:52+00:00",
+    "hostname": "syslog.example.com",
+    "receivedtimestatmp": "2014-04-17T06:06:52.825668+00:00",
+    "summary": "Did not receive identification string from 10.0.0.210\n",
+    "eventsource": "systemslogs",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "processid": "1939",
+      "program": "sshd",
+      "hostname": "git",
+      "payload": "",
+      "timestamp": "Apr 17 06:06:51"
+    }
+  },
+  {
+    "category": "syslog",
+    "processid": "0",
+    "severity": "INFO",
+    "utctimestamp": "2014-04-17T06:10:54+00:00",
+    "timestamp": "2014-04-17T06:10:54+00:00",
+    "hostname": "syslog.example.com",
+    "receivedtimestatmp": "2014-04-17T06:10:54.929854+00:00",
+    "summary": "  nagios : TTY=unknown ; PWD=/ ; USER=root ; COMMAND=/usr/lib64/nagios/plugins/custom/check_auditd.sh\n",
+    "eventsource": "systemslogs",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "processid": "",
+      "program": "sudo",
+      "hostname": "input",
+      "payload": "",
+      "timestamp": "Apr 17 06:10:54"
+    }
+  },
+  {
+    "category": "syslog",
+    "processid": "0",
+    "severity": "INFO",
+    "utctimestamp": "2014-04-17T06:10:51+00:00",
+    "timestamp": "2014-04-17T06:10:51+00:00",
+    "hostname": "syslog.example.com",
+    "receivedtimestatmp": "2014-04-17T06:10:51.866868+00:00",
+    "summary": "  nagios : TTY=unknown ; PWD=/ ; USER=root ; COMMAND=/usr/lib64/nagios/plugins/custom/check_puppet -t 7200\n",
+    "eventsource": "systemslogs",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "processid": "",
+      "program": "sudo",
+      "hostname": "redis",
+      "payload": "",
+      "timestamp": "Apr 17 06:10:51"
+    }
+  },
+  {
+    "category": "syslog",
+    "processid": "0",
+    "severity": "INFO",
+    "utctimestamp": "2014-04-17T06:10:28+00:00",
+    "timestamp": "2014-04-17T06:10:28+00:00",
+    "hostname": "syslog.example.com",
+    "receivedtimestatmp": "2014-04-17T06:10:28.687338+00:00",
+    "summary": "named-update : TTY=unknown ; PWD=/var/named ; USER=named-update ; COMMAND=/usr/bin/svn status /var/named/chroot/var/named\n",
+    "eventsource": "systemslogs",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "processid": "",
+      "program": "sudo",
+      "hostname": "admin",
+      "payload": "",
+      "timestamp": "Apr 17 06:10:27"
+    }
+  },
+  {
+    "category": "network",
+    "processid": "0",
+    "severity": "INFO",
+    "utctimestamp": "2014-04-17T06:15:07+00:00",
+    "timestamp": "2014-04-17T06:15:07+00:00",
+    "hostname": "syslog.example.com",
+    "receivedtimestatmp": "2014-04-17T06:15:07.862013+00:00",
+    "summary": "%-UI_JUNOSCRIPT_CMD: User 'root' used JUNOScript client to run command 'get-flow-statistics-all'\n",
+    "eventsource": "networklogs",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "processid": "35029",
+      "program": "mgd",
+      "hostname": "fw.example.com",
+      "payload": "",
+      "timestamp": "Apr 17 06:15:06"
+    }
+  },
+  {
+    "category": "network",
+    "processid": "0",
+    "severity": "INFO",
+    "utctimestamp": "2014-04-17T06:19:41+00:00",
+    "timestamp": "2014-04-17T06:19:41+00:00",
+    "hostname": "syslog.example.com",
+    "receivedtimestatmp": "2014-04-17T06:19:41.957329+00:00",
+    "summary": "%-UI_LOGIN_EVENT: User 'root' login, class 'super-user' [744], ssh-connection '', client-mode 'junoscript'\n",
+    "eventsource": "networklogs",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "processid": "744",
+      "program": "mgd",
+      "hostname": "switch1.example.com",
+      "payload": "",
+      "timestamp": "Apr 17 06:19:40"
+    }
+  },
+  {
+    "utctimestamp": "2014-04-17T07:05:02+00:00",
+    "tags": [
+      "example"
+    ],
+    "timestamp": "2014-04-17T00:05:02",
+    "receivedtimestatmp": "2014-04-17T00:05:03.941186+00:00",
+    "summary": "LDAP_SUCCESS john@example.com,o=com,dc=example srcIP=10.0.0.209",
+    "details": {
+      "dn": "john@example.com,o=com,dc=example",
+      "source": "Apr 17 00:05:02 ldap slapd[15932]: conn=25123333 fd=93 ACCEPT from IP=10.0.0.209:8325 (IP=0.0.0.0:389)\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=bind-openvpn,ou=logins,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=vpn,ou=logins,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 RESULT tag=97 err=0 text=\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND anonymous mech=implicit ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=john@example.com,o=com,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=john@example.com,o=com,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 RESULT tag=97 err=0 text=\n",
+      "srcip": "10.0.0.209",
+      "result": "LDAP_SUCCESS",
+      "success": true
+    }
+  },
+  {
+    "category": "bronotice",
+    "processid": "0",
+    "severity": "NOTICE",
+    "utctimestamp": "2014-04-17T07:17:09+00:00",
+    "timestamp": "2014-04-17T07:17:09+00:00",
+    "hostname": "nsm5",
+    "receivedtimestatmp": "2014-04-17T07:17:10.634904+00:00",
+    "summary": "SSL::Invalid_Server_Cert SSL certificate validation failed with (unable to get local issuer certificate) emailAddress=john@example.com,CN=mail.example.com,OU=Secure Mail Server,O=Example Corporation,L=Mountain View,ST=California,C=US",
+    "eventsource": "nsm",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "destinationipaddress": "10.0.0.38",
+      "uid": "CXOBsx4vMrhPXR4qM4",
+      "proto": "tcp",
+      "ts": "1397805429.043383",
+      "note": "SSL::Invalid_Server_Cert",
+      "sourceport": "46823",
+      "destinationport": "7071",
+      "msg": "SSL certificate validation failed with (unable to get local issuer certificate)",
+      "sourceipaddress": "10.0.0.154",
+      "payload": "",
+      "sub": "emailAddress=john@example.com,CN=mail.example.com,OU=Secure Mail Server,O=Example Corporation,L=Mountain View,ST=California,C=US"
+    }
+  },
+  {
+    "category": "bronotice",
+    "processid": "0",
+    "severity": "NOTICE",
+    "utctimestamp": "2014-04-17T07:17:07+00:00",
+    "timestamp": "2014-04-17T07:17:07+00:00",
+    "hostname": "nsm5",
+    "receivedtimestatmp": "2014-04-17T07:17:08.674456+00:00",
+    "summary": "SSL::Invalid_Server_Cert SSL certificate validation failed with (unable to get local issuer certificate) CN=ssl-selfsigned-unknownissuer.example.com",
+    "eventsource": "nsm",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "destinationipaddress": "8.8.8.8",
+      "destinationiplocation": "United States/San Francisco, CA",
+      "uid": "C5L6pJ2db92s2ajfnb",
+      "proto": "tcp",
+      "ts": "1397805427.078946",
+      "note": "SSL::Invalid_Server_Cert",
+      "sourceport": "34262",
+      "destinationport": "443",
+      "msg": "SSL certificate validation failed with (unable to get local issuer certificate)",
+      "sourceipaddress": "10.0.0.42",
+      "payload": "",
+      "sub": "CN=ssl-selfsigned-unknownissuer.example.com"
+    }
+  },
+  {
+    "category": "bronotice",
+    "processid": "0",
+    "severity": "NOTICE",
+    "utctimestamp": "2014-04-17T07:16:37+00:00",
+    "timestamp": "2014-04-17T07:16:37+00:00",
+    "hostname": "nsm5",
+    "receivedtimestatmp": "2014-04-17T07:16:38.513274+00:00",
+    "summary": "SSH::Password_Guessing 10.0.0.78 appears to be guessing SSH passwords (seen in 30 connections). Sampled servers:  10.30.252.148, 10.30.252.150, 10.30.252.148, 10.30.252.150, 10.30.252.150",
+    "eventsource": "nsm",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "destinationipaddress": "0.0.0.0",
+      "uid": "-",
+      "proto": "-",
+      "ts": "1397805396.838051",
+      "note": "SSH::Password_Guessing",
+      "sourceport": "-",
+      "destinationport": "-",
+      "msg": "10.0.0.78 appears to be guessing SSH passwords (seen in 30 connections).",
+      "sourceipaddress": "0.0.0.0",
+      "payload": "",
+      "sub": "Sampled servers:  10.30.252.148, 10.30.252.150, 10.30.252.148, 10.30.252.150, 10.30.252.150"
+    }
+  },
+  {
+    "category": "bronotice",
+    "processid": "0",
+    "severity": "NOTICE",
+    "utctimestamp": "2014-04-17T07:16:36+00:00",
+    "timestamp": "2014-04-17T07:16:36+00:00",
+    "hostname": "nsm5",
+    "receivedtimestatmp": "2014-04-17T07:16:37.437511+00:00",
+    "summary": "SSH::Password_Guessing 10.0.0.7 appears to be guessing SSH passwords (seen in 35 connections). Sampled servers:  10.245.217.46, 10.245.217.46, 10.245.217.46, 10.245.217.46, 10.245.217.46",
+    "eventsource": "nsm",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "destinationipaddress": "0.0.0.0",
+      "uid": "-",
+      "proto": "-",
+      "ts": "1397805396.486722",
+      "note": "SSH::Password_Guessing",
+      "sourceport": "-",
+      "destinationport": "-",
+      "msg": "10.0.0.7 appears to be guessing SSH passwords (seen in 35 connections).",
+      "sourceipaddress": "0.0.0.0",
+      "payload": "",
+      "sub": "Sampled servers:  10.245.217.46, 10.245.217.46, 10.245.217.46, 10.245.217.46, 10.245.217.46"
+    }
+  },
+  {
+    "category": "bronotice",
+    "processid": "0",
+    "severity": "NOTICE",
+    "utctimestamp": "2014-04-17T07:06:34+00:00",
+    "timestamp": "2014-04-17T07:06:34+00:00",
+    "hostname": "nsm5",
+    "receivedtimestatmp": "2014-04-17T07:06:35.451657+00:00",
+    "summary": "SSL::Certificate_Expired Certificate CN=example.com expired at 2013-02-01-21:38:50.000000000 -",
+    "eventsource": "nsm",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "destinationipaddress": "10.0.0.170",
+      "uid": "CAz8qn41YD9T8eNuh1",
+      "proto": "tcp",
+      "ts": "1397804793.952344",
+      "note": "SSL::Certificate_Expired",
+      "sourceport": "39764",
+      "destinationport": "311",
+      "msg": "Certificate CN=example.com expired at 2013-02-01-21:38:50.000000000",
+      "sourceipaddress": "10.0.0.128",
+      "payload": "",
+      "sub": "-"
+    }
+  }
+]

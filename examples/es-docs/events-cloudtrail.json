@@ -1,0 +1,75 @@
+[
+  {
+    "eventVersion": "1.01",
+    "eventID": "8d5840cf-6ne3-4947-be6b-cb5147856719",
+    "eventTime": "2014-04-17T06:32:05Z",
+    "utctimestamp": "2014-04-17T06:32:05+00:00",
+    "responseElements": null,
+    "awsRegion": "us-east-1",
+    "eventName": "DescribeInstances",
+    "userIdentity": {
+      "userName": "John",
+      "principalId": "XXXXXXXXXXXXXXXXXXXXX",
+      "accessKeyId": "XXXXXXXXXXXXXXXXXXXXX",
+      "type": "IAMUser",
+      "arn": "arn:aws:iam::646131927850:user/John",
+      "accountId": "646131927850"
+    },
+    "eventSource": "ec2.amazonaws.com",
+    "requestID": "eaa5966a-5d22-43f2-b2bf-4930afe601a4",
+    "userAgent": "aws-sdk-dotnet/1.4.11.0 .NET Runtime/4.0 .NET Framework/4.0 OS/6.1.7601.65536",
+    "sourceIPAddress": "59.15.171.43",
+    "tags": [
+      "example"
+    ]
+  },
+  {
+    "eventVersion": "1.01",
+    "eventID": "329817d2-f95b-43e0-bca3-4f70fb79f4ce",
+    "eventTime": "2014-04-17T06:30:03Z",
+    "utctimestamp": "2014-04-17T06:30:03+00:00",
+    "awsRegion": "us-east-1",
+    "eventName": "DescribeTrails",
+    "userIdentity": {
+      "userName": "jeff",
+      "principalId": "XXXXXXXXXXXXXXXXXXXXX",
+      "accessKeyId": "XXXXXXXXXXXXXXXXXXXXX",
+      "type": "IAMUser",
+      "arn": "arn:aws:iam::656531927250:user/jeff",
+      "accountId": "656531926850"
+    },
+    "eventSource": "cloudtrail.amazonaws.com",
+    "requestID": "e0007bf9-c6c2-11e3-94ae-9f9112d60855",
+    "userAgent": "Boto/2.23.0 Python/2.7.6 Linux/2.6.32-431.el6.x86_64",
+    "sourceIPAddress": "61.245.214.162",
+    "tags": [
+      "example"
+    ]
+  },
+  {
+    "eventVersion": "1.0",
+    "eventTime": "2014-04-17T06:14:35Z",
+    "utctimestamp": "2014-04-17T06:14:35+00:00",
+    "requestParameters": {
+      "securityGroupSet": {},
+      "securityGroupIdSet": {},
+      "filterSet": {}
+    },
+    "awsRegion": "us-west-2",
+    "eventName": "DescribeSecurityGroups",
+    "userIdentity": {
+      "userName": "John",
+      "principalId": "XXXXXXXXXXXXXXXXXXXXX",
+      "accessKeyId": "XXXXXXXXXXXXXXXXXXXXX",
+      "type": "IAMUser",
+      "arn": "arn:aws:iam::646131927850:user/John",
+      "accountId": "646131927850"
+    },
+    "eventSource": "ec2.amazonaws.com",
+    "userAgent": "aws-sdk-dotnet/1.4.11.0 .NET Runtime/4.0 .NET Framework/4.0 OS/6.1.7601.65536",
+    "sourceIPAddress": "59.15.171.43",
+    "tags": [
+      "example"
+    ]
+  }
+]
