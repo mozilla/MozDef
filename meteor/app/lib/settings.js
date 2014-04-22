@@ -6,6 +6,7 @@ Copyright (c) 2014 Mozilla Corporation
 
 Contributors:
 Jeff Bryner jbryner@mozilla.com
+Anthony Verez averez@mozilla.com
 */
 
 //configuration settings

@@ -68,4 +68,3 @@ function loadKibanaDashboards() {
     console.log(dashboardsRequest.data);
   }
 }
-
