@@ -302,7 +302,10 @@ Kibana
   # configure /etc/nginx/nginx.conf to target this folder
   sudo service nginx reload
 
-Import dashboards from `MozDef/kibana/dashboards` into the kibana webUI
+To initialize elasticsearch indices and load some sample data::
+
+  cd examples/es-docs/
+  python inject.py
 
 .. _Kibana: http://www.elasticsearch.org/overview/kibana
 
