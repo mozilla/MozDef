@@ -48,7 +48,7 @@ class message(object):
         rdict['details']['sourceipaddress'] = None
         rdict['details']['destinationipaddress'] = None
         self.registration = rdict
-        self.priority = 1
+        self.priority = 20
     
     def onMessage(self, message):
         if 'details' in message.keys():
