@@ -10,6 +10,7 @@
 
 import json
 import kombu
+import math
 import os
 import pyes
 import pytz
@@ -33,16 +34,44 @@ except ImportError as e:
     hasUWSGI = False
 
 
+def isNumber(s):
+    'check if a token is numeric, return bool'
+    try:
+        float(s)  # for int, long and float
+    except ValueError:
+        try:
+            complex(s)  # for complex
+        except ValueError:
+            return False
+    return True
+
+
+def digits(n):
+    '''return the number of digits in a number'''
+    if n > 0:
+        digits = int(math.log10(n))+1
+    elif n == 0:
+        digits = 1
+    else:
+        digits = int(math.log10(-n))+2
+    return digits
+
+
 def toUTC(suspectedDate, localTimeZone=None):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
     if localTimeZone is None:
         localTimeZone = options.defaultTimeZone
-    if type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
+        
+    if type(suspectedDate) == datetime:
         objDate = suspectedDate
+    elif isNumber(suspectedDate):
+        # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
+        epochDivisor = int(str(1) + '0'*(digits(suspectedDate) % 10))
+        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor))
+    elif type(suspectedDate) in (str, unicode):
+        objDate = parse(suspectedDate, fuzzy=True)
     
     if objDate.tzinfo is None:
         objDate = pytz.timezone(localTimeZone).localize(objDate)
@@ -76,11 +105,11 @@ def isCEF(aDict):
         return True
     # maybe it snuck in some other way
     # check some key CEF indicators (the header fields)
-    if 'fields' in aDict.keys():
+    if 'fields' in aDict.keys() and isinstance(aDict['fields'], dict):
         lowerKeys = [s.lower() for s in aDict['fields'].keys()]
         if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
             return True
-    if 'details' in aDict.keys():
+    if 'details' in aDict.keys() and isinstance(aDict['details'], dict):
         lowerKeys = [s.lower() for s in aDict['details'].keys()]
         if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
             return True        
@@ -142,7 +171,7 @@ def keyMapping(aDict):
                 
             if removeAt(k.lower()) in ('eventtime', 'timestamp'):
                 returndict[u'utctimestamp'] = toUTC(v)
-                returndict[u'timestamp'] = parse(v, fuzzy=True).isoformat()
+                returndict[u'timestamp'] = toUTC(v)
                 
             if removeAt(k.lower()) in ('hostname', 'source_host', 'host'):
                 returndict[u'hostname'] = toUnicode(v)
@@ -218,7 +247,7 @@ class taskConsumer(ConsumerMixin):
             Timer(options.esbulktimeout, self.flush_es_bulk).start()
 
     def get_consumers(self, Consumer, channel):
-        consumer = Consumer(self.taskQueue, callbacks=[self.on_message], accept=['json'])
+        consumer = Consumer(self.taskQueue, callbacks=[self.on_message], accept=['json', 'text/plain'])
         consumer.qos(prefetch_count=options.prefetch)
         return [consumer]
 
@@ -331,6 +360,8 @@ def registerPlugins():
                         mpriority = 100
                     if isinstance(mreg, dict):
                         print('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
+                    if isinstance(mreg, type(re.compile(''))):
+                        print('[*] plugin {0} registered with a regex: {1}'.format(mname, mreg.pattern))
                     pluginList.append((mclass, mreg, mpriority))
     return pluginList
 
@@ -360,12 +391,19 @@ def flattenDict(inDict, pre=None, values=True):
             else:
                 if pre:
                     if values:
-                        yield '.'.join(pre) + '.' + key + '=' + str(value)
+                        if isinstance(value, str):
+                            yield '.'.join(pre) + '.' + key + '=' + str(value)
+                        if isinstance(value, unicode):
+                            yield '.'.join(pre) + '.' + key + '=' + value.encode('ascii', 'ignore')
                     else:
                         yield '.'.join(pre) + '.' + key
                 else:
                     if values:
-                        yield key + '=' + str(value)
+                        if isinstance(value, str):
+                            yield key + '=' + str(value)
+                        if isinstance(value, unicode):
+                            yield key + '=' + value.encode('ascii', 'ignore')
+                            
                     else:
                         yield key
     else:
@@ -398,7 +436,7 @@ def sendEventToPlugins(anevent, pluginList):
         if isinstance(plugin[1], dict):
             # list of the plugin field requests. Will return key=None for keys registered without a particular value
             pluginRegistration = [entry for entry in flattenDict(plugin[1])]
-            #print('plug in wants: {0}'.format(pluginRegistration))
+            # print('plug in wants: {0}'.format(pluginRegistration))
             for p in pluginRegistration:
                 if p.endswith('=None'):  # a request for a field, no specific value
                     if p.replace('=None', '') in eventWithoutValues:
@@ -408,6 +446,9 @@ def sendEventToPlugins(anevent, pluginList):
                         send = True
         if send:
             anevent = plugin[0].onMessage(anevent)
+            eventWithValues = [e for e in flattenDict(anevent)]
+            eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
+            
     return anevent  
 
 
