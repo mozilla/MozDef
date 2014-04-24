@@ -26,7 +26,7 @@ from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 from threading import Timer
 
-# running under uwsgi? 
+# running under uwsgi?
 try:
     import uwsgi
     hasUWSGI = True
@@ -63,7 +63,7 @@ def toUTC(suspectedDate, localTimeZone=None):
     objDate = None
     if localTimeZone is None:
         localTimeZone = options.defaultTimeZone
-        
+
     if type(suspectedDate) == datetime:
         objDate = suspectedDate
     elif isNumber(suspectedDate):
@@ -72,7 +72,7 @@ def toUTC(suspectedDate, localTimeZone=None):
         objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor))
     elif type(suspectedDate) in (str, unicode):
         objDate = parse(suspectedDate, fuzzy=True)
-    
+
     if objDate.tzinfo is None:
         objDate = pytz.timezone(localTimeZone).localize(objDate)
         objDate = utc.normalize(objDate)
@@ -80,7 +80,7 @@ def toUTC(suspectedDate, localTimeZone=None):
         objDate = utc.normalize(objDate)
     if objDate is not None:
         objDate = utc.normalize(objDate)
-        
+
     return objDate.isoformat()
 
 
@@ -112,7 +112,7 @@ def isCEF(aDict):
     if 'details' in aDict.keys() and isinstance(aDict['details'], dict):
         lowerKeys = [s.lower() for s in aDict['details'].keys()]
         if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
-            return True        
+            return True
     return False
 
 
@@ -127,7 +127,7 @@ def safeString(aString):
 
 
 def toUnicode(obj, encoding='utf-8'):
-    if type(obj) in [int, long, float, complex]: 
+    if type(obj) in [int, long, float, complex]:
         # likely a number, convert it to string to get to unicode
         obj = str(obj)
     if isinstance(obj, basestring):
@@ -148,19 +148,19 @@ def keyMapping(aDict):
 
     # save the source event for chain of custody/forensics
     # returndict['original']=aDict
-    
+
     if 'utctimestamp' not in returndict.keys():
         # default in case we don't find a reasonable timestamp
         returndict['utctimestamp'] = toUTC(datetime.now())
-    
+
     # set the timestamp when we received it, i.e. now
     returndict['receivedtimestamp'] = toUTC(datetime.now())
-    try: 
+    try:
         for k, v in aDict.iteritems():
-            
+
             if removeAt(k.lower()) in ('message', 'summary'):
                 returndict[u'summary'] = toUnicode(v)
-                
+
             if removeAt(k.lower()) in ('payload') and 'summary' not in aDict.keys():
                 # special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
                 returndict[u'summary'] = toUnicode(v)
@@ -168,36 +168,36 @@ def keyMapping(aDict):
                 if 'details' not in returndict.keys():
                     returndict[u'details'] = dict()
                 returndict[u'details']['payload'] = toUnicode(v)
-                
+
             if removeAt(k.lower()) in ('eventtime', 'timestamp'):
                 returndict[u'utctimestamp'] = toUTC(v)
                 returndict[u'timestamp'] = toUTC(v)
-                
+
             if removeAt(k.lower()) in ('hostname', 'source_host', 'host'):
                 returndict[u'hostname'] = toUnicode(v)
 
             if removeAt(k.lower()) in ('tags'):
                 if len(v) > 0:
                     returndict[u'tags'] = v
-    
+
             # nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
             if removeAt(k.lower()) in ('syslogseverity', 'severity', 'severityvalue', 'level'):
                 returndict[u'severity'] = toUnicode(v).upper()
-                
+
             if removeAt(k.lower()) in ('facility', 'syslogfacility'):
                 returndict[u'facility'] = toUnicode(v)
-    
+
             if removeAt(k.lower()) in ('pid', 'processid'):
                 returndict[u'processid'] = toUnicode(v)
-            
+
             # nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
             if removeAt(k.lower()) in ('pname', 'processname', 'sourcename'):
                 returndict[u'processname'] = toUnicode(v)
-            
+
             # the file, or source
             if removeAt(k.lower()) in ('path', 'logger', 'file'):
                 returndict[u'eventsource'] = toUnicode(v)
-    
+
             if removeAt(k.lower()) in ('type', 'eventtype', 'category'):
                 returndict[u'category'] = toUnicode(v)
 
@@ -205,7 +205,7 @@ def keyMapping(aDict):
             if removeAt(k.lower()) in ('fields', 'details'):
                 if len(v) > 0:
                     returndict[u'details'] = v
-            
+
             # custom fields/details as a one off, not in an array
             # i.e. fields.something=value or details.something=value
             # move them to a dict for consistency in querying
@@ -214,7 +214,7 @@ def keyMapping(aDict):
                 newName = newName.lower().replace('details.', '')
                 # add a dict to hold the details if it doesn't exist
                 if 'details' not in returndict.keys():
-                    returndict[u'details'] = dict()                
+                    returndict[u'details'] = dict()
                 # add field
                 returndict[u'details'][unicode(newName)] = toUnicode(v)
     except Exception as e:
@@ -260,8 +260,8 @@ class taskConsumer(ConsumerMixin):
         '''
         # sys.stderr.write('mule {0} flushing bulk elastic search posts\n'.format(self.muleid))
         self.esConnection.flush_bulk(True)
-        Timer(options.esbulktimeout, self.flush_es_bulk).start()        
- 
+        Timer(options.esbulktimeout, self.flush_es_bulk).start()
+
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
         try:
@@ -269,7 +269,7 @@ class taskConsumer(ConsumerMixin):
             if isinstance(body, dict):
                 bodyDict = body
             elif isinstance(body, str) or isinstance(body, unicode):
-                try: 
+                try:
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
@@ -280,7 +280,7 @@ class taskConsumer(ConsumerMixin):
                 sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
             # normalize the dict
             normalizedDict = keyMapping(bodyDict)
-            
+
             # send the dict to elastic search and to the events task queue
             if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
                 # could be empty,or invalid
@@ -292,7 +292,7 @@ class taskConsumer(ConsumerMixin):
 
                 # make a json version for posting to elastic search
                 jbody = json.JSONEncoder().encode(normalizedDict)
-                
+
                 # figure out what type of document we are indexing and post to the elastic search index.
                 doctype = 'event'
                 if isCEF(bodyDict):
@@ -306,13 +306,13 @@ class taskConsumer(ConsumerMixin):
                         # don't create strange doc types..
                         if ' ' not in bodyDict['details']['deviceproduct'] and '.' not in bodyDict['details']['deviceproduct']:
                             doctype = bodyDict['details']['deviceproduct']
-                        
+
                 try:
                     if options.esbulksize != 0:
                         res = self.esConnection.index(index='events', doc_type=doctype, doc=jbody, bulk=True)
                     else:
                         res = self.esConnection.index(index='events', doc_type=doctype, doc=jbody, bulk=False)
-                        
+
                 except (pyes.exceptions.NoServerAvailable, pyes.exceptions.InvalidIndexNameException) as e:
                     # handle loss of server or race condition with index rotation/creation/aliasing
                     try:
@@ -393,17 +393,20 @@ def flattenDict(inDict, pre=None, values=True):
                     if values:
                         if isinstance(value, str):
                             yield '.'.join(pre) + '.' + key + '=' + str(value)
-                        if isinstance(value, unicode):
+                        elif isinstance(value, unicode):
                             yield '.'.join(pre) + '.' + key + '=' + value.encode('ascii', 'ignore')
+                        elif value is None:
+                            yield '.'.join(pre) + '.' + key + '=None'
                     else:
                         yield '.'.join(pre) + '.' + key
                 else:
                     if values:
                         if isinstance(value, str):
                             yield key + '=' + str(value)
-                        if isinstance(value, unicode):
+                        elif isinstance(value, unicode):
                             yield key + '=' + value.encode('ascii', 'ignore')
-                            
+                        elif value is None:
+                            yield key + '=None'
                     else:
                         yield key
     else:
@@ -448,8 +451,8 @@ def sendEventToPlugins(anevent, pluginList):
             anevent = plugin[0].onMessage(anevent)
             eventWithValues = [e for e in flattenDict(anevent)]
             eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
-            
-    return anevent  
+
+    return anevent
 
 
 def main():
@@ -468,7 +471,7 @@ def main():
     # Queue for the exchange
     eventTaskQueue = Queue(options.taskexchange, exchange=eventTaskExchange, routing_key=options.taskexchange)
     eventTaskQueue(mqConn).declare()
-    
+
     # topic exchange for anyone who wants to queue and listen for mozdef.event
     eventTopicExchange = Exchange(name=options.eventexchange, type='topic', durable=False, delivery_mode=1)
     eventTopicExchange(mqConn).declare()
@@ -479,21 +482,21 @@ def main():
         sys.stdout.write('started without uwsgi\n')
     # consume our queue and publish on the topic exchange
     taskConsumer(mqConn, eventTaskQueue, eventTopicExchange, es).run()
-    
+
 
 def initConfig():
     # change this to your default zone for when it's not specified
     options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
-    
+
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
     options.esbulksize = getConfig('esbulksize', 0, options.configfile)
     options.esbulktimeout = getConfig('esbulktimeout', 30, options.configfile)
-    
+
     # message queue options
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
     options.taskexchange = getConfig('taskexchange', 'eventtask', options.configfile)
-    options.eventexchange = getConfig('eventexchange', 'events', options.configfile)    
+    options.eventexchange = getConfig('eventexchange', 'events', options.configfile)
     # how many messages to ask for at once from the message queue
     options.prefetch = getConfig('prefetch', 50, options.configfile)
     options.mquser = getConfig('mquser', 'guest', options.configfile)
@@ -502,14 +505,14 @@ def initConfig():
     options.mqvhost = getConfig('mqvhost', '/', options.configfile)
     # set to either amqp or amqps for ssl
     options.mqprotocol = getConfig('mqprotocol', 'amqp', options.configfile)
-    
+
     # plugin options
     # secs to pass before checking for new/updated plugins
     # seems to cause memory leaks..
     # regular updates are disabled for now,
     # though we set the frequency anyway.
     options.plugincheckfrequency = getConfig('plugincheckfrequency', 120, options.configfile)
-    
+
 
 if __name__ == '__main__':
     # configure ourselves
@@ -517,13 +520,13 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    
+
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect(None)
-    
+
     # force a check for plugins and establish the plugin list
     pluginList = list()
     lastPluginCheck = datetime.now()-timedelta(minutes=60)
     pluginList, lastPluginCheck = checkPlugins(pluginList, lastPluginCheck)
-    
+
     main()
