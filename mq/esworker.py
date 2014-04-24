@@ -154,7 +154,7 @@ def keyMapping(aDict):
         returndict['utctimestamp'] = toUTC(datetime.now())
     
     # set the timestamp when we received it, i.e. now
-    returndict['receivedtimestatmp'] = toUTC(datetime.now())
+    returndict['receivedtimestamp'] = toUTC(datetime.now())
     try: 
         for k, v in aDict.iteritems():
             
