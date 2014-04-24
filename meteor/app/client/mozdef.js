@@ -153,7 +153,7 @@ if (Meteor.isClient) {
 
             // tags are saved in realtime
 
-            incidents.update(Session.get('incidentID'),{
+            incidents.update(Session.get('incidentID'),{$set:{
                 summary: template.find("#incidentSummary").value,
                 dateOpened: template.find("#dateOpened").value,
                 dateClosed: template.find("#dateClosed").value,
@@ -162,7 +162,7 @@ if (Meteor.isClient) {
                 dateVerified: template.find("#dateVerified").value,
                 dateMitigated: template.find("#dateMitigated").value,
                 dateContained: template.find("#dateContained").value
-            });
+            }});
             Router.go('/incidents/')
         },
         
