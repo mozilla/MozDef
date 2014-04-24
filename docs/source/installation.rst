@@ -30,19 +30,35 @@ You're done! Now go to:
  * http://127.0.0.1:8080 < loginput
  * http://127.0.0.1:8081 < rest api
 
-Known issues
-*************
+Get a terminal in the container
+*******************************
 
-* Marvel doesn't display node info: ` Oops! FacetPhaseExecutionException[Facet [fs.total.available_in_bytes]: failed to find mapping for fs.total.available_in_bytes]`
+An usual problem in Docker is that once you start a container, you cannot enter in it.
 
-Marvel uses techniques to gather system info that are not compatible with docker.
-See https://groups.google.com/forum/#!topic/elasticsearch/dhpxaOuoZWI
+To solve this, a solution is to use `nsenter` present in the `util-linux` > 2.23 package.
+Debian and Ubuntu currently provide the 2.20 version so you need to download and compile the source code::
 
-Despite this issue, marvel runs fine.
+  cd /tmp
+  curl https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz | tar -zxf-
+  cd util-linux-2.24
+  ./configure --without-ncurses
+  make nsenter
+  cp nsenter /usr/local/bin
 
-* I don't see any data or dashboards in Kibana
+Now we can create a script for docker (/usr/local/sbin/dkenter)::
 
-We need to create some sample data, it's in our roadmap ;)
+  #!/bin/bash
+
+  CNAME=$1
+  CPID=$(docker inspect --format '{{ .State.Pid }}' $CNAME)
+  nsenter --target $CPID --mount --uts --ipc --net --pid
+
+While your MozDef container is running::
+
+  docker ps # find the container ID, fc4917f00ead in this example
+  dkenter fc4917f00ead
+  root@fc4917f00ead:/# ...
+  root@fc4917f00ead:/# exit
 
 .. _docker: https://www.docker.io/
 
