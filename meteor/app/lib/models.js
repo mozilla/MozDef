@@ -22,7 +22,7 @@ models={
             dateClosed:"",
             theories:[],
             notes:[],
-            tags:['tag here'],
+            tags:[],
             phase:"Identification",
             discovery:"",
             verification:"",
