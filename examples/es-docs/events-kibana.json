@@ -1,5 +1,5 @@
 {
-  "title": "mozdef ldap dashboard",
+  "title": "MozDef Sample Events",
   "services": {
     "query": {
       "idQueue": [
@@ -25,49 +25,56 @@
     },
     "filter": {
       "idQueue": [
-        3
-      ],
-      "list": {
-        "0": {
-          "type": "time",
-          "field": "utctimestamp",
-          "from": "now-1h",
-          "to": "now",
-          "mandate": "must",
-          "active": true,
-          "alias": "",
-          "id": 0
-        },
-        "1": {
-          "type": "terms",
-          "field": "tags",
-          "value": "ldap",
-          "mandate": "must",
-          "active": true,
-          "alias": "",
-          "id": 1
-        },
-        "2": {
-          "type": "terms",
-          "field": "details.dn",
-          "value": "com",
-          "mandate": "must",
-          "active": true,
-          "alias": "",
-          "id": 2
-        }
-      },
-      "ids": [
+        0,
         1,
-        2,
-        0
-      ]
+        2
+      ],
+      "list": {},
+      "ids": []
     }
   },
   "rows": [
     {
+      "title": "Options",
+      "height": "50px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 7,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "text",
+          "status": "Stable",
+          "mode": "markdown",
+          "content": "If you have a field with a timestamp in it, you can set a time filter using the control in the navigation bar. You'll need to click the cog icon to configure the field that your timestamp is in.",
+          "style": {},
+          "title": "Have a timestamp somewhere?"
+        },
+        {
+          "error": false,
+          "span": 5,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "text",
+          "status": "Stable",
+          "mode": "markdown",
+          "content": "See the *Filters* bar above? Click it to expand the filters panel. Right now there are none. click on one of the icons in the document types list to filter down to only that document type",
+          "style": {},
+          "title": "About filters"
+        }
+      ],
+      "notice": false
+    },
+    {
       "title": "Graph",
-      "height": "100px",
+      "height": "250px",
       "editable": true,
       "collapse": false,
       "collapsable": true,
@@ -86,28 +93,22 @@
               0
             ]
           },
-          "field": "details.dn",
-          "exclude": [
-            "mozilla",
-            "mozilla.com",
-            "com",
-            "dc",
-            "o"
-          ],
-          "missing": false,
-          "other": false,
-          "size": 10,
+          "field": "_type",
+          "exclude": [],
+          "missing": true,
+          "other": true,
+          "size": 100,
           "order": "count",
           "style": {
             "font-size": "10pt"
           },
-          "donut": true,
+          "donut": false,
           "tilt": false,
           "labels": true,
           "arrangement": "horizontal",
           "chart": "pie",
-          "counter_pos": "below",
-          "title": "Top 10 Users",
+          "counter_pos": "none",
+          "title": "Document types",
           "spyable": true
         },
         {
@@ -124,14 +125,14 @@
               0
             ]
           },
-          "field": "tags",
+          "field": "_type",
           "exclude": [],
-          "missing": false,
-          "other": false,
+          "missing": true,
+          "other": true,
           "size": 10,
           "order": "count",
           "style": {
-            "font-size": "8pt"
+            "font-size": "10pt"
           },
           "donut": false,
           "tilt": false,
@@ -140,56 +141,21 @@
           "chart": "table",
           "counter_pos": "above",
           "spyable": true,
-          "title": "total"
-        },
-        {
-          "span": 4,
-          "editable": true,
-          "type": "sparklines",
-          "loadingEditor": false,
-          "mode": "count",
-          "time_field": "utctimestamp",
-          "queries": {
-            "mode": "all",
-            "ids": [
-              0
-            ]
-          },
-          "value_field": null,
-          "interval": "5m",
-          "spyable": true,
-          "derivative": true,
-          "title": "Trend"
+          "title": "Document Types"
         },
         {
           "error": false,
-          "span": 2,
+          "span": 6,
           "editable": true,
-          "type": "terms",
-          "loadingEditor": false,
-          "queries": {
-            "mode": "all",
-            "ids": [
-              0
-            ]
-          },
-          "field": "details.success",
-          "exclude": [],
-          "missing": false,
-          "other": false,
-          "size": 10,
-          "order": "count",
-          "style": {
-            "font-size": "10pt"
-          },
-          "donut": true,
-          "tilt": false,
-          "labels": true,
-          "arrangement": "horizontal",
-          "chart": "pie",
-          "counter_pos": "above",
-          "spyable": true,
-          "title": "Success/Failure"
+          "group": [
+            "default"
+          ],
+          "type": "text",
+          "status": "Stable",
+          "mode": "markdown",
+          "content": "It's the best I can do without knowing much about your data! I've tried to pick some sane defaults for you. The two *terms* panels to the left of this *text* panel show a breakdown of your document type. \n\nKibana is currently configured to point at the special Elasticsearch *_all* index. You can change that by clicking on the cog icon in the navigation bar at the top. You can also add rows from that dialog. You can edit individual panels by click on the cog icon on the panel you want to edit\n\nThe *table* panel below has attempted to list your fields to the left, select a few to view them in the table. To add more panels, of different types, click the cog on the row label to the far left",
+          "style": {},
+          "title": "The most generic dashboard ever"
         }
       ],
       "notice": false
@@ -220,15 +186,11 @@
             "font-size": "9pt"
           },
           "overflow": "min-height",
-          "fields": [
-            "tags",
-            "summary",
-            "details.source"
-          ],
+          "fields": [],
           "highlight": [],
-          "sortable": false,
+          "sortable": true,
           "header": true,
-          "paging": false,
+          "paging": true,
           "spyable": true,
           "queries": {
             "mode": "all",
@@ -249,12 +211,12 @@
   ],
   "editable": true,
   "index": {
-    "interval": "day",
-    "pattern": "[events]-YYYYMMDD",
+    "interval": "none",
+    "pattern": "none",
     "default": "events"
   },
   "style": "dark",
-  "failover": true,
+  "failover": false,
   "panel_hints": true,
   "loader": {
     "save_gist": false,
@@ -277,16 +239,14 @@
       "notice": false,
       "query": "*",
       "pinned": true,
-      "history": [
-        "*"
-      ],
+      "history": [],
       "remember": 10,
       "enable": true
     },
     {
       "type": "filtering",
-      "collapse": false,
-      "notice": true,
+      "collapse": true,
+      "notice": false,
       "enable": true
     }
   ],
@@ -320,9 +280,7 @@
         "1d"
       ],
       "timefield": "utctimestamp",
-      "enable": true,
-      "now": true,
-      "filter_id": 0
+      "enable": true
     }
   ],
   "refresh": false

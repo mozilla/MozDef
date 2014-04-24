@@ -1,5 +1,5 @@
 {
-  "title": "auditd",
+  "title": "MozDef Sample Alerts",
   "services": {
     "query": {
       "idQueue": [
@@ -25,38 +25,53 @@
     },
     "filter": {
       "idQueue": [
-        2,
-        3,
-        4
-      ],
-      "list": {
-        "0": {
-          "type": "terms",
-          "field": "_type",
-          "value": "auditd",
-          "mandate": "must",
-          "active": true,
-          "alias": "",
-          "id": 0
-        },
-        "1": {
-          "type": "time",
-          "field": "utctimestamp",
-          "from": "now-5m",
-          "to": "now",
-          "mandate": "must",
-          "active": true,
-          "alias": "",
-          "id": 1
-        }
-      },
-      "ids": [
         0,
-        1
-      ]
+        1,
+        2
+      ],
+      "list": {},
+      "ids": []
     }
   },
   "rows": [
+    {
+      "title": "Options",
+      "height": "50px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 7,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "text",
+          "status": "Stable",
+          "mode": "markdown",
+          "content": "If you have a field with a timestamp in it, you can set a time filter using the control in the navigation bar. You'll need to click the cog icon to configure the field that your timestamp is in.",
+          "style": {},
+          "title": "Have a timestamp somewhere?"
+        },
+        {
+          "error": false,
+          "span": 5,
+          "editable": true,
+          "group": [
+            "default"
+          ],
+          "type": "text",
+          "status": "Stable",
+          "mode": "markdown",
+          "content": "See the *Filters* bar above? Click it to expand the filters panel. Right now there are none. click on one of the icons in the document types list to filter down to only that document type",
+          "style": {},
+          "title": "About filters"
+        }
+      ],
+      "notice": false
+    },
     {
       "title": "Graph",
       "height": "250px",
@@ -78,10 +93,10 @@
               0
             ]
           },
-          "field": "details.ParentProcess",
+          "field": "_type",
           "exclude": [],
-          "missing": false,
-          "other": false,
+          "missing": true,
+          "other": true,
           "size": 100,
           "order": "count",
           "style": {
@@ -93,7 +108,7 @@
           "arrangement": "horizontal",
           "chart": "pie",
           "counter_pos": "none",
-          "title": "Events",
+          "title": "Document types",
           "spyable": true
         },
         {
@@ -110,11 +125,11 @@
               0
             ]
           },
-          "field": "details.suser",
+          "field": "_type",
           "exclude": [],
           "missing": true,
           "other": true,
-          "size": 20,
+          "size": 10,
           "order": "count",
           "style": {
             "font-size": "10pt"
@@ -126,41 +141,21 @@
           "chart": "table",
           "counter_pos": "above",
           "spyable": true,
-          "title": "Users"
+          "title": "Document Types"
         },
         {
           "error": false,
-          "span": 4,
+          "span": 6,
           "editable": true,
-          "type": "terms",
-          "loadingEditor": false,
-          "queries": {
-            "mode": "all",
-            "ids": [
-              0
-            ]
-          },
-          "field": "details.dhost",
-          "exclude": [
-            "mozilla.com",
-            "dmz.scl3",
-            "mozilla.org"
+          "group": [
+            "default"
           ],
-          "missing": true,
-          "other": true,
-          "size": 20,
-          "order": "count",
-          "style": {
-            "font-size": "10pt"
-          },
-          "donut": false,
-          "tilt": false,
-          "labels": true,
-          "arrangement": "horizontal",
-          "chart": "bar",
-          "counter_pos": "above",
-          "spyable": true,
-          "title": "hosts"
+          "type": "text",
+          "status": "Stable",
+          "mode": "markdown",
+          "content": "It's the best I can do without knowing much about your data! I've tried to pick some sane defaults for you. The two *terms* panels to the left of this *text* panel show a breakdown of your document type. \n\nKibana is currently configured to point at the special Elasticsearch *_all* index. You can change that by clicking on the cog icon in the navigation bar at the top. You can also add rows from that dialog. You can edit individual panels by click on the cog icon on the panel you want to edit\n\nThe *table* panel below has attempted to list your fields to the left, select a few to view them in the table. To add more panels, of different types, click the cog on the row label to the far left",
+          "style": {},
+          "title": "The most generic dashboard ever"
         }
       ],
       "notice": false
@@ -191,16 +186,7 @@
             "font-size": "9pt"
           },
           "overflow": "min-height",
-          "fields": [
-            "details.name",
-            "details.Command",
-            "details.suser",
-            "details.euid",
-            "details.dhost",
-            "details.cwd",
-            "details.dproc",
-            "details.signatureid"
-          ],
+          "fields": [],
           "highlight": [],
           "sortable": true,
           "header": true,
@@ -225,12 +211,12 @@
   ],
   "editable": true,
   "index": {
-    "interval": "day",
-    "pattern": "[events-]YYYYMMDD",
-    "default": "events"
+    "interval": "none",
+    "pattern": "none",
+    "default": "alerts"
   },
   "style": "dark",
-  "failover": true,
+  "failover": false,
   "panel_hints": true,
   "loader": {
     "save_gist": false,
@@ -253,16 +239,14 @@
       "notice": false,
       "query": "*",
       "pinned": true,
-      "history": [
-        "jbryner"
-      ],
+      "history": [],
       "remember": 10,
       "enable": true
     },
     {
       "type": "filtering",
-      "collapse": false,
-      "notice": true,
+      "collapse": true,
+      "notice": false,
       "enable": true
     }
   ],
@@ -273,7 +257,6 @@
       "notice": false,
       "status": "Stable",
       "time_options": [
-        "1m",
         "5m",
         "15m",
         "1h",
@@ -297,9 +280,7 @@
         "1d"
       ],
       "timefield": "utctimestamp",
-      "enable": true,
-      "now": true,
-      "filter_id": 1
+      "enable": true
     }
   ],
   "refresh": false

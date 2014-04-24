@@ -15,6 +15,22 @@ if (Meteor.isServer) {
         //important to set this for so persona can validate the source request
         //set to what the browser thinks you are coming from (i.e. localhost, or actual servername)
         Meteor.absoluteUrl.defaultOptions.rootUrl = mozdef.rootURL + ':' + mozdef.port
+        
+        //instead of the Meteor.settings we use put deployment
+        //settings in settings.js to make it easier to deploy
+        //and to allow clients to get access to deployment-specific settings.
+        //Simply deploying settings.js results in a static js file included in the client.
+        //Pull in settings.js entries into a collection
+        //so the client gets dynamic content
+        mozdefsettings.remove({});
+        mozdefsettings.insert({ key:'rootURL', 
+                                value : mozdef.rootURL });
+        mozdefsettings.insert({ key:'rootAPI', 
+                                value : mozdef.rootAPI });
+
+        //console.log(mozdefsettings.find({}).fetch())
+        
+        
         Accounts.config({
             forbidClientAccountCreation:"true",
         });
@@ -42,7 +58,7 @@ if (Meteor.isServer) {
             });
         }
         //delete/refresh incidents
-        incidents.remove({});
+        //incidents.remove({});
         if (incidents.find().count()==0){
             console.log("Refreshing sample incident data")
             //insert an incident using a model
@@ -71,7 +87,7 @@ if (Meteor.isServer) {
              asset:"User",
              attribute:"Confidentiality"}
             );
-        }
+        };
         console.log("Incidents: " + incidents.find({}).count());
         //get fresh stats for elastic search
         Meteor.call('refreshESStatus');

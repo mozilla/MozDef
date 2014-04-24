@@ -30,19 +30,35 @@ You're done! Now go to:
  * http://127.0.0.1:8080 < loginput
  * http://127.0.0.1:8081 < rest api
 
-Known issues
-*************
+Get a terminal in the container
+*******************************
 
-* Marvel doesn't display node info: ` Oops! FacetPhaseExecutionException[Facet [fs.total.available_in_bytes]: failed to find mapping for fs.total.available_in_bytes]`
+An usual problem in Docker is that once you start a container, you cannot enter in it.
 
-Marvel uses techniques to gather system info that are not compatible with docker.
-See https://groups.google.com/forum/#!topic/elasticsearch/dhpxaOuoZWI
+To solve this, a solution is to use `nsenter` present in the `util-linux` > 2.23 package.
+Debian and Ubuntu currently provide the 2.20 version so you need to download and compile the source code::
 
-Despite this issue, marvel runs fine.
+  cd /tmp
+  curl https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz | tar -zxf-
+  cd util-linux-2.24
+  ./configure --without-ncurses
+  make nsenter
+  cp nsenter /usr/local/bin
 
-* I don't see any data or dashboards in Kibana
+Now we can create a script for docker (/usr/local/sbin/dkenter)::
 
-We need to create some sample data, it's in our roadmap ;)
+  #!/bin/bash
+
+  CNAME=$1
+  CPID=$(docker inspect --format '{{ .State.Pid }}' $CNAME)
+  nsenter --target $CPID --mount --uts --ipc --net --pid
+
+While your MozDef container is running::
+
+  docker ps # find the container ID, fc4917f00ead in this example
+  dkenter fc4917f00ead
+  root@fc4917f00ead:/# ...
+  root@fc4917f00ead:/# exit
 
 .. _docker: https://www.docker.io/
 
@@ -191,12 +207,12 @@ You may want to edit the app/lib/settings.js file to properly point to your elas
 Then start meteor with::
 
   meteor
-  
+
 
 Node
 ******
 
-Alternatively you can run the meteor UI in 'deployment' mode using a native node installation. 
+Alternatively you can run the meteor UI in 'deployment' mode using a native node installation.
 
 First install node::
 
@@ -206,31 +222,31 @@ First install node::
     cd node-v0.10.25
     python configure
     make
-    make install   
+    make install
 
 Then bundle the meteor portion of mozdef::
 
   cd <your meteor mozdef directory>
   meteor bundle mozdef.tgz
 
-You can then deploy the meteor UI for mozdef as necessary:: 
+You can then deploy the meteor UI for mozdef as necessary::
 
   scp mozdef.tgz to your target host
   tar -xvzf mozdef.tgz
-  
+
 This will create a 'bundle' directory with the entire UI code below that directory.
-  
+
 You will need to update the settings.js file to match your servername/port::
 
   vim bundle/programs/server/app/app/lib/settings.js
-  
+
 If your development OS is different than your production OS you will also need to update
-the fibers node module:: 
+the fibers node module::
 
   cd bundle/programs/server/node_modules
   rm -rf fibers
   sudo npm install fibers@1.0.1
-  
+
 Then run the mozdef UI via node::
 
   export MONGO_URL=mongodb://mongoservername:3002/meteor
@@ -273,6 +289,8 @@ We use `uwsgi`_ to interface python and nginx::
   cp uwsgi ~/envs/mozdef/bin/
 
   cd rest
+  # modify settings.py
+  vim settings.py
   # modify uwsgi.ini
   vim uwsgi.ini
   uwsgi --ini uwsgi.ini
@@ -300,7 +318,10 @@ Kibana
   # configure /etc/nginx/nginx.conf to target this folder
   sudo service nginx reload
 
-Import dashboards from `MozDef/kibana/dashboards` into the kibana webUI
+To initialize elasticsearch indices and load some sample data::
+
+  cd examples/es-docs/
+  python inject.py
 
 .. _Kibana: http://www.elasticsearch.org/overview/kibana
 

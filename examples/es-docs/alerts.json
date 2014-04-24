@@ -1,0 +1,67 @@
+[
+	{
+	    "category": "LDAP Group Update",
+	    "severity": "INFO",
+	    "utctimestamp": "2014-04-17T18:48:02.077307+00:00",
+	    "tags": [
+	      "example"
+	    ],
+	    "timestamp": "2014-04-17T18:48:02.077307+00:00",
+	    "hostname": "syslog.example.com",
+	    "receivedtimestatmp": "2014-04-17T18:48:02.879482+00:00",
+	    "summary": "ldap.example.com mail=john@example.com,o=com,dc=example modify cn=vpn,ou=groups,dc=example add:member: mail=steve@example.com,o=com,dc=example",
+	    "eventsource": "/data/log/syslog/systems/ldap.example.com/2014-04-17.log"
+	},
+	{
+	    "category": "LDAP Group Update",
+	    "severity": "INFO",
+	    "utctimestamp": "2014-04-17T18:48:02.077307+00:00",
+	    "tags": [
+	      "example"
+	    ],
+	    "timestamp": "2014-04-17T18:48:02.077307+00:00",
+	    "hostname": "syslog.example.com",
+	    "receivedtimestatmp": "2014-04-17T18:48:02.862345+00:00",
+	    "summary": "ldap.example.com mail=john@example.com,o=com,dc=example modify cn=vpn,ou=groups,dc=example add ipHostNumber, replace entryCSN, replace modifiersName, replace modifyTimestamp,",
+	    "eventsource": "/data/log/syslog/systems/ldap.example.com/2014-04-17.log"
+	},
+	{
+	    "category": "LDAP Group Update",
+	    "severity": "INFO",
+	    "utctimestamp": "2014-04-17T22:00:02.092076+00:00",
+	    "tags": [
+	      "example"
+	    ],
+	    "timestamp": "2014-04-17T22:00:02.092076+00:00",
+	    "hostname": "syslog.example.com",
+	    "receivedtimestatmp": "2014-04-17T22:00:02.522354+00:00",
+	    "summary": "ldap.example.com mail=john@example.com,o=com,dc=example modify cn=vpn,ou=groups,dc=example add:member: mail=peter@example.com,o=com,dc=example",
+	    "eventsource": "/data/log/syslog/systems/ldap.example.com/2014-04-17.log"
+	},
+	{
+	    "category": "LDAP Group Update",
+	    "severity": "INFO",
+	    "utctimestamp": "2014-04-17T22:00:02.092076+00:00",
+	    "tags": [
+	      "example"
+	    ],
+	    "timestamp": "2014-04-17T22:00:02.092076+00:00",
+	    "hostname": "syslog.example.com",
+	    "receivedtimestatmp": "2014-04-17T22:00:02.486456+00:00",
+	    "summary": "ldap.example.com mail=john@example.com,o=com,dc=example modify cn=mail,ou=groups,dc=example add:member: mail=peter@example.com,o=com,dc=example",
+	    "eventsource": "/data/log/syslog/systems/ldap.example.com/2014-04-17.log"
+	},
+	{
+	    "category": "LDAP Group Update",
+	    "severity": "INFO",
+	    "utctimestamp": "2014-04-17T22:00:02.092076+00:00",
+	    "tags": [
+	      "example"
+	    ],
+	    "timestamp": "2014-04-17T22:00:02.092076+00:00",
+	    "hostname": "syslog.example.com",
+	    "receivedtimestatmp": "2014-04-17T22:00:02.488003+00:00",
+	    "summary": "ldap.example.com mail=john@example.com,o=com,dc=example modify cn=voip,ou=groups,dc=example add:member: mail=peter@example.com,o=com,dc=example",
+	    "eventsource": "/data/log/syslog/systems/ldap.example.com/2014-04-17.log"
+	}
+]

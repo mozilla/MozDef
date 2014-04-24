@@ -5,13 +5,13 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Anthony Verez averez@mozilla.com
 
 import sys
 import bottle
-from bottle import debug,route, run, template, response,request,post, default_app
-from bottle import _stdout as bottlelog
+from bottle import debug,route, run, response, request, default_app
 import json
-from configlib import getConfig,OptionParser
+from configlib import getConfig, OptionParser
 import pyes
 from elasticutils import S
 from datetime import datetime
@@ -19,8 +19,10 @@ from datetime import timedelta
 from dateutil.parser import parse
 import pytz
 
-options=None
+options = None
 # cors decorator for rest/ajax
+
+
 def enable_cors(fn):
     def _enable_cors(*args, **kwargs):
         # set CORS headers
@@ -34,12 +36,14 @@ def enable_cors(fn):
 
     return _enable_cors
 
+
 @route('/test')
 @route('/test/')
 def index():
     ip = request.environ.get('REMOTE_ADDR')
     #response.headers['X-IP'] = '{0}'.format(ip)
-    response.status=200
+    response.status = 200
+
 
 @route('/status')
 @route('/status/')
@@ -47,9 +51,10 @@ def index():
     if request.body:
         request.body.read()
         request.body.close()
-    response.status=200
-    response.content_type="application/json"
+    response.status = 200
+    response.content_type = "application/json"
     return(json.dumps(dict(status='ok')))
+
 
 @route('/ldapLogins')
 @route('/ldapLogins/')
@@ -58,8 +63,8 @@ def index():
     if request.body:
         request.body.read()
         request.body.close()
-    response.content_type="application/json"
-    return(esLdapResults())    
+    response.content_type = "application/json"
+    return(esLdapResults())
 
 
 @route('/alerts')
@@ -69,42 +74,55 @@ def index():
     if request.body:
         request.body.read()
         request.body.close()
-    response.content_type="application/json"
-    return(esAlertsSummary())   
-    
+    response.content_type = "application/json"
+    return(esAlertsSummary())
+
+
+@route('/kibanadashboards')
+@route('/kibanadashboards/')
+@enable_cors
+def index():
+    if request.body:
+        request.body.read()
+        request.body.close()
+    response.content_type = "application/json"
+    return(kibanaDashboards())
+
+
 #debug(True)
-def toUTC(suspectedDate,localTimeZone="US/Pacific"):
+def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
-    utc=pytz.UTC
-    objDate=None
-    if type(suspectedDate)==str:
-        objDate=parse(suspectedDate,fuzzy=True)
-    elif type(suspectedDate)==datetime:
-        objDate=suspectedDate
-    
+    utc = pytz.UTC
+    objDate = None
+    if type(suspectedDate) == str:
+        objDate = parse(suspectedDate, fuzzy=True)
+    elif type(suspectedDate) == datetime:
+        objDate = suspectedDate
+
     if objDate.tzinfo is None:
-        objDate=pytz.timezone(localTimeZone).localize(objDate)
-        objDate=utc.normalize(objDate)
+        objDate = pytz.timezone(localTimeZone).localize(objDate)
+        objDate = utc.normalize(objDate)
     else:
-        objDate=utc.normalize(objDate)
+        objDate = utc.normalize(objDate)
     if objDate is not None:
-        objDate=utc.normalize(objDate)
-        
+        objDate = utc.normalize(objDate)
+
     return objDate
 
+
 def esAlertsSummary(begindateUTC=None, enddateUTC=None):
-    resultsList=list()
+    resultsList = list()
     if begindateUTC is None:
-        begindateUTC=datetime.now() - timedelta(hours=12)
-        begindateUTC=toUTC(begindateUTC)
+        begindateUTC = datetime.now() - timedelta(hours=12)
+        begindateUTC = toUTC(begindateUTC)
     if enddateUTC is None:
-        enddateUTC= datetime.now()
-        enddateUTC= toUTC(enddateUTC)
+        enddateUTC = datetime.now()
+        enddateUTC = toUTC(enddateUTC)
     try:
 
         #q=S().es(urls=['http://{0}:{1}'.format(options.esserver,options.esport)]).query(_type='alert').filter(utctimestamp__range=[begindateUTC.isoformat(),enddateUTC.isoformat()])
         #f=q.facet_raw(alerttype={"terms" : {"script_field" : "_source.type","size" : 500}})
-        
+
         #get all alerts
         #q= S().es(urls=['http://{0}:{1}'.format(options.esserver,options.esport)]).query(_type='alert')
         q= S().es(urls=list('{0}'.format(s) for s in options.esservers)).query(_type='alert')
@@ -114,80 +132,119 @@ def esAlertsSummary(begindateUTC=None, enddateUTC=None):
             "facet_filter":{'range': {'utctimestamp': \
                                      {'gte': begindateUTC.isoformat(), 'lte': enddateUTC.isoformat()}}}\
 
-            })        
+            })
         return(json.dumps(f.facet_counts()['alerttype']))
-                
-    except Exception as e :
-        sys.stderr.write('%r'%e)
-        
+
+    except Exception as e:
+        sys.stderr.write('%r' % e)
+
+
 def esLdapResults(begindateUTC=None, enddateUTC=None):
-    resultsList=list()
+    resultsList = list()
     if begindateUTC is None:
-        begindateUTC=datetime.now() - timedelta(hours=12)
-        begindateUTC=toUTC(begindateUTC)
+        begindateUTC = datetime.now() - timedelta(hours=12)
+        begindateUTC = toUTC(begindateUTC)
     if enddateUTC is None:
-        enddateUTC= datetime.now()
-        enddateUTC= toUTC(enddateUTC)
+        enddateUTC = datetime.now()
+        enddateUTC = toUTC(enddateUTC)
     try:
-        es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
         #qDate=e=pyes.MatchQuery("message",options.datePhrase,"phrase")
-        qDate=pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',from_value=begindateUTC,to_value=enddateUTC))
+        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
+            from_value=begindateUTC, to_value=enddateUTC))
         q = pyes.MatchAllQuery()
-        q = pyes.FilteredQuery(q,qDate)
-        q = pyes.FilteredQuery(q,pyes.TermFilter('tags','ldap'))
-        q = pyes.FilteredQuery(q,pyes.TermFilter('details.result','ldap_invalid_credentials'))
-        q2=q.search()
+        q = pyes.FilteredQuery(q, qDate)
+        q = pyes.FilteredQuery(q, pyes.TermFilter('tags', 'ldap'))
+        q = pyes.FilteredQuery(q,
+            pyes.TermFilter('details.result', 'ldap_invalid_credentials'))
+        q2 = q.search()
         q2.facet.add_term_facet('details.result')
-        q2.facet.add_term_facet('details.dn',size=20)
-        results=es.search(q2, indices='events')
+        q2.facet.add_term_facet('details.dn', size=20)
+        results = es.search(q2, indices='events')
         #sys.stdout.write('{0}\n'.format(results.facets))
-    
-        stoplist=('o','mozilla','dc','com','mozilla.com','mozillafoundation.org','org')
+
+        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com',
+            'mozillafoundation.org', 'org')
         for t in results.facets['details.dn'].terms:
             if t['term'] in stoplist:
                 continue
             #print(t['term'])
-            failures=0
-            success=0
-            dn=t['term']
+            failures = 0
+            success = 0
+            dn = t['term']
 
             #re-query with the terms of the details.dn
             qt = pyes.MatchAllQuery()
-            qt = pyes.FilteredQuery(qt,qDate)
-            qt = pyes.FilteredQuery(qt,pyes.TermFilter('tags','ldap'))
-            qt = pyes.FilteredQuery(qt,pyes.TermFilter('details.dn',t['term']))
-            qt2=qt.search()
+            qt = pyes.FilteredQuery(qt, qDate)
+            qt = pyes.FilteredQuery(qt, pyes.TermFilter('tags', 'ldap'))
+            qt = pyes.FilteredQuery(qt,
+                pyes.TermFilter('details.dn', t['term']))
+            qt2 = qt.search()
             qt2.facet.add_term_facet('details.result')
-            results=es.search(qt2)
+            results = es.search(qt2)
             #sys.stdout.write('{0}\n'.format(results.facets['details.result'].terms))
-            
+
             for t in results.facets['details.result'].terms:
                 #print(t['term'],t['count'])
-                if t['term']=='ldap_success':
-                    success=t['count']
-                if t['term']=='ldap_invalid_credentials':
-                    failures=t['count']
-            resultsList.append(dict(dn=dn,failures=failures,success=success,begin=begindateUTC.isoformat(),end=enddateUTC.isoformat()))
-        
+                if t['term'] == 'ldap_success':
+                    success = t['count']
+                if t['term'] == 'ldap_invalid_credentials':
+                    failures = t['count']
+            resultsList.append(dict(dn=dn, failures=failures,
+                success=success, begin=begindateUTC.isoformat(),
+                end=enddateUTC.isoformat()))
+
         return(json.dumps(resultsList))
     except pyes.exceptions.NoServerAvailable:
         sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
-     
-        
+
+
+def kibanaDashboards():
+    try:
+        resultsList = []
+        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+        r = es.search(pyes.Search(pyes.MatchAllQuery(), size=100),
+            'kibana-int', 'dashboard')
+        if r:
+            for dashboard in r:
+                dashboardJson = json.loads(dashboard.dashboard)
+                resultsList.append({
+                    'name': dashboardJson['title'],
+                    'url': "%s/%s/%s" % (options.kibanaurl,
+                        "index.html#/dashboard/elasticsearch",
+                        dashboardJson['title'])
+                })
+            return json.dumps(resultsList)
+        else:
+            sys.stderr.write('No Kibana dashboard found\n')
+    except pyes.exceptions.NoServerAvailable:
+        sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
+
+
 def initConfig():
     #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
-    options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
+    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific',
+        options.configfile)
+    options.esservers = list(getConfig('esservers', 'http://localhost:9200',
+        options.configfile).split(','))
+    options.kibanaurl = getConfig('kibanaurl', 'http://localhost:9090',
+        options.configfile)
     print(options)
+
+
 if __name__ == "__main__":
-    parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
-    (options,args) = parser.parse_args()
+    parser = OptionParser()
+    parser.add_option("-c", dest='configfile',
+        default=sys.argv[0].replace('.py', '.conf'),
+        help="configuration file to use")
+    (options, args) = parser.parse_args()
     initConfig()
     run(host="localhost", port=8081)
 else:
-    parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
-    (options,args) = parser.parse_args()
-    initConfig()    
+    parser = OptionParser()
+    parser.add_option("-c", dest='configfile',
+        default=sys.argv[0].replace('.py', '.conf'),
+        help="configuration file to use")
+    (options, args) = parser.parse_args()
+    initConfig()
     application = default_app()

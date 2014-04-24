@@ -30,6 +30,12 @@ if (Meteor.isClient) {
         }
     });
 
+    // loads kibana dashboards
+    Template.menu.kibanadashboards = function() {
+      Meteor.call('loadKibanaDashboards');
+      return kibanadashboards.find();
+    }
+
     //helper functions for handlebars
     UI.registerHelper('now', function() {
         return new Date();
@@ -285,7 +291,6 @@ if (Meteor.isClient) {
   
   //three.js code to render attackers visualization
 
-    
     Template.attackers.rendered=function(){
         container=document.getElementById('attackers-wrapper')
         sceneObjects=[]
@@ -420,7 +425,7 @@ if (Meteor.isClient) {
         .range([0, maxRadius]);
     
         
-    d3.json(mozdef.ldapLoginDataURL, function(error, jsondata) {
+	d3.json(getSetting('rootAPI') + '/ldapLogins/' , function(error, jsondata) {
         //console.log(jsondata)
         r.domain([0, d3.max(jsondata, function(d) { return d.success+ d.failures; })])
         jsondata.forEach(function(d){
@@ -551,7 +556,7 @@ if (Meteor.isClient) {
     
     }
 
-  //d3 code to animate login counts
+  //d3 code to animate alerts
   Template.alertssummary.rendered = function () {
     container=document.getElementById('alerts-wrapper')
     container.style.cursor='wait'
@@ -589,9 +594,8 @@ if (Meteor.isClient) {
     var r = d3.scale.sqrt()
         .range([0, maxRadius]);
     
-        
-    d3.json(mozdef.alertDataURL, function(error, jsondata) {
-        if (typeof console !== 'undefined')
+    d3.json(getSetting('rootAPI') + '/alerts/', function(error, jsondata) {
+        if (typeof console !== 'undefined' && error)
           console.log(error)
         r.domain([0, d3.max(jsondata, function(d) { return d.count; })])
         jsondata.forEach(function(d){
@@ -677,8 +681,4 @@ if (Meteor.isClient) {
     }
     
   }
-    
-    
-    
 }
-
