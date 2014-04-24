@@ -151,18 +151,13 @@ if (Meteor.isClient) {
         "submit form": function (event,template){
             event.preventDefault();
 
-            var tags = [];
-            $.each($(".incidenttag"), function(index, value) {
-                var matches = value.innerHTML.match(/(\w+)(\.\w+)+/);
-                tags.push(matches[0]);
-            });
+            // tags are saved in realtime
 
             incidents.update(Session.get('incidentID'),{
                 summary: template.find("#incidentSummary").value,
                 dateOpened: template.find("#dateOpened").value,
                 dateClosed: template.find("#dateClosed").value,
                 phase: template.find("#phase").value,
-                tags: tags,
                 dateReported: template.find("#dateReported").value,
                 dateVerified: template.find("#dateVerified").value,
                 dateMitigated: template.find("#dateMitigated").value,
