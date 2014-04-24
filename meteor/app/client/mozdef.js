@@ -63,8 +63,9 @@ if (Meteor.isClient) {
 
     Template.veristags.events({
         'dragstart .tag': function(e){
-            //console.log('dragging ' + this.tag)
-            e.dataTransfer.setData("text/plain",this.tag);
+            //console.log(this.tag)
+            //console.log(e)
+            e.originalEvent.dataTransfer.setData("text/plain",this.tag);
         },
         'load': function(e, template){
             template.find("#tagfilter").value=Session.get('verisfilter');
@@ -125,8 +126,8 @@ if (Meteor.isClient) {
         },
         "drop .tags": function(e){
           e.preventDefault();
-          //console.log('drop event' + e)
-          tagtext=e.dataTransfer.getData("text/plain")
+          //console.log(e)
+          tagtext=e.originalEvent.dataTransfer.getData("text/plain")
           //e.target.textContent=droptag
           //console.log(tagtext)
           incidents.update(Session.get('incidentID'),{
@@ -135,21 +136,27 @@ if (Meteor.isClient) {
         },
         
         "click .tagdelete": function(e){
-            //console.log( e);
-            //console.log(e.target.parentNode.firstChild.data);
-            tagtext=e.target.parentNode.firstChild.data
+            tagtext=e.target.parentNode.firstChild.wholeText;
             incidents.update(Session.get('incidentID'),{
                 $pull:{tags:tagtext}
-            })
+            });
         },
         
-        "submit form":function (event,template){
+        "submit form": function (event,template){
             event.preventDefault();
+
+            var tags = [];
+            $.each($(".incidenttag"), function(index, value) {
+                var matches = value.innerHTML.match(/(\w+)(\.\w+)+/);
+                tags.push(matches[0]);
+            });
+
             incidents.update(Session.get('incidentID'),{
                 summary: template.find("#incidentSummary").value,
                 dateOpened: template.find("#dateOpened").value,
                 dateClosed: template.find("#dateClosed").value,
                 phase: template.find("#phase").value,
+                tags: tags,
                 dateReported: template.find("#dateReported").value,
                 dateVerified: template.find("#dateVerified").value,
                 dateMitigated: template.find("#dateMitigated").value,
