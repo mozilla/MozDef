@@ -19,17 +19,16 @@ def isIP(ip):
 
 
 def ipLocation(ip):
-    location = ""
+    location = dict()
     try:
         gi = pygeoip.GeoIP('/home/mozdef/envs/mozdef/bot/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
         geoDict = gi.record_by_addr(str(netaddr.IPNetwork(ip)[0]))
         if geoDict is not None:
-            location = geoDict['country_name']
-            if geoDict['country_code'] in ('US'):
-                if geoDict['metro_code']:
-                    location = location + '/{0}'.format(geoDict['metro_code'])
+            return geoDict
+        else:
+            location['location'] = 'unknown'
     except ValueError as e:
-        location = ""
+        pass
     return location
 
 
@@ -42,14 +41,14 @@ class message(object):
            set the priority if you have a preference for order of plugins to run.
            0 goes first, 100 is assumed/default if not sent
         '''
-        
+
         rdict = dict()
         rdict['details'] = dict()
         rdict['details']['sourceipaddress'] = None
         rdict['details']['destinationipaddress'] = None
         self.registration = rdict
         self.priority = 20
-    
+
     def onMessage(self, message):
         if 'details' in message.keys():
             if 'sourceipaddress' in message['details'].keys():
@@ -58,25 +57,25 @@ class message(object):
                     ip = netaddr.IPNetwork(ipText)[0]
                     if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                         '''lookup geoip info'''
-                        message['details']['sourceiplocation'] = ipLocation(ipText)
+                        message['details']['sourceipgeolocation'] = ipLocation(ipText)
                 else:
                     # invalid ip sent in the field
                     # if we send on, elastic search will error, so set it
                     # to a valid, yet meaningless value
                     message['details']['sourceipaddress'] = '0.0.0.0'
-                    
+
             if 'destinationipaddress' in message['details'].keys():
                 ipText = message['details']['destinationipaddress']
                 if isIP(ipText):
                     ip = netaddr.IPNetwork(ipText)[0]
                     if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                         '''lookup geoip info'''
-                        message['details']['destinationiplocation'] = ipLocation(ipText)
+                        message['details']['destinationipgeolocation'] = ipLocation(ipText)
                 else:
                     # invalid ip sent in the field
                     # if we send on, elastic search will error, so set it
                     # to a valid, yet meaningless value
                     message['details']['destinationipaddress'] = '0.0.0.0'
         return message
-        
+
         
