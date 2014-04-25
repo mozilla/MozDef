@@ -96,8 +96,7 @@ if (Meteor.isClient) {
         "click": function(e,t){
             if (this._id != undefined){
                 Session.set('displayMessage','Starting edit for incident._id: ' + this._id);
-                Session.set('incidentID',this._id);
-                Router.go('/incidents/edit')
+                Router.go('/incident/' + this._id + '/edit');
             }
         }
     });
@@ -133,18 +132,18 @@ if (Meteor.isClient) {
         "drop .tags": function(e){
           e.preventDefault();
           //console.log(e)
-          tagtext=e.originalEvent.dataTransfer.getData("text/plain")
+          tagtext = e.originalEvent.dataTransfer.getData("text/plain");
           //e.target.textContent=droptag
           //console.log(tagtext)
-          incidents.update(Session.get('incidentID'),{
-            $addToSet:{tags:tagtext}
+          incidents.update(Session.get('incidentID'), {
+            $addToSet: {tags:tagtext}
           });
         },
         
         "click .tagdelete": function(e){
-            tagtext=e.target.parentNode.firstChild.wholeText;
-            incidents.update(Session.get('incidentID'),{
-                $pull:{tags:tagtext}
+            tagtext = e.target.parentNode.firstChild.wholeText;
+            incidents.update(Session.get('incidentID'), {
+                $pull: {tags:tagtext}
             });
         },
         
@@ -153,7 +152,7 @@ if (Meteor.isClient) {
 
             // tags are saved in realtime
 
-            incidents.update(Session.get('incidentID'),{$set:{
+            incidents.update(Session.get('incidentID'), {$set: {
                 summary: template.find("#incidentSummary").value,
                 dateOpened: template.find("#dateOpened").value,
                 dateClosed: template.find("#dateClosed").value,
@@ -177,7 +176,7 @@ if (Meteor.isClient) {
 
     Template.editincidentform.rendered = function() {
             if (typeof console !== 'undefined') {
-              console.log('load edit incident form')
+              console.log('load edit incident form ' + Session.get('incidentID'));
             }
             $('#dateClosed').daterangepicker({
                                                 singleDatePicker: true,
