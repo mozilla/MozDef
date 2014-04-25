@@ -33,7 +33,6 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
 
-
     this.route('incidentnew', {
         path: '/incidents/new',
         template: 'addincidentform',
@@ -41,10 +40,15 @@ Router.map(function () {
     });
 
     this.route('incidentedit', {
-        path: '/incidents/edit',
+        path: '/incident/:_id/edit',
+        data: function() {
+            Session.set('incidentID', this.params._id);
+            return incidents.findOne(this.params._id);
+        },
         template: 'editincidentform',
         layoutTemplate: 'layout'
     });
+
 
     this.route('attackers', {
         path: '/incidents/attackers',
