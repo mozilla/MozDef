@@ -117,6 +117,63 @@ if (Meteor.isClient) {
         }
     });
 
+    var incidentRevision = function() {
+      this.save = function(e, template) {
+        // tags are saved in real realtime (without timer)
+
+        incidents.update(Session.get('incidentID'), {$set: {
+          summary: template.find("#incidentSummary").value,
+          dateOpened: template.find("#dateOpened").value,
+          dateClosed: template.find("#dateClosed").value,
+          phase: template.find("#phase").value,
+          dateReported: template.find("#dateReported").value,
+          dateVerified: template.find("#dateVerified").value,
+          dateMitigated: template.find("#dateMitigated").value,
+          dateContained: template.find("#dateContained").value
+        }},
+        {},
+        function(error, nobj) {
+          if (!error && nobj === 1) {
+            $('#saving').text('Changes Saved');
+          }
+        });
+      }
+
+      return this;
+    }();
+
+    var incidentSaveTimer = function() {
+      var timer;
+
+      this.set = function(saveFormCB) {
+        timer = Meteor.setTimeout(function() {
+          saveFormCB();
+          // Hide changes saved message after 3 secs
+          Meteor.setTimeout(function() {
+            $('#saving').text('');
+          }, 3000);
+        }, 3000);
+      };
+
+      this.clear = function() {
+        Meteor.clearInterval(timer);
+      };
+
+      this.run = function(e, t) {
+        // Save user input after 3 seconds of not typing
+        this.clear();
+ 
+        this.set(function() {
+          // We should update our document.
+          $('#saving').text('Saving...');
+          // If update is successful, then
+          incidentRevision.save(e, t);
+        });
+      };
+
+      return this;    
+    }();
+
     //edit events
     Template.editincidentform.events({
         "dragover .tags": function(e){
@@ -146,25 +203,112 @@ if (Meteor.isClient) {
                 $pull: {tags:tagtext}
             });
         },
-        
-        "submit form": function (event,template){
+
+        "click #saveChanges": function (event, template) {
             event.preventDefault();
 
-            // tags are saved in realtime
+            incidentRevision.save(event, template);
 
-            incidents.update(Session.get('incidentID'), {$set: {
-                summary: template.find("#incidentSummary").value,
-                dateOpened: template.find("#dateOpened").value,
-                dateClosed: template.find("#dateClosed").value,
-                phase: template.find("#phase").value,
-                dateReported: template.find("#dateReported").value,
-                dateVerified: template.find("#dateVerified").value,
-                dateMitigated: template.find("#dateMitigated").value,
-                dateContained: template.find("#dateContained").value
-            }});
-            Router.go('/incidents/')
+            //Router.go('/incidents/')
+        },
+
+        "keyup": function(e, t) {
+           // Save user input after 3 seconds of not typing
+           incidentSaveTimer.run(e, t);
+        },
+
+        "blur .calendarfield": function(e, t) {
+           // Save user input after 3 seconds of not typing
+           incidentSaveTimer.run(e, t);
+        },
+
+        "change #phase": function(e, t) {
+           // Save user input after 3 seconds of not typing
+           incidentSaveTimer.run(e, t);
+         },
+
+/*
+        "click #incidentSummarySave": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {summary: template.find("#incidentSummary").value}}
+          );
+          template.find("#incidentSummary").disabled = true;
+          $("#incidentSummarySave").addClass('hidden');
+          $("#incidentSummaryEdit").removeClass('hidden');
+        },
+
+        "click #incidentSummaryEdit": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {summary: template.find("#incidentSummary").value}}
+          );
+          template.find("#incidentSummary").disabled = false;
+          $("#incidentSummaryEdit").addClass('hidden');
+          $("#incidentSummarySave").removeClass('hidden');
+        },
+
+        "click .save#dateOpened": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {dateOpened: template.find("#dateOpened").value}}
+          );
+        },
+
+        "click .save#dateClosed": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {dateClosed: template.find("#dateClosed").value}}
+          );
+        },
+
+        "click .save#phase": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {phase: template.find("#phase").value}}
+          );
+        },
+
+        "click .save#dateReported": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {dateReported: template.find("#dateReported").value}}
+          );
+        },
+
+        "click .save#dateVerified": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {dateVerified: template.find("#dateVerified").value}}
+          );
+        },
+
+        "click .save#dateMitigated": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {dateMitigated: template.find("#dateMitigated").value}}
+          );
+        },
+
+        "click .save#dateContained": function(e, template) {
+          incidents.update(Session.get('incidentID'),
+            {$set: {dateContained: template.find("#dateContained").value}}
+          );
+        },
+*/
+
+        "click #saveChanges": function(e, template) {
+          console.log(Session.get('revisionsundo'));
+
+          incidentRevision.save(e, template);
+
+          var revisionsundo = Session.get('revisionsundo');
+          //revisionsundo.push(revisionIncident);
+          Session.set('revisionsundo', revisionsundo);
+
+          console.log(Session.get('revisionsundo'));
         },
         
+        "click #undo": function(e) {
+          console.log("undo");
+        },
+
+        "click #redo": function(e) {
+          console.log("redo");
+        },
+
         "readystatechange":function(e){
             if (typeof console !== 'undefined') {
               console.log('readystatechange')

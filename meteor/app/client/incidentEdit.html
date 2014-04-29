@@ -33,6 +33,9 @@ Jeff Bryner jbryner@mozilla.com
     {{>veristags}}
     <form id="editincidentform" class="form-horizontal editincidentform" style="margin: 0px 30% 20px;">
         <legend>Edit Incident</legend>
+        <div id="changesbox" class="alert alert-info">
+          <b><span id="saving"></span></b> <a href=# id="saveChanges"><b>Save changes now</b></a> - <a href=#><b>Undo</b></a> - <a href=#><b>Redo</b></a> - Changes automatically changed every 3 secs
+        </div>
         <fieldset>            
             <div class="control-group">
               <label class="control-label" for="incidentSummary">Summary</label>
@@ -47,7 +50,7 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="controls">
                     <div class="input-prepend input-group">
                         <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
-                        <input class="input dateOpened" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{dateOpened}}">
+                        <input class="input dateOpened calendarfield" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{dateOpened}}">
                     </div>
                 </div>
             </div>
@@ -56,7 +59,7 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="controls">
                     <div class="input-prepend input-group">
                         <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateClosed" name="dateClosed" id="dateClosed" type="text" value="{{dateClosed}}">
+                        <input class="form-control dateClosed calendarfield" name="dateClosed" id="dateClosed" type="text" value="{{dateClosed}}">
                     </div>
                 </div>
             </div>                
@@ -87,35 +90,24 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="controls">
                     <div class="input-prepend input-group input-append">
                         <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateReported" name="dateReported" id="dateReported" type="text" value="{{dateReported}}">
+                        <input class="form-control dateReported calendarfield" name="dateReported" id="dateReported" type="text" value="{{dateReported}}">
                         <span class="add-on" style="padding-right:12px">Reported</span>
                     </div>
                     <div class="input-prepend input-group input-append">
                         <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateVerified" name="dateVerified" id="dateVerified" type="text" value="{{dateVerified}}"><span class="add-on" style="padding-right: 20px">Verified</span>
+                        <input class="form-control dateVerified calendarfield" name="dateVerified" id="dateVerified" type="text" value="{{dateVerified}}"><span class="add-on" style="padding-right: 20px">Verified</span>
                     </div>
                     <div class="input-prepend input-group input-append">
                         <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateMitigated" name="dateMitigated" id="dateMitigated" type="text" value="{{dateMitigated}}"><span class="add-on" style="padding-right:10px">Mitigated</span> 
+                        <input class="form-control dateMitigated calendarfield" name="dateMitigated" id="dateMitigated" type="text" value="{{dateMitigated}}"><span class="add-on" style="padding-right:10px">Mitigated</span> 
                     </div>                            
                     <div class="input-prepend input-group input-append">
                         <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateContained" name="dateContained" id="dateContained" type="text" value="{{dateContained}}"><span class="add-on" style="padding-right:7px">Contained</span> 
+                        <input class="form-control dateContained calendarfield" name="dateContained" id="dateContained" type="text" value="{{dateContained}}"><span class="add-on" style="padding-right:7px">Contained</span> 
                     </div>                            
                 </div>
                     
             </div>
-
-            
-            
-            
-            <!-- Button -->
-            <div class="control-group">
-              <label class="control-label" for="submit"></label>
-              <div class="controls">
-                <button id="submit" type="submit" name="submit" class="btn btn-primary submit">Save</button>
-              </div>
-            </div>            
         </fieldset>
     </form>
 
