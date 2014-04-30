@@ -43,6 +43,12 @@ Router.map(function () {
         path: '/incident/:_id/edit',
         data: function() {
             Session.set('incidentID', this.params._id);
+            if (!Session.get('revisionsundo')) {
+                Session.set('revisionsundo', [incidents.findOne(this.params._id)]);
+            }
+            if (!Session.get('revisionsredo')) {
+                Session.set('revisionsredo', []);
+            }
             return incidents.findOne(this.params._id);
         },
         template: 'editincidentform',

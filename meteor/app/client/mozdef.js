@@ -117,6 +117,118 @@ if (Meteor.isClient) {
         }
     });
 
+    var incidentRevision = function() {
+      this.save = function(e, template) {
+        // Stop the timer if it was running
+        incidentSaveTimer.clear();
+
+        // tags are saved in real realtime (without timer)
+
+        var incidentobj = {
+          summary: template.find("#incidentSummary").value,
+          dateOpened: template.find("#dateOpened").value,
+          dateClosed: template.find("#dateClosed").value,
+          phase: template.find("#phase").value,
+          dateReported: template.find("#dateReported").value,
+          dateVerified: template.find("#dateVerified").value,
+          dateMitigated: template.find("#dateMitigated").value,
+          dateContained: template.find("#dateContained").value
+        }
+
+        incidents.update(Session.get('incidentID'),
+        {$set: incidentobj},
+        {},
+        function(error, nobj) {
+          if (!error && nobj === 1) {
+            $('#saving').text('Changes Saved');
+          }
+        });
+
+        var revisionsundo = Session.get('revisionsundo');
+        revisionsundo.push(incidentobj);
+        Session.set('revisionsundo', revisionsundo);
+      }
+
+      this.undo = function(e, template) {
+        if (Session.get('revisionsundo').length >= 1 && Session.get('revisionsundo')[0] != null) {
+          var revisionsundo = Session.get('revisionsundo');
+          if (revisionsundo.length > 1) {
+            var incident = revisionsundo.splice(revisionsundo.length-1, 1)[0];
+            var revisionsredo = Session.get('revisionsredo');
+            revisionsredo.unshift(incident);
+            Session.set('revisionsredo', revisionsredo);
+          }
+          else {
+            var incident = revisionsundo[0];
+          }
+          Session.set('revisionsundo', revisionsundo);
+
+          template.find("#incidentSummary").value = incident.summary;
+          template.find("#dateOpened").value = incident.dateOpened;
+          template.find("#dateClosed").value = incident.dateClosed;
+          template.find("#phase").value = incident.phase;
+          template.find("#dateReported").value = incident.dateReported;
+          template.find("#dateVerified").value = incident.dateVerified;
+          template.find("#dateMitigated").value = incident.dateMitigated;
+          template.find("#dateContained").value = incident.dateContained;
+        }
+      }
+
+      this.redo = function(e, template) {
+        if (Session.get('revisionsredo').length >= 1) {
+          var revisionsredo = Session.get('revisionsredo');
+          var incident = revisionsredo.splice(0, 1)[0];
+          var revisionsundo = Session.get('revisionsundo');
+          revisionsundo.push(incident);
+          Session.set('revisionsundo', revisionsundo);
+          Session.set('revisionsredo', revisionsredo);
+
+          template.find("#incidentSummary").value = incident.summary;
+          template.find("#dateOpened").value = incident.dateOpened;
+          template.find("#dateClosed").value = incident.dateClosed;
+          template.find("#phase").value = incident.phase;
+          template.find("#dateReported").value = incident.dateReported;
+          template.find("#dateVerified").value = incident.dateVerified;
+          template.find("#dateMitigated").value = incident.dateMitigated;
+          template.find("#dateContained").value = incident.dateContained;
+        }
+      }
+
+      return this;
+    }();
+
+    var incidentSaveTimer = function() {
+      var timer;
+
+      this.set = function(saveFormCB) {
+        $('#saving').text('');
+        timer = Meteor.setTimeout(function() {
+          saveFormCB();
+          Meteor.setTimeout(function() {
+            $('#saving').text('');
+          }, 3000);
+        }, 3000);
+      };
+
+      this.clear = function() {
+        Meteor.clearInterval(timer);
+      };
+
+      this.run = function(e, t) {
+        // Save user input after 3 seconds of not typing
+        this.clear();
+ 
+        this.set(function() {
+          // We should update our document.
+          $('#saving').text('Saving...');
+          // If update is successful, then
+          incidentRevision.save(e, t);
+        });
+      };
+
+      return this;    
+    }();
+
     //edit events
     Template.editincidentform.events({
         "dragover .tags": function(e){
@@ -146,25 +258,42 @@ if (Meteor.isClient) {
                 $pull: {tags:tagtext}
             });
         },
-        
-        "submit form": function (event,template){
+
+        "click #saveChanges": function (event, template) {
             event.preventDefault();
 
-            // tags are saved in realtime
+            incidentRevision.save(event, template);
 
-            incidents.update(Session.get('incidentID'), {$set: {
-                summary: template.find("#incidentSummary").value,
-                dateOpened: template.find("#dateOpened").value,
-                dateClosed: template.find("#dateClosed").value,
-                phase: template.find("#phase").value,
-                dateReported: template.find("#dateReported").value,
-                dateVerified: template.find("#dateVerified").value,
-                dateMitigated: template.find("#dateMitigated").value,
-                dateContained: template.find("#dateContained").value
-            }});
-            Router.go('/incidents/')
+            //Router.go('/incidents/')
+        },
+
+        "keyup": function(e, t) {
+           // Save user input after 3 seconds of not typing
+           incidentSaveTimer.run(e, t);
+        },
+
+        "blur .calendarfield": function(e, t) {
+           // Save user input after 3 seconds of not typing
+           incidentSaveTimer.run(e, t);
+        },
+
+        "change #phase": function(e, t) {
+           // Save user input after 3 seconds of not typing
+           incidentSaveTimer.run(e, t);
+         },
+
+        "click #saveChanges": function(e, template) {
+          incidentRevision.save(e, template);
         },
         
+        "click #undo": function(e, template) {
+          incidentRevision.undo(e, template);
+        },
+
+        "click #redo": function(e, template) {
+          incidentRevision.redo(e, template);
+        },
+
         "readystatechange":function(e){
             if (typeof console !== 'undefined') {
               console.log('readystatechange')
