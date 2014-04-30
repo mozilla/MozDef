@@ -119,9 +119,12 @@ if (Meteor.isClient) {
 
     var incidentRevision = function() {
       this.save = function(e, template) {
+        // Stop the timer if it was running
+        incidentSaveTimer.clear();
+
         // tags are saved in real realtime (without timer)
 
-        incidents.update(Session.get('incidentID'), {$set: {
+        var incidentobj = {
           summary: template.find("#incidentSummary").value,
           dateOpened: template.find("#dateOpened").value,
           dateClosed: template.find("#dateClosed").value,
@@ -130,13 +133,65 @@ if (Meteor.isClient) {
           dateVerified: template.find("#dateVerified").value,
           dateMitigated: template.find("#dateMitigated").value,
           dateContained: template.find("#dateContained").value
-        }},
+        }
+
+        incidents.update(Session.get('incidentID'),
+        {$set: incidentobj},
         {},
         function(error, nobj) {
           if (!error && nobj === 1) {
             $('#saving').text('Changes Saved');
           }
         });
+
+        var revisionsundo = Session.get('revisionsundo');
+        revisionsundo.push(incidentobj);
+        Session.set('revisionsundo', revisionsundo);
+      }
+
+      this.undo = function(e, template) {
+        if (Session.get('revisionsundo').length >= 1 && Session.get('revisionsundo')[0] != null) {
+          var revisionsundo = Session.get('revisionsundo');
+          if (revisionsundo.length > 1) {
+            var incident = revisionsundo.splice(revisionsundo.length-1, 1)[0];
+            var revisionsredo = Session.get('revisionsredo');
+            revisionsredo.unshift(incident);
+            Session.set('revisionsredo', revisionsredo);
+          }
+          else {
+            var incident = revisionsundo[0];
+          }
+          Session.set('revisionsundo', revisionsundo);
+
+          template.find("#incidentSummary").value = incident.summary;
+          template.find("#dateOpened").value = incident.dateOpened;
+          template.find("#dateClosed").value = incident.dateClosed;
+          template.find("#phase").value = incident.phase;
+          template.find("#dateReported").value = incident.dateReported;
+          template.find("#dateVerified").value = incident.dateVerified;
+          template.find("#dateMitigated").value = incident.dateMitigated;
+          template.find("#dateContained").value = incident.dateContained;
+        }
+      }
+
+      this.redo = function(e, template) {
+        if (Session.get('revisionsredo').length >= 1) {
+          var revisionsredo = Session.get('revisionsredo');
+          var incident = revisionsredo.splice(0, 1)[0];
+          var revisionsundo = Session.get('revisionsundo');
+          revisionsundo.push(incident);
+          Session.set('revisionsundo', revisionsundo);
+          Session.set('revisionsredo', revisionsredo);
+
+          template.find("#incidentSummary").value = incident.summary;
+          template.find("#dateOpened").value = incident.dateOpened;
+          template.find("#dateClosed").value = incident.dateClosed;
+          template.find("#phase").value = incident.phase;
+          template.find("#dateReported").value = incident.dateReported;
+          template.find("#dateVerified").value = incident.dateVerified;
+          template.find("#dateMitigated").value = incident.dateMitigated;
+          template.find("#dateContained").value = incident.dateContained;
+        }
       }
 
       return this;
@@ -146,9 +201,9 @@ if (Meteor.isClient) {
       var timer;
 
       this.set = function(saveFormCB) {
+        $('#saving').text('');
         timer = Meteor.setTimeout(function() {
           saveFormCB();
-          // Hide changes saved message after 3 secs
           Meteor.setTimeout(function() {
             $('#saving').text('');
           }, 3000);
@@ -227,86 +282,16 @@ if (Meteor.isClient) {
            incidentSaveTimer.run(e, t);
          },
 
-/*
-        "click #incidentSummarySave": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {summary: template.find("#incidentSummary").value}}
-          );
-          template.find("#incidentSummary").disabled = true;
-          $("#incidentSummarySave").addClass('hidden');
-          $("#incidentSummaryEdit").removeClass('hidden');
-        },
-
-        "click #incidentSummaryEdit": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {summary: template.find("#incidentSummary").value}}
-          );
-          template.find("#incidentSummary").disabled = false;
-          $("#incidentSummaryEdit").addClass('hidden');
-          $("#incidentSummarySave").removeClass('hidden');
-        },
-
-        "click .save#dateOpened": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {dateOpened: template.find("#dateOpened").value}}
-          );
-        },
-
-        "click .save#dateClosed": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {dateClosed: template.find("#dateClosed").value}}
-          );
-        },
-
-        "click .save#phase": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {phase: template.find("#phase").value}}
-          );
-        },
-
-        "click .save#dateReported": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {dateReported: template.find("#dateReported").value}}
-          );
-        },
-
-        "click .save#dateVerified": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {dateVerified: template.find("#dateVerified").value}}
-          );
-        },
-
-        "click .save#dateMitigated": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {dateMitigated: template.find("#dateMitigated").value}}
-          );
-        },
-
-        "click .save#dateContained": function(e, template) {
-          incidents.update(Session.get('incidentID'),
-            {$set: {dateContained: template.find("#dateContained").value}}
-          );
-        },
-*/
-
         "click #saveChanges": function(e, template) {
-          console.log(Session.get('revisionsundo'));
-
           incidentRevision.save(e, template);
-
-          var revisionsundo = Session.get('revisionsundo');
-          //revisionsundo.push(revisionIncident);
-          Session.set('revisionsundo', revisionsundo);
-
-          console.log(Session.get('revisionsundo'));
         },
         
-        "click #undo": function(e) {
-          console.log("undo");
+        "click #undo": function(e, template) {
+          incidentRevision.undo(e, template);
         },
 
-        "click #redo": function(e) {
-          console.log("redo");
+        "click #redo": function(e, template) {
+          incidentRevision.redo(e, template);
         },
 
         "readystatechange":function(e){
