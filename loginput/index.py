@@ -5,6 +5,7 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Anthony Verez averez@mozilla.com
 
 import sys
 import bottle
@@ -12,7 +13,8 @@ from bottle import debug,route, run, template, response,request,post, default_ap
 from bottle import _stdout as bottlelog
 import kombu
 from kombu import Connection,Queue,Exchange
-import json
+# Faster than json http://blog.yjl.im/2011/02/simple-simplejson-parse-time-test.html
+import simplejson as json
 from configlib import getConfig,OptionParser
 
 @route('/test')
@@ -33,11 +35,7 @@ def bulkindex():
         if len(bulkpost)>10: #TODO Check for bulk format.
             #iterate on messages and post to event message queue
 
-            eventlist=[]
             for i in bulkpost.splitlines():
-                eventlist.append(i)
-                
-            for i in eventlist:
                 try:
                     #valid json?
                     try:
