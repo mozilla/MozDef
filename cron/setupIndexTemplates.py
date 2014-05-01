@@ -36,6 +36,10 @@ def esPutTemplates():
                   "destinationport" : {
                     "type" : "string"
                   },
+                  "email" : {
+                    "index" : "not_analyzed",
+                    "type" : "string"
+                  },                  
                   "dn" : {
                     "type" : "string"
                   },
