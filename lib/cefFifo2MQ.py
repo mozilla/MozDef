@@ -143,7 +143,7 @@ def postLogs(logcache):
         try:
             #see if we have anything to post
             #waiting a bit to not end until we are told we can stop.
-            postdata=logcache.get(False,30)
+            postdata=logcache.get(True,1)
             if postdata is None:
                 #signalled from parent process that it's ok to stop.
                 logcache.task_done()
@@ -292,7 +292,7 @@ def main():
                             bufa.append(buf)
                     else:
                         #non read event occurred, wait a bit and poll again.
-                        time.sleep(.001)
+                        time.sleep(.01)
                       
                                   
                 if '\n' in ''.join(bufa):
