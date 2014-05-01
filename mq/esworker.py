@@ -26,6 +26,8 @@ from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 from threading import Timer
 
+NULLRE=type(re.compile(''))
+
 # running under uwsgi?
 try:
     import uwsgi
@@ -157,60 +159,61 @@ def keyMapping(aDict):
     returndict['receivedtimestamp'] = toUTC(datetime.now())
     try:
         for k, v in aDict.iteritems():
+            k=removeAt(k).lower()
 
-            if removeAt(k.lower()) in ('message', 'summary'):
+            if k in ('message', 'summary'):
                 returndict[u'summary'] = toUnicode(v)
 
-            if removeAt(k.lower()) in ('payload') and 'summary' not in aDict.keys():
+            if k in ('payload') and 'summary' not in aDict.keys():
                 # special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
                 returndict[u'summary'] = toUnicode(v)
-            elif removeAt(k.lower()) in ('payload'):
+            elif k in ('payload'):
                 if 'details' not in returndict.keys():
                     returndict[u'details'] = dict()
                 returndict[u'details']['payload'] = toUnicode(v)
 
-            if removeAt(k.lower()) in ('eventtime', 'timestamp'):
+            if k in ('eventtime', 'timestamp'):
                 returndict[u'utctimestamp'] = toUTC(v)
                 returndict[u'timestamp'] = toUTC(v)
 
-            if removeAt(k.lower()) in ('hostname', 'source_host', 'host'):
+            if k in ('hostname', 'source_host', 'host'):
                 returndict[u'hostname'] = toUnicode(v)
 
-            if removeAt(k.lower()) in ('tags'):
+            if k in ('tags'):
                 if len(v) > 0:
                     returndict[u'tags'] = v
 
             # nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
-            if removeAt(k.lower()) in ('syslogseverity', 'severity', 'severityvalue', 'level'):
+            if k in ('syslogseverity', 'severity', 'severityvalue', 'level'):
                 returndict[u'severity'] = toUnicode(v).upper()
 
-            if removeAt(k.lower()) in ('facility', 'syslogfacility'):
+            if k in ('facility', 'syslogfacility'):
                 returndict[u'facility'] = toUnicode(v)
 
-            if removeAt(k.lower()) in ('pid', 'processid'):
+            if k in ('pid', 'processid'):
                 returndict[u'processid'] = toUnicode(v)
 
             # nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
-            if removeAt(k.lower()) in ('pname', 'processname', 'sourcename'):
+            if k in ('pname', 'processname', 'sourcename'):
                 returndict[u'processname'] = toUnicode(v)
 
             # the file, or source
-            if removeAt(k.lower()) in ('path', 'logger', 'file'):
+            if k in ('path', 'logger', 'file'):
                 returndict[u'eventsource'] = toUnicode(v)
 
-            if removeAt(k.lower()) in ('type', 'eventtype', 'category'):
+            if k in ('type', 'eventtype', 'category'):
                 returndict[u'category'] = toUnicode(v)
 
             # custom fields as a list/array
-            if removeAt(k.lower()) in ('fields', 'details'):
+            if k in ('fields', 'details'):
                 if len(v) > 0:
                     returndict[u'details'] = v
 
             # custom fields/details as a one off, not in an array
             # i.e. fields.something=value or details.something=value
             # move them to a dict for consistency in querying
-            if removeAt(k.lower()).startswith('fields.') or removeAt(k.lower()).startswith('details.'):
-                newName = k.lower().replace('fields.', '')
+            if k.startswith('fields.') or k.startswith('details.'):
+                newName = k.replace('fields.', '')
                 newName = newName.lower().replace('details.', '')
                 # add a dict to hold the details if it doesn't exist
                 if 'details' not in returndict.keys():
@@ -333,8 +336,8 @@ class taskConsumer(ConsumerMixin):
                         return
                 # post the dict (kombu serializes it to json) to the events topic queue
                 # using the ensure function to shortcut connection/queue drops/stalls, etc.
-                ensurePublish = self.connection.ensure(self.mqproducer, self.mqproducer.publish, max_retries=10)
-                ensurePublish(normalizedDict, exchange=self.topicExchange, routing_key='mozdef.event')
+                # ensurePublish = self.connection.ensure(self.mqproducer, self.mqproducer.publish, max_retries=10)
+                # ensurePublish(normalizedDict, exchange=self.topicExchange, routing_key='mozdef.event')
             message.ack()
         except ValueError as e:
             sys.stderr.write("esworker exception in events queue %r\n" % e)
@@ -432,7 +435,7 @@ def sendEventToPlugins(anevent, pluginList):
         send = False
         # regex or dict as a registration
         # no regex instance type to compare to..so compare to re.compile
-        if isinstance(plugin[1], type(re.compile(''))):
+        if isinstance(plugin[1], NULLRE):
             for e in eventWithValues:
                 if plugin[1].search(e):
                     send = True
