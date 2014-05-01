@@ -119,6 +119,7 @@ Then::
   su - mozdef
   wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
   tar xvzf Python-2.7.6.tgz
+  cd Python-2.7.6
   ./configure --prefix=/home/mozdef/python2.7 --enable-shared
   make
   make install
@@ -142,9 +143,14 @@ RabbitMQ
 
 `RabbitMQ`_ is used on workers to have queues of events waiting to be inserted into the Elasticsearch cluster (storage).
 
-To install it, first make sure you enabled `EPEL repos`_. Then you need to install an Erlang environment::
+To install it, first make sure you enabled `EPEL repos`_. Then you need to install an Erlang environment.
+On Yum-based systems::
 
-  yum install erlang
+  sudo yum install erlang
+
+On APT-based systems::
+
+  sudo apt-get install erlang
 
 You can then install the rabbitmq server::
 
