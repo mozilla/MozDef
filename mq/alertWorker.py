@@ -7,10 +7,12 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Anthony Verez averez@mozilla.com
 
 import datetime
 import dateutil.parser
-import json
+# Faster than json http://blog.yjl.im/2011/02/simple-simplejson-parse-time-test.html
+import simplejson as json
 import kombu
 import logging
 import pyes
