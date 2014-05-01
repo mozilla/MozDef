@@ -18,20 +18,6 @@ def isIP(ip):
         return False
 
 
-def ipLocation(ip):
-    location = dict()
-    try:
-        gi = pygeoip.GeoIP('/home/mozdef/envs/mozdef/bot/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
-        geoDict = gi.record_by_addr(str(netaddr.IPNetwork(ip)[0]))
-        if geoDict is not None:
-            return geoDict
-        else:
-            location['location'] = 'unknown'
-    except ValueError as e:
-        pass
-    return location
-
-
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
@@ -48,6 +34,19 @@ class message(object):
         rdict['details']['destinationipaddress'] = None
         self.registration = rdict
         self.priority = 20
+        self.geoip = pygeoip.GeoIP('/home/mozdef/envs/mozdef/bot/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
+
+    def ipLocation(self, ip):
+        location = dict()
+        try:
+            geoDict = self.geoip.record_by_addr(str(netaddr.IPNetwork(ip)[0]))
+            if geoDict is not None:
+                return geoDict
+            else:
+                location['location'] = 'unknown'
+        except ValueError as e:
+            pass
+        return location
 
     def onMessage(self, message):
         if 'details' in message.keys():
@@ -57,7 +56,7 @@ class message(object):
                     ip = netaddr.IPNetwork(ipText)[0]
                     if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                         '''lookup geoip info'''
-                        message['details']['sourceipgeolocation'] = ipLocation(ipText)
+                        message['details']['sourceipgeolocation'] = self.ipLocation(ipText)
                 else:
                     # invalid ip sent in the field
                     # if we send on, elastic search will error, so set it
@@ -70,7 +69,7 @@ class message(object):
                     ip = netaddr.IPNetwork(ipText)[0]
                     if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                         '''lookup geoip info'''
-                        message['details']['destinationipgeolocation'] = ipLocation(ipText)
+                        message['details']['destinationipgeolocation'] = self.ipLocation(ipText)
                 else:
                     # invalid ip sent in the field
                     # if we send on, elastic search will error, so set it
