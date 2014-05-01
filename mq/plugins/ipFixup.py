@@ -59,6 +59,15 @@ class message(object):
           ipv6 in an ipv4 field
           ipv4 in another field
           '-' or other invalid ip in the ip field
+        Also sets ipv4 in two fields:
+            ipaddress (decimal mapping IP)
+            ipv4address (string mapping)
+            Elastic search is inconsistent about returning IPs as
+            decimal or IPs.
+            In a query an IP field is returned as string.
+            In a facets an IP field is returned as decimal.
+            No ES field type exists for ipv6, so always having
+            a string version is the most flexible option.
         '''
 
         if 'details' in message.keys():
@@ -69,6 +78,8 @@ class message(object):
                 ipText = message['details']['http_x_forwarded_for'].split(',')[0]
                 if isIPv4(ipText) and 'sourceipaddress' not in message['details'].keys():
                     message['details']['sourceipaddress'] = ipText
+                if isIPv4(ipText) and 'sourceipv4address' not in message['details'].keys():
+                    message['details']['sourceipv4address'] = ipText
                 if isIPv6(ipText) and 'sourceipv6address' not in message['details'].keys():
                     message['details']['sourceipv6address'] = ipText
 
@@ -84,6 +95,8 @@ class message(object):
                     else:
                         message['details']['sourceipaddress'] = '0.0.0.0'
                         addError(message, 'plugin: {0} error: {1}:{2}'.format('ipFixUp.py', 'sourceipaddress is invalid', ipText))
+                elif isIPv4(ipText):
+                    message['details']['sourceipv4address'] = ipText
 
             if 'destinationipaddress' in message['details'].keys():
                 ipText = message['details']['destinationipaddress']
@@ -97,11 +110,14 @@ class message(object):
                     else:
                         message['details']['destinationipaddress'] = '0.0.0.0'
                         addError(message, 'plugin: {0} error: {1}:{2}'.format('ipFixUp.py', 'destinationipaddress is invalid', ipText))
+                elif isIPv4(ipText):
+                    message['details']['destinationipv4address'] = ipText
 
             if 'src' in message['details'].keys():
                 ipText = message['details']['src']
                 if isIPv4(ipText):
                     message['details']['sourceipaddress'] = ipText
+                    message['details']['sourceipv4address'] = ipText
                 if isIPv6(ipText):
                     message['details']['sourceipv6address'] = ipText
 
@@ -109,12 +125,14 @@ class message(object):
                 ipText = message['details']['srcip']
                 if isIPv4(ipText):
                     message['details']['sourceipaddress'] = ipText
+                    message['details']['sourceipv4address'] = ipText
                 if isIPv6(ipText):
                     message['details']['sourceipv6address'] = ipText
             if 'dst' in message['details'].keys():
                 ipText = message['details']['dst']
                 if isIPv4(ipText):
                     message['details']['destinationipaddress'] = ipText
+                    message['details']['destinationipv4address'] = ipText
                 if isIPv6(ipText):
                     message['details']['destinationipv6address'] = ipText
 
@@ -122,6 +140,7 @@ class message(object):
                 ipText = message['details']['dstip']
                 if isIPv4(ipText):
                     message['details']['destinationipaddress'] = ipText
+                    message['details']['destinationipv4address'] = ipText
                 if isIPv6(ipText):
                     message['details']['destinationipv6address'] = ipText
 
