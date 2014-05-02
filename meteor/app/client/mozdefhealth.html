@@ -20,7 +20,6 @@ Anthony Verez averez@mozilla.com
                 <td>Cluster Status</td>
                 <td>Nodes</td>
                 <td>Data Nodes</td>
-                <td>Documents</td>
                 <td>Active Shards</td>
                 <td>Active Primary Shards</td>
                 <td>Relocating Shards</td>
@@ -29,8 +28,8 @@ Anthony Verez averez@mozilla.com
             </tr>
         </thead>
         <tbody>
-            {{#each eshealthitems}}	    
-                {{>esHealthTableItem}}
+            {{#each esclusterhealthitems}}	    
+                {{>esclusterHealthTableItem}}
             {{/each}}
         </tbody>
         </table>
@@ -57,13 +56,12 @@ Anthony Verez averez@mozilla.com
 
 </template>
 
-<template name="esHealthTableItem">
+<template name="esclusterHealthTableItem">
     <tr>
         <td>{{cluster_name}}</td>
         <td>{{status}}</td>
         <td>{{number_of_nodes}}</td>
         <td>{{number_of_data_nodes}}</td>
-        <td>{{total_docs}}</td>
         <td>{{active_shards}}</td>
         <td>{{active_primary_shards}}</td>
         <td>{{relocating_shards}}</td>

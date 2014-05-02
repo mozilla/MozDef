@@ -89,7 +89,5 @@ if (Meteor.isServer) {
             );
         };
         console.log("Incidents: " + incidents.find({}).count());
-        //get fresh stats for elastic search
-        Meteor.call('refreshESStatus');
   });   //end startup
 }   //end is server

@@ -80,10 +80,8 @@ if (Meteor.isClient) {
     
     //elastic search cluster template functions
     //return es health items
-    Template.mozdefhealth.eshealthitems = function () {
-        Session.set('displayMessage','displaying elastic search health')
-        Meteor.call('refreshESStatus');
-        return eshealth.find();
+    Template.mozdefhealth.esclusterhealthitems = function () {
+        return healthescluster.find();
     };
 
     Template.mozdefhealth.frontendhealthitems = function () {
