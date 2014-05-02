@@ -79,23 +79,33 @@ def getFrontendStats(es):
 
 
 def writeFrontendStats(data, mongo):
+    # Empty everything before
+    mongo.healthfrontend.remove({})
     for host in data:
         for key in host['_source']['details'].keys():
             # remove unwanted data
             if '.' in key:
                 del host['_source']['details'][key]
         mongo.healthfrontend.insert(host['_source'])
-        # print host['_source']['hostname']
-        # print host['_source']['details']['loadaverage']
-        # for key in host['_source']['details'].keys():
-            # if key not in ('username', 'loadaverage'):
-                # print key
-                # print host['_source']['details'][key]['publish_eps']
-                # print host['_source']['details'][key]['messages_ready']
-                # print host['_source']['details'][key]['messages_unacknowledged']
-                # if 'deliver_eps' in host['_source']['details'][key].keys():
-                    # print host['_source']['details'][key]['deliver_eps']
-        # print ''
+
+
+def getEsClusterStats(es):
+    escluster = pyes.managers.Cluster(es)
+    return escluster.health()
+
+
+def writeEsClusterStats(data, mongo):
+    # Empty everything before
+    mongo.healthescluster.remove({})
+    mongo.healthescluster.insert(data)
+
+
+def getEsNodesStats(es):
+    pass
+
+
+def writeEsNodesStats(es):
+    pass
 
 
 def main():
@@ -107,6 +117,7 @@ def main():
         # use meteor db
         mongo = client.meteor
         writeFrontendStats(getFrontendStats(es), mongo)
+        writeEsClusterStats(getEsClusterStats(es), mongo)
     except Exception as e:
         logger.error("Exception %r sending health to mongo" % e)
 
