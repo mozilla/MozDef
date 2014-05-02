@@ -260,7 +260,7 @@ class alertsListener(threading.Thread):
                 if self.connection is None or self.mqError or not self.connection.is_open:
                     self.openMQ()
                     self.client.root_logger.info('opening mq connection')
-                    time.sleep(10)
+                    time.sleep(20)
 
             except Exception as e:
                 self.client.root_logger.error(
