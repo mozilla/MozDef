@@ -291,7 +291,13 @@ class taskConsumer(ConsumerMixin):
                 # disable periodic checking for new plugins
                 # because of memory leak
                 # checkPlugins(pluginList,lastPluginCheck)
-                sendEventToPlugins(normalizedDict, pluginList)
+                normalizedDict = sendEventToPlugins(normalizedDict, pluginList)
+                
+                # drop the message if a plug in set it to None
+                # signalling a discard
+                if normalizedDict is None:
+                    message.ack()
+                    return
 
                 # make a json version for posting to elastic search
                 jbody = json.JSONEncoder().encode(normalizedDict)
@@ -452,6 +458,10 @@ def sendEventToPlugins(anevent, pluginList):
                         send = True
         if send:
             anevent = plugin[0].onMessage(anevent)
+            if anevent is None:
+                # plug-in is signalling to drop this message
+                # early exit
+                return anevent
             eventWithValues = [e for e in flattenDict(anevent)]
             eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
 
