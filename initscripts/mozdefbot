@@ -1,0 +1,214 @@
+#!/bin/bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2014 Mozilla Corporation
+#
+# Contributors:
+# Jeff Bryner jbryner@mozilla.com
+
+# uwsgi - This script starts and stops uwsgi to manage the mozdef bot
+#
+# chkconfig:   - 85 15
+# description: uWSGI is a program to run applications adhering to the
+#              Web Server Gateway Interface.
+# processname: uwsgi
+# config:      /etc/sysconfig/uwsgi
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source the virtual python environment with uwsgi
+source  /home/mozdef/envs/mozdef/bin/activate
+
+# all args are in the .ini file, restarts/quit/reload, etc via the fifo instead signalling the PID
+uwsgi="/home/mozdef/envs/mozdef/bin/uwsgi"
+prog=$(basename "$uwsgi")
+UWSGI_CONF_DIR="/home/mozdef/envs/mozdef/bot/"
+
+each_action() {
+    action=$1
+    configs=$(find "$UWSGI_CONF_DIR" \
+                   -maxdepth 1 \
+                   -type f \
+                   -regextype posix-extended \
+                   -iregex '.*\.(ini)$')
+
+    code=0
+    if [ -n "$configs" ]; then
+        for f in $configs; do
+            case "$action" in
+                force-reload|restart)
+                    stop "$f"
+                    start "$f"
+                    ;;
+                reload)
+                    reload "$f"
+                    ;;
+                chain-reload)
+                    chain-reload "$f"
+                    ;;
+                worker-reload)
+                    worker-reload "$f"
+                    ;;
+                stats)
+                    stats "$f"
+                    ;;                    
+                start)
+                    start "$f"
+                    ;;
+                status)
+                    rh_status "$f"
+                    ;;
+                status_q)
+                    rh_status "$f" >/dev/null 2>&1
+                    ;;
+                stop)
+                    stop "$f"
+                    ;;
+            esac
+            retval=$?
+        done
+
+        if [ $retval -gt $code ]; then
+            code=$retval
+        fi
+    fi
+
+    return $code
+}
+
+args_for() {
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+    args=""
+    case "$1" in
+        *.ini)        args="$args --ini $f";;
+    esac
+
+    echo "$args"
+}
+
+instance_for() {
+    config_file="$1"
+    instance=$(basename "$config_file")
+    instance=${instance%.*}
+    echo "$instance"
+}
+
+pidfile_for() {
+    instance=$(instance_for "$1")
+    echo "${UWSGI_CONF_DIR}/${instance}.pid"
+}
+
+fifo_for(){
+    instance=$(instance_for "$1")
+    echo "${UWSGI_CONF_DIR}/${instance}.fifo"
+}
+
+reload() {
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+    fifofile=$(fifo_for "$config_file")
+
+    echo -n "Reloading uWSGI for ${instance}... "
+    
+    killproc -p "$pidfile" "$prog" -HUP
+    retval=$?
+    echo
+    return $retval
+}
+
+chain-reload(){
+    #use the special uwsgi method to 'chain reload' workers
+    #allowing them to finish their jobs and restart one by one,only after one is ready
+    #trigger by echo c>fifo
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+    fifofile=$(fifo_for "$config_file")
+
+    echo -n "Chain reloading uWSGI for ${instance}... "
+    echo c > "$fifofile"
+    retval=$?
+    echo
+    return $retval
+}
+
+worker-reload(){
+    #use the special uwsgi method to 'gracefully reload' workers
+    #allowing them to finish their jobs and restart one by one, ready or not
+    #trigger by echo w>fifo
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+    fifofile=$(fifo_for "$config_file")
+
+    echo -n "Worker reloading uWSGI for ${instance}... "
+    echo w > "$fifofile"
+    retval=$?
+    echo
+    return $retval
+}
+
+stats(){
+    #use the special uwsgi method to request stats to the logs
+    #trigger by echo s>fifo
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+    fifofile=$(fifo_for "$config_file")
+
+    echo -n "Requesting stats (to logs) from uWSGI for ${instance}... "
+    echo s > "$fifofile"
+    retval=$?
+    echo
+    return $retval
+}
+
+
+start() {
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+    args="$(args_for "$config_file")"
+
+    echo -n "Starting uWSGI for ${instance}... "
+    daemon --pidfile="$pidfile" $uwsgi $args
+    retval=$?
+    echo
+    return $retval
+}
+
+rh_status() {
+    config_file="$1"
+    status -p "$(pidfile_for "$config_file")" "$prog"
+}
+
+stop() {
+    config_file="$1"
+    instance=$(instance_for "$config_file")
+    pidfile=$(pidfile_for "$config_file")
+
+    echo -n "Stopping uWSGI for ${instance}... "
+    killproc -p "$pidfile" "$prog"
+    retval=$?
+    echo
+    return $retval
+}
+
+case $1 in
+    worker-reload|stats|chain-reload|force_reload|reload|restart|start|status|status_q|stop)
+        each_action "$1"
+        ;;
+    *)
+        echo "Usage: $0 {worker-reload|chain-reload|reload|stats|restart|start|status|stop}"
+        echo "Restart options in order of niceness: chain-reload,worker-reload,reload,restart"
+        exit 2
+        ;;
+esac
+
+exit $?
