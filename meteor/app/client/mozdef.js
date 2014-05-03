@@ -92,6 +92,10 @@ if (Meteor.isClient) {
       return healthesnodes.find();
     };
 
+    Template.mozdefhealth.eshotthreadshealthitems = function () {
+      return healtheshotthreads.find();
+    };
+
     Template.mozdefhealth.helpers({
       lastupdate: function() {
         var obj = healthfrontend.findOne();
