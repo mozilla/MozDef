@@ -100,7 +100,7 @@ def writeEsClusterStats(data, mongo):
 
 def getEsNodesStats():
     # doesn't work with pyes
-    r = requests.get(options.esservers[0] + '/_nodes/stats/os,jvm,fs,process,breaker')
+    r = requests.get(options.esservers[0] + '/_nodes/stats/os,jvm,fs')
     jsonobj = r.json()
     results = []
     for nodeid in jsonobj['nodes']:
@@ -122,6 +122,23 @@ def writeEsNodesStats(data, mongo):
         mongo.healthesnodes.insert(nodedata)
 
 
+def getEsHotThreads():
+    # doesn't work with pyes
+    r = requests.get(options.esservers[0] + '/_nodes/hot_threads')
+    results = []
+    for line in r.text.split('\n'):
+        if 'cpu usage' in line:
+            results.append(line)
+    return results
+
+
+def writeEsHotThreads(data, mongo):
+    # Empty everything before
+    mongo.healtheshotthreads.remove({})
+    for line in data:
+        mongo.healtheshotthreads.insert({'line': line})
+
+
 def main():
     logger.debug('starting')
     logger.debug(options)
@@ -133,6 +150,7 @@ def main():
         writeFrontendStats(getFrontendStats(es), mongo)
         writeEsClusterStats(getEsClusterStats(es), mongo)
         writeEsNodesStats(getEsNodesStats(), mongo)
+        writeEsHotThreads(getEsHotThreads(), mongo)
     except Exception as e:
         logger.error("Exception %r sending health to mongo" % e)
 
