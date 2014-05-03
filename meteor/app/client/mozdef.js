@@ -88,6 +88,10 @@ if (Meteor.isClient) {
       return healthfrontend.find();
     };
 
+    Template.mozdefhealth.esnodeshealthitems = function () {
+      return healthesnodes.find();
+    };
+
     Template.mozdefhealth.helpers({
       lastupdate: function() {
         var obj = healthfrontend.findOne();
