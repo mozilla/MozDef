@@ -20,4 +20,3 @@ mozdefsettings = new Meteor.Collection("mozdefsettings");
 healthfrontend = new Meteor.Collection("healthfrontend");
 healthescluster = new Meteor.Collection("healthescluster");
 healthesnodes = new Meteor.Collection("healthesnodes");
-

@@ -8,9 +8,7 @@
 # Contributors:
 # Anthony Verez averez@mozilla.com
 
-import json
 import logging
-import os
 import pyes
 import pytz
 import requests
@@ -100,12 +98,28 @@ def writeEsClusterStats(data, mongo):
     mongo.healthescluster.insert(data)
 
 
-def getEsNodesStats(es):
-    pass
+def getEsNodesStats():
+    # doesn't work with pyes
+    r = requests.get(options.esservers[0] + '/_nodes/stats/os,jvm,fs,process,breaker')
+    jsonobj = r.json()
+    results = []
+    for nodeid in jsonobj['nodes']:
+        results.append({
+            'hostname': jsonobj['nodes'][nodeid]['host'],
+            'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'],
+            'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'],
+            'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
+            'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu']['usage'],
+            'load': jsonobj['nodes'][nodeid]['os']['load_average']
+        })
+    return results
 
 
-def writeEsNodesStats(es):
-    pass
+def writeEsNodesStats(data, mongo):
+    # Empty everything before
+    mongo.healthesnodes.remove({})
+    for nodedata in data:
+        mongo.healthesnodes.insert(nodedata)
 
 
 def main():
@@ -118,6 +132,7 @@ def main():
         mongo = client.meteor
         writeFrontendStats(getFrontendStats(es), mongo)
         writeEsClusterStats(getEsClusterStats(es), mongo)
+        writeEsNodesStats(getEsNodesStats(), mongo)
     except Exception as e:
         logger.error("Exception %r sending health to mongo" % e)
 
