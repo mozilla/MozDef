@@ -85,7 +85,7 @@ WARNING: this plugin is NOT open source. At the time of writing, Marvel is free 
 
 To install Marvel, on each of your elasticsearch node, from the Elasticsearch home directory::
 
-  bin/plugin -i elasticsearch/marvel/latest
+  sudo bin/plugin -i elasticsearch/marvel/latest
   sudo service elasticsearch restart
 
 You should now be able to access to Marvel at http://any-server-in-cluster:9200/_plugin/marvel
