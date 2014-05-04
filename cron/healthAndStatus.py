@@ -95,19 +95,24 @@ def main():
             healthlog['tags'] = ['mozdef', 'status']
             for m in mq:
                 if 'message_stats' in m.keys():
+                    if 'messages_ready' in m.keys():
+                        mready = m['messages_ready']
+                    else:
+                        mready = 0
+                    if 'messages_unacknowledged' in m.keys():
+                        munack = m['messages_unacknowledged']
+                    else:
+                        munack = 0
                     healthlog['details'][m['name']] = dict(
-                        messages_ready=m['messages_ready'],
-                        messages_unacknowledged=m['messages_unacknowledged'])
-                    #print(('\t\t{0} ready {1} unack'.format(m['messages_ready'], m['messages_unacknowledged'])))
+                        messages_ready=mready,
+                        messages_unacknowledged=munack)
 
                     if 'deliver_details' in m['message_stats'].keys():
                         healthlog['details'][m['name']]['deliver_eps'] = \
                             m['message_stats']['deliver_details']['rate']
-                        #print('\t\t{0} in/sec, {1} out/sec'.format(m['message_stats']['publish_details']['rate'],m['message_stats']['deliver_details']['rate']))
                     if 'publish_details' in m['message_stats'].keys():
                         healthlog['details'][m['name']]['publish_eps'] = \
                             m['message_stats']['publish_details']['rate']
-                        #print('\t\t{0} in/sec, 0 out/sec'.format(m['message_stats']['publish_details']['rate']))
 
         #print(json.dumps(healthlog, sort_keys=True, indent=4))
         #post to elastic search servers directly without going through message queues
