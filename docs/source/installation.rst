@@ -148,10 +148,6 @@ On Yum-based systems::
 
   sudo yum install erlang
 
-On APT-based systems::
-
-  sudo apt-get install erlang
-
 You can then install the rabbitmq server::
 
   rpm --import http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
@@ -160,6 +156,11 @@ You can then install the rabbitmq server::
 To start rabbitmq at startup::
 
   chkconfig rabbitmq-server on
+
+On APT-based systems ::
+
+  sudo apt-get install rabbitmq-server
+  sudo invoke-rc.d rabbitmq-server start
 
 .. _RabbitMQ: https://www.rabbitmq.com/
 .. _EPEL repos: http://fedoraproject.org/wiki/EPEL/FAQ#howtouse
