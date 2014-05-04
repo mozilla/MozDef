@@ -14,8 +14,11 @@ Anthony Verez averez@mozilla.com
 incidents = new Meteor.Collection("incidents");
 events = new Meteor.Collection("events");
 alerts = new Meteor.Collection("alerts");
-eshealth = new Meteor.Collection("eshealth");
 veris = new Meteor.Collection("veris");
 kibanadashboards = new Meteor.Collection("kibanadashboards");
-mozdefsettings=new Meteor.Collection("mozdefsettings");
+mozdefsettings = new Meteor.Collection("mozdefsettings");
+healthfrontend = new Meteor.Collection("healthfrontend");
+healthescluster = new Meteor.Collection("healthescluster");
+healthesnodes = new Meteor.Collection("healthesnodes");
+healtheshotthreads = new Meteor.Collection("healtheshotthreads");
 

@@ -80,11 +80,33 @@ if (Meteor.isClient) {
     
     //elastic search cluster template functions
     //return es health items
-    Template.esHealthTable.eshealthitems = function () {
-        Session.set('displayMessage','displaying elastic search health')
-        Meteor.call('refreshESStatus');
-        return eshealth.find();
+    Template.mozdefhealth.esclusterhealthitems = function () {
+        return healthescluster.find();
     };
+
+    Template.mozdefhealth.frontendhealthitems = function () {
+      return healthfrontend.find();
+    };
+
+    Template.mozdefhealth.esnodeshealthitems = function () {
+      return healthesnodes.find();
+    };
+
+    Template.mozdefhealth.eshotthreadshealthitems = function () {
+      return healtheshotthreads.find();
+    };
+
+    Template.mozdefhealth.helpers({
+      lastupdate: function() {
+        var obj = healthfrontend.findOne();
+        if (obj) {
+          return obj.utctimestamp;
+        }
+        else {
+          return;
+        }
+      }
+    });
 
     //return all incidents
     Template.incidents.incident = function () {
