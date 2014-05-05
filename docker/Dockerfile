@@ -14,7 +14,8 @@ MAINTAINER Yohann Lepage <yohann@lepage.info>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Locales
-RUN (apt-key update \
+RUN (apt-get clean \
+        && apt-key update \
 	&& apt-get -q -y update --fix-missing \
         && apt-get -q -y update \
 	&& apt-get install -q -y apt-utils \
@@ -46,10 +47,10 @@ ADD conf/nginx.conf /etc/nginx/
 
 #Mozdef
 RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor\
-        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
-        && /bin/ln -s /opt/MozDef-master /opt/MozDef \
-#        && curl -L https://github.com/netantho/MozDef/archive/averez-19-samples.tar.gz |tar -C /opt -xz \
-#        && /bin/ln -s /opt/MozDef-averez-19-samples /opt/MozDef \
+#        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
+#        && /bin/ln -s /opt/MozDef-master /opt/MozDef \
+        && curl -L https://github.com/netantho/MozDef/archive/averez-docker.tar.gz |tar -C /opt -xz \
+        && /bin/ln -s /opt/MozDef-averez-docker /opt/MozDef \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
 	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi gevent \
 	&& mkdir /var/log/mozdef \
