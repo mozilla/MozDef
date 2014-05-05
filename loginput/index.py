@@ -126,7 +126,13 @@ else:
     eventTaskExchange=Exchange(name=options.taskexchange,type='direct',durable=True)
     eventTaskExchange(mqConn).declare()
     eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange)
-    eventTaskQueue(mqConn).declare()    
-    mqproducer = mqConn.Producer(serializer='json')
-    
+    # Hack for supervisord which doesn't wait for rabbitmq to finish starting
+    rabbitStarted = False
+    while not rabbitStarted:
+      try:
+        eventTaskQueue(mqConn).declare()
+        mqproducer = mqConn.Producer(serializer='json')
+        rabbitStarted = True
+
     application = default_app()
+
