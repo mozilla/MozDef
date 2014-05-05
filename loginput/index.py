@@ -123,13 +123,13 @@ else:
     connString='amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,options.mqpassword,options.mqserver,options.mqport)
     mqConn=Connection(connString)
 
-    eventTaskExchange=Exchange(name=options.taskexchange,type='direct',durable=True)
-    eventTaskExchange(mqConn).declare()
-    eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange)
     # Hack for supervisord which doesn't wait for rabbitmq to finish starting
     rabbitStarted = False
     while not rabbitStarted:
         try:
+            eventTaskExchange=Exchange(name=options.taskexchange,type='direct',durable=True)
+            eventTaskExchange(mqConn).declare()
+            eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange)
             eventTaskQueue(mqConn).declare()
             mqproducer = mqConn.Producer(serializer='json')
             rabbitStarted = True
