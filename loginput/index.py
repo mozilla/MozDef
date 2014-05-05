@@ -129,10 +129,10 @@ else:
     # Hack for supervisord which doesn't wait for rabbitmq to finish starting
     rabbitStarted = False
     while not rabbitStarted:
-      try:
-        eventTaskQueue(mqConn).declare()
-        mqproducer = mqConn.Producer(serializer='json')
-        rabbitStarted = True
+        try:
+            eventTaskQueue(mqConn).declare()
+            mqproducer = mqConn.Producer(serializer='json')
+            rabbitStarted = True
 
     application = default_app()
 
