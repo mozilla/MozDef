@@ -5,8 +5,10 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Anthony Verez averez@mozilla.com
 
 import sys
+import os
 import bottle
 from bottle import debug,route, run, template, response,request,post, default_app
 from bottle import _stdout as bottlelog
@@ -104,8 +106,6 @@ def initConfig():
     
     options.mqserver=getConfig('mqserver','localhost',options.configfile)
     options.taskexchange=getConfig('taskexchange','eventtask',options.configfile)
-    #options.esserver=getConfig('esserver','localhost',options.configfile)
-    options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     options.mquser=getConfig('mquser','guest',options.configfile)
     options.mqpassword=getConfig('mqpassword','guest',options.configfile)
     options.mqport=getConfig('mqport',5672,options.configfile)
@@ -126,7 +126,12 @@ else:
     eventTaskExchange=Exchange(name=options.taskexchange,type='direct',durable=True)
     eventTaskExchange(mqConn).declare()
     eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange)
-    eventTaskQueue(mqConn).declare()    
+    # Hack for supervisord, rabbit is not fully started when loginput starts
+    try:
+        eventTaskQueue(mqConn).declare()
+    except:
+        sys.exit(1)
+
     mqproducer = mqConn.Producer(serializer='json')
     
     application = default_app()
