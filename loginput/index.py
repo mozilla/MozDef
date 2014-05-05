@@ -133,6 +133,8 @@ else:
             eventTaskQueue(mqConn).declare()
             mqproducer = mqConn.Producer(serializer='json')
             rabbitStarted = True
-
+        except:
+            pass
+    
     application = default_app()
 
