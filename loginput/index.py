@@ -47,10 +47,7 @@ def bulkindex():
                         return
                     if not 'index' in json.loads(i).keys(): #don't post the items telling us where to post things..
                         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
-                        bottlelog(ensurePublish)
-                        r=ensurePublish(eventDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
-                        bottlelog(r)
-                        bottlelog('published')
+                        ensurePublish(eventDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
                 except ValueError:
                     bottlelog('value error {0}'.format(i))
     return
@@ -76,10 +73,8 @@ def eventsindex():
         eventDict['endpoint']='events'
         #post to event message queue
         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
-        bottlelog(ensurePublish)
-        r=ensurePublish(eventDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
-        bottlelog(r)
-        bottlelog('published')
+        ensurePublish(eventDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
+
     return
 
 @route('/cef', method=['POST','PUT'])
