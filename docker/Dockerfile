@@ -107,7 +107,5 @@ EXPOSE 8081
 RUN apt-get clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Launch rabbit and sleep 10s for it to start
-RUN /etc/init.d/rabbitmq-server start && sleep 10
-
-CMD ["/usr/bin/supervisord"]
+CMD /etc/init.d/rabbitmq-server start && sleep 10 && /usr/bin/supervisord
 
