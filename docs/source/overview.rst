@@ -51,16 +51,29 @@ Architecture
 MozDef is based on open source technologies including:
 
 * Nginx (http(s) based log input)
-* Rabbit-MQ (message queue)
-* UWSGI (supervisory control of python-based workers)
+* RabbitMQ (message queue)
+* uWSGI (supervisory control of python-based workers)
 * bottle.py (simple python interface for web request handling)
-* Elastic Search (scalable indexing and searching of JSON documents)
+* elasticsearch (scalable indexing and searching of JSON documents)
 * Meteor (responsive framework for Node.js enabling real-time data sharing)
-* Mongo DB (scalable data store, tightly integrated to Meteor)
+* MongoDB (scalable data store, tightly integrated to Meteor)
 * VERIS from verizon (open source taxonomy of security incident categorizations)
 * d3 (javascript library for data driven documents)
 * three.js (javascript library for 3d visualizations)
 * Firefox (a snappy little web browser)
+
+Frontend processing
+*******************
+
+Frontend processing for MozDef consists of receiving a log (in json) over HTTP(S) or AMQP(S),
+doing data transformation including normalization, adding metainfo, etc. and pushing
+the data to elasticsearch.
+
+Internally MozDef uses RabbitMQ to queue events that are still to be processed.
+The diagram below shows the interactions between the python scripts (controlled by uWSGI),
+the RabbitMQ exchanges and elasticsearch indices.
+
+.. image:: images/frontend_processing.png
 
 Status
 ------
