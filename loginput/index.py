@@ -126,7 +126,8 @@ else:
     eventTaskExchange=Exchange(name=options.taskexchange,type='direct',durable=True)
     eventTaskExchange(mqConn).declare()
     eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange)
-    eventTaskQueue(mqConn).declare()    
+    eventTaskQueue(mqConn).declare()
     mqproducer = mqConn.Producer(serializer='json')
     
     application = default_app()
+

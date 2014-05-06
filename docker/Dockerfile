@@ -14,7 +14,8 @@ MAINTAINER Yohann Lepage <yohann@lepage.info>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Locales
-RUN (apt-key update \
+RUN (apt-get clean \
+        && apt-key update \
 	&& apt-get -q -y update --fix-missing \
         && apt-get -q -y update \
 	&& apt-get install -q -y apt-utils \
@@ -34,6 +35,7 @@ RUN apt-get install -q -y openjdk-7-jre
 
 # rabbit mq
 RUN apt-get install -q -y rabbitmq-server
+RUN rabbitmq-plugins enable rabbitmq_management
 # mongodb
 RUN apt-get install -q -y mongodb
 # nodejs
@@ -45,19 +47,20 @@ ADD conf/nginx.conf /etc/nginx/
 
 
 #Mozdef
-RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor\
-        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
-        && /bin/ln -s /opt/MozDef-master /opt/MozDef \
-#        && curl -L https://github.com/netantho/MozDef/archive/averez-19-samples.tar.gz |tar -C /opt -xz \
-#        && /bin/ln -s /opt/MozDef-averez-19-samples /opt/MozDef \
+RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget\
+#        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
+#        && /bin/ln -s /opt/MozDef-master /opt/MozDef \
+        && curl -L https://github.com/netantho/MozDef/archive/averez-docker.tar.gz |tar -C /opt -xz \
+        && /bin/ln -s /opt/MozDef-averez-docker /opt/MozDef \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
 	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi gevent \
 	&& mkdir /var/log/mozdef \
 	&& mkdir -p /run/uwsgi/apps/ \
 	&& touch /run/uwsgi/apps/loginput.socket && chmod 666 /run/uwsgi/apps/loginput.socket \
-	&& touch /run/uwsgi/apps/rest.socket && chmod 666 /run/uwsgi/apps/rest.socket)
+	&& touch /run/uwsgi/apps/rest.socket && chmod 666 /run/uwsgi/apps/rest.socket \
+        && mkdir -p /home/mozdef/envs/mozdef/bot/ && cd /home/mozdef/envs/mozdef/bot/ \
+        && wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && gzip -d GeoLiteCity.dat.gz)
 ADD conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
-
 
 # elasticsearch
 RUN (curl -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.1.tar.gz  | tar -C /opt -xz \
@@ -105,5 +108,6 @@ EXPOSE 8081
 # CLEAN
 RUN apt-get clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
-CMD ["/usr/bin/supervisord"]
+# Launch rabbit and sleep 10s for it to start
+CMD /etc/init.d/rabbitmq-server start && sleep 10 && /usr/bin/supervisord
 
