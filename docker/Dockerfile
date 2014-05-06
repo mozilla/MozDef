@@ -35,6 +35,7 @@ RUN apt-get install -q -y openjdk-7-jre
 
 # rabbit mq
 RUN apt-get install -q -y rabbitmq-server
+RUN rabbitmq-plugins enable rabbitmq_management
 # mongodb
 RUN apt-get install -q -y mongodb
 # nodejs
@@ -46,7 +47,7 @@ ADD conf/nginx.conf /etc/nginx/
 
 
 #Mozdef
-RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor\
+RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget\
 #        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
 #        && /bin/ln -s /opt/MozDef-master /opt/MozDef \
         && curl -L https://github.com/netantho/MozDef/archive/averez-docker.tar.gz |tar -C /opt -xz \
@@ -56,9 +57,10 @@ RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor\
 	&& mkdir /var/log/mozdef \
 	&& mkdir -p /run/uwsgi/apps/ \
 	&& touch /run/uwsgi/apps/loginput.socket && chmod 666 /run/uwsgi/apps/loginput.socket \
-	&& touch /run/uwsgi/apps/rest.socket && chmod 666 /run/uwsgi/apps/rest.socket)
+	&& touch /run/uwsgi/apps/rest.socket && chmod 666 /run/uwsgi/apps/rest.socket \
+        && mkdir -p /home/mozdef/envs/mozdef/bot/ && cd /home/mozdef/envs/mozdef/bot/ \
+        && wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && gzip -d GeoLiteCity.dat.gz)
 ADD conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
-
 
 # elasticsearch
 RUN (curl -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.1.tar.gz  | tar -C /opt -xz \
