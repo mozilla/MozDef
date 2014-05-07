@@ -219,7 +219,13 @@ def keyMapping(aDict):
                 if 'details' not in returndict.keys():
                     returndict[u'details'] = dict()
                 # add field
-                returndict[u'details'][unicode(newName)] = toUnicode(v)
+                if newName.endswith('_int'):
+                    returndict[u'details'][unicode(newName)] = int(v)
+                elif newName.endswith('_float'):
+                    returndict[u'details'][unicode(newName)] = float(v)
+                else:
+                    returndict[u'details'][unicode(newName)] = toUnicode(v)
+
     except Exception as e:
         sys.stderr.write('esworker exception normalizing the message %r\n' % e)
         return None

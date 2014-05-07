@@ -48,10 +48,10 @@ ADD conf/nginx.conf /etc/nginx/
 
 #Mozdef
 RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget\
-#        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
-#        && /bin/ln -s /opt/MozDef-master /opt/MozDef \
-        && curl -L https://github.com/netantho/MozDef/archive/averez-docker.tar.gz |tar -C /opt -xz \
-        && /bin/ln -s /opt/MozDef-averez-docker /opt/MozDef \
+        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
+        && /bin/ln -s /opt/MozDef-master /opt/MozDef \
+#        && curl -L https://github.com/netantho/MozDef/archive/averez-esworker-fix.tar.gz |tar -C /opt -xz \
+#        && /bin/ln -s /opt/MozDef-averez-esworker-fix /opt/MozDef \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
 	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi gevent \
 	&& mkdir /var/log/mozdef \
