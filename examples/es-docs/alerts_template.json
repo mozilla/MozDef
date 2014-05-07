@@ -8,18 +8,29 @@
           "type":"date"
         },
         "tags":{
-          "type":"string"
+          "type" : "multi_field",
+          "fields" : {
+            "tags": {"type": "string"},
+            "raw" : {"type" : "string", "index" : "not_analyzed"}
+          }
         },
         "summary":{
-          "type":"string"
+          "type" : "multi_field",
+          "fields" : {
+            "summary": {"type": "string"},
+            "raw" : {"type" : "string", "index" : "not_analyzed"}
+          }
         },
         "receivedtimestatmp":{
           "format":"dateOptionalTime",
           "type":"date"
         },
         "category":{
-          "index":"not_analyzed",
-          "type":"string"
+          "type" : "multi_field",
+          "fields" : {
+            "category": {"type": "string"},
+            "raw" : {"type" : "string", "index" : "not_analyzed"}
+          }
         },
         "events":{
           "properties":{
@@ -35,13 +46,25 @@
           }
         },
         "eventsource":{
-          "type":"string"
+          "type" : "multi_field",
+          "fields" : {
+            "eventsource": {"type": "string"},
+            "raw" : {"type" : "string", "index" : "not_analyzed"}
+          }
         },
         "hostname":{
-          "type":"string"
+          "type" : "multi_field",
+          "fields" : {
+            "hostname": {"type": "string"},
+            "raw" : {"type" : "string", "index" : "not_analyzed"}
+          }
         },
         "severity":{
-          "type":"string"
+          "type" : "multi_field",
+          "fields" : {
+            "severity": {"type": "string"},
+            "raw" : {"type" : "string", "index" : "not_analyzed"}
+          }
         },
         "utctimestamp":{
           "format":"dateOptionalTime",
