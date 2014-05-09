@@ -171,6 +171,7 @@ Meteor
 `Meteor`_ is a javascript framework used for the realtime aspect of the web interface.
 
 We first need to install `Mongodb`_ since it's the DB used by Meteor.
+On Yum-based systems::
 In /etc/yum.repo.d/mongo, add::
 
   [mongodb]
@@ -183,6 +184,9 @@ Then you can install mongodb::
 
   sudo yum install mongodb
 
+On APT-based systems::
+  sudo apt-get install mongodb-server
+  
 For meteor, in a terminal::
 
   curl https://install.meteor.com/ | sh
