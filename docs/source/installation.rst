@@ -187,6 +187,7 @@ Then you can install mongodb::
   sudo yum install mongodb
 
 On APT-based systems::
+
   sudo apt-get install mongodb-server
   
 For meteor, in a terminal::
