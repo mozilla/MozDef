@@ -173,6 +173,7 @@ Meteor
 We first need to install `Mongodb`_ since it's the DB used by Meteor.
 
 On Yum-based systems::
+
 In /etc/yum.repo.d/mongo, add::
 
   [mongodb]
