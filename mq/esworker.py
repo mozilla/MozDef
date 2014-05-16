@@ -218,7 +218,11 @@ def keyMapping(aDict):
                 # add a dict to hold the details if it doesn't exist
                 if 'details' not in returndict.keys():
                     returndict[u'details'] = dict()
-                # add field
+                # add field with a special case for shippers that
+                # don't send details
+                # in an array as int/floats/strings
+                # we let them dictate the data type with field_datatype
+                # convention
                 if newName.endswith('_int'):
                     returndict[u'details'][unicode(newName)] = int(v)
                 elif newName.endswith('_float'):
@@ -298,7 +302,7 @@ class taskConsumer(ConsumerMixin):
                 # because of memory leak
                 # checkPlugins(pluginList,lastPluginCheck)
                 normalizedDict = sendEventToPlugins(normalizedDict, pluginList)
-                
+
                 # drop the message if a plug in set it to None
                 # signalling a discard
                 if normalizedDict is None:
