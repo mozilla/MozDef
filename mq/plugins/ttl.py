@@ -63,7 +63,7 @@ class message(object):
         """
         Load the config file
         """
-        configfile = os.path.abspath(__file__).replace('.py', '.json')
+        configfile = os.path.abspath(__file__).replace('.pyc', '.json')
         # if os.path.isfile(configfile):
         confighandler = open(configfile)
         data = json.load(confighandler)
