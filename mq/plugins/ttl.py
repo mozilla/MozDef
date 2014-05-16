@@ -55,9 +55,10 @@ class message(object):
            0 goes first, 100 is assumed/default if not sent
         '''
 
-        self.data = self.loadconfig()
+        self.loadconfig()
         self.registration = self.get_registration()
         self.priority = 20
+
 
     def loadconfig(self):
         """
@@ -67,8 +68,15 @@ class message(object):
         # if os.path.isfile(configfile):
         confighandler = open(configfile)
         data = json.load(confighandler)
+        self.data = data
         confighandler.close()
-        return data
+        self.data_fields = []
+        self.data_ttl = []
+        for ttl_config in data['ttl']:
+            flatdict = flattenDict(ttl_config['fields'])
+            self.data_fields.append([e for e in flatdict])
+            self.data_ttl.append(ttl_config['ttl'])
+
         # else:
         #     return {}
 
@@ -90,18 +98,17 @@ class message(object):
         return registration
 
     def onMessage(self, message):
-        for ttl_config in self.data['ttl']:
+        for i in range(len(self.data_fields)):
             match = True
             # Flatten dict structure
-            flatdict = flattenDict(ttl_config['fields'])
-            flatten_ttl_fields = [e for e in flatdict]
+
             flatdict = flattenDict(message)
             flatten_message = [e for e in flatdict]
 
             # print flatten_ttl_fields
             # print flatten_message
 
-            for field_ttl in flatten_ttl_fields:
+            for field_ttl in self.data_fields[i]:
                 # Consider when None
                 if field_ttl.endswith('=None'):
                     match_none = False
@@ -118,7 +125,7 @@ class message(object):
 
             if match:
                 # configure the ttl
-                message['ttl'] = ttl_config['ttl']
+                message['ttl'] = self.data_ttl[i]
                 break
 
         # print message
