@@ -23,7 +23,7 @@ def esPutTemplates():
         "template" : "events*",
         "mappings" : {
           "event" : {
-            "_ttl" : { "enabled" : true }
+            "_ttl" : { "enabled" : true },
             "properties" : {
               "category" : {
                 "index" : "not_analyzed",
