@@ -62,16 +62,15 @@ class message(object):
     def loadconfig(self):
         """
         Load the config file
-        Give TTL config
         """
         configfile = os.path.abspath(__file__).replace('.py', '.json')
-        if os.path.isfile(configfile):
-            confighandler = open(configfile)
-            data = json.load(confighandler)
-            confighandler.close()
-            return data
-        else:
-            return {}
+        # if os.path.isfile(configfile):
+        confighandler = open(configfile)
+        data = json.load(confighandler)
+        confighandler.close()
+        return data
+        # else:
+        #     return {}
 
     def get_registration(self):
         """
