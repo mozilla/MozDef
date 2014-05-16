@@ -37,14 +37,12 @@ class message(object):
                     # auditd entry without a command
                     # likely a result of another command (java starting a job, etc.)
                     # signal a drop
-                     
+
                     #message = None
                     #return message
             if 'http_user_agent' in message['details']:
                 if message['details']['http_user_agent'] == 'ELB-HealthChecker/1.0':
                     message = None
                     return message
-            
-        return message
 
-        
+        return message

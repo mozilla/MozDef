@@ -23,6 +23,7 @@ def esPutTemplates():
         "template" : "events*",
         "mappings" : {
           "event" : {
+            "_ttl" : { "enabled" : true }
             "properties" : {
               "category" : {
                 "index" : "not_analyzed",
@@ -39,7 +40,7 @@ def esPutTemplates():
                   "email" : {
                     "index" : "not_analyzed",
                     "type" : "string"
-                  },                  
+                  },
                   "dn" : {
                     "type" : "string"
                   },

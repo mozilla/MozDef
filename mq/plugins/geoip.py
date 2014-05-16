@@ -76,5 +76,3 @@ class message(object):
                     # to a valid, yet meaningless value
                     message['details']['destinationipaddress'] = '0.0.0.0'
         return message
-
-        

@@ -1,0 +1,24 @@
+{
+    "registration": {
+        "details": {
+            "deviceproduct": "auditd"
+        },
+        "awsRegion": true
+    },
+    "ttl": [
+        {
+            "fields": {
+                "details": {
+                    "deviceproduct": "auditd"
+                }
+            },
+            "ttl": "1m"
+        },
+        {
+            "fields": {
+                "awsRegion": true
+            },
+            "ttl": "2m"
+        }
+    ]
+}
