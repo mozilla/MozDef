@@ -213,3 +213,25 @@ class message(object):
 #     }
 # })
 
+# M.onMessage({
+#     "category": "network",
+#     "processid": "0",
+#     "severity": "INFO",
+#     "utctimestamp": "2014-04-17T06:19:41+00:00",
+#     "timestamp": "2014-04-17T06:19:41+00:00",
+#     "hostname": "syslog.example.com",
+#     "receivedtimestatmp": "2014-04-17T06:19:41.957329+00:00",
+#     "summary": "%-UI_LOGIN_EVENT: User 'root' login, class 'super-user' [744], ssh-connection '', client-mode 'junoscript'\n",
+#     "eventsource": "networklogs",
+#     "tags": [
+#       "example"
+#     ],
+#     "details": {
+#       "processid": "744",
+#       "program": "mgd",
+#       "hostname": "switch1.example.com",
+#       "payload": "",
+#       "timestamp": "Apr 17 06:19:40"
+#     }
+# })
+
