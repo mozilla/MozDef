@@ -4,7 +4,7 @@
             "deviceproduct": "auditd"
         },
         "awsRegion": true,
-        "eventsource": "networklogs"
+        "category": "network"
     },
     "ttl": [
         {
@@ -23,7 +23,7 @@
         },
         {
             "fields": {
-                "eventsource": "networklogs"
+                "category": "network"
             },
             "ttl": "1m"
         }
