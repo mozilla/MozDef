@@ -281,6 +281,10 @@ You need to install nginx::
 
   sudo yum install nginx
 
+On apt-get based system::
+
+  sudo apt-get nginx
+
 If you don't have this package in your repos, before installing create `/etc/yum.repos.d/nginx.repo` with the following content::
 
   [nginx]
