@@ -101,6 +101,9 @@
           "format":"dateOptionalTime"
         }
       }
+    },
+    "_default_": {
+      "_ttl" : { "enabled" : true }
     }
   }
 }
