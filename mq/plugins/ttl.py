@@ -125,7 +125,7 @@ class message(object):
 
             if match:
                 # configure the ttl
-                message['ttl'] = self.data_ttl[i]
+                message['_ttl'] = self.data_ttl[i]
                 break
 
         # print message
