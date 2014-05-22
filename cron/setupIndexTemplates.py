@@ -27,6 +27,16 @@ def initConfig():
         'http://localhost:9200',
         options.configfile).split(',')
         )
+    options.templatenames = list(getConfig(
+        'templatenames',
+        'defaulttemplate',
+        options.configfile).split(',')
+        )
+    options.templatefiles = list(getConfig(
+        'templatefiles',
+        '',
+        options.configfile).split(',')
+        )
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -37,5 +47,5 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     initConfig()
     es = es_module.Elasticsearch(options.esservers[0])
-    es.setupIndexTemplate('eventstemplate', '../examples/es-docs/events_template.json')
-    es.setupIndexTemplate('alertstemplate', '../examples/es-docs/alerts_template.json')
+    for templatename, templatefile in zip(options.templatenames, options.templatefiles):
+        es.setupIndexTemplate(templatename, templatefile)
