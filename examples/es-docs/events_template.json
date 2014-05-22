@@ -2,6 +2,7 @@
   "template":"events*",
   "mappings":{
     "event":{
+      "_ttl" : { "enabled" : true },
       "properties":{
         "category":{
           "index":"not_analyzed",
@@ -20,6 +21,10 @@
             },
             "hostname":{
               "type":"string"
+            },
+            "email" : {
+              "type" : "string",
+              "index" : "not_analyzed"
             },
             "msg":{
               "type":"string"
@@ -100,6 +105,9 @@
           "format":"dateOptionalTime"
         }
       }
+    },
+    "_default_": {
+      "_ttl" : { "enabled" : true }
     }
   }
 }
