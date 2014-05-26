@@ -301,6 +301,7 @@ UWSGI
 We use `uwsgi`_ to interface python and nginx::
 
   wget http://projects.unbit.it/downloads/uwsgi-2.0.2.tar.gz
+  tar zxvf uwsgi-2.0.2.tar.gz
   ~/python2.7/bin/python uwsgiconfig.py --build
   ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/mozdef/bin/
