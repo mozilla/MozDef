@@ -85,7 +85,7 @@ WARNING: this plugin is NOT open source. At the time of writing, Marvel is free 
 
 To install Marvel, on each of your elasticsearch node, from the Elasticsearch home directory::
 
-  bin/plugin -i elasticsearch/marvel/latest
+  sudo bin/plugin -i elasticsearch/marvel/latest
   sudo service elasticsearch restart
 
 You should now be able to access to Marvel at http://any-server-in-cluster:9200/_plugin/marvel
@@ -119,6 +119,7 @@ Then::
   su - mozdef
   wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
   tar xvzf Python-2.7.6.tgz
+  cd Python-2.7.6
   ./configure --prefix=/home/mozdef/python2.7 --enable-shared
   make
   make install
@@ -142,9 +143,10 @@ RabbitMQ
 
 `RabbitMQ`_ is used on workers to have queues of events waiting to be inserted into the Elasticsearch cluster (storage).
 
-To install it, first make sure you enabled `EPEL repos`_. Then you need to install an Erlang environment::
+To install it, first make sure you enabled `EPEL repos`_. Then you need to install an Erlang environment.
+On Yum-based systems::
 
-  yum install erlang
+  sudo yum install erlang
 
 You can then install the rabbitmq server::
 
@@ -155,6 +157,11 @@ To start rabbitmq at startup::
 
   chkconfig rabbitmq-server on
 
+On APT-based systems ::
+
+  sudo apt-get install rabbitmq-server
+  sudo invoke-rc.d rabbitmq-server start
+
 .. _RabbitMQ: https://www.rabbitmq.com/
 .. _EPEL repos: http://fedoraproject.org/wiki/EPEL/FAQ#howtouse
 
@@ -164,6 +171,9 @@ Meteor
 `Meteor`_ is a javascript framework used for the realtime aspect of the web interface.
 
 We first need to install `Mongodb`_ since it's the DB used by Meteor.
+
+On Yum-based systems:
+
 In /etc/yum.repo.d/mongo, add::
 
   [mongodb]
@@ -176,6 +186,10 @@ Then you can install mongodb::
 
   sudo yum install mongodb
 
+On APT-based systems::
+
+  sudo apt-get install mongodb-server
+  
 For meteor, in a terminal::
 
   curl https://install.meteor.com/ | sh
@@ -267,6 +281,10 @@ You need to install nginx::
 
   sudo yum install nginx
 
+On apt-get based system::
+
+  sudo apt-get nginx
+
 If you don't have this package in your repos, before installing create `/etc/yum.repos.d/nginx.repo` with the following content::
 
   [nginx]
@@ -283,6 +301,7 @@ UWSGI
 We use `uwsgi`_ to interface python and nginx::
 
   wget http://projects.unbit.it/downloads/uwsgi-2.0.2.tar.gz
+  tar zxvf uwsgi-2.0.2.tar.gz
   ~/python2.7/bin/python uwsgiconfig.py --build
   ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/mozdef/bin/
