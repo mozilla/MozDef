@@ -486,14 +486,14 @@ def dict2List(inObj):
         yield ''
 
 
-def sendEventToPlugins(anevent, pluginList):
+def sendEventToPlugins(anevent, metadata, pluginList):
     '''compare the event to the plugin registrations.
        plugins register with a dictionary either including a value or None
        None meaning send anything with that field.
        Value meaning send anything mathing that exact value
        Do this comparison by flattening the dict into key.key.key=value being mindful of sub dictionaries
     '''
-    if not isinstance(anevent[0], dict):
+    if not isinstance(anevent, dict):
         raise TypeError('event is type {0}, should be a dict'.format(type(anevent[0])))
     # expecting tuple of module,criteria,priority in pluginList
 
@@ -522,21 +522,21 @@ def sendEventToPlugins(anevent, pluginList):
                         #send = True
         if isinstance(plugin[1], list):
             try:
-                if ( set(plugin[1]).intersection([e for e in dict2List(anevent[0])]) ):
+                if ( set(plugin[1]).intersection([e for e in dict2List(anevent)]) ):
                     send = True
             except TypeError:
-                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent[0]))
+                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
                 return anevent
         if send:
-            anevent = plugin[0].onMessage(anevent)
+            anevent = plugin[0].onMessage(anevent, metadata)
             if anevent is None:
                 # plug-in is signalling to drop this message
                 # early exit
-                return anevent
+                return (anevent, metadata)
             #eventWithValues = [e for e in flattenDict(anevent)]
             #eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
 
-    return anevent
+    return (anevent, metadata)
 
 
 def main():
