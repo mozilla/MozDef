@@ -301,7 +301,7 @@ class taskConsumer(ConsumerMixin):
             else:
                 # normalize the dict
                 # to the mozdef events standard
-                normalizedDict = keyMapping((bodyDict, None))
+                normalizedDict = keyMapping(bodyDict)
                 message_id = None
     
                 # send the dict to elastic search and to the events task queue
