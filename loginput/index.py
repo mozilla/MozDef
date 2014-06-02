@@ -98,6 +98,35 @@ def cefindex():
         ensurePublish(cefDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
     return
 
+@route('/custom/<application>',method=['POST','PUT'])
+def customindex():
+    '''
+        and endpoint designed for custom applications that want to post data
+        to elastic search through the mozdef event interface
+        post to /custom/vulnerabilities
+        for example to post vulnerability in a custom format
+        Posts must be in json and are best formatted using a plugin
+        to the esworker.py process.
+    '''
+    if request.body:
+        anevent=request.body.read()
+        request.body.close()
+        #valid json?
+        try:
+            customDict=json.loads(anevent)
+        except ValueError as e:
+            response.status=500
+            return
+        #let the message queue worker who gets this know where it was posted
+        customDict['endpoint']= application
+        customDict['customendpoint'] = True
+        
+        #post to eventtask exchange
+        ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
+        ensurePublish(customDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
+    return
+
+
 def initConfig():
     #change this to your default zone for when it's not specified
     options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)

@@ -291,69 +291,75 @@ class taskConsumer(ConsumerMixin):
                     return
             else:
                 sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
-            # normalize the dict
-            normalizedDict = keyMapping(bodyDict)
+                message.ack()
+                return
 
-            # send the dict to elastic search and to the events task queue
-            if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
-                # could be empty,or invalid
-                # pass the event to any plug-ins we have registered
-                # disable periodic checking for new plugins
-                # because of memory leak
-                # checkPlugins(pluginList,lastPluginCheck)
-                normalizedDict = sendEventToPlugins(normalizedDict, pluginList)
+            if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
+                # custom document
+                # send to plugins to allow them to modify it if needed
+                normalizedDict = sendEventToPlugins(bodyDict, pluginList)
+            else:
+                # normalize the dict
+                # to the mozdef events standard
+                normalizedDict = keyMapping(bodyDict)
+    
+                # send the dict to elastic search and to the events task queue
+                if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
+                    normalizedDict = sendEventToPlugins(normalizedDict, pluginList)
+    
+            # drop the message if a plug in set it to None
+            # signalling a discard
+            if normalizedDict is None:
+                message.ack()
+                return
 
-                # drop the message if a plug in set it to None
-                # signalling a discard
-                if normalizedDict is None:
-                    message.ack()
-                    return
+            # make a json version for posting to elastic search
+            jbody = json.JSONEncoder().encode(normalizedDict)
 
-                # make a json version for posting to elastic search
-                jbody = json.JSONEncoder().encode(normalizedDict)
+            # figure out doctype and index
+            doctype = 'event'
+            docindex = 'events'
+            if isCEF(normalizedDict):
+                # cef records are set to the 'deviceproduct' field value.
+                doctype = 'cef'
+                if 'details' in normalizedDict.keys() and 'deviceproduct' in normalizedDict['details'].keys():
+                    # don't create strange doc types..
+                    if ' ' not in normalizedDict['details']['deviceproduct'] and '.' not in normalizedDict['details']['deviceproduct']:
+                        doctype = normalizedDict['details']['deviceproduct']
+            
+            if 'docindex' in normalizedDict.keys():
+                docindex = normalizedDict['docindex']
+            if 'doctype' in normalizedDict.keys():
+                doctype = normalizedDict['doctype']
 
-                # figure out what type of document we are indexing and post to the elastic search index.
-                doctype = 'event'
-                if isCEF(bodyDict):
-                    # cef records are set to the 'deviceproduct' field value.
-                    doctype = 'cef'
-                    if 'fields' in bodyDict.keys() and 'deviceproduct' in bodyDict['fields'].keys():
-                        # don't create strange doc types..
-                        if ' ' not in bodyDict['fields']['deviceproduct'] and '.' not in bodyDict['fields']['deviceproduct']:
-                            doctype = bodyDict['fields']['deviceproduct']
-                    if 'details' in bodyDict.keys() and 'deviceproduct' in bodyDict['details'].keys():
-                        # don't create strange doc types..
-                        if ' ' not in bodyDict['details']['deviceproduct'] and '.' not in bodyDict['details']['deviceproduct']:
-                            doctype = bodyDict['details']['deviceproduct']
+            try:
+                if options.esbulksize != 0:
+                    res = self.esConnection.index(index=docindex, doc_type=doctype, doc=jbody, bulk=True)
+                else:
+                    res = self.esConnection.index(index=docindex, doc_type=doctype, doc=jbody, bulk=False)
 
+            except (pyes.exceptions.NoServerAvailable, pyes.exceptions.InvalidIndexNameException) as e:
+                # handle loss of server or race condition with index rotation/creation/aliasing
                 try:
-                    if options.esbulksize != 0:
-                        res = self.esConnection.index(index='events', doc_type=doctype, doc=jbody, bulk=True)
-                    else:
-                        res = self.esConnection.index(index='events', doc_type=doctype, doc=jbody, bulk=False)
-
-                except (pyes.exceptions.NoServerAvailable, pyes.exceptions.InvalidIndexNameException) as e:
-                    # handle loss of server or race condition with index rotation/creation/aliasing
-                    try:
-                        self.esConnection = esConnect(None)
-                        message.requeue()
-                        return
-                    except kombu.exceptions.MessageStateError:
-                        # state may be already set.
-                        return
-                except pyes.exceptions.ElasticSearchException as e:
-                    # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
-                    try:
-                        sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
-                        message.requeue()
-                        return
-                    except kombu.exceptions.MessageStateError:
-                        # state may be already set.
-                        return
-                # post the dict (kombu serializes it to json) to the events topic queue
-                # using the ensure function to shortcut connection/queue drops/stalls, etc.
-                # ensurePublish = self.connection.ensure(self.mqproducer, self.mqproducer.publish, max_retries=10)
-                # ensurePublish(normalizedDict, exchange=self.topicExchange, routing_key='mozdef.event')
+                    self.esConnection = esConnect(None)
+                    message.requeue()
+                    return
+                except kombu.exceptions.MessageStateError:
+                    # state may be already set.
+                    return
+            except pyes.exceptions.ElasticSearchException as e:
+                # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
+                try:
+                    sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
+                    message.requeue()
+                    return
+                except kombu.exceptions.MessageStateError:
+                    # state may be already set.
+                    return
+            # post the dict (kombu serializes it to json) to the events topic queue
+            # using the ensure function to shortcut connection/queue drops/stalls, etc.
+            # ensurePublish = self.connection.ensure(self.mqproducer, self.mqproducer.publish, max_retries=10)
+            # ensurePublish(normalizedDict, exchange=self.topicExchange, routing_key='mozdef.event')
             message.ack()
         except ValueError as e:
             sys.stderr.write("esworker exception in events queue %r\n" % e)
