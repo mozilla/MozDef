@@ -377,11 +377,9 @@ def registerPlugins():
                         mpriority = mclass.priority
                     else:
                         mpriority = 100
-                    if isinstance(mreg, dict):
+                    if isinstance(mreg, list):
                         print('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
-                    if isinstance(mreg, type(re.compile(''))):
-                        print('[*] plugin {0} registered with a regex: {1}'.format(mname, mreg.pattern))
-                    pluginList.append((mclass, mreg, mpriority))
+                        pluginList.append((mclass, mreg, mpriority))
     return pluginList
 
 
@@ -432,6 +430,42 @@ def flattenDict(inDict, pre=None, values=True):
         yield '-'.join(pre) + '.' + inDict
 
 
+def dict2List(inObj):
+    '''given a dictionary, potentially with multiple sub dictionaries
+       return a list of the dict keys and values
+    '''
+    if isinstance(inObj, dict):
+        for key, value in inObj.iteritems():
+            if isinstance(value, dict):
+                for d in dict2List(value):
+                    yield d
+            elif isinstance(value,list):
+                yield key.encode('ascii','ignore').lower()
+                for l in dict2List(value):
+                    yield l
+            else:
+                yield key.encode('ascii', 'ignore').lower()
+                if isinstance(value, str):
+                    yield value.lower()
+                elif isinstance(value, unicode):
+                    yield value.encode('ascii', 'ignore').lower()
+                else:
+                    yield value
+    elif isinstance(inObj,list):
+        for v in inObj:
+            if isinstance(v, str):
+                yield v.lower()
+            elif isinstance(v, unicode):
+                yield v.encode('ascii', 'ignore').lower()
+            elif isinstance(v,list):
+                for l in dict2List(v):
+                    yield l 
+            else:
+                yield v        
+    else:
+        yield ''
+
+
 def sendEventToPlugins(anevent, pluginList):
     '''compare the event to the plugin registrations.
        plugins register with a dictionary either including a value or None
@@ -443,37 +477,44 @@ def sendEventToPlugins(anevent, pluginList):
         raise TypeError('event is type {0}, should be a dict'.format(type(anevent)))
     # expecting tuple of module,criteria,priority in pluginList
 
-    eventWithValues = [e for e in flattenDict(anevent)]
-    eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
+    #eventWithValues = [e for e in flattenDict(anevent)]
+    #eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
     # sort the plugin list by priority
     for plugin in sorted(pluginList, key=itemgetter(2), reverse=False):
         # assume we don't run this event through the plugin
         send = False
         # regex or dict as a registration
         # no regex instance type to compare to..so compare to re.compile
-        if isinstance(plugin[1], NULLRE):
-            for e in eventWithValues:
-                if plugin[1].search(e):
+        #if isinstance(plugin[1], NULLRE):
+            #for e in eventWithValues:
+                #if plugin[1].search(e):
+                    #send = True
+        #if isinstance(plugin[1], dict):
+            ## list of the plugin field requests. Will return key=None for keys registered without a particular value
+            #pluginRegistration = [entry for entry in flattenDict(plugin[1])]
+            ## print('plug in wants: {0}'.format(pluginRegistration))
+            #for p in pluginRegistration:
+                #if p.endswith('=None'):  # a request for a field, no specific value
+                    #if p.replace('=None', '') in eventWithoutValues:
+                        #send = True
+                #else:
+                    #if p in eventWithValues:
+                        #send = True
+        if isinstance(plugin[1], list):
+            try:
+                if ( set(plugin[1]).intersection([e for e in dict2List(anevent)]) ):
                     send = True
-        if isinstance(plugin[1], dict):
-            # list of the plugin field requests. Will return key=None for keys registered without a particular value
-            pluginRegistration = [entry for entry in flattenDict(plugin[1])]
-            # print('plug in wants: {0}'.format(pluginRegistration))
-            for p in pluginRegistration:
-                if p.endswith('=None'):  # a request for a field, no specific value
-                    if p.replace('=None', '') in eventWithoutValues:
-                        send = True
-                else:
-                    if p in eventWithValues:
-                        send = True
+            except TypeError:
+                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
+                return anevent
         if send:
             anevent = plugin[0].onMessage(anevent)
             if anevent is None:
                 # plug-in is signalling to drop this message
                 # early exit
                 return anevent
-            eventWithValues = [e for e in flattenDict(anevent)]
-            eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
+            #eventWithValues = [e for e in flattenDict(anevent)]
+            #eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
 
     return anevent
 

@@ -21,18 +21,11 @@ def isIP(ip):
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
-           return a dict with fieldname:None to be sent anything with that field
-           return a dict with fieldname:Value to be sent anything with that field/value
-           return a string to be sent anything with any field matching that string evaluated as a regex.
+           as a list of lower case strings or values to match with an event's dictionary of keys or values
            set the priority if you have a preference for order of plugins to run.
            0 goes first, 100 is assumed/default if not sent
         '''
-
-        rdict = dict()
-        rdict['details'] = dict()
-        rdict['details']['sourceipaddress'] = None
-        rdict['details']['destinationipaddress'] = None
-        self.registration = rdict
+        self.registration = ['sourceipaddress', 'destinationipaddress']
         self.priority = 20
         self.geoip = pygeoip.GeoIP('/home/mozdef/envs/mozdef/bot/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
 

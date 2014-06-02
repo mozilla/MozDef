@@ -34,23 +34,12 @@ def addError(message, error):
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
-           return a dict with fieldname:None to be sent anything with that field
-           return a dict with fieldname:Value to be sent anything with that field/value
-           return a string to be sent anything with any field matching that string evaluated as a regex.
+           as a list of lower case strings or values to match with an event's dictionary of keys or values
            set the priority if you have a preference for order of plugins to run.
            0 goes first, 100 is assumed/default if not sent
         '''
         # ask for anything that could house an IP address
-        rdict = dict()
-        rdict['details'] = dict()
-        rdict['details']['sourceipaddress'] = None
-        rdict['details']['destinationipaddress'] = None
-        rdict['details']['src'] = None
-        rdict['details']['dst'] = None
-        rdict['details']['srcip'] = None
-        rdict['details']['dstip'] = None
-        rdict['details']['http_x_forwarded_for'] = None
-        self.registration = rdict
+        self.registration = ['sourceipaddress', 'destinationipaddress', 'src', 'dst', 'srcip', 'dstip', 'http_x_forwarded_for']
         self.priority = 15
 
     def onMessage(self, message):
