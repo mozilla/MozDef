@@ -42,7 +42,7 @@ class message(object):
         self.registration = ['sourceipaddress', 'destinationipaddress', 'src', 'dst', 'srcip', 'dstip', 'http_x_forwarded_for']
         self.priority = 15
 
-    def onMessage(self, message, message_id=None):
+    def onMessage(self, message, metadata):
         '''
         Examine possible ip addresses for the following:
           ipv6 in an ipv4 field
@@ -133,6 +133,6 @@ class message(object):
                 if isIPv6(ipText):
                     message['details']['destinationipv6address'] = ipText
 
-        return (message, message_id)
+        return (message, metadata)
 
         

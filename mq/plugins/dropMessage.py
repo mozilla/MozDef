@@ -26,7 +26,7 @@ class message(object):
         self.registration = rdict
         self.priority = 1
 
-    def onMessage(self, message, message_id=None):
+    def onMessage(self, message, metadata):
         # criteria for dropping messages
         # early exit by setting message = None and return
         if 'details' in message.keys():
@@ -45,4 +45,4 @@ class message(object):
                     message = None
                     return message
 
-        return (message, message_id)
+        return (message, metadata)
