@@ -297,15 +297,16 @@ class taskConsumer(ConsumerMixin):
             if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
                 # custom document
                 # send to plugins to allow them to modify it if needed
-                normalizedDict = sendEventToPlugins(bodyDict, pluginList)
+                (normalizedDict, message_id) = sendEventToPlugins((bodyDict, None), pluginList)
             else:
                 # normalize the dict
                 # to the mozdef events standard
-                normalizedDict = keyMapping(bodyDict)
+                normalizedDict = keyMapping((bodyDict, None))
+                message_id = None
     
                 # send the dict to elastic search and to the events task queue
                 if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
-                    normalizedDict = sendEventToPlugins(normalizedDict, pluginList)
+                    (normalizedDict, message_id) = sendEventToPlugins((normalizedDict, None), pluginList)
     
             # drop the message if a plug in set it to None
             # signalling a discard
@@ -334,9 +335,9 @@ class taskConsumer(ConsumerMixin):
 
             try:
                 if options.esbulksize != 0:
-                    res = self.esConnection.index(index=docindex, doc_type=doctype, doc=jbody, bulk=True)
+                    res = self.esConnection.index(index=docindex, id=message_id, doc_type=doctype, doc=jbody, bulk=True)
                 else:
-                    res = self.esConnection.index(index=docindex, doc_type=doctype, doc=jbody, bulk=False)
+                    res = self.esConnection.index(index=docindex, id=message_id, doc_type=doctype, doc=jbody, bulk=False)
 
             except (pyes.exceptions.NoServerAvailable, pyes.exceptions.InvalidIndexNameException) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
@@ -479,8 +480,8 @@ def sendEventToPlugins(anevent, pluginList):
        Value meaning send anything mathing that exact value
        Do this comparison by flattening the dict into key.key.key=value being mindful of sub dictionaries
     '''
-    if not isinstance(anevent, dict):
-        raise TypeError('event is type {0}, should be a dict'.format(type(anevent)))
+    if not isinstance(anevent[0], dict):
+        raise TypeError('event is type {0}, should be a dict'.format(type(anevent[0])))
     # expecting tuple of module,criteria,priority in pluginList
 
     #eventWithValues = [e for e in flattenDict(anevent)]
@@ -508,10 +509,10 @@ def sendEventToPlugins(anevent, pluginList):
                         #send = True
         if isinstance(plugin[1], list):
             try:
-                if ( set(plugin[1]).intersection([e for e in dict2List(anevent)]) ):
+                if ( set(plugin[1]).intersection([e for e in dict2List(anevent[0])]) ):
                     send = True
             except TypeError:
-                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
+                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent[0]))
                 return anevent
         if send:
             anevent = plugin[0].onMessage(anevent)
