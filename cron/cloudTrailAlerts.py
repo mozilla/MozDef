@@ -105,7 +105,7 @@ def esCloudTrailSearch(es,begindateUTC=None, enddateUTC=None):
         results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents],must_not=[qalerted])), indices='events')
         #uncomment for debugging to recreate alerts for events that already have an alerttimestamp
         #results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents])))
-        return(results)
+        return(results._search_raw()['hits']['hits'])
         
     except pyes.exceptions.NoServerAvailable:
         logger.error('Elastic Search server could not be reached, check network connectivity')
@@ -115,21 +115,25 @@ def createAlerts(es,esResults):
         if len(esResults)>0:
             for r in esResults:
                 alert=dict(utctimestamp=toUTC(datetime.now()).isoformat(),severity='INFO',summary='',category='AWSCloudtrail',tags=['cloudtrail','aws'],eventsource=[],events=[])
-                alert['events'].append(dict(index=r.get_meta()['index'],type=r.get_meta()['type'],id=r.get_meta()['id']))
-                alert['eventtimestamp']=r['eventTime']
+                alert['events'].append(
+                    dict(documentindex=r['_index'],
+                         documenttype=r['_type'],
+                         documentsource=r['_source'], 
+                         documentid=r['_id']))
+                alert['eventtimestamp']=r['_source']['eventTime']
                 alert['severity']='INFO'
-                alert['summary']=('{0} called {1} from {2}'.format(r['userIdentity']['userName'],r['eventName'],r['sourceIPAddress']))
+                alert['summary']=('{0} called {1} from {2}'.format(r['_source']['userIdentity']['userName'],r['_source']['eventName'],r['_source']['sourceIPAddress']))
                 alert['eventsource']=flattenDict(r)
-                if r['eventName']=='RunInstances':
-                    for i in r['responseElements']['instancesSet']['items']:
+                if r['_source']['eventName']=='RunInstances':
+                    for i in r['_source']['responseElements']['instancesSet']['items']:
                         if 'privateDnsName' in i.keys():
                             alert['summary'] += (' running {0} '.format(i['privateDnsName']))
                         elif 'instanceId' in i.keys():
                             alert['summary'] += (' running {0} '.format(i['instanceId']))
                         else:
                             alert['summary'] += (' running {0} '.format(flattenDict(i)))
-                if r['eventName']=='StartInstances':
-                    for i in r['requestParameters']['instancesSet']['items']:
+                if r['_source']['eventName']=='StartInstances':
+                    for i in r['_source']['requestParameters']['instancesSet']['items']:
                         alert['summary'] += (' starting {0} '.format(i['instanceId']))                
                 logger.debug(alert['summary'])
                 #logger.debug(alert['events'])
@@ -137,11 +141,11 @@ def createAlerts(es,esResults):
                 #save alert to alerts index, update events index with alert ID for cross reference
                 alertResult=alertToES(es,alert)
                 logger.debug(alertResult)
-                if 'alerts' not in r.keys():
-                    r['alerts']=[]
-                r['alerts'].append(dict(index=alertResult['_index'],type=alertResult['_type'],id=alertResult['_id']))
-                r['alerttimestamp']=toUTC(datetime.now()).isoformat()
-                es.update(r.get_meta()['index'],r.get_meta()['type'],r.get_meta()['id'],document=r)
+                if 'alerts' not in r['_source'].keys():
+                    r['_source']['alerts']=[]
+                r['_source']['alerts'].append(dict(index=alertResult['_index'],type=alertResult['_type'],id=alertResult['_id']))
+                r['_source']['alerttimestamp']=toUTC(datetime.now()).isoformat()
+                es.update(r['_index'],r['_type'],r['_id'],document=r['_source'])
                 alertToMessageQueue(alert)
     except Exception as e:
         logger.error("Exception %r when creating alerts "%e)
