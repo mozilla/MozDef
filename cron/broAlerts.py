@@ -149,7 +149,11 @@ def createAlerts(es,indicatorCounts):
             for i in indicatorCounts:
                 alert=dict(utctimestamp=toUTC(datetime.now()).isoformat(),severity='NOTICE',summary='',category='bro',tags=['bro','intel'],eventsource=[],events=[])
                 for e in i['events']:
-                    alert['events'].append(dict(index=e['_index'],type=e['_type'],id=e['_id']))
+                    alert['events'].append(
+                        dict(documentindex=e['_index'],
+                             documenttype=e['_type'],
+                             documentsource=e['_source'], 
+                             documentid=e['_id']))                    
                 alert['severity']='NOTICE'
                 alert['summary']=('{0} matches for indicator {1} '.format(i['count'],i['indicator']))
                 for e in i['events']:
