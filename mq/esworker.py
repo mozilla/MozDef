@@ -302,7 +302,7 @@ class taskConsumer(ConsumerMixin):
             if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
                 # custom document
                 # send to plugins to allow them to modify it if needed
-                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
+                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)[0]
             else:
                 # normalize the dict
                 # to the mozdef events standard
@@ -310,7 +310,7 @@ class taskConsumer(ConsumerMixin):
     
                 # send the dict to elastic search and to the events task queue
                 if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
-                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
+                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)[0]
     
             # drop the message if a plug in set it to None
             # signalling a discard
@@ -321,7 +321,6 @@ class taskConsumer(ConsumerMixin):
             # make a json version for posting to elastic search
             jbody = json.JSONEncoder().encode(normalizedDict)
 
-            sys.stderr.write("%r\n" % normalizedDict)
             if isCEF(normalizedDict):
                 # cef records are set to the 'deviceproduct' field value.
                 metadata['doc_type'] = 'cef'
