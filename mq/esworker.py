@@ -7,6 +7,8 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Anthony Verez averez@mozilla.com
+
 
 import json
 import kombu
@@ -26,7 +28,6 @@ from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 from threading import Timer
 
-NULLRE=type(re.compile(''))
 
 # running under uwsgi?
 try:
@@ -159,7 +160,7 @@ def keyMapping(aDict):
     returndict['receivedtimestamp'] = toUTC(datetime.now())
     try:
         for k, v in aDict.iteritems():
-            k=removeAt(k).lower()
+            k = removeAt(k).lower()
 
             if k in ('message', 'summary'):
                 returndict[u'summary'] = toUnicode(v)
@@ -278,6 +279,7 @@ class taskConsumer(ConsumerMixin):
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
         try:
+            # default elastic search metadata for an event
             metadata = {
                 'index': 'events',
                 'doc_type': 'event',
@@ -302,18 +304,18 @@ class taskConsumer(ConsumerMixin):
             if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
                 # custom document
                 # send to plugins to allow them to modify it if needed
-                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)[0]
+                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
             else:
                 # normalize the dict
                 # to the mozdef events standard
                 normalizedDict = keyMapping(bodyDict)
-    
-                # send the dict to elastic search and to the events task queue
+
+                # send to plugins to allow them to modify it if needed
                 if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
-                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)[0]
-    
+                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
+
             # drop the message if a plug in set it to None
-            # signalling a discard
+            # signaling a discard
             if normalizedDict is None:
                 message.ack()
                 return
@@ -328,11 +330,6 @@ class taskConsumer(ConsumerMixin):
                     # don't create strange doc types..
                     if ' ' not in normalizedDict['details']['deviceproduct'] and '.' not in normalizedDict['details']['deviceproduct']:
                         metadata['doc_type'] = normalizedDict['details']['deviceproduct']
-            
-            if 'docindex' in normalizedDict.keys():
-                metadata['index'] = normalizedDict['docindex']
-            if 'doctype' in normalizedDict.keys():
-                metadata['doc_type'] = normalizedDict['doctype']
 
             try:
                 if options.esbulksize != 0:
@@ -459,8 +456,8 @@ def dict2List(inObj):
             if isinstance(value, dict):
                 for d in dict2List(value):
                     yield d
-            elif isinstance(value,list):
-                yield key.encode('ascii','ignore').lower()
+            elif isinstance(value, list):
+                yield key.encode('ascii', 'ignore').lower()
                 for l in dict2List(value):
                     yield l
             else:
@@ -471,70 +468,50 @@ def dict2List(inObj):
                     yield value.encode('ascii', 'ignore').lower()
                 else:
                     yield value
-    elif isinstance(inObj,list):
+    elif isinstance(inObj, list):
         for v in inObj:
             if isinstance(v, str):
                 yield v.lower()
             elif isinstance(v, unicode):
                 yield v.encode('ascii', 'ignore').lower()
-            elif isinstance(v,list):
+            elif isinstance(v, list):
                 for l in dict2List(v):
-                    yield l 
+                    yield l
             else:
-                yield v        
+                yield v
     else:
         yield ''
 
 
 def sendEventToPlugins(anevent, metadata, pluginList):
     '''compare the event to the plugin registrations.
-       plugins register with a dictionary either including a value or None
-       None meaning send anything with that field.
-       Value meaning send anything mathing that exact value
-       Do this comparison by flattening the dict into key.key.key=value being mindful of sub dictionaries
+       plugins register with a list of keys or values
+       or values they want to match on
+       this function compares that registration list
+       to the current event and sends the event to plugins
+       in order
     '''
     if not isinstance(anevent, dict):
         raise TypeError('event is type {0}, should be a dict'.format(type(anevent)))
-    # expecting tuple of module,criteria,priority in pluginList
 
-    #eventWithValues = [e for e in flattenDict(anevent)]
-    #eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
+    # expecting tuple of module,criteria,priority in pluginList
     # sort the plugin list by priority
     for plugin in sorted(pluginList, key=itemgetter(2), reverse=False):
         # assume we don't run this event through the plugin
         send = False
-        # regex or dict as a registration
-        # no regex instance type to compare to..so compare to re.compile
-        #if isinstance(plugin[1], NULLRE):
-            #for e in eventWithValues:
-                #if plugin[1].search(e):
-                    #send = True
-        #if isinstance(plugin[1], dict):
-            ## list of the plugin field requests. Will return key=None for keys registered without a particular value
-            #pluginRegistration = [entry for entry in flattenDict(plugin[1])]
-            ## print('plug in wants: {0}'.format(pluginRegistration))
-            #for p in pluginRegistration:
-                #if p.endswith('=None'):  # a request for a field, no specific value
-                    #if p.replace('=None', '') in eventWithoutValues:
-                        #send = True
-                #else:
-                    #if p in eventWithValues:
-                        #send = True
         if isinstance(plugin[1], list):
             try:
-                if ( set(plugin[1]).intersection([e for e in dict2List(anevent)]) ):
+                if (set(plugin[1]).intersection([e for e in dict2List(anevent)])):
                     send = True
             except TypeError:
                 sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
                 return (anevent, metadata)
         if send:
-            anevent = plugin[0].onMessage(anevent, metadata)
+            (anevent, metadata) = plugin[0].onMessage(anevent, metadata)
             if anevent is None:
                 # plug-in is signalling to drop this message
                 # early exit
                 return (anevent, metadata)
-            #eventWithValues = [e for e in flattenDict(anevent)]
-            #eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
 
     return (anevent, metadata)
 
