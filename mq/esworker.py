@@ -321,6 +321,7 @@ class taskConsumer(ConsumerMixin):
             # make a json version for posting to elastic search
             jbody = json.JSONEncoder().encode(normalizedDict)
 
+            sys.stderr.write("%r\n" % normalizedDict)
             if isCEF(normalizedDict):
                 # cef records are set to the 'deviceproduct' field value.
                 metadata['doc_type'] = 'cef'
@@ -494,7 +495,7 @@ def sendEventToPlugins(anevent, metadata, pluginList):
        Do this comparison by flattening the dict into key.key.key=value being mindful of sub dictionaries
     '''
     if not isinstance(anevent, dict):
-        raise TypeError('event is type {0}, should be a dict'.format(type(anevent[0])))
+        raise TypeError('event is type {0}, should be a dict'.format(type(anevent)))
     # expecting tuple of module,criteria,priority in pluginList
 
     #eventWithValues = [e for e in flattenDict(anevent)]
@@ -526,7 +527,7 @@ def sendEventToPlugins(anevent, metadata, pluginList):
                     send = True
             except TypeError:
                 sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
-                return anevent
+                return (anevent, metadata)
         if send:
             anevent = plugin[0].onMessage(anevent, metadata)
             if anevent is None:
