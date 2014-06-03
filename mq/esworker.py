@@ -278,6 +278,11 @@ class taskConsumer(ConsumerMixin):
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
         try:
+            metadata = {
+                'index': 'events',
+                'doc_type': 'event',
+                'id': None
+            }
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
                 bodyDict = body
@@ -297,7 +302,7 @@ class taskConsumer(ConsumerMixin):
             if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
                 # custom document
                 # send to plugins to allow them to modify it if needed
-                normalizedDict = sendEventToPlugins(bodyDict, pluginList)
+                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)[0]
             else:
                 # normalize the dict
                 # to the mozdef events standard
@@ -305,7 +310,7 @@ class taskConsumer(ConsumerMixin):
     
                 # send the dict to elastic search and to the events task queue
                 if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
-                    normalizedDict = sendEventToPlugins(normalizedDict, pluginList)
+                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)[0]
     
             # drop the message if a plug in set it to None
             # signalling a discard
@@ -316,27 +321,36 @@ class taskConsumer(ConsumerMixin):
             # make a json version for posting to elastic search
             jbody = json.JSONEncoder().encode(normalizedDict)
 
-            # figure out doctype and index
-            doctype = 'event'
-            docindex = 'events'
             if isCEF(normalizedDict):
                 # cef records are set to the 'deviceproduct' field value.
-                doctype = 'cef'
+                metadata['doc_type'] = 'cef'
                 if 'details' in normalizedDict.keys() and 'deviceproduct' in normalizedDict['details'].keys():
                     # don't create strange doc types..
                     if ' ' not in normalizedDict['details']['deviceproduct'] and '.' not in normalizedDict['details']['deviceproduct']:
-                        doctype = normalizedDict['details']['deviceproduct']
+                        metadata['doc_type'] = normalizedDict['details']['deviceproduct']
             
             if 'docindex' in normalizedDict.keys():
-                docindex = normalizedDict['docindex']
+                metadata['index'] = normalizedDict['docindex']
             if 'doctype' in normalizedDict.keys():
-                doctype = normalizedDict['doctype']
+                metadata['doc_type'] = normalizedDict['doctype']
 
             try:
                 if options.esbulksize != 0:
-                    res = self.esConnection.index(index=docindex, doc_type=doctype, doc=jbody, bulk=True)
+                    res = self.esConnection.index(
+                        index=metadata['index'],
+                        id=metadata['id'],
+                        doc_type=metadata['doc_type'],
+                        doc=jbody,
+                        bulk=True
+                    )
                 else:
-                    res = self.esConnection.index(index=docindex, doc_type=doctype, doc=jbody, bulk=False)
+                    res = self.esConnection.index(
+                        index=metadata['index'],
+                        id=metadata['id'],
+                        doc_type=metadata['doc_type'],
+                        doc=jbody,
+                        bulk=False
+                    )
 
             except (pyes.exceptions.NoServerAvailable, pyes.exceptions.InvalidIndexNameException) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
@@ -472,7 +486,7 @@ def dict2List(inObj):
         yield ''
 
 
-def sendEventToPlugins(anevent, pluginList):
+def sendEventToPlugins(anevent, metadata, pluginList):
     '''compare the event to the plugin registrations.
        plugins register with a dictionary either including a value or None
        None meaning send anything with that field.
@@ -512,17 +526,17 @@ def sendEventToPlugins(anevent, pluginList):
                     send = True
             except TypeError:
                 sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
-                return anevent
+                return (anevent, metadata)
         if send:
-            anevent = plugin[0].onMessage(anevent)
+            anevent = plugin[0].onMessage(anevent, metadata)
             if anevent is None:
                 # plug-in is signalling to drop this message
                 # early exit
-                return anevent
+                return (anevent, metadata)
             #eventWithValues = [e for e in flattenDict(anevent)]
             #eventWithoutValues = [e for e in flattenDict(anevent, values=False)]
 
-    return anevent
+    return (anevent, metadata)
 
 
 def main():

@@ -41,7 +41,7 @@ class message(object):
             pass
         return location
 
-    def onMessage(self, message):
+    def onMessage(self, message, metadata):
         if 'details' in message.keys():
             if 'sourceipaddress' in message['details'].keys():
                 ipText = message['details']['sourceipaddress']
@@ -68,4 +68,4 @@ class message(object):
                     # if we send on, elastic search will error, so set it
                     # to a valid, yet meaningless value
                     message['details']['destinationipaddress'] = '0.0.0.0'
-        return message
+        return (message, metadata)
