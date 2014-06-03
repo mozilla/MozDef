@@ -99,7 +99,7 @@ def cefindex():
     return
 
 @route('/custom/<application>',method=['POST','PUT'])
-def customindex():
+def customindex(application):
     '''
         and endpoint designed for custom applications that want to post data
         to elastic search through the mozdef event interface
