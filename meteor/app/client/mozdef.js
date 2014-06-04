@@ -786,6 +786,7 @@ if (Meteor.isClient) {
 					nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
 					if (nameplate){
 						nameplate.element.style.display='inline';
+						nameplate.lookAt( sceneCamera.position );
 					}
 					
 				}
