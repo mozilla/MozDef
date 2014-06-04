@@ -21,4 +21,5 @@ healthfrontend = new Meteor.Collection("healthfrontend");
 healthescluster = new Meteor.Collection("healthescluster");
 healthesnodes = new Meteor.Collection("healthesnodes");
 healtheshotthreads = new Meteor.Collection("healtheshotthreads");
+attackers = new Meteor.Collection("attackers");
 

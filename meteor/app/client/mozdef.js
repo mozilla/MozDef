@@ -13,8 +13,17 @@ if (Meteor.isClient) {
     //defaults: 
     Session.set('verisfilter','');
     Session.set('rotate',.001);
-    sceneCamera='';
-    sceneObjects=[];
+	var scene = null;
+    var sceneCamera = null;
+	var sceneControls = null;
+    var sceneObjects=[];
+	var selectedObject=null;
+	var intersectedObject=null;
+	var mouse = new THREE.Vector2();
+	var offset = new THREE.Vector3();
+	var projector = new THREE.Projector();
+	var plane = null;
+	var scenePadding=100;
     
     //debug/testing functions
     Template.hello.greeting = function () {
@@ -409,128 +418,7 @@ if (Meteor.isClient) {
         }
     });
 
-    Template.attackers.events({
-        "click": function(event,template){
-            if (typeof console !== 'undefined')
-              console.log('attacker click event')
-            //console.log(sceneCamera)
-            camera=sceneCamera
-            //var objects = [];
-            var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
-            projector = new THREE.Projector();
-            projector.unprojectVector( vector, camera );
-
-            var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
-
-            var intersects = raycaster.intersectObjects( sceneObjects );
-
-            if ( intersects.length > 0 ) {
-                for ( var i = 0; i < intersects.length; i ++ ) {
-                    intersects[ i ].object.material.color.setHex( Math.random() * 0xffffff );
-                    if (typeof console !== 'undefined')
-                      console.log(intersects[i].object.name)
-                }
-            }
-        }
-    });
-  
-  //three.js code to render attackers visualization
-
-    Template.attackers.rendered=function(){
-        container=document.getElementById('attackers-wrapper')
-        sceneObjects=[]
-        var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(35, window.innerWidth/window.innerHeight, 0.1, 1000);
-        //var renderer = new THREE.WebGLRenderer();
-        //renderer.setSize(window.innerWidth, window.innerHeight);
-        var renderer = new THREE.WebGLRenderer( { antialias: false ,precision: 'lowp'} );
-        renderer.setSize( window.innerWidth,window.innerHeight );
-        //renderer.setClearColor( scene.fog.color, .1 );
-        //renderer.setClearColor(0xffffff,.1)
-        renderer.setClearColor(0x205799,.0005)
-
-
-        renderer.gammaInput = true;
-        renderer.gammaOutput = true;
-        renderer.shadowMapEnabled = true;
-
-        renderer.shadowMapCascade = true;
-        //renderer.shadowMapType = THREE.PCFSoftShadowMap;
-        renderer.shadowMapType = THREE.BasicShadowMap        
-        
-        
-        
-        //container=document.createElement('div');
-		//document.body.appendChild( container );
-        
-        // SCENE
-        scene = new THREE.Scene();
-//				// LIGHTS
-        //scene.add( new THREE.AmbientLight( 0x222222 ) );
-        scene.add( new THREE.AmbientLight( 0xffffff ) );
-
-        var light = new THREE.DirectionalLight( 0xffffff, 2 );
-        light.position.set( 200, 450, 500 );
-
-        light.castShadow = true;
-        light.shadowMapWidth = 1024;
-        light.shadowMapHeight = 1024;
-        light.shadowMapDarkness = 0.20;
-        //light.shadowCameraVisible = true;
-
-        light.shadowCascade = false;
-        light.shadowCascadeCount = 3;
-        light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
-        light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
-        light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
-        light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
-
-        scene.add( light );
-        //  GROUND
-
-        var gt = THREE.ImageUtils.loadTexture( "/images/concrete.jpg" );
-        //var gg = new THREE.PlaneGeometry( 16000, 16000 );
-        //var gm = new THREE.MeshPhongMaterial( { color: 0xffffff, map: gt } );
-        var gg = new THREE.PlaneGeometry( 120, 120 );
-        var gm = new THREE.MeshPhongMaterial( { color: 0xffffff, map: gt } );
-
-        var ground = new THREE.Mesh( gg, gm );
-        ground.rotation.x = - Math.PI / 2;
-        //ground.material.map.repeat.set( 64, 64 );
-        //ground.material.map.repeat.set( 2, 2 );
-        //ground.material.map.wrapS = ground.material.map.wrapT = THREE.RepeatWrapping;
-        ground.receiveShadow = true;
-
-        //scene.add( ground );
-        
-        //document.body.appendChild(renderer.domElement);
-        
-        var geometry = new THREE.CubeGeometry(1,1,1);
-        var material = new THREE.MeshBasicMaterial({color: 0xFFF8DC});
-		var ct = THREE.ImageUtils.loadTexture( "/images/concrete.jpg" );
-        //var cg = new THREE.PlaneGeometry( 120, 120 );
-        var cm = new THREE.MeshPhongMaterial( { color: 0xffffff, map: gt } );
-
-		//var cubeTexture = new THREE.Mesh( cg, cm );
-        
-        var cube = new THREE.Mesh(geometry, cm);
-        cube.name='bad attacker'
-        scene.add(cube);
-        sceneObjects.push(cube)
-        camera.position.z = 10;
-        var render = function () { requestAnimationFrame(render);
-            //cube.rotation.x += 0.001;
-            cube.rotation.x += Session.get('rotate');
-            cube.rotation.y += 0.01;
-            renderer.render(scene, camera);
-        };
-        container.appendChild( renderer.domElement );
-        sceneCamera=camera
-        render();        
-    }
-    
-
-  
+ 
   //d3 code to animate login counts
   Template.logincounts.rendered = function () {
     container=document.getElementById('logins-wrapper')
@@ -826,4 +714,312 @@ if (Meteor.isClient) {
     }
     
   }
-}
+
+	Template.attackers.events({
+		"click #btnReset": function(e){
+			sceneControls.reset();
+			sceneCamera.position.z = 50;
+			sceneCamera.position.x = 0;
+			sceneCamera.position.y = 0;
+			sceneCamera.rotation.x=0;
+			sceneCamera.rotation.y=0;
+			sceneCamera.rotation.z=0;
+			sceneCamera.updateProjectionMatrix();
+		},
+		"mousedown": function(event,template){
+		//if mouse is over a character
+		//set the selected object
+		//set the offset to the 2D plane
+		//set the cursor
+			event.preventDefault();	
+			var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+			projector.unprojectVector( vector, sceneCamera );
+			var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
+			var intersects = raycaster.intersectObjects( sceneObjects ,true);
+			if ( intersects.length > 0 ) {
+				sceneControls.enabled = false;
+				selectedObject = intersects[ 0 ].object.parent;
+				var intersects = raycaster.intersectObject( plane );
+				offset.copy( intersects[ 0 ].point ).sub( plane.position );
+				container.style.cursor = 'move';
+			}
+		},
+		"mousemove": function(event,template){
+			//x = right/left
+			//y = up/down
+			//if we move the mouse
+			//track the movement
+			//if selected object
+			//    move the selected object and any CSS objects with it
+			//    along the 2D plane
+			//if intersected objects
+			//    move the 2D plane
+			//if no selected object we are moving the scene camera
+			
+			
+			event.preventDefault();
+			mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+			mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+			var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+			projector.unprojectVector( vector, sceneCamera );
+			var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
+
+			if ( selectedObject ){
+				var intersects = raycaster.intersectObject( plane );
+				selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
+				//console.log(selectedObject.parent.dbid);
+				nameplate=selectedObject.parent.getObjectByName('nameplate:' + selectedObject.dbid,true)
+				if ( nameplate ){
+					nameplate.position.copy( selectedObject.position);
+					nameplate.position.add(nameplate.offset);
+				}
+				return;			
+			}
+			
+			var intersects = raycaster.intersectObjects( sceneObjects, true );
+			if ( intersects.length > 0 ) {
+				if ( intersectedObject != intersects[ 0 ].object.parent ) {
+					intersectedObject = intersects[ 0 ].object.parent;
+					plane.position.copy( intersectedObject.position );
+					plane.lookAt( sceneCamera.position );
+					
+					nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
+					if (nameplate){
+						nameplate.element.style.display='inline';
+					}
+					
+				}
+				container.style.cursor = 'pointer';
+
+			} else {
+				intersectedObject = null;
+				container.style.cursor = 'auto';
+				for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
+					if ( scene.children[i].name.lastIndexOf('nameplate',0)===0 ){
+						scene.children[i].element.style.display='none';
+					}
+				
+				}
+			}
+		},
+		"mouseup": function(event,template){
+		//clear selected objects
+			event.preventDefault();
+			sceneControls.enabled = true;
+			if ( intersectedObject ) {
+				plane.position.copy( intersectedObject.position );
+				selectedObject = null;
+			}
+			container.style.cursor = 'auto';
+		}
+	});
+
+  Template.attackers.rendered = function () {
+	console.log('entering draw attackers');
+	var characters = [];
+	scene = new THREE.Scene();
+	scene.name='attackerScene';
+	var clock = new THREE.Clock();
+	sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
+	var renderer = new THREE.WebGLRenderer( { alpha: true , precision: 'lowp',premultipliedAlpha: false} );
+	renderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
+	//create a plane to use to help position the attackers when moved with the mouse
+	plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
+	
+	//setup the scene controls
+	sceneControls = new THREE.TrackballControls( sceneCamera );
+	sceneControls.rotateSpeed = 1.0;
+	sceneControls.zoomSpeed = 3;
+	sceneControls.panSpeed = 0.3;
+	sceneControls.noZoom = false;
+	sceneControls.noPan = false;
+	sceneControls.staticMoving = false;
+	//sceneControls.dynamicDampingFactor = 0.3;
+
+	//setup the css renderer for non-web gl objects
+	var cssRenderer = new THREE.CSS3DRenderer();
+	cssRenderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
+	cssRenderer.domElement.style.position = 'absolute';
+	cssRenderer.domElement.style.top = 0;
+	document.getElementById('attackers-wrapper').appendChild(cssRenderer.domElement);
+	//var ball = document.createElement('img');
+	//ball.src='/images/ball.png';
+	//var cssObject = new THREE.CSS3DObject(ball);
+	//cssObject.position = plane.position;
+	//cssObject.rotation = plane.rotation;
+	//cssObject.position.z=-100;
+	//cssObject.scale.x=.1;
+	//cssObject.scale.y=.1;
+	//cssObject.scale.z=.1;
+	//scene.add(cssObject);
+	//console.log(cssObject);
+
+	
+	var configOgro = {
+		baseUrl: "/other/ogro/",
+		body: "ogro-light.js",
+		skins: [ "grok.jpg", "ogrobase.png", "arboshak.png", "ctf_r.png", "ctf_b.png", "darkam.png", "freedom.png",
+				 "gib.png", "gordogh.png", "igdosh.png", "khorne.png", "nabogro.png",
+				 "sharokh.png" ],
+		weapons:  [ [ "weapon-light.js", "weapon.jpg" ] ],
+		animations: {
+			move: "run",
+			idle: "stand",
+			jump: "jump",
+			attack: "attack",
+			crouchMove: "cwalk",
+			crouchIdle: "cstand",
+			crouchAttach: "crattack"
+		},
+		walkSpeed: 350,
+		crouchSpeed: 175
+	};
+
+	var ogroControls = {
+		moveForward: false,
+		moveBackward: false,
+		moveLeft: false,
+		moveRight: false
+	};
+
+	function onWindowResize( event ) {
+			SCREEN_WIDTH = window.innerWidth-scenePadding;
+			SCREEN_HEIGHT = window.innerHeight-scenePadding;
+			renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+			sceneCamera.aspect = SCREEN_WIDTH/ SCREEN_HEIGHT;
+			sceneCamera.updateProjectionMatrix();
+	};
+
+	var sceneSetup = function(){
+			sceneObjects=[];
+			window.addEventListener( 'resize', onWindowResize, false );			
+			container=document.getElementById('attackers-wrapper');
+			renderer.setSize( window.innerWidth-scenePadding,window.innerHeight-scenePadding );
+			//no background for renderer..let the gradient show 
+			renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
+			renderer.shadowMapEnabled = false;
+			//renderer.shadowMapCascade = false;
+			//renderer.shadowMapType = THREE.BasicShadowMap;
+			//add plane for mapping mouse movements to 2D space
+			plane.visible = false;
+			scene.add( plane );			
+	
+			// Lights
+			scene.add( new THREE.AmbientLight( 0xffffff ) );
+			var light = new THREE.DirectionalLight( 0xffffff, .2 );
+			light.position.set( 200, 450, 500 );
+			light.castShadow = false;
+			//light.shadowMapWidth = 100;
+			//light.shadowMapHeight = 100;
+			//light.shadowMapDarkness = 0.20;
+			//light.shadowCascade = true;
+			//light.shadowCascadeCount = 3;
+			//light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
+			//light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
+			//light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
+			//light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
+			scene.add( light );
+
+			sceneCamera.position.z = 50;
+			var render = function () { 
+				requestAnimationFrame(render);
+				var delta = clock.getDelta();
+				characters.forEach(function(element,index,array){
+					element.update(delta);
+				});
+				sceneControls.update();
+				renderer.render(scene, sceneCamera);
+				cssRenderer.render(scene,sceneCamera);
+			};
+			container.appendChild( renderer.domElement );
+			render();
+	
+	};
+
+
+	//ogro setup 
+	var createCharacter=function(dbrecord,x,y,z){
+		var character = new THREE.MD2CharacterComplex();
+		character.id=dbrecord._id;
+		character.name=dbrecord._id;
+		character.scale = .05;
+		character.dbrecord=dbrecord;
+		character.animationFPS=Math.floor((Math.random() * 5)+1);
+		character.controls = ogroControls;
+		character.root.position.x=Math.floor((Math.random() * 5)+1);
+		character.root.position.y=Math.floor((Math.random() * 5)+1);
+		character.root.position.z=Math.floor((Math.random() * 5)+1);
+		character.root.name='ogro:' + dbrecord._id;
+		character.root.dbid=dbrecord._id;
+		
+		character.loadParts( configOgro );
+		
+		character.onLoadComplete = function () {
+			//character.setWeapon(Math.floor((Math.random()*1)));
+			this.setSkin(Math.floor((Math.random() * 10)));
+			this.setAnimation(configOgro.animations["stand"]);
+
+			//create the character's nameplate
+			var acallout=document.createElement('div');
+			acallout.className='attackercallout';
+			
+			var aid=document.createElement('div');
+			aid.className='id';
+			aid.textContent=this.dbrecord.sourceipaddress;
+			acallout.appendChild(aid);
+			
+			var adetails=document.createElement('div');
+			adetails.className='details';
+			adetails.textContent=this.dbrecord.details.msg + "" + this.dbrecord.details.sub;
+			acallout.appendChild(adetails);
+			
+			var nameplate=new THREE.CSS3DObject(acallout);
+			var npOffset=new THREE.Vector3();
+			nameplate.name='nameplate:' + this.id;
+			nameplate.dbid=this.id;
+			npOffset.x=0;
+			npOffset.y=0;
+			npOffset.z=.5;
+			nameplate.offset=npOffset;
+			nameplate.scale.x=.01;
+			nameplate.scale.y=.01;
+			nameplate.scale.z=.01;
+			nameplate.position.copy(this.root.position);
+			nameplate.position.add(npOffset);
+			nameplate.element.style.display='none';
+			
+			//add everything.
+			//threejs doesn't take children that aren't threejs object3d instances
+			//so add the nameplate manually. 
+			this.root.children.push(nameplate);
+			nameplate.parent=this.root;
+			scene.add(nameplate);
+			
+			scene.add(this.root);
+			characters.push( this );
+			sceneObjects.push(this.root);
+			
+		};
+	};
+
+	sceneSetup();
+
+	Deps.autorun(function() {
+		console.log('running dep orgro autorun');
+		attackers.find().forEach(function(element,index,array){
+			//add to the scene if it's new
+			var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
+			x=Math.floor((Math.random() * 5)+1);
+			y=Math.floor((Math.random() * 5)+1);
+			z=Math.floor((Math.random() * 5)+1);			
+			if ( exists === undefined ) {
+				createCharacter(element,x,y,z)
+				}
+			else{
+				exists.root.position.x=x;
+				exists.root.position.z=z;
+			}
+		});
+	});
+   };
+};
