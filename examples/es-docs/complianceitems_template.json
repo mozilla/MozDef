@@ -1,0 +1,48 @@
+{
+  "template": "complianceitems*",
+  "mappings": {
+    "history": {
+      "_ttl": {
+        "enabled": true
+      },
+      "properties": {
+        "target": {
+          "type": "multi_field",
+          "fields": {
+            "target": {
+              "type": "string"
+            },
+            "raw": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        }
+      }
+    },
+    "last_known_state": {
+      "_ttl": {
+        "enabled": true
+      },
+      "properties": {
+        "target": {
+          "type": "multi_field",
+          "fields": {
+            "target": {
+              "type": "string"
+            },
+            "raw": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        }
+      }
+    },
+    "_default_": {
+      "_ttl": {
+        "enabled": true
+      }
+    }
+  }
+}
