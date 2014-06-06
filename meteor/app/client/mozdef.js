@@ -24,6 +24,7 @@ if (Meteor.isClient) {
 	var projector = new THREE.Projector();
 	var plane = null;
 	var scenePadding=100;
+	var renderer = new THREE.WebGLRenderer( { alpha: true , precision: 'lowp',premultipliedAlpha: false} );
     
     //debug/testing functions
     Template.hello.greeting = function () {
@@ -726,6 +727,26 @@ if (Meteor.isClient) {
 			sceneCamera.rotation.z=0;
 			sceneCamera.updateProjectionMatrix();
 		},
+		"click #btnWireFrame": function(event,template){
+			//console.log(template);
+			for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
+				if ( scene.children[i].name.lastIndexOf('ogro',0)===0 ){
+					//console.log(scene.children[i]);
+					if ( event.currentTarget.textContent=='WireFrame' ){
+						scene.children[i].base.setWireframe(true);
+					} else{
+						scene.children[i].base.setWireframe(false);
+					}
+				}
+			}
+			
+			if ( event.currentTarget.textContent=='WireFrame' ){
+				event.currentTarget.textContent='Color';
+			} else {
+				event.currentTarget.textContent='WireFrame';
+			}
+			
+		},
 		"mousedown": function(event,template){
 		//if mouse is over a character
 		//set the selected object
@@ -816,13 +837,12 @@ if (Meteor.isClient) {
 	});
 
   Template.attackers.rendered = function () {
-	console.log('entering draw attackers');
+	//console.log('entering draw attackers');
 	var characters = [];
 	scene = new THREE.Scene();
 	scene.name='attackerScene';
 	var clock = new THREE.Clock();
 	sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
-	var renderer = new THREE.WebGLRenderer( { alpha: true , precision: 'lowp',premultipliedAlpha: false} );
 	renderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
 	//create a plane to use to help position the attackers when moved with the mouse
 	plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
@@ -843,19 +863,7 @@ if (Meteor.isClient) {
 	cssRenderer.domElement.style.position = 'absolute';
 	cssRenderer.domElement.style.top = 0;
 	document.getElementById('attackers-wrapper').appendChild(cssRenderer.domElement);
-	//var ball = document.createElement('img');
-	//ball.src='/images/ball.png';
-	//var cssObject = new THREE.CSS3DObject(ball);
-	//cssObject.position = plane.position;
-	//cssObject.rotation = plane.rotation;
-	//cssObject.position.z=-100;
-	//cssObject.scale.x=.1;
-	//cssObject.scale.y=.1;
-	//cssObject.scale.z=.1;
-	//scene.add(cssObject);
-	//console.log(cssObject);
 
-	
 	var configOgro = {
 		baseUrl: "/other/ogro/",
 		body: "ogro-light.js",
@@ -892,6 +900,7 @@ if (Meteor.isClient) {
 	};
 
 	var sceneSetup = function(){
+			//console.log('scene setup');
 			sceneObjects=[];
 			window.addEventListener( 'resize', onWindowResize, false );			
 			container=document.getElementById('attackers-wrapper');
@@ -952,11 +961,13 @@ if (Meteor.isClient) {
 		character.root.position.z=Math.floor((Math.random() * 5)+1);
 		character.root.name='ogro:' + dbrecord._id;
 		character.root.dbid=dbrecord._id;
+		character.root.base=character;
 		
 		character.loadParts( configOgro );
 		
 		character.onLoadComplete = function () {
-			//character.setWeapon(Math.floor((Math.random()*1)));
+			//no weapons for now..
+			//this.setWeapon(Math.floor((Math.random()*1)));
 			this.setSkin(Math.floor((Math.random() * 10)));
 			this.setAnimation(configOgro.animations["stand"]);
 
@@ -1006,7 +1017,7 @@ if (Meteor.isClient) {
 	sceneSetup();
 
 	Deps.autorun(function() {
-		console.log('running dep orgro autorun');
+		//console.log('running dep orgro autorun');
 		attackers.find().forEach(function(element,index,array){
 			//add to the scene if it's new
 			var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
@@ -1014,9 +1025,11 @@ if (Meteor.isClient) {
 			y=Math.floor((Math.random() * 5)+1);
 			z=Math.floor((Math.random() * 5)+1);			
 			if ( exists === undefined ) {
+				//console.log('adding character')
 				createCharacter(element,x,y,z)
 				}
 			else{
+				//console.log('updating character')
 				exists.root.position.x=x;
 				exists.root.position.z=z;
 			}
