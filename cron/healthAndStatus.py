@@ -17,6 +17,7 @@ import pytz
 import requests
 import sys
 from datetime import datetime
+from hashlib import md5
 from requests.auth import HTTPBasicAuth
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
@@ -36,9 +37,8 @@ def initLogger():
     formatter.formatTime = loggerTimeStamp
     if options.output == 'syslog':
         logger.addHandler(
-            SysLogHandler(
-                address=(options.sysloghostname,
-                    options.syslogport)))
+            SysLogHandler(address=(options.sysloghostname,
+                                   options.syslogport)))
     else:
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
@@ -65,7 +65,20 @@ def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     return objDate
 
 
+def getDocID(servername):
+    # create a hash to use as the ES doc id
+    # hostname plus salt as doctype.latest
+    hash = md5()
+    hash.update('{0}.mozdefhealth.latest'.format(servername))
+    return hash.hexdigest()
+
+
 def main():
+    '''
+    Get health and status stats and post to ES
+    Post both as a historical reference (for charts)
+    and as a static docid (for realtime current health/EPS displays)
+    '''
     logger.debug('starting')
     logger.debug(options)
     es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
@@ -74,10 +87,13 @@ def main():
 
         for server in options.mqservers:
             logger.debug('checking message queues on {0}'.format(server))
-            r = requests.get('http://{0}:{1}/api/queues'.format(server,
-                options.mqapiport), auth=auth)
+            r = requests.get(
+                'http://{0}:{1}/api/queues'.format(server,
+                                                   options.mqapiport),
+                auth=auth)
+
             mq = r.json()
-            #setup a log entry for health/status.
+            # setup a log entry for health/status.
             healthlog = dict(
                 utctimestamp=pytz.timezone('US/Pacific').localize(
                     datetime.now()).isoformat(),
@@ -94,7 +110,7 @@ def main():
             healthlog['details']['loadaverage'] = list(os.getloadavg())
             healthlog['tags'] = ['mozdef', 'status']
             for m in mq:
-                if 'message_stats' in m.keys():
+                if 'message_stats' in m.keys() and isinstance(m['message_stats'], dict):
                     if 'messages_ready' in m.keys():
                         mready = m['messages_ready']
                     else:
@@ -114,13 +130,20 @@ def main():
                         healthlog['details'][m['name']]['publish_eps'] = \
                             m['message_stats']['publish_details']['rate']
 
-        #print(json.dumps(healthlog, sort_keys=True, indent=4))
-        #post to elastic search servers directly without going through message queues
-        es.index(
-            index='events',
-            doc_type='mozdefhealth',
-            doc=json.dumps(healthlog),
-            bulk=False)
+            # post to elastic search servers directly without going through
+            # message queues in case there is an availability issue
+            es.index(index='events',
+                     doc_type='mozdefhealth',
+                     doc=json.dumps(healthlog),
+                     bulk=False)
+            # post another doc with a static docid and tag
+            # for use when querying for the latest status
+            healthlog['tags'] = ['mozdef', 'status', 'latest']
+            es.index(index='events',
+                     id=getDocID(server),
+                     doc_type='mozdefhealth',
+                     doc=json.dumps(healthlog),
+                     bulk=False)
     except Exception as e:
         logger.error("Exception %r when gathering health and status " % e)
 
@@ -129,27 +152,31 @@ def initConfig():
     # output our log to stdout or syslog
     options.output = getConfig('output', 'stdout', options.configfile)
     # syslog hostname
-    options.sysloghostname = getConfig('sysloghostname', 'localhost',
-        options.configfile)
+    options.sysloghostname = getConfig('sysloghostname',
+                                       'localhost',
+                                       options.configfile)
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
     # msg queue servers to check in on (list of servernames)
     # message queue server(s) hostname
-    options.mqservers = list(getConfig('mqservers', 'localhost',
-        options.configfile).split(','))
+    options.mqservers = list(getConfig('mqservers',
+                                       'localhost',
+                                       options.configfile).split(','))
     options.mquser = getConfig('mquser', 'guest', options.configfile)
     options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
     # port of the rabbitmq json management interface
     options.mqapiport = getConfig('mqapiport', 15672, options.configfile)
 
     # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific',
-        options.configfile)
+    options.defaultTimeZone = getConfig('defaulttimezone',
+                                        'US/Pacific',
+                                        options.configfile)
 
     # elastic search server settings
-    options.esservers = list(getConfig('esservers', 'http://localhost:9200',
-        options.configfile).split(','))
+    options.esservers = list(getConfig('esservers',
+                                       'http://localhost:9200',
+                                       options.configfile).split(','))
 
 if __name__ == '__main__':
     parser = OptionParser()

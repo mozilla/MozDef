@@ -70,8 +70,9 @@ def getFrontendStats(es):
         from_value=begindateUTC, to_value=enddateUTC))
     qType = pyes.TermFilter('_type', 'mozdefhealth')
     qMozdef = pyes.TermsFilter('category', ['mozdef'])
+    qLatest = pyes.TermsFilter('tags', ['latest'])
     pyesresults = es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(
-        must=[qType, qDate, qMozdef])),
+        must=[qType, qLatest, qMozdef])),
         indices='events')
     return pyesresults._search_raw()['hits']['hits']
 
