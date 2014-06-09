@@ -25,7 +25,9 @@ if (Meteor.isClient) {
 	var plane = null;
 	var scenePadding=100;
 	var renderer = new THREE.WebGLRenderer( { alpha: true , precision: 'lowp',premultipliedAlpha: false} );
-    
+    var characters = [];
+    var baseCharacter = new THREE.MD2CharacterComplex();
+
     //debug/testing functions
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')
@@ -289,14 +291,6 @@ if (Meteor.isClient) {
             incidents.update(Session.get('incidentID'), {
                 $pull: {tags:tagtext}
             });
-        },
-
-        "click #saveChanges": function (event, template) {
-            event.preventDefault();
-
-            incidentRevision.save(event, template);
-
-            //Router.go('/incidents/')
         },
 
         "keyup": function(e, t) {
@@ -716,324 +710,343 @@ if (Meteor.isClient) {
     
   }
 
-	Template.attackers.events({
-		"click #btnReset": function(e){
-			sceneControls.reset();
-			sceneCamera.position.z = 50;
-			sceneCamera.position.x = 0;
-			sceneCamera.position.y = 0;
-			sceneCamera.rotation.x=0;
-			sceneCamera.rotation.y=0;
-			sceneCamera.rotation.z=0;
-			sceneCamera.updateProjectionMatrix();
-		},
-		"click #btnWireFrame": function(event,template){
-			//console.log(template);
-			for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
-				if ( scene.children[i].name.lastIndexOf('ogro',0)===0 ){
-					//console.log(scene.children[i]);
-					if ( event.currentTarget.textContent=='WireFrame' ){
-						scene.children[i].base.setWireframe(true);
-					} else{
-						scene.children[i].base.setWireframe(false);
-					}
-				}
-			}
-			
-			if ( event.currentTarget.textContent=='WireFrame' ){
-				event.currentTarget.textContent='Color';
-			} else {
-				event.currentTarget.textContent='WireFrame';
-			}
-			
-		},
-		"mousedown": function(event,template){
-		//if mouse is over a character
-		//set the selected object
-		//set the offset to the 2D plane
-		//set the cursor
-			event.preventDefault();	
-			var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-			projector.unprojectVector( vector, sceneCamera );
-			var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
-			var intersects = raycaster.intersectObjects( sceneObjects ,true);
-			if ( intersects.length > 0 ) {
-				sceneControls.enabled = false;
-				selectedObject = intersects[ 0 ].object.parent;
-				var intersects = raycaster.intersectObject( plane );
-				offset.copy( intersects[ 0 ].point ).sub( plane.position );
-				container.style.cursor = 'move';
-			}
-		},
-		"mousemove": function(event,template){
-			//x = right/left
-			//y = up/down
-			//if we move the mouse
-			//track the movement
-			//if selected object
-			//    move the selected object and any CSS objects with it
-			//    along the 2D plane
-			//if intersected objects
-			//    move the 2D plane
-			//if no selected object we are moving the scene camera
-			
-			
-			event.preventDefault();
-			mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-			mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-			var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-			projector.unprojectVector( vector, sceneCamera );
-			var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
 
-			if ( selectedObject ){
-				var intersects = raycaster.intersectObject( plane );
-				selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
-				//console.log(selectedObject.parent.dbid);
-				nameplate=selectedObject.parent.getObjectByName('nameplate:' + selectedObject.dbid,true)
-				if ( nameplate ){
-					nameplate.position.copy( selectedObject.position);
-					nameplate.position.add(nameplate.offset);
-				}
-				return;			
-			}
-			
-			var intersects = raycaster.intersectObjects( sceneObjects, true );
-			if ( intersects.length > 0 ) {
-				if ( intersectedObject != intersects[ 0 ].object.parent ) {
-					intersectedObject = intersects[ 0 ].object.parent;
-					plane.position.copy( intersectedObject.position );
-					plane.lookAt( sceneCamera.position );
-					
-					nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
-					if (nameplate){
-						nameplate.element.style.display='inline';
-						nameplate.lookAt( sceneCamera.position );
-					}
-					
-				}
-				container.style.cursor = 'pointer';
+    Template.attackers.events({
+        "click #btnReset": function(e){
+            sceneControls.reset();
+            sceneCamera.position.z = 50;
+            sceneCamera.position.x = 0;
+            sceneCamera.position.y = 0;
+            sceneCamera.rotation.x=0;
+            sceneCamera.rotation.y=0;
+            sceneCamera.rotation.z=0;
+            sceneCamera.updateProjectionMatrix();
+        },
+        "click #btnWireFrame": function(event,template){
+            //console.log(template);
+            for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
+                if ( scene.children[i].name.lastIndexOf('ogro',0)===0 ){
+                    //console.log(scene.children[i]);
+                    if ( event.currentTarget.textContent=='WireFrame' ){
+                        scene.children[i].base.setWireframe(true);
+                    } else{
+                        scene.children[i].base.setWireframe(false);
+                    }
+                }
+            }
+            
+            if ( event.currentTarget.textContent=='WireFrame' ){
+                event.currentTarget.textContent='Color';
+            } else {
+                event.currentTarget.textContent='WireFrame';
+            }
+            
+        },
+        "mousedown": function(event,template){
+        //if mouse is over a character
+        //set the selected object
+        //set the offset to the 2D plane
+        //set the cursor
+            event.preventDefault(); 
+            var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+            projector.unprojectVector( vector, sceneCamera );
+            var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
+            var intersects = raycaster.intersectObjects( sceneObjects ,true);
+            if ( intersects.length > 0 ) {
+                sceneControls.enabled = false;
+                selectedObject = intersects[ 0 ].object.parent;
+                var intersects = raycaster.intersectObject( plane );
+                offset.copy( intersects[ 0 ].point ).sub( plane.position );
+                container.style.cursor = 'move';
+            }
+        },
+        "mousemove": function(event,template){
+            //x = right/left
+            //y = up/down
+            //if we move the mouse
+            //track the movement
+            //if selected object
+            //    move the selected object and any CSS objects with it
+            //    along the 2D plane
+            //if intersected objects
+            //    move the 2D plane
+            //if no selected object we are moving the scene camera
+            
+            
+            event.preventDefault();
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+            projector.unprojectVector( vector, sceneCamera );
+            var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
 
-			} else {
-				intersectedObject = null;
-				container.style.cursor = 'auto';
-				for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
-					if ( scene.children[i].name.lastIndexOf('nameplate',0)===0 ){
-						scene.children[i].element.style.display='none';
-					}
-				
-				}
-			}
-		},
-		"mouseup": function(event,template){
-		//clear selected objects
-			event.preventDefault();
-			sceneControls.enabled = true;
-			if ( intersectedObject ) {
-				plane.position.copy( intersectedObject.position );
-				selectedObject = null;
-			}
-			container.style.cursor = 'auto';
-		}
-	});
+            if ( selectedObject ){
+                var intersects = raycaster.intersectObject( plane );
+                selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
+                //console.log(selectedObject.parent.dbid);
+                nameplate=selectedObject.parent.getObjectByName('nameplate:' + selectedObject.dbid,true)
+                if ( nameplate ){
+                    nameplate.position.copy( selectedObject.position);
+                    nameplate.position.add(nameplate.offset);
+                }
+                return;         
+            }
+            
+            var intersects = raycaster.intersectObjects( sceneObjects, true );
+            if ( intersects.length > 0 ) {
+                if ( intersectedObject != intersects[ 0 ].object.parent ) {
+                    intersectedObject = intersects[ 0 ].object.parent;
+                    plane.position.copy( intersectedObject.position );
+                    plane.lookAt( sceneCamera.position );
+                    
+                    nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
+                    if (nameplate){
+                        nameplate.element.style.display='inline';
+                        nameplate.lookAt( sceneCamera.position );
+                    }
+                    
+                }
+                container.style.cursor = 'pointer';
+
+            } else {
+                intersectedObject = null;
+                container.style.cursor = 'auto';
+                for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
+                    if ( scene.children[i].name.lastIndexOf('nameplate',0)===0 ){
+                        scene.children[i].element.style.display='none';
+                    }
+                
+                }
+            }
+        },
+        "mouseup": function(event,template){
+        //clear selected objects
+            event.preventDefault();
+            sceneControls.enabled = true;
+            if ( intersectedObject ) {
+                plane.position.copy( intersectedObject.position );
+                selectedObject = null;
+            }
+            container.style.cursor = 'auto';
+        }
+    });
 
   Template.attackers.rendered = function () {
-	//console.log('entering draw attackers');
-	var characters = [];
-	scene = new THREE.Scene();
-	scene.name='attackerScene';
-	var clock = new THREE.Clock();
-	sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
-	renderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
-	//create a plane to use to help position the attackers when moved with the mouse
-	plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-	
-	//setup the scene controls
-	sceneControls = new THREE.TrackballControls( sceneCamera );
-	sceneControls.rotateSpeed = 1.0;
-	sceneControls.zoomSpeed = 3;
-	sceneControls.panSpeed = 0.3;
-	sceneControls.noZoom = false;
-	sceneControls.noPan = false;
-	sceneControls.staticMoving = false;
-	//sceneControls.dynamicDampingFactor = 0.3;
+    //console.log('entering draw attackers');
+    scene = new THREE.Scene();
+    scene.name='attackerScene';
+    var clock = new THREE.Clock();
+    sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
+    renderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
+    //create a plane to use to help position the attackers when moved with the mouse
+    plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
+    
+    //setup the scene controls
+    sceneControls = new THREE.TrackballControls( sceneCamera );
+    sceneControls.rotateSpeed = 1.0;
+    sceneControls.zoomSpeed = 3;
+    sceneControls.panSpeed = 0.3;
+    sceneControls.noZoom = false;
+    sceneControls.noPan = false;
+    sceneControls.staticMoving = false;
+    //sceneControls.dynamicDampingFactor = 0.3;
 
-	//setup the css renderer for non-web gl objects
-	var cssRenderer = new THREE.CSS3DRenderer();
-	cssRenderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
-	cssRenderer.domElement.style.position = 'absolute';
-	cssRenderer.domElement.style.top = 0;
-	document.getElementById('attackers-wrapper').appendChild(cssRenderer.domElement);
+    //setup the css renderer for non-web gl objects
+    var cssRenderer = new THREE.CSS3DRenderer();
+    cssRenderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
+    cssRenderer.domElement.style.position = 'absolute';
+    cssRenderer.domElement.style.top = 0;
+    document.getElementById('attackers-wrapper').appendChild(cssRenderer.domElement);
 
-	var configOgro = {
-		baseUrl: "/other/ogro/",
-		body: "ogro-light.js",
-		skins: [ "grok.jpg", "ogrobase.png", "arboshak.png", "ctf_r.png", "ctf_b.png", "darkam.png", "freedom.png",
-				 "gib.png", "gordogh.png", "igdosh.png", "khorne.png", "nabogro.png",
-				 "sharokh.png" ],
-		weapons:  [ [ "weapon-light.js", "weapon.jpg" ] ],
-		animations: {
-			move: "run",
-			idle: "stand",
-			jump: "jump",
-			attack: "attack",
-			crouchMove: "cwalk",
-			crouchIdle: "cstand",
-			crouchAttach: "crattack"
-		},
-		walkSpeed: 350,
-		crouchSpeed: 175
-	};
+    var configOgro = {
+        baseUrl: "/other/ogro/",
+        body: "ogro-light.js",
+        skins: [ "grok.jpg", "ogrobase.png", "arboshak.png", "ctf_r.png", "ctf_b.png", "darkam.png", "freedom.png",
+                 "gib.png", "gordogh.png", "igdosh.png", "khorne.png", "nabogro.png",
+                 "sharokh.png" ],
+        weapons:  [ [ "weapon-light.js", "weapon.jpg" ] ],
+        animations: {
+            move: "run",
+            idle: "stand",
+            jump: "jump",
+            attack: "attack",
+            crouchMove: "cwalk",
+            crouchIdle: "cstand",
+            crouchAttach: "crattack"
+        },
+        walkSpeed: 350,
+        crouchSpeed: 175
+    };
 
-	var ogroControls = {
-		moveForward: false,
-		moveBackward: false,
-		moveLeft: false,
-		moveRight: false
-	};
+    var ogroControls = {
+        moveForward: false,
+        moveBackward: false,
+        moveLeft: false,
+        moveRight: false
+    };
 
-	function onWindowResize( event ) {
-			SCREEN_WIDTH = window.innerWidth-scenePadding;
-			SCREEN_HEIGHT = window.innerHeight-scenePadding;
-			renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-			sceneCamera.aspect = SCREEN_WIDTH/ SCREEN_HEIGHT;
-			sceneCamera.updateProjectionMatrix();
-	};
+    function onWindowResize( event ) {
+            SCREEN_WIDTH = window.innerWidth-scenePadding;
+            SCREEN_HEIGHT = window.innerHeight-scenePadding;
+            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+            sceneCamera.aspect = SCREEN_WIDTH/ SCREEN_HEIGHT;
+            sceneCamera.updateProjectionMatrix();
+    };
 
-	var sceneSetup = function(){
-			//console.log('scene setup');
-			sceneObjects=[];
-			window.addEventListener( 'resize', onWindowResize, false );			
-			container=document.getElementById('attackers-wrapper');
-			renderer.setSize( window.innerWidth-scenePadding,window.innerHeight-scenePadding );
-			//no background for renderer..let the gradient show 
-			renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
-			renderer.shadowMapEnabled = false;
-			//renderer.shadowMapCascade = false;
-			//renderer.shadowMapType = THREE.BasicShadowMap;
-			//add plane for mapping mouse movements to 2D space
-			plane.visible = false;
-			scene.add( plane );			
-	
-			// Lights
-			scene.add( new THREE.AmbientLight( 0xffffff ) );
-			var light = new THREE.DirectionalLight( 0xffffff, .2 );
-			light.position.set( 200, 450, 500 );
-			light.castShadow = false;
-			//light.shadowMapWidth = 100;
-			//light.shadowMapHeight = 100;
-			//light.shadowMapDarkness = 0.20;
-			//light.shadowCascade = true;
-			//light.shadowCascadeCount = 3;
-			//light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
-			//light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
-			//light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
-			//light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
-			scene.add( light );
+    var sceneSetup = function(){
+            //console.log('scene setup');
+            sceneObjects=[];
+            window.addEventListener( 'resize', onWindowResize, false );         
+            container=document.getElementById('attackers-wrapper');
+            renderer.setSize( window.innerWidth-scenePadding,window.innerHeight-scenePadding );
+            //no background for renderer..let the gradient show 
+            renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
+            renderer.shadowMapEnabled = false;
+            //renderer.shadowMapCascade = false;
+            //renderer.shadowMapType = THREE.BasicShadowMap;
+            //add plane for mapping mouse movements to 2D space
+            plane.visible = false;
+            scene.add( plane );         
+    
+            // Lights
+            scene.add( new THREE.AmbientLight( 0xffffff ) );
+            var light = new THREE.DirectionalLight( 0xffffff, .2 );
+            light.position.set( 200, 450, 500 );
+            light.castShadow = false;
+            //light.shadowMapWidth = 100;
+            //light.shadowMapHeight = 100;
+            //light.shadowMapDarkness = 0.20;
+            //light.shadowCascade = true;
+            //light.shadowCascadeCount = 3;
+            //light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
+            //light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
+            //light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
+            //light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
+            scene.add( light );
 
-			sceneCamera.position.z = 50;
-			var render = function () { 
-				requestAnimationFrame(render);
-				var delta = clock.getDelta();
-				characters.forEach(function(element,index,array){
-					element.update(delta);
-				});
-				sceneControls.update();
-				renderer.render(scene, sceneCamera);
-				cssRenderer.render(scene,sceneCamera);
-			};
-			container.appendChild( renderer.domElement );
-			render();
-	
-	};
+            sceneCamera.position.z = 50;
+            console.log('scene loaded');
+            var render = function () { 
+                requestAnimationFrame(render);
+                var delta = clock.getDelta();
+                characters.forEach(function(element,index,array){
+                    element.update(delta);
+                });
+                sceneControls.update();
+                renderer.render(scene, sceneCamera);
+                cssRenderer.render(scene,sceneCamera);
+            };
+            container.appendChild( renderer.domElement );
+            render();
+    };
 
+    baseCharacter.onLoadComplete = function () {
+        console.log('base character loaded');
+        baseCharacter.root.position.x=0;
+        baseCharacter.root.position.y=0;
+        baseCharacter.root.position.z=0;
+    };
+    //load base character
+    baseCharacter.loadParts(configOgro);
 
-	//ogro setup 
-	var createCharacter=function(dbrecord,x,y,z){
-		var character = new THREE.MD2CharacterComplex();
-		character.id=dbrecord._id;
-		character.name=dbrecord._id;
-		character.scale = .05;
-		character.dbrecord=dbrecord;
-		character.animationFPS=Math.floor((Math.random() * 5)+1);
-		character.controls = ogroControls;
-		character.root.position.x=Math.floor((Math.random() * 5)+1);
-		character.root.position.y=Math.floor((Math.random() * 5)+1);
-		character.root.position.z=Math.floor((Math.random() * 5)+1);
-		character.root.name='ogro:' + dbrecord._id;
-		character.root.dbid=dbrecord._id;
-		character.root.base=character;
-		
-		character.loadParts( configOgro );
-		
-		character.onLoadComplete = function () {
-			//no weapons for now..
-			//this.setWeapon(Math.floor((Math.random()*1)));
-			this.setSkin(Math.floor((Math.random() * 10)));
-			this.setAnimation(configOgro.animations["stand"]);
+    //ogro setup 
+    var createCharacter=function(dbrecord,x,y,z){
+        var character = new THREE.MD2CharacterComplex();
+        character.id=dbrecord._id;
+        character.name=dbrecord._id;
+        character.scale = .05;
+        character.dbrecord=dbrecord;
+        character.animationFPS=Math.floor((Math.random() * 5)+1);
+        character.controls = ogroControls;
+        character.root.position.x=x;
+        character.root.position.y=y;
+        character.root.position.z=z;
+        character.root.name='ogro:' + dbrecord._id;
+        character.root.dbid=dbrecord._id;
+        character.root.base=character;
+        character.shareParts(baseCharacter);
+        
+        //no weapons for now..
+        //this.setWeapon(Math.floor((Math.random()*1)));
+        character.setSkin(Math.floor((Math.random() * 10)));
+        //this.setAnimation(configOgro.animations["stand"]);
 
-			//create the character's nameplate
-			var acallout=document.createElement('div');
-			acallout.className='attackercallout';
-			
-			var aid=document.createElement('div');
-			aid.className='id';
-			aid.textContent=this.dbrecord.sourceipaddress;
-			acallout.appendChild(aid);
-			
-			var adetails=document.createElement('div');
-			adetails.className='details';
-			adetails.textContent=this.dbrecord.details.msg + "" + this.dbrecord.details.sub;
-			acallout.appendChild(adetails);
-			
-			var nameplate=new THREE.CSS3DObject(acallout);
-			var npOffset=new THREE.Vector3();
-			nameplate.name='nameplate:' + this.id;
-			nameplate.dbid=this.id;
-			npOffset.x=0;
-			npOffset.y=0;
-			npOffset.z=.5;
-			nameplate.offset=npOffset;
-			nameplate.scale.x=.01;
-			nameplate.scale.y=.01;
-			nameplate.scale.z=.01;
-			nameplate.position.copy(this.root.position);
-			nameplate.position.add(npOffset);
-			nameplate.element.style.display='none';
-			
-			//add everything.
-			//threejs doesn't take children that aren't threejs object3d instances
-			//so add the nameplate manually. 
-			this.root.children.push(nameplate);
-			nameplate.parent=this.root;
-			scene.add(nameplate);
-			
-			scene.add(this.root);
-			characters.push( this );
-			sceneObjects.push(this.root);
-			
-		};
-	};
+        //create the character's nameplate
+        var acallout=document.createElement('div');
+        acallout.className='attackercallout';
+        
+        var aid=document.createElement('div');
+        aid.className='id';
+        aid.textContent=dbrecord.sourceipaddress;
+        acallout.appendChild(aid);
+        
+        var adetails=document.createElement('div');
+        adetails.className='details';
+        adetails.textContent=dbrecord.details.msg + "" + dbrecord.details.sub;
+        acallout.appendChild(adetails);
+        
+        var nameplate=new THREE.CSS3DObject(acallout);
+        var npOffset=new THREE.Vector3();
+        nameplate.name='nameplate:' + character.id;
+        nameplate.dbid=character.id;
+        npOffset.x=0;
+        npOffset.y=0;
+        npOffset.z=.5;
+        nameplate.offset=npOffset;
+        nameplate.scale.x=.01;
+        nameplate.scale.y=.01;
+        nameplate.scale.z=.01;
+        nameplate.position.copy(character.root.position);
+        nameplate.position.add(npOffset);
+        nameplate.element.style.display='none';
+            
+        //add everything.
+        //threejs doesn't take children that aren't threejs object3d instances
+        //so add the nameplate manually. 
+        character.root.children.push(nameplate);
+        nameplate.parent=character.root;
+        scene.add(nameplate);
+        
+        scene.add(character.root);
+        characters.push( character );
+        sceneObjects.push(character.root);
+    }; //end createCharacter
 
-	sceneSetup();
+    sceneSetup();
 
-	Deps.autorun(function() {
-		//console.log('running dep orgro autorun');
-		attackers.find().forEach(function(element,index,array){
-			//add to the scene if it's new
-			var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
-			x=Math.floor((Math.random() * 5)+1);
-			y=Math.floor((Math.random() * 5)+1);
-			z=Math.floor((Math.random() * 5)+1);			
-			if ( exists === undefined ) {
-				//console.log('adding character')
-				createCharacter(element,x,y,z)
-				}
-			else{
-				//console.log('updating character')
-				exists.root.position.x=x;
-				exists.root.position.z=z;
-			}
-		});
-	});
-   };
+    Deps.autorun(function() {
+        //console.log('running dep orgro autorun');
+        //pick a starting position for the group
+        var startingPosition = new THREE.Vector3();
+        startingPosition.x=_.random(-5,5);
+        startingPosition.y=_.random(-1,1);
+        startingPosition.z=_.random(-1,1);
+        
+        function waitForBaseCharacter(){
+            console.log(baseCharacter.loadCounter);
+            if ( baseCharacter.loadCounter!==0 ){
+                setTimeout(function(){waitForBaseCharacter()},100);
+            }else{
+                i=0;
+                attackers.find().forEach(function(element,index,array){
+                    //add to the scene if it's new
+                    var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
+                    if ( exists === undefined ) {
+                        //console.log('adding character')
+                        x=startingPosition.x + (i*2);
+                        createCharacter(element,x,startingPosition.y,startingPosition.z)
+                        }
+                    else{
+                        console.log('updating character')
+                        //exists.root.position.x=x;
+                        //exists.root.position.z=z;
+                    }
+                    i+=1;
+                });
+            };
+        };
+        waitForBaseCharacter();
+    }); //end deps.autorun
+   };//end template.attackers.rendered
 };
+
