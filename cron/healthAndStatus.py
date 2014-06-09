@@ -108,27 +108,37 @@ def main():
 
             healthlog['details'] = dict(username='mozdef')
             healthlog['details']['loadaverage'] = list(os.getloadavg())
+            healthlog['details']['queues']=list()
+            healthlog['details']['total_deliver_eps'] = 0
+            healthlog['details']['total_publish_eps'] = 0
+            healthlog['details']['total_messages_ready'] = 0
             healthlog['tags'] = ['mozdef', 'status']
             for m in mq:
                 if 'message_stats' in m.keys() and isinstance(m['message_stats'], dict):
                     if 'messages_ready' in m.keys():
                         mready = m['messages_ready']
+                        healthlog['details']['total_messages_ready'] += m['messages_ready']
                     else:
                         mready = 0
                     if 'messages_unacknowledged' in m.keys():
                         munack = m['messages_unacknowledged']
                     else:
                         munack = 0
-                    healthlog['details'][m['name']] = dict(
+                    queueinfo=dict(
+                        queue=m['name'],
+                        vhost=m['vhost'], 
                         messages_ready=mready,
                         messages_unacknowledged=munack)
-
+            
                     if 'deliver_details' in m['message_stats'].keys():
-                        healthlog['details'][m['name']]['deliver_eps'] = \
+                        queueinfo['deliver_eps'] = \
                             m['message_stats']['deliver_details']['rate']
+                        healthlog['details']['total_deliver_eps'] += m['message_stats']['deliver_details']['rate']
                     if 'publish_details' in m['message_stats'].keys():
-                        healthlog['details'][m['name']]['publish_eps'] = \
+                        queueinfo['publish_eps'] = \
                             m['message_stats']['publish_details']['rate']
+                        healthlog['details']['total_publish_eps'] += m['message_stats']['publish_details']['rate']
+                    healthlog['details']['queues'].append(queueinfo)
 
             # post to elastic search servers directly without going through
             # message queues in case there is an availability issue

@@ -64,7 +64,7 @@ def toUTC(suspectedDate, localTimeZone="US/Pacific"):
 
 
 def getFrontendStats(es):
-    begindateUTC = toUTC(datetime.now() - timedelta(minutes=1))
+    begindateUTC = toUTC(datetime.now() - timedelta(minutes=15))
     enddateUTC = toUTC(datetime.now())
     qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
         from_value=begindateUTC, to_value=enddateUTC))
@@ -72,7 +72,7 @@ def getFrontendStats(es):
     qMozdef = pyes.TermsFilter('category', ['mozdef'])
     qLatest = pyes.TermsFilter('tags', ['latest'])
     pyesresults = es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(
-        must=[qType, qLatest, qMozdef])),
+        must=[qDate, qType, qLatest, qMozdef])),
         indices='events')
     return pyesresults._search_raw()['hits']['hits']
 
