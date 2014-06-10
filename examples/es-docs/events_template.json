@@ -20,7 +20,11 @@
               "type":"string"
             },
             "hostname":{
-              "type":"string"
+              "type" : "multi_field",
+              "fields" : {
+                "hostname": {"type": "string"},
+                "raw" : {"type" : "string", "index" : "not_analyzed"}
+              }
             },
             "email" : {
               "type" : "string",
@@ -82,7 +86,88 @@
         "processid":{
           "type":"string"
         },
-        "receivedtimestatmp":{
+        "receivedtimestamp":{
+          "type":"date",
+          "format":"dateOptionalTime"
+        },
+        "severity":{
+          "type":"string"
+        },
+        "summary":{
+          "type":"string"
+        },
+        "tags":{
+          "index":"not_analyzed",
+          "type":"string"
+        },
+        "timestamp":{
+          "type":"date",
+          "format":"dateOptionalTime"
+        },
+        "utctimestamp":{
+          "type":"date",
+          "format":"dateOptionalTime"
+        }
+      }
+    },
+    "auditd":{
+      "_ttl" : { "enabled" : true },
+      "properties":{
+        "category":{
+          "index":"not_analyzed",
+          "type":"string"
+        },
+        "details":{
+          "properties":{
+            "dhost":{
+              "type" : "multi_field",
+              "fields" : {
+                "dhost": {"type": "string"},
+                "raw" : {"type" : "string", "index" : "not_analyzed"}
+              }
+            },
+            "auid":{
+              "type":"integer"
+            },
+            "deviceversion":{
+              "type": "integer"
+            },
+            "duid":{
+              "type": "integer"
+            },
+            "egid":{
+              "type": "integer"
+            },
+            "euid":{
+              "type": "integer"
+            },
+            "fsgid":{
+              "type": "integer"
+            },
+            "fsuid":{
+              "type": "integer"
+            },
+            "gid":{
+              "type": "integer"
+            },
+            "ses":{
+              "type": "integer"
+            },
+            "severity":{
+              "type": "integer"
+            },
+            "sgid":{
+              "type": "integer"
+            },
+            "suid":{
+              "type": "integer"
+            },
+            "version":{
+              "type": "integer"
+            }
+          }
+        },
+        "receivedtimestamp":{
           "type":"date",
           "format":"dateOptionalTime"
         },
