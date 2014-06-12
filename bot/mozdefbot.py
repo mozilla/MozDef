@@ -61,7 +61,6 @@ keywords = {'INFORMATIONAL': colors['green'],
             'INFO': colors['green'],
             'WARNING': colors['yellow'],
             'CRITICAL': colors['red'],
-            'mozdef': colors['blue'],
             }
 
 
