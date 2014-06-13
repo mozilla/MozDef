@@ -17,7 +17,7 @@ class message(object):
         '''
         self.registration = ['RT_FLOW']
         self.priority = 5
-        self.deny_regex = re.compile(r'%-RT_FLOW_SESSION_DENY: session denied (?P<src>([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+))/(?P<srcport>[0-9]+)->(?P<dst>([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+))/(?P<dstport>[0-9]+) (?P<service>\S+) (?P<proto>[0-9]+)\((?P<prototype>[0-9]+)\) (?P<policy>\S+) (?P<srczone>\S+) (?P<dstzone>\S+) UNKNOWN UNKNOWN N/A\(N/A\) (?P<interface>\S+)')
+        self.deny_regex = re.compile(r'%-RT_FLOW_SESSION_DENY: session denied (?P<src>([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+))/(?P<srcport>[0-9]+)->(?P<dst>([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+))/(?P<dstport>[0-9]+) (?P<service>\S+) (?P<proto>[0-9]+)\((?P<prototype>[0-9]+)\) (?P<policy>\S+) (?P<srczone>\S+) (?P<dstzone>\S+) UNKNOWN UNKNOWN N/A\(N/A\) (?P<interface>\S+)(\n)?')
 
     def onMessage(self, message, metadata):
         if 'details' in message.keys():
