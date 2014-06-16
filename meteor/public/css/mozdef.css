@@ -26,6 +26,11 @@ body{
 }    
 
 /*mozdef custom */
+.upperwhite {
+    color: #FFF;
+    text-transform: uppercase;
+}
+
 #bottom-toolbar {
   background: #444444;
   width: 100%;

@@ -13,21 +13,21 @@ if (Meteor.isClient) {
     //defaults: 
     Session.set('verisfilter','');
     Session.set('rotate',.001);
-	var scene = null;
+    var scene = null;
     var sceneCamera = null;
-	var sceneControls = null;
+    var sceneControls = null;
     var sceneObjects=[];
-	var selectedObject=null;
-	var intersectedObject=null;
-	var mouse = new THREE.Vector2();
-	var offset = new THREE.Vector3();
-	var projector = new THREE.Projector();
-	var plane = null;
-	var scenePadding=100;
-	var renderer = new THREE.WebGLRenderer( { alpha: true , precision: 'lowp',premultipliedAlpha: false} );
+    var selectedObject=null;
+    var intersectedObject=null;
+    var mouse = new THREE.Vector2();
+    var offset = new THREE.Vector3();
+    var projector = new THREE.Projector();
+    var plane = null;
+    var scenePadding=100;
+    var renderer = new THREE.WebGLRenderer( { alpha: true , precision: 'lowp',premultipliedAlpha: false} );
     var characters = [];
     var baseCharacter = new THREE.MD2CharacterComplex();
-
+    
     //debug/testing functions
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')
@@ -119,6 +119,37 @@ if (Meteor.isClient) {
         }
       }
     });
+    
+    Template.mozdefhealth.rendered = function () {
+        var ringChartEPS   = dc.pieChart("#ringChart-EPS");
+        var ringChartLoadAverage = dc.pieChart("#ringChart-LoadAverage");
+        var frontEndData=healthfrontend.find({}).fetch();
+        var ndx = crossfilter(frontEndData);
+        var hostDim  = ndx.dimension(function(d) {return d.hostname;});
+        var hostEPS = hostDim.group().reduceSum(function(d) {return d.details.total_deliver_eps;});
+        var hostLoadAverage = hostDim.group().reduceSum(function(d) {return d.details.loadaverage[0];}); 
+        
+        ringChartEPS
+            .width(150).height(150)
+            .dimension(hostDim)
+            .group(hostEPS)
+            .label(function(d) {return d.value; })
+            .innerRadius(30);
+
+        ringChartLoadAverage
+            .width(150).height(150)
+            .dimension(hostDim)
+            .group(hostLoadAverage)
+            .label(function(d) {return d.value; })
+            .innerRadius(30);
+        dc.renderAll();
+        Deps.autorun(function() {
+            frontEndData=healthfrontend.find({}).fetch();
+            ndx.remove();
+            ndx.add(frontEndData);
+            dc.redrawAll();
+        }); //end deps.autorun
+     };
 
     //return all incidents
     Template.incidents.incident = function () {
@@ -292,7 +323,6 @@ if (Meteor.isClient) {
                 $pull: {tags:tagtext}
             });
         },
-
         "keyup": function(e, t) {
            // Save user input after 3 seconds of not typing
            incidentSaveTimer.run(e, t);
@@ -710,7 +740,6 @@ if (Meteor.isClient) {
     
   }
 
-
     Template.attackers.events({
         "click #btnReset": function(e){
             sceneControls.reset();
@@ -1049,4 +1078,3 @@ if (Meteor.isClient) {
     }); //end deps.autorun
    };//end template.attackers.rendered
 };
-
