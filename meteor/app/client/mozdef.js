@@ -122,12 +122,20 @@ if (Meteor.isClient) {
     
     Template.mozdefhealth.rendered = function () {
         var ringChartEPS   = dc.pieChart("#ringChart-EPS");
+        var totalEPS   = dc.numberDisplay("#total-EPS");
         var ringChartLoadAverage = dc.pieChart("#ringChart-LoadAverage");
         var frontEndData=healthfrontend.find({}).fetch();
         var ndx = crossfilter(frontEndData);
         var hostDim  = ndx.dimension(function(d) {return d.hostname;});
         var hostEPS = hostDim.group().reduceSum(function(d) {return d.details.total_deliver_eps;});
-        var hostLoadAverage = hostDim.group().reduceSum(function(d) {return d.details.loadaverage[0];}); 
+        var hostLoadAverage = hostDim.group().reduceSum(function(d) {return d.details.loadaverage[0];});
+        var epsTotal = ndx.groupAll().reduceSum(function(d) {return d.details.total_deliver_eps;});
+        
+        console.log(epsTotal.value());
+        
+        totalEPS
+            .valueAccessor(function(d){return d;})
+            .group(epsTotal);
         
         ringChartEPS
             .width(150).height(150)
