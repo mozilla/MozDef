@@ -65,25 +65,22 @@ def main():
     try:
         es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
         #capture the time we start running so next time we catch any files created while we run.
-        lastrun=toUTC(options.lastrun).isoformat()
-        today=toUTC(datetime.utcnow()).isoformat()
-        print lastrun
-        print today
-        url = options.mighost+'/api/v1/search?type=command&status=done&report=complianceitems&before='+today+'&after='+lastrun
+        lastrun=str(options.lastrun.isoformat())
+        today=datetime.utcnow().isoformat()+'+00:00'
+        url = options.mighost+'/api/v1/search?type=command&status=done&report=complianceitems&limit=1000000&before='+today+'&after='+lastrun
         url = url.replace('+00:00', 'Z')
         r = requests.get(url,
             cert=(options.sslclientcert, options.sslclientkey))
         migjson=r.json()
-        print url
+        logger.debug(url)
         if migjson['collection']['items'][0]['data'][0]['value']:
-            for compliancecheck in migjson['collection']['items'][0]['data'][0]['value']:
-                pp.pprint(compliancecheck)
-                print '\n'
-                # historical data
-                res=es.index(index='complianceitems',doc_type='history',doc=compliancecheck)
-                # last_known_state data
-                docid=hashlib.md5('complianceitems'+compliancecheck['check']['ref']+compliancecheck['check']['test']['value']+compliancecheck['target']).hexdigest()
-                res=es.index(index='complianceitems',id=docid,doc_type='last_known_state',doc=compliancecheck)
+            for complianceitem in migjson['collection']['items'][0]['data'][0]['value']:
+                # historical data - index the new logs
+                res=es.index(index='complianceitems',doc_type='history',doc=complianceitem)
+                # last_known_state data - update the logs
+                # _id = md5('complianceitems'+check.ref+check.test.value+target)
+                docid=hashlib.md5('complianceitems'+complianceitem['check']['ref']+complianceitem['check']['test']['value']+complianceitem['target']).hexdigest()
+                res=es.index(index='complianceitems',id=docid,doc_type='last_known_state',doc=complianceitem)
         else:
             logger.error("No compliance item available, terminating")
         setConfig('lastrun',today,options.configfile)
@@ -97,12 +94,11 @@ def initConfig():
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
     options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     # Z = UTC, -07:00 = PDT
-    options.defaulttimediff=getConfig('defaulttimediff','Z',options.configfile)
     options.mighost=getConfig('mighost','https://localhost',options.configfile)
     options.sslclientcert=getConfig('sslclientcert','mig.crt',options.configfile)
     options.sslclientkey=getConfig('sslclientkey','mig.key',options.configfile)
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
-    options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(hours=1)),options.configfile))
+    options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(minutes=15)),options.configfile))
 
 if __name__ == '__main__':
     parser=OptionParser()
