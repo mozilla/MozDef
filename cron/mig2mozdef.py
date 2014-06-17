@@ -72,19 +72,20 @@ def main():
         r = requests.get(url,
             cert=(options.sslclientcert, options.sslclientkey),
             verify=options.sslcacert)
-        migjson=r.json()
-        logger.debug(url)
-        if migjson['collection']['items'][0]['data'][0]['value']:
-            for complianceitem in migjson['collection']['items'][0]['data'][0]['value']:
-                # historical data - index the new logs
-                res=es.index(index='complianceitems',doc_type='history',doc=complianceitem)
-                # last_known_state data - update the logs
-                # _id = md5('complianceitems'+check.ref+check.test.value+target)
-                docid=hashlib.md5('complianceitems'+complianceitem['check']['ref']+complianceitem['check']['test']['value']+complianceitem['target']).hexdigest()
-                res=es.index(index='complianceitems',id=docid,doc_type='last_known_state',doc=complianceitem)
-        else:
-            logger.debug("No compliance item available, terminating")
-        setConfig('lastrun',today,options.configfile)
+        if r.status_code == 200:
+            migjson=r.json()
+            logger.debug(url)
+            if migjson['collection']['items'][0]['data'][0]['value']:
+                for complianceitem in migjson['collection']['items'][0]['data'][0]['value']:
+                    # historical data - index the new logs
+                    res=es.index(index='complianceitems',doc_type='history',doc=complianceitem)
+                    # last_known_state data - update the logs
+                    # _id = md5('complianceitems'+check.ref+check.test.value+target)
+                    docid=hashlib.md5('complianceitems'+complianceitem['check']['ref']+complianceitem['check']['test']['value']+complianceitem['target']).hexdigest()
+                    res=es.index(index='complianceitems',id=docid,doc_type='last_known_state',doc=complianceitem)
+            else:
+                logger.debug("No compliance item available, terminating")
+            setConfig('lastrun',today,options.configfile)
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
 
