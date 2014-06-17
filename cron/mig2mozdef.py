@@ -70,7 +70,8 @@ def main():
         url = options.mighost+'/api/v1/search?type=command&status=done&report=complianceitems&limit=1000000&before='+today+'&after='+lastrun
         url = url.replace('+00:00', 'Z')
         r = requests.get(url,
-            cert=(options.sslclientcert, options.sslclientkey))
+            cert=(options.sslclientcert, options.sslclientkey),
+            verify=options.sslcacert)
         migjson=r.json()
         logger.debug(url)
         if migjson['collection']['items'][0]['data'][0]['value']:
@@ -82,7 +83,7 @@ def main():
                 docid=hashlib.md5('complianceitems'+complianceitem['check']['ref']+complianceitem['check']['test']['value']+complianceitem['target']).hexdigest()
                 res=es.index(index='complianceitems',id=docid,doc_type='last_known_state',doc=complianceitem)
         else:
-            logger.error("No compliance item available, terminating")
+            logger.debug("No compliance item available, terminating")
         setConfig('lastrun',today,options.configfile)
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
@@ -97,6 +98,7 @@ def initConfig():
     options.mighost=getConfig('mighost','https://localhost',options.configfile)
     options.sslclientcert=getConfig('sslclientcert','mig.crt',options.configfile)
     options.sslclientkey=getConfig('sslclientkey','mig.key',options.configfile)
+    options.sslcacert = getConfig('sslcacert', '', options.configfile)
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(minutes=15)),options.configfile))
 
