@@ -42,13 +42,13 @@ Anthony Verez averez@mozilla.com
         <table class="table table-striped table-bordered table-hover table-condensed">
         <thead>
             <tr>
-                <td>Frontend node</td>
-                <td>Load average</td>
+                <td>Frontend Node</td>
+                <td>Load Average</td>
                 <td>Queue</td>
-                <td>messages_ready</td>
-                <td>messages_unacknowledged</td>
-                <td>deliver_eps</td>
-                <td>publish_eps</td>
+                <td>Messages Ready</td>
+                <td>Messages Unacknowledged</td>
+                <td>EPS IN</td>
+                <td>EPS to ElasticSearch</td>
             </tr>
         </thead>
         <tbody>
@@ -61,12 +61,12 @@ Anthony Verez averez@mozilla.com
         <table class="table table-striped table-bordered table-hover table-condensed">
         <thead>
             <tr>
-                <td>ES node</td>
-                <td>CPU usage</td>
-                <td>Load averages</td>
-                <td>JVM mem %</td>
-                <td>disk free (GB)</td>
-                <td>disk total (GB)</td>
+                <td>ES Node</td>
+                <td>CPU %</td>
+                <td>Load Average</td>
+                <td>JVM Memory %</td>
+                <td>Disk Free (GB)</td>
+                <td>Disk Total (GB)</td>
             </tr>
         </thead>
         <tbody>
@@ -118,30 +118,19 @@ Anthony Verez averez@mozilla.com
         <td></td>
         <td>{{details.total_messages_ready}}</td>
         <td></td>
-        <td>{{details.total_deliver_eps}}</td>
         <td>{{details.total_publish_eps}}</td>
+        <td>{{details.total_deliver_eps}}</td>
     </tr>
-    {{#if details.events}}
+    {{#each details.queues}}
         <tr>
             <td></td>
             <td></td>
-            <td>events</td>
-            <td>{{details.events.messages_ready}}</td>
-            <td>{{details.events.messages_unacknowledged}}</td>
-            <td>{{details.events.deliver_eps}}</td>
-            <td>{{details.events.publish_eps}}</td>
+            <td>{{queue}}</td>
+            <td>{{messages_ready}}</td>
+            <td>{{messages_unacknowledged}}</td>
+            <td>{{publish_eps}}</td>
+            <td>{{deliver_eps}}</td>
         </tr>
-    {{/if}}
-    {{#if details.eventtask}}
-        <tr>
-            <td></td>
-            <td></td>
-            <td>eventtask</td>
-            <td>{{details.eventtask.messages_ready}}</td>
-            <td>{{details.eventtask.messages_unacknowledged}}</td>
-            <td>{{details.eventtask.deliver_eps}}</td>
-            <td>{{details.eventtask.publish_eps}}</td>
-        </tr>
-    {{/if}}
+    {{/each}}
 </template>
 
