@@ -134,6 +134,10 @@ def main():
                         queueinfo['deliver_eps'] = \
                             m['message_stats']['deliver_details']['rate']
                         healthlog['details']['total_deliver_eps'] += m['message_stats']['deliver_details']['rate']
+                    if 'deliver_no_ack_details' in m['message_stats'].keys():
+                        queueinfo['deliver_eps'] = \
+                            m['message_stats']['deliver_no_ack_details']['rate']
+                        healthlog['details']['total_deliver_eps'] += m['message_stats']['deliver_no_ack_details']['rate']
                     if 'publish_details' in m['message_stats'].keys():
                         queueinfo['publish_eps'] = \
                             m['message_stats']['publish_details']['rate']
