@@ -77,7 +77,6 @@ def initConfig():
 if __name__ == '__main__':
     parser = OptionParser()
     defaultconfigfile = sys.argv[0].replace('backupDiscover.py', 'backup.conf')
-    print defaultconfigfile
     parser.add_option("-c",
                       dest='configfile',
                       default=defaultconfigfile,
