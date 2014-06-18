@@ -261,7 +261,7 @@ class taskConsumer(ConsumerMixin):
             Timer(options.esbulktimeout, self.flush_es_bulk).start()
 
     def get_consumers(self, Consumer, channel):
-        consumer = Consumer(self.taskQueue, callbacks=[self.on_message], accept=['json', 'text/plain'])
+        consumer = Consumer(self.taskQueue, callbacks=[self.on_message], accept=['json', 'text/plain'], no_ack=(not options.mqack))
         consumer.qos(prefetch_count=options.prefetch)
         return [consumer]
 
@@ -527,10 +527,18 @@ def main():
         mqSSL = False
     mqConn = Connection(connString, ssl=mqSSL)
     # Task Exchange for events sent via http for us to normalize and post to elastic search
-    eventTaskExchange = Exchange(name=options.taskexchange, type='direct', durable=True)
+    if options.mqack:
+        # conservative, store msgs to disk, ack each message
+        eventTaskExchange = Exchange(name=options.taskexchange, type='direct', durable=True, delivery_mode=2)
+    else:
+        # fast, transient delivery, store in memory only, auto-ack messages
+        eventTaskExchange = Exchange(name=options.taskexchange, type='direct', durable=True, delivery_mode=1)
     eventTaskExchange(mqConn).declare()
     # Queue for the exchange
-    eventTaskQueue = Queue(options.taskexchange, exchange=eventTaskExchange, routing_key=options.taskexchange)
+    if options.mqack:
+        eventTaskQueue = Queue(options.taskexchange, exchange=eventTaskExchange, routing_key=options.taskexchange, durable=True, no_ack=False)
+    else:
+        eventTaskQueue = Queue(options.taskexchange, exchange=eventTaskExchange, routing_key=options.taskexchange, durable=True, no_ack=True)
     eventTaskQueue(mqConn).declare()
 
     # topic exchange for anyone who wants to queue and listen for mozdef.event
@@ -566,6 +574,10 @@ def initConfig():
     options.mqvhost = getConfig('mqvhost', '/', options.configfile)
     # set to either amqp or amqps for ssl
     options.mqprotocol = getConfig('mqprotocol', 'amqp', options.configfile)
+    # run with message acking?
+    # also toggles transient/persistant delivery (messages in memory only or stored on disk)
+    # ack=True sets persistant delivery, False sets transient delivery
+    options.mqack = getConfig('mqack', True, options.configfile)
 
     # plugin options
     # secs to pass before checking for new/updated plugins
