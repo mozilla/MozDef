@@ -46,7 +46,6 @@ def main():
             aws_secret_access_key=options.aws_secret_access_key
         )
         idate = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m%d')
-        yearmonth = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y-%m')
         hostname = socket.gethostname()
 
         # Create snapshot repo if not registered
