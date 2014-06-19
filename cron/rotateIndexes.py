@@ -58,10 +58,10 @@ def esRotateIndexes():
                         if oldindex == newindex:
                             logger.debug('do not rotate %s index, month has not changed yet' % index)
                             continue
-                        logger.debug('Creating %s index' % newindex)
-                        es.indices.create_index(newindex)
-                        logger.debug('Updating %s alias to new index' % index)
-                        es.indices.set_alias(index, newindex)
+                    logger.debug('Creating %s index' % newindex)
+                    es.indices.create_index(newindex)
+                    logger.debug('Updating %s alias to new index' % index)
+                    es.indices.set_alias(index, newindex)
                     if oldindex in indices:
                         logger.debug('Updating %s-previous alias to old index' % index)
                         es.indices.set_alias('%s-previous' % index, oldindex)
