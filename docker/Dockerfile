@@ -72,8 +72,8 @@ ADD conf/elasticsearch.yml /opt/elasticsearch-1.0.1/config/
 
 
 # Kibana
-RUN (curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.0.0.tar.gz |tar -C /opt -xz \
-       && /bin/ln -s /opt/kibana-3.0.0 /opt/kibana)
+RUN (curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz |tar -C /opt -xz \
+       && /bin/ln -s /opt/kibana-3.1.0 /opt/kibana)
 
 # Meteor
 RUN (curl -L https://install.meteor.com/ | /bin/sh \
