@@ -124,7 +124,7 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-c",
                       dest='configfile',
-                      default=sys.argv[0].replace('pruneIndexes.py', 'backup.conf'),
+                      default=sys.argv[0].replace('.py', '.conf'),
                       help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()

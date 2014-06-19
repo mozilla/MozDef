@@ -58,15 +58,15 @@ def esRotateIndexes():
                         if oldindex == newindex:
                             logger.debug('do not rotate %s index, month has not changed yet' % index)
                             continue
-                    if oldindex in indices:
                         logger.debug('Creating %s index' % newindex)
                         es.indices.create_index(newindex)
                         logger.debug('Updating %s alias to new index' % index)
                         es.indices.set_alias(index, newindex)
+                    if oldindex in indices:
                         logger.debug('Updating %s-previous alias to old index' % index)
                         es.indices.set_alias('%s-previous' % index, oldindex)
                     else:
-                        logger.error('Error, old index %s is missing, rotation cancelled' % oldindex)
+                        logger.debug('Old index %s is missing, do not change %s-previous alias' % oldindex, index)
             except Exception as e:
                 logger.error("Unhandled exception while rotating %s, terminating: %r" % (index, e))
 
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-c",
                       dest='configfile',
-                      default=sys.argv[0].replace('rotateIndexes.py', 'backup.conf'),
+                      default=sys.argv[0].replace('.py', '.conf'),
                       help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()

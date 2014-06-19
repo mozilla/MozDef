@@ -173,7 +173,7 @@ def initConfig():
 
 if __name__ == '__main__':
     parser = OptionParser()
-    defaultconfigfile = sys.argv[0].replace('backupSnapshot.py', 'backup.conf')
+    defaultconfigfile = sys.argv[0].replace('.py', '.conf')
     parser.add_option("-c",
                       dest='configfile',
                       default=defaultconfigfile,
