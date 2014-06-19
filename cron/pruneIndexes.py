@@ -26,6 +26,7 @@ logger = logging.getLogger(sys.argv[0])
 logger.level=logging.INFO
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
+
 def esPruneIndexes():
     if options.output == 'syslog':
         logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
