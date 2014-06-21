@@ -28,6 +28,7 @@ class message(object):
             		if msg_unparsed.startswith('%-RT_FLOW_SESSION_DENY:'):
             			deny_search = re.search(self.deny_regex, msg_unparsed)
             			if deny_search:
+            				message['details']['action'] = 'denied'
             				message['details']['src'] = deny_search.group('src')
             				message['details']['srcport_int'] = deny_search.group('srcport')
             				message['details']['dst'] = deny_search.group('dst')
@@ -42,6 +43,7 @@ class message(object):
             		if msg_unparsed.startswith('%-RT_FLOW_SESSION_CREATE:'):
             			create_search = re.search(self.create_regex, msg_unparsed)
             			if create_search:
+            				message['details']['action'] = 'created'
             				message['details']['src'] = create_search.group('src')
             				message['details']['srcport_int'] = create_search.group('srcport')
             				message['details']['dst'] = create_search.group('dst')
