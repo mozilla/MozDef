@@ -28,7 +28,7 @@ class message(object):
                     if search:
                         message['details']['trapname'] = search.group('trapname')
                         message['details']['trapseverity'] = search.group('trapseverity')
-                        message['details']['source_host'] = search.group('source_host')
+                        message['details']['sourcehostname'] = search.group('source_host')
                         message['details']['trappayload'] = search.group('trappayload')
                         message['details']['hostname'] = search.group('source_host')
 
