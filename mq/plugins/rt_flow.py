@@ -23,39 +23,39 @@ class message(object):
     def onMessage(self, message, metadata):
         if 'details' in message.keys():
             if 'program' in message['details'].keys():
-            	if 'RT_FLOW' == message['details']['program']:
-            		msg_unparsed = message['summary']
-            		if msg_unparsed.startswith('%-RT_FLOW_SESSION_DENY:'):
-            			deny_search = re.search(self.deny_regex, msg_unparsed)
-            			if deny_search:
-            				message['details']['action'] = 'denied'
-            				message['details']['src'] = deny_search.group('src')
-            				message['details']['srcport_int'] = deny_search.group('srcport')
-            				message['details']['dst'] = deny_search.group('dst')
-            				message['details']['dstport_int'] = deny_search.group('dstport')
-            				message['details']['service'] = deny_search.group('service')
-            				message['details']['proto_int'] = deny_search.group('proto')
-            				message['details']['prototype_int'] = deny_search.group('prototype')
-            				message['details']['policy'] = deny_search.group('policy')
-            				message['details']['srczone'] = deny_search.group('srczone')
-            				message['details']['dstzone'] = deny_search.group('dstzone')
-            				message['details']['interface'] = deny_search.group('interface')
-            		if msg_unparsed.startswith('%-RT_FLOW_SESSION_CREATE:'):
-            			create_search = re.search(self.create_regex, msg_unparsed)
-            			if create_search:
-            				message['details']['action'] = 'created'
-            				message['details']['src'] = create_search.group('src')
-            				message['details']['srcport_int'] = create_search.group('srcport')
-            				message['details']['dst'] = create_search.group('dst')
-            				message['details']['dstport_int'] = create_search.group('dstport')
-            				message['details']['service'] = create_search.group('service')
-            				message['details']['srcnatrule'] = create_search.group('srcnatrule')
-            				message['details']['dstnatrule'] = create_search.group('dstnatrule')
-            				message['details']['protocol'] = create_search.group('protocol')
-            				message['details']['policy'] = create_search.group('policy')
-            				message['details']['srczone'] = create_search.group('srczone')
-            				message['details']['dstzone'] = create_search.group('dstzone')
-            				message['details']['sessionid_int'] = create_search.group('sessionid')
-            				message['details']['interface'] = create_search.group('interface')
+                if 'RT_FLOW' == message['details']['program']:
+                    msg_unparsed = message['summary']
+                    if msg_unparsed.startswith('%-RT_FLOW_SESSION_DENY:'):
+                        deny_search = re.search(self.deny_regex, msg_unparsed)
+                        if deny_search:
+                            message['details']['action'] = 'denied'
+                            message['details']['src'] = deny_search.group('src')
+                            message['details']['srcport_int'] = deny_search.group('srcport')
+                            message['details']['dst'] = deny_search.group('dst')
+                            message['details']['dstport_int'] = deny_search.group('dstport')
+                            message['details']['service'] = deny_search.group('service')
+                            message['details']['proto_int'] = deny_search.group('proto')
+                            message['details']['prototype_int'] = deny_search.group('prototype')
+                            message['details']['policy'] = deny_search.group('policy')
+                            message['details']['srczone'] = deny_search.group('srczone')
+                            message['details']['dstzone'] = deny_search.group('dstzone')
+                            message['details']['interface'] = deny_search.group('interface')
+                    if msg_unparsed.startswith('%-RT_FLOW_SESSION_CREATE:'):
+                        create_search = re.search(self.create_regex, msg_unparsed)
+                        if create_search:
+                            message['details']['action'] = 'created'
+                            message['details']['src'] = create_search.group('src')
+                            message['details']['srcport_int'] = create_search.group('srcport')
+                            message['details']['dst'] = create_search.group('dst')
+                            message['details']['dstport_int'] = create_search.group('dstport')
+                            message['details']['service'] = create_search.group('service')
+                            message['details']['srcnatrule'] = create_search.group('srcnatrule')
+                            message['details']['dstnatrule'] = create_search.group('dstnatrule')
+                            message['details']['protocol'] = create_search.group('protocol')
+                            message['details']['policy'] = create_search.group('policy')
+                            message['details']['srczone'] = create_search.group('srczone')
+                            message['details']['dstzone'] = create_search.group('dstzone')
+                            message['details']['sessionid_int'] = create_search.group('sessionid')
+                            message['details']['interface'] = create_search.group('interface')
 
         return (message, metadata)

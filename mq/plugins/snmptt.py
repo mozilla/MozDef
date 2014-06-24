@@ -22,9 +22,9 @@ class message(object):
     def onMessage(self, message, metadata):
         if 'details' in message.keys():
             if 'program' in message['details'].keys():
-            	if 'snmptt' == message['details']['program']:
-            		msg_unparsed = message['summary']
-            		search = re.search(self.regex, msg_unparsed)
+                if 'snmptt' == message['details']['program']:
+                    msg_unparsed = message['summary']
+                    search = re.search(self.regex, msg_unparsed)
                     if search:
                         message['details']['trapname'] = search.group('trapname')
                         message['details']['trapseverity'] = search.group('trapseverity')
