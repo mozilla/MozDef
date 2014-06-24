@@ -127,43 +127,55 @@
               }
             },
             "auid":{
-              "type":"integer"
+              "type":"long"
             },
             "deviceversion":{
               "type": "integer"
             },
             "duid":{
-              "type": "integer"
+              "type": "long"
             },
             "egid":{
-              "type": "integer"
+              "type": "long"
             },
             "euid":{
-              "type": "integer"
+              "type": "long"
             },
             "fsgid":{
-              "type": "integer"
+              "type": "long"
             },
             "fsuid":{
-              "type": "integer"
+              "type": "long"
             },
             "gid":{
-              "type": "integer"
+              "type": "long"
             },
             "ses":{
-              "type": "integer"
+              "type": "long"
             },
             "severity":{
               "type": "integer"
             },
             "sgid":{
-              "type": "integer"
+              "type": "long"
             },
             "suid":{
-              "type": "integer"
+              "type": "long"
             },
             "version":{
               "type": "integer"
+            },
+            "ogid": {
+              "type": "long"
+            },
+            "ouid": {
+              "type": "long"
+            },
+            "uid": {
+              "type": "long"
+            },
+            "pid": {
+              "type": "long"
             }
           }
         },
