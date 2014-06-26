@@ -76,6 +76,7 @@ def main():
             migjson=r.json()
             logger.debug(url)
             if migjson['collection']['items'][0]['data'][0]['value']:
+                migjson['collection']['items'][0]['data'][0]['value'] = migjson['collection']['items'][0]['data'][0]['value'][::-1]
                 for complianceitem in migjson['collection']['items'][0]['data'][0]['value']:
                     # historical data - index the new logs
                     res=es.index(index='complianceitems',doc_type='history',doc=complianceitem)
