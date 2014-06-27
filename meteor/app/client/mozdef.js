@@ -832,10 +832,12 @@ if (Meteor.isClient) {
                 offset.copy( intersects[ 0 ].point ).sub( plane.position );
                 container.style.cursor = 'move';
                 //console.log(selectedObject);
-                var attacker = attackers.findOne({_id: selectedObject.dbid})
-                $("#banhammerIP")[0].textContent = attacker.sourceipaddress;
-                $('#btnBanhammer')[0].href = '/incidents/banhammer/'+attacker.sourceipaddress;
-                $("#btnBanhammer").show();
+                if (getSetting('enableBanhammer')) {
+                    var attacker = attackers.findOne({_id: selectedObject.dbid})
+                    $("#banhammerIP")[0].textContent = attacker.sourceipaddress;
+                    $('#btnBanhammer')[0].href = '/incidents/banhammer/'+attacker.sourceipaddress;
+                    $("#btnBanhammer").show();
+                }
             }
         },
         "mousemove": function(event,template){
