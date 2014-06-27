@@ -9,7 +9,7 @@
 
 import sys
 import bottle
-from bottle import debug,route, run, response, request, default_app
+from bottle import debug,route, run, response, request, default_app, post
 import json
 from configlib import getConfig, OptionParser
 import pyes
@@ -18,8 +18,12 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
 import pytz
+import MySQLdb
+from datetime import datetime, timedelta
 
 options = None
+dbcursor = None
+mysqlconn = None
 # cors decorator for rest/ajax
 
 
@@ -87,6 +91,16 @@ def index():
         request.body.close()
     response.content_type = "application/json"
     return(kibanaDashboards())
+
+
+@post('/banhammer', methods=['POST'])
+@post('/banhammer/', methods=['POST'])
+@enable_cors
+def index():
+    # try:
+    return(banhammer(request.json))
+    # except Exception as e:
+    #     sys.stderr.write('Error parsing json sent to POST /banhammer\n')
 
 
 #debug(True)
@@ -221,6 +235,51 @@ def kibanaDashboards():
         sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
 
 
+def banhammer(action):
+    try:
+        # Look if attacker already in the DB, if yes get id
+        dbcursor.execute("""SELECT id FROM blacklist_offender
+              WHERE address = "%s" AND cidr = %d""" % (action['address'], int(action['cidr'])))
+        qresult = dbcursor.fetchone()
+        if not qresult:
+            # insert new attacker in banhammer DB
+            created_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            dbcursor.execute("""
+                INSERT INTO blacklist_offender(address, cidr, created_date, updated_date)
+                VALUES ("%s", %d, '%s', '%s')
+            """ % (action['address'], action['cidr'], created_date, created_date))
+            # get the ID of this query
+            dbcursor.execute("""SELECT id FROM blacklist_offender
+              WHERE address = "%s" AND cidr = %d""" % (action['address'], int(action['cidr'])))
+        (attacker_id,) = qresult
+        # Compute start and end dates
+        start_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        end_date = datetime.utcnow() + timedelta(hours=1)
+        if action['duration'] == '12hr':
+            end_date = datetime.utcnow() + timedelta(hours=12)
+        elif action['duration'] == '1d':
+            end_date = datetime.utcnow() + timedelta(days=1)
+        elif action['duration'] == '1w':
+            end_date = datetime.utcnow() + timedelta(days=7)
+        elif action['duration'] == '30d':
+            end_date = datetime.utcnow() + timedelta(days=30)
+
+        if action['bugid']:
+            # Insert in DB
+            dbcursor.execute("""
+                INSERT INTO blacklist_blacklist(offender_id, start_date, end_date, comment, reporter, bug_number, removed)
+                VALUES (%d, "%s", "%s", "%s", "%s", %d, 0)
+                """ % (attacker_id, start_date, end_date, action['comment'], action['reporter'], int(action['bugid'])))
+        else:
+            dbcursor.execute("""
+                INSERT INTO blacklist_blacklist(offender_id, start_date, end_date, comment, reporter, removed)
+                VALUES (%d, "%s", "%s", "%s", "%s", 0)
+                """ % (attacker_id, start_date, end_date, action['comment'], action['reporter']))
+        mysqlconn.commit()
+    except Exception as e:
+        sys.stderr.write('Error while banhammering %s/%d: %s\n' % (action['address'], action['cidr'], e))
+
+
 def initConfig():
     #change this to your default zone for when it's not specified
     options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific',
@@ -228,6 +287,14 @@ def initConfig():
     options.esservers = list(getConfig('esservers', 'http://localhost:9200',
         options.configfile).split(','))
     options.kibanaurl = getConfig('kibanaurl', 'http://localhost:9090',
+        options.configfile)
+    options.banhammerdbhost = getConfig('banhammerdbhost', 'localhost',
+        options.configfile)
+    options.banhammerdbuser = getConfig('banhammerdbuser', 'root',
+        options.configfile)
+    options.banhammerdbpasswd = getConfig('banhammerdbpasswd', '',
+        options.configfile)
+    options.banhammerdbdb = getConfig('banhammerdbdb', 'banhammer',
         options.configfile)
     print(options)
 
@@ -239,6 +306,15 @@ if __name__ == "__main__":
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
+    try:
+        mysqlconn = MySQLdb.connect(
+            host=options.banhammerdbhost,
+            user=options.banhammerdbuser,
+            passwd=options.banhammerdbpasswd,
+            db=options.banhammerdbdb)
+        dbcursor = mysqlconn.cursor()
+    except Exception as e:
+        sys.stderr.write('Failed to connect to the Banhammer DB\n')
     run(host="localhost", port=8081)
 else:
     parser = OptionParser()
@@ -247,4 +323,13 @@ else:
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
+    try:
+        mysqlconn = MySQLdb.connect(
+            host=options.banhammerdbhost,
+            user=options.banhammerdbuser,
+            passwd=options.banhammerdbpasswd,
+            db=options.banhammerdbdb)
+        dbcursor = mysqlconn.cursor()
+    except Exception as e:
+        sys.stderr.write('Failed to connect to the Banhammer DB\n')
     application = default_app()
