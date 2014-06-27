@@ -81,7 +81,14 @@ Router.map(function () {
        layoutTemplate: 'layout'
     });
     
-    
+    this.route('banhammer', {
+        path: '/incidents/banhammer/:_ipaddr',
+        template: 'banhammerform',
+        data: function() {
+          Session.set('banhammeripaddr', this.params._ipaddr);
+        },
+        layoutTemplate: 'layout'
+    });    
 
 });
 

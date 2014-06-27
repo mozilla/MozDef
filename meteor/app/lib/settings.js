@@ -21,6 +21,7 @@ elasticsearch = {
 mozdef = {
   rootURL: "https://localhost",
   port: "443",
-  rootAPI: "http://localhost:8081"
+  rootAPI: "http://localhost:8081",
+  enableBanhammer: false
 }
 
