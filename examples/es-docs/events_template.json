@@ -54,6 +54,14 @@
             "sourceipaddress":{
               "type":"ip"
             },
+            "sourceipgeolocation":{
+              "properties":{
+                "country_name": {
+                  "type": "string",
+                  "index" : "not_analyzed"
+                }
+              }
+            },
             "sourceport":{
               "type":"string"
             },
