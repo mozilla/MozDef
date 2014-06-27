@@ -411,7 +411,7 @@ if (Meteor.isClient) {
                                                 format: 'MM/DD/YYYY hh:mm:ss A',
                                                 startDate: moment()
                                                 });
-    }
+    };
 
     //add incident events
     Template.addincidentform.events({
@@ -431,6 +431,39 @@ if (Meteor.isClient) {
             Router.go('/incidents/')
         }
 
+    });
+
+    Template.banhammerform.rendered = function() {
+        $('#ipaddr')[0].value = Session.get('banhammeripaddr');
+    };
+
+    Template.banhammerform.events({
+        "submit form": function(event, template) {
+            event.preventDefault();
+            var reporter = '';
+            try {
+                reporter = Meteor.user().profile.email;
+            }
+            catch(err) {
+                reporter = 'test';
+            }
+            var ipaddr = $('#ipaddr')[0].value.split('/');
+            var address = ipaddr[0];
+            var cidr = 32;
+            if (ipaddr.length == 2) {
+                parseInt(ipaddr[1]);
+            }
+            var actionobj = {
+              address: address,
+              cidr: cidr,
+              duration: $('#duration')[0].value,
+              comment: $('#comment')[0].value,
+              reporter: reporter,
+              bugid: parseInt($('#bugid')[0].value)
+            };
+            Meteor.call('banhammer', actionobj);
+            Router.go('/incidents/attackers');
+        }
     });
 
     //auto run to handle session variable changes
@@ -777,6 +810,11 @@ if (Meteor.isClient) {
             }
             
         },
+        "click #btnBanhammer": function(event, template) {
+          // TODO: modal with ipaddr, duration (dropdown), comment (text 1024 chars), bug (text 7 chars, optional)
+          console.log("Banhammer!");
+          console.log(event);
+        },
         "mousedown": function(event,template){
         //if mouse is over a character
         //set the selected object
@@ -793,6 +831,11 @@ if (Meteor.isClient) {
                 var intersects = raycaster.intersectObject( plane );
                 offset.copy( intersects[ 0 ].point ).sub( plane.position );
                 container.style.cursor = 'move';
+                //console.log(selectedObject);
+                var attacker = attackers.findOne({_id: selectedObject.dbid})
+                $("#banhammerIP")[0].textContent = attacker.sourceipaddress;
+                $('#btnBanhammer')[0].href = '/incidents/banhammer/'+attacker.sourceipaddress;
+                $("#btnBanhammer").show();
             }
         },
         "mousemove": function(event,template){
@@ -868,6 +911,7 @@ if (Meteor.isClient) {
 
   Template.attackers.rendered = function () {
     //console.log('entering draw attackers');
+    $("#btnBanhammer").hide();
     scene = new THREE.Scene();
     scene.name='attackerScene';
     var clock = new THREE.Clock();

@@ -11,7 +11,8 @@ Jeff Bryner jbryner@mozilla.com
 //public functions
 Meteor.methods({
   'saySomething': saySomething,
-  'loadKibanaDashboards': loadKibanaDashboards
+  'loadKibanaDashboards': loadKibanaDashboards,
+  'banhammer': banhammer
 });
 
 function saySomething() {
@@ -34,6 +35,16 @@ function loadKibanaDashboards() {
     console.log(mozdef.rootAPI + '/kibanadashboards');
     console.log("returned a " + dashboardsRequest.statusCode);
     console.log(dashboardsRequest.data);
+  }
+}
+
+function banhammer(actionobj) {
+  var banhammerRequest = HTTP.post(mozdef.rootAPI + '/banhammer', {data: actionobj});
+  if (banhammerRequest.statusCode==200) {
+    console.log(actionobj.address+"/"+actionobj.cidr+" banhammered for "+actionobj.duration);
+  }
+  else {
+    console.log("Could not banhammer "+actionobj.address+"/"+actionobj.cidr+" for "+actionobj.duration);
   }
 }
 
