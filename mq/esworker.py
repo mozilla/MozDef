@@ -231,6 +231,16 @@ def keyMapping(aDict):
                 else:
                     returndict[u'details'][unicode(newName)] = toUnicode(v)
 
+            #nxlog windows log handling
+            if 'Domain' in aDict.keys() and 'SourceModuleType' in aDict.keys():
+                # add a dict to hold the details if it doesn't exist
+                if 'details' not in returndict.keys():
+                    returndict[u'details'] = dict()
+
+                # nxlog parses all windows event fields very well
+                # copy all fields to details
+                returndict[u'details'][k]=v
+
     except Exception as e:
         sys.stderr.write('esworker exception normalizing the message %r\n' % e)
         return None
