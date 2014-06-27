@@ -97,10 +97,11 @@ def index():
 @post('/banhammer/', methods=['POST'])
 @enable_cors
 def index():
-    # try:
-    return(banhammer(request.json))
-    # except Exception as e:
-    #     sys.stderr.write('Error parsing json sent to POST /banhammer\n')
+    if (options.banhammerenable == 'true'):
+        try:
+            return(banhammer(request.json))
+        except Exception as e:
+            sys.stderr.write('Error parsing json sent to POST /banhammer\n')
 
 
 #debug(True)
@@ -288,6 +289,8 @@ def initConfig():
         options.configfile).split(','))
     options.kibanaurl = getConfig('kibanaurl', 'http://localhost:9090',
         options.configfile)
+    options.banhammerenable = getConfig('banhammerenable', 'false',
+        options.configfile)
     options.banhammerdbhost = getConfig('banhammerdbhost', 'localhost',
         options.configfile)
     options.banhammerdbuser = getConfig('banhammerdbuser', 'root',
@@ -306,15 +309,16 @@ if __name__ == "__main__":
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    try:
-        mysqlconn = MySQLdb.connect(
-            host=options.banhammerdbhost,
-            user=options.banhammerdbuser,
-            passwd=options.banhammerdbpasswd,
-            db=options.banhammerdbdb)
-        dbcursor = mysqlconn.cursor()
-    except Exception as e:
-        sys.stderr.write('Failed to connect to the Banhammer DB\n')
+    if (options.banhammerenable == 'true'):
+        try:
+            mysqlconn = MySQLdb.connect(
+                host=options.banhammerdbhost,
+                user=options.banhammerdbuser,
+                passwd=options.banhammerdbpasswd,
+                db=options.banhammerdbdb)
+            dbcursor = mysqlconn.cursor()
+        except Exception as e:
+            sys.stderr.write('Failed to connect to the Banhammer DB\n')
     run(host="localhost", port=8081)
 else:
     parser = OptionParser()
@@ -323,13 +327,14 @@ else:
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    try:
-        mysqlconn = MySQLdb.connect(
-            host=options.banhammerdbhost,
-            user=options.banhammerdbuser,
-            passwd=options.banhammerdbpasswd,
-            db=options.banhammerdbdb)
-        dbcursor = mysqlconn.cursor()
-    except Exception as e:
-        sys.stderr.write('Failed to connect to the Banhammer DB\n')
+    if (options.banhammerenable == 'true'):
+        try:
+            mysqlconn = MySQLdb.connect(
+                host=options.banhammerdbhost,
+                user=options.banhammerdbuser,
+                passwd=options.banhammerdbpasswd,
+                db=options.banhammerdbdb)
+            dbcursor = mysqlconn.cursor()
+        except Exception as e:
+            sys.stderr.write('Failed to connect to the Banhammer DB\n')
     application = default_app()
