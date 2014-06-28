@@ -40,7 +40,8 @@
               "type":"string"
             },
             "program":{
-              "type":"string"
+              "type":"string",
+              "index" : "not_analyzed"
             },
             "protocol":{
               "type":"string"
