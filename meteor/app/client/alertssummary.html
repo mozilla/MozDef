@@ -10,10 +10,29 @@ Anthony Verez averez@mozilla.com
 -->
 
 <template name="alertssummary">
-<style>
-
-</style>
-<div class="alerts-wrapper" id="alerts-wrapper">
-
+<div class="container">
+    <div id="charts" class="row-fluid">
+        <div class="row">
+            <div id="ringChart-category" class="span6 text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5>
+            <span class="reset" style="display: none;"></span>
+            </div>
+            <div id="ringChart-severity" class="span6 text-center"><h5 class="upperwhite" id="Severity">Severity: <span class="filter"></span></h5></div>
+        </div>
+        <div class="row">
+            <a class="reset" href="javascript:myChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+            <div id="alerts-data-table" >
+                <table class="alerts-data-table table table-striped table-bordered table-hover table-condensed">
+                    <thead><tr>
+                    <td class="upperwhite">UTC Timestamp</td>
+                    <td class="upperwhite">Severity</td>
+                    <td class="upperwhite">Category</td>
+                    <td class="upperwhite">Summary</td>
+                    </tr>
+                    </thead>
+                <!-- data rows will be filled in here -->
+                </table>
+            </div>
+        </div>        
+    </div>
 </div>
 </template>
