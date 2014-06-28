@@ -152,6 +152,10 @@ if (Meteor.isClient) {
             .group(function (d) {
                     return d.dd.getFullYear() + "/" + format2d(d.dd.getMonth() + 1) + "/" + format2d(d.dd.getDate());
                     })
+            .sortBy(function(d) {
+                return d.dd;
+            })
+            .order(d3.descending)
             .columns([
                 function(d) {return d.utctimestamp;},
                 function(d) {return d.severity;},
