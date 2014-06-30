@@ -47,7 +47,7 @@ ADD conf/nginx.conf /etc/nginx/
 
 
 #Mozdef
-RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget\
+RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget python-mysqldb\
         && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
         && /bin/ln -s /opt/MozDef-master /opt/MozDef \
 #        && curl -L https://github.com/netantho/MozDef/archive/averez-esworker-fix.tar.gz |tar -C /opt -xz \
