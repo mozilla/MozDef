@@ -119,60 +119,95 @@ if (Meteor.isClient) {
         }
       }
     });
+
+    Template.alertssummary.events({
+        "click .reset": function(e,t){
+            dc.filterAll();
+            dc.redrawAll();
+            }
+    });    
     
     Template.alertssummary.rendered = function() {
+        console.log('rendered');
         var ringChartCategory   = dc.pieChart("#ringChart-category");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity");
-        var alertsData=alerts.find({}).fetch();
-        alertsData.forEach(function (d) {
-            d.dd=new Date(Date.parse(d.utctimestamp));
-            d.month = d3.time.month(d.dd);
-        });        
-        var ndx = crossfilter(alertsData);
-        var severityDim = ndx.dimension(function(d) {return d.severity;});
-        var categoryDim = ndx.dimension(function(d) {return d.category;});
-        var format2d = d3.format("02d");
-
-        ringChartCategory
-            .width(150).height(150)
-            .dimension(categoryDim)
-            .group(categoryDim.group())
-            .label(function(d) {return d.key; })
-            .innerRadius(30);
-
-        ringChartSeverity
-            .width(150).height(150)
-            .dimension(severityDim)
-            .group(severityDim.group())
-            .label(function(d) {return d.key; })
-            .innerRadius(30);              
-
-        dc.dataTable(".alerts-data-table")
-            .dimension(severityDim)
-            .group(function (d) {
-                    return d.dd.getFullYear() + "/" + format2d(d.dd.getMonth() + 1) + "/" + format2d(d.dd.getDate());
-                    })
-            .sortBy(function(d) {
-                return d.dd;
-            })
-            .order(d3.descending)
-            .columns([
-                function(d) {return d.utctimestamp;},
-                function(d) {return d.severity;},
-                function(d) {return d.category;},
-                function(d) {return d.summary;}
-            ]);
-
-        dc.renderAll();
+        var volumeChart         = dc.barChart("#volumeChart");
+        // set our data source
+        var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
+        var ndx = crossfilter();
+        function descNumbers(a, b) {
+            return b-a;
+        }
+        
         Deps.autorun(function() {
-            alertsData=alerts.find({}).fetch();
+            console.log('deps autorun');
+            alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}}).fetch();
+            //parse, group data for the d3 charts
             alertsData.forEach(function (d) {
-                d.dd=new Date(Date.parse(d.utctimestamp));
-                d.month = d3.time.month(d.dd);
-            });
-            ndx.remove();
-            ndx.add(alertsData);
-            dc.redrawAll();
+                d.jdate=new Date(Date.parse(d.utctimestamp));
+                d.dd=moment.utc(d.utctimestamp)
+                d.month = d.dd.get('month');
+                d.hour = d.dd.get('hour')
+                d.epoch=d.dd.unix();
+            });        
+            ndx = crossfilter(alertsData);
+            if ( ndx.size() >0){
+                var all = ndx.groupAll();
+                var severityDim = ndx.dimension(function(d) {return d.severity;});
+                var categoryDim = ndx.dimension(function(d) {return d.category;});
+                var hourDim = ndx.dimension(function (d) {return d3.time.hour(d.jdate);});
+                var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
+                var format2d = d3.format("02d");
+                var volumeByHourGroup = hourDim.group().reduceCount();
+                ndx.remove();
+                ndx.add(alertsData);
+                ringChartCategory
+                    .width(150).height(150)
+                    .dimension(categoryDim)
+                    .group(categoryDim.group())
+                    .label(function(d) {return d.key; })
+                    .innerRadius(30)
+                    .expireCache();
+        
+                ringChartSeverity
+                    .width(150).height(150)
+                    .dimension(severityDim)
+                    .group(severityDim.group())
+                    .label(function(d) {return d.key; })
+                    .innerRadius(30)
+                    .expireCache();
+                dc.dataCount(".record-count")
+                    .dimension(ndx)
+                    .group(all);            
+                dc.dataTable(".alerts-data-table")
+                    .dimension(epochDim)
+                    .size(100)
+                    .group(function (d) {
+                            //return d.dd.getFullYear() + "/" + format2d(d.dd.getMonth() + 1) + "/" + format2d(d.dd.getDate());
+                            //return moment.duration(d.dd).humanize() +' ago';
+                            return d.dd.local().format("ddd, hA"); 
+                            })
+                    .sortBy(function(d) {
+                        return d.utcepoch;
+                    })
+                    .order(descNumbers)                    
+                    .columns([
+                        function(d) {return d.jdate;},
+                        function(d) {return d.severity;},
+                        function(d) {return d.category;},
+                        function(d) {return d.summary;}
+                    ])
+                    .expireCache();
+                
+                volumeChart
+                    .width(600)
+                    .height(150)
+                    .dimension(hourDim)
+                    .group(volumeByHourGroup)
+                    .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]))
+                    .expireCache();
+                dc.renderAll();
+            }
         }); //end deps.autorun    
     };
 
