@@ -11,8 +11,11 @@ import netaddr
 
 def isIP(ip):
     try:
-        netaddr.IPNetwork(ip)
-        return True
+        if '.' in ip and len(ip.split('.'))==4:
+            netaddr.IPNetwork(ip)
+            return True
+        else:
+            return False
     except:
         return False
 

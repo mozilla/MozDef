@@ -14,10 +14,7 @@ getSetting=function (settingKey){
 	  //returns the value given a setting key
 	  //makes server-side settings easier to 
 	  //deploy than normal meteor --settings
-	  var settingvalue = mozdefsettings.findOne({ key : settingKey });
-          if(settingvalue)
-	    return settingvalue.value;
-          else
-            return '';
+	  var settingvalue = mozdefsettings.findOne({ key : settingKey }).value;
+	  return settingvalue;
 	};
 
