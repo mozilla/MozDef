@@ -17,3 +17,4 @@ getSetting=function (settingKey){
 	  var settingvalue = mozdefsettings.findOne({ key : settingKey }).value;
 	  return settingvalue;
 	};
+

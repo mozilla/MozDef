@@ -80,6 +80,15 @@ Router.map(function () {
        template:'veristags',
        layoutTemplate: 'layout'
     });
+
+    this.route('alert', {
+        path: '/alert/:alert_id',
+        template: 'alert',
+        data: function() {
+          Session.set('alertID', this.params.alert_id);
+        },
+        layoutTemplate: 'layout'
+    });
     
     this.route('banhammer', {
         path: '/incidents/banhammer/:_ipaddr',
