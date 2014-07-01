@@ -23,7 +23,11 @@ def initConfig():
         'http://localhost:9200',
         options.configfile).split(',')
     )
-
+    options.loginputserver = getConfig(
+        'loginputserver',
+        'http://localhost:8080',
+        options.configfile
+    )
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -34,6 +38,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     initConfig()
     es = es_module.Elasticsearch(options.esservers[0])
+    loginput = es_module.Elasticsearch(options.loginputserver, loginput=True)
     es.deleteIndex('events')
     es.deleteIndex('alerts')
     es.deleteIndex('kibana-int')
@@ -42,8 +47,8 @@ if __name__ == '__main__':
     es.createIndex('alerts')
     es.createIndex('events')
     es.loadDocs('alerts', 'alert', 'alerts.json')
-    es.loadDocs('events', 'auditd', 'events-auditd.json')
-    es.loadDocs('events', 'event', 'events-event.json')
+    loginput.loadDocs('events', 'auditd', 'events-auditd.json')
+    loginput.loadDocs('events', 'event', 'events-event.json')
     es.loadDocs('events', 'cloudtrail', 'events-cloudtrail.json')
     es.loadDashboard('events', 'events-kibana.json')
     es.loadDashboard('alerts', 'alerts-kibana.json')

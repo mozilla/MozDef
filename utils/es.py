@@ -14,13 +14,14 @@ import requests
 
 
 class Elasticsearch(object):
-    def __init__(self, esserver):
+    def __init__(self, esserver, loginput=False):
         """
         Class used for ES features not supported by pyes
         and for shortcuts when using pyes
         """
         self.esserver = esserver
         self.conn = pyes.ES(esserver)
+        self.loginput = loginput
 
     def deleteIndex(self, index):
         print('Deleting %s index...' % index)
@@ -37,6 +38,7 @@ class Elasticsearch(object):
         if r.status_code == 200:
             print('Successfully put %s template' % template_name)
         else:
+            print(r.json())
             print('Problem putting %s template %r' % (template_name, r))
         f.close()
 
@@ -52,7 +54,11 @@ class Elasticsearch(object):
         f = open(docs_file)
         data = json.load(f)
         for l in data:
-            self.conn.index(l, index, docs_type)
+            if self.loginput:
+                url = '{0}/events'.format(self.esserver)
+                requests.put(url=url, data=json.dumps(l))
+            else:
+                self.conn.index(l, index, docs_type)
         f.close()
 
     def loadDashboard(self, dash_name, dash_file):
