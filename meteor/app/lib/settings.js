@@ -14,7 +14,7 @@ Anthony Verez averez@mozilla.com
 elasticsearch = {
   address: "http://localhost:9200/",
   healthurl: "_cluster/health",
-  docstatsurl: "_stats/docs",
+  docstatsurl: "_stats/docs"
 }
 
 
@@ -22,6 +22,7 @@ mozdef = {
   rootURL: "https://localhost",
   port: "443",
   rootAPI: "http://localhost:8081",
+  kibanaURL: "http://localhost:9090",
   enableBanhammer: false
 }
 

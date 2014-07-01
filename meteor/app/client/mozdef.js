@@ -158,6 +158,7 @@ if (Meteor.isClient) {
             .order(d3.descending)
             .columns([
                 function(d) {return d.utctimestamp;},
+                function(d) {return d._id + '<br> <a href="' + d.url + '">see in kibana</a>';},
                 function(d) {return d.severity;},
                 function(d) {return d.category;},
                 function(d) {return d.summary;}
@@ -169,6 +170,7 @@ if (Meteor.isClient) {
             alertsData.forEach(function (d) {
                 d.dd=new Date(Date.parse(d.utctimestamp));
                 d.month = d3.time.month(d.dd);
+                d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d._id;
             });
             ndx.remove();
             ndx.add(alertsData);
@@ -577,7 +579,6 @@ if (Meteor.isClient) {
       var r = d3.scale.sqrt()
           .range([0, maxRadius]);
       
-          
       d3.json(getSetting('rootAPI') + '/ldapLogins/' , function(error, jsondata) {
           //console.log(jsondata)
           r.domain([0, d3.max(jsondata, function(d) { return d.success+ d.failures; })])

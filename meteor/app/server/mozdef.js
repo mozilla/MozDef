@@ -27,6 +27,8 @@ if (Meteor.isServer) {
                                 value : mozdef.rootURL });
         mozdefsettings.insert({ key:'rootAPI', 
                                 value : mozdef.rootAPI });
+        mozdefsettings.insert({ key:'kibanaURL',
+                                value : mozdef.kibanaURL });
 
         //console.log(mozdefsettings.find({}).fetch())
         
