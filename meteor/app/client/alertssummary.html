@@ -13,15 +13,15 @@ Anthony Verez averez@mozilla.com
 <div class="container">
     <div id="charts" class="row-fluid">
         <div class="row">
-            <div id="ringChart-category" class="span2 text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5>
+            <div id="ringChart-category" class="span3 text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5>
             </div>
             <div id="volumeChart" class="span6 text-center"><h5 class="upperwhite">Volume <span class="filter"></span></h5></div>
-            <div id="ringChart-severity" class="span2 text-center"><h5 class="upperwhite" id="Severity">Severity: <span class="filter"></span></h5></div>
+            <div id="ringChart-severity" class="span3 text-center"><h5 class="upperwhite" id="Severity">Severity: <span class="filter"></span></h5></div>
         </div>
         <div class="row">
             <div><a class="reset">reset filters</a></div>
             <div class="record-count">
-                <span class="filter-count"></span> selected out of <span class="total-count"></span> alerts
+                <span class="filter-count"></span> selected/<span class="total-count"></span> displayed out of {{alertsCount}} total alerts
             </div>
         </div>
         <div class="row">

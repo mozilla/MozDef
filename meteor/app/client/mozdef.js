@@ -153,6 +153,10 @@ if (Meteor.isClient) {
             }
     });   
  
+    Template.alertssummary.alertsCount = function () {
+      return alerts.find({}).count();
+    };
+    
     Template.alertssummary.rendered = function() {
         console.log('rendered');
         var ringChartCategory   = dc.pieChart("#ringChart-category");
@@ -167,7 +171,8 @@ if (Meteor.isClient) {
         
         Deps.autorun(function() {
             console.log('deps autorun');
-            alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}}).fetch();
+            alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 1000, reactive:false}).fetch();
+            var alertsCount=alerts.find({}).count();
             //parse, group data for the d3 charts
             alertsData.forEach(function (d) {
                 d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
