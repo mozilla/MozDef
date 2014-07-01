@@ -119,7 +119,33 @@ if (Meteor.isClient) {
         }
       }
     });
-    
+
+    Template.alert.rendered = function() {
+        Deps.autorun(function() {
+            var myalert = alerts.find({'esmetadata.id': Session.get('alertID')}).fetch();
+            var table = document.getElementById("alert-table");
+            // remove data rows if any
+            if (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+            myalert.forEach(function (d) {
+                console.log(Session.get('alertID'));
+                d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
+                var row = table.insertRow(1);
+                var ctimestamp = row.insertCell(0);
+                var cid = row.insertCell(1);
+                var cseverity = row.insertCell(2);
+                var ccategory = row.insertCell(3);
+                var csummary = row.insertCell(4);
+                ctimestamp.innerHTML = d.utctimestamp;
+                cid.innerHTML = '<a href="/alert/' + d.esmetadata.id + '">' + d.esmetadata.id + '</a><br> <a href="' + d.url + '">see in kibana</a>';
+                cseverity.innerHTML = d.severity;
+                ccategory.innerHTML = d.category;
+                csummary.innerHTML = d.summary;
+            });
+        }); //end deps.autorun
+    }
+ 
     Template.alertssummary.rendered = function() {
         var ringChartCategory   = dc.pieChart("#ringChart-category");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity");
@@ -158,7 +184,7 @@ if (Meteor.isClient) {
             .order(d3.descending)
             .columns([
                 function(d) {return d.utctimestamp;},
-                function(d) {return d._id + '<br> <a href="' + d.url + '">see in kibana</a>';},
+                function(d) {return '<a href="/alert/' + d.esmetadata.id + '">' + d.esmetadata.id + '</a><br> <a href="' + d.url + '">see in kibana</a>';},
                 function(d) {return d.severity;},
                 function(d) {return d.category;},
                 function(d) {return d.summary;}
@@ -170,7 +196,7 @@ if (Meteor.isClient) {
             alertsData.forEach(function (d) {
                 d.dd=new Date(Date.parse(d.utctimestamp));
                 d.month = d3.time.month(d.dd);
-                d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d._id;
+                d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
             });
             ndx.remove();
             ndx.add(alertsData);
