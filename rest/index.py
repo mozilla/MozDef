@@ -289,7 +289,7 @@ def initConfig():
         options.configfile).split(','))
     options.kibanaurl = getConfig('kibanaurl', 'http://localhost:9090',
         options.configfile)
-    options.banhammerenable = getConfig('banhammerenable', 'false',
+    options.banhammerenable = getConfig('banhammerenable', False,
         options.configfile)
     options.banhammerdbhost = getConfig('banhammerdbhost', 'localhost',
         options.configfile)
@@ -309,7 +309,7 @@ if __name__ == "__main__":
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    if (options.banhammerenable == 'true'):
+    if options.banhammerenable:
         try:
             mysqlconn = MySQLdb.connect(
                 host=options.banhammerdbhost,
