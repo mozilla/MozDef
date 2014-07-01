@@ -195,7 +195,13 @@ def parseCEF(acef):
         logger.error('Index error parsing CEF headers in {0}'.format(acef[:200]))
         return None
 
-    mlist = '|'.join(acef.split('|')[7:]).decode('ascii', 'ignore')
+    # get the non header fields including any pipes in target commands, etc. 
+    # mlist = '|'.join(acef.split('|')[7:]).decode('ascii','ignore')
+    # since fields are delimited by field=value<space>field=value
+    # and we are reversing the text to find fields, 
+    # add a beginning space else we miss the first field.
+    # then grab everything after the cef header as ascii
+    mlist = ' ' + '|'.join(acef.split('|')[7:]).decode('ascii','ignore')      
     # unescape any escaped field\\=value fields
     mlist = mlist.replace('\\=', '=')
     # no empty messages
