@@ -97,7 +97,7 @@ def index():
 @post('/banhammer/', methods=['POST'])
 @enable_cors
 def index():
-    if (options.banhammerenable == 'true'):
+    if options.banhammerenable:
         try:
             return(banhammer(request.json))
         except Exception as e:
@@ -246,12 +246,13 @@ def banhammer(action):
             # insert new attacker in banhammer DB
             created_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             dbcursor.execute("""
-                INSERT INTO blacklist_offender(address, cidr, created_date, updated_date)
-                VALUES ("%s", %d, '%s', '%s')
-            """ % (action['address'], action['cidr'], created_date, created_date))
+                INSERT INTO blacklist_offender(address, cidr)
+                VALUES ("%s", %d)
+            """ % (action['address'], action['cidr']))
             # get the ID of this query
             dbcursor.execute("""SELECT id FROM blacklist_offender
               WHERE address = "%s" AND cidr = %d""" % (action['address'], int(action['cidr'])))
+            qresult = dbcursor.fetchone()
         (attacker_id,) = qresult
         # Compute start and end dates
         start_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -268,15 +269,16 @@ def banhammer(action):
         if action['bugid']:
             # Insert in DB
             dbcursor.execute("""
-                INSERT INTO blacklist_blacklist(offender_id, start_date, end_date, comment, reporter, bug_number, removed)
-                VALUES (%d, "%s", "%s", "%s", "%s", %d, 0)
+                INSERT INTO blacklist_blacklist(offender_id, start_date, end_date, comment, reporter, bug_number)
+                VALUES (%d, "%s", "%s", "%s", "%s", %d)
                 """ % (attacker_id, start_date, end_date, action['comment'], action['reporter'], int(action['bugid'])))
         else:
             dbcursor.execute("""
-                INSERT INTO blacklist_blacklist(offender_id, start_date, end_date, comment, reporter, removed)
-                VALUES (%d, "%s", "%s", "%s", "%s", 0)
+                INSERT INTO blacklist_blacklist(offender_id, start_date, end_date, comment, reporter)
+                VALUES (%d, "%s", "%s", "%s", "%s")
                 """ % (attacker_id, start_date, end_date, action['comment'], action['reporter']))
         mysqlconn.commit()
+        sys.stderr.write('%s/%d: banhammered\n' % (action['address'], action['cidr']))
     except Exception as e:
         sys.stderr.write('Error while banhammering %s/%d: %s\n' % (action['address'], action['cidr'], e))
 
@@ -327,7 +329,7 @@ else:
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    if (options.banhammerenable == 'true'):
+    if options.banhammerenable:
         try:
             mysqlconn = MySQLdb.connect(
                 host=options.banhammerdbhost,
