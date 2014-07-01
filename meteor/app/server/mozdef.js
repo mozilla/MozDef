@@ -27,6 +27,8 @@ if (Meteor.isServer) {
                                 value : mozdef.rootURL });
         mozdefsettings.insert({ key:'rootAPI', 
                                 value : mozdef.rootAPI });
+        mozdefsettings.insert({ key:'enableBanhammer', 
+                                value : mozdef.enableBanhammer }); 
 
         //console.log(mozdefsettings.find({}).fetch())
         
