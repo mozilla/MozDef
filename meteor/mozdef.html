@@ -29,17 +29,7 @@ Anthony Verez averez@mozilla.com
 </head>
 <body>
     {{> menu}}
-    <div class="loginButtons" >
-        {{#if loggingIn}}
-                Logging In
-        {{else}}        
-            {{#if currentUser}}
-                Logout: {{currentUser.profile.email}}
-            {{/if}}        
-        {{/if}}
-        {{> loginButtons align="right"}}
-
-    </div>    
+   
     <div id="main-content">
 
     </div>           
@@ -51,24 +41,26 @@ Anthony Verez averez@mozilla.com
 <!--the main, simple layout for the router to target-->
 <template name="layout">
 
-    <div>
         {{#if currentUser}}
             {{>yield}}
         {{else}}
-            <div class="container"><div class="row"><div class="col-md-2 col-md-offset-5">
-               <div class="alert alert-info alert-dismissible" role="alert">
+            <div class="span5 offset4">
+                <div class="alert alert-info alert-dismissible" role="alert">
                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                    <strong>Please login</strong>
                </div>
-            </div></div></div>
+            </div>
         {{/if}}
-    </div>
+
 </template>
 
 
 <!--a nice greeting-->
 <template name="hello">
-    <p class="welcome">{{greeting}}<br>welcome</p>
+    <div class="span12">
+        <p class="welcome">{{greeting}}<br>welcome</p>
+    </div>
 
+        
 </template>
 

@@ -13,6 +13,7 @@ html{
 	background: none;
 	min-height: 100%;
 }
+
 body{
 	/*gradient*/
     background: rgb(32,87,153); /* Old browsers */
@@ -22,13 +23,33 @@ body{
     background: -o-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(125,185,232,1) 100%); /* Opera 11.10+ */
     background: -ms-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(125,185,232,1) 100%); /* IE10+ */
     background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(125,185,232,1) 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */    
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */
+    /*font-family: Georgia, serif;*/
+    /*font-family: "Trebuchet MS", sans-serif;*/
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    /*font-family: monospace;*/
+    /*font-family: sans-serif;*/
+    font-size: 12px;
+    margin: 0;
+    min-width: 990px;
+    padding: 0;
+    color: #000;
+    line-height: normal;
 }    
 
 /*mozdef custom */
 .upperwhite {
     color: #FFF;
     text-transform: uppercase;
+}
+
+#header a.mozilla {
+    position: relative;
+    float: right;
+    display: block;
+    height: 40px;
+    width: 100px;
+    overflow: hidden;
 }
 
 #bottom-toolbar {
@@ -43,6 +64,7 @@ body{
   font-size: 13px;
   color: #fff;
 }
+
 #bottom-toolbar .button {
   margin: 3px 3px 3px 0;
   padding: 2px 3px 2px 5px;
@@ -58,6 +80,7 @@ body{
 		text-align: center;
 		cursor: default;
 }
+
 .attackercallout .id {
 		position: absolute;
 		top: 20px;
@@ -65,6 +88,7 @@ body{
 		font-size: 12px;
 		color: rgba(127,255,255,0.75);
 }
+
 .attackercallout .details {
 		position: absolute;
 		bottom: 15px;
@@ -85,6 +109,7 @@ body{
 .table-hover tbody tr:hover > th {
   background-color: rgba(211, 202, 193,.7);
 }
+
 td{
   color:white;
 }
@@ -94,20 +119,19 @@ td{
 }    
 
 .logins-wrapper .svgtextlabel {
-  font: 20px Arial, sans-serif;
+  font-size: 20px;
   color: white;
 }
 
 .loginButtons {
   text-align: right;
-  position: fixed;
-  right:10%;
-  top:10px;
   color:white;
 }
+
 .login-password-form{
   display:none;
 }
+
 .or {
   display: none;
 }
@@ -145,15 +169,6 @@ circle:hover{
     stroke: black;
 }
 
-#header {
-
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    height: 57px;
-    margin: 0 auto;
-    width: 970px;
-}
 
 #header:after {
     content: "";
@@ -161,12 +176,13 @@ circle:hover{
 }
 
 #header h2 {
+    font: 30px sans-serif;
     background-image: url(/images/fx-usage-logo.png);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: 0px,0px;
     float: left;
-    font: normal 30px sans-serif;
+    font: normal 30px;
     margin: 0;
     padding: 2px 0px;
     color:  red;
@@ -175,19 +191,57 @@ circle:hover{
     text-shadow: #000 5px 3px 3px;
 }
 
-#header a.mozilla {
-    text-indent: -9999px;
-}
-
 #header a.mozdef{
 	color:white;
 }
+
+/*menu styling*/
+#nav-main {
+    text-align: left;
+    font-weight: bolder;
+    text-transform: uppercase;
+    display: inline-block;
+    height: 45px;
+}
+
+#nav-main ul {
+    float: left;
+    z-index: 99;
+    left: auto;
+    margin: 0px;
+    padding: 0px;
+}
+
+#nav-main li {
+    float: left;
+    background: none repeat scroll 0% 0% transparent;
+    margin: 0px 0px 0px -1px;
+    padding: 0px;
+    position: relative;
+    z-index: 100;
+    list-style: none outside none;
+}
+
 #nav-main li a,
 #nav-main li a:link,
 #nav-main li a:visited,
 #nav-main li span {
     border-color: #3a3c46;
     color: #fff;
+    padding: 15px 30px 10px 10px;
+    height: 18px;
+    display: block;
+    border-style: solid;
+    -moz-border-top-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    border-width: 0px 1px;
+    z-index: 100;
+    position:relative;
+    float:left;
+    border-image: none;
+    text-decoration: none;
 }
 
 #nav-main li.last a,
@@ -219,9 +273,45 @@ circle:hover{
         inset rgba(0,0,0,0.3) 0 -6px 20px 10px;
     background: #000;
     background: rgba(0,0,0,0);
+
+    transition-duration: 0.2s;
+    transition-timing-function: linear;
+    transition-delay: 0s;
+    transition-property: #6363CE, box-shadow, border-right;
+    padding-bottom: 15px;
+    outline: 0px none;
+}
+
+/* Second-level Menu Items */
+
+#nav-main li:hover ul,
+.js #nav-main li.hover ul {
+    margin-top: 47px;
+    left: 0;
+    opacity: 1;
+    -moz-transition: opacity 0.2s ease-in-out;
+    -webkit-transition: opacity 0.2s ease-in-out;
+    -o-transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out;
+}
+
+#nav-main ul ul,
+#nav-main ul ul li {
+    height: auto;
+    border: 0;
+    float: none;
+    margin-left: 0px;
 }
 
 #nav-main ul ul {
+    height: auto;
+    float: none;
+    position: absolute;
+    left: -999em;
+    opacity: 0;
+    z-index: 99;
+    width: 190px;
+    border-radius: 0px 4px 4px;
     border: 1px solid #3a3c46;
     text-shadow: 1px 1px 0 #000, 0 0 5px #000;
     background: #000;
@@ -238,12 +328,31 @@ circle:hover{
 }
 
 #nav-main ul ul li {
+    height: auto;
+    float: none;
+    border: 0px none;
     box-shadow:
         inset rgba(41,48,54,0.2) 0 -1px 0 0;
     -moz-box-shadow:
         inset rgba(41,48,54,0.2) 0 -1px 0 0;
     -webkit-box-shadow:
         inset rgba(41,48,54,0.2) 0 -1px 0 0;
+}
+
+#nav-main ul ul a,
+#nav-main ul ul a:link,
+#nav-main ul ul a:visited {
+    overflow: hidden;
+    padding: 8px 10px;
+    margin: 0px;
+    height: auto;
+    float: none;
+    display: block;
+    font-size: 10px;
+    border: 0px none;
+    position: relative;
+    background: none repeat scroll 0% 0% transparent;
+    box-shadow: none;    
 }
 
 #nav-main ul ul a:hover,
@@ -268,11 +377,65 @@ circle:hover{
 }
 
 
-#main-content {
+/* Currently active menu items */
+#nav-main ul li.current span,
+#nav-main ul li.current a,
+#nav-main ul li.current a:link,
+#nav-main ul li.current a:visited {
+    border-bottom-width: 1px;
+    -moz-border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
+    border-radius: 0 0 4px 4px;
+    background: #fbfdff;
+    background: -moz-linear-gradient(top, rgba(255,255,255,0.4) 0%,
+                                     rgba(255,255,255,0.8) 100%);
+    box-shadow:
+        rgba(152,178,201,0.2) 0 0px 0px,
+        inset rgba(152,178,201,0.3) 0 -2px 0,
+        inset rgba(255,255,255,0.8) 0 -6px 6px 4px;
+    -moz-box-shadow:
+        rgba(152,178,201,0.2) 0 0px 0px,
+        inset rgba(152,178,201,0.3) 0 -2px 0,
+        inset rgba(255,255,255,0.8) 0 -6px 6px 4px;
+    -webkit-box-shadow:
+        rgba(152,178,201,0.2) 0 0px 0px,
+        inset rgba(152,178,201,0.3) 0 -2px 0,
+        inset rgba(255,255,255,0.8) 0 -6px 6px 4px;
+    padding-right: 30px;
+    padding-bottom: 15px;
+}
 
+#nav-main ul li.current:hover a,
+#nav-main ul li.current.hover a,
+#nav-main ul li.current a:hover,
+#nav-main ul li.current a:focus,
+#nav-main ul li.current a:active,
+.js #nav-main ul li.current a:focus {
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webbkit-box-shadow: none;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    border-bottom: 0;
+}
+
+#nav-main ul li.current ul span,
+#nav-main ul li.current ul a,
+#nav-main ul li.current ul a:link,
+#nav-main ul li.current ul a:visited {
+    background: none;
+    height: auto;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    padding: 8px 10px;
+}
+
+#main-content {
     color: #fff;
     margin: 0 auto;
-    padding: 0 20px;
+    /*padding: 0 20px;*/
     text-align: left;
     text-shadow: #000 1px 1px 1px;
 }

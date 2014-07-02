@@ -10,36 +10,32 @@ Anthony Verez averez@mozilla.com
 -->
 
 <template name="alertssummary">
-<div class="container">
-    <div id="charts" class="row-fluid">
-        <div class="row">
-            <div id="ringChart-category" class="span3 text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5>
-            </div>
-            <div id="volumeChart" class="span6 text-center"><h5 class="upperwhite">Volume <span class="filter"></span></h5></div>
+<div class="container">    
+    <div id="charts" class="row-fluid span12">
+            <div id="ringChart-category" class="span3 text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5></div>
+            <div id="volumeChart" class="span5 text-center"><h5 class="upperwhite">Volume <span class="filter"></span></h5></div>
             <div id="ringChart-severity" class="span3 text-center"><h5 class="upperwhite" id="Severity">Severity: <span class="filter"></span></h5></div>
+    </div>
+    <div class="row span12">
+        <div><a class="reset">reset filters</a></div>
+        <div class="record-count">
+            <span class="filter-count"></span> selected/<span class="total-count"></span> displayed out of {{alertsCount}} total alerts
         </div>
-        <div class="row">
-            <div><a class="reset">reset filters</a></div>
-            <div class="record-count">
-                <span class="filter-count"></span> selected/<span class="total-count"></span> displayed out of {{alertsCount}} total alerts
-            </div>
+    </div>
+    <div class="row span12">
+        <div id="alerts-data-table" >
+            <table class="alerts-data-table table table-reactive table-hover table-condensed">
+                <thead><tr>
+                <td class="upperwhite">Timestamp</td>
+                <td class="upperwhite">Links</td>
+                <td class="upperwhite">Severity</td>
+                <td class="upperwhite">Category</td>
+                <td class="upperwhite">Summary</td>
+                </tr>
+                </thead>
+            <!-- data rows will be filled in here -->
+            </table>
         </div>
-        <div class="row">
-            <a class="reset" href="javascript:myChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-            <div id="alerts-data-table" >
-                <table class="alerts-data-table table table-striped table-bordered table-hover table-condensed">
-                    <thead><tr>
-                    <td class="upperwhite">Timestamp</td>
-                    <td class="upperwhite">ID</td>
-                    <td class="upperwhite">Severity</td>
-                    <td class="upperwhite">Category</td>
-                    <td class="upperwhite">Summary</td>
-                    </tr>
-                    </thead>
-                <!-- data rows will be filled in here -->
-                </table>
-            </div>
-        </div>        
     </div>
 </div>
 </template>

@@ -10,38 +10,55 @@ Anthony Verez averez@mozilla.com
 -->
 
 <template name="menu">
-    <div id="header" role="banner">
-        <h2><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></h2>
-        <div id="nav-main" role="navigation">
-        <ul>
-            <li class="first"><a href="#">Kibana dashboards</a>
-                <ul>
-                    {{#each kibanadashboards as item}}
-                        {{>kibanaDashboardItem}}
-                    {{/each}}
-                </ul>
+    <div id="header"  class="row">
+        <div class="span2 offset2">
+            <h2><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></h2>
+        </div>
+        <div id="nav-main" class="span6">
+            <ul>
+                <li class="first"><a href="#">Kibana dashboards</a>
+                    <ul>
+                        {{#each kibanadashboards as item}}
+                            {{>kibanaDashboardItem}}
+                        {{/each}}
+                    </ul>
+    
+                </li>
+                <li class="first"><a href="/events/">Events</a>
+                    <ul>
+                        <li class="first"><a href="/logincounts/">logincounts</a></li>
+                    </ul>
+                </li>
+                <li><a href="/alerts/">Alerts</a>
+                    <ul>
+                        <li class="last"><a href="/alerts/setup">setup</a></li>
+                    </ul>
+                </li>
+                <li><a href="/Incidents">Incidents</a>
+                    <ul>
+                        <li class="first"><a href="/incidents/new/">new incident</a></li>
+                        <li class="last"><a href="/incidents/attackers">attackers</a></li>
+                    </ul>
+                </li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </div>
+        <div class="span1">
+            <a class="mozilla" href="http://mozilla.org"><img src="/images/mozilla-tab.png"></a>
+        </div>
+        <div class="span2">
 
-            </li>
-            <li class="first"><a href="/events/">Events</a>
-                <ul>
-                    <li class="first"><a href="/logincounts/">logincounts</a></li>
-                </ul>
-            </li>
-            <li><a href="/alerts/">Alerts</a>
-                <ul>
-                    <li class="last"><a href="/alerts/setup">setup</a></li>
-                </ul>
-            </li>
-            <li><a href="/Incidents">Incidents</a>
-                <ul>
-                    <li class="first"><a href="/incidents/new/">new incident</a></li>
-                    <li class="last"><a href="/incidents/attackers">attackers</a></li>
-                </ul>
-            </li>
-            <li><a href="/about">About</a></li>
-        </ul>
-<a class="mozilla" href="http://mozilla.org"><img src="/images/mozilla-tab.png"></a>
-</div>
+            {{#if loggingIn}}
+                    Logging In
+            {{else}}        
+                {{#if currentUser}}
+                    Logout: {{currentUser.profile.email}}
+                {{/if}}        
+            {{/if}}
+            {{> loginButtons align="right"}}
+      
+        </div>
+         
 </div>
 </template>
 
