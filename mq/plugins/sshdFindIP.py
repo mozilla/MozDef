@@ -11,8 +11,11 @@ import netaddr
 
 def isIP(ip):
     try:
+        # netaddr on it's own considers 1 and 0 to be valid_ipv4
+        # so a little sanity check prior to netaddr.
         if '.' in ip and len(ip.split('.'))==4:
-            netaddr.IPNetwork(ip)
+            # some ips are quoted
+            netaddr.IPNetwork(ip.strip("'").strip('"'))
             return True
         else:
             return False
