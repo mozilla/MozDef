@@ -30,8 +30,8 @@ body{
     /*font-family: monospace;*/
     /*font-family: sans-serif;*/
     font-size: 12px;
-    margin: 0;
-    min-width: 990px;
+    /*margin: 0;*/
+    /*min-width: 990px;*/
     padding: 0;
     color: #000;
     line-height: normal;
@@ -99,7 +99,17 @@ body{
 }
 
 /*bootstrap overrides*/
-   
+
+.centerspan [class*="span"]{
+    margin: 0 auto;
+    float: none;
+}
+
+.center {
+    margin: 0 auto;
+    float: none;
+}
+
 .table-striped tbody > tr:nth-child(odd) > td,
 .table-striped tbody > tr:nth-child(odd) > th {
   background-color: rgba(211, 202, 193,.2);
@@ -184,8 +194,7 @@ circle:hover{
     float: left;
     font: normal 30px;
     margin: 0;
-    padding: 2px 0px;
-    color:  red;
+    padding: 2px 10px;
     text-align: left;
     text-indent: 50px;
     text-shadow: #000 5px 3px 3px;
@@ -195,6 +204,12 @@ circle:hover{
 	color:white;
 }
 
+#header label{
+    display: inherit;
+    cursor: auto;
+    margin:.5em;
+}
+
 /*menu styling*/
 #nav-main {
     text-align: left;
@@ -202,6 +217,8 @@ circle:hover{
     text-transform: uppercase;
     display: inline-block;
     height: 45px;
+    margin:.5em;
+    line-height: normal;
 }
 
 #nav-main ul {
@@ -228,8 +245,8 @@ circle:hover{
 #nav-main li span {
     border-color: #3a3c46;
     color: #fff;
-    padding: 15px 30px 10px 10px;
-    height: 18px;
+    padding: 8px 30px 10px 10px;
+    height: 10px;
     display: block;
     border-style: solid;
     -moz-border-top-colors: none;
@@ -274,11 +291,11 @@ circle:hover{
     background: #000;
     background: rgba(0,0,0,0);
 
-    transition-duration: 0.2s;
+    transition-duration: 0.1s;
     transition-timing-function: linear;
     transition-delay: 0s;
     transition-property: #6363CE, box-shadow, border-right;
-    padding-bottom: 15px;
+    padding-bottom: 30px;
     outline: 0px none;
 }
 
@@ -434,7 +451,7 @@ circle:hover{
 
 #main-content {
     color: #fff;
-    margin: 0 auto;
+    /*margin: 0 auto;*/
     /*padding: 0 20px;*/
     text-align: left;
     text-shadow: #000 1px 1px 1px;

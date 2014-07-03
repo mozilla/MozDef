@@ -44,7 +44,7 @@ Anthony Verez averez@mozilla.com
         {{#if currentUser}}
             {{>yield}}
         {{else}}
-            <div class="span5 offset4">
+            <div class="span5 center">
                 <div class="alert alert-info alert-dismissible" role="alert">
                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                    <strong>Please login</strong>
@@ -57,8 +57,10 @@ Anthony Verez averez@mozilla.com
 
 <!--a nice greeting-->
 <template name="hello">
-    <div class="span12">
-        <p class="welcome">{{greeting}}<br>welcome</p>
+    <div class="container">
+        <div class="center">
+            <p class="welcome">{{greeting}}<br>welcome</p>
+        </div>
     </div>
 
         
