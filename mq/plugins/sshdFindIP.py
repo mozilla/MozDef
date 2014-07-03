@@ -9,10 +9,11 @@
 import netaddr
 
 
-def isIP(ip):
+def isIPv4(ip):
     try:
         # netaddr on it's own considers 1 and 0 to be valid_ipv4
         # so a little sanity check prior to netaddr.
+        # Use IPNetwork instead of valid_ipv4 to allow CIDR
         if '.' in ip and len(ip.split('.'))==4:
             # some ips are quoted
             netaddr.IPNetwork(ip.strip("'").strip('"'))
@@ -29,7 +30,7 @@ class message(object):
            as a list of lower case strings or values to match with an event's dictionary of keys or values
            set the priority if you have a preference for order of plugins to run. 0 goes first, 100 is assumed/default if not sent
         '''
-        # get sshd events
+        # get events that may include an unparsed IP in the summary
         self.registration = ['sshd', 'fail2ban']
         self.priority = 5
         
@@ -37,12 +38,27 @@ class message(object):
         # if we don't have a source IP address
         # look for words that are IP addresses, 
         # move to details.sourceipaddress
+        doSearch = False
+        detailsExists = True
+        foundIPv4 = ''
         if 'summary' in message.keys():
             if 'details' in message.keys() and isinstance(message['details'], dict):
                 if 'sourceipaddress' not in message['details'].keys():
-                    for word in message['summary'].strip().split():
-                        saneword = word.strip().strip('"').strip("'")
-                        if isIP(saneword):
-                            message['details']['sourceipaddress'] = saneword
+                    doSearch = True
+            else:
+                doSearch = True
+                detailsExists = False
+            
+            if doSearch:
+                for word in message['summary'].strip().split():
+                    saneword = word.strip().strip('"').strip("'")
+                    if isIPv4(saneword):
+                        foundIPv4 = saneword
+                        break
+
+            if len(foundIPv4):
+                if not detailsExists:
+                    message['details'] = dict()
+                message['details']['sourceipaddress'] = foundIPv4
 
         return (message, metadata)
