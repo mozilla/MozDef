@@ -19,25 +19,40 @@ Jeff Bryner jbryner@mozilla.com
     width: 16px;
     background: url("/images/close_16.png") no-repeat 0 center;
 }
-.incidenttag{
 
-      border-radius: 10px ;
-    
+#tags li {
+    list-style: none outside none;
 }
 
 .daterangepicker td{
     color:black;
 }
 
+#editincidentform{
+    margin: 0px 30% 20px;
+}
+
 </style>
-    {{>veristags}}
-    <form id="editincidentform" class="form-horizontal editincidentform" style="margin: 0px 30% 20px;">
-        <legend>Edit Incident</legend>
+<div class="container">
+    <div class="row span4 center">
         <div id="changesbox" class="alert alert-info">
           <b><span id="saving"></span></b><br>
           <a href=# id="saveChanges"><b>Save changes now</b></a> - <a href=# id="undo"><b>Undo</b></a> - <a href=# id="redo"><b>Redo</b></a>
-        </div>
-        <fieldset>            
+        </div>        
+    </div>
+    <div class="row span4 center">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#">Edit</a></li>
+            <li><a href="#">References</a></li>
+            <li><a href="#">Theories</a></li>
+            <li><a href="#">Mitigations</a></li>
+        </ul>
+    </div>
+    <div class="row center">
+        {{>veristags}}
+
+        <form id="editincidentform" class="form-horizontal editincidentform" >
+        <fieldset>
             <div class="control-group">
               <label class="control-label" for="incidentSummary">Summary</label>
               <div class="controls">
@@ -80,10 +95,14 @@ Jeff Bryner jbryner@mozilla.com
             <div class="control-group">
                 <label class="control-label" for="tags">Tags</label>
                 <div class="controls" id="tags">
+                    <ul>
                     {{#each tags}}
+                    <li>
                         <div class="incidenttag">{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
-                    {{/each}}                      
-                    <div class="tags">drag to add a tag</div>
+                    </li>
+                    {{/each}}
+                    </ul>
+                    <div class="tags">drag here to add a tag</div>
                 </div>
             </div>
             <div class="control-group">
@@ -111,6 +130,7 @@ Jeff Bryner jbryner@mozilla.com
             </div>
         </fieldset>
     </form>
-
+    </div>
+</div>
 
 </template>
