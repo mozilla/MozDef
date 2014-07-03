@@ -40,8 +40,9 @@ class message(object):
         if 'summary' in message.keys():
             if 'details' in message.keys() and isinstance(message['details'], dict):
                 if 'sourceipaddress' not in message['details'].keys():
-                    for w in message['summary'].strip().split():
-                        if isIP(w):
-                            message['details']['sourceipaddress'] = w
+                    for word in message['summary'].strip().split():
+                        saneword = word.strip().strip('"').strip("'")
+                        if isIP(saneword):
+                            message['details']['sourceipaddress'] = saneword
 
         return (message, metadata)
