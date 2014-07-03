@@ -850,7 +850,7 @@ if (Meteor.isClient) {
             //if no selected object we are moving the scene camera
             
             
-            event.preventDefault();
+            //event.preventDefault();
             mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
             mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
             var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
@@ -927,7 +927,7 @@ if (Meteor.isClient) {
     sceneControls.noZoom = false;
     sceneControls.noPan = false;
     sceneControls.staticMoving = false;
-    //sceneControls.dynamicDampingFactor = 0.3;
+    sceneControls.dynamicDampingFactor = 0.3;
 
     //setup the css renderer for non-web gl objects
     var cssRenderer = new THREE.CSS3DRenderer();
@@ -1126,4 +1126,14 @@ if (Meteor.isClient) {
         waitForBaseCharacter();
     }); //end deps.autorun
    };//end template.attackers.rendered
+   
+    Template.attackers.destroyed = function () {
+        //remove scene Controls so they don't interfere with other forms, etc.
+        var scene = null;
+        var sceneCamera = null;
+        var sceneControls = null;
+        var sceneObjects=[];
+        var selectedObject=null;
+        var intersectedObject=null;
+    };//end template.attackers.destroyed
 };
