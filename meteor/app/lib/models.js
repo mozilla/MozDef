@@ -18,12 +18,13 @@ models={
     incident: function() {
         return {
             summary:"",
+            description: "",
             dateOpened: today,
             dateClosed:"",
             theories:[],
             notes:[],
             tags:[],
-            trackers:[],
+            references:[],
             phase:"Identification",
             timeline: {reported:"",
                         verified:"",

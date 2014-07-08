@@ -320,7 +320,8 @@ if (Meteor.isClient) {
         // tags are saved in real realtime (without timer)
 
         var incidentobj = {
-          summary: template.find("#incidentSummary").value,
+          summary: template.find("#summary").value,
+          description: template.find("#description").value,
           dateOpened: template.find("#dateOpened").value,
           dateClosed: template.find("#dateClosed").value,
           phase: template.find("#phase").value,
@@ -358,7 +359,8 @@ if (Meteor.isClient) {
           }
           Session.set('revisionsundo', revisionsundo);
 
-          template.find("#incidentSummary").value = incident.summary;
+          template.find("#summary").value = incident.summary;
+          template.find("#description").value = incident.description;
           template.find("#dateOpened").value = incident.dateOpened;
           template.find("#dateClosed").value = incident.dateClosed;
           template.find("#phase").value = incident.phase;
@@ -378,7 +380,8 @@ if (Meteor.isClient) {
           Session.set('revisionsundo', revisionsundo);
           Session.set('revisionsredo', revisionsredo);
 
-          template.find("#incidentSummary").value = incident.summary;
+          template.find("#summary").value = incident.summary;
+          template.find("#description").value = incident.description;
           template.find("#dateOpened").value = incident.dateOpened;
           template.find("#dateClosed").value = incident.dateClosed;
           template.find("#phase").value = incident.phase;
@@ -490,19 +493,19 @@ if (Meteor.isClient) {
             $(e.target.hash).fadeIn(400);
         },
         
-        "click #saveTracker": function(e,template){
-            tValue=$('#newTracker').val();
+        "click #saveReference": function(e,template){
+            tValue=$('#newReference').val();
             if ( tValue.length > 0 ) {
                 incidents.update(Session.get('incidentID'), {
-                    $addToSet: {trackers:tValue}
+                    $addToSet: {references:tValue}
                 });                
             }
-            $('#newTracker').val('');
+            $('#newReference').val('');
         },
-        "click .trackerdelete": function(e){
-            trackertext = e.target.parentNode.firstChild.wholeText;
+        "click .referencedelete": function(e){
+            reftext = e.target.parentNode.firstChild.wholeText;
             incidents.update(Session.get('incidentID'), {
-                $pull: {trackers:trackertext}
+                $pull: {references:reftext}
             });
         },        
 
@@ -574,7 +577,7 @@ if (Meteor.isClient) {
         "submit form": function(event, template) {
             event.preventDefault();
             incidents.insert({
-                summary: template.find("#incidentSummary").value,
+                summary: template.find("#summary").value,
                 dateOpened: template.find("#dateOpened").value,
                 phase: template.find("#phase").value
             });

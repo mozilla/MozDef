@@ -15,7 +15,7 @@ Jeff Bryner jbryner@mozilla.com
         list-style: none outside none;
     }
     
-    #trackers li {
+    #references li {
         list-style: none outside none;
     }
     
@@ -34,6 +34,11 @@ Jeff Bryner jbryner@mozilla.com
     .tabcontent.active {
         display:block;
     }
+
+    textarea {
+        overflow: auto; 
+        vertical-align: top; /* Improves readability, alignment */
+    }    
 </style>
 <div class="container">
     <div class="row span4 center">
@@ -45,7 +50,7 @@ Jeff Bryner jbryner@mozilla.com
     <div class="row span4 center">
         <ul class="nav nav-tabs">
             <li class="tabnav active"><a href="#edittab">Edit</a></li>
-            <li class="tabnav"><a href="#trackerstab">Trackers</a></li>
+            <li class="tabnav"><a href="#referencestab">References</a></li>
             <li class="tabnav"><a href="#theoriestab">Theories</a></li>
             <li class="tabnav"><a href="#mitigationstab">Mitigations</a></li>
         </ul>
@@ -56,18 +61,25 @@ Jeff Bryner jbryner@mozilla.com
         <form id="editincidentform" class="form-horizontal" >
         <fieldset>
             <div class="control-group">
-              <label class="control-label" for="incidentSummary">Summary</label>
+              <label class="control-label" for="summary">Summary</label>
               <div class="controls">
-                <input id="incidentSummary" name="incidentSummary" placeholder="name" class="input-xlarge incidentSummary" required=""
+                <input id="summary" name="summary" placeholder="short description" class="input-xlarge summary" required=""
                 type="text" value="{{summary}}">
               </div>
-            </div>            
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="description">Description</label>
+              <div class="controls">
+                <textarea id="description" name="description" placeholder="long description" class="input-xlarge description" rows=3>{{description}}</textarea>
+              </div>
+            </div>               
 
             <div class="control-group">
                 <label class="control-label" for="dateOpened">Date Opened</label>
                 <div class="controls">
                     <div class="input-prepend input-group">
-                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
                         <input class="input dateOpened calendarfield" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{dateOpened}}">
                     </div>
                 </div>
@@ -76,7 +88,7 @@ Jeff Bryner jbryner@mozilla.com
                 <label class="control-label" for="dateClosed">Date Closed</label>
                 <div class="controls">
                     <div class="input-prepend input-group">
-                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
                         <input class="form-control dateClosed calendarfield" name="dateClosed" id="dateClosed" type="text" value="{{dateClosed}}">
                     </div>
                 </div>
@@ -111,20 +123,20 @@ Jeff Bryner jbryner@mozilla.com
                 <label class="control-label" for="dateReported">Timeline</label>
                 <div class="controls">
                     <div class="input-prepend input-group input-append">
-                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
                         <input class="form-control dateReported calendarfield" name="dateReported" id="dateReported" type="text" value="{{dateReported}}">
                         <span class="add-on" style="padding-right:12px">Reported</span>
                     </div>
                     <div class="input-prepend input-group input-append">
-                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
                         <input class="form-control dateVerified calendarfield" name="dateVerified" id="dateVerified" type="text" value="{{dateVerified}}"><span class="add-on" style="padding-right: 20px">Verified</span>
                     </div>
                     <div class="input-prepend input-group input-append">
-                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
                         <input class="form-control dateMitigated calendarfield" name="dateMitigated" id="dateMitigated" type="text" value="{{dateMitigated}}"><span class="add-on" style="padding-right:10px">Mitigated</span> 
                     </div>                            
                     <div class="input-prepend input-group input-append">
-                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
                         <input class="form-control dateContained calendarfield" name="dateContained" id="dateContained" type="text" value="{{dateContained}}"><span class="add-on" style="padding-right:7px">Contained</span> 
                     </div>                            
                 </div>
@@ -134,17 +146,17 @@ Jeff Bryner jbryner@mozilla.com
         </form>
     </div>
     
-    <div id="trackerstab" class="row center tabcontent">
-        <form id="trackersform" class="form-horizontal" >
+    <div id="referencestab" class="row center tabcontent">
+        <form id="referencesform" class="form-horizontal" >
         <fieldset>
             <div class="control-group">
-              <label class="control-label" for="trackers">Trackers</label>
-              <div class="controls" id="trackers">
-                <input id="newTracker" class="input-xlarge" type="text" value=""><button id="saveTracker" type="submit" class="btn btn-primary submit">Save</button>
+              <label class="control-label" for="references">References</label>
+              <div class="controls" id="references">
+                <input id="newReference" class="input-xlarge" type="text" value=""><button id="saveReference" type="submit" class="btn btn-primary submit">Save</button>
                 <ul>
-                    {{#each trackers}}
+                    {{#each references}}
                     <li>
-                        <div> {{.}}<button type="button" class="trackerdelete close pull-left" aria-hidden="false">&times;</button></div>
+                        <div>{{.}}<button type="button" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>
                     </li>
                     {{/each}}
                 </ul>
