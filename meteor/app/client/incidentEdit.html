@@ -11,27 +11,29 @@ Jeff Bryner jbryner@mozilla.com
 <!--edit incident form -->
 <template name="editincidentform">
 <style>
-.controls .remove {
-    position: absolute;
-    top: 0;
-    right: 4px;
-    bottom: 0;
-    width: 16px;
-    background: url("/images/close_16.png") no-repeat 0 center;
-}
-
-#tags li {
-    list-style: none outside none;
-}
-
-.daterangepicker td{
-    color:black;
-}
-
-#editincidentform{
-    margin: 0px 30% 20px;
-}
-
+    #tags li {
+        list-style: none outside none;
+    }
+    
+    #trackers li {
+        list-style: none outside none;
+    }
+    
+    .daterangepicker td{
+        color:black;
+    }
+    
+    form{
+        margin: 0px 20% 20px;
+    }
+    
+    .tabcontent {
+        display:none;
+    }
+     
+    .tabcontent.active {
+        display:block;
+    }
 </style>
 <div class="container">
     <div class="row span4 center">
@@ -42,16 +44,16 @@ Jeff Bryner jbryner@mozilla.com
     </div>
     <div class="row span4 center">
         <ul class="nav nav-tabs">
-            <li class="active"><a href="#">Edit</a></li>
-            <li><a href="#">References</a></li>
-            <li><a href="#">Theories</a></li>
-            <li><a href="#">Mitigations</a></li>
+            <li class="tabnav active"><a href="#edittab">Edit</a></li>
+            <li class="tabnav"><a href="#trackerstab">Trackers</a></li>
+            <li class="tabnav"><a href="#theoriestab">Theories</a></li>
+            <li class="tabnav"><a href="#mitigationstab">Mitigations</a></li>
         </ul>
     </div>
-    <div class="row center">
+    <div id="edittab" class="row center tabcontent active">
         {{>veristags}}
 
-        <form id="editincidentform" class="form-horizontal editincidentform" >
+        <form id="editincidentform" class="form-horizontal" >
         <fieldset>
             <div class="control-group">
               <label class="control-label" for="incidentSummary">Summary</label>
@@ -98,11 +100,11 @@ Jeff Bryner jbryner@mozilla.com
                     <ul>
                     {{#each tags}}
                     <li>
-                        <div class="incidenttag">{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
+                        <div>{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
                     </li>
                     {{/each}}
                     </ul>
-                    <div class="tags">drag here to add a tag</div>
+                    <div class="tags"><span class="alert alert-info">drag here to add a tag</span></div>
                 </div>
             </div>
             <div class="control-group">
@@ -129,7 +131,27 @@ Jeff Bryner jbryner@mozilla.com
                     
             </div>
         </fieldset>
-    </form>
+        </form>
+    </div>
+    
+    <div id="trackerstab" class="row center tabcontent">
+        <form id="trackersform" class="form-horizontal" >
+        <fieldset>
+            <div class="control-group">
+              <label class="control-label" for="trackers">Trackers</label>
+              <div class="controls" id="trackers">
+                <input id="newTracker" class="input-xlarge" type="text" value=""><button id="saveTracker" type="submit" class="btn btn-primary submit">Save</button>
+                <ul>
+                    {{#each trackers}}
+                    <li>
+                        <div> {{.}}<button type="button" class="trackerdelete close pull-left" aria-hidden="false">&times;</button></div>
+                    </li>
+                    {{/each}}
+                </ul>
+              </div>
+            </div>
+        </fieldset>
+        </form>
     </div>
 </div>
 

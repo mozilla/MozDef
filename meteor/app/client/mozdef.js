@@ -158,7 +158,7 @@ if (Meteor.isClient) {
     };
     
     Template.alertssummary.rendered = function() {
-        console.log('rendered');
+        //console.log('rendered');
         var ringChartCategory   = dc.pieChart("#ringChart-category");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity");
         var volumeChart         = dc.barChart("#volumeChart");
@@ -170,7 +170,7 @@ if (Meteor.isClient) {
         }
         
         Deps.autorun(function() {
-            console.log('deps autorun');
+            //console.log('deps autorun');
             alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 1000, reactive:false}).fetch();
             var alertsCount=alerts.find({}).count();
             //parse, group data for the d3 charts
@@ -479,6 +479,32 @@ if (Meteor.isClient) {
         "click #redo": function(e, template) {
           incidentRevision.redo(e, template);
         },
+        
+        "click .tabnav": function (e,template){
+            //console.log(e);
+            //set the tab and tab content to active to display
+            //and hide the non active ones.
+            $(e.currentTarget).addClass('active').siblings().removeClass('active');
+            $(e.target.hash).hide();
+            $(e.target.hash).addClass('active').siblings().removeClass('active');
+            $(e.target.hash).fadeIn(400);
+        },
+        
+        "click #saveTracker": function(e,template){
+            tValue=$('#newTracker').val();
+            if ( tValue.length > 0 ) {
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {trackers:tValue}
+                });                
+            }
+            $('#newTracker').val('');
+        },
+        "click .trackerdelete": function(e){
+            trackertext = e.target.parentNode.firstChild.wholeText;
+            incidents.update(Session.get('incidentID'), {
+                $pull: {trackers:trackertext}
+            });
+        },        
 
         "readystatechange":function(e){
             if (typeof console !== 'undefined') {
@@ -908,225 +934,265 @@ if (Meteor.isClient) {
         }
     });
 
-  Template.attackers.rendered = function () {
-    //console.log('entering draw attackers');
-    $("#btnBanhammer").hide();
-    scene = new THREE.Scene();
-    scene.name='attackerScene';
-    var clock = new THREE.Clock();
-    sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
-    renderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
-    //create a plane to use to help position the attackers when moved with the mouse
-    plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-    
-    //setup the scene controls
-    sceneControls = new THREE.TrackballControls( sceneCamera );
-    sceneControls.rotateSpeed = 1.0;
-    sceneControls.zoomSpeed = 3;
-    sceneControls.panSpeed = 0.3;
-    sceneControls.noZoom = false;
-    sceneControls.noPan = false;
-    sceneControls.staticMoving = false;
-    sceneControls.dynamicDampingFactor = 0.3;
-
-    //setup the css renderer for non-web gl objects
-    var cssRenderer = new THREE.CSS3DRenderer();
-    cssRenderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
-    cssRenderer.domElement.style.position = 'absolute';
-    cssRenderer.domElement.style.top = 0;
-    document.getElementById('attackers-wrapper').appendChild(cssRenderer.domElement);
-
-    var configOgro = {
-        baseUrl: "/other/ogro/",
-        body: "ogro-light.js",
-        skins: [ "grok.jpg", "ogrobase.png", "arboshak.png", "ctf_r.png", "ctf_b.png", "darkam.png", "freedom.png",
-                 "gib.png", "gordogh.png", "igdosh.png", "khorne.png", "nabogro.png",
-                 "sharokh.png" ],
-        weapons:  [ [ "weapon-light.js", "weapon.jpg" ] ],
-        animations: {
-            move: "run",
-            idle: "stand",
-            jump: "jump",
-            attack: "attack",
-            crouchMove: "cwalk",
-            crouchIdle: "cstand",
-            crouchAttach: "crattack"
-        },
-        walkSpeed: 350,
-        crouchSpeed: 175
-    };
-
-    var ogroControls = {
-        moveForward: false,
-        moveBackward: false,
-        moveLeft: false,
-        moveRight: false
-    };
-
-    function onWindowResize( event ) {
-            SCREEN_WIDTH = window.innerWidth-scenePadding;
-            SCREEN_HEIGHT = window.innerHeight-scenePadding;
-            renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-            sceneCamera.aspect = SCREEN_WIDTH/ SCREEN_HEIGHT;
-            sceneCamera.updateProjectionMatrix();
-    };
-
-    var sceneSetup = function(){
-            //console.log('scene setup');
-            sceneObjects=[];
-            window.addEventListener( 'resize', onWindowResize, false );         
-            container=document.getElementById('attackers-wrapper');
-            renderer.setSize( window.innerWidth-scenePadding,window.innerHeight-scenePadding );
-            //no background for renderer..let the gradient show 
-            renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
-            renderer.shadowMapEnabled = false;
-            //renderer.shadowMapCascade = false;
-            //renderer.shadowMapType = THREE.BasicShadowMap;
-            //add plane for mapping mouse movements to 2D space
-            plane.visible = false;
-            scene.add( plane );         
-    
-            // Lights
-            scene.add( new THREE.AmbientLight( 0xffffff ) );
-            var light = new THREE.DirectionalLight( 0xffffff, .2 );
-            light.position.set( 200, 450, 500 );
-            light.castShadow = false;
-            //light.shadowMapWidth = 100;
-            //light.shadowMapHeight = 100;
-            //light.shadowMapDarkness = 0.20;
-            //light.shadowCascade = true;
-            //light.shadowCascadeCount = 3;
-            //light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
-            //light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
-            //light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
-            //light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
-            scene.add( light );
-
-            sceneCamera.position.z = 50;
-            console.log('scene loaded');
-            var render = function () { 
-                requestAnimationFrame(render);
-                var delta = clock.getDelta();
-                characters.forEach(function(element,index,array){
-                    element.update(delta);
-                });
-                sceneControls.update();
-                renderer.render(scene, sceneCamera);
-                cssRenderer.render(scene,sceneCamera);
-            };
-            container.appendChild( renderer.domElement );
-            render();
-    };
-
-    baseCharacter.onLoadComplete = function () {
-        console.log('base character loaded');
-        baseCharacter.root.position.x=0;
-        baseCharacter.root.position.y=0;
-        baseCharacter.root.position.z=0;
-    };
-    //load base character
-    baseCharacter.loadParts(configOgro);
-
-    //ogro setup 
-    var createCharacter=function(dbrecord,x,y,z){
-        var character = new THREE.MD2CharacterComplex();
-        character.id=dbrecord._id;
-        character.name=dbrecord._id;
-        character.scale = .05;
-        character.dbrecord=dbrecord;
-        character.animationFPS=Math.floor((Math.random() * 5)+1);
-        character.controls = ogroControls;
-        character.root.position.x=x;
-        character.root.position.y=y;
-        character.root.position.z=z;
-        character.root.name='ogro:' + dbrecord._id;
-        character.root.dbid=dbrecord._id;
-        character.root.base=character;
-        character.shareParts(baseCharacter);
+    Template.attackers.rendered = function () {
+        //console.log('entering draw attackers');
+        //var ringChartCategory   = dc.pieChart("#ringChart-category");
+        //// set our data source
+        //var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
+        //var ndx = crossfilter();        
         
-        //no weapons for now..
-        //this.setWeapon(Math.floor((Math.random()*1)));
-        character.setSkin(Math.floor((Math.random() * 10)));
-        //this.setAnimation(configOgro.animations["stand"]);
+        $("#btnBanhammer").hide();
+        scene = new THREE.Scene();
+        scene.name='attackerScene';
+        var clock = new THREE.Clock();
+        sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
+        renderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
+        //create a plane to use to help position the attackers when moved with the mouse
+        plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
+        
+        //setup the scene controls
+        sceneControls = new THREE.TrackballControls( sceneCamera );
+        sceneControls.rotateSpeed = 1.0;
+        sceneControls.zoomSpeed = 3;
+        sceneControls.panSpeed = 0.3;
+        sceneControls.noZoom = false;
+        sceneControls.noPan = false;
+        sceneControls.staticMoving = false;
+        sceneControls.dynamicDampingFactor = 0.3;
+        
+        //setup the css renderer for non-web gl objects
+        var cssRenderer = new THREE.CSS3DRenderer();
+        cssRenderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
+        cssRenderer.domElement.style.position = 'absolute';
+        cssRenderer.domElement.style.top = 0;
+        document.getElementById('attackers-wrapper').appendChild(cssRenderer.domElement);
 
-        //create the character's nameplate
-        var acallout=document.createElement('div');
-        acallout.className='attackercallout';
-        
-        var aid=document.createElement('div');
-        aid.className='id';
-        aid.textContent=dbrecord.sourceipaddress;
-        acallout.appendChild(aid);
-        
-        var adetails=document.createElement('div');
-        adetails.className='details';
-        adetails.textContent=dbrecord.details.msg + "" + dbrecord.details.sub;
-        acallout.appendChild(adetails);
-        
-        var nameplate=new THREE.CSS3DObject(acallout);
-        var npOffset=new THREE.Vector3();
-        nameplate.name='nameplate:' + character.id;
-        nameplate.dbid=character.id;
-        npOffset.x=0;
-        npOffset.y=0;
-        npOffset.z=.5;
-        nameplate.offset=npOffset;
-        nameplate.scale.x=.01;
-        nameplate.scale.y=.01;
-        nameplate.scale.z=.01;
-        nameplate.position.copy(character.root.position);
-        nameplate.position.add(npOffset);
-        nameplate.element.style.display='none';
-            
-        //add everything.
-        //threejs doesn't take children that aren't threejs object3d instances
-        //so add the nameplate manually. 
-        character.root.children.push(nameplate);
-        nameplate.parent=character.root;
-        scene.add(nameplate);
-        
-        scene.add(character.root);
-        characters.push( character );
-        sceneObjects.push(character.root);
-    }; //end createCharacter
-
-    sceneSetup();
-
-    Deps.autorun(function() {
-        //console.log('running dep orgro autorun');
-        //pick a starting position for the group
-        var startingPosition = new THREE.Vector3();
-        startingPosition.x=_.random(-5,5);
-        startingPosition.y=_.random(-1,1);
-        startingPosition.z=_.random(-1,1);
-        
-        function waitForBaseCharacter(){
-            console.log(baseCharacter.loadCounter);
-            if ( baseCharacter.loadCounter!==0 ){
-                setTimeout(function(){waitForBaseCharacter()},100);
-            }else{
-                i=0;
-                attackers.find().forEach(function(element,index,array){
-                    //add to the scene if it's new
-                    var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
-                    if ( exists === undefined ) {
-                        //console.log('adding character')
-                        x=startingPosition.x + (i*2);
-                        createCharacter(element,x,startingPosition.y,startingPosition.z)
-                        }
-                    else{
-                        console.log('updating character')
-                        //exists.root.position.x=x;
-                        //exists.root.position.z=z;
-                    }
-                    i+=1;
-                });
-            };
+        var configOgro = {
+            baseUrl: "/other/ogro/",
+            body: "ogro-light.js",
+            skins: [ "grok.jpg", "ogrobase.png", "arboshak.png", "ctf_r.png", "ctf_b.png", "darkam.png", "freedom.png",
+                     "gib.png", "gordogh.png", "igdosh.png", "khorne.png", "nabogro.png",
+                     "sharokh.png" ],
+            weapons:  [ [ "weapon-light.js", "weapon.jpg" ] ],
+            animations: {
+                move: "run",
+                idle: "stand",
+                jump: "jump",
+                attack: "attack",
+                crouchMove: "cwalk",
+                crouchIdle: "cstand",
+                crouchAttach: "crattack"
+            },
+            walkSpeed: 350,
+            crouchSpeed: 175
         };
-        waitForBaseCharacter();
-    }); //end deps.autorun
-   };//end template.attackers.rendered
-   
+
+        var ogroControls = {
+            moveForward: false,
+            moveBackward: false,
+            moveLeft: false,
+            moveRight: false
+        };
+
+        function onWindowResize( event ) {
+                SCREEN_WIDTH = window.innerWidth-scenePadding;
+                SCREEN_HEIGHT = window.innerHeight-scenePadding;
+                renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+                sceneCamera.aspect = SCREEN_WIDTH/ SCREEN_HEIGHT;
+                sceneCamera.updateProjectionMatrix();
+        };
+
+        var sceneSetup = function(){
+                //console.log('scene setup');
+                sceneObjects=[];
+                window.addEventListener( 'resize', onWindowResize, false );         
+                container=document.getElementById('attackers-wrapper');
+                renderer.setSize( window.innerWidth-scenePadding,window.innerHeight-scenePadding );
+                //no background for renderer..let the gradient show 
+                renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
+                renderer.shadowMapEnabled = false;
+                //renderer.shadowMapCascade = false;
+                //renderer.shadowMapType = THREE.BasicShadowMap;
+                //add plane for mapping mouse movements to 2D space
+                plane.visible = false;
+                scene.add( plane );         
+        
+                // Lights
+                scene.add( new THREE.AmbientLight( 0xffffff ) );
+                var light = new THREE.DirectionalLight( 0xffffff, .2 );
+                light.position.set( 200, 450, 500 );
+                light.castShadow = false;
+                //light.shadowMapWidth = 100;
+                //light.shadowMapHeight = 100;
+                //light.shadowMapDarkness = 0.20;
+                //light.shadowCascade = true;
+                //light.shadowCascadeCount = 3;
+                //light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
+                //light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
+                //light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
+                //light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
+                scene.add( light );
+    
+                sceneCamera.position.z = 50;
+                //console.log('scene loaded');
+                var render = function () { 
+                    requestAnimationFrame(render);
+                    var delta = clock.getDelta();
+                    characters.forEach(function(element,index,array){
+                        element.update(delta);
+                    });
+                    sceneControls.update();
+                    renderer.render(scene, sceneCamera);
+                    cssRenderer.render(scene,sceneCamera);
+                };
+                container.appendChild( renderer.domElement );
+                render();
+        };
+
+        baseCharacter.onLoadComplete = function () {
+            //console.log('base character loaded');
+            baseCharacter.root.position.x=0;
+            baseCharacter.root.position.y=0;
+            baseCharacter.root.position.z=0;
+        };
+        //load base character
+        baseCharacter.loadParts(configOgro);
+
+        //ogro setup 
+        var createCharacter=function(dbrecord,x,y,z){
+            var character = new THREE.MD2CharacterComplex();
+            character.id=dbrecord._id;
+            character.name=dbrecord._id;
+            character.scale = .05;
+            character.dbrecord=dbrecord;
+            character.animationFPS=Math.floor((Math.random() * 5)+1);
+            character.controls = ogroControls;
+            character.root.position.x=x;
+            character.root.position.y=y;
+            character.root.position.z=z;
+            character.root.name='ogro:' + dbrecord._id;
+            character.root.dbid=dbrecord._id;
+            character.root.base=character;
+            character.shareParts(baseCharacter);
+            
+            //no weapons for now..
+            //this.setWeapon(Math.floor((Math.random()*1)));
+            character.setSkin(Math.floor((Math.random() * 10)));
+            //this.setAnimation(configOgro.animations["stand"]);
+    
+            //create the character's nameplate
+            var acallout=document.createElement('div');
+            acallout.className='attackercallout';
+            
+            var aid=document.createElement('div');
+            aid.className='id';
+            aid.textContent=dbrecord.sourceipaddress;
+            acallout.appendChild(aid);
+            
+            var adetails=document.createElement('div');
+            adetails.className='details';
+            adetails.textContent=dbrecord.details.msg + "" + dbrecord.details.sub;
+            acallout.appendChild(adetails);
+            
+            var nameplate=new THREE.CSS3DObject(acallout);
+            var npOffset=new THREE.Vector3();
+            nameplate.name='nameplate:' + character.id;
+            nameplate.dbid=character.id;
+            npOffset.x=0;
+            npOffset.y=0;
+            npOffset.z=.5;
+            nameplate.offset=npOffset;
+            nameplate.scale.x=.01;
+            nameplate.scale.y=.01;
+            nameplate.scale.z=.01;
+            nameplate.position.copy(character.root.position);
+            nameplate.position.add(npOffset);
+            nameplate.element.style.display='none';
+                
+            //add everything.
+            //threejs doesn't take children that aren't threejs object3d instances
+            //so add the nameplate manually. 
+            character.root.children.push(nameplate);
+            nameplate.parent=character.root;
+            scene.add(nameplate);
+            
+            scene.add(character.root);
+            characters.push( character );
+            sceneObjects.push(character.root);
+        }; //end createCharacter
+    
+        sceneSetup();
+
+        Deps.autorun(function() {
+            console.log('running dep orgro autorun');
+            //pick a starting position for the group
+            var startingPosition = new THREE.Vector3();
+            startingPosition.x=_.random(-5,5);
+            startingPosition.y=_.random(-1,1);
+            startingPosition.z=_.random(-1,1);
+            
+            function waitForBaseCharacter(){
+                //console.log(baseCharacter.loadCounter);
+                if ( baseCharacter.loadCounter!==0 ){
+                    setTimeout(function(){waitForBaseCharacter()},100);
+                }else{
+                    i=0;
+                    attackers.find().forEach(function(element,index,array){
+                        //add to the scene if it's new
+                        var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
+                        if ( exists === undefined ) {
+                            //console.log('adding character')
+                            x=startingPosition.x + (i*2);
+                            createCharacter(element,x,startingPosition.y,startingPosition.z)
+                            }
+                        else{
+                            console.log('updating character')
+                            //exists.root.position.x=x;
+                            //exists.root.position.z=z;
+                        }
+                        i+=1;
+                    });
+                };
+            };
+            waitForBaseCharacter();
+            //load dc.js selector charts
+            //alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 1000, reactive:false}).fetch();
+            ////parse, group data for the d3 charts
+            //alertsData.forEach(function (d) {
+            //    d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
+            //    d.jdate=new Date(Date.parse(d.utctimestamp));
+            //    d.dd=moment.utc(d.utctimestamp)
+            //    d.month = d.dd.get('month');
+            //    d.hour = d.dd.get('hour')
+            //    d.epoch=d.dd.unix();
+            //    console.log(d);
+            //});        
+            //ndx = crossfilter(alertsData);
+            //if ( ndx.size() >0){
+            //    var all = ndx.groupAll();
+            //    var severityDim = ndx.dimension(function(d) {return d.severity;});
+            //    var categoryDim = ndx.dimension(function(d) {return d.category;});
+            //    var hourDim = ndx.dimension(function (d) {return d3.time.hour(d.jdate);});
+            //    var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
+            //    var format2d = d3.format("02d");
+            //    var volumeByHourGroup = hourDim.group().reduceCount();
+            //    ndx.remove();
+            //    ndx.add(alertsData);
+            //    ringChartCategory
+            //        .width(150).height(150)
+            //        .dimension(categoryDim)
+            //        .group(categoryDim.group())
+            //        .label(function(d) {return d.key; })
+            //        .innerRadius(30)
+            //        .expireCache();
+            //}
+            //dc.renderAll();
+                    
+            
+            //end load dc.js selector charts
+        }); //end deps.autorun
+       };//end template.attackers.rendered
+       
     Template.attackers.destroyed = function () {
         //remove scene Controls so they don't interfere with other forms, etc.
         var scene = null;

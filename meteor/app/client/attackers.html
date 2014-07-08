@@ -11,8 +11,77 @@ Anthony Verez averez@mozilla.com
 
 <template name="attackers">
 <style>
+/* http://www.sitepoint.com/css3-sliding-menu/ */    
+sidenav
+{
+    position: fixed;
+    left: -16em;
+    top: 0;
+    bottom: 0;
+    /*background-color: #654;*/
+    background-color: #444444;
+    border-right: 15px solid #765;
+    box-shadow: 4px 0 5px rgba(0,0,0,0.2);
+    z-index: 1;
+    cursor: pointer;
+    
+    text-align: left;
+    font-weight: bolder;
+    text-transform: uppercase;
+    display: inline-block;
+    height: 100%;
+    margin: 0em;
+    line-height: normal;
+ 
+    
+}
+
+/*pull out triangle*/ 
+sidenav:after
+{
+    position: absolute;
+    content: ' ';
+    width: 0;
+    height: 0;
+    right: -50px;
+    top: 50%;
+    border-width: 20px 20px;
+    border-style: solid;
+    border-color: transparent transparent transparent #765;
+}
+
+sidenav ul
+{
+    width: 14em;
+    list-style-type: none;
+    margin: auto;
+    padding: 1em;
+}
+
+sidenav:hover
+{
+    left: 0;
+}
+
+sidenav
+{
+    -webkit-transition: all 400ms ease;
+    -moz-transition: all 400ms ease;
+    -ms-transition: all 400ms ease;
+    -o-transition: all 400ms ease;
+    transition: all 400ms ease;
+}
 
 </style>
+<!-- menu -->
+<sidenav>
+    <ul>
+        <li><a href="#">Most Recent</a></li>
+        <li><a href="#">Category1</a></li>
+        <li><a href="#">Category2</a></li>
+    </ul>
+    <div id="ringChart-category" class="text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5></div>
+</sidenav>
 <div class="attackers-wrapper" id="attackers-wrapper">
 
     <div id="bottom-toolbar">

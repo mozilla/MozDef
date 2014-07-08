@@ -23,14 +23,8 @@ models={
             theories:[],
             notes:[],
             tags:[],
+            trackers:[],
             phase:"Identification",
-            discovery:"",
-            verification:"",
-            accessibility:"",
-            confidence:"",
-            
-            actor:"",
-            motive:"",
             timeline: {reported:"",
                         verified:"",
                         mitigationAvailable:"",
@@ -44,6 +38,12 @@ models={
             action:"",
             asset:"",
             attribute:"",
+            discovery:"",
+            verification:"",
+            accessibility:"",
+            confidence:"",
+            actor:"",
+            motive:"",            
             impact:""
         };
     },

@@ -40,16 +40,24 @@ Anthony Verez averez@mozilla.com
 <!--begin layout templates-->
 <!--the main, simple layout for the router to target-->
 <template name="layout">
-
-        {{#if currentUser}}
-            {{>yield}}
-        {{else}}
-            <div class="span5 center">
-                <div class="alert alert-info alert-dismissible" role="alert">
-                   <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                   <strong>Please login</strong>
-               </div>
-            </div>
+        {{#if loggingIn}}
+                <div class="span5 center">
+                    <div class="alert alert-info alert-dismissible" role="alert">
+                       <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                       <strong>logging in</strong>
+                   </div>
+                </div>
+        {{else}}  
+            {{#if currentUser}}
+                {{>yield}}
+            {{else}}
+                <div class="span5 center">
+                    <div class="alert alert-info alert-dismissible" role="alert">
+                       <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                       <strong>Please login</strong>
+                   </div>
+                </div>
+            {{/if}}
         {{/if}}
 
 </template>
@@ -59,7 +67,7 @@ Anthony Verez averez@mozilla.com
 <template name="hello">
     <div class="container">
         <div class="center">
-            <p class="welcome">{{greeting}}<br>welcome</p>
+            <p class="welcome">{{greeting}}<br>hand made by Mozilla</p>
         </div>
     </div>
 
