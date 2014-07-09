@@ -44,9 +44,9 @@ if (Meteor.isClient) {
 
     // loads kibana dashboards
     Template.menu.kibanadashboards = function() {
-      Meteor.call('loadKibanaDashboards');
-      return kibanadashboards.find();
-    }
+        Meteor.call('loadKibanaDashboards');
+        return kibanadashboards.find();
+    };
 
     //helper functions for handlebars
     UI.registerHelper('now', function() {
@@ -57,6 +57,7 @@ if (Meteor.isClient) {
         //return the mozdef server settings object.    
         return mozdef 
     });
+
     UI.registerHelper('isselected',function(optionvalue,datavalue){
         if (optionvalue==datavalue){
             return 'selected'
@@ -75,9 +76,17 @@ if (Meteor.isClient) {
             return ret; 
     });
     
+    UI.registerHelper('objKeys', function (all) {
+        //given an object, return key:value pairs
+        //for easy iteration.
+        return _.map(all, function(i, k) {
+            return {key: k, value: i};
+        });
+    });    
+    
     Template.veristags.veris=function(){
         return veris.find({tag:{$regex:'.*' +Session.get('verisfilter') + '.*',$options:'i'}},{limit:50});
-    }
+    };
 
     Template.veristags.events({
         'dragstart .tag': function(e){
@@ -97,15 +106,15 @@ if (Meteor.isClient) {
     };
 
     Template.mozdefhealth.frontendhealthitems = function () {
-      return healthfrontend.find();
+        return healthfrontend.find();
     };
 
     Template.mozdefhealth.esnodeshealthitems = function () {
-      return healthesnodes.find();
+        return healthesnodes.find();
     };
 
     Template.mozdefhealth.eshotthreadshealthitems = function () {
-      return healtheshotthreads.find();
+        return healtheshotthreads.find();
     };
 
     Template.mozdefhealth.helpers({
@@ -120,31 +129,15 @@ if (Meteor.isClient) {
       }
     });
 
-    Template.alert.rendered = function() {
-        Deps.autorun(function() {
-            var myalert = alerts.find({'esmetadata.id': Session.get('alertID')}).fetch();
-            var table = document.getElementById("alert-table");
-            // remove data rows if any
-            if (table.rows.length > 1) {
-                table.deleteRow(1);
-            }
-            myalert.forEach(function (d) {
-                console.log(Session.get('alertID'));
-                d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
-                var row = table.insertRow(1);
-                var ctimestamp = row.insertCell(0);
-                var cid = row.insertCell(1);
-                var cseverity = row.insertCell(2);
-                var ccategory = row.insertCell(3);
-                var csummary = row.insertCell(4);
-                ctimestamp.innerHTML = d.utctimestamp;
-                cid.innerHTML = '<a href="/alert/' + d.esmetadata.id + '">' + d.esmetadata.id + '</a><br> <a href="' + d.url + '">see in kibana</a>';
-                cseverity.innerHTML = d.severity;
-                ccategory.innerHTML = d.category;
-                csummary.innerHTML = d.summary;
-            });
-        }); //end deps.autorun
-    }
+    //alert detail helpers
+    Template.alertdetail.thisalertevents = function () {
+        return alerts.findOne({'esmetadata.id': Session.get('alertID')}).events;
+    };
+    
+    Template.alertdetail.kibanaurl = function () {
+        url=getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + Session.get('alertID');
+        return url;
+    };
  
     Template.alertssummary.events({
         "click .reset": function(e,t){

@@ -11,13 +11,6 @@ Jeff Bryner jbryner@mozilla.com
 <!--edit incident form -->
 <template name="editincidentform">
 <style>
-    #tags li {
-        list-style: none outside none;
-    }
-    
-    #references li {
-        list-style: none outside none;
-    }
     
     .daterangepicker td{
         color:black;
@@ -109,7 +102,7 @@ Jeff Bryner jbryner@mozilla.com
             <div class="control-group">
                 <label class="control-label" for="tags">Tags</label>
                 <div class="controls" id="tags">
-                    <ul>
+                    <ul class="unstyled">
                     {{#each tags}}
                     <li>
                         <div>{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
@@ -150,10 +143,10 @@ Jeff Bryner jbryner@mozilla.com
         <form id="referencesform" class="form-horizontal" >
         <fieldset>
             <div class="control-group">
-              <label class="control-label" for="references">References</label>
+              <label class="control-label" for="references">Reference</label>
               <div class="controls" id="references">
                 <input id="newReference" class="input-xlarge" type="text" value=""><button id="saveReference" type="submit" class="btn btn-primary submit">Save</button>
-                <ul>
+                <ul class="unstyled">
                     {{#each references}}
                     <li>
                         <div>{{.}}<button type="button" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>

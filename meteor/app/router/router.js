@@ -83,9 +83,10 @@ Router.map(function () {
 
     this.route('alert', {
         path: '/alert/:alert_id',
-        template: 'alert',
+        template: 'alertdetail',
         data: function() {
           Session.set('alertID', this.params.alert_id);
+          return alerts.findOne({'esmetadata.id': Session.get('alertID')});
         },
         layoutTemplate: 'layout'
     });
