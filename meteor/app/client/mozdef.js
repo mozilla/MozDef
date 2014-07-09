@@ -90,12 +90,14 @@ if (Meteor.isClient) {
 
     Template.veristags.events({
         'dragstart .tag': function(e){
-            //console.log(this.tag)
-            //console.log(e)
             e.originalEvent.dataTransfer.setData("text/plain",this.tag);
         },
         'load': function(e, template){
             template.find("#tagfilter").value=Session.get('verisfilter');
+        },
+        'click li': function(e,template){
+            Session.set('verisfilter',e.target.textContent);
+            template.find("#tagfilter").value=e.target.textContent;
         }
     });
     

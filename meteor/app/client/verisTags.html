@@ -10,24 +10,44 @@ Jeff Bryner jbryner@mozilla.com
 
 <template name="veristags">
 <style>
-.veristags{
+.veristagform{
     position: relative;
     float: right;
     margin: 5px;
     padding: 2px 7px;
     font-size: 95%;
-    font-weight: bold;
     background: #999;
     color: #fff;    
 }
 .tag{
     cursor: pointer;
+    text-align: left;
+}
+li {
+    cursor: pointer;
+    color: #000;
+}
+.label{
+    cursor: pointer;
 }
 
 </style>
-<form class="veristags form-search" role="form">
+
+<form class="veristagform form-search" role="form">
     <div class="form-group">
       <input type="search" class="form-control search-query tagfilter" id="tagfilter" placeholder="tag filter">
+        <div class="dropdown pull-right">
+        <a class="dropdown-toggle" data-toggle="dropdown" id="dLabel" data-target="#"><span class="label label-info">common</span><b class="caret"></b></a>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+            <li>actor</li>
+            <li>asset</li>
+            <li>action</li>
+            <li>impact</li>
+            <li>discovery</li>
+            <li>motive</li>
+            <li>confidence</li>
+        </ul>
+        </div>        
     </div>
     <div class="veristags">
           {{#each veris}}
