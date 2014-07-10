@@ -12,7 +12,6 @@ Anthony Verez averez@mozilla.com
 if (Meteor.isClient) {
     //defaults: 
     Session.set('verisfilter','');
-    Session.set('rotate',.001);
     var scene = null;
     var sceneCamera = null;
     var sceneControls = null;
@@ -23,7 +22,7 @@ if (Meteor.isClient) {
     var offset = new THREE.Vector3();
     var projector = new THREE.Projector();
     var plane = null;
-    var scenePadding=100;
+    var scenePadding=10;
     var renderer = new THREE.WebGLRenderer( { alpha: true , precision: 'lowp',premultipliedAlpha: false} );
     var characters = [];
     var baseCharacter = new THREE.MD2CharacterComplex();
@@ -158,6 +157,7 @@ if (Meteor.isClient) {
         var ringChartSeverity   = dc.pieChart("#ringChart-severity");
         var volumeChart         = dc.barChart("#volumeChart");
         // set our data source
+        Meteor.subscribe("alerts");
         var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
         var ndx = crossfilter();
         function descNumbers(a, b) {
@@ -166,6 +166,7 @@ if (Meteor.isClient) {
         
         Deps.autorun(function() {
             //console.log('deps autorun');
+            
             alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 1000, reactive:false}).fetch();
             var alertsCount=alerts.find({}).count();
             //parse, group data for the d3 charts
@@ -834,7 +835,7 @@ if (Meteor.isClient) {
         "click #btnBanhammer": function(event, template) {
           // TODO: modal with ipaddr, duration (dropdown), comment (text 1024 chars), bug (text 7 chars, optional)
           console.log("Banhammer!");
-          console.log(event);
+          //console.log(event);
         },
         "mousedown": function(event,template){
         //if mouse is over a character
