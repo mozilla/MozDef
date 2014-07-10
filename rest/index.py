@@ -7,26 +7,28 @@
 # Jeff Bryner jbryner@mozilla.com
 # Anthony Verez averez@mozilla.com
 
-import sys
 import bottle
-from bottle import debug,route, run, response, request, default_app, post
 import json
-from configlib import getConfig, OptionParser
+import MySQLdb
+import netaddr
 import pyes
+import pytz
+import sys
+from bottle import debug, route, run, response, request, default_app, post
+from datetime import datetime, timedelta
+from configlib import getConfig, OptionParser
 from elasticutils import S
 from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
-import pytz
-import MySQLdb
-from datetime import datetime, timedelta
+from ipwhois import IPWhois
 
 options = None
 dbcursor = None
 mysqlconn = None
+
+
 # cors decorator for rest/ajax
-
-
 def enable_cors(fn):
     def _enable_cors(*args, **kwargs):
         # set CORS headers
@@ -45,7 +47,7 @@ def enable_cors(fn):
 @route('/test/')
 def index():
     ip = request.environ.get('REMOTE_ADDR')
-    #response.headers['X-IP'] = '{0}'.format(ip)
+    # response.headers['X-IP'] = '{0}'.format(ip)
     response.status = 200
 
 
@@ -104,7 +106,28 @@ def index():
             sys.stderr.write('Error parsing json sent to POST /banhammer\n')
 
 
-#debug(True)
+@post('/ipwhois', methods=['POST'])
+@post('/ipwhois/', methods=['POST'])
+@enable_cors
+def index():
+    '''return a json version of whois for an ip address'''
+    if request.body:
+        arequest = request.body.read()
+        request.body.close()
+    # valid json?
+    try:
+        requestDict = json.loads(arequest)
+    except ValueError as e:
+        response.status = 500
+        return        
+    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
+        response.content_type = "application/json"
+        return(getWhois(requestDict['ipaddress']))
+    else:
+        response.status = 500
+        return
+    
+
 def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
@@ -123,6 +146,21 @@ def toUTC(suspectedDate, localTimeZone="US/Pacific"):
         objDate = utc.normalize(objDate)
 
     return objDate
+
+
+def isIPv4(ip):
+    try:
+        # netaddr on it's own considers 1 and 0 to be valid_ipv4
+        # so a little sanity check prior to netaddr.
+        # Use IPNetwork instead of valid_ipv4 to allow CIDR
+        if '.' in ip and len(ip.split('.')) == 4:
+            # some ips are quoted
+            netaddr.IPNetwork(ip.strip("'").strip('"'))
+            return True
+        else:
+            return False
+    except:
+        return False
 
 
 def esAlertsSummary(begindateUTC=None, enddateUTC=None):
@@ -164,7 +202,6 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         enddateUTC = toUTC(enddateUTC)
     try:
         es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-        #qDate=e=pyes.MatchQuery("message",options.datePhrase,"phrase")
         qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
             from_value=begindateUTC, to_value=enddateUTC))
         q = pyes.MatchAllQuery()
@@ -176,7 +213,6 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         q2.facet.add_term_facet('details.result')
         q2.facet.add_term_facet('details.dn', size=20)
         results = es.search(q2, indices='events')
-        #sys.stdout.write('{0}\n'.format(results.facets))
 
         stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com',
             'mozillafoundation.org', 'org')
@@ -281,6 +317,14 @@ def banhammer(action):
         sys.stderr.write('%s/%d: banhammered\n' % (action['address'], action['cidr']))
     except Exception as e:
         sys.stderr.write('Error while banhammering %s/%d: %s\n' % (action['address'], action['cidr'], e))
+
+
+def getWhois(ipaddress):
+    try:
+        whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup()
+        return (json.dumps(whois))
+    except Exception as e:
+        sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
 
 
 def initConfig():
