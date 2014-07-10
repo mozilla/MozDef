@@ -67,7 +67,7 @@ def main():
         #capture the time we start running so next time we catch any files created while we run.
         lastrun=str(options.lastrun.isoformat())
         today=datetime.utcnow().isoformat()+'+00:00'
-        url = options.mighost+'/api/v1/search?type=command&status=done&report=complianceitems&limit=1000000&before='+today+'&after='+lastrun
+        url = options.mighost+'/api/v1/search?type=command&status=done&threatfamily=compliance&report=complianceitems&limit=1000000&before='+today+'&after='+lastrun
         url = url.replace('+00:00', 'Z')
         r = requests.get(url,
             cert=(options.sslclientcert, options.sslclientkey),
