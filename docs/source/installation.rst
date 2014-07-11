@@ -23,12 +23,12 @@ Running the container::
 
 You're done! Now go to:
 
- * http://127.0.0.1:3000 < meteor (main web interface)
- * http://127.0.0.1:9090 < kibana
- * http://127.0.0.1:9200 < elasticsearch
- * http://127.0.0.1:9200/\_plugin/marvel < marvel (monitoring for elasticsearch)
- * http://127.0.0.1:8080 < loginput
- * http://127.0.0.1:8081 < rest api
+ * http://localhost:3000 < meteor (main web interface)
+ * http://localhost:9090 < kibana
+ * http://localhost:9200 < elasticsearch
+ * http://localhost:9200/\_plugin/marvel < marvel (monitoring for elasticsearch)
+ * http://localhost:8080 < loginput
+ * http://localhost:8081 < rest api
 
 Get a terminal in the container
 *******************************
