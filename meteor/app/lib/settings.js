@@ -19,8 +19,8 @@ elasticsearch = {
 
 
 mozdef = {
-  rootURL: "https://localhost",
-  port: "443",
+  rootURL: "http://localhost",
+  port: "3000",
   rootAPI: "http://localhost:8081",
   kibanaURL: "http://localhost:9090",
   enableBanhammer: false
