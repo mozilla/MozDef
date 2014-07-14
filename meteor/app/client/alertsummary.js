@@ -64,6 +64,26 @@ if (Meteor.isClient) {
           });
         };
         
+        addIPDropDowns=function(){
+            //fix up anything with an ipaddress class
+            //by making them into a pull down bootstrap menu                
+            $( '.ipaddress').each(function( index ) {
+                iptext=$(this).text();
+                //add a caret so it looks drop downy
+                $(this).append('<b class="caret"></b>');
+              
+                //wrap the whole thing in a dropdown class
+                $(this).wrap( "<span class='dropdown' id='ipdropdown" + index + "'></span>" );
+    
+                //add the drop down menu
+                $('#ipdropdown'+index).append("<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel" + index
+                                              + "'><li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li</ul>"); 
+              
+                //wrap just the ip in a bootstrap dropdown with a unique id
+                $(this).wrap( "<a class='dropdown-toggle' data-toggle='dropdown' href='#' id='dLabel" + index +"'></a>" );
+            });                        
+        };
+        
         
         Deps.autorun(function() {
             //console.log('deps autorun');
@@ -78,7 +98,6 @@ if (Meteor.isClient) {
                 d.month = d.dd.get('month');
                 d.hour = d.dd.get('hour')
                 d.epoch=d.dd.unix();
-                //d.summary=ipHighlight(d.summary);
             });        
             ndx = crossfilter(alertsData);
             if ( ndx.size() >0){
@@ -126,8 +145,18 @@ if (Meteor.isClient) {
                         function(d) {return '<a href="/alert/' + d.esmetadata.id + '">' + d.esmetadata.id + '</a><br> <a href="' + d.url + '">see in kibana</a>';},
                         function(d) {return d.severity;},
                         function(d) {return d.category;},
-                        function(d) {return d.summary;}
-                    ])
+                        function(d) {
+                            //create a jquery object of the summary
+                            //and send it through iphighlight to append a class to any ip address we find
+                            var colObj=$($.parseHTML('<span>' + d.summary + '</span>'))
+                            ipHighlight(colObj);
+                            
+                            //return just the html we created as the column
+                            return colObj.prop('outerHTML');
+                            }
+                        ])
+                    .on('postRedraw',addIPDropDowns)
+                    .on('postRender',addIPDropDowns)
                     .expireCache();
                 
                 volumeChart
@@ -138,33 +167,7 @@ if (Meteor.isClient) {
                     .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]))
                     .expireCache();
                 dc.renderAll();
-                
-                //ipHighlight($(".dc-table-column"));
-                //ipHighlight($("td[class*='_4']"));
-                //add a dropdown menu to anything matching an ip address
-                //search likely places for ip, adding an ip class
-                $( "td[class*='_4']" ).each(function( index ) {
-                    //console.log( index + ": " + $( this ).text() );
-                    ipHighlight($(this));
-                });
-                
-                //fix up the ips we found
-                //by making them into a pull down bootstrap menu                
-                $( '.ipaddress' ).each(function( index ) {
-                    iptext=$(this).text();
-                    //add a caret so it looks drop downy
-                    $(this).append('<b class="caret"></b>');
-                  
-                    //wrap the whole thing in a dropdown class
-                    $(this).wrap( "<span class='dropdown' id='ipdropdown" + index + "'></span>" );
 
-                    //add the drop down menu
-                    $('#ipdropdown'+index).append("<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel" + index
-                                                  + "'><li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li</ul>"); 
-                  
-                    //wrap just the ip in a bootstrap dropdown with a unique id
-                    $(this).wrap( "<a class='dropdown-toggle' data-toggle='dropdown' href='#' id='dLabel" + index +"'></a>" );
-                });
             }
         }); //end deps.autorun    
     };

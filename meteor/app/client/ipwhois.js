@@ -20,23 +20,25 @@ if (Meteor.isClient) {
             whoisresult.content='';
             whoisresult.data=null;
             whoisDep.changed();
-            Meteor.apply('ipwhois',
-                         [Session.get('ipwhoisipaddress')],
-                         onResultReceived = function(err,result){
-                            
-                            if (typeof err == 'undefined') {
-                                //console.log(err,result);
-                                whoisresult.status='completed';
-                                whoisresult.result = result;
-                                whoisresult.content=result.content;
-                                whoisresult.data=result.data;
-                                whoisDep.changed();
-                            } else {
-                                whoisresult.status='error';
-                                whoisresult.error=err;
-                                whoisDep.changed();
-                            }
-                        })};
+            if (Session.get('ipwhoisipaddress') ) {
+                Meteor.apply('ipwhois',
+                    [Session.get('ipwhoisipaddress')],
+                    onResultReceived = function(err,result){
+                       
+                       if (typeof err == 'undefined') {
+                           //console.log(err,result);
+                           whoisresult.status='completed';
+                           whoisresult.result = result;
+                           whoisresult.content=result.content;
+                           whoisresult.data=result.data;
+                           whoisDep.changed();
+                       } else {
+                           whoisresult.status='error';
+                           whoisresult.error=err;
+                           whoisDep.changed();
+                       }
+                   })};
+            }
 
     Template.ipwhois.events({
         "click .showmodal": function(event, template) {
