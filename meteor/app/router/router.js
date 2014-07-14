@@ -98,6 +98,14 @@ Router.map(function () {
           Session.set('banhammeripaddr', this.params._ipaddr);
         },
         layoutTemplate: 'layout'
+    });
+
+    this.route('ipwhois', {
+        path: '/ipwhois/:_ipaddress',
+        template: 'ipwhois',
+        data: function() {
+          Session.set('ipwhoisipaddress', this.params._ipaddress);
+        }
     });    
 
 });

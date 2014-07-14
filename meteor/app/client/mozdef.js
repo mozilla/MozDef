@@ -12,6 +12,9 @@ Anthony Verez averez@mozilla.com
 if (Meteor.isClient) {
     //defaults: 
     Session.set('verisfilter','');
+    
+
+   
 
     //debug/testing functions
     Template.hello.greeting = function () {
@@ -61,11 +64,24 @@ if (Meteor.isClient) {
             return ret; 
     });
     
+    UI.registerHelper('isEqual', function (var1,var2){
+        return var1 === var2;
+    });
+    
+    UI.registerHelper('notIsEqual', function (var1,var2){
+        return var1 !== var2
+    });
+    
     UI.registerHelper('objKeys', function (all) {
         //given an object, return key:value pairs
         //for easy iteration.
         return _.map(all, function(i, k) {
-            return {key: k, value: i};
+                if ( ! _.isObject(i) ) {
+                    return {key: k, value: i};
+                } else {
+                    return { key: null, value: null};
+                }
+                
         });
     });    
     

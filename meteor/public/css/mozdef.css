@@ -48,6 +48,11 @@ body{
     text-shadow: #000 .7px .7px .7px;
 }
 
+.ipaddress {
+  color: red;
+
+}
+
 #header a.mozilla {
     position: relative;
     float: right;

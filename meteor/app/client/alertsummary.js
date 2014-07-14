@@ -15,7 +15,11 @@ if (Meteor.isClient) {
         "click .reset": function(e,t){
             dc.filterAll();
             dc.redrawAll();
-            }
+            },
+        "click .ipmenu-whois": function(e,t){
+            Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalwhoiswindow').modal()
+        }
     });   
  
     Template.alertssummary.alertsCount = function () {
@@ -35,6 +39,32 @@ if (Meteor.isClient) {
             return b-a;
         }
         
+        function isIPv4(entry) {
+          var blocks = entry.split(".");
+          if(blocks.length === 4) {
+            return blocks.every(function(block) {
+              return parseInt(block,10) >=0 && parseInt(block,10) <= 255;
+            });
+          }
+          return false;
+        }         
+        
+        ipHighlight=function(anelement){
+          var words=anelement.text().split(' ');
+          //console.log(words);
+          words.forEach(function(w){
+            if ( isIPv4(w) ){
+                //console.log(w);
+              anelement.
+                highlight(w,
+                          {wordsOnly:true,
+                           element: "em",
+                          className:"ipaddress"});
+            }
+          });
+        };
+        
+        
         Deps.autorun(function() {
             //console.log('deps autorun');
             
@@ -48,6 +78,7 @@ if (Meteor.isClient) {
                 d.month = d.dd.get('month');
                 d.hour = d.dd.get('hour')
                 d.epoch=d.dd.unix();
+                //d.summary=ipHighlight(d.summary);
             });        
             ndx = crossfilter(alertsData);
             if ( ndx.size() >0){
@@ -107,6 +138,33 @@ if (Meteor.isClient) {
                     .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]))
                     .expireCache();
                 dc.renderAll();
+                
+                //ipHighlight($(".dc-table-column"));
+                //ipHighlight($("td[class*='_4']"));
+                //add a dropdown menu to anything matching an ip address
+                //search likely places for ip, adding an ip class
+                $( "td[class*='_4']" ).each(function( index ) {
+                    //console.log( index + ": " + $( this ).text() );
+                    ipHighlight($(this));
+                });
+                
+                //fix up the ips we found
+                //by making them into a pull down bootstrap menu                
+                $( '.ipaddress' ).each(function( index ) {
+                    iptext=$(this).text();
+                    //add a caret so it looks drop downy
+                    $(this).append('<b class="caret"></b>');
+                  
+                    //wrap the whole thing in a dropdown class
+                    $(this).wrap( "<span class='dropdown' id='ipdropdown" + index + "'></span>" );
+
+                    //add the drop down menu
+                    $('#ipdropdown'+index).append("<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel" + index
+                                                  + "'><li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li</ul>"); 
+                  
+                    //wrap just the ip in a bootstrap dropdown with a unique id
+                    $(this).wrap( "<a class='dropdown-toggle' data-toggle='dropdown' href='#' id='dLabel" + index +"'></a>" );
+                });
             }
         }); //end deps.autorun    
     };

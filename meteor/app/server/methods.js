@@ -12,7 +12,8 @@ Jeff Bryner jbryner@mozilla.com
 Meteor.methods({
   'saySomething': saySomething,
   'loadKibanaDashboards': loadKibanaDashboards,
-  'banhammer': banhammer
+  'banhammer': banhammer,
+  'ipwhois': ipwhois
 });
 
 function saySomething() {
@@ -29,7 +30,7 @@ function loadKibanaDashboards() {
     dashboardsRequest.data.forEach(function(dashboard, index, arr) {
       kibanadashboards.insert(dashboard);
     });
-    console.log(dashboardsRequest.data);
+    //console.log(dashboardsRequest.data);
   } else {
     console.log("Could not retrieve kibana dashboards... check settings");
     console.log(mozdef.rootAPI + '/kibanadashboards');
@@ -42,9 +43,21 @@ function banhammer(actionobj) {
   var banhammerRequest = HTTP.post(mozdef.rootAPI + '/banhammer', {data: actionobj});
   if (banhammerRequest.statusCode==200) {
     console.log(actionobj.address+"/"+actionobj.cidr+" banhammered for "+actionobj.duration);
-  }
-  else {
+  } else {
     console.log("Could not banhammer "+actionobj.address+"/"+actionobj.cidr+" for "+actionobj.duration);
   }
 }
 
+function ipwhois(ipaddress){
+    console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipwhois/');
+    var ipwhoisResponse = HTTP.post(mozdef.rootAPI + '/ipwhois/',{data: {'ipaddress':ipaddress}});
+    
+    if ( typeof ipwhoisResponse == 'undefined') {
+        console.log("no response from server")
+        return "";
+    } else {
+        console.log(ipwhoisResponse);
+        return ipwhoisResponse;
+    }
+    
+}
