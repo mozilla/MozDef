@@ -49,14 +49,14 @@ function banhammer(actionobj) {
 }
 
 function ipwhois(ipaddress){
-    console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipwhois/');
+    //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipwhois/');
     var ipwhoisResponse = HTTP.post(mozdef.rootAPI + '/ipwhois/',{data: {'ipaddress':ipaddress}});
     
     if ( typeof ipwhoisResponse == 'undefined') {
         console.log("no response from server")
         return "";
     } else {
-        console.log(ipwhoisResponse);
+        //console.log(ipwhoisResponse);
         return ipwhoisResponse;
     }
     

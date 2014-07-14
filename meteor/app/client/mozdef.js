@@ -85,38 +85,6 @@ if (Meteor.isClient) {
         });
     });    
     
-    Template.banhammerform.rendered = function() {
-        $('#ipaddr')[0].value = Session.get('banhammeripaddr');
-    };
-
-    Template.banhammerform.events({
-        "submit form": function(event, template) {
-            event.preventDefault();
-            var reporter = '';
-            try {
-                reporter = Meteor.user().profile.email;
-            }
-            catch(err) {
-                reporter = 'test';
-            }
-            var ipaddr = $('#ipaddr')[0].value.split('/');
-            var address = ipaddr[0];
-            var cidr = 32;
-            if (ipaddr.length == 2) {
-                parseInt(ipaddr[1]);
-            }
-            var actionobj = {
-              address: address,
-              cidr: cidr,
-              duration: $('#duration')[0].value,
-              comment: $('#comment')[0].value,
-              reporter: reporter,
-              bugid: parseInt($('#bugid')[0].value)
-            };
-            Meteor.call('banhammer', actionobj);
-            Router.go('/incidents/attackers');
-        }
-    });
 
     //auto run to handle session variable changes
     Deps.autorun(function() {

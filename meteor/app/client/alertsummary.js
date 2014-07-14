@@ -19,7 +19,12 @@ if (Meteor.isClient) {
         "click .ipmenu-whois": function(e,t){
             Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalwhoiswindow').modal()
+        },
+        "click .ipmenu-blockip": function(e,t){
+            Session.set('banhammeripaddr',($(e.target).attr('data-ipaddress')));
+            $('#modalBlockIPWindow').modal()
         }
+        
     });   
  
     Template.alertssummary.alertsCount = function () {
@@ -76,8 +81,13 @@ if (Meteor.isClient) {
                 $(this).wrap( "<span class='dropdown' id='ipdropdown" + index + "'></span>" );
     
                 //add the drop down menu
-                $('#ipdropdown'+index).append("<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel" + index
-                                              + "'><li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li</ul>"); 
+                ipmenu=$("<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel" + index + "'>'");
+                whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li</ul>");
+                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li</ul>");
+                
+                ipmenu.append(whoisitem,blockIPitem);
+                
+                $('#ipdropdown'+index).append(ipmenu);
               
                 //wrap just the ip in a bootstrap dropdown with a unique id
                 $(this).wrap( "<a class='dropdown-toggle' data-toggle='dropdown' href='#' id='dLabel" + index +"'></a>" );
