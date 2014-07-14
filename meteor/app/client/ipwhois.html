@@ -1,0 +1,101 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+
+Contributors:
+Jeff Bryner jbryner@mozilla.com
+
+contains two ways to display the same whois data
+non-modal: for http(s)://servername/ipwhois/1.2.3.4
+modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
+            $('#modalwhoiswindow').modal()
+-->
+
+<template name="ipwhois">
+<style>
+    .row { color: white;
+    }
+</style>
+<body>
+
+
+<div class="container">
+    <div class="well">
+        whois: {{whois.status}}
+    </div>
+    <div class="row"><a class="showmodal" href=#>click me for modal</a></div>
+    <div class="row center">
+        <ul class="unstyled">
+            {{#each objKeys whois.data}}
+                    {{#if notIsEqual value null}}
+                        <li>{{key}}: {{value}}</li>
+                    {{/if}}
+            {{/each}}
+        </ul>
+        <ul class="unstyled">
+            {{#each whois.data.nets}}
+                {{#each objKeys this}}
+                        <li>{{key}}: {{value}}</li>
+                {{/each}}                
+            {{/each}}
+            
+        </ul>
+    </div>
+    <div class="row center">
+        <span>raw json:</span>
+        <span class="unstyled">
+                {{whois.content}}
+        </span>
+    </div>
+    {{>whoismodal}}
+</div>
+</body>
+</template>
+
+<template name="whoismodal">
+    <style>
+    .modal-body .row { color: black;
+    }
+    </style>
+<div class="modal hide" id="modalwhoiswindow">
+    <div class="modal-header">
+       <button type="button" class="close" data-dismiss="modal">&times;</button>
+       <h3>Whois Results</h3>
+    </div>
+    <div class="modal-body">
+            <div class="row center">
+                <div class="well">
+                    whois: {{whois.status}}
+                </div>
+            </div>
+            <div class="row  center">
+                <ul class="unstyled">
+                    {{#each objKeys whois.data}}
+                            {{#if notIsEqual value null}}
+                                <li>{{key}}: {{value}}</li>
+                            {{/if}}
+                    {{/each}}
+                </ul>
+                <ul class="unstyled">
+                    {{#each whois.data.nets}}
+                        {{#each objKeys this}}
+                                <li>{{key}}: {{value}}</li>
+                        {{/each}}                
+                    {{/each}}
+                    
+                </ul>
+            </div>
+            <div class="row span2 center">
+                <span>raw json:</span>
+                <span class="unstyled">
+                        {{whois.content}}
+                </span>
+            </div>            
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn" data-dismiss="modal">Close</a>
+  </div>
+ </div>
+</template>
