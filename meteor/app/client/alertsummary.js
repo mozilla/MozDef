@@ -121,6 +121,7 @@ if (Meteor.isClient) {
             //and if we no longer do (search didn't match)
             //clear filters..redraw.
             if ( alertsData.length === 0 && ndx.size()>0){
+                console.log('clearing ndx/dc.js');
                 dc.filterAll();
                 ndx.remove();
                 dc.redrawAll();

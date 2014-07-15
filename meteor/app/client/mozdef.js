@@ -69,21 +69,36 @@ if (Meteor.isClient) {
     });
     
     UI.registerHelper('isEqual', function (var1,var2){
+        //easy comparison operator for template engine
         return var1 === var2;
     });
     
-    UI.registerHelper('notIsEqual', function (var1,var2){
+    UI.registerHelper('isNotEqual', function (var1,var2){
+        //easy comparison operator for template engine
         return var1 !== var2
     });
     
-    UI.registerHelper('objKeys', function (all) {
+    UI.registerHelper('isAnObject', function (var1){
+        //help the template engine figure out objects for "each" iteration
+        return _.isObject(var1)
+    });
+    
+    UI.registerHelper('objKeyValue', function (obj,yieldObject) {
         //given an object, return key:value pairs
         //for easy iteration.
-        return _.map(all, function(i, k) {
+        
+        //decide whether to return objects natively:
+        yieldObject = typeof yieldObject !== 'undefined' ? yieldObject : true;
+        
+        return _.map(obj, function(i, k) {
                 if ( ! _.isObject(i) ) {
                     return {key: k, value: i};
                 } else {
-                    return { key: null, value: null};
+                    if (yieldObject) {
+                        return { key: k, value: i};
+                    } else {
+                        return { key: null, value: null};
+                    }
                 }
                 
         });

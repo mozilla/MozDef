@@ -28,15 +28,15 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
     <div class="row"><a class="showmodal" href=#>click me for modal</a></div>
     <div class="row center">
         <ul class="unstyled">
-            {{#each objKeys whois.data}}
-                    {{#if notIsEqual value null}}
+            {{#each objKeyValue whois.data}}
+                    {{#if isNotEqual value null}}
                         <li>{{key}}: {{value}}</li>
                     {{/if}}
             {{/each}}
         </ul>
         <ul class="unstyled">
             {{#each whois.data.nets}}
-                {{#each objKeys this}}
+                {{#each objKeyValue this}}
                         <li>{{key}}: {{value}}</li>
                 {{/each}}                
             {{/each}}
@@ -72,15 +72,15 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
             </div>
             <div class="row  center">
                 <ul class="unstyled">
-                    {{#each objKeys whois.data}}
-                            {{#if notIsEqual value null}}
+                    {{#each objKeyValue whois.data false}}
+                            {{#if isNotEqual value null}}
                                 <li>{{key}}: {{value}}</li>
                             {{/if}}
                     {{/each}}
                 </ul>
                 <ul class="unstyled">
                     {{#each whois.data.nets}}
-                        {{#each objKeys this}}
+                        {{#each objKeyValue this}}
                                 <li>{{key}}: {{value}}</li>
                         {{/each}}                
                     {{/each}}
