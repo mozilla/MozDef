@@ -26,21 +26,27 @@ class AlertTask(Task):
     def __init__(self):
         self.alert_name = self.__class__.__name__
         self.filter = None
+        # List of events
         self.events = None
+        # List of aggregations
+        # e.g. when aggregField is email: [{value:'evil@evil.com',count:1337,events:[...]}, ...]
         self.aggregations = None
 
         self.log.debug('starting {0}'.format(self.alert_name))
         self.log.debug(RABBITMQ)
         self.log.debug(ES)
 
-        self.configureKombu()
-        self.configureES()
+        self._configureKombu()
+        self._configureES()
 
     @property
     def log(self):
         return get_task_logger('%s.%s' % (__name__, self.alert_name))
 
-    def configureKombu(self):
+    def _configureKombu(self):
+        """
+        Configure kombu for rabbitmq
+        """
         try:
             connString = 'amqp://{0}:{1}@{2}:{3}//'.format(
                 RABBITMQ['mquser'],
@@ -62,7 +68,10 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Exception while configuring kombu for alerts: {0}'.format(e))
 
-    def configureES(self):
+    def _configureES(self):
+        """
+        Configure pyes for elasticsearch
+        """
         try:
             self.es = pyes.ES(ES['servers'])
             self.log.debug('ES configured')
@@ -70,6 +79,9 @@ class AlertTask(Task):
             self.log.error('Exception while configuring ES for alerts: {0}'.format(e))
 
     def alertToMessageQueue(self, alertDict):
+        """
+        Send alert to the rabbit message queue
+        """
         try:
             # cherry pick items from the alertDict to send to the alerts messageQueue
             mqAlert = dict(severity='INFO', category='')
@@ -95,6 +107,9 @@ class AlertTask(Task):
             self.log.error('Exception while sending alert to message queue: {0}'.format(e))
 
     def alertToES(self, alertDict):
+        """
+        Send alert to elasticsearch
+        """
         try:
             res = self.es.index(index='alerts', doc_type='alert', doc=alertDict)
             self.log.debug('alert sent to ES')
@@ -103,12 +118,16 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Exception while pushing alert to ES: {0}'.format(e))
 
-    # def genericXeventsYtime(self, X, Y, aggregField, summaryDescr, sampleField, summarySamplesCount):
-    #     pass
-
-    # def genericExactMatch
-
     def filtersManual(self, date_timedelta, must=[], should=[], must_not=[]):
+        """
+        Configure filters manually
+
+        date_timedelta is a dict in timedelta format
+        see https://docs.python.org/2/library/datetime.html#timedelta-objects
+
+        must, should and must_not are pyes filter objects lists
+        see http://pyes.readthedocs.org/en/latest/references/pyes.filters.html
+        """
         begindateUTC = datetime.utcnow() - timedelta(**date_timedelta)
         enddateUTC = datetime.utcnow()
         qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
@@ -122,6 +141,14 @@ class AlertTask(Task):
         self.filter = q
 
     def filtersFromKibanaDash(self, fp, date_timedelta):
+        """
+        Import filters from a kibana dashboard
+
+        fp is the file path of the json file
+
+        date_timedelta is a dict in timedelta format
+        see https://docs.python.org/2/library/datetime.html#timedelta-objects
+        """
         f = open(fp)
         data = json.load(f)
         must = []
@@ -169,6 +196,9 @@ class AlertTask(Task):
         self.filtersManual(date_timedelta, must=must, should=should, must_not=must_not)
 
     def searchEventsSimple(self):
+        """
+        Search events matching filters, store events in self.events
+        """
         try:
             pyesresults = self.es.search(
                 self.filter,
@@ -180,6 +210,9 @@ class AlertTask(Task):
             self.log.error('Error while searching events in ES: {0}'.format(e))
 
     def searchEventsAggreg(self, aggregField, samplesLimit=5):
+        """
+        Search aggregations matching filters by aggregField, store them in self.aggregations
+        """
         try:
             pyesresults = self.es.search(
                 self.filter,
@@ -214,6 +247,9 @@ class AlertTask(Task):
             self.log.error('Error while searching events in ES: {0}'.format(e))
 
     def walkEvents(self):
+        """
+        Walk through events, provide some methods to hook in alerts
+        """
         if len(self.events) > 0:
             for i in self.events:
                 alert = self.onEvent(i)
@@ -225,6 +261,9 @@ class AlertTask(Task):
                     self.hookAfterInsertion(alert)
 
     def walkAggregations(self, threshold):
+        """
+        Walk through aggregations, provide some methods to hook in alerts
+        """
         if len(self.aggregations) > 0:
             for aggreg in self.aggregations:
                 if aggreg['count'] >= threshold:
@@ -307,6 +346,9 @@ class AlertTask(Task):
         pass
 
     def run(self):
+        """
+        Main method launched by celery periodically
+        """
         try:
             self.main()
             self.log.debug('finished')
