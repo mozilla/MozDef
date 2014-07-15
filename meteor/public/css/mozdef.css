@@ -49,8 +49,10 @@ body{
 }
 
 .ipaddress {
-  color: red;
-
+  font-family: monospace ;
+  font-size: 120%;
+  color: #FFF;
+  font-style: normal;
 }
 
 #header a.mozilla {
