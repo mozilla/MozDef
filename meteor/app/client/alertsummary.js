@@ -13,6 +13,7 @@ if (Meteor.isClient) {
 
     Template.alertssummary.events({
         "click .reset": function(e,t){
+            Session.set('alertsearchtext','');
             dc.filterAll();
             dc.redrawAll();
             },
@@ -23,6 +24,13 @@ if (Meteor.isClient) {
         "click .ipmenu-blockip": function(e,t){
             Session.set('banhammeripaddr',($(e.target).attr('data-ipaddress')));
             $('#modalBlockIPWindow').modal()
+        },
+        "keyup #alertsearchtext": function(e,t){
+            var code = e.which;
+            if(code==13){//enter
+                e.preventDefault();
+                Session.set('alertsearchtext',$('#alertsearchtext').val());
+            }
         }
         
     });   
@@ -36,9 +44,10 @@ if (Meteor.isClient) {
         var ringChartCategory   = dc.pieChart("#ringChart-category");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity");
         var volumeChart         = dc.barChart("#volumeChart");
+        $('#alertsearchtext').val(Session.get('alertsearchtext'));
         // set our data source
-        Meteor.subscribe("alerts");
-        var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
+        //Meteor.subscribe("alerts");
+        //var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
         var ndx = crossfilter();
         function descNumbers(a, b) {
             return b-a;
@@ -95,10 +104,8 @@ if (Meteor.isClient) {
         };
         
         
-        Deps.autorun(function() {
-            //console.log('deps autorun');
-            
-            alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 1000, reactive:false}).fetch();
+        Deps.autorun(function() {            
+            alertsData=alerts.find({summary: {$regex:Session.get('alertsearchtext')}},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 100, reactive:false}).fetch();
             var alertsCount=alerts.find({}).count();
             //parse, group data for the d3 charts
             alertsData.forEach(function (d) {
@@ -108,8 +115,19 @@ if (Meteor.isClient) {
                 d.month = d.dd.get('month');
                 d.hour = d.dd.get('hour')
                 d.epoch=d.dd.unix();
-            });        
-            ndx = crossfilter(alertsData);
+            });
+            //deps.autorun gets called with and without dc/ndx initialized
+            //so check if we used to have data
+            //and if we no longer do (search didn't match)
+            //clear filters..redraw.
+            if ( alertsData.length === 0 && ndx.size()>0){
+                dc.filterAll();
+                ndx.remove();
+                dc.redrawAll();
+            } else {
+                ndx = crossfilter(alertsData);
+            }
+            
             if ( ndx.size() >0){
                 var all = ndx.groupAll();
                 var severityDim = ndx.dimension(function(d) {return d.severity;});
@@ -118,8 +136,8 @@ if (Meteor.isClient) {
                 var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
                 var format2d = d3.format("02d");
                 var volumeByHourGroup = hourDim.group().reduceCount();
-                ndx.remove();
-                ndx.add(alertsData);
+                //ndx.remove();
+                //ndx.add(alertsData);
                 ringChartCategory
                     .width(150).height(150)
                     .dimension(categoryDim)
@@ -152,7 +170,7 @@ if (Meteor.isClient) {
                     .order(descNumbers)                    
                     .columns([
                         function(d) {return d.jdate;},
-                        function(d) {return '<a href="/alert/' + d.esmetadata.id + '">' + d.esmetadata.id + '</a><br> <a href="' + d.url + '">see in kibana</a>';},
+                        function(d) {return '<a href="/alert/' + d.esmetadata.id + '">mozdef</a><br> <a href="' + d.url + '">kibana</a>';},
                         function(d) {return d.severity;},
                         function(d) {return d.category;},
                         function(d) {
@@ -177,8 +195,8 @@ if (Meteor.isClient) {
                     .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]))
                     .expireCache();
                 dc.renderAll();
-
             }
+            
         }); //end deps.autorun    
     };
  
