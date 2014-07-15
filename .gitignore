@@ -1,4 +1,4 @@
 .DS_Store
 meteor/packages
 *.pyc
-
+celebeat-schedule.*
