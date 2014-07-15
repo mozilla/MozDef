@@ -274,6 +274,12 @@ def kibanaDashboards():
 
 def banhammer(action):
     try:
+        mysqlconn = MySQLdb.connect(
+            host=options.banhammerdbhost,
+            user=options.banhammerdbuser,
+            passwd=options.banhammerdbpasswd,
+            db=options.banhammerdbdb)
+        dbcursor = mysqlconn.cursor()
         # Look if attacker already in the DB, if yes get id
         dbcursor.execute("""SELECT id FROM blacklist_offender
               WHERE address = "%s" AND cidr = %d""" % (action['address'], int(action['cidr'])))
