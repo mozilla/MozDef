@@ -61,7 +61,7 @@ if (Meteor.isClient) {
         var ringChartCategory   = dc.pieChart("#ringChart-category");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity");
         var volumeChart         = dc.barChart("#volumeChart");
-        $('#alertsearchtext').val(Session.get('alertsearchtext'));
+        
         var ndx = crossfilter();
 
         function descNumbers(a, b) {
@@ -217,6 +217,7 @@ if (Meteor.isClient) {
             //console.log(comp);
             Meteor.subscribe("alerts-count");
             cnt=alertsCount.findOne();
+            $('#alertsearchtext').val(Session.get('alertsearchtext'));
             if ( cnt ){
                 alertsDep.changed();
                 currentCount=cnt.count;
