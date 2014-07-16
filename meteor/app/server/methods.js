@@ -12,7 +12,7 @@ Jeff Bryner jbryner@mozilla.com
 Meteor.methods({
   'saySomething': saySomething,
   'loadKibanaDashboards': loadKibanaDashboards,
-  'banhammer': banhammer,
+  'blockip': blockIP,
   'ipwhois': ipwhois
 });
 
@@ -39,12 +39,12 @@ function loadKibanaDashboards() {
   }
 }
 
-function banhammer(actionobj) {
-  var banhammerRequest = HTTP.post(mozdef.rootAPI + '/banhammer', {data: actionobj});
-  if (banhammerRequest.statusCode==200) {
-    console.log(actionobj.address+"/"+actionobj.cidr+" banhammered for "+actionobj.duration);
+function blockIP(actionobj) {
+  var blockIPRequest = HTTP.post(mozdef.rootAPI + '/blockip', {data: actionobj});
+  if (blockIPRequest.statusCode==200) {
+    console.log(actionobj.address+"/"+actionobj.cidr+" blocked for "+actionobj.duration);
   } else {
-    console.log("Could not banhammer "+actionobj.address+"/"+actionobj.cidr+" for "+actionobj.duration);
+    console.log("Could not block "+actionobj.address+"/"+actionobj.cidr+" for "+actionobj.duration);
   }
 }
 

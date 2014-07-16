@@ -95,11 +95,11 @@ def index():
     return(kibanaDashboards())
 
 
-@post('/banhammer', methods=['POST'])
-@post('/banhammer/', methods=['POST'])
+@post('/blockip', methods=['POST'])
+@post('/blockip/', methods=['POST'])
 @enable_cors
 def index():
-    if options.banhammerenable:
+    if options.enableBlockIP:
         try:
             return(banhammer(request.json))
         except Exception as e:
@@ -333,6 +333,19 @@ def getWhois(ipaddress):
         sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
 
 
+def checkBlockIPService():
+    if options.enableBlockIP:
+        try:
+            mysqlconn = MySQLdb.connect(
+                host=options.banhammerdbhost,
+                user=options.banhammerdbuser,
+                passwd=options.banhammerdbpasswd,
+                db=options.banhammerdbdb)
+            dbcursor = mysqlconn.cursor()
+        except Exception as e:
+            sys.stderr.write('Failed to connect to the Banhammer DB\n')    
+
+
 def initConfig():
     #change this to your default zone for when it's not specified
     options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific',
@@ -341,7 +354,12 @@ def initConfig():
         options.configfile).split(','))
     options.kibanaurl = getConfig('kibanaurl', 'http://localhost:9090',
         options.configfile)
-    options.banhammerenable = getConfig('banhammerenable', False,
+    
+    # options for your custom/internal ip blocking service
+    # mozilla's is called banhammer
+    # and uses an intermediary mysql DB
+    # here we set and test credentials
+    options.enableBlockIP = getConfig('enableBlockIP', False,
         options.configfile)
     options.banhammerdbhost = getConfig('banhammerdbhost', 'localhost',
         options.configfile)
@@ -351,7 +369,8 @@ def initConfig():
         options.configfile)
     options.banhammerdbdb = getConfig('banhammerdbdb', 'banhammer',
         options.configfile)
-    print(options)
+
+    checkBlockIPService()
 
 
 if __name__ == "__main__":
@@ -361,16 +380,7 @@ if __name__ == "__main__":
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    if options.banhammerenable:
-        try:
-            mysqlconn = MySQLdb.connect(
-                host=options.banhammerdbhost,
-                user=options.banhammerdbuser,
-                passwd=options.banhammerdbpasswd,
-                db=options.banhammerdbdb)
-            dbcursor = mysqlconn.cursor()
-        except Exception as e:
-            sys.stderr.write('Failed to connect to the Banhammer DB\n')
+
     run(host="localhost", port=8081)
 else:
     parser = OptionParser()
@@ -379,14 +389,5 @@ else:
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    if options.banhammerenable:
-        try:
-            mysqlconn = MySQLdb.connect(
-                host=options.banhammerdbhost,
-                user=options.banhammerdbuser,
-                passwd=options.banhammerdbpasswd,
-                db=options.banhammerdbdb)
-            dbcursor = mysqlconn.cursor()
-        except Exception as e:
-            sys.stderr.write('Failed to connect to the Banhammer DB\n')
+
     application = default_app()

@@ -29,8 +29,8 @@ if (Meteor.isServer) {
                                 value : mozdef.rootAPI });
         mozdefsettings.insert({ key:'kibanaURL',
                                 value : mozdef.kibanaURL });
-        mozdefsettings.insert({ key:'enableBanhammer', 
-                                value : mozdef.enableBanhammer }); 
+        mozdefsettings.insert({ key:'enableBlockIP', 
+                                value : mozdef.enableBlockIP }); 
 
         //console.log(mozdefsettings.find({}).fetch())
         

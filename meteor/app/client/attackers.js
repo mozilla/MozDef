@@ -57,7 +57,7 @@ if (Meteor.isClient) {
             }
             
         },
-        "click #btnBanhammer": function(event, template) {
+        "click #btnBlockIP": function(event, template) {
           // TODO: modal with ipaddr, duration (dropdown), comment (text 1024 chars), bug (text 7 chars, optional)
           console.log("Banhammer!");
           //console.log(event);
@@ -79,11 +79,11 @@ if (Meteor.isClient) {
                 offset.copy( intersects[ 0 ].point ).sub( plane.position );
                 container.style.cursor = 'move';
                 //console.log(selectedObject);
-                if (getSetting('enableBanhammer')) {
+                if (getSetting('enableBlockIP')) {
                     var attacker = attackers.findOne({_id: selectedObject.dbid})
-                    $("#banhammerIP")[0].textContent = attacker.sourceipaddress;
-                    $('#btnBanhammer')[0].href = '/incidents/banhammer/'+attacker.sourceipaddress;
-                    $("#btnBanhammer").show();
+                    $("#blockIP")[0].textContent = attacker.sourceipaddress;
+                    $('#btnBlockIP')[0].href = '/incidents/blockip/'+attacker.sourceipaddress;
+                    $("#btnBlockIP").show();
                 }
             }
         },
@@ -165,7 +165,7 @@ if (Meteor.isClient) {
         //var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
         //var ndx = crossfilter();        
         
-        $("#btnBanhammer").hide();
+        $("#btnBlockIP").hide();
         scene = new THREE.Scene();
         scene.name='attackerScene';
         var clock = new THREE.Clock();

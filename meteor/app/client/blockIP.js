@@ -33,25 +33,26 @@ if (Meteor.isClient) {
           reporter: reporter,
           bugid: parseInt($('#bugid')[0].value)
         };
-        Meteor.call('banhammer', actionobj);
-        //Router.go('/incidents/attackers');    
+        Meteor.call('blockip', actionobj);
+        
     };
     
     
-    Template.banhammerform.rendered = function() {
-        $('#ipaddr')[0].value = Session.get('banhammeripaddr');
+    Template.blockIPform.rendered = function() {
+        $('#ipaddr')[0].value = Session.get('blockIPipaddress');
     };
 
-    Template.banhammerform.events({
+    Template.blockIPform.events({
         "submit form": function(event, template) {
             event.preventDefault();
             blockIP();
+            Router.go('/incidents/attackers');
         }
     });
     
     Template.blockIPModal.rendered = function(){
         Deps.autorun(function() {
-            $('#ipaddr')[0].value = Session.get('banhammeripaddr');
+            $('#ipaddr')[0].value = Session.get('blockIPipaddress');
         }); //end deps.autorun
     };
     

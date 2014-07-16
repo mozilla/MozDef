@@ -91,11 +91,11 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
     
-    this.route('banhammer', {
-        path: '/incidents/banhammer/:_ipaddr',
-        template: 'banhammerform',
+    this.route('blockip', {
+        path: '/incidents/blockip/:_ipaddr',
+        template: 'blockIPform',
         data: function() {
-          Session.set('banhammeripaddr', this.params._ipaddr);
+          Session.set('blockIPipaddress', this.params._ipaddr);
         },
         layoutTemplate: 'layout'
     });

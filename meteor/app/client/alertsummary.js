@@ -28,7 +28,7 @@ if (Meteor.isClient) {
             $('#modalwhoiswindow').modal()
         },
         "click .ipmenu-blockip": function(e,t){
-            Session.set('banhammeripaddr',($(e.target).attr('data-ipaddress')));
+            Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalBlockIPWindow').modal()
         },
         "keyup #alertsearchtext": function(e,t){
