@@ -15,6 +15,7 @@ if (Meteor.isClient) {
     //of alerts instead of subscribing to the large
     //alerts table.
     var alertsDep = new Deps.Dependency;
+    var currentCount=0
 
     Template.alertssummary.events({
         "click .reset": function(e,t){
@@ -43,25 +44,26 @@ if (Meteor.isClient) {
     Template.alertssummary.alertsTotalCount = function () {
         //sometimes the collection isn't ready
         //so return 0 until it is.
-        cnt=alertsCount.findOne();
-        if ( cnt ){
-            alertsDep.changed();
-            return(cnt.count);
-        }else{
-            return(0);
-        }
+        
+        //cnt=alertsCount.findOne();
+        //if ( cnt ){
+        //    alertsDep.changed();
+        //    refreshAlertsData();
+        //    return(cnt.count);
+        //}else{
+        //    return(0);
+        //}
+        alertsDep.depend();
+        return currentCount;
     };
     
     Template.alertssummary.rendered = function() {
-        //console.log('rendered');
         var ringChartCategory   = dc.pieChart("#ringChart-category");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity");
         var volumeChart         = dc.barChart("#volumeChart");
         $('#alertsearchtext').val(Session.get('alertsearchtext'));
-        // set our data source
-        //Meteor.subscribe("alerts");
-        //var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
         var ndx = crossfilter();
+
         function descNumbers(a, b) {
             return b-a;
         }
@@ -117,11 +119,8 @@ if (Meteor.isClient) {
         };
         
         
-        Deps.autorun(function() {
-            Meteor.subscribe("alerts-count");
-            alertsDep.depend();
-            alertsData=alerts.find({summary: {$regex:Session.get('alertsearchtext')}},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 100, reactive:false}).fetch();
-            //var alertsCount=alerts.find({}).count();
+        refreshAlertsData=function(){
+            var alertsData=alerts.find({summary: {$regex:Session.get('alertsearchtext')}},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 100, reactive:false}).fetch();
             //parse, group data for the d3 charts
             alertsData.forEach(function (d) {
                 d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
@@ -144,7 +143,7 @@ if (Meteor.isClient) {
                 ndx = crossfilter(alertsData);
             }
             
-            if ( ndx.size() >0){
+            if ( ndx.size() >0){             
                 var all = ndx.groupAll();
                 var severityDim = ndx.dimension(function(d) {return d.severity;});
                 var categoryDim = ndx.dimension(function(d) {return d.category;});
@@ -152,8 +151,7 @@ if (Meteor.isClient) {
                 var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
                 var format2d = d3.format("02d");
                 var volumeByHourGroup = hourDim.group().reduceCount();
-                //ndx.remove();
-                //ndx.add(alertsData);
+
                 ringChartCategory
                     .width(150).height(150)
                     .dimension(categoryDim)
@@ -212,8 +210,21 @@ if (Meteor.isClient) {
                     .expireCache();
                 dc.renderAll();
             }
-            
+    
+        };
+        
+        Deps.autorun(function(comp) {
+            //console.log(comp);
+            Meteor.subscribe("alerts-count");
+            cnt=alertsCount.findOne();
+            if ( cnt ){
+                alertsDep.changed();
+                currentCount=cnt.count;
+                Deps.nonreactive(refreshAlertsData);
+            }
+        
         }); //end deps.autorun    
     };
  
+
 };

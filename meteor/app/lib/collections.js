@@ -38,12 +38,6 @@ if (Meteor.isServer) {
         return alerts.find({}, {sort: {utcepoch: -1},limit:100});
     });
     
-    //Meteor.publish('alerts-count',function(){
-    //    //return the current alert count
-    //    //clients can use this to know when new alerts are present.
-    //    return alerts.find().count(); 
-    //});
-
     Meteor.publish("alerts-count", function () {
       var self = this;
       var count = 0;
@@ -54,22 +48,15 @@ if (Meteor.isServer) {
       // have run. Until then, we don't want to send a lot of
       // `self.changed()` messages - hence tracking the
       // `initializing` state.
-      var handle = alerts.find({}).observeChanges({
-        added: function () {
-          count++;
-          if (!initializing)
+      //get a count by watching for only 1 new entry sorted in reverse date order.
+      //use that hook to return a find().count rather than iterating the entire result set over and over
+      var handle = alerts.find({}, {sort: {utcepoch: -1},limit:1}).observe({
+        added: function (newDoc,oldDoc) {
+            count=alerts.find().count();
+            if (!initializing)
             self.changed("alerts-count", recordID,{count: count});
-        },
-        removed: function () {
-          count--;
-          self.changed("alerts-count", recordID,{count: count});
         }
-        // don't care about changed
       });
-    
-      // Instead, we'll send one `self.added()` message right after
-      // observeChanges has returned, and mark the subscription as
-      // ready.
       initializing = false;
       self.added("alerts-count", recordID,{count: count});
       self.ready();
@@ -80,7 +67,7 @@ if (Meteor.isServer) {
       self.onStop(function () {
         handle.stop();
       });
-    });
+    });    
     
     
     
