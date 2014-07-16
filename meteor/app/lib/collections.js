@@ -110,7 +110,7 @@ if (Meteor.isServer) {
     });    
 
     Meteor.publish("kibanadashboards", function () {
-        return kibanadashboards.find({}, {limit:0});
+        return kibanadashboards.find({},{sort:{name:1}, limit:20});
     });    
 
     Meteor.publish("attackers", function () {
