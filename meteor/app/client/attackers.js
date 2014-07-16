@@ -419,12 +419,14 @@ if (Meteor.isClient) {
        
     Template.attackers.destroyed = function () {
         //remove scene Controls so they don't interfere with other forms, etc.
-        var scene = null;
-        var sceneCamera = null;
-        var sceneControls = null;
-        var sceneObjects=[];
-        var selectedObject=null;
-        var intersectedObject=null;
+        scene = null;
+        sceneCamera = null;
+        //turn off controls to avoid mouse wheel/click/etc interference with other templates
+        sceneControls.enabled=false;
+        sceneControls = null;
+        sceneObjects=[];
+        selectedObject=null;
+        intersectedObject=null;
     };//end template.attackers.destroyed
 
 
