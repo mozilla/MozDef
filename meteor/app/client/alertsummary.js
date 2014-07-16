@@ -10,6 +10,11 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
+    
+    //register a dependency we can control via the count
+    //of alerts instead of subscribing to the large
+    //alerts table.
+    var alertsDep = new Deps.Dependency;
 
     Template.alertssummary.events({
         "click .reset": function(e,t){
@@ -35,8 +40,16 @@ if (Meteor.isClient) {
         
     });   
  
-    Template.alertssummary.alertsCount = function () {
-      return alerts.find({}).count();
+    Template.alertssummary.alertsTotalCount = function () {
+        //sometimes the collection isn't ready
+        //so return 0 until it is.
+        cnt=alertsCount.findOne();
+        if ( cnt ){
+            alertsDep.changed();
+            return(cnt.count);
+        }else{
+            return(0);
+        }
     };
     
     Template.alertssummary.rendered = function() {
@@ -104,9 +117,11 @@ if (Meteor.isClient) {
         };
         
         
-        Deps.autorun(function() {            
+        Deps.autorun(function() {
+            Meteor.subscribe("alerts-count");
+            alertsDep.depend();
             alertsData=alerts.find({summary: {$regex:Session.get('alertsearchtext')}},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 100, reactive:false}).fetch();
-            var alertsCount=alerts.find({}).count();
+            //var alertsCount=alerts.find({}).count();
             //parse, group data for the d3 charts
             alertsData.forEach(function (d) {
                 d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;

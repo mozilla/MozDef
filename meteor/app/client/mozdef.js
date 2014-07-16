@@ -16,10 +16,6 @@ if (Meteor.isClient) {
     Session.set('alertsearchtext','');
   });    
     
-    
-
-   
-
     //debug/testing functions
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')

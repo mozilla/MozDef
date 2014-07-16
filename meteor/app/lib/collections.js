@@ -33,39 +33,88 @@ if (Meteor.isServer) {
     });
 
     Meteor.publish("alerts", function () {
-      return alerts.find({}, {sort: {utcepoch: -1},limit:1000});
+        //limit to the last 100 records by default
+        //to eash the sync transfer to dc.js/crossfilter
+        return alerts.find({}, {sort: {utcepoch: -1},limit:100});
     });
+    
+    //Meteor.publish('alerts-count',function(){
+    //    //return the current alert count
+    //    //clients can use this to know when new alerts are present.
+    //    return alerts.find().count(); 
+    //});
+
+    Meteor.publish("alerts-count", function () {
+      var self = this;
+      var count = 0;
+      var initializing = true;
+      var recordID=Meteor.uuid();
+    
+      // observeChanges only returns after the initial `added` callbacks
+      // have run. Until then, we don't want to send a lot of
+      // `self.changed()` messages - hence tracking the
+      // `initializing` state.
+      var handle = alerts.find({}).observeChanges({
+        added: function () {
+          count++;
+          if (!initializing)
+            self.changed("alerts-count", recordID,{count: count});
+        },
+        removed: function () {
+          count--;
+          self.changed("alerts-count", recordID,{count: count});
+        }
+        // don't care about changed
+      });
+    
+      // Instead, we'll send one `self.added()` message right after
+      // observeChanges has returned, and mark the subscription as
+      // ready.
+      initializing = false;
+      self.added("alerts-count", recordID,{count: count});
+      self.ready();
+    
+      // Stop observing the cursor when client unsubs.
+      // Stopping a subscription automatically takes
+      // care of sending the client any removed messages.
+      self.onStop(function () {
+        handle.stop();
+      });
+    });
+    
+    
+    
 
     Meteor.publish("incidents", function () {
-      return incidents.find({}, {limit:1000});
+        return incidents.find({}, {limit:100});
     });
 
     Meteor.publish("veris", function () {
-      return veris.find({}, {limit:0});
+        return veris.find({}, {limit:0});
     });
 
     Meteor.publish("healthfrontend", function () {
-      return healthfrontend.find({}, {limit:0});
+        return healthfrontend.find({}, {limit:0});
     });
 
     Meteor.publish("healthescluster", function () {
-      return healthescluster.find({}, {limit:0});
+        return healthescluster.find({}, {limit:0});
     });
 
     Meteor.publish("healthesnodes", function () {
-      return healthesnodes.find({}, {limit:0});
+        return healthesnodes.find({}, {limit:0});
     });
 
     Meteor.publish("healtheshotthreads", function () {
-      return healtheshotthreads.find({}, {limit:0});
+        return healtheshotthreads.find({}, {limit:0});
     });    
 
     Meteor.publish("kibanadashboards", function () {
-      return kibanadashboards.find({}, {limit:0});
+        return kibanadashboards.find({}, {limit:0});
     });    
 
     Meteor.publish("attackers", function () {
-      return attackers.find({}, {limit:0});
+        return attackers.find({}, {limit:0});
     });    
 
 
@@ -73,11 +122,14 @@ if (Meteor.isServer) {
 };
 
 if (Meteor.isClient) {
+    //client side collections:
+    alertsCount = new Meteor.Collection("alerts-count");
     //client-side subscriptions  
     Meteor.subscribe("mozdefsettings");
     Meteor.subscribe("incidents");
     Meteor.subscribe("events");
     Meteor.subscribe("alerts");
+    
     Meteor.subscribe("veris");
     Meteor.subscribe("kibanadashboards");
     Meteor.subscribe("healthfrontend");
