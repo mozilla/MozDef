@@ -162,28 +162,39 @@ class AlertTask(Task):
                 # self.log.info(fieldname)
                 # self.log.info(value)
 
-                # _exists_:field
-                if filt['query'].startswith('_exists_:'):
-                    pyesfilt = pyes.ExistsFilter(value.split('.')[-1])
-                    # self.log.info('exists %s' % value.split('.')[-1])
-                # _missing_:field
-                elif filt['query'].startswith('_missing_:'):
-                    pyesfilt = pyes.filters.MissingFilter(value.split('.')[-1])
-                    # self.log.info('missing %s' % value.split('.')[-1])
-                # field:"value"
-                elif '\"' in value:
-                    value = value.split('\"')[1]
-                    pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, 'phrase'))
-                    # self.log.info("phrase %s %s" % (fieldname, value))
-                # field:(value1 value2 value3)
-                elif '(' in value and ')' in value:
-                    value = value.split('(')[1]
-                    value = value.split('(')[0]
-                    pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, "boolean"))
-                # field:value
+                # field: fieldname
+                # query: value
+                if 'field' in filt.keys():
+                    fieldname = filt['field']
+                    value = filt['query']
+                    if '\"' in value:
+                        value = value.split('\"')[1]
+                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, 'phrase'))
+                    else:
+                        pyesfilt = pyes.TermFilter(fieldname, value)
                 else:
-                    pyesfilt = pyes.TermFilter(fieldname, value)
-                    # self.log.info("terms %s %s" % (fieldname, value))
+                    # _exists_:field
+                    if filt['query'].startswith('_exists_:'):
+                        pyesfilt = pyes.ExistsFilter(value.split('.')[-1])
+                        # self.log.info('exists %s' % value.split('.')[-1])
+                    # _missing_:field
+                    elif filt['query'].startswith('_missing_:'):
+                        pyesfilt = pyes.filters.MissingFilter(value.split('.')[-1])
+                        # self.log.info('missing %s' % value.split('.')[-1])
+                    # field:"value"
+                    elif '\"' in value:
+                        value = value.split('\"')[1]
+                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, 'phrase'))
+                        # self.log.info("phrase %s %s" % (fieldname, value))
+                    # field:(value1 value2 value3)
+                    elif '(' in value and ')' in value:
+                        value = value.split('(')[1]
+                        value = value.split('(')[0]
+                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, "boolean"))
+                    # field:value
+                    else:
+                        pyesfilt = pyes.TermFilter(fieldname, value)
+                        # self.log.info("terms %s %s" % (fieldname, value))
 
                 if filt['mandate'] == 'must':
                     must.append(pyesfilt)
@@ -255,7 +266,7 @@ class AlertTask(Task):
                 alert = self.onEvent(i)
                 if alert:
                     self.log.debug(alert)
-                    alertResultES = self.alertToES(es, alert)
+                    alertResultES = self.alertToES(alert)
                     self.tagEventsAlert([i], alertResultES)
                     self.alertToMessageQueue(alert)
                     self.hookAfterInsertion(alert)

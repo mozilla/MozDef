@@ -279,3 +279,37 @@ Examples
 	        "result": "10 authentication failures in a row"
 	    }
 	}
+
+
+BanHammer
+---------
+
+MozDef integrates `BanHammer`_ in its web interface to easily ban attackers from your network.
+To enable this feature, in ``meteor/app/lib/settings``, change the ``enableBanhammer`` option to ``true``, and modify set your BanHammer DB parameters in ``rest/index.conf``::
+
+    banhammerenable=True
+    banhammerdbhost="localhost"
+    banhammerdbuser="root"
+    banhammerdbpasswd=""
+    banhammerdbdb="banhammer"
+
+.. _BanHammer: https://github.com/XioNoX/BanHammer
+
+Writing alerts
+--------------
+
+Alerts allow you to create notifications based on events stored in elasticsearch.
+You would usually try to aggregate and correlate events that are the most severe and on which you have response capability.
+Alerts are stored in the `alerts`_ folder.
+
+There are two types of alerts:
+
+* simple alerts that consider events on at a time. For example you may want to get an alert everytime a single LDAP modification is detected.
+* aggregation alerts allow you to aggregate events on the field of your choice. For example you may want to alert when more than 3 login attempts failed for the same username.
+
+To narrow the events your alert sees, you need to specify filters. You can either use `pyes`_ to do that or load them from a Kibana dashboard.
+
+You'll find documented examples in the `alerts`_ folder.
+
+.. _alerts: https://github.com/jeffbryner/MozDef/tree/master/alerts
+.. _pyes: http://pyes.readthedocs.org/
