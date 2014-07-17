@@ -93,7 +93,7 @@ if (Meteor.isClient) {
           });
         };
         
-        addIPDropDowns=function(){
+        addBootstrapIPDropDowns=function(){
             //fix up anything with an ipaddress class
             //by making them into a pull down bootstrap menu                
             $( '.ipaddress').each(function( index ) {
@@ -115,6 +115,28 @@ if (Meteor.isClient) {
               
                 //wrap just the ip in a bootstrap dropdown with a unique id
                 $(this).wrap( "<a class='dropdown-toggle' data-toggle='dropdown' href='#' id='dLabel" + index +"'></a>" );
+            });                        
+        };
+
+        addIPDropDowns=function(){
+            //fix up anything with an ipaddress class
+            //by making them into a pull down menu driven by jquery                
+            $( '.ipaddress').each(function( index ) {
+                iptext=$(this).text();
+                //add a caret so it looks drop downy
+                $(this).append('<b class="caret"></b>');
+              
+                //wrap the whole thing in a ul dropdown class
+                $(this).wrap( "<ul class='dropdown'><li><a href='#'></a><li></ul>" );
+    
+                //add the drop down menu
+                ipmenu=$("<ul class='sub_menu'>");
+                whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
+                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
+                
+                ipmenu.append(whoisitem,blockIPitem);
+                
+                $(this).parent().parent().append(ipmenu);              
             });                        
         };
         

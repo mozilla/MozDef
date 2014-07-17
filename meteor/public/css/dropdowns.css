@@ -1,0 +1,79 @@
+/*
+ * adapted from http://css-tricks.com/simple-jquery-dropdowns/
+	LEVEL ONE
+*/
+
+ul.dropdown {
+    position: relative;
+    display: inline-block;
+    width: max-content;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+    margin:0em 0em -.5em 0em;
+    list-style: none;
+}
+
+ul.dropdown li  {
+    font-weight: bold; float: left; zoom: 1;
+    border-radius: 3px;
+}
+
+ul.dropdown a:hover {
+    color: #000;
+}
+
+ul.dropdown li a {
+    display: block; padding: 1px 2px; border-right: 1px solid #333;
+	color: #222;
+}
+
+ul.dropdown li:last-child a {
+    border-right: none;
+}
+
+ul.dropdown li.hover,
+ul.dropdown li:hover {
+    background: #08C;
+    color: black;
+    position: relative; }
+ul.dropdown li.hover a  { color: black; }
+
+/* 
+	LEVEL TWO
+*/
+ul.dropdown ul {
+    min-width: 5em;
+    visibility: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin: 0px 0px 0px 0px;
+    list-style: none;
+}
+
+ul.dropdown ul li {
+    font-weight: normal;
+    background: #f6f6f6;
+    color: #000; 								  
+    border-bottom: 1px solid #ccc;
+    float: none;
+    border-radius: 3px;
+}
+									  
+                                    /* IE 6 & 7 Needs Inline Block */
+ul.dropdown ul li a	{
+    border-right: none;
+    width: 100%;
+    display: inline-block;
+} 
+
+/* 
+	LEVEL THREE
+*/
+ul.dropdown ul ul {
+    left: 100%; top: 0;
+}
+ul.dropdown li:hover > ul {
+    visibility: visible;
+}
