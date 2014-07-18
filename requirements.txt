@@ -1,4 +1,4 @@
-amqp==1.4.4
+amqp==1.4.5
 anyjson==0.3.3
 boto==2.26.1
 bottle==0.12.4
@@ -8,7 +8,7 @@ docutils==0.11
 elasticutils==0.8.2
 futures==2.1.6
 glob2==0.4.1
-kombu==3.0.13
+kombu==3.0.21
 pika==0.9.13
 pyelasticsearch==0.6.1
 pyes==0.90.1
