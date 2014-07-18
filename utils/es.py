@@ -11,7 +11,7 @@
 import pyes
 import json
 import requests
-
+from datetime import datetime
 
 class Elasticsearch(object):
     def __init__(self, esserver):
