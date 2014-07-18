@@ -52,6 +52,8 @@ RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysq
         && /bin/ln -s /opt/MozDef-master /opt/MozDef \
 #        && curl -L https://github.com/netantho/MozDef/archive/averez-esworker-fix.tar.gz |tar -C /opt -xz \
 #        && /bin/ln -s /opt/MozDef-averez-esworker-fix /opt/MozDef \
+#	dep bug in whois
+	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 ipaddr dnspython celery \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
 	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi gevent \
 	&& mkdir /var/log/mozdef \
@@ -61,6 +63,8 @@ RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysq
         && mkdir -p /home/mozdef/envs/mozdef/bot/ && cd /home/mozdef/envs/mozdef/bot/ \
         && wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && gzip -d GeoLiteCity.dat.gz)
 ADD conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
+ADD conf/settings.js /opt/MozDef/meteor/app/lib/settings.js
+ADD conf/config.py /opt/MozDef/alerts/lib/config.py
 
 # elasticsearch
 RUN (curl -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.1.tar.gz  | tar -C /opt -xz \
