@@ -83,6 +83,15 @@ def getESAlerts(es):
     return results._search_raw()
 
 
+def ensureIndexes(mozdefdb):
+    '''
+    make sure we've got or create an index on the utcepoch field in descending order
+    to make it easy on the alerts screen queries.
+    
+    '''
+    alerts = mozdefdb['alerts']
+    alerts.ensure_index([('utcepoch',-1)])
+    
 def updateMongo(mozdefdb, esAlerts):
     alerts = mozdefdb['alerts']
     for a in esAlerts['hits']['hits']:
@@ -112,6 +121,7 @@ def main():
         es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
         client = MongoClient(options.mongohost, options.mongoport)
         mozdefdb = client.meteor
+        ensureIndexes(mozdefdb)
         esResults = getESAlerts(es)
         updateMongo(mozdefdb, esResults)
 
