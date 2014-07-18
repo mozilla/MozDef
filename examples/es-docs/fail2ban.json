@@ -1,0 +1,37 @@
+[
+  {
+    "category": "syslog",
+    "processid": "0",
+    "receivedtimestamp": "2014-07-17T15:57:19.358119+00:00",
+    "severity": "WARNING",
+    "utctimestamp": "2014-07-17T15:57:18+00:00",
+    "timestamp": "2014-07-17T15:57:18+00:00",
+    "hostname": "example.com",
+    "summary": "The IP 0.0.141.210 has been banned for 21600 seconds after 4 failed attempts against SIP\n",
+    "eventsource": "systemslogs",
+    "details": {
+      "processid": "",
+      "sourceipv4address": "0.0.141.210",
+      "timestamp": "Jul 17 15:57:16",
+      "hostname": "pbx1",
+      "program": "fail2ban",
+      "sourceipgeolocation": {
+        "city": "Buffalo",
+        "region_code": "NY",
+        "area_code": 716,
+        "time_zone": "America/New_York",
+        "dma_code": 514,
+        "metro_code": "Buffalo, NY",
+        "country_code3": "USA",
+        "latitude": 42.9864,
+        "postal_code": "14221",
+        "longitude": -78.7279,
+        "country_code": "US",
+        "country_name": "United States",
+        "continent": "NA"
+      },
+      "sourceipaddress": "0.0.141.210",
+      "payload": ""
+    }
+  }
+]

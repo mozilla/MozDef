@@ -1,0 +1,17 @@
+[
+  {
+    "category": "bro_notice",
+    "processid": "0",
+    "receivedtimestamp": "2014-07-17T05:37:57.617362+00:00",
+    "severity": "NOTICE",
+    "utctimestamp": "2014-07-17T05:37:56+00:00",
+    "tags": "nsm,bro,notice",
+    "timestamp": "2014-07-17T05:37:56+00:00",
+    "hostname": "nsm7",
+    "summary": "MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker Excessive HTTP errors for requests from 0.0.224.14 3 in 1.0 hr, eps: 0",
+    "eventsource": "nsm",
+    "details": {
+      "payload": ""
+    }
+  }
+]
