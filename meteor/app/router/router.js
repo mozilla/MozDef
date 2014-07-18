@@ -108,6 +108,13 @@ Router.map(function () {
         }
     });    
 
+        this.route('ipdshield', {
+        path: '/ipdshield/:_ipaddress',
+        template: 'ipdshield',
+        data: function() {
+          Session.set('ipdshieldipaddress', this.params._ipaddress);
+        }
+    }); 
 });
 
 

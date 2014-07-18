@@ -13,6 +13,7 @@ import MySQLdb
 import netaddr
 import pyes
 import pytz
+import requests
 import sys
 from bottle import debug, route, run, response, request, default_app, post
 from datetime import datetime, timedelta
@@ -126,7 +127,59 @@ def index():
     else:
         response.status = 500
         return
-    
+
+@post('/ipcifquery', methods=['POST'])
+@post('/ipcifquery/', methods=['POST'])
+@enable_cors
+def index():
+    '''return a json version of cif query for an ip address'''
+    if request.body:
+        arequest = request.body.read()
+        request.body.close()
+    # valid json?
+    try:
+        requestDict = json.loads(arequest)
+    except ValueError as e:
+        response.status = 500
+        return        
+    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
+        response.content_type = "application/json"
+        return(getIPCIF(requestDict['ipaddress']))
+    else:
+        response.status = 500
+        return    
+
+@post('/ipdshieldquery', methods=['POST'])
+@post('/ipdshieldquery/', methods=['POST'])
+@enable_cors
+def index():
+    '''
+    return a json version of dshield query for an ip address
+    https://isc.sans.edu/api/index.html
+    '''
+    if request.body:
+        arequest = request.body.read()
+        request.body.close()
+    # valid json?
+    try:
+        requestDict = json.loads(arequest)
+    except ValueError as e:
+        response.status = 500
+        return        
+    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
+        url="https://isc.sans.edu/api/ip/"
+        
+        dresponse = requests.get('{0}{1}?json'.format(url, requestDict['ipaddress']))
+        if dresponse.status_code == 200:
+            response.content_type = "application/json"
+            return(dresponse.content)
+        else:
+            response.status = dresponse.status_code
+            return
+    else:
+        response.status = 500
+        return
+
 
 def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
@@ -332,7 +385,31 @@ def getWhois(ipaddress):
     except Exception as e:
         sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
 
+def getIPCIF(ipaddress):
+    # query a CIF service for information on this IP address per:
+    # https://code.google.com/p/collective-intelligence-framework/wiki/API_HTTP_v1
+    try:
+        resultsList = []
+        url='{0}api?apikey={1}&limit=20&q={2}'.format(options.cifhosturl,
+                                             options.cifapikey,
+                                             ipaddress)
+        headers = {'Accept': 'application/json'}
+        r=requests.get(url=url,verify=False,headers=headers)
+        if r.status_code == 200:
+            # we get a \n delimited list of json entries
+            cifjsons=r.text.split('\n')
+            for c in cifjsons:
+                # test for valid json
+                try:
+                    resultsList.append(json.loads(c))
+                except ValueError:
+                    pass
+            return json.dumps(resultsList)
 
+    except Exception as e:
+        sys.stderr.write('Error looking up CIF results for {0}: {1}\n'.format(ipaddress, e))
+
+        
 def checkBlockIPService():
     if options.enableBlockIP:
         try:
@@ -348,28 +425,45 @@ def checkBlockIPService():
 
 def initConfig():
     #change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific',
-        options.configfile)
-    options.esservers = list(getConfig('esservers', 'http://localhost:9200',
-        options.configfile).split(','))
-    options.kibanaurl = getConfig('kibanaurl', 'http://localhost:9090',
-        options.configfile)
+    options.defaultTimeZone = getConfig('defaulttimezone',
+                                        'US/Pacific',
+                                        options.configfile)
+    options.esservers = list(getConfig('esservers',
+                                       'http://localhost:9200',
+                                       options.configfile).split(','))
+    options.kibanaurl = getConfig('kibanaurl',
+                                  'http://localhost:9090',
+                                  options.configfile)
     
     # options for your custom/internal ip blocking service
     # mozilla's is called banhammer
     # and uses an intermediary mysql DB
-    # here we set and test credentials
-    options.enableBlockIP = getConfig('enableBlockIP', False,
-        options.configfile)
-    options.banhammerdbhost = getConfig('banhammerdbhost', 'localhost',
-        options.configfile)
-    options.banhammerdbuser = getConfig('banhammerdbuser', 'root',
-        options.configfile)
-    options.banhammerdbpasswd = getConfig('banhammerdbpasswd', '',
-        options.configfile)
-    options.banhammerdbdb = getConfig('banhammerdbdb', 'banhammer',
-        options.configfile)
+    # here we set credentials
+    options.enableBlockIP = getConfig('enableBlockIP',
+                                      False,
+                                      options.configfile)
+    options.banhammerdbhost = getConfig('banhammerdbhost',
+                                        'localhost',
+                                        options.configfile)
+    options.banhammerdbuser = getConfig('banhammerdbuser',
+                                        'auser',
+                                        options.configfile)
+    options.banhammerdbpasswd = getConfig('banhammerdbpasswd',
+                                          '',
+                                          options.configfile)
+    options.banhammerdbdb = getConfig('banhammerdbdb',
+                                      'banhammer',
+                                      options.configfile)
+    
+    # options for your CIF service
+    options.cifapikey = getConfig('cifapikey', '', options.configfile)
+    options.cifhosturl = getConfig('cifhosturl',
+                                   'http://localhost/',
+                                   options.configfile)
 
+
+    # check any service you'd like at startup rather than waiting
+    # for a client request.
     checkBlockIPService()
 
 

@@ -27,9 +27,19 @@ if (Meteor.isClient) {
             Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalwhoiswindow').modal()
         },
+        "click .ipmenu-dshield": function(e,t){
+            Session.set('ipdshieldipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modaldshieldwindow').modal()
+        },        
         "click .ipmenu-blockip": function(e,t){
             Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalBlockIPWindow').modal()
+        },
+        "click .dropdown": function(e,t){
+            console.log(e);
+            $(e.target).addClass("hover");
+            $('ul:first',$(e.target)).css('visibility', 'visible');            
+            
         },
         "keyup #alertsearchtext": function(e,t){
             var code = e.which;
@@ -42,17 +52,6 @@ if (Meteor.isClient) {
     });   
  
     Template.alertssummary.alertsTotalCount = function () {
-        //sometimes the collection isn't ready
-        //so return 0 until it is.
-        
-        //cnt=alertsCount.findOne();
-        //if ( cnt ){
-        //    alertsDep.changed();
-        //    refreshAlertsData();
-        //    return(cnt.count);
-        //}else{
-        //    return(0);
-        //}
         alertsDep.depend();
         return currentCount;
     };
@@ -94,6 +93,7 @@ if (Meteor.isClient) {
         };
         
         addBootstrapIPDropDowns=function(){
+            //bootstrap version: disabled for now due to getElementByID bug in v2 until mozdef meets bootstrap v3.
             //fix up anything with an ipaddress class
             //by making them into a pull down bootstrap menu                
             $( '.ipaddress').each(function( index ) {
@@ -107,9 +107,10 @@ if (Meteor.isClient) {
                 //add the drop down menu
                 ipmenu=$("<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel" + index + "'>'");
                 whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li</ul>");
+                dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
                 blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li</ul>");
                 
-                ipmenu.append(whoisitem,blockIPitem);
+                ipmenu.append(whoisitem,dshielditem,blockIPitem);
                 
                 $('#ipdropdown'+index).append(ipmenu);
               
@@ -128,16 +129,18 @@ if (Meteor.isClient) {
               
                 //wrap the whole thing in a ul dropdown class
                 $(this).wrap( "<ul class='dropdown'><li><a href='#'></a><li></ul>" );
-    
+
                 //add the drop down menu
                 ipmenu=$("<ul class='sub_menu'>");
                 whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
+                dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
                 blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
                 
-                ipmenu.append(whoisitem,blockIPitem);
+                ipmenu.append(whoisitem,dshielditem,blockIPitem);
                 
                 $(this).parent().parent().append(ipmenu);              
-            });                        
+            });
+
         };
         
         

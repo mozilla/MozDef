@@ -13,7 +13,8 @@ Meteor.methods({
   'saySomething': saySomething,
   'loadKibanaDashboards': loadKibanaDashboards,
   'blockip': blockIP,
-  'ipwhois': ipwhois
+  'ipwhois': ipwhois,
+  'ipdshield': ipdshield
 });
 
 function saySomething() {
@@ -59,5 +60,17 @@ function ipwhois(ipaddress){
         //console.log(ipwhoisResponse);
         return ipwhoisResponse;
     }
+}
+function ipdshield(ipaddress){
+    //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipwhois/');
+    var ipdshieldResponse = HTTP.post(mozdef.rootAPI + '/ipdshieldquery/',{data: {'ipaddress':ipaddress}});
+    
+    if ( typeof ipdshieldResponse == 'undefined') {
+        console.log("no response from server")
+        return "";
+    } else {
+        //console.log(ipdshieldResponse);
+        return ipdshieldResponse;
+    }    
     
 }
