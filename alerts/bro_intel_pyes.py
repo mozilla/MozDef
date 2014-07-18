@@ -9,30 +9,40 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
+import pyes
 
 class AlertBroIntel(AlertTask):
     def main(self):
-    	# Configure filters by importing a kibana dashboard
-    	date_timedelta = dict(minutes=30)
-    	self.filtersFromKibanaDash('bro_intel_dashboard.json', date_timedelta)
+        # look for events in last 30 mins
+        date_timedelta = dict(minutes=30)
+        # Configure filters using pyes
+        must = [
+            pyes.TermFilter('_type', 'event'),
+            pyes.TermFilter('category', 'bro_intel'),
+            pyes.ExistsFilter('seenindicator')
+        ]
+        self.filtersManual(date_timedelta, must=must)
 
-    	# Search aggregations on field 'seenindicator'
-    	self.searchEventsAggreg('seenindicator', samplesLimit=50)
+        # Search aggregations on field 'seenindicator', keep 50 samples of events at most
+        self.searchEventsAggreg('seenindicator', samplesLimit=50)
         # alert when >= 5 matching events in an aggregation
-    	self.walkAggregations(threshold=5)
+        self.walkAggregations(threshold=5)
 
     # Set alert properties
     def onAggreg(self, aggreg):
-    	category = 'bro'
-    	tags = ['bro']
-    	severity = 'NOTICE'
+        # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
+        # aggreg['value']: value of the aggregation field, ex: toto@example.com
+        # aggreg['events']: list of events in the aggregation
+        category = 'bro'
+        tags = ['bro']
+        severity = 'NOTICE'
 
         summary = ('{0} {1}: {2}'.format(aggreg['count'], 'bro intel match', aggreg['value']))
-        # append first X source IPs
+        # append first 3 source IPs
         summary += ' sample sourceips: '
         for e in aggreg['events'][:3]:
             if 'sourceipaddress' in e['_source']['details'].keys():
                 summary += '{0} '.format(e['_source']['details']['sourceipaddress'])
 
         # Create the alert object based on these properties
-    	return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+        return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

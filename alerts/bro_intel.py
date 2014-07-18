@@ -10,32 +10,33 @@
 
 from lib.alerttask import AlertTask
 
-class AlertBruteforceSsh(AlertTask):
+class AlertBroIntel(AlertTask):
     def main(self):
-    	# look for events in last 15 mins
-    	date_timedelta = dict(minutes=15)
+    	# look for events in last 30 mins
+    	date_timedelta = dict(minutes=30)
         # Configure filters by importing a kibana dashboard
-    	self.filtersFromKibanaDash('mozilla_bruteforce_ssh_dashboard.json', date_timedelta)
+    	self.filtersFromKibanaDash('mozilla_bro_intel_dashboard.json', date_timedelta)
 
-    	# Search aggregations on field 'sourceipaddress', keep 50 samples of events at most
-    	self.searchEventsAggreg('sourceipaddress', samplesLimit=50)
+    	# Search aggregations on field 'seenindicator', keep 50 samples of events at most
+    	self.searchEventsAggreg('seenindicator', samplesLimit=50)
         # alert when >= 5 matching events in an aggregation
-    	self.walkAggregations(threshold=2)
+    	self.walkAggregations(threshold=5)
 
     # Set alert properties
     def onAggreg(self, aggreg):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
-    	category = 'bruteforce'
-    	tags = ['ssh']
+    	category = 'bro'
+    	tags = ['bro']
     	severity = 'NOTICE'
 
-        summary = ('{0} ssh bruteforce attempts by {1}'.format(aggreg['count'], aggreg['value']))
-        # append first 3 hostnames
+        summary = ('{0} {1}: {2}'.format(aggreg['count'], 'bro intel match', aggreg['value']))
+        # append first 3 source IPs
+        summary += ' sample sourceips: '
         for e in aggreg['events'][:3]:
-            if 'details' in e.keys() and 'hostname' in e['details']:
-                summary += ' on {0}'.format(e['_source']['details']['hostname'])
+            if 'sourceipaddress' in e['_source']['details'].keys():
+                summary += '{0} '.format(e['_source']['details']['sourceipaddress'])
 
         # Create the alert object based on these properties
     	return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

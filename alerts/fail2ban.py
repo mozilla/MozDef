@@ -12,8 +12,9 @@ from lib.alerttask import AlertTask
 
 class AlertFail2ban(AlertTask):
     def main(self):
-    	# Configure filters by importing a kibana dashboard
+    	# look for events in last 10 mins
     	date_timedelta = dict(minutes=10)
+        # Configure filters by importing a kibana dashboard
     	self.filtersFromKibanaDash('mozilla_fail2ban_dashboard.json', date_timedelta)
 
     	# Search events
@@ -26,6 +27,7 @@ class AlertFail2ban(AlertTask):
     	tags = ['fail2ban']
     	severity = 'NOTICE'
 
+        # the summary of the alert is the one of the event
         summary = event['_source']['summary']
 
         # Create the alert object based on these properties
