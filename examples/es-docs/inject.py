@@ -35,6 +35,7 @@ if __name__ == '__main__':
     initConfig()
     es = es_module.Elasticsearch(options.esservers[0])
     es.deleteIndex('events')
+    es.deleteIndex('events-previous')
     es.deleteIndex('alerts')
     es.deleteIndex('kibana-int')
     es.setupIndexTemplate('eventstemplate', 'events_template.json')
