@@ -311,5 +311,12 @@ To narrow the events your alert sees, you need to specify filters. You can eithe
 
 You'll find documented examples in the `alerts`_ folder.
 
+Once you've written your alert, you need to configure it in celery to be launched periodically.
+If you have a ``AlertBruteforceSsh`` class in a ``alerts/bruteforce_ssh.py`` file for example, in ``alerts/lib/config`` you can configure the task to run every minute::
+
+	ALERTS = {
+		'bruteforce_ssh.AlertBruteforceSsh': crontab(minute='*/1'),
+	}
+
 .. _alerts: https://github.com/jeffbryner/MozDef/tree/master/alerts
 .. _pyes: http://pyes.readthedocs.org/

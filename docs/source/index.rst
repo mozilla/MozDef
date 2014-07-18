@@ -14,7 +14,6 @@ Table of Contents
   installation
   usage
   advanced_settings
-  public_api
   code
   benchmarking
   contributors
