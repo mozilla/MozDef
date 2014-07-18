@@ -42,6 +42,7 @@ if __name__ == '__main__':
     es.setupIndexTemplate('alertstemplate', 'alerts_template.json')
     es.createIndex('alerts')
     es.createIndex('events')
+    es.createIndex('events-previous')
     es.loadDocs('alerts', 'alert', 'alerts.json')
     es.loadDocs('events', 'auditd', 'events-auditd.json')
     es.loadDocs('events', 'event', 'events-event.json')
