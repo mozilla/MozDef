@@ -334,27 +334,32 @@ if (Meteor.isClient) {
             //this.setAnimation(configOgro.animations["stand"]);
     
             //create the character's nameplate
-            var acallout=$("<div class='attackercallout'></div>");
-            var aid=$('<div/>',{
+            var acallout=$('<div class="container-fluid attackercallout"></div>');
+            var aid=$('<div class="row-fluid"></div>');
+            aid.append(
+                       $('<span/>',{
                 'class': 'id',
                 text: dbrecord.events[0].details.sourceipaddress
-            });
+            }));
+            
             var adetails=$('<ul/>',{
                 'class':'details',
             });
             adetails.append($('<li/>',{
                 text: 'Last Seen: ' + dbrecord.lastseentimestamp
             }));
+            adetails.wrap($('<div class="row-fluid"></div>'));
+            
+            var abuttons=$('<div class="row-fluid"/>');
             if (getSetting('enableBlockIP')) {            
-                adetails.append($('<a/>',{
-                    'href': '#',
-                    'class': 'blockip',
+                abuttons.append($('<button/>',{
+                    'class': 'blockip btn btn-danger btn-mini center',
                     'data-ipaddress': dbrecord.events[0].details.sourceipaddress,
                     text: 'Block IP'
                 }));
             }
             
-            acallout.append(aid,adetails);
+            acallout.append(aid,adetails,abuttons);
             
             var nameplate=new THREE.CSS3DObject(acallout.get()[0]);
             var npOffset=new THREE.Vector3();
