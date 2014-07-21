@@ -15,7 +15,7 @@ class AlertCloudtrail(AlertTask):
     	# look for events in last 160 hours
     	date_timedelta = dict(hours=160)
         # Configure filters by importing a kibana dashboard
-    	self.filtersFromKibanaDash('mozilla_cloudtrail_dashboard.json', date_timedelta)
+    	self.filtersFromKibanaDash('cloudtrail_dashboard.json', date_timedelta)
 
     	# Search events
     	self.searchEventsSimple()

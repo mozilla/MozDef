@@ -15,7 +15,7 @@ class AlertFail2ban(AlertTask):
     	# look for events in last 10 mins
     	date_timedelta = dict(minutes=10)
         # Configure filters by importing a kibana dashboard
-    	self.filtersFromKibanaDash('mozilla_fail2ban_dashboard.json', date_timedelta)
+    	self.filtersFromKibanaDash('fail2ban_dashboard.json', date_timedelta)
 
     	# Search events
     	self.searchEventsSimple()

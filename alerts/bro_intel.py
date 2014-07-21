@@ -15,7 +15,7 @@ class AlertBroIntel(AlertTask):
     	# look for events in last 30 mins
     	date_timedelta = dict(minutes=30)
         # Configure filters by importing a kibana dashboard
-    	self.filtersFromKibanaDash('mozilla_bro_intel_dashboard.json', date_timedelta)
+    	self.filtersFromKibanaDash('bro_intel_dashboard.json', date_timedelta)
 
     	# Search aggregations on field 'seenindicator', keep 50 samples of events at most
     	self.searchEventsAggreg('seenindicator', samplesLimit=50)
