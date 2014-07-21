@@ -94,7 +94,7 @@ body{
 
 .attackercallout .id {
 		position: absolute;
-		top: 20px;
+		top: 10px;
 		left: 10px;
 		font-size: 12px;
 		color: rgba(127,255,255,0.75);
@@ -102,11 +102,25 @@ body{
 
 .attackercallout .details {
 		position: absolute;
-		bottom: 15px;
+        text-align: left;
+		bottom: 50px;
 		left: 0px;
 		right: 0px;
 		font-size: 12px;
 		color: rgba(127,255,255,0.75);
+}
+
+.attackercallout .blockip{
+    color: red;
+    text-transform: uppercase;
+}
+.attackercallout ul{
+    list-style: none;
+    float: left;
+    z-index: 99;
+    left: auto;
+    margin: 0px;
+    padding: 0px;  
 }
 
 /*bootstrap overrides*/

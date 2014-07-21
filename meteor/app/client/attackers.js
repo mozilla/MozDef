@@ -17,14 +17,18 @@ if (Meteor.isClient) {
     var sceneObjects=[];
     var selectedObject=null;
     var intersectedObject=null;
-    var mouse = new THREE.Vector2();
-    var offset = new THREE.Vector3();
-    var projector = new THREE.Projector();
     var plane = null;
     var scenePadding=10;
-    var renderer = new THREE.WebGLRenderer( { alpha: true , precision: 'lowp',premultipliedAlpha: false} );
     var characters = [];
-    var baseCharacter = new THREE.MD2CharacterComplex();
+    var mouse = null;
+    var offset = null;
+    var projector = null;
+    var renderer = null;
+    var baseCharacter = null;
+    var cssRenderer = null;
+    var clock = null;
+    var container = null;
+
         
     Template.attackers.events({
         "click #btnReset": function(e){
@@ -57,17 +61,21 @@ if (Meteor.isClient) {
             }
             
         },
-        "click #btnBlockIP": function(event, template) {
-          // TODO: modal with ipaddr, duration (dropdown), comment (text 1024 chars), bug (text 7 chars, optional)
-          console.log("Banhammer!");
-          //console.log(event);
+        "click .blockip": function(e,t){
+            Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
+            //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
+            sceneControls.enabled = false;
+            $('#modalBlockIPWindow').on('hidden', function () {
+                sceneControls.enabled=true;
+            });
+            $('#modalBlockIPWindow').modal();
         },
         "mousedown": function(event,template){
         //if mouse is over a character
         //set the selected object
         //set the offset to the 2D plane
         //set the cursor
-            event.preventDefault(); 
+            //event.preventDefault();
             var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
             projector.unprojectVector( vector, sceneCamera );
             var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
@@ -85,7 +93,7 @@ if (Meteor.isClient) {
                     $('#btnBlockIP')[0].href = '/incidents/blockip/'+attacker.sourceipaddress;
                     $("#btnBlockIP").show();
                 }
-            }
+            }          
         },
         "mousemove": function(event,template){
             //x = right/left
@@ -99,64 +107,84 @@ if (Meteor.isClient) {
             //    move the 2D plane
             //if no selected object we are moving the scene camera
             
-            
-            //event.preventDefault();
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-            var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-            projector.unprojectVector( vector, sceneCamera );
-            var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
-
-            if ( selectedObject ){
-                var intersects = raycaster.intersectObject( plane );
-                selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
-                //console.log(selectedObject.parent.dbid);
-                nameplate=selectedObject.parent.getObjectByName('nameplate:' + selectedObject.dbid,true)
-                if ( nameplate ){
-                    nameplate.position.copy( selectedObject.position);
-                    nameplate.position.add(nameplate.offset);
-                }
-                return;         
-            }
-            
-            var intersects = raycaster.intersectObjects( sceneObjects, true );
-            if ( intersects.length > 0 ) {
-                if ( intersectedObject != intersects[ 0 ].object.parent ) {
-                    intersectedObject = intersects[ 0 ].object.parent;
-                    plane.position.copy( intersectedObject.position );
-                    plane.lookAt( sceneCamera.position );
-                    
-                    nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
-                    if (nameplate){
-                        nameplate.element.style.display='inline';
-                        nameplate.lookAt( sceneCamera.position );
+            if ( sceneControls  ) {           
+                //event.preventDefault();
+                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+                projector.unprojectVector( vector, sceneCamera );
+                var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
+    
+                if ( selectedObject ){
+                    var intersects = raycaster.intersectObject( plane );
+                    selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
+                    //console.log(selectedObject.parent.dbid);
+                    nameplate=selectedObject.parent.getObjectByName('nameplate:' + selectedObject.dbid,true)
+                    if ( nameplate ){
+                        nameplate.position.copy( selectedObject.position);
+                        nameplate.position.add(nameplate.offset);
                     }
-                    
+                    return;         
                 }
-                container.style.cursor = 'pointer';
-
-            } else {
-                intersectedObject = null;
-                container.style.cursor = 'auto';
-                for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
-                    if ( scene.children[i].name.lastIndexOf('nameplate',0)===0 ){
-                        scene.children[i].element.style.display='none';
-                    }
                 
+                var intersects = raycaster.intersectObjects( sceneObjects, true );
+                if ( intersects.length > 0 ) {
+                    if ( intersectedObject != intersects[ 0 ].object.parent ) {
+                        intersectedObject = intersects[ 0 ].object.parent;
+                        plane.position.copy( intersectedObject.position );
+                        plane.lookAt( sceneCamera.position );
+                        
+                        nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
+                        if (nameplate){
+                            nameplate.element.style.display='inline';
+                            nameplate.lookAt( sceneCamera.position );
+                        }
+                        
+                    }
+                    container.style.cursor = 'pointer';
+    
+                } else {
+                    intersectedObject = null;
+                    container.style.cursor = 'auto';
+                    for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
+                        if ( scene.children[i].name.lastIndexOf('nameplate',0)===0 ){
+                            scene.children[i].element.style.display='none';
+                        }
+                    }
                 }
             }
         },
         "mouseup": function(event,template){
         //clear selected objects
-            event.preventDefault();
-            sceneControls.enabled = true;
+            //event.preventDefault();
             if ( intersectedObject ) {
                 plane.position.copy( intersectedObject.position );
                 selectedObject = null;
+                sceneControls.enabled=true;
             }
             container.style.cursor = 'auto';
         }
     });
+    
+    Template.attackers.created = function (){
+        //new instances of THREE objects for this tempate
+        scene = new THREE.Scene();
+        sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
+        sceneControls = new THREE.TrackballControls( sceneCamera );
+        //create a plane to use to help position the attackers when moved with the mouse
+        plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
+        mouse = new THREE.Vector2();
+        offset = new THREE.Vector3();
+        projector = new THREE.Projector();
+        renderer = new THREE.WebGLRenderer( { alpha: true ,
+                                                  precision: 'lowp',
+                                                  premultipliedAlpha: false
+                                                  });
+        baseCharacter = new THREE.MD2CharacterComplex();
+        //setup the css renderer for non-web gl objects
+        cssRenderer = new THREE.CSS3DRenderer();
+        clock = new THREE.Clock();
+    };
 
     Template.attackers.rendered = function () {
         //console.log('entering draw attackers');
@@ -164,18 +192,10 @@ if (Meteor.isClient) {
         //// set our data source
         //var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
         //var ndx = crossfilter();        
-        
-        $("#btnBlockIP").hide();
-        scene = new THREE.Scene();
+
         scene.name='attackerScene';
-        var clock = new THREE.Clock();
-        sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
-        renderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
-        //create a plane to use to help position the attackers when moved with the mouse
-        plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
-        
+
         //setup the scene controls
-        sceneControls = new THREE.TrackballControls( sceneCamera );
         sceneControls.rotateSpeed = 1.0;
         sceneControls.zoomSpeed = 3;
         sceneControls.panSpeed = 0.3;
@@ -183,14 +203,8 @@ if (Meteor.isClient) {
         sceneControls.noPan = false;
         sceneControls.staticMoving = false;
         sceneControls.dynamicDampingFactor = 0.3;
-        
-        //setup the css renderer for non-web gl objects
-        var cssRenderer = new THREE.CSS3DRenderer();
-        cssRenderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
-        cssRenderer.domElement.style.position = 'absolute';
-        cssRenderer.domElement.style.top = 0;
-        document.getElementById('attackers-wrapper').appendChild(cssRenderer.domElement);
 
+        //setup ogro
         var configOgro = {
             baseUrl: "/other/ogro/",
             body: "ogro-light.js",
@@ -218,6 +232,7 @@ if (Meteor.isClient) {
             moveRight: false
         };
 
+        //handle resize events
         function onWindowResize( event ) {
                 SCREEN_WIDTH = window.innerWidth-scenePadding;
                 SCREEN_HEIGHT = window.innerHeight-scenePadding;
@@ -226,11 +241,11 @@ if (Meteor.isClient) {
                 sceneCamera.updateProjectionMatrix();
         };
 
-        var sceneSetup = function(){
+        var sceneSetup = function(thistemplate){
                 //console.log('scene setup');
                 sceneObjects=[];
                 window.addEventListener( 'resize', onWindowResize, false );         
-                container=document.getElementById('attackers-wrapper');
+                container=thistemplate.find('#attackers-wrapper');
                 renderer.setSize( window.innerWidth-scenePadding,window.innerHeight-scenePadding );
                 //no background for renderer..let the gradient show 
                 renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
@@ -239,8 +254,13 @@ if (Meteor.isClient) {
                 //renderer.shadowMapType = THREE.BasicShadowMap;
                 //add plane for mapping mouse movements to 2D space
                 plane.visible = false;
-                scene.add( plane );         
-        
+                scene.add( plane );
+
+                //setup renderer for css objects
+                cssRenderer.setSize(window.innerWidth-scenePadding,window.innerHeight-scenePadding);
+                cssRenderer.domElement.style.position = 'absolute';
+                cssRenderer.domElement.style.top = 0;
+
                 // Lights
                 scene.add( new THREE.AmbientLight( 0xffffff ) );
                 var light = new THREE.DirectionalLight( 0xffffff, .2 );
@@ -260,16 +280,25 @@ if (Meteor.isClient) {
                 sceneCamera.position.z = 50;
                 //console.log('scene loaded');
                 var render = function () { 
-                    requestAnimationFrame(render);
-                    var delta = clock.getDelta();
-                    characters.forEach(function(element,index,array){
-                        element.update(delta);
-                    });
-                    sceneControls.update();
-                    renderer.render(scene, sceneCamera);
-                    cssRenderer.render(scene,sceneCamera);
+                    rid=requestAnimationFrame(render);
+                    if (clock) {
+                        var delta = clock.getDelta();
+                        characters.forEach(function(element,index,array){
+                            element.update(delta);
+                        });
+                    }
+                    if (sceneControls) {
+                        sceneControls.update();
+                        renderer.render(scene, sceneCamera);
+                        cssRenderer.render(scene,sceneCamera);
+                    }else{
+                        //renderer but no controls
+                        //cancel our hook to animation
+                        cancelAnimationFrame(rid);
+                    }
                 };
-                container.appendChild( renderer.domElement );
+                thistemplate.find("#attackers-wrapper").appendChild(renderer.domElement);
+                thistemplate.find("#attackers-wrapper").appendChild(cssRenderer.domElement);                
                 render();
         };
 
@@ -305,20 +334,29 @@ if (Meteor.isClient) {
             //this.setAnimation(configOgro.animations["stand"]);
     
             //create the character's nameplate
-            var acallout=document.createElement('div');
-            acallout.className='attackercallout';
+            var acallout=$("<div class='attackercallout'></div>");
+            var aid=$('<div/>',{
+                'class': 'id',
+                text: dbrecord.events[0].details.sourceipaddress
+            });
+            var adetails=$('<ul/>',{
+                'class':'details',
+            });
+            adetails.append($('<li/>',{
+                text: 'Last Seen: ' + dbrecord.lastseentimestamp
+            }));
+            if (getSetting('enableBlockIP')) {            
+                adetails.append($('<a/>',{
+                    'href': '#',
+                    'class': 'blockip',
+                    'data-ipaddress': dbrecord.events[0].details.sourceipaddress,
+                    text: 'Block IP'
+                }));
+            }
             
-            var aid=document.createElement('div');
-            aid.className='id';
-            aid.textContent=dbrecord.sourceipaddress;
-            acallout.appendChild(aid);
+            acallout.append(aid,adetails);
             
-            var adetails=document.createElement('div');
-            adetails.className='details';
-            adetails.textContent=dbrecord.details.msg + "" + dbrecord.details.sub;
-            acallout.appendChild(adetails);
-            
-            var nameplate=new THREE.CSS3DObject(acallout);
+            var nameplate=new THREE.CSS3DObject(acallout.get()[0]);
             var npOffset=new THREE.Vector3();
             nameplate.name='nameplate:' + character.id;
             nameplate.dbid=character.id;
@@ -345,7 +383,7 @@ if (Meteor.isClient) {
             sceneObjects.push(character.root);
         }; //end createCharacter
     
-        sceneSetup();
+        sceneSetup(this);
 
         Deps.autorun(function() {
             console.log('running dep orgro autorun');
@@ -418,6 +456,8 @@ if (Meteor.isClient) {
        };//end template.attackers.rendered
        
     Template.attackers.destroyed = function () {
+        //container=document.getElementById('attackers-wrapper');
+        //container.removeChild( renderer.domElement );
         //remove scene Controls so they don't interfere with other forms, etc.
         scene = null;
         sceneCamera = null;
@@ -427,6 +467,17 @@ if (Meteor.isClient) {
         sceneObjects=[];
         selectedObject=null;
         intersectedObject=null;
+        mouse = null;
+        offset = null;
+        projector = null;
+        plane = null;
+        renderer = null;
+        cssRenderer = null;
+        characters = [];
+        baseCharacter = null;
+        clock=null;
+        container = null;
+
     };//end template.attackers.destroyed
 
 

@@ -33,8 +33,7 @@ if (Meteor.isServer) {
                                 value : mozdef.enableBlockIP }); 
 
         //console.log(mozdefsettings.find({}).fetch())
-        
-        
+
         Accounts.config({
             forbidClientAccountCreation:"true",
         });
