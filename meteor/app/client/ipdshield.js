@@ -19,6 +19,7 @@ if (Meteor.isClient) {
             dshieldresult.result = null;
             dshieldresult.content='';
             dshieldresult.data=null;
+            dshieldresult.error = undefined;
             dshieldDep.changed();
             if (Session.get('ipdshieldipaddress') ) {
                 Meteor.apply('ipdshield',

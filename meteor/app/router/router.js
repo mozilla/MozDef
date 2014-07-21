@@ -108,13 +108,21 @@ Router.map(function () {
         }
     });    
 
-        this.route('ipdshield', {
+    this.route('ipdshield', {
         path: '/ipdshield/:_ipaddress',
         template: 'ipdshield',
         data: function() {
           Session.set('ipdshieldipaddress', this.params._ipaddress);
         }
-    }); 
+    });
+
+    this.route('ipcif', {
+        path: '/ipcif/:_ipaddress',
+        template: 'ipcif',
+        data: function() {
+          Session.set('ipcifipaddress', this.params._ipaddress);
+        }
+    });    
 });
 
 

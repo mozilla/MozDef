@@ -18,7 +18,8 @@ if (Meteor.isClient) {
             whoisresult.status='running';
             whoisresult.result = null;
             whoisresult.content='';
-            whoisresult.data=null;
+            whoisresult.data=null;s
+            whoisresult.error = undefined;
             whoisDep.changed();
             if (Session.get('ipwhoisipaddress') ) {
                 Meteor.apply('ipwhois',

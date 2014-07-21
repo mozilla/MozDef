@@ -14,6 +14,7 @@ Meteor.methods({
   'loadKibanaDashboards': loadKibanaDashboards,
   'blockip': blockIP,
   'ipwhois': ipwhois,
+  'ipcif': ipcif,
   'ipdshield': ipdshield
 });
 
@@ -61,6 +62,7 @@ function ipwhois(ipaddress){
         return ipwhoisResponse;
     }
 }
+
 function ipdshield(ipaddress){
     //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipwhois/');
     var ipdshieldResponse = HTTP.post(mozdef.rootAPI + '/ipdshieldquery/',{data: {'ipaddress':ipaddress}});
@@ -71,6 +73,20 @@ function ipdshield(ipaddress){
     } else {
         //console.log(ipdshieldResponse);
         return ipdshieldResponse;
+    }    
+    
+}
+
+function ipcif(ipaddress){
+    //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipcifquery/');
+    var ipcifResponse = HTTP.post(mozdef.rootAPI + '/ipcifquery/',{data: {'ipaddress':ipaddress}});
+    
+    if ( typeof ipcifResponse == 'undefined') {
+        console.log("no response from server")
+        return "";
+    } else {
+        //console.log(ipdshieldResponse);
+        return ipcifResponse;
     }    
     
 }

@@ -35,11 +35,13 @@ if (Meteor.isClient) {
             Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalBlockIPWindow').modal()
         },
+        "click .ipmenu-cif": function(e,t){
+            Session.set('ipcifipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalcifwindow').modal()
+        },        
         "click .dropdown": function(e,t){
-            console.log(e);
             $(e.target).addClass("hover");
-            $('ul:first',$(e.target)).css('visibility', 'visible');            
-            
+            $('ul:first',$(e.target)).css('visibility', 'visible');
         },
         "keyup #alertsearchtext": function(e,t){
             var code = e.which;
@@ -106,11 +108,12 @@ if (Meteor.isClient) {
     
                 //add the drop down menu
                 ipmenu=$("<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel" + index + "'>'");
-                whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li</ul>");
+                whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
                 dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
-                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li</ul>");
+                cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
+                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
                 
-                ipmenu.append(whoisitem,dshielditem,blockIPitem);
+                ipmenu.append(whoisitem,dshielditem,cifitem,blockIPitem);
                 
                 $('#ipdropdown'+index).append(ipmenu);
               
@@ -131,12 +134,13 @@ if (Meteor.isClient) {
                 $(this).wrap( "<ul class='dropdown'><li><a href='#'></a><li></ul>" );
 
                 //add the drop down menu
-                ipmenu=$("<ul class='sub_menu'>");
+                ipmenu=$("<ul class='sub_menu' />");
                 whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
                 dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
+                cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
                 blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
                 
-                ipmenu.append(whoisitem,dshielditem,blockIPitem);
+                ipmenu.append(whoisitem,dshielditem,cifitem,blockIPitem);
                 
                 $(this).parent().parent().append(ipmenu);              
             });

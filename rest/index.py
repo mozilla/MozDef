@@ -390,7 +390,7 @@ def getIPCIF(ipaddress):
     # https://code.google.com/p/collective-intelligence-framework/wiki/API_HTTP_v1
     try:
         resultsList = []
-        url='{0}api?apikey={1}&limit=20&q={2}'.format(options.cifhosturl,
+        url='{0}api?apikey={1}&limit=20&confidence=65&q={2}'.format(options.cifhosturl,
                                              options.cifapikey,
                                              ipaddress)
         headers = {'Accept': 'application/json'}
