@@ -1,5 +1,6 @@
 # nxlog-windows
 First follow the installation instructions for [nxlog](http://nxlog.org/nxlog-docs/en/nxlog-reference-manual.html#quickstart_windows)
+[nxlog download] (http://nxlog.org/download)
 
 Edit the nxlog.conf file to match your environment, be sure to include the define ROOT stanza as described in the quick start.
 
