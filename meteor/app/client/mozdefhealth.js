@@ -36,7 +36,7 @@ if (Meteor.isClient) {
           return obj.utctimestamp;
         }
         else {
-          return;
+          return null;
         }
       }
     });
