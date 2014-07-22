@@ -1,0 +1,126 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+
+Contributors:
+Anthony Verez averez@mozilla.com
+Jeff Bryner jbryner@mozilla.com
+-->
+
+<!--block IP form -->
+<template name="blockIPform">
+    <form id="blockIPform" class="form-horizontal" style="margin: 0px 30% 20px;">
+        <legend>Block IP</legend>
+        <fieldset>
+            <!-- IP addr -->        
+            <div class="control-group">
+              <label class="control-label" for="ipaddr">IP address or subnet (IPv6 supported, use addr/X for subnets)</label>
+              <div class="controls">
+                <input id="ipaddr" name="ipaddr" class="form-control" type="text" required>
+              </div>
+            </div>
+            <!-- Duration -->
+            <div class="control-group">
+              <label class="control-label" for="duration">Duration</label>
+              <div class="controls">
+                <select id="duration" name="duration" class="form-control">
+                  <option value='1hr' selected>1 hour</option>
+                  <option value='12hr'>12 hours</option>
+                  <option value='1d'>1 day</option>
+                  <option value='1w'>1 week</option>
+                  <option value='30d'>30 days</option>
+                </select>
+              </div>
+            </div>
+            <!-- Comment -->
+            <div class="control-group">
+                <label class="control-label" for="comment">Comment</label>
+                <div class="controls">
+                    <input id="comment" name="comment" class="input-xlarge" type="text" required>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="bugid">Bug/Reference ID</label>
+                <div class="controls">
+                    <input id="bugid" name="bugid" class="form-control" type="number" placeholder="optional" maxlength="7">
+                </div>
+            </div>
+            
+            <!-- Button -->
+            <div class="control-group">
+              <label class="control-label" for="submit"></label>
+              <div class="controls">
+                <button id="submit" type="submit" name="submit" class="btn btn-danger submit">Block!</button>
+              </div>
+            </div>
+        </fieldset>
+    </form>
+</template>
+
+
+<template name="blockIPModal">
+    <style>
+    .modal-body .row { color: black;
+    }
+    </style>
+<div class="modal hide" id="modalBlockIPWindow">
+    <div class="modal-header">
+       <button type="button" class="close" data-dismiss="modal">&times;</button>
+       <h3>Block IP</h3>
+    </div>
+    <div class="modal-body">  
+        <form id="blockIPform" class="form-horizontal" style="margin: 0px 5%;">
+            <fieldset>
+                <!-- IP addr -->        
+                <div class="control-group">
+                  <label class="control-label" for="ipaddr">IP address or subnet (IPv6 supported, use addr/X for subnets)</label>
+                  <div class="controls">
+                    <input id="ipaddr" name="ipaddr" class="form-control" type="text" required>
+                  </div>
+                </div>
+                <!-- Duration -->
+                <div class="control-group">
+                  <label class="control-label" for="duration">Duration</label>
+                  <div class="controls">
+                    <select id="duration" name="duration" class="form-control">
+                      <option value='1hr' selected>1 hour</option>
+                      <option value='12hr'>12 hours</option>
+                      <option value='1d'>1 day</option>
+                      <option value='1w'>1 week</option>
+                      <option value='30d'>30 days</option>
+                    </select>
+                  </div>
+                </div>
+                <!-- Comment -->
+                <div class="control-group">
+                    <label class="control-label" for="comment">Comment</label>
+                    <div class="controls">
+                        <input id="comment" name="comment" class="input-xlarge" type="text" required>
+                    </div>
+                </div>
+    
+                <div class="control-group">
+                    <label class="control-label" for="bugid">Bug ID</label>
+                    <div class="controls">
+                        <input id="bugid" name="bugid" class="form-control" type="number" placeholder="optional" maxlength="7">
+                    </div>
+                </div>
+                
+                <!-- Button -->
+                <div class="control-group">
+                  <label class="control-label" for="submit"></label>
+                  <div class="controls">
+                    <button id="submit" type="submit" name="submit" class="btn btn-danger submit">Block!</button>
+                  </div>
+                </div>
+            </fieldset>
+        </form>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn" data-dismiss="modal">Close</a>
+  </div>
+ </div>
+</template>

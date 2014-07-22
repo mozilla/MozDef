@@ -23,12 +23,12 @@ Running the container::
 
 You're done! Now go to:
 
- * http://127.0.0.1:3000 < meteor (main web interface)
- * http://127.0.0.1:9090 < kibana
- * http://127.0.0.1:9200 < elasticsearch
- * http://127.0.0.1:9200/\_plugin/marvel < marvel (monitoring for elasticsearch)
- * http://127.0.0.1:8080 < loginput
- * http://127.0.0.1:8081 < rest api
+ * http://localhost:3000 < meteor (main web interface)
+ * http://localhost:9090 < kibana
+ * http://localhost:9200 < elasticsearch
+ * http://localhost:9200/\_plugin/marvel < marvel (monitoring for elasticsearch)
+ * http://localhost:8080 < loginput
+ * http://localhost:8081 < rest api
 
 Get a terminal in the container
 *******************************
@@ -60,8 +60,21 @@ While your MozDef container is running::
   root@fc4917f00ead:/# ...
   root@fc4917f00ead:/# exit
 
-.. _docker: https://www.docker.io/
+Docker config in AWS
+********************
 
+If you don't want to install MozDef with docker on your own machine because for example it doesn't support docker or you fear you don't have enough memory, AWS supports docker.
+
+1. Create a t2.small instance (enough to test MozDef) with the following details:
+
+   * AMI: Ubuntu LTS-14-04 HVM
+   * In "Configure Instance Details", expand the "Advanced Details" section. Under "User data", select "As text". Enter `#include https://get.docker.io` into the instance "User data". It will bootstrap docker in your instance boot.
+2. In this instance, clone our github repo
+3. Follow our docker config install `instructions`_
+4. Configure your security group to open the ports you need. Keep in mind that it's probably a bad idea to have a public facing elasticsearch.
+
+.. _docker: https://www.docker.io/
+.. _instructions: http://mozdef.readthedocs.org/en/latest/installation.html#dockerfile
 
 Elasticsearch nodes
 -------------------

@@ -389,7 +389,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		//disabled to avoid bug where other scenes won't receive mousedown
         //after trackball controls exist in a scene.
-        //event.preventDefault();
+        event.preventDefault();
 		event.stopPropagation();
 
 		if ( _state === STATE.NONE ) {
@@ -426,8 +426,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		if ( _this.enabled === false ) return;
 
-		//event.preventDefault();
-		//event.stopPropagation();
+		event.preventDefault();
+		event.stopPropagation();
 
 		if ( _state === STATE.ROTATE && !_this.noRotate ) {
 

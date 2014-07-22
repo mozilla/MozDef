@@ -31,4 +31,4 @@ MySQL-python==1.2.5
 dnspython==1.11.1
 ipaddr==2.1.11
 ipwhois==0.8.2
-
+celery==3.1.13

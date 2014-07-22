@@ -29,13 +29,6 @@ greetz = ["mozdef bot in da house",
           "mozdef has joined the room..no one panic",
           "mozdef bot here..nice to see everyone"]
 
-retorts = ["why, why soo mean?",
-           "someone got up on the wrong side of...",
-           "yo momma arcsight",
-           "gross arcsight..why you do that?",
-           "fat chance arcsight",
-           "arcsight you're such a show off"]
-
 panics = ["don't panic",
           ".. a towel has immense psychological value",
           "..but in fact the message was this: 'So Long, and Thanks for All the Fish.'",
@@ -190,7 +183,14 @@ class alertsListener(threading.Thread):
             " [x]event {0}:{1}".format(method.routing_key, bodyin))
         try:
             jbody = json.loads(bodyin)
-            self.client.msg(options.alertircchannel, formatAlert(jbody))
+            
+            # see where we send this alert
+            ircchannel = options.alertircchannel
+            if 'ircchannel' in jbody.keys():
+                if jbody['ircchannel'] in options.join.split(","):
+                    ircchannel = jbody['ircchannel']
+
+            self.client.msg(ircchannel, formatAlert(jbody))
 
         except Exception as e:
             self.client.root_logger.error(
@@ -213,19 +213,23 @@ class alertsListener(threading.Thread):
                     result = self.channel.queue_declare(exclusive=False)
                     queue_name = result.method.queue
                     self.channel.queue_bind(
-                        exchange=options.alertexchange, queue=queue_name, routing_key=options.alertqueue)
+                        exchange=options.alertexchange,
+                        queue=queue_name,
+                        routing_key=options.alertqueue)
 
                 self.client.root_logger.info(
                     'INFO consuming message queue {0}'.format(options.alertqueue))
                 self.client.msg(
                     options.alertircchannel, 'consuming message queue {0}'.format(options.alertqueue))
                 self.channel.basic_consume(
-                    self.alertsCallback, queue=queue_name, no_ack=True)
+                    self.alertsCallback,
+                    queue=queue_name,
+                    no_ack=True)
                 self.channel.start_consuming()
         except pika.exceptions.ConnectionClosed as e:
             self.client.root_logger.error("MQ Connection closed {0}".format(e))
             self.client.msg(
-                options.alertircchannel, "ERROR: Message queue is closed. No alerts for you")
+                options.alertircchannel, "ERROR: Message queue is closed. Will retry.")
             self.mqError = True
             try:
                 self.connection = None
@@ -319,9 +323,7 @@ class mozdefBot():
             def priv_handler(client, actor, recipient, message):
                 self.root_logger.debug(
                     'privmsggot:' + message + ' from ' + actor)
-                if 'ArcSight' in actor or 'jeff' in actor:
-                    if 'BANG' in message:
-                        self.client.msg(recipient, random.choice(retorts))
+
                 if "!help" in message:
                     self.client.msg(
                         recipient, "I just send alerts and taunt arcsight..for now..but try these:")
@@ -330,10 +332,13 @@ class mozdefBot():
                     self.client.msg(recipient, "!panic  --panic (or not )")
                     self.client.msg(
                         recipient, "!ipinfo --do a geoip lookup on an ip address")
+
                 if "!quote" in message:
                     self.client.msg(recipient, getQuote())
+
                 if "!panic" in message:
                     self.client.msg(recipient, random.choice(panics))
+
                 if "!ipinfo" in message:
                     for i in message.split():
                         if isIP(i):
@@ -399,7 +404,7 @@ def initConfig():
         options.configfile))
 
     if options.alertircchannel == '':
-        options.alertircchannel = options.join
+        options.alertircchannel = options.join.split(",")[0]
 
 if __name__ == "__main__":
     parser = OptionParser()

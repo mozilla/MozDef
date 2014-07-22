@@ -11,8 +11,8 @@ Anthony Verez averez@mozilla.com
 
 <head>
     <meta name="viewport" content="width=1024">
-    <link href="/css/template.css"   rel="stylesheet" media="screen,projection,tv" >
     <link href="/css/mozdef.css" rel="stylesheet" media="screen,projection,tv">
+    <link href="/css/dropdowns.css" rel="stylesheet" media="screen,projection,tv">
     <!--persona login-->
   <script>
     (function() {
@@ -28,11 +28,7 @@ Anthony Verez averez@mozilla.com
 <title>mozdef::mozilla defense platform</title>
 </head>
 <body>
-    {{> menu}}
-   
-    <div id="main-content">
-
-    </div>           
+          
 
 
   
@@ -40,6 +36,8 @@ Anthony Verez averez@mozilla.com
 <!--begin layout templates-->
 <!--the main, simple layout for the router to target-->
 <template name="layout">
+    {{> menu}}
+      
         {{#if loggingIn}}
                 <div class="span5 center">
                     <div class="alert alert-info alert-dismissible" role="alert">
@@ -60,17 +58,19 @@ Anthony Verez averez@mozilla.com
             {{/if}}
         {{/if}}
 
+    <div id="main-content">
+
+    </div>          
+
 </template>
 
 
 <!--a nice greeting-->
 <template name="hello">
     <div class="container">
-        <div class="center">
+        <div class="row center">
             <p class="welcome">{{greeting}}<br>hand made by Mozilla</p>
         </div>
     </div>
-
-        
 </template>
 

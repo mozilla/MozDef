@@ -16,13 +16,15 @@ html{
 
 body{
 	/*gradient*/
+    
     background: rgb(32,87,153); /* Old browsers */
-    background: -moz-linear-gradient(top, rgba(30,87,153,1) 0%, rgba(32,124,202,1) 43%, rgba(41,137,216,1) 62%, rgba(125,185,232,1) 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(43%,rgba(32,124,202,1)), color-stop(62%,rgba(41,137,216,1)), color-stop(100%,rgba(125,185,232,1))); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(125,185,232,1) 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(125,185,232,1) 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(125,185,232,1) 100%); /* IE10+ */
-    background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(125,185,232,1) 100%); /* W3C */
+    background: -moz-linear-gradient(top, rgba(30,87,153,1) 0%, rgba(32,124,202,1) 43%, rgba(41,137,216,1) 62%, rgba(41,150,217,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(43%,rgba(32,124,202,1)), color-stop(62%,rgba(41,137,216,1)), color-stop(100%,rgba(41,150,217,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */*/
+    background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
     /*font-family: Georgia, serif;*/
     /*font-family: "Trebuchet MS", sans-serif;*/
     /*font-family: monospace;*/
@@ -46,6 +48,12 @@ body{
 
 .shadow {
     text-shadow: #000 .7px .7px .7px;
+}
+
+.ipaddress {
+  color: #FFF;
+  font-style: normal;
+  font-weight: normal;
 }
 
 #header a.mozilla {
@@ -78,29 +86,38 @@ body{
 }
 
 .attackercallout {
-		width: 120px;
-		height: 160px;
-		box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
-		border: 1px solid rgba(127,255,255,0.25);
-		text-align: center;
-		cursor: default;
+    width: 120px;
+    height: 160px;
+    box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
+    border: 1px solid rgba(127,255,255,0.25);
+    text-align: center;
+    cursor: default;
 }
 
 .attackercallout .id {
-		position: absolute;
-		top: 20px;
-		left: 10px;
-		font-size: 12px;
-		color: rgba(127,255,255,0.75);
+    font-size: 12px;
+    color: rgba(127,255,255,0.75);
 }
 
 .attackercallout .details {
-		position: absolute;
-		bottom: 15px;
-		left: 0px;
-		right: 0px;
-		font-size: 12px;
-		color: rgba(127,255,255,0.75);
+    text-align: left;
+    left: 2px;
+    font-size: 12px;
+    color: rgba(127,255,255,0.75);
+}
+
+.attackercallout .blockip{
+    color: #FFF;
+    text-transform: uppercase;
+    margin-top: 20px;
+}
+.attackercallout ul{
+    list-style: none;
+    float: left;
+    z-index: 99;
+    left: auto;
+    margin: 0px;
+    padding: 0px;  
 }
 
 /*bootstrap overrides*/

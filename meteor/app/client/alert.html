@@ -55,11 +55,23 @@ Anthony Verez averez@mozilla.com
             <td>{{documenttype}}</td>
             <td>{{documentsource.summary}}</td>
         </tr>
-        {{#each objKeys this.documentsource.details}}
-        <tr>
-                <td>{{key}}:</td>
-                <td>{{value}}</td>
-        </tr>
+        {{#each objKeyValue this.documentsource.details}}
+
+            {{#if isAnObject value}}
+                <tr><td>{{key}}</td>
+                {{#with value}}
+                    {{#each objKeyValue this}}
+                        <td>{{key}}:</td>
+                        <td>{{value}}</td>                    
+                    {{/each}}
+                {{/with}}
+                </tr>
+            {{else}}
+                <tr>
+                    <td>{{key}}:</td>
+                    <td>{{value}}</td>
+                </tr>            
+            {{/if}}
         {{/each}}
     </table>
 </template>
