@@ -19,11 +19,11 @@ if (Meteor.isClient) {
         catch(err) {
             reporter = 'test';
         }
+        var cidr = 32;
         var ipaddr = $('#ipaddr')[0].value.split('/');
         var address = ipaddr[0];
-        var cidr = 32;
         if (ipaddr.length == 2) {
-            parseInt(ipaddr[1]);
+            cidr=parseInt(ipaddr[1]);
         }
         var actionobj = {
           address: address,
