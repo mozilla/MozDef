@@ -10,7 +10,7 @@
 
 from celery.schedules import crontab
 import time
-import logging                                                                             [34/680]
+import logging
 
 ALERTS = {
     'bro_intel.AlertBroIntel': crontab(minute='*/1'),

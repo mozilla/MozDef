@@ -15,7 +15,7 @@ class AlertBroNotice(AlertTask):
         # look for events in last 30 mins
     	date_timedelta = dict(minutes=30)
         # Configure filters by importing a kibana dashboard
-    	self.filtersFromKibanaDash('mozilla_bro_notice_dashboard.json', date_timedelta)
+    	self.filtersFromKibanaDash('bro_notice_dashboard.json', date_timedelta)
 
     	# Search events
     	self.searchEventsSimple()
