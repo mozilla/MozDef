@@ -18,7 +18,7 @@ if (Meteor.isClient) {
             whoisresult.status='running';
             whoisresult.result = null;
             whoisresult.content='';
-            whoisresult.data=null;s
+            whoisresult.data=null;
             whoisresult.error = undefined;
             whoisDep.changed();
             if (Session.get('ipwhoisipaddress') ) {

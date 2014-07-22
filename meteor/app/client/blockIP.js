@@ -23,7 +23,7 @@ if (Meteor.isClient) {
         var ipaddr = $('#ipaddr')[0].value.split('/');
         var address = ipaddr[0];
         if (ipaddr.length == 2) {
-            cidr=parseInt(ipaddr[1]);
+            cidr=parseInt(ipaddr[1]) || 32;
         }
         var actionobj = {
           address: address,
