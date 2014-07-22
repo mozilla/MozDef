@@ -11,7 +11,7 @@
 import pyes
 import json
 import requests
-
+from datetime import datetime
 
 class Elasticsearch(object):
     def __init__(self, esserver):
@@ -47,11 +47,14 @@ class Elasticsearch(object):
         except:
             pass
 
-    def loadDocs(self, index, docs_type, docs_file):
+    def loadDocs(self, index, docs_type, docs_file, update_date=False):
         print('Loading docs from %s...' % docs_file)
         f = open(docs_file)
         data = json.load(f)
         for l in data:
+            if update_date:
+                # update date to right now
+                l['utctimestamp'] = datetime.utcnow().isoformat()+'+00:00'
             self.conn.index(l, index, docs_type)
         f.close()
 
