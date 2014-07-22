@@ -62,15 +62,19 @@ if (Meteor.isClient) {
             .dimension(hostDim)
             .group(hostEPS)
             .label(function(d) {return d.value; })
-            .innerRadius(30);
+            .innerRadius(30)
+            .filter = function() {};
 
         ringChartLoadAverage
             .width(150).height(150)
             .dimension(hostDim)
             .group(hostLoadAverage)
             .label(function(d) {return d.value; })
-            .innerRadius(30);
+            .innerRadius(30)
+            .filter = function() {};
+
         dc.renderAll();
+
         Deps.autorun(function() {
             frontEndData=healthfrontend.find({}).fetch();
             ndx.remove();
