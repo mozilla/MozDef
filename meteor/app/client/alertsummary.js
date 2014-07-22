@@ -149,7 +149,20 @@ if (Meteor.isClient) {
         
         
         refreshAlertsData=function(){
-            var alertsData=alerts.find({summary: {$regex:Session.get('alertsearchtext')}},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 100, reactive:false}).fetch();
+            var alertsData=alerts.find({
+                summary: {$regex:Session.get('alertsearchtext')}},
+                {fields:{
+                    esmetadata:1,
+                    utctimestamp:1,
+                    utcepoch:1,
+                    summary:1,
+                    severity:1,
+                    category:1
+                    },
+                sort: {utcepoch: 'desc'},
+                limit: 100,
+                reactive:false})
+                .fetch();
             //parse, group data for the d3 charts
             alertsData.forEach(function (d) {
                 d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
