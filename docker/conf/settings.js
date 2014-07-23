@@ -11,17 +11,10 @@ Anthony Verez averez@mozilla.com
 
 //configuration settings
 
-elasticsearch = {
-  address: "http://localhost:9200/",
-  healthurl: "_cluster/health",
-  docstatsurl: "_stats/docs"
-}
-
-
 mozdef = {
   rootURL: "http://localhost",
   port: "3000",
   rootAPI: "http://localhost:8081",
   kibanaURL: "http://localhost:9090",
-  enableBanhammer: false
+  enableBlockIP: false
 }
