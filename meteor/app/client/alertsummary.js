@@ -256,9 +256,14 @@ if (Meteor.isClient) {
         };
         
         Deps.autorun(function(comp) {
-            //console.log(comp);
+            //subscribe to the number of alerts
+            //and to the summary of alerts
+            //if the count changes, refresh ourselves in a non-reactive way
+            //to lessen the meteor hooks since we don't care about field-level changes.
             Meteor.subscribe("alerts-count");
-            Meteor.subscribe("alerts-summary");
+            Meteor.subscribe("alerts-summary", onReady=function(){
+                Deps.nonreactive(refreshAlertsData);
+            });
             cnt=alertsCount.findOne();
             $('#alertsearchtext').val(Session.get('alertsearchtext'));
             if ( cnt ){

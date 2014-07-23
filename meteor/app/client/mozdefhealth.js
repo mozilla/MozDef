@@ -90,11 +90,13 @@ if (Meteor.isClient) {
         }
 
         Deps.autorun(function() {
-            Meteor.subscribe("healthfrontend");
+            Meteor.subscribe("healthfrontend",onReady=function(){
+                Deps.nonreactive(refreshChartData);
+            });
             Meteor.subscribe("healthescluster");
             Meteor.subscribe("healthesnodes");
             Meteor.subscribe("healtheshotthreads");
-            refreshChartData();
+            
 
         }); //end deps.autorun
      };
