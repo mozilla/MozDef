@@ -92,6 +92,7 @@ body{
     border: 1px solid rgba(127,255,255,0.25);
     text-align: center;
     cursor: default;
+    z-index: 99;    
 }
 
 .attackercallout .id {
@@ -114,7 +115,6 @@ body{
 .attackercallout ul{
     list-style: none;
     float: left;
-    z-index: 99;
     left: auto;
     margin: 0px;
     padding: 0px;  
