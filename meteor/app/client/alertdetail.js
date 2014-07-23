@@ -20,5 +20,6 @@ if (Meteor.isClient) {
         url=getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + Session.get('alertID');
         return url;
     };
+    
 
 }

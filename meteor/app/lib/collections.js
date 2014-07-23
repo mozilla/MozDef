@@ -32,10 +32,25 @@ if (Meteor.isServer) {
         return mozdefsettings.find();
     });
 
-    Meteor.publish("alerts", function () {
+    Meteor.publish("alerts-summary", function () {
         //limit to the last 100 records by default
-        //to eash the sync transfer to dc.js/crossfilter
-        return alerts.find({}, {sort: {utcepoch: -1},limit:100});
+        //to ease the sync transfer to dc.js/crossfilter
+        return alerts.find({},
+                        {fields:{
+                                _id:1,
+                                esmetadata:1,
+                                utctimestamp:1,
+                                utcepoch:1,
+                                summary:1,
+                                severity:1,
+                                category:1
+                                },
+                           sort: {utcepoch: -1},
+                           limit:100});
+    });
+    
+    Meteor.publish("alerts-details",function(alertid){
+       return alerts.find({'esmetadata.id': alertid});
     });
     
     Meteor.publish("alerts-count", function () {
@@ -101,7 +116,7 @@ if (Meteor.isServer) {
     });    
 
     Meteor.publish("attackers", function () {
-        return attackers.find({}, {limit:0});
+        return attackers.find({}, {limit:100});
     });    
 
 
@@ -111,18 +126,11 @@ if (Meteor.isServer) {
 if (Meteor.isClient) {
     //client side collections:
     alertsCount = new Meteor.Collection("alerts-count");
-    //client-side subscriptions  
+    //client-side subscriptions
     Meteor.subscribe("mozdefsettings");
     Meteor.subscribe("incidents");
-    Meteor.subscribe("events");
-    Meteor.subscribe("alerts");
-    
     Meteor.subscribe("veris");
     Meteor.subscribe("kibanadashboards");
-    Meteor.subscribe("healthfrontend");
-    Meteor.subscribe("healthescluster");
-    Meteor.subscribe("healthesnodes");
-    Meteor.subscribe("healtheshotthreads");
     Meteor.subscribe("attackers");
 };
 

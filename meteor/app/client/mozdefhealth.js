@@ -46,40 +46,56 @@ if (Meteor.isClient) {
         var ringChartEPS   = dc.pieChart("#ringChart-EPS");
         var totalEPS   = dc.numberDisplay("#total-EPS");
         var ringChartLoadAverage = dc.pieChart("#ringChart-LoadAverage");
-        var frontEndData=healthfrontend.find({}).fetch();
-        var ndx = crossfilter(frontEndData);
-        var hostDim  = ndx.dimension(function(d) {return d.hostname;});
-        var hostEPS = hostDim.group().reduceSum(function(d) {return d.details.total_deliver_eps.toFixed(2);});
-        var hostLoadAverage = hostDim.group().reduceSum(function(d) {return d.details.loadaverage[0];});
-        var epsTotal = ndx.groupAll().reduceSum(function(d) {return d.details.total_deliver_eps;});
         
-        totalEPS
-            .valueAccessor(function(d){return d;})
-            .group(epsTotal);
+        refreshChartData=function(){
+            var frontEndData=healthfrontend.find({}).fetch();
+            var ndx = crossfilter(frontEndData);
+
+            if ( frontEndData.length === 0 && ndx.size()>0){
+                console.log('clearing ndx/dc.js');
+                dc.filterAll();
+                ndx.remove();
+                dc.redrawAll();
+            } else {
+                ndx = crossfilter(frontEndData);
+            }            
+            if ( ndx.size() >0){ 
+                var hostDim  = ndx.dimension(function(d) {return d.hostname;});
+                var hostEPS = hostDim.group().reduceSum(function(d) {return d.details.total_deliver_eps.toFixed(2);});
+                var hostLoadAverage = hostDim.group().reduceSum(function(d) {return d.details.loadaverage[0];});
+                var epsTotal = ndx.groupAll().reduceSum(function(d) {return d.details.total_deliver_eps;});
+                
+                totalEPS
+                    .valueAccessor(function(d){return d;})
+                    .group(epsTotal);
+                
+                ringChartEPS
+                    .width(150).height(150)
+                    .dimension(hostDim)
+                    .group(hostEPS)
+                    .label(function(d) {return d.value; })
+                    .innerRadius(30)
+                    .filter = function() {};
         
-        ringChartEPS
-            .width(150).height(150)
-            .dimension(hostDim)
-            .group(hostEPS)
-            .label(function(d) {return d.value; })
-            .innerRadius(30)
-            .filter = function() {};
-
-        ringChartLoadAverage
-            .width(150).height(150)
-            .dimension(hostDim)
-            .group(hostLoadAverage)
-            .label(function(d) {return d.value; })
-            .innerRadius(30)
-            .filter = function() {};
-
-        dc.renderAll();
+                ringChartLoadAverage
+                    .width(150).height(150)
+                    .dimension(hostDim)
+                    .group(hostLoadAverage)
+                    .label(function(d) {return d.value; })
+                    .innerRadius(30)
+                    .filter = function() {};
+        
+                dc.renderAll();
+            }
+        }
 
         Deps.autorun(function() {
-            frontEndData=healthfrontend.find({}).fetch();
-            ndx.remove();
-            ndx.add(frontEndData);
-            dc.redrawAll();
+            Meteor.subscribe("healthfrontend");
+            Meteor.subscribe("healthescluster");
+            Meteor.subscribe("healthesnodes");
+            Meteor.subscribe("healtheshotthreads");
+            refreshChartData();
+
         }); //end deps.autorun
      };
 }

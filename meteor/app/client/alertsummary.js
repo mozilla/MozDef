@@ -149,19 +149,19 @@ if (Meteor.isClient) {
         
         
         refreshAlertsData=function(){
-            var alertsData=alerts.find({
-                summary: {$regex:Session.get('alertsearchtext')}},
-                {fields:{
-                    esmetadata:1,
-                    utctimestamp:1,
-                    utcepoch:1,
-                    summary:1,
-                    severity:1,
-                    category:1
-                    },
-                sort: {utcepoch: 'desc'},
-                limit: 100,
-                reactive:false})
+            var alertsData=alerts.find(
+                                        {summary: {$regex:Session.get('alertsearchtext')}},
+                                        {fields:{
+                                            esmetadata:1,
+                                            utctimestamp:1,
+                                            utcepoch:1,
+                                            summary:1,
+                                            severity:1,
+                                            category:1
+                                            },
+                                        sort: {utcepoch: 'desc'},
+                                        limit: 100,
+                                        reactive:false})
                 .fetch();
             //parse, group data for the d3 charts
             alertsData.forEach(function (d) {
@@ -258,6 +258,7 @@ if (Meteor.isClient) {
         Deps.autorun(function(comp) {
             //console.log(comp);
             Meteor.subscribe("alerts-count");
+            Meteor.subscribe("alerts-summary");
             cnt=alertsCount.findOne();
             $('#alertsearchtext').val(Session.get('alertsearchtext'));
             if ( cnt ){
