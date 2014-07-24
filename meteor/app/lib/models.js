@@ -25,6 +25,8 @@ models={
             notes:[],
             tags:[],
             references:[],
+            lessons:[],
+            mitigations:[],
             phase:"Identification",
             timeline: {reported:"",
                         verified:"",

@@ -37,16 +37,18 @@ Jeff Bryner jbryner@mozilla.com
           <a href=# id="saveChanges"><b>Save changes now</b></a> - <a href=# id="undo"><b>Undo</b></a> - <a href=# id="redo"><b>Redo</b></a>
         </div>        
     </div>
-    <div class="row span5 center">
+
+    <div class="row span6 center">
         <ul class="nav nav-tabs">
-            <li class="tabnav active"><a href="#edittab">Edit</a></li>
+            <li class="tabnav active"><a href="#maintab">Main</a></li>
+            <li class="tabnav"><a href="#notestab">Notes</a></li>
             <li class="tabnav"><a href="#referencestab">References</a></li>
             <li class="tabnav"><a href="#theoriestab">Theories</a></li>
             <li class="tabnav"><a href="#mitigationstab">Mitigations</a></li>
             <li class="tabnav"><a href="#lessonstab">Lessons Learned</a></li>
         </ul>
     </div>
-    <div id="edittab" class="row span11 offset2 tabcontent active">
+    <div id="maintab" class="row span11 offset1 tabcontent active">
         <div class="span6">
         <form id="editincidentform" class="form-horizontal" >
         <fieldset>
@@ -61,7 +63,7 @@ Jeff Bryner jbryner@mozilla.com
             <div class="control-group">
               <label class="control-label" for="description">Description</label>
               <div class="controls">
-                <textarea id="description" name="description" placeholder="long description" class="input-xlarge description" rows=3>{{description}}</textarea>
+                <textarea id="description" name="description" placeholder="long description" class="input-xxlarge description" rows=4>{{description}}</textarea>
               </div>
             </div>               
 
@@ -143,21 +145,21 @@ Jeff Bryner jbryner@mozilla.com
     
     <div id="referencestab" class="row span8 center tabcontent">
         <form id="referencesform" class="form-horizontal" >
-        <fieldset>
-            <div class="control-group">
-              <label class="control-label" for="references">Reference</label>
-              <div class="controls" id="references">
-                <input id="newReference" class="input-xlarge" type="text" value=""><button id="saveReference" type="submit" class="btn btn-primary submit">Save</button>
-                <ul class="unstyled">
-                    {{#each references}}
-                    <li>
-                        <div>{{.}}<button type="button" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>
-                    </li>
-                    {{/each}}
-                </ul>
-              </div>
-            </div>
-        </fieldset>
+            <fieldset>
+                <div class="control-group">
+                  <label class="control-label" for="references">Reference</label>
+                  <div class="controls" id="references">
+                    <input id="newReference" class="input-xlarge" type="text" value=""><button id="saveReference" type="submit" class="btn btn-primary submit">Save</button>
+                    <ul class="unstyled">
+                        {{#each references}}
+                        <li>
+                            <div>{{.}}<button type="button" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>
+                        </li>
+                        {{/each}}
+                    </ul>
+                  </div>
+                </div>
+            </fieldset>
         </form>
     </div>
     
@@ -321,6 +323,58 @@ Jeff Bryner jbryner@mozilla.com
                 </div>
             </fieldset>
         </form>
-    </div>    
+    </div>
+
+    <div id="notestab" class="row span8 center tabcontent">
+        <form id="notesform" class="form-horizontal" >
+            <fieldset>
+                <div class="control-group">
+                    <label class="control-label" for="newNoteSummary">New Note:</label>
+                    <div class="controls">
+                        <input id="newNoteSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+                    </div>
+                </div>              
+                <div class="control-group">
+                    <label class="control-label" for="newNoteDescription">Description:</label>
+                    <div class="controls">
+                        <textarea id="newNoteDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <button id="saveNote" type="submit" class="btn btn-primary submit">Save</button>
+                    </div>
+                </div>
+                <!-- table of existing items-->
+                <div class="control-group">
+                <label class="pull-left" >Existing Notes:</label>
+                <table id="notes" class="table table-striped table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <td>Summary</td>
+                            <td>Description</td>
+                            <td>Created</td>
+                            <td>Creator</td>
+                            <td>Status</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{#each notes}}
+                        <tr>
+                            <td>{{summary}}</td>
+                            <td>{{description}}</td>
+                            <td>{{dateCreated}}</td>
+                            <td>{{creator}}</td>
+                            <td>{{status}}</td>
+                            <td><button class="btn btn-danger notedelete" data-noteid={{_id}}>delete</button></td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
 </div>
 </template>

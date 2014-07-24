@@ -335,6 +335,30 @@ if (Meteor.isClient) {
             e.preventDefault();
         },
 
+        "click #saveNote": function(e,template){
+            newNote=models.note();
+            newNote.summary=$('#newNoteSummary').val();
+            newNote.description=$('#newNoteDescription').val();
+            newNote.creator=Meteor.user().profile.email;
+            newNote.lastModifier=Meteor.user().profile.email;
+            if ( newNote.summary && newNote.description ) {
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {notes:newNote}
+                });
+                $('#newNoteSummary').val('');
+                $('#newNoteDescription').val('');
+                e.preventDefault();
+            }
+
+        },
+        "click .notedelete": function(e){
+            id = $(e.target).attr('data-noteid');
+            incidents.update(Session.get('incidentID'), {
+                $pull: {notes: {"_id": id}}
+            });
+            e.preventDefault();
+        },
+
         "readystatechange":function(e){
             if (typeof console !== 'undefined') {
               console.log('readystatechange')
