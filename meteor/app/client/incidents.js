@@ -44,6 +44,11 @@ if (Meteor.isClient) {
         }
     });
 
+    
+    Template.incidents.rendered = function(){
+       Meteor.subscribe("incidents-summary");  
+    };
+
     //edit helpers
     Template.editincidentform.helpers({
         incident: function() {
@@ -232,7 +237,6 @@ if (Meteor.isClient) {
         },
         
         "click .tabnav": function (e,template){
-            //console.log(e);
             //set the tab and tab content to active to display
             //and hide the non active ones.
             $(e.currentTarget).addClass('active').siblings().removeClass('active');
@@ -255,6 +259,27 @@ if (Meteor.isClient) {
             incidents.update(Session.get('incidentID'), {
                 $pull: {references:reftext}
             });
+        },
+        
+        "click #saveTheory": function(e,template){
+            newTheory=models.theory();
+            newTheory.summary=$('#newTheorySummary').val();
+            newTheory.description=$('#newTheoryDescription').val();
+            newTheory.creator=Meteor.user().profile.email;
+            newTheory.lastModifier=Meteor.user().profile.email;
+            if ( newTheory ) {
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {theories:newTheory}
+                });                
+            }
+            $('#newTheorySummary').val('');
+            $('#newTheoryDescription').val('');
+        },
+        "click .theorydelete": function(e){
+            id = $(e.target).attr('data-theoryid');
+            incidents.update(Session.get('incidentID'), {
+                $pull: {theories: {"_id": id}}
+            });
         },        
 
         "readystatechange":function(e){
@@ -267,61 +292,60 @@ if (Meteor.isClient) {
     });
 
     Template.editincidentform.rendered = function() {
-            if (typeof console !== 'undefined') {
-              console.log('load edit incident form ' + Session.get('incidentID'));
-            }
-            $('#dateClosed').daterangepicker({
-                                                singleDatePicker: true,
-                                                timePicker:true,
-                                                timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
-                                                startDate: moment()
-                                                });
-            $('#dateOpened').daterangepicker({
-                                                singleDatePicker: true,
-                                                timePicker:true,
-                                                timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
-                                                startDate: moment()
-                                                });
-            $('#dateReported').daterangepicker({
-                                                singleDatePicker: true,
-                                                timePicker:true,
-                                                timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
-                                                startDate: moment()
-                                                });
-            $('#dateVerified').daterangepicker({
-                                                singleDatePicker: true,
-                                                timePicker:true,
-                                                timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
-                                                startDate: moment()
-                                                });
-            $('#dateMitigated').daterangepicker({
-                                                singleDatePicker: true,
-                                                timePicker:true,
-                                                timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
-                                                startDate: moment()
-                                                });
-            $('#dateContained').daterangepicker({
-                                                singleDatePicker: true,
-                                                timePicker:true,
-                                                timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
-                                                startDate: moment()
-                                                });
+        if (typeof console !== 'undefined') {
+          console.log('load edit incident form ' + Session.get('incidentID'));
+        }
+        //init the date pickers.
+        $('#dateClosed').daterangepicker({
+                                            singleDatePicker: true,
+                                            timePicker:true,
+                                            timePickerIncrement:1,
+                                            format: 'MM/DD/YYYY hh:mm:ss A',
+                                            startDate: moment()
+                                            });
+        $('#dateOpened').daterangepicker({
+                                            singleDatePicker: true,
+                                            timePicker:true,
+                                            timePickerIncrement:1,
+                                            format: 'MM/DD/YYYY hh:mm:ss A',
+                                            startDate: moment()
+                                            });
+        $('#dateReported').daterangepicker({
+                                            singleDatePicker: true,
+                                            timePicker:true,
+                                            timePickerIncrement:1,
+                                            format: 'MM/DD/YYYY hh:mm:ss A',
+                                            startDate: moment()
+                                            });
+        $('#dateVerified').daterangepicker({
+                                            singleDatePicker: true,
+                                            timePicker:true,
+                                            timePickerIncrement:1,
+                                            format: 'MM/DD/YYYY hh:mm:ss A',
+                                            startDate: moment()
+                                            });
+        $('#dateMitigated').daterangepicker({
+                                            singleDatePicker: true,
+                                            timePicker:true,
+                                            timePickerIncrement:1,
+                                            format: 'MM/DD/YYYY hh:mm:ss A',
+                                            startDate: moment()
+                                            });
+        $('#dateContained').daterangepicker({
+                                            singleDatePicker: true,
+                                            timePicker:true,
+                                            timePickerIncrement:1,
+                                            format: 'MM/DD/YYYY hh:mm:ss A',
+                                            startDate: moment()
+                                            });
+        //set up reactive data 
+        Deps.autorun(function() {
+            Meteor.subscribe("incidents-details",Session.get('incidentID'));
+        }); //end deps.autorun
     };
 
     //add incident events
     Template.addincidentform.events({
-
-        "load": function(event,template){
-            event.preventDefault();
-            Session.set('displayMessage','Set date');
-        },
-
         "submit form": function(event, template) {
             event.preventDefault();
             incidents.insert({
@@ -329,6 +353,7 @@ if (Meteor.isClient) {
                 dateOpened: template.find("#dateOpened").value,
                 phase: template.find("#phase").value
             });
+            //TODO; reroute to full blown edit form after this minimal input is complete
             Router.go('/incidents/')
         }
 

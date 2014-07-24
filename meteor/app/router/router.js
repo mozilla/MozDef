@@ -41,8 +41,11 @@ Router.map(function () {
 
     this.route('incidentedit', {
         path: '/incident/:_id/edit',
-        data: function() {
+        waitOn: function() {
             Session.set('incidentID', this.params._id);
+            return Meteor.subscribe('incidents-details', Session.get('incidentID'))
+            },        
+        data: function() {
             if (!Session.get('revisionsundo')) {
                 Session.set('revisionsundo', [incidents.findOne(this.params._id)]);
             }

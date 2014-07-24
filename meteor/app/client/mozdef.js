@@ -20,7 +20,7 @@ if (Meteor.isClient) {
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')
             console.log("mozdef starting");
-        return "mozdef: the mozilla defense platform";
+        return "MozDef: the Mozilla defense platform";
     };
 
     Template.hello.events({

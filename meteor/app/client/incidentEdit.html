@@ -16,9 +16,7 @@ Jeff Bryner jbryner@mozilla.com
         color:black;
     }
     
-    form{
-        margin: 0px 20% 20px;
-    }
+
     
     .tabcontent {
         display:none;
@@ -48,9 +46,8 @@ Jeff Bryner jbryner@mozilla.com
             <li class="tabnav"><a href="#mitigationstab">Mitigations</a></li>
         </ul>
     </div>
-    <div id="edittab" class="row center tabcontent active">
-        {{>veristags}}
-
+    <div id="edittab" class="row span10 offset2 tabcontent active">
+        <div class="span5">
         <form id="editincidentform" class="form-horizontal" >
         <fieldset>
             <div class="control-group">
@@ -137,9 +134,13 @@ Jeff Bryner jbryner@mozilla.com
             </div>
         </fieldset>
         </form>
+        </div>
+        <div class="span4 pull-right">
+            {{>veristags}}
+        </div>        
     </div>
     
-    <div id="referencestab" class="row center tabcontent">
+    <div id="referencestab" class="row span8 center tabcontent">
         <form id="referencesform" class="form-horizontal" >
         <fieldset>
             <div class="control-group">
@@ -158,6 +159,48 @@ Jeff Bryner jbryner@mozilla.com
         </fieldset>
         </form>
     </div>
-</div>
+    
+    <div id="theoriestab" class="row span8 center tabcontent">
+        <form id="theoriesform" class="form-horizontal" >
+            <fieldset>
+                <div class="control-group">
+                    <label class="control-label" for="newtheory">New Theory:</label>
+                    <div class="controls" id="newtheory" >
+                        <input id="newTheorySummary" class="input-xlarge" type="text" value="" placeholder="short summary">
+                        <textarea id="newTheoryDescription" placeholder="long description" class="input-xxlarge"  rows=4></textarea>
+                        <button id="saveTheory" type="submit" class="btn btn-primary submit">Save</button>
+                    </div>
+                </div>
+                <!-- table of existing theories-->
+                <div class="control-group">
+                <label class="pull-left" >Existing Theories:</label>
+                <table id="theories" class="table table-striped table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <td>Summary</td>
+                            <td>Description</td>
+                            <td>Created</td>
+                            <td>Creator</td>
+                            <td>Status</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{#each theories}}
+                        <tr>
+                            <td>{{summary}}</td>
+                            <td>{{description}}</td>
+                            <td>{{dateCreated}}</td>
+                            <td>{{creator}}</td>
+                            <td>{{status}}</td>
+                            <td><button class="btn btn-danger theorydelete" data-theoryid={{_id}}>delete</button></td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+                </div>
+            </fieldset>
+        </form>
 
+    </div>
+</div>
 </template>

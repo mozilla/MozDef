@@ -49,16 +49,33 @@ models={
         };
     },
 
+    theory: function() {
+        return {
+            '_id': Meteor.uuid(),
+            'dateCreated': today,
+            'summary': '',
+            'description': '',
+            'creator': '',
+            'status': 'unverified',
+            'lastModifier': '',
+            'evidence': []
+        };
+    },
+    
     note: function() {
         return {
+            '_id': Meteor.uuid(),
             'title': '',
             'content': '',
+            'dateCreated': today,
+            'creator': '',
             'lastModifier': ''
         };
     },
 
     credential: function() {
         return {
+            '_id': Meteor.uuid(),
             'username': '',
             'password': '',
             'hash': ''

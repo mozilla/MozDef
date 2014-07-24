@@ -59,7 +59,8 @@ if (Meteor.isClient) {
             } else {
                 ndx = crossfilter(frontEndData);
             }            
-            if ( ndx.size() >0){ 
+            if ( ndx.size() >0){
+                console.log(ndx.size());
                 var hostDim  = ndx.dimension(function(d) {return d.hostname;});
                 var hostEPS = hostDim.group().reduceSum(function(d) {return d.details.total_deliver_eps.toFixed(2);});
                 var hostLoadAverage = hostDim.group().reduceSum(function(d) {return d.details.loadaverage[0];});
@@ -73,7 +74,7 @@ if (Meteor.isClient) {
                     .width(150).height(150)
                     .dimension(hostDim)
                     .group(hostEPS)
-                    .label(function(d) {return d.value; })
+                    .label(function(d) {return d.value ||''; })
                     .innerRadius(30)
                     .filter = function() {};
         
@@ -81,7 +82,7 @@ if (Meteor.isClient) {
                     .width(150).height(150)
                     .dimension(hostDim)
                     .group(hostLoadAverage)
-                    .label(function(d) {return d.value; })
+                    .label(function(d) {return d.value ||''; })
                     .innerRadius(30)
                     .filter = function() {};
         
