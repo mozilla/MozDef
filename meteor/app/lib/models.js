@@ -61,7 +61,20 @@ models={
             'evidence': []
         };
     },
-    
+
+    mitigation: function() {
+        return {
+            '_id': Meteor.uuid(),
+            'dateCreated': today,
+            'summary': '',
+            'description': '',
+            'temporary': false,
+            'creator': '',
+            'status': 'planned',
+            'lastModifier': ''
+        };
+    },
+
     note: function() {
         return {
             '_id': Meteor.uuid(),

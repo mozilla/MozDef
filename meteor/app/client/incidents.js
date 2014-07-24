@@ -285,6 +285,33 @@ if (Meteor.isClient) {
             e.preventDefault();
         },        
 
+        "click #saveMitigation": function(e,template){
+            newMitigation=models.mitigation();
+            console.log($('#newMitigationTemporary').checked);
+            newMitigation.summary=$('#newMitigationSummary').val();
+            newMitigation.description=$('#newMitigationDescription').val();
+            newMitigation.temporary=$('#newMitigationTemporary').is(':checked');
+            newMitigation.creator=Meteor.user().profile.email;
+            newMitigation.lastModifier=Meteor.user().profile.email;
+            if ( newMitigation.summary && newMitigation.description ) {
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {mitigations:newMitigation}
+                });
+                $('#newMitigationSummary').val('');
+                $('#newMitigationDescription').val('');
+                $('#newMitigationTemporary').attr('checked', false);
+                e.preventDefault();
+            }
+
+        },
+        "click .mitigationdelete": function(e){
+            id = $(e.target).attr('data-mitigationid');
+            incidents.update(Session.get('incidentID'), {
+                $pull: {mitigations: {"_id": id}}
+            });
+            e.preventDefault();
+        }, 
+        
         "readystatechange":function(e){
             if (typeof console !== 'undefined') {
               console.log('readystatechange')
