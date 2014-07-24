@@ -87,9 +87,13 @@ if (Meteor.isServer) {
     
     
 
-    Meteor.publish("incidents", function () {
+    Meteor.publish("incidents-summary", function () {
         return incidents.find({}, {limit:100});
     });
+    
+    Meteor.publish("incidents-details",function(incidentid){
+       return incidents.find({'_id': incidentid});
+    });    
 
     Meteor.publish("veris", function () {
         return veris.find({}, {limit:0});
@@ -128,7 +132,6 @@ if (Meteor.isClient) {
     alertsCount = new Meteor.Collection("alerts-count");
     //client-side subscriptions
     Meteor.subscribe("mozdefsettings");
-    Meteor.subscribe("incidents");
     Meteor.subscribe("veris");
     Meteor.subscribe("kibanadashboards");
     Meteor.subscribe("attackers");

@@ -32,8 +32,6 @@ if (Meteor.isServer) {
         mozdefsettings.insert({ key:'enableBlockIP', 
                                 value : mozdef.enableBlockIP }); 
 
-        //console.log(mozdefsettings.find({}).fetch())
-
         Accounts.config({
             forbidClientAccountCreation:"true",
         });
@@ -69,28 +67,8 @@ if (Meteor.isServer) {
             i.summary="testing";
             i.dateOpened.setTime(Date.parse("10/1/2012 8:00"));
             incidents.insert(i);
-            console.log(i);
+            //console.log(i);
             
-            //insert an incident with manual json
-            incidents.insert(
-            {summary:"Persona Impersonation",
-             dateOpened:"10/1/2013",
-             dateClosed:"10/2/2013",
-             actor:"External",
-             action:"Error",
-             asset:"User",
-             attribute:"Integrity"}
-             );
-            incidents.insert(
-            {summary:"Boris Password Exposure",
-             dateOpened:"10/1/2013",
-             dateClosed:"10/2/2013",
-             actor:"Internal",
-             action:"Error",
-             asset:"User",
-             attribute:"Confidentiality"}
-            );
         };
-        console.log("Incidents: " + incidents.find({}).count());
   });   //end startup
 }   //end is server
