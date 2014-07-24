@@ -75,6 +75,18 @@ models={
         };
     },
 
+    lesson: function() {
+        return {
+            '_id': Meteor.uuid(),
+            'dateCreated': today,
+            'summary': '',
+            'description': '',
+            'creator': '',
+            'status': '',
+            'lastModifier': ''
+        };
+    },
+
     note: function() {
         return {
             '_id': Meteor.uuid(),

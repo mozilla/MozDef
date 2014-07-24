@@ -287,7 +287,6 @@ if (Meteor.isClient) {
 
         "click #saveMitigation": function(e,template){
             newMitigation=models.mitigation();
-            console.log($('#newMitigationTemporary').checked);
             newMitigation.summary=$('#newMitigationSummary').val();
             newMitigation.description=$('#newMitigationDescription').val();
             newMitigation.temporary=$('#newMitigationTemporary').is(':checked');
@@ -310,8 +309,32 @@ if (Meteor.isClient) {
                 $pull: {mitigations: {"_id": id}}
             });
             e.preventDefault();
-        }, 
-        
+        },
+
+        "click #saveLesson": function(e,template){
+            newLesson=models.lesson();
+            newLesson.summary=$('#newLessonSummary').val();
+            newLesson.description=$('#newLessonDescription').val();
+            newLesson.creator=Meteor.user().profile.email;
+            newLesson.lastModifier=Meteor.user().profile.email;
+            if ( newLesson.summary && newLesson.description ) {
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {lessons:newLesson}
+                });
+                $('#newLessonSummary').val('');
+                $('#newLessonDescription').val('');
+                e.preventDefault();
+            }
+
+        },
+        "click .lessondelete": function(e){
+            id = $(e.target).attr('data-lessonid');
+            incidents.update(Session.get('incidentID'), {
+                $pull: {lessons: {"_id": id}}
+            });
+            e.preventDefault();
+        },
+
         "readystatechange":function(e){
             if (typeof console !== 'undefined') {
               console.log('readystatechange')
