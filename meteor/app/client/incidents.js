@@ -267,19 +267,22 @@ if (Meteor.isClient) {
             newTheory.description=$('#newTheoryDescription').val();
             newTheory.creator=Meteor.user().profile.email;
             newTheory.lastModifier=Meteor.user().profile.email;
-            if ( newTheory ) {
+            if ( newTheory.summary && newTheory.description ) {
                 incidents.update(Session.get('incidentID'), {
                     $addToSet: {theories:newTheory}
-                });                
+                });
+                $('#newTheorySummary').val('');
+                $('#newTheoryDescription').val('');
+                e.preventDefault();
             }
-            $('#newTheorySummary').val('');
-            $('#newTheoryDescription').val('');
+
         },
         "click .theorydelete": function(e){
             id = $(e.target).attr('data-theoryid');
             incidents.update(Session.get('incidentID'), {
                 $pull: {theories: {"_id": id}}
             });
+            e.preventDefault();
         },        
 
         "readystatechange":function(e){

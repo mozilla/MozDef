@@ -15,13 +15,11 @@ Jeff Bryner jbryner@mozilla.com
     .daterangepicker td{
         color:black;
     }
-    
-
-    
+ 
     .tabcontent {
         display:none;
     }
-     
+
     .tabcontent.active {
         display:block;
     }
@@ -30,6 +28,7 @@ Jeff Bryner jbryner@mozilla.com
         overflow: auto; 
         vertical-align: top; /* Improves readability, alignment */
     }    
+
 </style>
 <div class="container">
     <div class="row span4 center">
@@ -46,14 +45,14 @@ Jeff Bryner jbryner@mozilla.com
             <li class="tabnav"><a href="#mitigationstab">Mitigations</a></li>
         </ul>
     </div>
-    <div id="edittab" class="row span10 offset2 tabcontent active">
-        <div class="span5">
+    <div id="edittab" class="row span11 offset2 tabcontent active">
+        <div class="span6">
         <form id="editincidentform" class="form-horizontal" >
         <fieldset>
             <div class="control-group">
               <label class="control-label" for="summary">Summary</label>
               <div class="controls">
-                <input id="summary" name="summary" placeholder="short description" class="input-xlarge summary" required=""
+                <input id="summary" name="summary" placeholder="short description" class="input-block-level summary" required=""
                 type="text" value="{{summary}}">
               </div>
             </div>
@@ -74,6 +73,7 @@ Jeff Bryner jbryner@mozilla.com
                     </div>
                 </div>
             </div>
+            
             <div class="control-group">
                 <label class="control-label" for="dateClosed">Date Closed</label>
                 <div class="controls">
@@ -164,10 +164,19 @@ Jeff Bryner jbryner@mozilla.com
         <form id="theoriesform" class="form-horizontal" >
             <fieldset>
                 <div class="control-group">
-                    <label class="control-label" for="newtheory">New Theory:</label>
-                    <div class="controls" id="newtheory" >
-                        <input id="newTheorySummary" class="input-xlarge" type="text" value="" placeholder="short summary">
-                        <textarea id="newTheoryDescription" placeholder="long description" class="input-xxlarge"  rows=4></textarea>
+                    <label class="control-label" for="newTheorySummary">New Theory:</label>
+                    <div class="controls">
+                        <input id="newTheorySummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="newTheoryDescription">Description:</label>
+                    <div class="controls">
+                        <textarea id="newTheoryDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
                         <button id="saveTheory" type="submit" class="btn btn-primary submit">Save</button>
                     </div>
                 </div>
