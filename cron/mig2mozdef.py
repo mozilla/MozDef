@@ -67,11 +67,13 @@ def main():
         #capture the time we start running so next time we catch any files created while we run.
         lastrun=str(options.lastrun.isoformat())
         today=datetime.utcnow().isoformat()+'+00:00'
-        url = options.mighost+'/api/v1/search?type=command&status=done&threatfamily=compliance&report=complianceitems&limit=1000000&before='+today+'&after='+lastrun
+        # set the max num of items to 50k. At 600kB per item, that's already ~30MB of json body.
+        url = options.mighost+'/api/v1/search?type=command&status=done&threatfamily=compliance&report=complianceitems&limit=50000&before='+today+'&after='+lastrun
         url = url.replace('+00:00', 'Z')
         r = requests.get(url,
             cert=(options.sslclientcert, options.sslclientkey),
-            verify=options.sslcacert)
+            verify=options.sslcacert,
+            timeout=240) # timeout at 4 minutes. those are big requests.
         if r.status_code == 200:
             migjson=r.json()
             logger.debug(url)
@@ -90,13 +92,17 @@ def main():
             if cicnt == 0:
                 logger.debug("No compliance item available, terminating")
             setConfig('lastrun',today,options.configfile)
-        else:
+        elif r.status_code == 500:
+            # api returns a 500 with an error body on failures
             migjson=r.json()
             raise Exception("API returned HTTP code %s and error '%s:%s'" %
                                 (r.status_code,
                                 migjson['collection']['code'],
                                 migjson['collection']['message'])
                             )
+        else:
+            # another type of failure that's unlikely to have an error body
+            raise Exception("Failed with HTTP code %s" % r.status_code)
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
 
