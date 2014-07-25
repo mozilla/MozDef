@@ -90,6 +90,13 @@ def main():
             if cicnt == 0:
                 logger.debug("No compliance item available, terminating")
             setConfig('lastrun',today,options.configfile)
+        else:
+            migjson=r.json()
+            raise Exception("API returned HTTP code %s and error '%s:%s'" %
+                                (r.status_code,
+                                migjson['collection']['code'],
+                                migjson['collection']['message'])
+                            )
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
 
