@@ -64,7 +64,12 @@ Router.map(function () {
         template: 'attackers',
         layoutTemplate: 'layout'
     });
-    
+   
+    this.route('globe', {
+        path: '/incidents/globe',
+        template: 'globe',
+        layoutTemplate: 'layout'
+    }); 
     
     this.route('logincounts', {
         path: '/logincounts',
