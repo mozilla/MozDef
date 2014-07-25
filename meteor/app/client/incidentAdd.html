@@ -10,6 +10,12 @@ Jeff Bryner jbryner@mozilla.com
 
 <!--new incident form -->
 <template name="addincidentform">
+<style>
+    
+    .daterangepicker td{
+        color:black;
+    }
+</style>
     <form id="addincidentform" class="form-horizontal" style="margin: 0px 30% 20px;">
         <legend>New Incident</legend>
         <fieldset>
@@ -17,23 +23,25 @@ Jeff Bryner jbryner@mozilla.com
             <div class="control-group">
               <label class="control-label" for="summary">Incident Summary</label>
               <div class="controls">
-                <input id="summary" name="summary" placeholder="summary" class="input-xlarge summary" required="" type="text">
+                <input id="summary" name="summary" placeholder="summary" class="input-xxlarge summary" required="" type="text">
               </div>
             </div>            
             <!-- date Opened -->
             <div class="control-group">
                 <label class="control-label" for="dateOpened">Date Opened</label>
                 <div class="controls">
-                    <input class="input-xlarge dateOpened" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{now}}">
+                    <div class="input-prepend input-group">
+                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
+                        <input class="input dateOpened calendarfield" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{uiDateFormat now}}">
+                    </div>
                 </div>
-
             </div>
             <!-- Phase -->
             <div class="control-group">
               <label class="control-label" for="phase">Phase</label>
               <div class="controls">
                 <select id="phase" name="phase" class="input-xlarge">
-                  <option >Identification</option>
+                  <option>Identification</option>
                   <option>Containment</option>
                   <option>Eradication</option>
                   <option>Recovery</option>

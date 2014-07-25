@@ -88,7 +88,16 @@ if (Meteor.isServer) {
     
 
     Meteor.publish("incidents-summary", function () {
-        return incidents.find({}, {limit:100});
+        return incidents.find({},
+                              {fields: {
+                                        _id:1,
+                                        summary:1,
+                                        phase:1,
+                                        dateOpened:1,
+                                        dateClosed:1
+                                },
+                              sort: {dateOpened: -1},
+                              limit:100});
     });
     
     Meteor.publish("incidents-details",function(incidentid){

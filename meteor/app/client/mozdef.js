@@ -11,12 +11,39 @@ Anthony Verez averez@mozilla.com
 
 if (Meteor.isClient) {
     //defaults:
-  Meteor.startup(function () {
-    Session.set('verisfilter','');
-    Session.set('alertsearchtext','');
-  });    
+    Meteor.startup(function () {
+      Session.set('verisfilter','');
+      Session.set('alertsearchtext','');
+    });    
     
+    //helper functions for UI templates
+    //and other client javascript routines
+    dateOrNull=function(maybeDate){
+        adate=moment(maybeDate);
+        if (adate.isValid()) {
+            return adate.toDate();
+        }else{
+            return null;
+        }
+    };
+    
+    dateFormat=function(adate){
+        mdate=moment(adate || null);
+        if (mdate.isValid()) {
+            dformat='MM/DD/YYYY hh:mm:ss A';
+            return mdate.format(dformat);
+        }else{
+            return '';
+        }
+    };
+
     //debug/testing functions
+    debugLog=function(logthis){
+        if (typeof console !== 'undefined') {
+          console.log(logthis);
+        }
+    };
+    
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')
             console.log("mozdef starting");
@@ -35,6 +62,10 @@ if (Meteor.isClient) {
         Meteor.call('loadKibanaDashboards');
         return kibanadashboards.find();
     };
+    
+    UI.registerHelper('uiDateFormat',function(adate){
+        return dateFormat(adate);
+    });
 
     //helper functions for handlebars
     UI.registerHelper('now', function() {
