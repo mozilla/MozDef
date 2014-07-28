@@ -583,8 +583,8 @@ if (Meteor.isClient) {
         }
         else {
           attackers.find().forEach(function(element,index,array){
-            data.attackers[element.events[0].details.sourceipaddress] = {
-              coords: [element.geocoordinates.lattitude, element.geocoordinates.longitude],
+            data.attackers[element.events[0].documentsource.details.sourceipaddress] = {
+              coords: [element.geocoordinates.latitude, element.geocoordinates.longitude],
               score: 0.2+element.score,
               campaigns: [element.category],
               last_seen: element.lastseentimestamp

@@ -28,6 +28,8 @@ if (Meteor.isClient) {
     var cssRenderer = null;
     var clock = null;
     var container = null;
+    var categoryDim = null;
+    var agoDim = null;
 
         
     Template.attackers.events({
@@ -86,13 +88,6 @@ if (Meteor.isClient) {
                 var intersects = raycaster.intersectObject( plane );
                 offset.copy( intersects[ 0 ].point ).sub( plane.position );
                 container.style.cursor = 'move';
-                //console.log(selectedObject);
-                if (getSetting('enableBlockIP')) {
-                    var attacker = attackers.findOne({_id: selectedObject.dbid})
-                    $("#blockIP")[0].textContent = attacker.sourceipaddress;
-                    $('#btnBlockIP')[0].href = '/incidents/blockip/'+attacker.sourceipaddress;
-                    $("#btnBlockIP").show();
-                }
             }          
         },
         "mousemove": function(event,template){
@@ -188,10 +183,9 @@ if (Meteor.isClient) {
 
     Template.attackers.rendered = function () {
         //console.log('entering draw attackers');
-        //var ringChartCategory   = dc.pieChart("#ringChart-category");
-        //// set our data source
-        //var alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'},limit:1}).fetch();
-        //var ndx = crossfilter();        
+        var ringChartCategory   = dc.pieChart("#ringChart-category");
+        var ringChartLastSeen   = dc.pieChart("#ringChart-lastseen");
+        var ndx = crossfilter();        
 
         scene.name='attackerScene';
 
@@ -339,7 +333,7 @@ if (Meteor.isClient) {
             aid.append(
                        $('<span/>',{
                 'class': 'id',
-                text: dbrecord.events[0].details.sourceipaddress
+                text: dbrecord.indicators[0].ipv4address
             }));
             
             var adetails=$('<ul/>',{
@@ -348,13 +342,19 @@ if (Meteor.isClient) {
             adetails.append($('<li/>',{
                 text: 'Last Seen: ' + dbrecord.lastseentimestamp
             }));
+            adetails.append($('<li/>',{
+                text: 'alerts: ' + dbrecord.alertscount
+            }));
+            adetails.append($('<li/>',{
+                text: 'events: ' + dbrecord.eventscount
+            }));            
             adetails.wrap($('<div class="row-fluid"></div>'));
             
             var abuttons=$('<div class="row-fluid"/>');
             if (getSetting('enableBlockIP')) {            
                 abuttons.append($('<button/>',{
                     'class': 'blockip btn btn-danger btn-mini center',
-                    'data-ipaddress': dbrecord.events[0].details.sourceipaddress,
+                    'data-ipaddress': dbrecord.indicators[0].ipv4address,
                     text: 'Block IP'
                 }));
             }
@@ -390,73 +390,139 @@ if (Meteor.isClient) {
     
         sceneSetup(this);
 
-        Deps.autorun(function() {
-            console.log('running dep orgro autorun');
+        var clearCharacters = function() {
+            //inspect scene children
+            //by name and remove characters/nameplates.
+            var objsToRemove = _.rest(scene.children, 1);
+            _.each(objsToRemove, function(object){
+                if ( _.has(object,'name') ){
+                    if ( object.name.indexOf('nameplate') > -1 ||
+                         object.name.indexOf('ogro') > -1
+                        ) {
+                    //debugLog('removing: ' + object.name);
+                    scene.remove(object);
+                    }
+                }
+            });
+            characters=[];
+            sceneObjects=[];
+        };
+        
+        var createCharacters = function(dataArray){
             //pick a starting position for the group
             var startingPosition = new THREE.Vector3();
             startingPosition.x=_.random(-5,5);
             startingPosition.y=_.random(-1,1);
             startingPosition.z=_.random(-1,1);
+            i=0;
+            //attackers.find({},{fields:{events:0,alerts:0},reactive:false,limit:100}).forEach(function(element,index,array){
+            dataArray.forEach(function(element,index,array){
+                //add to the scene if it's new
+                var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
+                if ( exists === undefined ) {
+                    //debugLog('adding character')
+                    x=startingPosition.x + (i*2);
+                    createCharacter(element,x,startingPosition.y,startingPosition.z)
+                    }
+                else{
+                    debugLog('updating character')
+                    //exists.root.position.x=x;
+                    //exists.root.position.z=z;
+                }
+                i+=1;
+            });            
+        };
+
+        var filterCharacters = function(chart,filter){
+            //debugLog(chart);
+            //debugLog(filter);
+            //debugLog(agoDim.top(Infinity));
+            //debugLog(categoryDim.top(Infinity));
+            clearCharacters();
             
-            function waitForBaseCharacter(){
-                //console.log(baseCharacter.loadCounter);
-                if ( baseCharacter.loadCounter!==0 ){
-                    setTimeout(function(){waitForBaseCharacter()},100);
-                }else{
-                    i=0;
-                    attackers.find().forEach(function(element,index,array){
-                        //add to the scene if it's new
-                        var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
-                        if ( exists === undefined ) {
-                            //console.log('adding character')
-                            x=startingPosition.x + (i*2);
-                            createCharacter(element,x,startingPosition.y,startingPosition.z)
-                            }
-                        else{
-                            console.log('updating character')
-                            //exists.root.position.x=x;
-                            //exists.root.position.z=z;
-                        }
-                        i+=1;
-                    });
-                };
-            };
-            waitForBaseCharacter();
+            //set tooltips on the chart titles
+            //to display the current filters.
+            $('#LastSeen').prop('title', "");
+            lastSeenFilters=ringChartLastSeen.filters();
+            if (lastSeenFilters.length>0) {
+                $('#LastSeen').prop('title', lastSeenFilters);
+            }
+            $('#Categories').prop('title', "");
+            categoryFilters=ringChartCategory.filters();
+            if (categoryFilters.length>0) {
+                $('#Categories').prop('title', categoryFilters);
+            }            
+            createCharacters(agoDim.top(Infinity));
+        };        
+        
+        refreshAttackerData=function(){
             //load dc.js selector charts
-            //alertsData=alerts.find({},{fields:{events:0,eventsource:0}, sort: {utcepoch: 'desc'}, limit: 1000, reactive:false}).fetch();
+            //attackerData=attackers.find({},{fields:{events:0,alerts:0}, sort: {lastseentimestamp: 'desc'}, limit: 100, reactive:false}).fetch();
+            //var attackerData=attackers.find({},{fields:{events:0,alerts:0},limit:100}).fetch();
+            var attackerData=attackers.find({},
+                                        {fields:{
+                                            events:0,
+                                            alerts:0
+                                            },
+                                        reactive:false,
+                                        limit: 100}).fetch();
+            console.log(attackerData.length);
             ////parse, group data for the d3 charts
-            //alertsData.forEach(function (d) {
-            //    d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
-            //    d.jdate=new Date(Date.parse(d.utctimestamp));
-            //    d.dd=moment.utc(d.utctimestamp)
-            //    d.month = d.dd.get('month');
-            //    d.hour = d.dd.get('hour')
-            //    d.epoch=d.dd.unix();
-            //    console.log(d);
-            //});        
-            //ndx = crossfilter(alertsData);
-            //if ( ndx.size() >0){
-            //    var all = ndx.groupAll();
-            //    var severityDim = ndx.dimension(function(d) {return d.severity;});
-            //    var categoryDim = ndx.dimension(function(d) {return d.category;});
-            //    var hourDim = ndx.dimension(function (d) {return d3.time.hour(d.jdate);});
-            //    var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
-            //    var format2d = d3.format("02d");
-            //    var volumeByHourGroup = hourDim.group().reduceCount();
-            //    ndx.remove();
-            //    ndx.add(alertsData);
-            //    ringChartCategory
-            //        .width(150).height(150)
-            //        .dimension(categoryDim)
-            //        .group(categoryDim.group())
-            //        .label(function(d) {return d.key; })
-            //        .innerRadius(30)
-            //        .expireCache();
-            //}
-            //dc.renderAll();
-                    
-            
-            //end load dc.js selector charts
+            attackerData.forEach(function (d) {
+                d.jdate=new Date(Date.parse(d.lastseentimestamp));
+                d.dd=moment.utc(d.lastseentimestamp)
+                d.month = d.dd.get('month');
+                d.hour = d.dd.get('hour')
+                d.epoch=d.dd.unix();
+                d.ago=d.dd.fromNow();
+                //debugLog(d);
+            });        
+            ndx = crossfilter(attackerData);
+            if ( ndx.size() >0){
+                allGroup = ndx.groupAll();
+                //var severityDim = ndx.dimension(function(d) {return d.severity;});
+                categoryDim = ndx.dimension(function(d) {return d.category;});
+                agoDim = ndx.dimension(function (d) {return d.ago;});
+                //var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
+                //var format2d = d3.format("02d");
+                //var volumeByHourGroup = hourDim.group().reduceCount();
+                //ndx.remove();
+                //ndx.add(aData);
+                ringChartCategory
+                    .width(150).height(150)
+                    .dimension(categoryDim)
+                    .group(categoryDim.group())
+                    .label(function(d) {return d.key; })
+                    .innerRadius(30)
+                    .expireCache();
+                ringChartLastSeen
+                    .width(150).height(150)
+                    .dimension(agoDim)
+                    .group(agoDim.group())
+                    .label(function(d) {return d.key; })
+                    .innerRadius(30)
+                    .expireCache()
+                    .on('filtered',filterCharacters);                    
+                dc.renderAll();
+            }
+        };//end refreshAttackerData
+
+        waitForBaseCharacter = function(){
+            //console.log(baseCharacter.loadCounter);
+            if ( baseCharacter.loadCounter!==0 ){
+                setTimeout(function(){waitForBaseCharacter()},100);
+            }else{
+                filterCharacters();
+            };
+        };        
+        Deps.autorun(function() {
+            //console.log('running dep orgro autorun');
+            Meteor.subscribe("attackers-summary", onReady=function(){
+                //load the data for the scene/filters/charts, etc. 
+                Deps.nonreactive(refreshAttackerData);
+                //load the base character meshes, etc to allow resource sharing                
+                Deps.nonreactive(waitForBaseCharacter);
+            });            
         }); //end deps.autorun
        };//end template.attackers.rendered
        

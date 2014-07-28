@@ -58,6 +58,11 @@ sidenav ul
     padding: 1em;
 }
 
+sidenav div{
+    margin:auto;
+    padding-left: 2em;
+}
+
 sidenav:hover
 {
     left: 0;
@@ -76,11 +81,14 @@ sidenav
 <!-- menu -->
 <sidenav>
     <ul>
-        <li><a href="#">Most Recent</a></li>
-        <li><a href="#">Category1</a></li>
-        <li><a href="#">Category2</a></li>
+        <li><a href="#">Attacker Filters</a></li>
     </ul>
-    <div id="ringChart-category" class="text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5></div>
+    <div class="row">
+        <div id="ringChart-category" class="text-center"><h5 class="upperwhite" id="Categories">Categories:</h5></div>
+    </div>
+    <div class="row">
+        <div id="ringChart-lastseen" class="text-center"><h5 class="upperwhite" id="LastSeen">Last Seen:</h5></div>
+    </div>
 </sidenav>
 <div class="attackers-wrapper" id="attackers-wrapper">
 

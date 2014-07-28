@@ -100,6 +100,22 @@ if (Meteor.isServer) {
                               limit:100});
     });
     
+    Meteor.publish("attackers", function () {
+        return attackers.find({}, {limit:100});
+    });
+
+    Meteor.publish("attackers-summary", function () {
+    //limit to the last 100 records by default
+    //to ease the sync transfer to dc.js/crossfilter
+    return attackers.find({},
+                    {fields:{
+                            events:0,
+                            alerts:0,
+                            },
+                       sort: {lastseentimestamp: -1},
+                       limit:100});
+    });
+    
     Meteor.publish("incidents-details",function(incidentid){
        return incidents.find({'_id': incidentid});
     });    
@@ -128,9 +144,7 @@ if (Meteor.isServer) {
         return kibanadashboards.find({},{sort:{name:1}, limit:20});
     });    
 
-    Meteor.publish("attackers", function () {
-        return attackers.find({}, {limit:100});
-    });    
+   
 
 
     
