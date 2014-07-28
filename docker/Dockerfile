@@ -9,7 +9,7 @@
 
 FROM debian:testing
 
-MAINTAINER Yohann Lepage <yohann@lepage.info>
+MAINTAINER Jeff Bryner <jbryner@mozilla.com>
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -52,10 +52,8 @@ RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysq
         && /bin/ln -s /opt/MozDef-master /opt/MozDef \
 #        && curl -L https://github.com/netantho/MozDef/archive/averez-esworker-fix.tar.gz |tar -C /opt -xz \
 #        && /bin/ln -s /opt/MozDef-averez-esworker-fix /opt/MozDef \
-#	dep bug in whois
-	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 ipaddr dnspython celery \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
-	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi gevent \
+	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi gevent celery \
 	&& mkdir /var/log/mozdef \
 	&& mkdir -p /run/uwsgi/apps/ \
 	&& touch /run/uwsgi/apps/loginput.socket && chmod 666 /run/uwsgi/apps/loginput.socket \
