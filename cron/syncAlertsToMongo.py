@@ -49,7 +49,7 @@ def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
-    if type(suspectedDate) == str:
+    if type(suspectedDate) in (str, unicode):
         objDate = parse(suspectedDate, fuzzy=True)
     elif type(suspectedDate) == datetime:
         objDate = suspectedDate
