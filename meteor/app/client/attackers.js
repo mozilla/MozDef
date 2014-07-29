@@ -31,7 +31,6 @@ if (Meteor.isClient) {
     var categoryDim = null;
     var agoDim = null;
 
-        
     Template.attackers.events({
         "click #btnReset": function(e){
             sceneControls.reset();
@@ -72,6 +71,19 @@ if (Meteor.isClient) {
             });
             $('#modalBlockIPWindow').modal();
         },
+        "mouseenter #attackerLimit": function(e,t){
+            //debugLog(e.currentTarget);
+            //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
+            sceneControls.enabled = false;
+        },
+        "mouseleave #attackerLimit": function(e,t){
+            //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
+            sceneControls.enabled = true;
+        },
+        "change #attackerLimit": function(e,t){
+            Session.set('attackerlimit', $('#attackerLimit').val());
+            debugLog('should change dep' + Session.get('attackerlimit'));
+        },         
         "mousedown": function(event,template){
         //if mouse is over a character
         //set the selected object
@@ -162,7 +174,7 @@ if (Meteor.isClient) {
     });
     
     Template.attackers.created = function (){
-        //new instances of THREE objects for this tempate
+        //new instances of THREE objects for this template
         scene = new THREE.Scene();
         sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
         sceneControls = new THREE.TrackballControls( sceneCamera );
@@ -185,7 +197,7 @@ if (Meteor.isClient) {
         //console.log('entering draw attackers');
         var ringChartCategory   = dc.pieChart("#ringChart-category");
         var ringChartLastSeen   = dc.pieChart("#ringChart-lastseen");
-        var ndx = crossfilter();        
+        var ndx = crossfilter();
 
         scene.name='attackerScene';
 
@@ -453,41 +465,40 @@ if (Meteor.isClient) {
                 $('#Categories').prop('title', categoryFilters);
             }            
             createCharacters(agoDim.top(Infinity));
-        };        
+        };
         
-        refreshAttackerData=function(){
+        var redrawCharacters = function(){
+            //debugLog('redrawCharacters');
+            refreshAttackerData(parseInt(Session.get('attackerlimit')));
+            filterCharacters();
+        };
+        
+        var refreshAttackerData=function(attackerlimit){
+            //debugLog('refreshAttackerData is called ' + new Date() + ' to get: ' + attackerlimit + ' attackers');
             //load dc.js selector charts
-            //attackerData=attackers.find({},{fields:{events:0,alerts:0}, sort: {lastseentimestamp: 'desc'}, limit: 100, reactive:false}).fetch();
-            //var attackerData=attackers.find({},{fields:{events:0,alerts:0},limit:100}).fetch();
+
             var attackerData=attackers.find({},
                                         {fields:{
                                             events:0,
                                             alerts:0
                                             },
                                         reactive:false,
-                                        limit: 100}).fetch();
-            console.log(attackerData.length);
+                                        sort: {lastseentimestamp: 'desc'},
+                                        limit: parseInt(Session.get('attackerlimit'))}).fetch();
             ////parse, group data for the d3 charts
             attackerData.forEach(function (d) {
                 d.jdate=new Date(Date.parse(d.lastseentimestamp));
                 d.dd=moment.utc(d.lastseentimestamp)
-                d.month = d.dd.get('month');
-                d.hour = d.dd.get('hour')
-                d.epoch=d.dd.unix();
+                //d.month = d.dd.get('month');
+                //d.hour = d.dd.get('hour');
+                //d.epoch=d.dd.unix();
                 d.ago=d.dd.fromNow();
-                //debugLog(d);
             });        
             ndx = crossfilter(attackerData);
             if ( ndx.size() >0){
                 allGroup = ndx.groupAll();
-                //var severityDim = ndx.dimension(function(d) {return d.severity;});
                 categoryDim = ndx.dimension(function(d) {return d.category;});
                 agoDim = ndx.dimension(function (d) {return d.ago;});
-                //var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
-                //var format2d = d3.format("02d");
-                //var volumeByHourGroup = hourDim.group().reduceCount();
-                //ndx.remove();
-                //ndx.add(aData);
                 ringChartCategory
                     .width(150).height(150)
                     .dimension(categoryDim)
@@ -512,17 +523,25 @@ if (Meteor.isClient) {
             if ( baseCharacter.loadCounter!==0 ){
                 setTimeout(function(){waitForBaseCharacter()},100);
             }else{
-                filterCharacters();
-            };
-        };        
+                //debugLog('base character is fully loaded');
+                redrawCharacters();
+            }
+        };
         Deps.autorun(function() {
-            //console.log('running dep orgro autorun');
-            Meteor.subscribe("attackers-summary", onReady=function(){
-                //load the data for the scene/filters/charts, etc. 
-                Deps.nonreactive(refreshAttackerData);
-                //load the base character meshes, etc to allow resource sharing                
-                Deps.nonreactive(waitForBaseCharacter);
+            //debugLog('running dep orgro autorun');
+            
+            $("#attackerLimit").val(Session.get('attackerlimit'));
+            Meteor.subscribe("attackers-summary", onReady=function() {
+                //load the base character meshes, etc to allow resource sharing
+                //when this completes it triggers a clear/dataload and filtering of characters.
+                waitForBaseCharacter();
+            });
+            //Changing the session.attackerlimit should
+            //make us redraw a new set of attackers.
+            Deps.onInvalidate(function () {
+                waitForBaseCharacter();
             });            
+
         }); //end deps.autorun
        };//end template.attackers.rendered
        

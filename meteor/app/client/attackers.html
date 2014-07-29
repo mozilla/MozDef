@@ -23,7 +23,7 @@ sidenav
     border-right: 15px solid #765;
     box-shadow: 4px 0 5px rgba(0,0,0,0.2);
     z-index: 1;
-    cursor: pointer;
+
     
     text-align: left;
     font-weight: bolder;
@@ -32,8 +32,6 @@ sidenav
     height: 100%;
     margin: 0em;
     line-height: normal;
- 
-    
 }
 
 /*pull out triangle*/ 
@@ -81,7 +79,18 @@ sidenav
 <!-- menu -->
 <sidenav>
     <ul>
-        <li><a href="#">Attacker Filters</a></li>
+        <li>Last X Attackers:
+            <select id="attackerLimit" class="input-small" title="limit how many attackers are retrieved">
+              <option value='5'>5</option>
+              <option value='10'>10</option>
+              <option value='15'>15</option>
+              <option value='20'>20</option>
+              <option value='25'>25</option>
+              <option value='30'>30</option>
+              <option value='35'>35</option>
+              <option value='40'>40</option>
+            </select>            
+        </li>
     </ul>
     <div class="row">
         <div id="ringChart-category" class="text-center"><h5 class="upperwhite" id="Categories">Categories:</h5></div>

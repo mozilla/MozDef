@@ -14,6 +14,7 @@ if (Meteor.isClient) {
     Meteor.startup(function () {
       Session.set('verisfilter','');
       Session.set('alertsearchtext','');
+      Session.set('attackerlimit','10');
     });    
     
     //helper functions for UI templates
@@ -75,6 +76,11 @@ if (Meteor.isClient) {
     UI.registerHelper('mozdef',function(){
         //return the mozdef server settings object.    
         return mozdef 
+    });
+    
+    UI.registerHelper('getsession',function(sessionkey){
+        //return the mozdef server settings object.    
+        return Session.get(sessionkey)
     });
 
     UI.registerHelper('isselected',function(optionvalue,datavalue){

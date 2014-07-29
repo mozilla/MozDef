@@ -33,7 +33,7 @@ def loggerTimeStamp(self, record, datefmt=None):
 
 
 def initLogger():
-    logger.level = logging.DEBUG
+    logger.level = logging.INFO
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     formatter.formatTime = loggerTimeStamp
@@ -51,7 +51,7 @@ def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
-    if type(suspectedDate) == str:
+    if type(suspectedDate) in (str, unicode):
         objDate = parse(suspectedDate, fuzzy=True)
     elif type(suspectedDate) == datetime:
         objDate = suspectedDate
@@ -161,7 +161,7 @@ def searchMongoAlerts(mozdefdb):
                     newAttacker['alertscount'] = len(newAttacker['alerts'])
                     newAttacker['eventscount'] = len(newAttacker['events'])
                     if newAttacker['eventscount'] > 0:
-                        newAttacker['lastseentimestamp'] = newAttacker['events'][-1]['documentsource']['utctimestamp']                    
+                        newAttacker['lastseentimestamp'] = toUTC(newAttacker['events'][-1]['documentsource']['utctimestamp'], 'UTC')
                     attackers.insert(newAttacker)
                     #upate geoIP info
                     latestGeoIP = [a['events'] for a in alerts.find(
@@ -197,14 +197,12 @@ def searchMongoAlerts(mozdefdb):
                             for e in alert['events']:
                                 attacker['events'].append(e)
                             
-                            print(alert.keys())
-                            print(alert['events'][-1]['documentsource'])
                             # geo ip could have changed, update it
                             # to the latest
                             updateAttackerGeoIP(mozdefdb, attacker['_id'], alert['events'][-1]['documentsource'])
                         
                         # update last seen time
-                        attacker['lastseentimestamp'] = attacker['events'][-1]['documentsource']['utctimestamp']
+                        attacker['lastseentimestamp'] = toUTC(attacker['events'][-1]['documentsource']['utctimestamp'], 'UTC')
                         # update counts
                         attacker['alertscount'] = len(attacker['alerts'])
                         attacker['eventscount'] = len(attacker['events'])
