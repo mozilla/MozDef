@@ -52,12 +52,7 @@ if (Meteor.isClient) {
         }
         
     });   
- 
-    Template.alertssummary.alertsTotalCount = function () {
-        alertsDep.depend();
-        return currentCount;
-    };
-    
+     
     Template.alertssummary.rendered = function() {
         var ringChartCategory   = dc.pieChart("#ringChart-category");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity");
@@ -260,17 +255,23 @@ if (Meteor.isClient) {
             //and to the summary of alerts
             //if the count changes, refresh ourselves in a non-reactive way
             //to lessen the meteor hooks since we don't care about field-level changes.
-            Meteor.subscribe("alerts-count");
+            Meteor.subscribe("alerts-count", onReady=function(){
+               currentCount=alertsCount.findOne().count;
+            });
             Meteor.subscribe("alerts-summary", onReady=function(){
-                Deps.nonreactive(refreshAlertsData);
+                refreshAlertsData();
             });
             cnt=alertsCount.findOne();
             $('#alertsearchtext').val(Session.get('alertsearchtext'));
             if ( cnt ){
-                alertsDep.changed();
-                currentCount=cnt.count;
-                Deps.nonreactive(refreshAlertsData);
+                //debugLog('cnt exists alertsCount changed..updating text.')
+                $('#totalAlerts').text(cnt.count);
             }
+            Deps.onInvalidate(function () {
+                //debugLog('alertsCount changed..refreshing alerts data.')
+                refreshAlertsData();
+            });              
+            
         
         }); //end deps.autorun    
     };

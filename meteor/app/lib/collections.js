@@ -59,27 +59,43 @@ if (Meteor.isServer) {
       var initializing = true;
       var recordID=Meteor.uuid();
     
-      // observeChanges only returns after the initial `added` callbacks
-      // have run. Until then, we don't want to send a lot of
-      // `self.changed()` messages - hence tracking the
-      // `initializing` state.
       //get a count by watching for only 1 new entry sorted in reverse date order.
       //use that hook to return a find().count rather than iterating the entire result set over and over
-      var handle = alerts.find({}, {sort: {utcepoch: -1},limit:1}).observe({
+      var handle = alerts.find({}, {sort: {utcepoch: -1},limit:1}).observeChanges({
         added: function (newDoc,oldDoc) {
             count=alerts.find().count();
-            if (!initializing)
-            self.changed("alerts-count", recordID,{count: count});
-        }
+            if (!initializing) {
+                self.changed("alerts-count", recordID,{count: count});
+                //console.log('added alerts count to' + count);
+            }           
+        },
+
+        changed: function (newDoc,oldDoc) {
+            count=alerts.find().count();
+            if (!initializing) {
+                self.changed("alerts-count", recordID,{count: count});
+                //console.log('changed alerts count to' + count);
+            }
+        },
+
+        removed: function (newDoc,oldDoc) {
+            count=alerts.find().count();
+            if (!initializing) {
+                self.changed("alerts-count", recordID,{count: count});
+                //console.log('changed alerts count to' + count);
+            }
+        }        
       });
       initializing = false;
       self.added("alerts-count", recordID,{count: count});
+      //console.log('count is ready: ' + count);
       self.ready();
     
       // Stop observing the cursor when client unsubs.
       // Stopping a subscription automatically takes
       // care of sending the client any removed messages.
       self.onStop(function () {
+        //console.log('stopped publishing alerts count.')
         handle.stop();
       });
     });    
