@@ -75,7 +75,6 @@ if (Meteor.isClient) {
     var overRenderer;
 
     var curZoomSpeed = 0;
-    var zoomSpeed = 50;
 
     var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
     var rotation = { x: 0, y: 0 },
@@ -305,7 +304,7 @@ if (Meteor.isClient) {
     function onMouseWheelChrome(event) {
       event.preventDefault();
       if (overRenderer) {
-        zoom(event.wheelDeltaY * 0.3);
+        zoom(event.wheelDeltaY * 2);
       }
       return false;
     }
@@ -313,7 +312,7 @@ if (Meteor.isClient) {
     function onMouseWheelFF(event) {
       event.preventDefault();
       if (overRenderer) {
-        zoom(event.detail * 1.5);
+        zoom(- event.detail * 40);
       }
       return false;
     }
