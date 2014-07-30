@@ -344,9 +344,9 @@ Kibana
 
 `Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data::
 
-  wget https://download.elasticsearch.org/kibana/kibana/kibana-3.0.0milestone5.tar.gz
-  tar xvzf kibana-3.0.0milestone5.tar.gz
-  mv kibana-3.0.0milestone5 kibana
+  wget https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz
+  tar xvzf kibana-3.1.0.tar.gz
+  mv kibana-3.1.0 kibana
   # configure /etc/nginx/nginx.conf to target this folder
   sudo service nginx reload
 
