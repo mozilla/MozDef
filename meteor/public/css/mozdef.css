@@ -120,6 +120,10 @@ body{
     padding: 0px;  
 }
 
+.attackercallout a{
+    color: yellow;
+}
+
 /*bootstrap overrides*/
 
 [class*="span"].centerspan {

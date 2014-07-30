@@ -378,12 +378,18 @@ if (Meteor.isClient) {
             adetails.append($('<li/>',{
                 text: 'Last Seen: ' + dbrecord.lastseentimestamp
             }));
-            adetails.append($('<li/>',{
-                text: 'alerts: ' + dbrecord.alertscount
-            }));
-            adetails.append($('<li/>',{
-                text: 'events: ' + dbrecord.eventscount
-            }));            
+            adetails.append($('<li/>')
+                .append($('<a/>',{
+                  'href': getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
+                  'target':"_blank",
+                  text: 'alerts: ' + dbrecord.alertscount
+                })));
+            adetails.append($('<li/>')
+                .append($('<a/>',{
+                  'href':getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
+                  'target':"_blank",
+                  text: 'events: ' + dbrecord.eventscount
+                })));           
             adetails.wrap($('<div class="row-fluid"></div>'));
             
             var abuttons=$('<div class="row-fluid"/>');

@@ -77,10 +77,17 @@ if (Meteor.isClient) {
         //return the mozdef server settings object.    
         return mozdef 
     });
+
     
-    UI.registerHelper('getsession',function(sessionkey){
-        //return the mozdef server settings object.    
-        return Session.get(sessionkey)
+    UI.registerHelper('getAlertURL', function(alertid){
+        //could be mongo id or es id
+        //assume mongo
+        if ( alerts.find({'_id':alertid}).count() >0 ){
+            id=alerts.findOne({'_id':alertid}).esmetadata.id;
+            return(getSetting('rootURL') + '/alert/' +  id);
+        }else{
+            return(getSetting('rootURL') + '/alert/' +  alertid);
+        }
     });
 
     UI.registerHelper('isselected',function(optionvalue,datavalue){

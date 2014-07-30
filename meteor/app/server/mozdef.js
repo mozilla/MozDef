@@ -24,7 +24,7 @@ if (Meteor.isServer) {
         //so the client gets dynamic content
         mozdefsettings.remove({});
         mozdefsettings.insert({ key:'rootURL', 
-                                value : mozdef.rootURL });
+                                value : mozdef.rootURL + ':' + mozdef.port });
         mozdefsettings.insert({ key:'rootAPI', 
                                 value : mozdef.rootAPI });
         mozdefsettings.insert({ key:'kibanaURL',

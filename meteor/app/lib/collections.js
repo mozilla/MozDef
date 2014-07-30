@@ -50,7 +50,15 @@ if (Meteor.isServer) {
     });
     
     Meteor.publish("alerts-details",function(alertid){
-       return alerts.find({'esmetadata.id': alertid});
+       //return alerts.find({'esmetadata.id': alertid});
+       //alert ids can be either mongo or elastic search IDs
+       //look for both to publish to the collection.
+       return alerts.find({
+        $or:[
+             {'esmetadata.id': alertid},
+             {'_id': alertid},
+             ]
+        });
     });
     
     Meteor.publish("alerts-count", function () {
@@ -119,6 +127,10 @@ if (Meteor.isServer) {
     Meteor.publish("attackers", function () {
         return attackers.find({}, {limit:100});
     });
+    
+    Meteor.publish("attacker-details",function(attackerid){
+       return attackers.find({'_id': attackerid});
+    });  
 
     Meteor.publish("attackers-summary", function () {
     //limit to the last 100 records by default

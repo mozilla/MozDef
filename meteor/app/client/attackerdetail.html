@@ -1,0 +1,107 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+
+Contributors:
+Jeff Bryner jbryner@mozilla.com
+-->
+
+<template name="attackerdetail">
+<div class="container">
+    <div class="row center">
+        <div id="attacker" >
+
+            <table class="table table-reactive table-hover table-condensed" id="alert-table">
+                <thead>
+                    <tr>
+                        <td class="upperwhite">Last Seen</td>
+                        <td class="upperwhite">Created</td>
+                        <td class="upperwhite">Events</td>
+                        <td class="upperwhite">Alerts</td>
+                        <td class="upperwhite">Category</td>
+                        <td class="upperwhite">Summary</td>
+                    </tr>
+                </thead>
+                <tbody>
+			<tr>
+				<td>{{lastseentimestamp}}</td>
+                <td>{{dateCreated}}</td>
+                <td>{{eventscount}}</td>
+				<td>{{alertscount}}</td>
+				<td>{{category}}</td>
+                <td>{{summary}}</td>
+			</tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row center">
+        <caption><h5>Alerts</h5></caption>
+        {{#each this.alerts}}
+            {{#with thisalert this.alertid}}
+                <div class="row center">{{>attacker_alert}}</div>
+            {{/with}}
+        {{/each}}
+    </div>
+    <div class="row center">
+    <caption><h5>Events</h5></caption>
+        {{#each this.events}}
+            <div class="row center">{{>attacker_event}}</div>
+        {{/each}}
+    </div>
+    
+   
+</div>
+
+</template>
+
+
+<!--each individual alert -->
+<template name="attacker_alert">
+    <table class="table table-reactive table-hover table-condensed" id="attacker-alerts-table">
+        <tr>
+            <td><a href="{{getAlertURL _id}}" target="_blank">MozDef</a></td>
+            <td>{{utctimestamp}}</td>
+            <td>{{severity}}</td>
+            <td>{{category}}</td>
+            <td>{{summary}}</td>
+        </tr>
+    </table>
+</template>
+
+<!--each individual event -->
+<template name="attacker_event">
+    <table class="table table-reactive table-hover table-condensed" id="attacker-events-table">
+        
+        <tr>
+            <td>{{documentindex}}</td>
+            <td>{{documentid}}</td>
+            <td>{{documenttype}}</td>
+            <td>{{documentsource.summary}}</td>
+            <td>{{>eventdetails}}</td>
+        </tr>
+
+    </table>
+</template>
+
+<template name="eventdetails">
+        {{#each objKeyValue this.documentsource.details}}
+            {{#if isAnObject value}}
+                <div><span>{{key}}</span>
+                {{#with value}}
+                    {{#each objKeyValue this}}
+                        <span>{{key}}:</span>
+                        <span>{{value}}</span>                    
+                    {{/each}}
+                {{/with}}
+                </div>
+            {{else}}
+                <div>
+                    <span>{{key}}:</span>
+                    <span>{{value}}</span>
+                </div>            
+            {{/if}}
+        {{/each}}    
+</template>

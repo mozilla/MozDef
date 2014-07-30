@@ -60,13 +60,26 @@ Router.map(function () {
 
 
     this.route('attackers', {
-        path: '/incidents/attackers',
+        path: '/attackers',
         template: 'attackers',
+        layoutTemplate: 'layout'
+    });
+
+    this.route('attackerdetail', {
+        path: '/attacker/:attackerid',
+        template: 'attackerdetail',
+        waitOn: function() {
+            Session.set('attackerID', this.params.attackerid);
+            return Meteor.subscribe('attacker-details', Session.get('attackerID'))
+            },
+        data: function() {
+          return attackers.findOne({'_id':Session.get('attackerID')});
+        },
         layoutTemplate: 'layout'
     });
    
     this.route('globe', {
-        path: '/incidents/globe',
+        path: '/globe',
         template: 'globe',
         layoutTemplate: 'layout'
     }); 
@@ -89,7 +102,7 @@ Router.map(function () {
        layoutTemplate: 'layout'
     });
 
-    this.route('alert', {
+    this.route('alertdetail', {
         path: '/alert/:alert_id',
         template: 'alertdetail',
         waitOn: function() {

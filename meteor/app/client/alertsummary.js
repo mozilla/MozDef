@@ -221,7 +221,7 @@ if (Meteor.isClient) {
                     .order(descNumbers)                    
                     .columns([
                         function(d) {return d.jdate;},
-                        function(d) {return '<a href="/alert/' + d.esmetadata.id + '">mozdef</a><br> <a href="' + d.url + '">kibana</a>';},
+                        function(d) {return '<a href="/alert/' + d.esmetadata.id + '">mozdef</a><br> <a href="' + d.url + '"  target="_blank">kibana</a>';},
                         function(d) {return d.severity;},
                         function(d) {return d.category;},
                         function(d) {
