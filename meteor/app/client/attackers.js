@@ -18,7 +18,7 @@ if (Meteor.isClient) {
     var selectedObject=null;
     var intersectedObject=null;
     var plane = null;
-    var scenePadding=10;
+    var scenePadding=50;
     var characters = [];
     var mouse = null;
     var offset = null;
@@ -153,13 +153,37 @@ if (Meteor.isClient) {
                 } else {
                     intersectedObject = null;
                     container.style.cursor = 'auto';
+                    //hide all the nameplates
+                    //that aren't sticky
                     for ( var i = 0, l = scene.children.length; i < l; i ++ ) {
                         if ( scene.children[i].name.lastIndexOf('nameplate',0)===0 ){
-                            scene.children[i].element.style.display='none';
+                            aplate=scene.children[i];
+                            if (! aplate.sticky ){
+                                aplate.element.style.display='none';
+                            }
                         }
                     }
                 }
             }
+        },
+        "dblclick": function(event,template){
+            //select this for modification
+            if ( intersectedObject ){
+                console.log(intersectedObject);
+                //find this one's name plate and mark it sticky
+                nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
+                if (nameplate){
+                    nameplate.element.style.display='inline';
+                    nameplate.lookAt( sceneCamera.position );
+                    if (! nameplate.sticky ){
+                        nameplate.sticky=true;
+                    }else{
+                        nameplate.sticky=false;
+                    }
+                }                
+                
+            }
+
         },
         "mouseup": function(event,template){
         //clear selected objects
