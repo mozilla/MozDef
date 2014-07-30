@@ -10,6 +10,11 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
+    var note = null;
+    var theory = null;
+    var mitigation = null;
+    var lesson = null;
+    
 
     Template.veristags.veris=function(){
         return veris.find({tag:{$regex:'.*' +Session.get('verisfilter') + '.*',$options:'i'}},{limit:50});
@@ -249,21 +254,49 @@ if (Meteor.isClient) {
         },
         
         "click #saveTheory": function(e,template){
-            newTheory=models.theory();
-            newTheory.summary=$('#newTheorySummary').val();
-            newTheory.description=$('#newTheoryDescription').val();
-            newTheory.creator=Meteor.user().profile.email;
-            newTheory.lastModifier=Meteor.user().profile.email;
-            if ( newTheory.summary && newTheory.description ) {
+            if (! theory) {
+                theory=models.theory();
+                theory.creator=Meteor.user().profile.email;
+            }
+
+            theory.summary=$('#theorySummary').val();
+            theory.description=$('#theoryDescription').val();
+            theory.lastModifier=Meteor.user().profile.email;
+
+            if ( theory.summary && theory.description ) {
+                //limited support for modify a set, so pull/add
                 incidents.update(Session.get('incidentID'), {
-                    $addToSet: {theories:newTheory}
+                    $pull: {theories: {"_id": theory._id}}
                 });
-                $('#newTheorySummary').val('');
-                $('#newTheoryDescription').val('');
+
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {theories:theory}
+                });
+
+                $('#theorySummary').val('');
+                $('#theoryDescription').val('');
+                theory=null;
                 e.preventDefault();
             }
 
         },
+
+        "click .theoryedit": function(e){
+            theory=models.theory();
+            theory._id= $(e.target).attr('data-theoryid');
+            //elemMatch not available on client side..iterate the theories for a match.
+            theories=incidents.findOne({'_id':Session.get('incidentID')},
+                                  {theories:{$elemMatch:{'_id': theory._id}}},
+                                  { "theories.$": 1 }
+                                  ).theories;
+            theory=_.findWhere(theories, {'_id': theory._id});
+            if (theory != undefined) {
+                $('#theorySummary').val(theory.summary);
+                $('#theoryDescription').val(theory.description);
+            }
+            e.preventDefault();
+        },        
+
         "click .theorydelete": function(e){
             id = $(e.target).attr('data-theoryid');
             incidents.update(Session.get('incidentID'), {
@@ -273,23 +306,47 @@ if (Meteor.isClient) {
         },        
 
         "click #saveMitigation": function(e,template){
-            newMitigation=models.mitigation();
-            newMitigation.summary=$('#newMitigationSummary').val();
-            newMitigation.description=$('#newMitigationDescription').val();
-            newMitigation.temporary=$('#newMitigationTemporary').is(':checked');
-            newMitigation.creator=Meteor.user().profile.email;
-            newMitigation.lastModifier=Meteor.user().profile.email;
-            if ( newMitigation.summary && newMitigation.description ) {
+            if (! mitigation ){
+                mitigation=models.mitigation();
+                mitigation.creator=Meteor.user().profile.email;
+            }
+            mitigation.summary=$('#mitigationSummary').val();
+            mitigation.description=$('#mitigationDescription').val();
+            mitigation.temporary=$('#mitigationTemporary').is(':checked');
+            mitigation.lastModifier=Meteor.user().profile.email;
+
+            if ( mitigation.summary && mitigation.description ) {
+                //limited support for modify a set, so pull/add
                 incidents.update(Session.get('incidentID'), {
-                    $addToSet: {mitigations:newMitigation}
+                    $pull: {mitigations: {"_id": mitigation._id}}
                 });
-                $('#newMitigationSummary').val('');
-                $('#newMitigationDescription').val('');
-                $('#newMitigationTemporary').attr('checked', false);
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {mitigations:mitigation}
+                });
+                $('#mitigationSummary').val('');
+                $('#mitigationDescription').val('');
+                $('#mitigationTemporary').prop('checked', false);
+                mitigation=null;
                 e.preventDefault();
             }
 
         },
+        "click .mitigationedit": function(e){
+            mitigation=models.mitigation();
+            mitigation._id= $(e.target).attr('data-mitigationid');
+            //elemMatch not available on client side..iterate the theories for a match.
+            mitigations=incidents.findOne({'_id':Session.get('incidentID')},
+                                  {mitigations:{$elemMatch:{'_id': mitigation._id}}},
+                                  { "mitigations.$": 1 }
+                                  ).mitigations;
+            mitigation=_.findWhere(mitigations, {'_id': mitigation._id});
+            if (mitigation != undefined) {
+                $('#mitigationSummary').val(mitigation.summary);
+                $('#mitigationDescription').val(mitigation.description);
+                $('#mitigationTemporary').prop('checked', mitigation.temporary);
+            }
+            e.preventDefault();
+        },         
         "click .mitigationdelete": function(e){
             id = $(e.target).attr('data-mitigationid');
             incidents.update(Session.get('incidentID'), {
@@ -299,20 +356,43 @@ if (Meteor.isClient) {
         },
 
         "click #saveLesson": function(e,template){
-            newLesson=models.lesson();
-            newLesson.summary=$('#newLessonSummary').val();
-            newLesson.description=$('#newLessonDescription').val();
-            newLesson.creator=Meteor.user().profile.email;
-            newLesson.lastModifier=Meteor.user().profile.email;
-            if ( newLesson.summary && newLesson.description ) {
+            if ( ! lesson ){
+                lesson=models.lesson();
+                lesson.creator=Meteor.user().profile.email;
+            }
+            lesson.summary=$('#lessonSummary').val();
+            lesson.description=$('#lessonDescription').val();
+            lesson.lastModifier=Meteor.user().profile.email;
+
+            if ( lesson.summary && lesson.description ) {
+                //limited support for modify a set, so pull/add
                 incidents.update(Session.get('incidentID'), {
-                    $addToSet: {lessons:newLesson}
+                    $pull: {lessons: {"_id": lesson._id}}
                 });
-                $('#newLessonSummary').val('');
-                $('#newLessonDescription').val('');
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {lessons:lesson}
+                });
+                $('#lessonSummary').val('');
+                $('#lessonDescription').val('');
+                lesson=null;
                 e.preventDefault();
             }
 
+        },
+        "click .lessonedit": function(e){
+            lesson=models.lesson();
+            lesson._id= $(e.target).attr('data-lessonid');
+            //elemMatch not available on client side..iterate the theories for a match.
+            lessons=incidents.findOne({'_id':Session.get('incidentID')},
+                                  {lessons:{$elemMatch:{'_id': lesson._id}}},
+                                  { "lessons.$": 1 }
+                                  ).lessons;
+            lesson=_.findWhere(lessons, {'_id': lesson._id});
+            if (lesson != undefined) {
+                $('#lessonSummary').val(lesson.summary);
+                $('#lessonDescription').val(lesson.description);
+            }
+            e.preventDefault();
         },
         "click .lessondelete": function(e){
             id = $(e.target).attr('data-lessonid');
@@ -323,20 +403,44 @@ if (Meteor.isClient) {
         },
 
         "click #saveNote": function(e,template){
-            newNote=models.note();
-            newNote.summary=$('#newNoteSummary').val();
-            newNote.description=$('#newNoteDescription').val();
-            newNote.creator=Meteor.user().profile.email;
-            newNote.lastModifier=Meteor.user().profile.email;
-            if ( newNote.summary && newNote.description ) {
+            if (! note){
+                note=models.note();
+                note.creator=Meteor.user().profile.email;
+            }
+            note.summary=$('#noteSummary').val();
+            note.description=$('#noteDescription').val();
+            note.lastModifier=Meteor.user().profile.email;
+
+            if ( note.summary && note.description ) {
+                //limited support for modify a set, so pull/add
                 incidents.update(Session.get('incidentID'), {
-                    $addToSet: {notes:newNote}
+                    $pull: {notes: {"_id": note._id}}
+                });                
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {notes:note}
                 });
-                $('#newNoteSummary').val('');
-                $('#newNoteDescription').val('');
+                $('#noteSummary').val('');
+                $('#noteDescription').val('');
+                note=null;
                 e.preventDefault();
             }
 
+        },
+
+        "click .noteedit": function(e){
+            note=models.note();
+            note._id= $(e.target).attr('data-noteid');
+            //elemMatch not available on client side..iterate the theories for a match.
+            notes=incidents.findOne({'_id':Session.get('incidentID')},
+                                  {notes:{$elemMatch:{'_id': note._id}}},
+                                  { "notes.$": 1 }
+                                  ).notes;
+            note=_.findWhere(notes, {'_id': note._id});
+            if (note != undefined) {
+                $('#noteSummary').val(note.summary);
+                $('#noteDescription').val(note.description);
+            }
+            e.preventDefault();
         },
         "click .notedelete": function(e){
             id = $(e.target).attr('data-noteid');

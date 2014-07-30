@@ -167,15 +167,15 @@ Jeff Bryner jbryner@mozilla.com
         <form id="theoriesform" class="form-horizontal" >
             <fieldset>
                 <div class="control-group">
-                    <label class="control-label" for="newTheorySummary">New Theory:</label>
+                    <label class="control-label" for="theorySummary">Theory:</label>
                     <div class="controls">
-                        <input id="newTheorySummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+                        <input id="theorySummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="newTheoryDescription">Description:</label>
+                    <label class="control-label" for="theoryDescription">Description:</label>
                     <div class="controls">
-                        <textarea id="newTheoryDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                        <textarea id="theoryDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="control-group">
@@ -189,6 +189,7 @@ Jeff Bryner jbryner@mozilla.com
                 <table id="theories" class="table table-striped table-hover table-condensed">
                     <thead>
                         <tr>
+                            <td></td>
                             <td>Summary</td>
                             <td>Description</td>
                             <td>Created</td>
@@ -199,6 +200,7 @@ Jeff Bryner jbryner@mozilla.com
                     <tbody>
                     {{#each theories}}
                         <tr>
+                            <td><button class="btn theoryedit" data-theoryid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
                             <td>{{dateCreated}}</td>
@@ -218,22 +220,22 @@ Jeff Bryner jbryner@mozilla.com
         <form id="mitigationsform" class="form-horizontal" >
             <fieldset>
                 <div class="control-group">
-                    <label class="control-label" for="newMitigationSummary">New Mitigation:</label>
+                    <label class="control-label" for="mitigationSummary">Mitigation:</label>
                     <div class="controls">
-                        <input id="newMitigationSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+                        <input id="mitigationSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
                     </div>
                 </div>
                 <div class="control-group">
                     <div class="controls">
                     <label class="checkbox">
-                        <input type="checkbox" id="newMitigationTemporary"> Temporary?
+                        <input type="checkbox" id="mitigationTemporary"> Temporary?
                     </label>
                     </div>
                 </div>                
                 <div class="control-group">
-                    <label class="control-label" for="newMitigationDescription">Description:</label>
+                    <label class="control-label" for="mitigationDescription">Description:</label>
                     <div class="controls">
-                        <textarea id="newMitigationDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                        <textarea id="mitigationDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="control-group">
@@ -247,6 +249,7 @@ Jeff Bryner jbryner@mozilla.com
                 <table id="mitigations" class="table table-striped table-hover table-condensed">
                     <thead>
                         <tr>
+                            <td></td>
                             <td>Summary</td>
                             <td>Description</td>
                             <td>Temporary?</td>
@@ -258,6 +261,7 @@ Jeff Bryner jbryner@mozilla.com
                     <tbody>
                     {{#each mitigations}}
                         <tr>
+                            <td><button class="btn mitigationedit" data-mitigationid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
                             <td>{{temporary}}</td>
@@ -278,15 +282,15 @@ Jeff Bryner jbryner@mozilla.com
         <form id="lessonsform" class="form-horizontal" >
             <fieldset>
                 <div class="control-group">
-                    <label class="control-label" for="newLessonSummary">New Lesson:</label>
+                    <label class="control-label" for="lessonSummary">Lesson:</label>
                     <div class="controls">
-                        <input id="newLessonSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+                        <input id="lessonSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
                     </div>
                 </div>              
                 <div class="control-group">
-                    <label class="control-label" for="newLessonDescription">Description:</label>
+                    <label class="control-label" for="lessonDescription">Description:</label>
                     <div class="controls">
-                        <textarea id="newLessonDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                        <textarea id="lessonDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="control-group">
@@ -300,6 +304,7 @@ Jeff Bryner jbryner@mozilla.com
                 <table id="lessons" class="table table-striped table-hover table-condensed">
                     <thead>
                         <tr>
+                            <td></td>
                             <td>Summary</td>
                             <td>Description</td>
                             <td>Created</td>
@@ -310,6 +315,7 @@ Jeff Bryner jbryner@mozilla.com
                     <tbody>
                     {{#each lessons}}
                         <tr>
+                            <td><button class="btn lessonedit" data-lessonid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
                             <td>{{dateCreated}}</td>
@@ -329,15 +335,15 @@ Jeff Bryner jbryner@mozilla.com
         <form id="notesform" class="form-horizontal" >
             <fieldset>
                 <div class="control-group">
-                    <label class="control-label" for="newNoteSummary">New Note:</label>
+                    <label class="control-label" for="noteSummary">Note:</label>
                     <div class="controls">
-                        <input id="newNoteSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+                        <input id="noteSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
                     </div>
                 </div>              
                 <div class="control-group">
-                    <label class="control-label" for="newNoteDescription">Description:</label>
+                    <label class="control-label" for="noteDescription">Description:</label>
                     <div class="controls">
-                        <textarea id="newNoteDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                        <textarea id="noteDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="control-group">
@@ -351,6 +357,7 @@ Jeff Bryner jbryner@mozilla.com
                 <table id="notes" class="table table-striped table-hover table-condensed">
                     <thead>
                         <tr>
+                            <td></td>
                             <td>Summary</td>
                             <td>Description</td>
                             <td>Created</td>
@@ -361,6 +368,7 @@ Jeff Bryner jbryner@mozilla.com
                     <tbody>
                     {{#each notes}}
                         <tr>
+                            <td><button class="btn noteedit" data-noteid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
                             <td>{{dateCreated}}</td>
