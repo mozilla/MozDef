@@ -11,23 +11,27 @@ Anthony Verez averez@mozilla.com
 
 <!--a striped table of incidents-->
 <template name="incidents">
-
-	<div class="incidents container">
-	<table class="table table-striped table-hover table-condensed">
-		<thead>
-			<tr>
-                <td>Summary</td>
-                <td>Phase</td>
-                <td>Opened</td>
-                <td>Closed</td>
-            </tr>
-		</thead>
-		<tbody>
-		{{#each incident}}
-			{{>each_incident}}
-		{{/each}}
-		</tbody>
-	</table>
+    <div class="incidents container">
+        <div class="row  center">            
+            <table class="table table-striped table-hover table-condensed">
+                <caption><h5>Last 100 incidents</h5></caption>
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>Summary</td>
+                        <td>Phase</td>
+                        <td>Opened</td>
+                        <td>Closed</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#each incident}}
+                    {{>each_incident}}
+                {{/each}}
+                </tbody>
+            </table>
+            </div>
     </div>
 </template>
 
@@ -35,10 +39,16 @@ Anthony Verez averez@mozilla.com
 <template name="each_incident">
 
 			<tr>
+                <td><button class="btn btn-small incidentedit" data-incidentid={{_id}}>edit</button></td>
 				<td>{{summary}}</td>
                 <td>{{phase}}</td>
 				<td>{{dateOpened}}</td>
 				<td>{{dateClosed}}</td>
+                <td><button class="btn btn-small btn-warning" data-toggle="collapse" data-target="#delete{{_id}}">arm delete</button>
+                    <div id="delete{{_id}}" class="collapse">
+                        <button class="btn btn-danger incidentdelete" data-incidentid={{_id}}>delete</button>
+                    </div>
+                </td>
 			</tr>
 
 </template>

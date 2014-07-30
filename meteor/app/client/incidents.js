@@ -41,12 +41,16 @@ if (Meteor.isClient) {
 
     //select an incident for editing
     Template.incidents.events({
-        "click": function(e,t){
+        "click .incidentedit": function(e,t){
             if (this._id != undefined){
                 //Session.set('displayMessage','Starting edit for incident._id: ' + this._id);
                 Router.go('/incident/' + this._id + '/edit');
             }
-        }
+        },
+        
+        "click .incidentdelete": function(e){
+            incidents.remove(this._id);
+        }        
     });
 
     
