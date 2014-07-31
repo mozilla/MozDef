@@ -259,9 +259,12 @@ def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
                 attacker['geocoordinates'] = dict(countrycode='',
                                                   longitude=0,
                                                   latitude=0)
-                attacker['geocoordinates']['countrycode'] = eventDictionary['details']['sourceipgeolocation']['country_code']
-                attacker['geocoordinates']['longitude'] = eventDictionary['details']['sourceipgeolocation']['longitude']
-                attacker['geocoordinates']['latitude'] = eventDictionary['details']['sourceipgeolocation']['latitude']
+                if 'country_code' in eventDictionary['details']['sourceipgeolocation'].keys():
+                    attacker['geocoordinates']['countrycode'] = eventDictionary['details']['sourceipgeolocation']['country_code']
+                if 'longitude' in eventDictionary['details']['sourceipgeolocation'].keys():
+                    attacker['geocoordinates']['longitude'] = eventDictionary['details']['sourceipgeolocation']['longitude']
+                if 'latitude' in eventDictionary['details']['sourceipgeolocation'].keys():
+                    attacker['geocoordinates']['latitude'] = eventDictionary['details']['sourceipgeolocation']['latitude']
                 attackers.save(attacker)
     else:
         logger.debug('no details in the dictionary')
