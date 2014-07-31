@@ -466,7 +466,7 @@ if (Meteor.isClient) {
 
     function displayFacts(addr) {
       var attacker = data_store.attackers[addr];
-      $('#attacker_addr').html("<a href='/attacker/"+attacker._id+"'>"+addr+"</a>");
+      $('#attacker_addr').html("<a href='/attacker/"+attacker._id+"' target='_blank'>"+addr+"</a>");
       $('#attacker_score').text(attacker.score - 0.2);
       $('#attacker_campaigns').text(attacker.campaigns.join(', '));
       $('#attacker_lastseen').text(attacker.last_seen);
