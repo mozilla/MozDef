@@ -581,7 +581,7 @@ if (Meteor.isClient) {
         }
         else {
           attackers.find().forEach(function(element,index,array){
-            data.attackers[element.events[0].documentsource.details.sourceipaddress] = {
+            data.attackers[element.indicators[0].ipv4address] = {
               _id: element._id,
               coords: [element.geocoordinates.latitude, element.geocoordinates.longitude],
               score: 0.2+element.score,
@@ -601,7 +601,7 @@ if (Meteor.isClient) {
       }
 
     Deps.autorun(function() {
-        Meteor.subscribe("attackers", onReady=function() {
+        Meteor.subscribe("attackers-summary", onReady=function() {
             waitForGlobe();
         });      
       
