@@ -575,7 +575,6 @@ if (Meteor.isClient) {
       y.addEventListener('mouseover', settime(globe,i), false);
     }
 
-    Deps.autorun(function() {
       function waitForGlobe() {
         if (!document.getElementById(time[currentTime]) || !document.getElementById(campaigns[currentCampaign]) || !globe) {
           setTimeout(function(){waitForGlobe()},100);
@@ -599,7 +598,12 @@ if (Meteor.isClient) {
           globe.doSpin();
         }
       }
-      waitForGlobe();
+
+    Deps.autorun(function() {
+        Meteor.subscribe("attackers-summary", onReady=function() {
+            waitForGlobe();
+        });      
+      
     });
   }
 

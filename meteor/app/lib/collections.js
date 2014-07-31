@@ -172,7 +172,26 @@ if (Meteor.isServer) {
         return kibanadashboards.find({},{sort:{name:1}, limit:20});
     });    
 
-   
+   //access rules from clients
+   //barebones to allow you to specify rules
+   //currently incidents collection is the only one updated by clients
+   //for speed of access
+   //the only rule is that the incident creator is the only one who can delete an incident.
+    incidents.allow({
+      insert: function (userId, doc) {
+        // the user must be logged in to create an incident
+        return (userId);
+      },
+      update: function (userId, doc, fields, modifier) {
+        // the user must be logged in to create an incident
+        return (userId);
+      },
+      remove: function (userId, doc) {
+        // can only remove one's own indicents
+        return doc.creator === Meteor.user().profile.email;
+      },
+      fetch: ['creator']
+    });   
 
 
     

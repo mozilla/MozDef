@@ -21,6 +21,7 @@ models={
             description: "",
             dateOpened: today,
             dateClosed:"",
+            creator: Meteor.user().profile.email,
             theories:[],
             notes:[],
             tags:[],
