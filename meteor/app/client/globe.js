@@ -466,7 +466,7 @@ if (Meteor.isClient) {
 
     function displayFacts(addr) {
       var attacker = data_store.attackers[addr];
-      $('#attacker_addr').html(addr);
+      $('#attacker_addr').html("<a href='/attacker/"+attacker._id+"'>"+addr+"</a>");
       $('#attacker_score').text(attacker.score - 0.2);
       $('#attacker_campaigns').text(attacker.campaigns.join(', '));
       $('#attacker_lastseen').text(attacker.last_seen);
@@ -582,6 +582,7 @@ if (Meteor.isClient) {
         else {
           attackers.find().forEach(function(element,index,array){
             data.attackers[element.events[0].documentsource.details.sourceipaddress] = {
+              _id: element._id,
               coords: [element.geocoordinates.latitude, element.geocoordinates.longitude],
               score: 0.2+element.score,
               campaigns: [element.category],
