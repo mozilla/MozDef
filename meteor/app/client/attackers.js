@@ -169,7 +169,6 @@ if (Meteor.isClient) {
         "dblclick": function(event,template){
             //select this for modification
             if ( intersectedObject ){
-                console.log(intersectedObject);
                 //find this one's name plate and mark it sticky
                 nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
                 if (nameplate){

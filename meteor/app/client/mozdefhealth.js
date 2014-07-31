@@ -52,7 +52,7 @@ if (Meteor.isClient) {
             var ndx = crossfilter(frontEndData);
 
             if ( frontEndData.length === 0 && ndx.size()>0){
-                console.log('clearing ndx/dc.js');
+                debugLog('clearing ndx/dc.js');
                 dc.filterAll();
                 ndx.remove();
                 dc.redrawAll();
@@ -60,7 +60,6 @@ if (Meteor.isClient) {
                 ndx = crossfilter(frontEndData);
             }            
             if ( ndx.size() >0){
-                console.log(ndx.size());
                 var hostDim  = ndx.dimension(function(d) {return d.hostname;});
                 var hostEPS = hostDim.group().reduceSum(function(d) {return d.details.total_deliver_eps.toFixed(2);});
                 var hostLoadAverage = hostDim.group().reduceSum(function(d) {return d.details.loadaverage[0];});
