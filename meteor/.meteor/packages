@@ -4,9 +4,6 @@
 # but you can also edit it by hand.
 
 standard-app-packages
-autopublish
-insecure
-bootstrap
 accounts-ui
 accounts-password
 backbone
@@ -14,4 +11,5 @@ backbone
 http
 accounts-persona
 d3
+bootstrap
 iron-router
