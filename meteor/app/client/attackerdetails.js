@@ -10,14 +10,14 @@ Jeff Bryner jbryner@mozilla.com
 
 if (Meteor.isClient) {
 
-   //detail helpers
-    Template.attackerdetail.thisalert = function (mongoalertid) {
+   //details helpers
+    Template.attackerdetails.thisalert = function (mongoalertid) {
         //attackers store a ref mongo id to alerts attacker.alerts.alertid
         //return an alert given it's mongo id
         return alerts.findOne({'_id': mongoalertid});
     };    
     
-    Template.attackerdetail.rendered = function() {
+    Template.attackerdetails.rendered = function() {
         Deps.autorun(function(comp) {
             //subscribe to the alerts data we need
             Meteor.subscribe('attacker-details', Session.get('attackerID'),onReady=function(){

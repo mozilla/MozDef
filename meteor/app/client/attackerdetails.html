@@ -8,7 +8,7 @@ Contributors:
 Jeff Bryner jbryner@mozilla.com
 -->
 
-<template name="attackerdetail">
+<template name="attackerdetails">
 <div class="container">
     <div class="row center">
         <div id="attacker" >
@@ -86,22 +86,4 @@ Jeff Bryner jbryner@mozilla.com
     </table>
 </template>
 
-<template name="eventdetails">
-        {{#each objKeyValue this.documentsource.details}}
-            {{#if isAnObject value}}
-                <div><span>{{key}}</span>
-                {{#with value}}
-                    {{#each objKeyValue this}}
-                        <span>{{key}}:</span>
-                        <span>{{value}}</span>                    
-                    {{/each}}
-                {{/with}}
-                </div>
-            {{else}}
-                <div>
-                    <span>{{key}}:</span>
-                    <span>{{value}}</span>
-                </div>            
-            {{/if}}
-        {{/each}}    
-</template>
+

@@ -65,9 +65,9 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
 
-    this.route('attackerdetail', {
+    this.route('attackerdetails', {
         path: '/attacker/:attackerid',
-        template: 'attackerdetail',
+        template: 'attackerdetails',
         waitOn: function() {
             Session.set('attackerID', this.params.attackerid);
             return Meteor.subscribe('attacker-details', Session.get('attackerID'))
@@ -102,9 +102,9 @@ Router.map(function () {
        layoutTemplate: 'layout'
     });
 
-    this.route('alertdetail', {
+    this.route('alertdetails', {
         path: '/alert/:alert_id',
-        template: 'alertdetail',
+        template: 'alertdetails',
         waitOn: function() {
             Session.set('alertID', this.params.alert_id);
             return Meteor.subscribe('alerts-details', Session.get('alertID'))
