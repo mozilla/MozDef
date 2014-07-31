@@ -601,7 +601,7 @@ if (Meteor.isClient) {
       }
 
     Deps.autorun(function() {
-        Meteor.subscribe("attackers-summary", onReady=function() {
+        Meteor.subscribe("attackers", onReady=function() {
             waitForGlobe();
         });      
       
