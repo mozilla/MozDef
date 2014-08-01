@@ -54,21 +54,9 @@ if (Meteor.isServer) {
             var verisFile = Assets.getText("veris.dotformat.txt");
             var verisObject = verisFile.split("\n");
             verisObject.forEach(function(verisItem) {
-               //console.log({tag: verisItem});
                veris.insert({tag: verisItem});
             });
         }
-        //delete/refresh incidents
-        //incidents.remove({});
-        if (incidents.find().count()==0){
-            console.log("Refreshing sample incident data")
-            //insert an incident using a model
-            var i=models.incident();
-            i.summary="testing";
-            i.dateOpened.setTime(Date.parse("10/1/2012 8:00"));
-            incidents.insert(i);
-            //console.log(i);
-            
-        };
+
   });   //end startup
 }   //end is server
