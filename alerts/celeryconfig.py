@@ -18,6 +18,19 @@ app = Celery('alerts',
              include=alerts_include)
 
 
+CELERY_DISABLE_RATE_LIMITS = True
+CELERYD_CONCURRENCY = 1
+CELERY_IGNORE_RESULT = True
+
+CELERY_DEFAULT_QUEUE = 'celery-default'
+CELERY_QUEUES = {
+    'celery-default': {
+        "exchange": "celery-default",
+        "binding_key": "celery-default",
+    },
+}
+
+
 CELERYBEAT_SCHEDULE = {}
 
 # Register frequency of the tasks in the scheduler
@@ -25,8 +38,8 @@ for alert in ALERTS.keys():
     CELERYBEAT_SCHEDULE[alert] = {
         'task': alert,
         'schedule': ALERTS[alert],
+        'options': {'queue': 'celery-default', "exchange": "celery-default"},
     }
-
 
 # Load logging config
 dictConfig(LOGGING)
