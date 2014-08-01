@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 while true
 do
-          ./json2Mozdef.py
+          ./sampleData2MozDef.py
           sleep 2
 done

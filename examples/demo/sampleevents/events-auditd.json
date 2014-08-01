@@ -1,0 +1,153 @@
+[
+  {
+    "timestamp": "2014-04-17T05:31:33.631170+00:00",
+    "summary": "Unix Exec",
+    "receivedtimestamp": "2014-04-17T05:33:33.637966+00:00",
+    "utctimestamp": "2014-04-17T05:33:33.631170+00:00",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "auid": "0",
+      "parentprocess": "java",
+      "severity": "3",
+      "duid": "2317",
+      "truncated": "Yes",
+      "deviceversion": "2",
+      "auditkey": "exec ",
+      "devicevendor": "Unix",
+      "tty": "(none)",
+      "duser": "mapred",
+      "dproc": "/usr/java/jdk1.6.0_31/jre/bin/java",
+      "version": "0",
+      "command": "",
+      "signatureid": "EXECVE",
+      "suser": "root",
+      "msg": "",
+      "dhost": "node33.example.com",
+      "fname": "/usr/java/jdk1.6.0_31/jre/bin/java",
+      "deviceproduct": "auditd",
+      "name": "Unix Exec"
+    }
+  },
+  {
+    "timestamp": "2014-04-17T05:32:33.509015+00:00",
+    "summary": "Unix Exec",
+    "receivedtimestamp": "2014-04-17T05:32:33.510685+00:00",
+    "utctimestamp": "2014-04-17T05:32:33.509015+00:00",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "auid": "4294967295",
+      "parentprocess": "sosreport",
+      "severity": "3",
+      "duid": "0",
+      "truncated": "No",
+      "deviceversion": "2",
+      "auditkey": "exec ",
+      "devicevendor": "Unix",
+      "tty": "(none)",
+      "duser": "root",
+      "dproc": "/bin/bash",
+      "version": "0",
+      "command": "/bin/sh -c /bin/ls -laR /dev",
+      "signatureid": "EXECVE",
+      "fname": "/bin/sh",
+      "msg": "",
+      "dhost": "web3.example.com",
+      "deviceproduct": "auditd",
+      "name": "Unix Exec"
+    }
+  },
+  {
+    "timestamp": "2014-04-17T05:33:33.222518+00:00",
+    "summary": "Unix Exec",
+    "receivedtimestamp": "2014-04-17T05:33:33.224129+00:00",
+    "utctimestamp": "2014-04-17T05:33:33.222518+00:00",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "auid": "4294967295",
+      "parentprocess": "gmond",
+      "severity": "3",
+      "duid": "99",
+      "truncated": "No",
+      "deviceversion": "2",
+      "auditkey": "exec ",
+      "devicevendor": "Unix",
+      "tty": "(none)",
+      "duser": "nobody",
+      "dproc": "/bin/bash",
+      "version": "0",
+      "command": "/bin/sh -c netstat -t -a -n",
+      "signatureid": "EXECVE",
+      "fname": "/bin/sh",
+      "msg": "",
+      "dhost": "node27.example.com",
+      "deviceproduct": "auditd",
+      "name": "Unix Exec"
+    }
+  },
+  {
+    "timestamp": "2014-04-17T05:34:33.069873+00:00",
+    "summary": "Unix Exec",
+    "receivedtimestamp": "2014-04-17T05:34:33.079831+00:00",
+    "utctimestamp": "2014-04-17T05:34:33.069873+00:00",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "auid": "4294967295",
+      "parentprocess": "sosreport",
+      "severity": "3",
+      "duid": "0",
+      "truncated": "No",
+      "deviceversion": "2",
+      "auditkey": "exec ",
+      "devicevendor": "Unix",
+      "tty": "(none)",
+      "duser": "root",
+      "dproc": "/bin/bash",
+      "version": "0",
+      "command": "/bin/sh -c /sbin/route -n",
+      "signatureid": "EXECVE",
+      "fname": "/bin/sh",
+      "msg": "",
+      "dhost": "web9.example.com",
+      "deviceproduct": "auditd",
+      "name": "Unix Exec"
+    }
+  },
+  {
+    "timestamp": "2014-04-17T05:35:33.039246+00:00",
+    "summary": "Unix Exec",
+    "receivedtimestamp": "2014-04-17T05:35:33.041927+00:00",
+    "utctimestamp": "2014-04-17T05:35:33.039246+00:00",
+    "tags": [
+      "example"
+    ],
+    "details": {
+      "auid": "4294967295",
+      "parentprocess": "sosreport",
+      "severity": "3",
+      "duid": "0",
+      "truncated": "No",
+      "deviceversion": "2",
+      "auditkey": "exec ",
+      "devicevendor": "Unix",
+      "tty": "(none)",
+      "duser": "root",
+      "dproc": "/sbin/ifconfig",
+      "version": "0",
+      "command": "/sbin/ifconfig -a",
+      "signatureid": "EXECVE",
+      "fname": "/sbin/ifconfig",
+      "msg": "",
+      "dhost": "monitoring.example.com",
+      "deviceproduct": "auditd",
+      "name": "Unix Exec"
+    }
+  }
+]

@@ -94,6 +94,8 @@ VOLUME ['/var/lib/elasticsearch','/var/log/elasticsearch']
 VOLUME ['/var/lib/mongodb','/var/log/mongodb']
 #	Nginx
 VOLUME ['/var/log/nginx','/var/log/mozdef']
+#       Quick share resource
+VOLUME ['/tmp/share','/tmp/share']
 
 # PORTS
 #       METEOR
