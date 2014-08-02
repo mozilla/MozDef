@@ -83,7 +83,7 @@ def genRandomIPv4():
              '116.10.191.',
              '144.0.0.']
     if random.randint(0,10)>=5:
-        return '{0}{1}'.format(random.choice(coreIPs), random.randint(1,10))
+        return '{0}{1}'.format(random.choice(coreIPs), random.randint(1,2))
     else:
         return '.'.join("%d" % (random.randint(0,254)) for x in range(4))
 
