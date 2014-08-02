@@ -74,15 +74,25 @@ def postLogs(logcache):
         #except Exception as e:
             #logger.fatal("exception posting to %s %r %r [will not retry]\n"%(url,e,postdata))
             #sys.exit(1)
+
 def genRandomIPv4():
-    return '.'.join("%d" % (random.randint(0,254)) for x in range(4))
+    #random, but not too random as to allow for alerting about attacks from
+    #the same IP.
+    coreIPs=['1.93.25.',
+             '222.73.115.',
+             '116.10.191.',
+             '144.0.0.']
+    if random.randint(0,10)>=5:
+        return '{0}{1}'.format(random.choice(coreIPs), random.randint(1,10))
+    else:
+        return '.'.join("%d" % (random.randint(0,254)) for x in range(4))
 
 def makeLogs():
     try:
         eventfiles = glob.glob(options.jsonglob)
         eventfiles = ['./sampleevents/events-event.json']
         #pick a random number of events to send
-        for i in range(0, random.randrange(0, 10)):
+        for i in range(0, random.randrange(0, 200)):
             #pick a random type of event to send
             eventfile = random.choice(eventfiles)
             #print(eventfile)
