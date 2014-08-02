@@ -28,19 +28,6 @@ if (Meteor.isClient) {
     Template.mozdefhealth.eshotthreadshealthitems = function () {
         return healtheshotthreads.find();
     };
-
-    Template.mozdefhealth.helpers({
-      lastupdate: function() {
-        var obj = healthfrontend.findOne();
-        if (obj) {
-          return obj.utctimestamp;
-        }
-        else {
-          return null;
-        }
-      }
-    });
-
  
    Template.mozdefhealth.rendered = function () {
         var ringChartEPS   = dc.pieChart("#ringChart-EPS");
@@ -91,13 +78,18 @@ if (Meteor.isClient) {
 
         Deps.autorun(function() {
             Meteor.subscribe("healthfrontend",onReady=function(){
-                Deps.nonreactive(refreshChartData);
+                refreshChartData();
             });
             Meteor.subscribe("healthescluster");
             Meteor.subscribe("healthesnodes");
             Meteor.subscribe("healtheshotthreads");
-            
-
+            //using dc.js doesn't trigger the reactive update
+            //so update a UI object and refresh dc.js so both get data when it updates.
+            var obj = healthfrontend.findOne();
+            if (obj) {
+               $('.lastupdate').text('Last Update: ' + obj.utctimestamp);
+               refreshChartData();
+            }
         }); //end deps.autorun
      };
 }
