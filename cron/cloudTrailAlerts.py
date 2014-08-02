@@ -125,13 +125,14 @@ def createAlerts(es,esResults):
                 alert['summary']=('{0} called {1} from {2}'.format(r['_source']['userIdentity']['userName'],r['_source']['eventName'],r['_source']['sourceIPAddress']))
                 alert['eventsource']=flattenDict(r)
                 if r['_source']['eventName']=='RunInstances':
-                    for i in r['_source']['responseElements']['instancesSet']['items']:
-                        if 'privateDnsName' in i.keys():
-                            alert['summary'] += (' running {0} '.format(i['privateDnsName']))
-                        elif 'instanceId' in i.keys():
-                            alert['summary'] += (' running {0} '.format(i['instanceId']))
-                        else:
-                            alert['summary'] += (' running {0} '.format(flattenDict(i)))
+                    if isinstance(r['_source']['responseElements'], dict) and 'instancesSet' in r['_source']['responseElements'].keys():
+                        for i in r['_source']['responseElements']['instancesSet']['items']:
+                            if 'privateDnsName' in i.keys():
+                                alert['summary'] += (' running {0} '.format(i['privateDnsName']))
+                            elif 'instanceId' in i.keys():
+                                alert['summary'] += (' running {0} '.format(i['instanceId']))
+                            else:
+                                alert['summary'] += (' running {0} '.format(flattenDict(i)))
                 if r['_source']['eventName']=='StartInstances':
                     for i in r['_source']['requestParameters']['instancesSet']['items']:
                         alert['summary'] += (' starting {0} '.format(i['instanceId']))                
@@ -147,7 +148,7 @@ def createAlerts(es,esResults):
                 r['_source']['alerttimestamp']=toUTC(datetime.now()).isoformat()
                 es.update(r['_index'],r['_type'],r['_id'],document=r['_source'])
                 alertToMessageQueue(alert)
-    except Exception as e:
+    except EOFError as e:
         logger.error("Exception %r when creating alerts "%e)
         
 def main():
