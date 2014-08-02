@@ -43,7 +43,7 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
+def toUTC(suspectedDate, localTimeZone="UTC"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
@@ -64,8 +64,8 @@ def toUTC(suspectedDate, localTimeZone="US/Pacific"):
 
 
 def getFrontendStats(es):
-    begindateUTC = toUTC(datetime.now() - timedelta(minutes=15))
-    enddateUTC = toUTC(datetime.now())
+    begindateUTC = toUTC(datetime.now() - timedelta(minutes=15), options.defaulttimezone)
+    enddateUTC = toUTC(datetime.now(), options.defaulttimezone)
     qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
         from_value=begindateUTC, to_value=enddateUTC))
     qType = pyes.TermFilter('_type', 'mozdefhealth')
@@ -165,18 +165,15 @@ def initConfig():
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-    options.mqservers = list(getConfig('mqservers', 'localhost',
-        options.configfile).split(','))
-    options.mquser = getConfig('mquser', 'guest', options.configfile)
-    options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
-    # port of the rabbitmq json management interface
-    options.mqapiport = getConfig('mqapiport', 15672, options.configfile)
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers', 'http://localhost:9200',
         options.configfile).split(','))
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
+    # change this to your default zone for when it's not specified
+    options.defaulttimezone = getConfig('defaulttimezone',
+                                        'UTC',
+                                        options.configfile)
 
 
 if __name__ == '__main__':

@@ -45,7 +45,7 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
+def toUTC(suspectedDate, localTimeZone='UTC'):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
@@ -95,8 +95,7 @@ def main():
             mq = r.json()
             # setup a log entry for health/status.
             healthlog = dict(
-                utctimestamp=pytz.timezone('US/Pacific').localize(
-                    datetime.now()).isoformat(),
+                utctimestamp=toUTC(datetime.now(), options.defaulttimezone).isoformat(),
                 hostname=server,
                 processid=os.getpid(),
                 processname=sys.argv[0],
@@ -183,8 +182,8 @@ def initConfig():
     options.mqapiport = getConfig('mqapiport', 15672, options.configfile)
 
     # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
+    options.defaulttimezone = getConfig('defaulttimezone',
+                                        'UTC',
                                         options.configfile)
 
     # elastic search server settings
