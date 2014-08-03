@@ -57,7 +57,7 @@ class AlertTask(Task):
 
             self.alertExchange = kombu.Exchange(
                 name=RABBITMQ['alertexchange'],
-                type='direct',
+                type='topic',
                 durable=True)
             self.alertExchange(self.mqConn).declare()
             alertQueue = kombu.Queue(RABBITMQ['alertqueue'],
