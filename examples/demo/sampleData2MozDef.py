@@ -82,7 +82,7 @@ def genRandomIPv4():
              '222.73.115.',
              '116.10.191.',
              '144.0.0.']
-    if random.randint(0,10)>=5:
+    if random.randint(0,10)>= 2:
         return '{0}{1}'.format(random.choice(coreIPs), random.randint(1,2))
     else:
         return '.'.join("%d" % (random.randint(0,254)) for x in range(4))
@@ -92,7 +92,7 @@ def makeLogs():
         eventfiles = glob.glob(options.jsonglob)
         eventfiles = ['./sampleevents/events-event.json']
         #pick a random number of events to send
-        for i in range(0, random.randrange(0, 200)):
+        for i in range(0, random.randrange(20, 200)):
             #pick a random type of event to send
             eventfile = random.choice(eventfiles)
             #print(eventfile)
@@ -113,17 +113,18 @@ def makeLogs():
                 event['tags'].append('demodata')
                 
                 if 'details' in event.keys():
+                    randomIP = genRandomIPv4()
                     if 'sourceipaddress' in event['details']:
-                        event['details']['sourceipaddress'] = genRandomIPv4()
+                        event['details']['sourceipaddress'] = randomIP
 
                     if 'sourceipv4address' in event['details']:
-                        event['details']['sourceipv4address'] = genRandomIPv4()                        
+                        event['details']['sourceipv4address'] = randomIP                        
                     
                     if 'destinationipaddress' in event['details']:
-                        event['details']['destinationipaddress'] = genRandomIPv4()
+                        event['details']['destinationipaddress'] = randomIP
                 
                     if 'destinationipv4address' in event['details']:
-                        event['details']['destinationipv4address'] = genRandomIPv4()                
+                        event['details']['destinationipv4address'] = randomIP                
                 
                 #print(event['timestamp'], event['tags'], event['summary'])
 
