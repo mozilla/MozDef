@@ -5,11 +5,12 @@
     "severity": "NOTICE",
     "hostname": "example.com",
     "summary": "%-SSHD_LOGIN_FAILED: Login failed for user 'ch' from host <randomipaddress>",
-    "eventsource": "systemslogs",
+    "file": "systemslogs",
     "details": {
-      "processid": "",
+      "processid": "188",
       "hostname": "example.com",
       "program": "sshd"
     }
 }
 ]
+

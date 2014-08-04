@@ -1,0 +1,38 @@
+[
+{
+    "category": "network",
+    "processid": "0",
+    "severity": "INFO",
+    "summary": "%-RT_FLOW_SESSION_CREATE: session created 10.2.2.59/41228->63.245.215.25/443 junos-https 63.245.221.32/38987->63.245.215.25/443 natrulename None 6 any--any corp external 251204 N/A(N/A) reth10.2\n",
+    "file": "networklogs",
+    "details": {
+      "protocol": "6",
+      "sourceipv4address": "10.2.2.59",
+      "payload": "",
+      "sourceipaddress": "10.2.2.59",
+      "service": "junos-https",
+      "hostname": "fw1.example.com",
+      "program": "RT_FLOW",
+      "destinationport": "443",
+      "policy": "any--any",
+      "destinationnatrule": "None",
+      "destinationipaddress": "63.245.215.25",
+      "destinationzone": "external",
+      "destinationipv4address": "63.245.215.25"
+    }
+},
+{
+    "category": "network",
+    "processid": "0",
+    "severity": "INFO",
+    "hostname": "syslog1.example.com",
+    "summary": "%-RT_FLOW_SESSION_CLOSE: session closed idle Timeout: 10.6.4.3/9601->20.21.23.121/64635 icmp 63.245.214.82/47722->20.21.23.121/64635 a-nat None 1 global-icmp-permit srv untrust 20434750 0(0) 0(0) 1 UNKNOWN UNKNOWN N/A(N/A) reth10.8 UNKNOWN\n",
+    "file": "networklogs",
+    "details": {
+      "processid": "",
+      "program": "RT_FLOW",
+      "hostname": "fw1.example.com",
+      "payload": ""
+    }
+  }
+]
