@@ -30,7 +30,15 @@ Jeff Bryner jbryner@mozilla.com
                 <td>{{dateCreated}}</td>
                 <td>{{eventscount}}</td>
 				<td>{{alertscount}}</td>
-				<td>{{category}}</td>
+                <td>
+                    <select id="attackerCategory" name="category" class="input-medium" title="category of this attacker">
+                        <option {{ isselected 'unknown' category }} value='unknown'>Unknown</option>
+                        <option {{ isselected 'skiddie' category }} value='skiddie'>Script Kiddie</option>
+                        <option {{ isselected 'bruteforcer' category }} value='bruteforcer'>Brute Forcer</option>
+                        <option {{ isselected 'bountyhunter' category }} value='bountyhunter'>Bounty Hunter</option>
+                        <option {{ isselected 'APT' category }} value='apt'>APT</option>
+                    </select>
+                </td>
                 <td>{{summary}}</td>
 			</tr>
                 </tbody>

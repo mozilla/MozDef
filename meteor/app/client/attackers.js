@@ -82,7 +82,6 @@ if (Meteor.isClient) {
         },
         "change #attackerLimit": function(e,t){
             Session.set('attackerlimit', $('#attackerLimit').val());
-            debugLog('should change dep' + Session.get('attackerlimit'));
         },         
         "mousedown": function(event,template){
         //if mouse is over a character
@@ -534,7 +533,8 @@ if (Meteor.isClient) {
                     .group(categoryDim.group())
                     .label(function(d) {return d.key; })
                     .innerRadius(30)
-                    .expireCache();
+                    .expireCache()
+                    .on('filtered',filterCharacters);
                 ringChartLastSeen
                     .width(150).height(150)
                     .dimension(agoDim)

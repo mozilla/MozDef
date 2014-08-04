@@ -179,11 +179,11 @@ if (Meteor.isServer) {
    //the only rule is that the incident creator is the only one who can delete an incident.
     incidents.allow({
       insert: function (userId, doc) {
-        // the user must be logged in to create an incident
+        // the user must be logged in
         return (userId);
       },
       update: function (userId, doc, fields, modifier) {
-        // the user must be logged in to create an incident
+        // the user must be logged in
         return (userId);
       },
       remove: function (userId, doc) {
@@ -191,10 +191,15 @@ if (Meteor.isServer) {
         return doc.creator === Meteor.user().profile.email;
       },
       fetch: ['creator']
-    });   
-
-
+    });
     
+    attackers.allow({
+      update: function (userId, doc, fields, modifier) {
+        // the user must be logged in 
+        return (userId);
+      }
+    });
+
 };
 
 if (Meteor.isClient) {

@@ -261,18 +261,13 @@ if (Meteor.isClient) {
             Meteor.subscribe("alerts-summary", onReady=function(){
                 refreshAlertsData();
             });
-            cnt=alertsCount.findOne();
+            var cnt=alertsCount.findOne();
             $('#alertsearchtext').val(Session.get('alertsearchtext'));
             if ( cnt ){
                 //debugLog('cnt exists alertsCount changed..updating text.')
                 $('#totalAlerts').text(cnt.count);
-            }
-            Deps.onInvalidate(function () {
-                //debugLog('alertsCount changed..refreshing alerts data.')
                 refreshAlertsData();
-            });              
-            
-        
+            }
         }); //end deps.autorun    
     };
  

@@ -10,6 +10,12 @@ Jeff Bryner jbryner@mozilla.com
 
 if (Meteor.isClient) {
 
+    Template.attackerdetails.events({
+        "change #attackerCategory": function(e,t){
+            attackers.update(Session.get('attackerID'), {$set: {'category':$('#attackerCategory').val()}});
+        }
+    });
+
    //details helpers
     Template.attackerdetails.thisalert = function (mongoalertid) {
         //attackers store a ref mongo id to alerts attacker.alerts.alertid
