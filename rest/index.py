@@ -248,7 +248,7 @@ def esAlertsSummary(begindateUTC=None, enddateUTC=None):
 def esLdapResults(begindateUTC=None, enddateUTC=None):
     resultsList = list()
     if begindateUTC is None:
-        begindateUTC = datetime.now() - timedelta(hours=12)
+        begindateUTC = datetime.now() - timedelta(hours=1)
         begindateUTC = toUTC(begindateUTC)
     if enddateUTC is None:
         enddateUTC = datetime.now()
