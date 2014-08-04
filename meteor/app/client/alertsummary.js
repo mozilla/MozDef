@@ -43,6 +43,14 @@ if (Meteor.isClient) {
             $(e.target).addClass("hover");
             $('ul:first',$(e.target)).css('visibility', 'visible');
         },
+        "click .btnAlertAck": function(e,t){
+            id = $(e.target).attr('data-target');
+            //acknowledge the alert
+            alerts.update(id, {$set: {'acknowledged':new Date()}});
+            alerts.update(id, {$set: {'acknowledgedby':Meteor.user().profile.email}});
+            //disable the button once ack'd
+            $(e.target).prop('disabled', true);
+        },
         "keyup #alertsearchtext": function(e,t){
             var code = e.which;
             if(code==13){//enter
@@ -152,7 +160,8 @@ if (Meteor.isClient) {
                                             utcepoch:1,
                                             summary:1,
                                             severity:1,
-                                            category:1
+                                            category:1,
+                                            acknowledged:1
                                             },
                                         sort: {utcepoch: 'desc'},
                                         limit: 100,
@@ -232,7 +241,14 @@ if (Meteor.isClient) {
                             
                             //return just the html we created as the column
                             return colObj.prop('outerHTML');
+                            },
+                        function(d) {
+                            if ( d.acknowledged ) {
+                                return '<button class="btn btn-mini btn-warning btnAlertAck" disabled data-target="' + d._id + '">ack</button>'
+                            }else{
+                                return '<button class="btn btn-mini btn-warning btnAlertAck" data-target="' + d._id + '">ack</button>'
                             }
+                        }
                         ])
                     .on('postRedraw',addIPDropDowns)
                     .on('postRender',addIPDropDowns)

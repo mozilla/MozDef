@@ -43,7 +43,8 @@ if (Meteor.isServer) {
                                 utcepoch:1,
                                 summary:1,
                                 severity:1,
-                                category:1
+                                category:1,
+                                acknowledged:1
                                 },
                            sort: {utcepoch: -1},
                            limit:100});
@@ -200,6 +201,12 @@ if (Meteor.isServer) {
       }
     });
 
+    alerts.allow({
+      update: function (userId, doc, fields, modifier) {
+        // the user must be logged in 
+        return (userId);
+      }
+    });
 };
 
 if (Meteor.isClient) {
