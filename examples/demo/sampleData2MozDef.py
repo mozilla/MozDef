@@ -90,9 +90,9 @@ def genRandomIPv4():
 def makeLogs():
     try:
         eventfiles = glob.glob(options.jsonglob)
-        eventfiles = ['./sampleevents/events-event.json']
+        #eventfiles = ['./sampleevents/events-event.json']
         #pick a random number of events to send
-        for i in range(0, random.randrange(20, 200)):
+        for i in range(1, random.randrange(20, 100)):
             #pick a random type of event to send
             eventfile = random.choice(eventfiles)
             #print(eventfile)
@@ -112,20 +112,15 @@ def makeLogs():
                 
                 event['tags'].append('demodata')
                 
-                if 'details' in event.keys():
+                #replace <randomipaddress> with a random ip address
+                if 'summary' in event.keys() and '<randomipaddress>' in event['summary']:
                     randomIP = genRandomIPv4()
-                    if 'sourceipaddress' in event['details']:
-                        event['details']['sourceipaddress'] = randomIP
+                    event['summary'] = event['summary'].replace("<randomipaddress>", randomIP)
+                    if 'details' not in event.keys():
+                        event['details'] = dict()
+                    event['details']['sourceipaddress'] = randomIP
+                    event['details']['sourceipv4address'] = randomIP                        
 
-                    if 'sourceipv4address' in event['details']:
-                        event['details']['sourceipv4address'] = randomIP                        
-                    
-                    if 'destinationipaddress' in event['details']:
-                        event['details']['destinationipaddress'] = randomIP
-                
-                    if 'destinationipv4address' in event['details']:
-                        event['details']['destinationipv4address'] = randomIP                
-                
                 #print(event['timestamp'], event['tags'], event['summary'])
 
                 logcache.put(json.dumps(event))
