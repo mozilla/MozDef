@@ -17,7 +17,7 @@ High level
 **********
 
 * Provide a platform for use by defenders to rapidly discover and respond to security incidents.
-* Automate interfaces to other systems like bunker, banhammer, mig
+* Automate interfaces to other systems like MIG, flowspec, load balancers, etc
 * Provide metrics for security events and incidents
 * Facilitate real-time collaboration amongst incident handlers
 * Facilitate repeatable, predictable processes for incident handling
@@ -27,15 +27,15 @@ Technical
 *********
 
 * Replace a SIEM
-* Scalable, should be able to handle thousands of events/s, provide fast searching, alerting and correlations and handle interactions between teams of incident handlers.
+* Scalable, should be able to handle thousands of events persecond, provide fast searching, alerting, correlation and handle interactions between teams of incident handlers.
 
 MozDef aims to provide traditional SIEM functionality including:
 
-* Accepts events/logs from your systems
-* Stores the events/logs
-* Facilitate searches
-* Facilitate alerting
-* Facilitate log management (archiving,restoration)
+* Accepting events/logs from a variety of systems
+* Storing events/logs
+* Facilitating searches
+* Facilitating alerting
+* Facilitating log management (archiving,restoration)
 
 It is non-traditional in that it:
 
@@ -50,8 +50,8 @@ Architecture
 ------------
 MozDef is based on open source technologies including:
 
-* Nginx (http(s) based log input)
-* RabbitMQ (message queue)
+* Nginx (http(s)-based log input)
+* RabbitMQ (message queue and amqp(s)-based log input)
 * uWSGI (supervisory control of python-based workers)
 * bottle.py (simple python interface for web request handling)
 * elasticsearch (scalable indexing and searching of JSON documents)
@@ -59,14 +59,15 @@ MozDef is based on open source technologies including:
 * MongoDB (scalable data store, tightly integrated to Meteor)
 * VERIS from verizon (open source taxonomy of security incident categorizations)
 * d3 (javascript library for data driven documents)
+* dc.js (javascript wrapper for d3 providing common charts, graphs)
 * three.js (javascript library for 3d visualizations)
 * Firefox (a snappy little web browser)
 
 Frontend processing
 *******************
 
-Frontend processing for MozDef consists of receiving a log (in json) over HTTP(S) or AMQP(S),
-doing data transformation including normalization, adding metainfo, etc. and pushing
+Frontend processing for MozDef consists of receiving an event/log (in json) over HTTP(S) or AMQP(S),
+doing data transformation including normalization, adding metadata, etc. and pushing
 the data to elasticsearch.
 
 Internally MozDef uses RabbitMQ to queue events that are still to be processed.
@@ -78,7 +79,7 @@ the RabbitMQ exchanges and elasticsearch indices.
 Status
 ------
 
-MozDef is in early proof of concept phases at Mozilla where we are using it to replace our current SIEM.
+MozDef is in production at Mozilla where we are using it to process over 300 million events per day.
 
 Roadmap
 -------
@@ -89,13 +90,13 @@ Near term:
 * Enhance the incident workflow UI to enable realtime collaboration
 * Enable basic plug-ins to the event input stream for meta data, additional parsing, categorization and basic machine learning
 * Support as many common event/log shippers as possible with repeatable recipies
+* 3D visualizations of threat actors
 
 Mid term:
 
 * Repeatable installation guides
 * Ready-made AMIs/downloadable ISOs
 * Correlation through machine learning, AI
-* 3D visualizations of threat actors
 * Base integration into Mozilla's defense mechanisms for automation
 
 Long term:
