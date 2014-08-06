@@ -61,7 +61,10 @@ While your MozDef container is running::
   root@fc4917f00ead:/# exit
 
 Docker config in AWS
-********************
+--------------------
+
+Summary
+*******
 
 If you don't want to install MozDef with docker on your own machine because for example it doesn't support docker or you fear you don't have enough memory, AWS supports docker.
 
@@ -73,6 +76,91 @@ If you don't want to install MozDef with docker on your own machine because for 
 3. Follow our docker config install `instructions`_
 4. Configure your security group to open the ports you need. Keep in mind that it's probably a bad idea to have a public facing elasticsearch.
 
+Detailed Steps
+**************
+Step by Step:
+    Sign into AWS
+    Choose EC2
+    Choose Images->AMIs
+    Find  Public Image ami-a7fdfee2 or a suitable Ubuntu 14.04 LTS(HVM) SSD 64bit server with HVM virtualization.
+    Choose Launch
+    Choose an instance type according to your budget. (at least a t2.small)
+    Choose next: configure instance details
+    Choose a network or create a VPC
+    Choose or create a new subnet
+    Choose to Assign a public IP
+    Under advanced details: user data choose 'as text' and enter #include https://get.docker.io
+    Choose next: add storage and add appropriate storage according to your budget
+    Choose next and add any tags you may want
+    Choose next and select any security group you may want to limit incoming traffic.
+    Choose launch and select an ssh key-pair or create a new one for ssh access to the instance.
+    
+    For easy connect instructions, select your instance in the Ec2 dashboard->instances menu and choose connect for instructions.
+    ssh into your new instance according to the instructions ^^
+    
+    clone the github repo to get the latest code:
+    from your home directory (/home/ubuntu if using the AMI instance from above)
+        sudo apt-get update
+        sudo apt-get install git
+        git clone https://github.com/jeffbryner/MozDef.git (or https://github.com/mozilla/mozdef upon release)
+        
+    change the settings.js file to match your install:
+    vim /home/ubuntu/MozDef/docker/conf/settings.js
+        <change rootURL,rootAPI, kibanaURL from localhost to the FQDN or ip address of your AMI instance: i.e. http://1.2.3.4 >
+        
+    Inbound port notes:
+    You will need to allow the AWS/docker instance to talk to the FQDN or ip address you specify in settings.js
+    or the web ui will likely fail as it tries to contact internal services.
+    i.e. you may need to setup custom TCP rules in your AWS security group to allow the instance to talk to itself
+    if you use the public IP on the ports specified in settings.js. (usually 3000 for meteor, 8081 for rest api, 9090 for kibana and 9200 for kibana/ES)
+
+    build docker:
+        cd MozDef/docker
+        sudo apt-get install make
+        sudo make build (this will take awhile)
+            [ make build-no-cache     (if needed use to disable docker caching routines or rebuild) 
+            [ at the end you should see a message like: Successfully built e8e075e66d8d ]
+
+    starting docker:
+        <build dkenter which will allow you to enter the docker container and control services, change settings, etc>
+            sudo apt-get install gcc
+            cd /tmp
+            curl https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz | tar -zxf-
+            cd util-linux-2.24
+            ./configure --without-ncurses
+            make nsenter
+            sudo cp nsenter /usr/local/bin
+            
+            sudo vim /usr/local/bin/dkenter
+                #!/bin/bash
+                
+                CNAME=$1
+                CPID=$(docker inspect --format '{{ .State.Pid }}' $CNAME)
+                nsenter --target $CPID --mount --uts --ipc --net --pid
+                
+            sudo chmod +x /usr/local/bin/dkenter
+
+        cd && cd MozDef/docker/
+        screen (running docker will not run in background session)
+        sudo make run
+        Browse to http://youripaddress:3000 for the MozDef UI
+
+    Build notes:
+    ************
+    You can sign in using any Persona-enabled service (i.e. any yahoo or gmail account will work)
+    supervisor config that starts everything is in /etc/supervisor/conf.d/supervisor.conf
+    MozDef runs as root in /opt/MozDef
+    Logs are in /var/log/mozdef
+    MozDef will automatically start sending sample events to itself. To turn this off:
+        0) get a new screen ( ctrl a c)
+        1) sudo docker ps (to get the container id)
+        2) sudo dkenter <containerid>
+        3) supervisorctl
+        4) stop realTimeEvents
+            
+
+    
+    
 .. _docker: https://www.docker.io/
 .. _instructions: http://mozdef.readthedocs.org/en/latest/installation.html#dockerfile
 
