@@ -78,7 +78,8 @@ If you don't want to install MozDef with docker on your own machine because for 
 
 Detailed Steps
 **************
-Step by Step:
+Step by Step::
+
     Sign into AWS
     Choose EC2
     Choose Images->AMIs
