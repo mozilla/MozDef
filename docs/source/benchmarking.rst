@@ -1,10 +1,10 @@
 Benchmarking
 ============
 
-Performance is important for a SIEM because it's where you want to see and analyze all your security events.
+Performance is important for a SIEM because it's where you want to store, search and analyze all your security events.
 
-You probably want it to handle a lot of new messages per second, be able to have a fast reply when you search and have fast correlation.
-Therefore, we provide some benchmarking scripts for MozDef to help you determine the performance of your setup.
+You will want it to handle a significant number of new events per second, be able to search quickly and perform fast correlation.
+Therefore, we provide some benchmarking scripts for MozDef to help you determine the performance of your setup. Performance tuning of elastic search can be complex and we highly recommend spending time tuning your environment.
 
 
 Elasticsearch
@@ -12,7 +12,7 @@ Elasticsearch
 
 Elasticsearch is the main backend component of MozDef.
 We strongly recommend you to have a 3+ nodes cluster to allow recovery and load balancing.
-During our tests, Elasticsearch recovered well after being hit too much.
+During our tests, Elasticsearch recovered well after being pushed to the limits of hardware, loosing and regaining nodes, and a variety of valid/invalid data. We provide the following scripts for you to use to test your own implementation.
 
 The scripts for Elasticsearch benchmarking are in `benchmarking/es/`.
 They use `nodejs`_ to allow asynchronous HTTP requests.
