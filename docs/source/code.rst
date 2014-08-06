@@ -12,22 +12,15 @@ To create a plugin, make a python class that presents a registration dictionary 
 
 ::
 
-  class message(object):
-      def __init__(self):
-          '''register our criteria for being passed a message
-             return a dict with fieldname:None to be sent anything with that field
-             return a dict with fieldname:Value to be sent anything with that field/value
-             return a string to be sent anything with any field matching that string evaluated as a regex.
-             set the priority if you have a preference for order of plugins to run.
-             0 goes first, 100 is assumed/default if not sent
-          '''
-          
-          rdict = dict()
-          rdict['details'] = dict()
-          rdict['details']['sourceipaddress'] = None
-          rdict['details']['destinationipaddress'] = None
-          self.registration = rdict
-          self.priority = 1
+class message(object):
+    def __init__(self):
+        '''register our criteria for being passed a message
+           as a list of lower case strings or values to match with an event's dictionary of keys or values
+           set the priority if you have a preference for order of plugins to run.
+           0 goes first, 100 is assumed/default if not sent
+        '''
+        self.registration = ['sourceipaddress', 'destinationipaddress']
+        self.priority = 20
           
 
 Message Processing
@@ -37,14 +30,16 @@ To process a message, define an onMessage function within your class as follows:
 
 ::
 
-    def onMessage(self, message):
-        return message
+def onMessage(self, message, metadata):
+    #do something interesting with the message or metadata
+    return (message, metadata)
 
 
-The plugin will receive a copy of the incoming event as a python dictionary in the 'message' variable. The plugin can do
-whatever it wants with this dictionary and return it to MozDef. Plugins will be called in priority order 0 to 100 if the 
-incoming event matches their registration criteria. i.e. If you register for sourceipaddress you will only get events containing
-the sourceipaddress field.
+The plugin will receive a copy of the incoming event as a python dictionary in the 'message' variable. The plugin can do whatever it wants with this dictionary and return it to MozDef. Plugins will be called in priority order 0 to 100 if the incoming event matches their registration criteria. i.e. If you register for sourceipaddress you will only get events containing the sourceipaddress field.
+
+If you return the message as None (i.e. message=None) the message will be dropped and not be processed any further. 
+If you modify the metadata the new values will be used when the message is posted to elastic search. You can use this
+to assign custom document types, set static document _id values, etc. 
 
 
 Plugin Registration
