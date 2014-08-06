@@ -42,7 +42,7 @@ httpsession.trust_env=False #turns of needless .netrc check for creds
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.DEBUG
+logger.level=logging.INFO
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -324,13 +324,13 @@ def initConfig():
     #how many alerts to create
     options.alertscount = getConfig('alertscount', 2, options.configfile)
     #how many minutes to wait between creating ^ alerts 
-    options.alertsminutesinterval = getConfig('alertsminutesinterval', 1, options.configfile)
+    options.alertsminutesinterval = getConfig('alertsminutesinterval', 5, options.configfile)
     options.lastalert = getConfig('lastalert', datetime.now() - timedelta(hours=1), options.configfile)
     
     #how many attackers to create
     options.attackerscount = getConfig('attackers', 1, options.configfile)
     #how many minutes to wait between creating ^ attackers 
-    options.attackersminutesinterval = getConfig('attackersminutesinterval', 1, options.configfile)
+    options.attackersminutesinterval = getConfig('attackersminutesinterval', 5, options.configfile)
     options.lastattacker = getConfig('lastattacker', datetime.now() - timedelta(hours=1), options.configfile)
 
 
