@@ -427,7 +427,7 @@ def checkBlockIPService():
 
 def initConfig():
     #change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone',
+    options.defaulttimezone = getConfig('defaulttimezone',
                                         'UTC',
                                         options.configfile)
     options.esservers = list(getConfig('esservers',
