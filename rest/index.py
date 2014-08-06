@@ -181,10 +181,12 @@ def index():
         return
 
 
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
+def toUTC(suspectedDate, localTimeZone=None):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
+    if localTimeZone is None:
+        localTimeZone=options.defaulttimezone    
     if type(suspectedDate) == str:
         objDate = parse(suspectedDate, fuzzy=True)
     elif type(suspectedDate) == datetime:
@@ -267,8 +269,8 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         q2.facet.add_term_facet('details.dn', size=20)
         results = es.search(q2, indices='events')
 
-        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com',
-            'mozillafoundation.org', 'org')
+        stoplist = ('o', 'example', 'dc', 'com', 'mozilla.com',
+            'example.com', 'org')
         for t in results.facets['details.dn'].terms:
             if t['term'] in stoplist:
                 continue
@@ -426,7 +428,7 @@ def checkBlockIPService():
 def initConfig():
     #change this to your default zone for when it's not specified
     options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
+                                        'UTC',
                                         options.configfile)
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
