@@ -15,7 +15,7 @@ From an event management point of view MozDef relies on Elastic Search for:
 This means if you use MozDef for your log management you can use the features of Elastic Search to store millions of events, archive them to Amazon if needed,
 index the fields of your events, and search them using highly capable interfaces like Kibana.
 
-Mozdef differs from other log management solutions that use Elastic Search in that it does not allow your log shippers direct contact with Elastic Search itself.
+MozDef differs from other log management solutions that use Elastic Search in that it does not allow your log shippers direct contact with Elastic Search itself.
 In order to provide advanced functionality like event correlation, aggregation and machine learning, MozDef inserts itself as a shim between your log shippers (rsyslog, syslog-ng, beaver, nxlog, heka, logstash)
 and Elastic Search. This means your log shippers interact with MozDef directly and MozDef handles translating their events as they make they're way to Elastic Search.
 
@@ -33,8 +33,8 @@ The logical flow of events is:
                    ++++++++++++                                  | cluster      |
                    ++++++++++++                                  |              |
                    | shipper  +–––––––+–––––––––––+              |              |
-                   +––––––––––+       |    MozDef ++–––––––––––––+              |
-                                      |    FrontEnd+             |              |
+                   +––––––––––+       |    MozDef +-–––––––––––––+              |
+                                      |    FrontEnd              |              |
                                       +–––––––––––+              |              |
                                                                  +––––––––––––––+
 
@@ -55,11 +55,12 @@ Event Enrichment
 To facilitate event correlation, MozDef allows you to write plugins to populate your event data with consistent meta-data customized for your environment. Through simple
 python plug-ins this allows you to accomplish a variety of event-related tasks like: 
 
+* further parse your events into more details
+* geoIP tag your events
+* correct fields not properly handled by log shippers
 * tag all events involving key staff
 * tag all events involving previous attackers or hits on a watchlist
-* correct fields not properly handled by log shippers
 * tap into your event stream for ancilary systems
-* geoIP tag your events
 * maintain 'last-seen' lists for assets, employees, attackers
 
 Event Correlation/Alerting
