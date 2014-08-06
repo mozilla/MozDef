@@ -1,0 +1,58 @@
+[
+  {
+    "tags": [
+      "ldap",
+      "example"
+    ],
+    "summary": "LDAP_SUCCESS john@example.com,o=com,dc=example srcIP=10.0.0.209",
+    "details": {
+      "dn": "john@example.com,o=com,dc=example",
+      "source": "Apr 17 00:05:02 ldap slapd[15932]: conn=25123333 fd=93 ACCEPT from IP=10.0.0.209:8325 (IP=0.0.0.0:389)\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=bind-openvpn,ou=logins,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=vpn,ou=logins,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 RESULT tag=97 err=0 text=\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND anonymous mech=implicit ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=john@example.com,o=com,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=john@example.com,o=com,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 RESULT tag=97 err=0 text=\n",
+      "srcip": "10.0.0.209",
+      "result": "LDAP_SUCCESS",
+      "success": true
+    }
+  },
+  {
+    "tags": [
+      "ldap",
+      "example"
+    ],
+    "summary": "LDAP_SUCCESS bob@example.com,o=com,dc=example srcIP=10.0.0.209",
+    "details": {
+      "dn": "bob@example.com,o=com,dc=example",
+      "source": "Apr 17 00:05:02 ldap slapd[15932]: conn=25123333 fd=93 ACCEPT from IP=10.0.0.209:8325 (IP=0.0.0.0:389)\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=bind-openvpn,ou=logins,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=vpn,ou=logins,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 RESULT tag=97 err=0 text=\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND anonymous mech=implicit ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=bob@example.com,o=com,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=bob@example.com,o=com,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 RESULT tag=97 err=0 text=\n",
+      "srcip": "10.0.0.209",
+      "result": "LDAP_SUCCESS",
+      "success": true
+    }
+  },
+  {
+    "tags": [
+      "ldap",
+      "example"
+    ],
+    "summary": "LDAP_SUCCESS mary@example.com,o=com,dc=example srcIP=10.0.0.209",
+    "details": {
+      "dn": "mary@example.com,o=com,dc=example",
+      "source": "Apr 17 00:05:02 ldap slapd[15932]: conn=25123333 fd=93 ACCEPT from IP=10.0.0.209:8325 (IP=0.0.0.0:389)\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=bind-openvpn,ou=logins,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=vpn,ou=logins,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 RESULT tag=97 err=0 text=\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND anonymous mech=implicit ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=mary@example.com,o=com,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=mary@example.com,o=com,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 RESULT tag=97 err=0 text=\n",
+      "srcip": "10.0.0.209",
+      "result": "LDAP_SUCCESS",
+      "success": true
+    }
+  },  
+  {
+    "tags": [
+      "ldap",
+      "example"
+    ],
+    "summary": "LDAP_SUCCESS sue@example.com,o=com,dc=example srcIP=10.0.0.209",
+    "details": {
+      "dn": "sue@example.com,o=com,dc=example",
+      "source": "Apr 17 00:05:02 ldap slapd[15932]: conn=25123333 fd=93 ACCEPT from IP=10.0.0.209:8325 (IP=0.0.0.0:389)\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=bind-openvpn,ou=logins,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=vpn,ou=logins,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 RESULT tag=97 err=0 text=\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND anonymous mech=implicit ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=sue@example.com,o=com,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=sue@example.com,o=com,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 RESULT tag=97 err=0 text=\n",
+      "srcip": "10.0.0.209",
+      "result": "LDAP_SUCCESS",
+      "success": true
+    }
+  }
+]

@@ -1,0 +1,66 @@
+[
+{
+    "tags": [
+      "ldap",
+      "example"
+    ],
+    "timestamp": "2014-08-05T20:38:39+00:00",
+    "summary": "LDAP_INVALID_CREDENTIALS john@example.com,o=com,dc=example srcIP=10.20.70.200",
+    "details": {
+      "dn": "john@example.com,o=com,dc=example",
+      "success": false,
+      "sourceipv4address": "10.20.70.200",
+      "result": "LDAP_INVALID_CREDENTIALS",
+      "srcip": "10.20.0.200",
+      "sourceipaddress": "10.20.0.200"
+    }
+},
+{
+    "tags": [
+      "ldap",
+      "example"
+    ],
+    "timestamp": "2014-08-05T20:38:39+00:00",
+    "summary": "LDAP_INVALID_CREDENTIALS bob@example.com,o=com,dc=example srcIP=10.20.70.200",
+    "details": {
+      "dn": "bob@example.com,o=com,dc=example",    
+      "success": false,
+      "sourceipv4address": "10.20.70.200",
+      "result": "LDAP_INVALID_CREDENTIALS",
+      "srcip": "10.20.0.200",
+      "sourceipaddress": "10.20.0.200"
+    }
+},
+{
+    "tags": [
+      "ldap",
+      "example"
+    ],
+    "timestamp": "2014-08-05T20:38:39+00:00",
+    "summary": "LDAP_INVALID_CREDENTIALS mary@example.com,o=com,dc=example srcIP=10.20.70.200",
+    "details": {
+      "dn": "mary@example.com,o=com,dc=example",
+      "success": false,
+      "sourceipv4address": "10.20.70.200",
+      "result": "LDAP_INVALID_CREDENTIALS",
+      "srcip": "10.20.0.200",
+      "sourceipaddress": "10.20.0.200"
+    }
+},
+{
+    "tags": [
+      "ldap",
+      "example"
+    ],
+    "timestamp": "2014-08-05T20:38:39+00:00",
+    "summary": "LDAP_INVALID_CREDENTIALS sue@example.com,o=com,dc=example srcIP=10.20.70.200",
+    "details": {
+      "dn": "sue@example.com,o=com,dc=example",
+      "success": false,
+      "sourceipv4address": "10.20.70.200",
+      "result": "LDAP_INVALID_CREDENTIALS",
+      "srcip": "10.20.0.200",
+      "sourceipaddress": "10.20.0.200"
+    }
+}
+]

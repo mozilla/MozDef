@@ -1,5 +1,6 @@
 [
 {
+    "duplicate": 12,
     "category": "syslog",
     "processid": "0",
     "severity": "NOTICE",

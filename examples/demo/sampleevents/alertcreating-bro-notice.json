@@ -1,0 +1,16 @@
+[
+  {
+    "category": "bro_notice",
+    "processid": "0",
+    "severity": "NOTICE",
+    "tags": ["nsm","bro","intel"],
+    "hostname": "nsm7",
+    "summary": "MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker Excessive HTTP errors for requests from <randomipaddress> 120 in 1.0 hr, eps: 0",
+    "file": "nsm",
+    "details": {
+      "payload": "",
+      "note": "MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker",
+      "sub": "120 in 1.0 hr, eps: 0"
+    }
+  }
+]
