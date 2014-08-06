@@ -84,9 +84,9 @@ MozDef is in production at Mozilla where we are using it to process over 300 mil
 Roadmap
 -------
 
-Near term:
+Initial Release:
 
-* Replace base SIEM functionality including log input, event management, search, alerts, basic correlations.
+* Facilitate replacing base SIEM functionality including log input, event management, search, alerts, basic correlations.
 * Enhance the incident workflow UI to enable realtime collaboration
 * Enable basic plug-ins to the event input stream for meta data, additional parsing, categorization and basic machine learning
 * Support as many common event/log shippers as possible with repeatable recipies
@@ -98,6 +98,10 @@ Mid term:
 * Ready-made AMIs/downloadable ISOs
 * Correlation through machine learning, AI
 * Base integration into Mozilla's defense mechanisms for automation
+* Fine tuning of interactions between meteor, mongo, dc.js
+* Support a variety of authentication/authorization schemes/technologies
+* Plain text version of attackers
+* Enhanced search for alerts, events, attackers within the MozDef UI
 
 Long term:
 
