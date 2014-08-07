@@ -15,7 +15,8 @@ if (Meteor.isClient) {
     //of alerts instead of subscribing to the large
     //alerts table.
     var alertsDep = new Deps.Dependency;
-    var currentCount=0
+    var currentCount=0;
+    var currentSearch=null;
 
     Template.alertssummary.events({
         "click .reset": function(e,t){
@@ -282,7 +283,11 @@ if (Meteor.isClient) {
             if ( cnt ){
                 //debugLog('cnt exists alertsCount changed..updating text.')
                 $('#totalAlerts').text(cnt.count);
-                refreshAlertsData();
+                if ( cnt.count != currentCount || Session.get('alertsearchtext') !=currentSearch ) {
+                    currentCount=cnt.count;
+                    currentSearch=Session.get('alertsearchtext');
+                    refreshAlertsData();
+                }
             }
         }); //end deps.autorun    
     };
