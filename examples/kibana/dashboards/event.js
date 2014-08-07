@@ -20,7 +20,7 @@ if (events.length > 5)
 else
   title_suffix = events.join(', ');
 dashboard.title = 'Event ' + title_suffix;
-dashboard.failover = false;
+dashboard.failover = true;
 dashboard.index = {
   interval: "day",
   pattern: "[events-]YYYYMMDD",

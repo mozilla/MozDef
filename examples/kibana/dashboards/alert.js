@@ -20,7 +20,7 @@ if (alerts.length > 5)
 else
   title_suffix = alerts.join(', ');
 dashboard.title = 'Alert ' + title_suffix;
-dashboard.failover = false;
+dashboard.failover = true;
 dashboard.index = {
   interval: "month",
   pattern: "[alerts-]YYYYMM",
