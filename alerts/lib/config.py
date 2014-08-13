@@ -13,7 +13,11 @@ import time
 import logging
 
 ALERTS = {
-
+    'bro_intel.AlertBroIntel': crontab(minute='*/1'),
+    'bro_notice.AlertBroNotice': crontab(minute='*/1'),
+    'bruteforce_ssh.AlertBruteforceSsh': crontab(minute='*/1'),
+    'cloudtrail.AlertCloudtrail': crontab(minute='*/1'),
+    'fail2ban.AlertFail2ban': crontab(minute='*/1'),
 }
 
 
