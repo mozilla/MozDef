@@ -21,7 +21,8 @@ app = Celery('alerts',
 CELERY_DISABLE_RATE_LIMITS = True
 CELERYD_CONCURRENCY = 1
 CELERY_IGNORE_RESULT = True
-
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 CELERY_DEFAULT_QUEUE = 'celery-default'
 CELERY_QUEUES = {
     'celery-default': {
