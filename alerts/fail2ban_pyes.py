@@ -13,8 +13,8 @@ import pyes
 
 class AlertFail2ban(AlertTask):
     def main(self):
-    	# look for events in last 10 mins
-    	date_timedelta = dict(minutes=10)
+        # look for events in last 10 mins
+        date_timedelta = dict(minutes=10)
         # Configure filters using pyes
         must = [
             pyes.TermFilter('_type', 'event'),
@@ -23,18 +23,18 @@ class AlertFail2ban(AlertTask):
         ]
         self.filtersManual(date_timedelta, must=must)
 
-    	# Search events
-    	self.searchEventsSimple()
-    	self.walkEvents()
+        # Search events
+        self.searchEventsSimple()
+        self.walkEvents()
 
     # Set alert properties
     def onEvent(self, event):
-    	category = 'fail2ban'
-    	tags = ['fail2ban']
-    	severity = 'NOTICE'
+        category = 'fail2ban'
+        tags = ['fail2ban']
+        severity = 'NOTICE'
 
-        # the summary of the alert is the one of the event
+        # the summary of the alert is the same as the event
         summary = event['_source']['summary']
 
         # Create the alert object based on these properties
-    	return self.createAlertDict(summary, category, tags, [event], severity)
+        return self.createAlertDict(summary, category, tags, [event], severity)

@@ -13,8 +13,8 @@ import pyes
 
 class AlertBruteforceSsh(AlertTask):
     def main(self):
-    	# look for events in last 15 mins
-    	date_timedelta = dict(minutes=15)
+        # look for events in last 15 mins
+        date_timedelta = dict(minutes=15)
         # Configure filters using pyes
         must = [
             pyes.TermFilter('_type', 'event'),
@@ -31,19 +31,19 @@ class AlertBruteforceSsh(AlertTask):
         ]
         self.filtersManual(date_timedelta, must=must, must_not=must_not)
 
-    	# Search aggregations on field 'sourceipaddress', keep 50 samples of events at most
-    	self.searchEventsAggreg('sourceipaddress', samplesLimit=50)
+        # Search aggregations on field 'sourceipaddress', keep 50 samples of events at most
+        self.searchEventsAggreg('sourceipaddress', samplesLimit=50)
         # alert when >= 5 matching events in an aggregation
-    	self.walkAggregations(threshold=2)
+        self.walkAggregations(threshold=2)
 
     # Set alert properties
     def onAggreg(self, aggreg):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
-    	category = 'bruteforce'
-    	tags = ['ssh']
-    	severity = 'NOTICE'
+        category = 'bruteforce'
+        tags = ['ssh']
+        severity = 'NOTICE'
 
         summary = ('{0} ssh bruteforce attempts by {1}'.format(aggreg['count'], aggreg['value']))
         # append first 3 hostnames
@@ -52,4 +52,4 @@ class AlertBruteforceSsh(AlertTask):
                 summary += ' on {0}'.format(e['_source']['details']['hostname'])
 
         # Create the alert object based on these properties
-    	return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+        return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

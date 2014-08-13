@@ -13,8 +13,8 @@ import pyes
 
 class AlertCloudtrail(AlertTask):
     def main(self):
-    	# look for events in last 160 hours
-    	date_timedelta = dict(hours=160)
+        # look for events in last 160 hours
+        date_timedelta = dict(hours=160)
         # Configure filters using pyes
         must = [
             pyes.TermFilter('_type', 'cloudtrail'),
@@ -22,15 +22,15 @@ class AlertCloudtrail(AlertTask):
         ]
         self.filtersManual(date_timedelta, must=must)
 
-    	# Search events
-    	self.searchEventsSimple()
-    	self.walkEvents()
+        # Search events
+        self.searchEventsSimple()
+        self.walkEvents()
 
     # Set alert properties
     def onEvent(self, event):
-    	category = 'AWSCloudtrail'
-    	tags = ['cloudtrail','aws']
-    	severity = 'INFO'
+        category = 'AWSCloudtrail'
+        tags = ['cloudtrail','aws']
+        severity = 'INFO'
 
         summary = ('{0} called {1} from {2}'.format(event['_source']['userIdentity']['userName'], event['_source']['eventName'], event['_source']['sourceIPAddress']))
         if event['_source']['eventName'] == 'RunInstances':
@@ -46,4 +46,4 @@ class AlertCloudtrail(AlertTask):
                 summary += (' starting {0} '.format(i['instanceId']))
 
         # Create the alert object based on these properties
-    	return self.createAlertDict(summary, category, tags, [event], severity)
+        return self.createAlertDict(summary, category, tags, [event], severity)
