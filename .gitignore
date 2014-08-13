@@ -2,3 +2,4 @@
 meteor/packages
 *.pyc
 celebeat-schedule.*
+results
