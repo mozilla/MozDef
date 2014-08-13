@@ -34,6 +34,10 @@ ES = {
 	'servers': ['http://localhost:9200']
 }
 
+OPTIONS = {
+    'defaulttimezone': 'UTC',
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

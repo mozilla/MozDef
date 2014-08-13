@@ -7,19 +7,42 @@
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
+# Jeff Bryner jbryner@mozilla.com
+
+import json
+import kombu
+import pytz
+import pyes
 
 from datetime import datetime
 from datetime import timedelta
+from dateutil.parser import parse
 from collections import Counter
-import json
-
 from celery import Task
 from celery.utils.log import get_task_logger
+from config import RABBITMQ, ES, OPTIONS
 
-import kombu
-import pyes
+def toUTC(suspectedDate, localTimeZone=None):
+    '''make a UTC date out of almost anything'''
+    utc = pytz.UTC
+    objDate = None
+    if localTimeZone is None:
+        localTimeZone= OPTIONS['defaulttimezone']    
+    if type(suspectedDate) in (str, unicode):
+        objDate = parse(suspectedDate, fuzzy=True)
+    elif type(suspectedDate) == datetime:
+        objDate = suspectedDate
 
-from config import RABBITMQ, ES
+    if objDate.tzinfo is None:
+        objDate = pytz.timezone(localTimeZone).localize(objDate)
+        objDate = utc.normalize(objDate)
+    else:
+        objDate = utc.normalize(objDate)
+    if objDate is not None:
+        objDate = utc.normalize(objDate)
+
+    return objDate
+
 
 class AlertTask(Task):
 
@@ -128,8 +151,8 @@ class AlertTask(Task):
         must, should and must_not are pyes filter objects lists
         see http://pyes.readthedocs.org/en/latest/references/pyes.filters.html
         """
-        begindateUTC = datetime.utcnow() - timedelta(**date_timedelta)
-        enddateUTC = datetime.utcnow()
+        begindateUTC = toUTC(datetime.now() - timedelta(**date_timedelta))
+        enddateUTC = toUTC(datetime.now())
         qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
             from_value=begindateUTC, to_value=enddateUTC))
         q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
@@ -290,7 +313,7 @@ class AlertTask(Task):
         Create an alert dict
         """
         alert = {
-            'utctimestamp': datetime.utcnow().isoformat(),
+            'utctimestamp': toUTC(datetime.now()).isoformat(),
             'severity': severity,
             'summary': summary,
             'category': category,
@@ -343,7 +366,8 @@ class AlertTask(Task):
                     'index': alertResultES['_index'],
                     'type': alertResultES['_type'],
                     'id': alertResultES['_id']})
-                event['_source']['alerttimestamp'] = datetime.utcnow().isoformat()
+                event['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
+
 
                 self.es.update(event['_index'], event['_type'],
                     event['_id'], document=event['_source'])
