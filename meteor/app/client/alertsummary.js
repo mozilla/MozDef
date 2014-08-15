@@ -10,11 +10,6 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
-    
-    //register a dependency we can control via the count
-    //of alerts instead of subscribing to the large
-    //alerts table.
-    var alertsDep = new Deps.Dependency;
     var currentCount=0;
     var currentSearch=null;
 
@@ -174,9 +169,7 @@ if (Meteor.isClient) {
             alertsData.forEach(function (d) {
                 d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
                 d.jdate=new Date(Date.parse(d.utctimestamp));
-                d.dd=moment.utc(d.utctimestamp)
-                d.month = d.dd.get('month');
-                d.hour = d.dd.get('hour')
+                d.dd=moment.utc(d.utctimestamp);
                 d.epoch=d.dd.unix();
             });
             //deps.autorun gets called with and without dc/ndx initialized
@@ -192,13 +185,12 @@ if (Meteor.isClient) {
                 ndx = crossfilter(alertsData);
             }
             
-            if ( ndx.size() >0){             
+            if ( ndx.size() >0){
                 var all = ndx.groupAll();
                 var severityDim = ndx.dimension(function(d) {return d.severity;});
                 var categoryDim = ndx.dimension(function(d) {return d.category;});
                 var hourDim = ndx.dimension(function (d) {return d3.time.hour(d.jdate);});
                 var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
-                var format2d = d3.format("02d");
                 var volumeByHourGroup = hourDim.group().reduceCount();
 
                 ringChartCategory
@@ -208,23 +200,23 @@ if (Meteor.isClient) {
                     .label(function(d) {return d.key; })
                     .innerRadius(30)
                     .expireCache();
-        
+
                 ringChartSeverity
                     .width(150).height(150)
                     .dimension(severityDim)
                     .group(severityDim.group())
                     .label(function(d) {return d.key; })
                     .innerRadius(30)
-                    .expireCache();
+                    .expireCache();          
+
                 dc.dataCount(".record-count")
                     .dimension(ndx)
-                    .group(all);            
+                    .group(all); 
+
                 dc.dataTable(".alerts-data-table")
                     .dimension(epochDim)
                     .size(100)
                     .group(function (d) {
-                            //return d.dd.getFullYear() + "/" + format2d(d.dd.getMonth() + 1) + "/" + format2d(d.dd.getDate());
-                            //return moment.duration(d.dd).humanize() +' ago';
                             return d.dd.local().format("ddd, hA"); 
                             })
                     .sortBy(function(d) {
@@ -247,9 +239,9 @@ if (Meteor.isClient) {
                             },
                         function(d) {
                             if ( d.acknowledged ) {
-                                return '<button class="btn btn-mini btn-warning btnAlertAck" disabled data-target="' + d._id + '">ack</button>'
+                                return '<button class="btn btn-mini btn-warning btnAlertAck" disabled data-target="' + d._id + '">ack</button>';
                             }else{
-                                return '<button class="btn btn-mini btn-warning btnAlertAck" data-target="' + d._id + '">ack</button>'
+                                return '<button class="btn btn-mini btn-warning btnAlertAck" data-target="' + d._id + '">ack</button>';
                             }
                         }
                         ])
