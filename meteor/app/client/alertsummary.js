@@ -87,11 +87,13 @@ if (Meteor.isClient) {
           var words=anelement.text().split(' ');
           //console.log(words);
           words.forEach(function(w){
+            //clean up potential interference chars
+            w=w.replace(/,|:|;/g,'')
             if ( isIPv4(w) ){
                 //console.log(w);
               anelement.
                 highlight(w,
-                          {wordsOnly:true,
+                          {wordsOnly:false,
                            element: "em",
                           className:"ipaddress"});
             }
