@@ -19,7 +19,7 @@ class AlertFail2ban(AlertTask):
         must = [
             pyes.TermFilter('_type', 'event'),
             pyes.TermFilter('program', 'fail2ban'),
-            pyes.QueryFilter(pyes.MatchQuery("summary","has been banned","phrase"))
+            pyes.QueryFilter(pyes.MatchQuery("summary","banned for","phrase"))
         ]
         self.filtersManual(date_timedelta, must=must)
 
