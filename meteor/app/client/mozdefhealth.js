@@ -92,4 +92,8 @@ if (Meteor.isClient) {
             }
         }); //end deps.autorun
      };
+
+    Template.mozdefhealth.destroyed = function () {
+        dc.deregisterAllCharts();    
+    };     
 }

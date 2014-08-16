@@ -16,8 +16,8 @@ if (Meteor.isClient) {
     Template.alertssummary.events({
         "click .reset": function(e,t){
             Session.set('alertsearchtext','');
-            dc.filterAll();
-            dc.redrawAll();
+            dc.filterAll("alertssummary");
+            dc.redrawAll("alertssummary");
             },
         "click .ipmenu-whois": function(e,t){
             Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
@@ -58,9 +58,9 @@ if (Meteor.isClient) {
     });   
      
     Template.alertssummary.rendered = function() {
-        var ringChartCategory   = dc.pieChart("#ringChart-category");
-        var ringChartSeverity   = dc.pieChart("#ringChart-severity");
-        var volumeChart         = dc.barChart("#volumeChart");
+        var ringChartCategory   = dc.pieChart("#ringChart-category","alertssummary");
+        var ringChartSeverity   = dc.pieChart("#ringChart-severity","alertssummary");
+        var volumeChart         = dc.barChart("#volumeChart","alertssummary");
         
         var ndx = crossfilter();
 
@@ -177,10 +177,10 @@ if (Meteor.isClient) {
             //and if we no longer do (search didn't match)
             //clear filters..redraw.
             if ( alertsData.length === 0 && ndx.size()>0){
-                console.log('clearing ndx/dc.js');
-                dc.filterAll();
+                //console.log('clearing ndx/dc.js');
+                dc.filterAll("alertssummary");
                 ndx.remove();
-                dc.redrawAll();
+                dc.redrawAll("alertssummary");
             } else {
                 ndx = crossfilter(alertsData);
             }
@@ -198,31 +198,31 @@ if (Meteor.isClient) {
                     .dimension(categoryDim)
                     .group(categoryDim.group())
                     .label(function(d) {return d.key; })
-                    .innerRadius(30)
-                    .expireCache();
+                    .innerRadius(30);
+                    //.expireCache();
 
                 ringChartSeverity
                     .width(150).height(150)
                     .dimension(severityDim)
                     .group(severityDim.group())
                     .label(function(d) {return d.key; })
-                    .innerRadius(30)
-                    .expireCache();          
+                    .innerRadius(30);
+                    //.expireCache();          
 
-                dc.dataCount(".record-count")
+                dc.dataCount(".record-count","alertssummary")
                     .dimension(ndx)
                     .group(all); 
 
-                dc.dataTable(".alerts-data-table")
+                dc.dataTable(".alerts-data-table","alertssummary")
                     .dimension(epochDim)
                     .size(100)
+                    .order(d3.descending)
+                    .sortBy(function(d) {
+                        return d.utcepoch;
+                    })                    
                     .group(function (d) {
                             return d.dd.local().format("ddd, hA"); 
                             })
-                    .sortBy(function(d) {
-                        return d.utcepoch;
-                    })
-                    .order(descNumbers)                    
                     .columns([
                         function(d) {return d.jdate;},
                         function(d) {return '<a href="/alert/' + d.esmetadata.id + '">mozdef</a><br> <a href="' + d.url + '"  target="_blank">kibana</a>';},
@@ -246,21 +246,21 @@ if (Meteor.isClient) {
                         }
                         ])
                     .on('postRedraw',addIPDropDowns)
-                    .on('postRender',addIPDropDowns)
-                    .expireCache();
+                    .on('postRender',addIPDropDowns);
+                    //.expireCache();
                 
                 volumeChart
                     .width(600)
                     .height(150)
                     .dimension(hourDim)
                     .group(volumeByHourGroup)
-                    .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]))
-                    .expireCache();
-                dc.renderAll();
+                    .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]));
+                    //.expireCache();
+                dc.renderAll("alertssummary");
             }
     
         };
-        
+
         Deps.autorun(function(comp) {
             //subscribe to the number of alerts
             //and to the summary of alerts
@@ -283,8 +283,11 @@ if (Meteor.isClient) {
                     refreshAlertsData();
                 }
             }
-        }); //end deps.autorun    
+        }); //end deps.autorun
     };
  
+    Template.alertssummary.destroyed = function () {
+        dc.deregisterAllCharts('alertssummary');    
+    };
 
 };

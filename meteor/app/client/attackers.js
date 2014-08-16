@@ -30,6 +30,9 @@ if (Meteor.isClient) {
     var container = null;
     var categoryDim = null;
     var agoDim = null;
+    var ringChartAttackerCategory = null;
+    var ringChartLastSeen = null;
+    var ndx = null;
 
     Template.attackers.events({
         "click #btnReset": function(e){
@@ -217,9 +220,9 @@ if (Meteor.isClient) {
 
     Template.attackers.rendered = function () {
         //console.log('entering draw attackers');
-        var ringChartCategory   = dc.pieChart("#ringChart-category");
-        var ringChartLastSeen   = dc.pieChart("#ringChart-lastseen");
-        var ndx = crossfilter();
+        ringChartAttackerCategory   = dc.pieChart("#ringChart-category","attackers");
+        ringChartLastSeen   = dc.pieChart("#ringChart-lastseen","attackers");
+        ndx = crossfilter();
 
         scene.name='attackerScene';
 
@@ -488,7 +491,7 @@ if (Meteor.isClient) {
                 $('#LastSeen').prop('title', lastSeenFilters);
             }
             $('#Categories').prop('title', "");
-            categoryFilters=ringChartCategory.filters();
+            categoryFilters=ringChartAttackerCategory.filters();
             if (categoryFilters.length>0) {
                 $('#Categories').prop('title', categoryFilters);
             }            
@@ -527,7 +530,7 @@ if (Meteor.isClient) {
                 allGroup = ndx.groupAll();
                 categoryDim = ndx.dimension(function(d) {return d.category;});
                 agoDim = ndx.dimension(function (d) {return d.ago;});
-                ringChartCategory
+                ringChartAttackerCategory
                     .width(150).height(150)
                     .dimension(categoryDim)
                     .group(categoryDim.group())
@@ -543,7 +546,7 @@ if (Meteor.isClient) {
                     .innerRadius(30)
                     .expireCache()
                     .on('filtered',filterCharacters);                    
-                dc.renderAll();
+                dc.renderAll('attackers');
             }
         };//end refreshAttackerData
 
@@ -596,6 +599,11 @@ if (Meteor.isClient) {
         baseCharacter = null;
         clock=null;
         container = null;
+        dc.deregisterAllCharts('attackers');
+        ringChartAttackerCategory = null;
+        ringChartLastSeen = null;
+        ndx = null;
+        
 
     };//end template.attackers.destroyed
 
