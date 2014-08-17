@@ -61,6 +61,8 @@ if (Meteor.isClient) {
         var ringChartCategory   = dc.pieChart("#ringChart-category","alertssummary");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity","alertssummary");
         var volumeChart         = dc.barChart("#volumeChart","alertssummary");
+        var alertsTable         = dc.dataTable(".alerts-data-table","alertssummary");
+        var alertsCounts        = dc.dataCount(".record-count","alertssummary");
         
         var ndx = crossfilter();
 
@@ -182,17 +184,17 @@ if (Meteor.isClient) {
                 ndx.remove();
                 dc.redrawAll("alertssummary");
             } else {
-                ndx = crossfilter(alertsData);
+                ndx = crossfilter(alertsData);               
             }
-            
-            if ( ndx.size() >0){
+
+            if ( ndx.size() >0 ){
                 var all = ndx.groupAll();
                 var severityDim = ndx.dimension(function(d) {return d.severity;});
                 var categoryDim = ndx.dimension(function(d) {return d.category;});
                 var hourDim = ndx.dimension(function (d) {return d3.time.hour(d.jdate);});
                 var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
                 var volumeByHourGroup = hourDim.group().reduceCount();
-
+                
                 ringChartCategory
                     .width(150).height(150)
                     .dimension(categoryDim)
@@ -209,19 +211,19 @@ if (Meteor.isClient) {
                     .innerRadius(30);
                     //.expireCache();          
 
-                dc.dataCount(".record-count","alertssummary")
+                alertsCounts
                     .dimension(ndx)
                     .group(all); 
 
-                dc.dataTable(".alerts-data-table","alertssummary")
+                alertsTable
                     .dimension(epochDim)
                     .size(100)
-                    .order(d3.descending)
+                    .order(descNumbers)
                     .sortBy(function(d) {
                         return d.utcepoch;
                     })                    
                     .group(function (d) {
-                            return d.dd.local().format("ddd, hA"); 
+                            return d.dd.local().format("ddd, hhA"); 
                             })
                     .columns([
                         function(d) {return d.jdate;},
@@ -246,8 +248,8 @@ if (Meteor.isClient) {
                         }
                         ])
                     .on('postRedraw',addIPDropDowns)
-                    .on('postRender',addIPDropDowns);
-                    //.expireCache();
+                    .on('postRender',addIPDropDowns)
+                    .expireCache();
                 
                 volumeChart
                     .width(600)
