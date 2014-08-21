@@ -18,6 +18,10 @@ Table of Contents
   benchmarking
   contributors
 
+Screenshots
+===========
++:doc:`screenshots`
+
 Indices and tables
 ==================
 
