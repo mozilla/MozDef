@@ -85,7 +85,6 @@ RUN (curl -L https://install.meteor.com/ | /bin/sh \
 	&& npm install -g meteorite \
 	&& ln -s /usr/bin/nodejs /usr/bin/node \
 	&& cd /opt/MozDef/meteor \
-	&& mrt update \
 	&& /usr/local/bin/mrt add iron-router \
 	&& /usr/local/bin/mrt add accounts-persona)
 
