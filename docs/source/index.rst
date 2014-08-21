@@ -35,4 +35,4 @@ Contact
 
 * opsec+mozdef INSERTAT mozilla.com
 * Jeff Bryner, jbryner INSERTAT mozilla.com @0x7eff
-* Anthony Verez, averez INSERTAT mozilla.com @netantho
+* Anthony Verez, @netantho
