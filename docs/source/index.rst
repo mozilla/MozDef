@@ -20,7 +20,7 @@ Table of Contents
 
 Screenshots
 ===========
-+:doc:`screenshots`
+:doc:`screenshots`
 
 Indices and tables
 ==================
