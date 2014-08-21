@@ -12,15 +12,13 @@ Table of Contents
   overview
   introduction
   installation
+  screenshots
   usage
   advanced_settings
   code
   benchmarking
   contributors
 
-Screenshots
-===========
-:doc:`screenshots`
 
 Indices and tables
 ==================
