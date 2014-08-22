@@ -3,7 +3,7 @@ Installation
 
 `For the Mozilla setup, please have a look at the MozDef Mana page.`
 
-The installation process has been tested on CentOS 6 and RHEL 6.
+The installation process has been tested on CentOS 6, RHEL 6 and Ubuntu 14.
 
 Docker
 ------
@@ -13,7 +13,7 @@ You can quickly install MozDef with an automated build generation using `docker`
 Dockerfile
 ***********
 
-After installing `docker`_, use this to build a new image::
+After `installing docker`_, use this to build a new image::
 
   cd docker && sudo make build
 
@@ -33,7 +33,7 @@ You're done! Now go to:
 Get a terminal in the container
 *******************************
 
-An usual problem in Docker is that once you start a container, you cannot enter in it.
+An common problem in Docker is that once you start a container, you cannot enter it as there is no ssh by default.
 
 To solve this, a solution is to use `nsenter` present in the `util-linux` > 2.23 package.
 Debian and Ubuntu currently provide the 2.20 version so you need to download and compile the source code::
@@ -103,7 +103,7 @@ Step by Step::
     from your home directory (/home/ubuntu if using the AMI instance from above)
         sudo apt-get update
         sudo apt-get install git
-        git clone https://github.com/jeffbryner/MozDef.git (or https://github.com/mozilla/mozdef upon release)
+        git clone https://github.com/jeffbryner/MozDef.git
         
     change the settings.js file to match your install:
     vim /home/ubuntu/MozDef/docker/conf/settings.js
@@ -163,6 +163,7 @@ Step by Step::
     
     
 .. _docker: https://www.docker.io/
+.. _installing docker: https://docs.docker.com/installation/#installation
 .. _instructions: http://mozdef.readthedocs.org/en/latest/installation.html#dockerfile
 
 Elasticsearch nodes
