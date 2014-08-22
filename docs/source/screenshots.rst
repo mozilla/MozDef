@@ -1,7 +1,7 @@
 Screenshots
 ==========
 
-Here are some screen captures of some of the screens within MozDef.
+Here are a few screen captures of key portions of the MozDef user interface.
 
 
 Health and Status
