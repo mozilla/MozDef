@@ -1,8 +1,6 @@
 Installation
 ============
 
-`For the Mozilla setup, please have a look at the MozDef Mana page.`
-
 The installation process has been tested on CentOS 6, RHEL 6 and Ubuntu 14.
 
 Docker
