@@ -38,3 +38,4 @@ Contact
 * opsec+mozdef INSERTAT mozilla.com
 * Jeff Bryner, jbryner INSERTAT mozilla.com @0x7eff
 * Anthony Verez, @netantho
+* https://lists.mozilla.org/listinfo/dev-mozdef
