@@ -33,18 +33,19 @@ if (Meteor.isServer) {
                                 value : mozdef.enableBlockIP }); 
 
         Accounts.config({
-            forbidClientAccountCreation:"true",
+            forbidClientAccountCreation:true,
         });
 
         Accounts.onCreateUser(function(options, user) {
           console.log('creating user');
           console.log(user);
-          user.profile = {};
-          user.profile.email = user.services.persona.email;
-          console.log('User email is ' + user.profile.email);
+          if ( user.services.persona.email ) {
+            user.profile = {};
+            user.profile.email = user.services.persona.email;
+            console.log('User email is: ' + user.profile.email);
+          }
           return user;
         });
-        
         
         //update veris if missing:
         console.log("checking the veris framework reference enumeration");

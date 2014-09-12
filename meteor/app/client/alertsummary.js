@@ -10,12 +10,13 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
-    var currentCount=0;
+    var currentCount = 0;
     var currentSearch=null;
 
     Template.alertssummary.events({
         "click .reset": function(e,t){
-            Session.set('alertsearchtext','');
+            Session.set('alertssearchtext','');
+            Session.set('alertsfiltertext','');
             dc.filterAll("alertssummary");
             dc.redrawAll("alertssummary");
             },
@@ -47,11 +48,23 @@ if (Meteor.isClient) {
             //disable the button once ack'd
             $(e.target).prop('disabled', true);
         },
-        "keyup #alertsearchtext": function(e,t){
+        "keyup #alertsfiltertext": function(e,t){
             var code = e.which;
             if(code==13){//enter
                 e.preventDefault();
-                Session.set('alertsearchtext',$('#alertsearchtext').val());
+                Session.set('alertsfiltertext',$('#alertsfiltertext').val());
+                refreshAlertsData();
+            }
+        },
+        "click .alertssearch": function (e,t){
+            e.preventDefault();
+            Session.set('alertssearchtext',$('#alertssearchtext').val());
+            Session.set('alertssearchtime',$('#searchTime').val());
+            try{
+                Session.set('alertsrecordlimit',parseInt($('#recordLimit').val()));
+            }catch(e){
+                debugLog("Error parsing recordLimit, setting to default value");
+                Session.set('alertsrecordlimit',100);
             }
         }
         
@@ -152,28 +165,50 @@ if (Meteor.isClient) {
         
         
         refreshAlertsData=function(){
-            var alertsData=alerts.find(
-                                        {summary: {$regex:Session.get('alertsearchtext')}},
-                                        {fields:{
-                                            esmetadata:1,
-                                            utctimestamp:1,
-                                            utcepoch:1,
-                                            summary:1,
-                                            severity:1,
-                                            category:1,
-                                            acknowledged:1
-                                            },
-                                        sort: {utcepoch: 'desc'},
-                                        limit: 100,
-                                        reactive:false})
-                .fetch();
-            //parse, group data for the d3 charts
-            alertsData.forEach(function (d) {
-                d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
-                d.jdate=new Date(Date.parse(d.utctimestamp));
-                d.dd=moment.utc(d.utctimestamp);
-                d.epoch=d.dd.unix();
-            });
+            timeperiod=Session.get('alertssearchtime');
+            if ( timeperiod ==='tail' || timeperiod == 'none' ){
+                beginningtime=moment(0);
+            }else{
+                //determine the utcepoch range
+                beginningtime=moment().utc();
+                //expect timeperiod like '1 days'
+                timevalue=Number(timeperiod.split(" ")[0]);
+                timeunits=timeperiod.split(" ")[1];       
+                beginningtime.subtract(timevalue,timeunits);
+            }
+            
+            try{
+
+                var alertsData=alerts.find(
+                                {$and: [{summary: {$regex:Session.get('alertssearchtext')}},
+                                {summary: {$regex:Session.get('alertsfiltertext')}}],
+                                utcepoch: {$gte: beginningtime.unix()}},
+                                {fields:{
+                                        _id:1,
+                                        esmetadata:1,
+                                        utctimestamp:1,
+                                        utcepoch:1,
+                                        summary:1,
+                                        severity:1,
+                                        category:1,
+                                        acknowledged:1
+                                        },
+                                    sort: {utcepoch: -1},
+                                    limit: Session.get('alertsrecordlimit'),
+                                    reactive:false})
+                    .fetch();
+                //parse, group data for the d3 charts
+                alertsData.forEach(function (d) {
+                    d.url = getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id;
+                    d.jdate=new Date(Date.parse(d.utctimestamp));
+                    d.dd=moment.utc(d.utctimestamp);
+                    d.epoch=d.dd.unix();
+                });
+            }
+            catch (e){
+                debugLog("Error while searching/filtering alerts:")
+                debugLog(e);
+            }
             //deps.autorun gets called with and without dc/ndx initialized
             //so check if we used to have data
             //and if we no longer do (search didn't match)
@@ -271,17 +306,21 @@ if (Meteor.isClient) {
             Meteor.subscribe("alerts-count", onReady=function(){
                currentCount=alertsCount.findOne().count;
             });
-            Meteor.subscribe("alerts-summary", onReady=function(){
+            Meteor.subscribe("alerts-summary", Session.get('alertssearchtext'), Session.get('alertssearchtime'),Session.get('alertsrecordlimit'), onReady=function(){
                 refreshAlertsData();
             });
+            $('#searchTime').val(Session.get('alertssearchtime'));
             var cnt=alertsCount.findOne();
-            $('#alertsearchtext').val(Session.get('alertsearchtext'));
+            $('#alertsfiltertext').val(Session.get('alertsfiltertext'));
+            $('#alertssearchtext').val(Session.get('alertssearchtext'));
+            $('#recordLimit').val(Session.get('alertsrecordlimit'));
             if ( cnt ){
                 //debugLog('cnt exists alertsCount changed..updating text.')
                 $('#totalAlerts').text(cnt.count);
-                if ( cnt.count != currentCount || Session.get('alertsearchtext') !=currentSearch ) {
-                    currentCount=cnt.count;
-                    currentSearch=Session.get('alertsearchtext');
+                if ( cnt.count != currentCount || currentSearch != Session.get('alertsfiltertext') + Session.get('alertssearchtext') + Session.get('alertssearchtime' ) + Session.get('alertsrecordlimit')  ) {
+                    currentCount = cnt.count;
+                    currentSearch = Session.get('alertsfiltertext') + Session.get('alertssearchtext') + Session.get('alertssearchtime' ) + Session.get('alertsrecordlimit');
+
                     refreshAlertsData();
                 }
             }

@@ -10,8 +10,51 @@ Anthony Verez averez@mozilla.com
 -->
 
 <template name="alertssummary">
-
-<div class="container">    
+<div class="container">
+    <div class="row-fluid span12">
+        <button class="btn btn-mini btn-info" data-toggle="collapse" data-target="#alertSearch">search</button>    
+        <div id='alertSearch' class="collapse">
+            <form class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label" for="searchSummary">Summary</label>
+                    <div class="controls">
+                    <input type="search" name="searchSummary" class="search-query span7" id="alertssearchtext" placeholder="summary field regex search">
+                    </div>
+                </div>            
+                
+                <div class="control-group">
+                    <label class="control-label" for="searchTime">Time Period</label>
+                    <div class="controls">                
+                        <select id="searchTime" name="searchTime" class="input-medium" title="Time Period">
+                            <option value='tail'>Last 100 events</option>
+                            <option value='1 hours'>Last Hour</option>
+                            <option value='2 hours'>Last 2 Hours</option>
+                            <option value='6 hours'>Last 6 hours</option>
+                            <option value='1 days'>Last day</option>
+                            <option value='2 days'>Last 2 days</option>
+                            <option value='7 days'>Last 7 days</option>
+                            <option value='30 days'>Last 30 days</option>
+                            <option value='none'>None</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="recordLimit">Record Limit</label>
+                    <div class="controls">
+                    <input type="search" name="recordLimit" class="span2" id="recordLimit" placeholder="# records">
+                    </div>
+                </div>                
+                <div class="control-group">
+                    <div class="controls">
+                        <button class="btn btn-mini alertssearch">search</button>
+                    </div>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</div>
+<div class="container">
     <div id="charts" class="row-fluid span12">
             <div id="ringChart-category" class="span3 text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5></div>
             <div id="volumeChart" class="span5 text-center"><h5 class="upperwhite">Volume <span class="filter"></span></h5></div>
@@ -22,7 +65,7 @@ Anthony Verez averez@mozilla.com
         <div class="span3 record-count">
             <span class="filter-count"></span> selected/<span class="total-count"></span> displayed/total: <span id="totalAlerts"></span>
         </div>
-        <div class="span7"><input type="search" class="search-query" style="width:inherit;" id="alertsearchtext" placeholder="summary field regex search"></div>
+        <div class="span7"><input type="search" class="search-query" style="width:inherit;" id="alertsfiltertext" placeholder="summary field regex filter"></div>
     </div>
     <div class="row-fluid span12">
         <div id="alerts-data-table" >

@@ -154,6 +154,7 @@ td{
     text-align: center;
 }    
 
+/*login ui css to hide the local account/password signup options */
 .logins-wrapper .svgtextlabel {
   font-size: 20px;
   color: white;
