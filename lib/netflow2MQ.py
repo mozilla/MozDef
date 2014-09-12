@@ -161,12 +161,12 @@ def main():
             # Number of flows exported in this packet (1-30)
             (header['version'], header['count']) = struct.unpack('!HH',buf[0:4])
             if header['version'] != 5:
-                print "Not NetFlow v5!"
+                logger.error( "Not NetFlow v5!")
                 continue
             
             # It's pretty unlikely you'll ever see more then 1000 records in a 1500 byte UDP packet
             if header['count'] <= 0 or header['count'] >= 1000:
-                print "Invalid count %s" % header['count']
+                logger.error("Invalid count %s" % header['count'])
                 continue
             
             # Current time in milliseconds since the export device booted
@@ -183,8 +183,7 @@ def main():
             header['engineid'] = socket.ntohl(struct.unpack('B', buf[21])[0])
             # First two bits hold the sampling mode; remaining 14 bits hold value of sampling interval
             header['samplinginterval'] = struct.unpack('!H', buf[22:24])[0] & 0b0011111111111111
-            
-            #print header
+
             
             for i in range(0, header['count']):
                 try:
@@ -231,12 +230,12 @@ def main():
                     
                     nfevent = dict(utctimestamp=toUTC(datetime.now()).isoformat())
                     nfevent['tags'] = ['netflow']
-                    nfevent['summary'] = '{0}:{1} --> {2}:{3}'.format(record['sourceaddress'], record['sourceport'], record['destinationaddress'], record['destinationport'])
+                    nfevent['summary'] = '{0}:{1} --> {2}:{3}'.format(record['sourceipaddress'], record['sourceport'], record['destinationipaddress'], record['destinationport'])
                     nfevent['details'] = record
                     logcache.put(json.dumps(nfevent))
-                    print(json.dumps(nfevent))
+                    logger.debug(json.dumps(nfevent))
                 except Exception as e:
-                    print(e)
+                    logger.error('%r'%e)
                     continue
 
 
