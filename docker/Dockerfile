@@ -65,17 +65,17 @@ ADD conf/settings.js /opt/MozDef/meteor/app/lib/settings.js
 ADD conf/config.py /opt/MozDef/alerts/lib/config.py
 
 # elasticsearch
-RUN (curl -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.1.tar.gz  | tar -C /opt -xz \
-	&& /bin/ln -s /opt/elasticsearch-1.0.1 /opt/elasticsearch \
+RUN (curl -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.2.tar.gz  | tar -C /opt -xz \
+	&& /bin/ln -s /opt/elasticsearch-1.3.2 /opt/elasticsearch \
 	&& /opt/elasticsearch/bin/plugin --install elasticsearch/marvel/latest \
 	&& rm /opt/elasticsearch/config/elasticsearch.yml)
 # ADD conf/elasticsearch/elasticsearch.yml /opt/elasticsearch/config/ # BUG https://github.com/dotcloud/docker/issues/2446
-ADD conf/elasticsearch.yml /opt/elasticsearch-1.0.1/config/
+ADD conf/elasticsearch.yml /opt/elasticsearch-1.3.2/config/
 
 
 # Kibana
-RUN (curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.0.0.tar.gz |tar -C /opt -xz \
-       && /bin/ln -s /opt/kibana-3.0.0 /opt/kibana)
+RUN (curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz |tar -C /opt -xz \
+       && /bin/ln -s /opt/kibana-3.1.0 /opt/kibana)
 #can't add from the local relative dir, so add from github
 ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
 ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
