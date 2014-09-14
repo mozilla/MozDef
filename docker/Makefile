@@ -26,7 +26,8 @@ build-no-cache:
 	docker build --no-cache -t $(NAME):$(VERSION) .
 
 run:
-	docker run -p 3000:3000 -p 9090:9090 -p 9200:9200 -p 8080:8080 -p 8081:8081 -t -i $(NAME):$(VERSION)
+	docker run -p 3000:3000 -p 9090:9090 -p 9200:9200 -p 8080:8080 -p 8081:8081 \
+		-h $(NAME) -t -i $(NAME):$(VERSION)
 
 debug:build
 	docker run -p 3000:3000 -p 9090:9090 -p 9200:9200 -p 8080:8080 -p 8081:8081 \
@@ -36,7 +37,7 @@ debug:build
 		-v $(shell pwd)/container/var/log/mongodb:/var/log/mongodb \
 		-v $(shell pwd)/container/var/log/nginx:/var/log/nginx \
 		-v $(shell pwd)/container/var/log/mozdef:/var/log/mozdef \
-	 	-t -i $(NAME):$(VERSION) /bin/bash
+	 	-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
 
 
 try: build run
