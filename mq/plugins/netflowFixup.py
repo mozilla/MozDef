@@ -4,27 +4,23 @@
 # Copyright (c) 2014 Mozilla Corporation
 #
 # Contributors:
-# Anthony Verez averez@mozilla.com
+# Jeff Bryner jbryner@mozilla.com
+
 
 class message(object):
     def __init__(self):
-        '''register our criteria for being passed a message
-           as a list of lower case strings or values to match with an event's dictionary of keys or values
-           set the priority if you have a preference for order of plugins to run. 0 goes first, 100 is assumed/default if not sent
         '''
-        self.registration = ['network,netflow']
-        self.priority = 10
-
+        takes an incoming message
+        and sets the doc_type
+        '''
+    
+        self.registration = ['netflow']
+        self.priority = 5
+ 
     def onMessage(self, message, metadata):
+        # set the doc type
+        # to avoid data type conflicts with other doc types 
+        # (int v string, etc)
+        metadata['doc_type']= 'netflow'
 
-        fields = ['tags', 'summary', 'category', 'severity']
-
-        if 'details' in message.keys():
-            # details.something -> something
-            for field in fields:
-                if field in message['details'].keys():
-                    message[field] = message['details'][field]
-                    del message['details'][field]
-
-        return (message, metadata)
-
+        return (message, metadata) 
