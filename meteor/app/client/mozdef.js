@@ -14,7 +14,7 @@ if (Meteor.isClient) {
     Meteor.startup(function () {
       Session.set('verisfilter','');
       Session.set('alertssearchtext','');
-      Session.set('alertssearchtime','none');
+      Session.set('alertssearchtime','tail');
       Session.set('alertsfiltertext','');
       Session.set('alertsrecordlimit',100);
       Session.set('attackerlimit','10');

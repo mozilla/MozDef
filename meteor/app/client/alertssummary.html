@@ -12,7 +12,7 @@ Anthony Verez averez@mozilla.com
 <template name="alertssummary">
 <div class="container">
     <div class="row-fluid span12">
-        <button class="btn btn-mini btn-info" data-toggle="collapse" data-target="#alertSearch">search</button>    
+        <button class="btn btn-mini" data-toggle="collapse" data-target="#alertSearch">search</button>    
         <div id='alertSearch' class="collapse">
             <form class="form-horizontal">
                 <div class="control-group">
@@ -26,7 +26,7 @@ Anthony Verez averez@mozilla.com
                     <label class="control-label" for="searchTime">Time Period</label>
                     <div class="controls">                
                         <select id="searchTime" name="searchTime" class="input-medium" title="Time Period">
-                            <option value='tail'>Last 100 events</option>
+                            <option value='tail'>Latest events</option>
                             <option value='1 hours'>Last Hour</option>
                             <option value='2 hours'>Last 2 Hours</option>
                             <option value='6 hours'>Last 6 hours</option>
