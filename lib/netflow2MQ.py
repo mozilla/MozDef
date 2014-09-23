@@ -227,13 +227,14 @@ def main():
                     record['destinationmask'] = data2[6]
             
                     #publish record
+                    if str(record['sourceport']) not in options.sourceportignore.split(','):
                     
-                    nfevent = dict(utctimestamp=toUTC(datetime.now()).isoformat())
-                    nfevent['tags'] = ['netflow']
-                    nfevent['summary'] = '{0}:{1} --> {2}:{3}'.format(record['sourceipaddress'], record['sourceport'], record['destinationipaddress'], record['destinationport'])
-                    nfevent['details'] = record
-                    logcache.put(json.dumps(nfevent))
-                    logger.debug(json.dumps(nfevent))
+                        nfevent = dict(utctimestamp=toUTC(datetime.now()).isoformat())
+                        nfevent['tags'] = ['netflow']
+                        nfevent['summary'] = '{0}:{1} --> {2}:{3}'.format(record['sourceipaddress'], record['sourceport'], record['destinationipaddress'], record['destinationport'])
+                        nfevent['details'] = record
+                        logcache.put(json.dumps(nfevent))
+                        logger.debug(json.dumps(nfevent))
                 except Exception as e:
                     logger.error('%r'%e)
                     continue
@@ -267,6 +268,9 @@ def initConfig():
     
     #netflow options
     options.netflowport = getConfig('netflowport', 2056, options.configfile)
+    #comma separated list of ports to ignore/drop
+    #to avoid capturing return traffic
+    options.sourceportignore = getConfig('sourceportignore', '', options.configfile)
 
 
 if __name__ == '__main__':
