@@ -28,9 +28,8 @@ class message(object):
                     if search:
                         message['details']['alert_type'] = search.group('alert_type')
                         message['details']['entity_type'] = search.group('entity_type')
-                        message['details']['sourcehostname'] = search.group('source_host')
+                        message['details']['hostname'] = search.group('source_host')
                         message['details']['entity'] = search.group('entity')
                         message['details']['alert_message'] = search.group('alert_message')
 
         return (message, metadata)
-
