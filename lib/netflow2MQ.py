@@ -155,7 +155,16 @@ def main():
     while True:
         try:
             buf, address = sock.recvfrom(1500)
+            netflowsource=address[0]
+            netflowsource=socket.getfqdn(netflowsource)
             
+            #is the sender in a whitelist of accepted senders?
+            if len(options.senderwhitelist) > 0:
+                if netflowsource not in options.senderwhitelist.split(','):
+                    logger.debug('ignoring: {0}'.format(netflowsource))
+                    continue
+            
+
             header = {}
             # NetFlow export format version number
             # Number of flows exported in this packet (1-30)
@@ -193,6 +202,8 @@ def main():
                     data2 = struct.unpack('!BBBHHBB',buf[base+37:base+46])
             
                     record = header
+                    # Netflow source
+                    record['hostname'] = netflowsource
                     # Source IP addressess
                     record['sourceipaddress'] = inet_ntoa(buf[base+0:base+4])
                     # Destination IP addressess
@@ -230,7 +241,7 @@ def main():
                     if str(record['sourceport']) not in options.sourceportignore.split(','):
                     
                         nfevent = dict(utctimestamp=toUTC(datetime.now()).isoformat())
-                        nfevent['tags'] = ['netflow']
+                        nfevent['tags'] = ['netflow', 'network']
                         nfevent['summary'] = '{0}:{1} --> {2}:{3}'.format(record['sourceipaddress'], record['sourceport'], record['destinationipaddress'], record['destinationport'])
                         nfevent['details'] = record
                         logcache.put(json.dumps(nfevent))
@@ -271,6 +282,8 @@ def initConfig():
     #comma separated list of ports to ignore/drop
     #to avoid capturing return traffic
     options.sourceportignore = getConfig('sourceportignore', '', options.configfile)
+    #to avoid capturing traffic from unwanted netflow senders
+    options.senderwhitelist = getConfig('senderwhitelist', '', options.configfile)
 
 
 if __name__ == '__main__':
