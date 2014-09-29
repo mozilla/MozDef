@@ -34,8 +34,8 @@ ES = {
         'servers': ['http://localhost:9200']
 }
 
-ES = {
-        'servers': ['http://localhost:9200']
+OPTIONS = {
+        'defaulttimezone': 'UTC'
 }
 
 LOGGING = {
