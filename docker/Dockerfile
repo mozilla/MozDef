@@ -63,6 +63,7 @@ RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysq
 ADD conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 ADD conf/settings.js /opt/MozDef/meteor/app/lib/settings.js
 ADD conf/config.py /opt/MozDef/alerts/lib/config.py
+ADD conf/sampleData2MozDef.conf /opt/MozDef/examples/demo/sampleData2MozDef.conf
 
 # elasticsearch
 RUN (curl -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.2.tar.gz  | tar -C /opt -xz \
