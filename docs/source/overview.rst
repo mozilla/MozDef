@@ -26,8 +26,8 @@ High level
 Technical
 *********
 
-* Replace a SIEM
-* Scalable, should be able to handle thousands of events persecond, provide fast searching, alerting, correlation and handle interactions between teams of incident handlers.
+* Replace a Security Information and Event Management (SIEM)
+* Scalable, should be able to handle thousands of events per second, provide fast searching, alerting, correlation and handle interactions between teams of incident handlers.
 
 MozDef aims to provide traditional SIEM functionality including:
 
@@ -86,7 +86,7 @@ Roadmap
 
 Initial Release:
 
-* Facilitate replacing base SIEM functionality including log input, event management, search, alerts, basic correlations.
+* Facilitate replacing base SIEM functionality including log input, event management, search, alerts, basic correlations
 * Enhance the incident workflow UI to enable realtime collaboration
 * Enable basic plug-ins to the event input stream for meta data, additional parsing, categorization and basic machine learning
 * Support as many common event/log shippers as possible with repeatable recipies
@@ -106,6 +106,6 @@ Mid term:
 Long term:
 
 * Integration into common defense mechanisms used outside Mozilla
-* Enhanced visualizations and interactions including alternative interfaces (myo,omnidirectional treadmills, oculus rift)
+* Enhanced visualizations and interactions including alternative interfaces (myo, omnidirectional treadmills, oculus rift)
 
 
