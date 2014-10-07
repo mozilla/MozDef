@@ -38,12 +38,13 @@ Jeff Bryner jbryner@mozilla.com
         </div>        
     </div>
 
-    <div class="row span6 center">
+    <div class="row span7 center">
         <ul class="nav nav-tabs">
             <li class="tabnav active"><a href="#maintab">Main</a></li>
             <li class="tabnav"><a href="#notestab">Notes</a></li>
             <li class="tabnav"><a href="#referencestab">References</a></li>
             <li class="tabnav"><a href="#theoriestab">Theories</a></li>
+            <li class="tabnav"><a href="#timestampstab">Timestamps</a></li>
             <li class="tabnav"><a href="#mitigationstab">Mitigations</a></li>
             <li class="tabnav"><a href="#lessonstab">Lessons Learned</a></li>
         </ul>
@@ -96,6 +97,7 @@ Jeff Bryner jbryner@mozilla.com
                   <option {{ isselected 'Eradication' phase }}>Eradication</option>
                   <option {{ isselected 'Recovery' phase }}>Recovery</option>
                   <option {{ isselected 'Lessons Learned' phase }}>Lessons Learned</option>
+                  <option {{ isselected 'Closed' phase }}>Lessons Learned</option>
                 </select>
               </div>
             </div>
@@ -215,7 +217,60 @@ Jeff Bryner jbryner@mozilla.com
             </fieldset>
         </form>
     </div>
-    
+
+    <div id="timestampstab" class="row span8 center tabcontent">
+        <form id="timestampsform" class="form-horizontal" >
+            <fieldset>
+                <div class="control-group">
+                    <label class="control-label" for="timestamp">Timestamp:</label>
+                    <div class="controls">
+                        <input id="timestamp" class="input-xlarge" type="text" value="" placeholder="date/time" required>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="timestampDescription">Description:</label>
+                    <div class="controls">
+                        <textarea id="timestampDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <button id="saveTimestamp" type="submit" class="btn btn-primary submit">Save</button>
+                    </div>
+                </div>
+                <!-- table of existing items-->
+                <div class="control-group">
+                <label class="pull-left" >Existing Timestamps:</label>
+                <table id="timeline" class="table table-striped table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <td></td>
+                            <td>Timestamp</td>
+                            <td>Description</td>
+                            <td>Created</td>
+                            <td>Creator</td>
+                            <td>Status</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{#each timestamps}}
+                        <tr>
+                            <td><button class="btn timestampedit" data-timestampid={{_id}}>edit</button></td>
+                            <td>{{timestamp}}</td>
+                            <td>{{description}}</td>
+                            <td>{{dateCreated}}</td>
+                            <td>{{creator}}</td>
+                            <td>{{status}}</td>
+                            <td><button class="btn btn-danger timestampdelete" data-timestampid={{_id}}>delete</button></td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+                </div>
+            </fieldset>
+        </form>
+    </div>    
+
     <div id="mitigationstab" class="row span8 center tabcontent">
         <form id="mitigationsform" class="form-horizontal" >
             <fieldset>

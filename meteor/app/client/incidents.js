@@ -307,7 +307,59 @@ if (Meteor.isClient) {
                 $pull: {theories: {"_id": id}}
             });
             e.preventDefault();
-        },        
+        },
+
+        "click #saveTimestamp": function(e,template){
+            if (! timestamp) {
+                timestamp=models.timestamp();
+                timestamp.creator=Meteor.user().profile.email;
+            }
+
+            timestamp.timestamp=dateOrNull($('#timestamp').val());
+            timestamp.description=$('#timestampDescription').val();
+            timestamp.lastModifier=Meteor.user().profile.email;
+
+            if ( timestamp.timestamp && timestamp.description ) {
+                //limited support for modify a set, so pull/add
+                incidents.update(Session.get('incidentID'), {
+                    $pull: {timestamps: {"_id": timestamp._id}}
+                });
+
+                incidents.update(Session.get('incidentID'), {
+                    $addToSet: {timestamps:timestamp}
+                });
+
+                $('#timestamp').val('');
+                $('#timestampDescription').val('');
+                timestamp=null;
+                e.preventDefault();
+            }
+
+        },
+
+        "click .timestampedit": function(e){
+            timestamp=models.timestamp();
+            timestamp._id= $(e.target).attr('data-timestampid');
+            //elemMatch not available on client side..iterate the theories for a match.
+            timestamps=incidents.findOne({'_id':Session.get('incidentID')},
+                                  {timestamps:{$elemMatch:{'_id': timestamp._id}}},
+                                  { "timestamps.$": 1 }
+                                  ).timestamps;
+            timestamp=_.findWhere(timestamps, {'_id': timestamp._id});
+            if (timestamp != undefined) {
+                $('#timestamp').val(timestamp.timestamp);
+                $('#timestampDescription').val(timestamp.description);
+            }
+            e.preventDefault();
+        }, 
+
+        "click .timestampdelete": function(e){
+            id = $(e.target).attr('data-timestampid');
+            incidents.update(Session.get('incidentID'), {
+                $pull: {timestamps: {"_id": id}}
+            });
+            e.preventDefault();
+        },
 
         "click #saveMitigation": function(e,template){
             if (! mitigation ){

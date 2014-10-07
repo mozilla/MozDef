@@ -28,6 +28,7 @@ models={
             references:[],
             lessons:[],
             mitigations:[],
+            timestamps:[],
             phase:"Identification",
             timeline: {reported:"",
                         verified:"",
@@ -64,6 +65,18 @@ models={
             'evidence': []
         };
     },
+
+    timestamp: function() {
+        return {
+            '_id': Meteor.uuid(),
+            'dateCreated': today,
+            'timestamp': today,
+            'description': '',
+            'creator': '',
+            'status': '',
+            'lastModifier': ''
+        };
+    },    
 
     mitigation: function() {
         return {
