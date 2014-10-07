@@ -21,5 +21,23 @@ if (Meteor.isClient) {
         return url;
     };
     
+    Template.alertdetails.events({
+        "click .makeincident": function(event, template) {
+            event.preventDefault();
+            newIncident=models.incident();
+            newIncident.summary= template.data.summary,
+            newIncident.dateOpened=dateOrNull(template.data.utctimestamp),            
+            newid=incidents.insert(newIncident);
+            //add a link to this alert in the references
+            incidents.update(newid, {
+                $addToSet: {references:template.firstNode.baseURI}
+            });
+            //debugLog(template.firstNode.baseURI);
+            //reroute to full blown edit form after this minimal input is complete
+            Router.go('/incident/' + newid + '/edit');
+        }
+    });
+    
+    
 
 }

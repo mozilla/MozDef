@@ -12,6 +12,7 @@ Anthony Verez averez@mozilla.com
 <template name="alertdetails">
 <div class="container">
     <div class="row center">
+        <div><button class="btn btn-danger makeincident" data-alertid={{esmetadata.id}}>Escalate To Incident</button></div>
         <div id="alert" >
 
             <table class="table table-reactive table-hover table-condensed" id="alert-table">
@@ -26,11 +27,11 @@ Anthony Verez averez@mozilla.com
                 </thead>
                 <tbody>
 			<tr>
-				<td>{{utctimestamp}}</td>
+				<td class="alerttimestamp">{{utctimestamp}}</td>
                 <td><a target="_blank" href="{{kibanaurl}}">open in kibana</a></td>
 				<td>{{severity}}</td>
 				<td>{{category}}</td>
-                <td>{{summary}}</td>
+                <td class="alertsummary">{{summary}}</td>
 			</tr>
                 </tbody>
             </table>

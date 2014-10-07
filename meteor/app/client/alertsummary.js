@@ -19,7 +19,7 @@ if (Meteor.isClient) {
             Session.set('alertsfiltertext','');
             dc.filterAll("alertssummary");
             dc.redrawAll("alertssummary");
-            },
+            },           
         "click .ipmenu-whois": function(e,t){
             Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalwhoiswindow').modal()
