@@ -10,6 +10,7 @@
 
 import json
 import logging
+import math
 import pyes
 import pytz
 import random
@@ -33,6 +34,29 @@ def initLogger():
     sh = logging.StreamHandler(sys.stderr)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
+
+
+def isNumber(s):
+    'check if a token is numeric, return bool'
+    try:
+        float(s)  # for int, long and float
+    except ValueError:
+        try:
+            complex(s)  # for complex
+        except ValueError:
+            return False
+    return True
+
+
+def digits(n):
+    '''return the number of digits in a number'''
+    if n > 0:
+        digits = int(math.log10(n))+1
+    elif n == 0:
+        digits = 1
+    else:
+        digits = int(math.log10(-n))+2
+    return digits
 
 
 def toUTC(suspectedDate, localTimeZone=None):
