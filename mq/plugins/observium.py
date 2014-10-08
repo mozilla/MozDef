@@ -31,5 +31,10 @@ class message(object):
                         message['details']['hostname'] = search.group('source_host')
                         message['details']['entity'] = search.group('entity')
                         message['details']['alert_message'] = search.group('alert_message')
+                        # tag the message
+                        if 'tags' in message.keys() and isinstance(message['tags'], list):
+                            message['tags'].append('alert')
+                        else:
+                            message['tags'] = ['alert']                        
 
         return (message, metadata)
