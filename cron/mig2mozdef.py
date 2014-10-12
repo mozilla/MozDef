@@ -68,7 +68,7 @@ def main():
         lastrun=str(options.lastrun.isoformat())
         today=datetime.utcnow().isoformat()+'+00:00'
         # set the max num of items to 50k. At 600kB per item, that's already ~30MB of json body.
-        url = options.mighost+'/api/v1/search?type=command&status=done&threatfamily=compliance&report=complianceitems&limit=50000&before='+today+'&after='+lastrun
+        url = options.mighost+'/api/v1/search?type=command&status=success&threatfamily=compliance&report=complianceitems&limit=50000&before='+today+'&after='+lastrun
         url = url.replace('+00:00', 'Z')
         r = requests.get(url,
             cert=(options.sslclientcert, options.sslclientkey),
