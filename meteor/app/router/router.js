@@ -39,6 +39,12 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
 
+    this.route('incidentsveris', {
+        path: '/incidents/veris',
+        template: 'incidentsveris',
+        layoutTemplate: 'layout'
+    });
+
     this.route('incidentedit', {
         path: '/incident/:_id/edit',
         waitOn: function() {

@@ -23,6 +23,9 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
 from ipwhois import IPWhois
+from bson.son import SON
+from pymongo import MongoClient
+from bson import json_util
 
 options = None
 dbcursor = None
@@ -74,15 +77,15 @@ def index():
     return(esLdapResults())
 
 
-@route('/alerts')
-@route('/alerts/')
+@route('/veris')
+@route('/veris/')
 @enable_cors
 def index():
     if request.body:
         request.body.read()
         request.body.close()
     response.content_type = "application/json"
-    return(esAlertsSummary())
+    return(verisSummary())
 
 
 @route('/kibanadashboards')
@@ -181,12 +184,10 @@ def index():
         return
 
 
-def toUTC(suspectedDate, localTimeZone=None):
+def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone    
     if type(suspectedDate) == str:
         objDate = parse(suspectedDate, fuzzy=True)
     elif type(suspectedDate) == datetime:
@@ -217,36 +218,6 @@ def isIPv4(ip):
     except:
         return False
 
-
-def esAlertsSummary(begindateUTC=None, enddateUTC=None):
-    resultsList = list()
-    if begindateUTC is None:
-        begindateUTC = datetime.now() - timedelta(hours=12)
-        begindateUTC = toUTC(begindateUTC)
-    if enddateUTC is None:
-        enddateUTC = datetime.now()
-        enddateUTC = toUTC(enddateUTC)
-    try:
-
-        #q=S().es(urls=['http://{0}:{1}'.format(options.esserver,options.esport)]).query(_type='alert').filter(utctimestamp__range=[begindateUTC.isoformat(),enddateUTC.isoformat()])
-        #f=q.facet_raw(alerttype={"terms" : {"script_field" : "_source.type","size" : 500}})
-
-        #get all alerts
-        #q= S().es(urls=['http://{0}:{1}'.format(options.esserver,options.esport)]).query(_type='alert')
-        q= S().es(urls=list('{0}'.format(s) for s in options.esservers)).query(_type='alert')
-        #create a facet field using the entire 'category' field  (not the sub terms) and filter it by date. 
-        f=q.facet_raw(\
-            alerttype={"terms" : {"script_field" : "_source.category"},\
-            "facet_filter":{'range': {'utctimestamp': \
-                                     {'gte': begindateUTC.isoformat(), 'lte': enddateUTC.isoformat()}}}\
-
-            })
-        return(json.dumps(f.facet_counts()['alerttype']))
-
-    except Exception as e:
-        sys.stderr.write('%r' % e)
-
-
 def esLdapResults(begindateUTC=None, enddateUTC=None):
     resultsList = list()
     if begindateUTC is None:
@@ -269,8 +240,8 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         q2.facet.add_term_facet('details.dn', size=20)
         results = es.search(q2, indices='events')
 
-        stoplist = ('o', 'example', 'dc', 'com', 'mozilla.com',
-            'example.com', 'org')
+        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com',
+            'mozillafoundation.org', 'org')
         for t in results.facets['details.dn'].terms:
             if t['term'] in stoplist:
                 continue
@@ -425,10 +396,42 @@ def checkBlockIPService():
             sys.stderr.write('Failed to connect to the Banhammer DB\n')    
 
 
+def verisSummary(verisRegex=None):
+    try:
+        # aggregate the veris tags from the incidents collection and return as json
+        client = MongoClient(options.mongohost, options.mongoport)
+        # use meteor db
+        incidents= client.meteor['incidents']
+        #iveris=incidents.aggregate([
+                                   #{"$match":{"tags":{"$exists":True}}},
+                                   #{"$unwind" : "$tags" },
+                                   #{"$match":{"tags":{"$regex":''}}}, #regex for tag querying
+                                   #{"$group": {"_id": "$tags", "hitcount": {"$sum": 1}}}, # count by tag
+                                   #{"$sort": SON([("hitcount", -1), ("_id", -1)])}, #sort 
+                                   #])
+        
+        iveris=incidents.aggregate([
+                                    
+                                   {"$match":{"tags":{"$exists":True}}},
+                                   {"$unwind" : "$tags" },
+                                   {"$match":{"tags":{"$regex":''}}}, #regex for tag querying
+                                   { "$project" : { "dateOpened" : 1 , 
+                                                   "tags" : 1 ,
+                                                   "phase": 1,
+                                                   "_id": 0
+                                                   } }
+                                   ])        
+        if 'ok' in iveris.keys() and 'result' in iveris.keys():
+            return json.dumps(iveris['result'], default=json_util.default)
+        else:
+            return json.dumps(list())
+    except Exception as e:
+            sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))            
+
 def initConfig():
     #change this to your default zone for when it's not specified
-    options.defaulttimezone = getConfig('defaulttimezone',
-                                        'UTC',
+    options.defaultTimeZone = getConfig('defaulttimezone',
+                                        'US/Pacific',
                                         options.configfile)
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
@@ -462,7 +465,9 @@ def initConfig():
     options.cifhosturl = getConfig('cifhosturl',
                                    'http://localhost/',
                                    options.configfile)
-
+    # mongo connectivity options
+    options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
+    options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
     # check any service you'd like at startup rather than waiting
     # for a client request.
