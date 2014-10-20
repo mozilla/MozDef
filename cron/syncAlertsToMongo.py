@@ -87,12 +87,15 @@ def getESAlerts(es):
 
 def ensureIndexes(mozdefdb):
     '''
-    make sure we've got or create an index on the utcepoch field in descending order
-    to make it easy on the alerts screen queries.
+    make sure we've got or create
+    1) an index on the utcepoch field in descending order
+       to make it easy on the alerts screen queries.
+    2) an index on esmetadata.id for correlation to ES
     
     '''
     alerts = mozdefdb['alerts']
     alerts.ensure_index([('utcepoch',-1)])
+    alerts.ensure_index([('esmetadata.id',1)])
     
 def updateMongo(mozdefdb, esAlerts):
     alerts = mozdefdb['alerts']
