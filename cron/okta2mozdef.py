@@ -85,12 +85,14 @@ def main():
                 if 'published' in event.keys():
                     if toUTC(event['published'])>options.lastrun:
                         try:
-                            event['utctimestamp']=toUTC(event['published']).isoformat()
-                            event['category'] = 'okta'
-                            event['tags'] = ['okta']
+                            mozdefEvent = dict()
+                            mozdefEvent['utctimestamp']=toUTC(event['published']).isoformat()
+                            mozdefEvent['category'] = 'okta'
+                            mozdefEvent['tags'] = ['okta']
                             if 'action' in event.keys() and 'message' in event['action'].keys():
-                                event['summary'] = event['action']['message']
-                            jbody=json.dumps(event)
+                                mozdefEvent['summary'] = event['action']['message']
+                            mozdefEvent['details'] = event
+                            jbody=json.dumps(mozdefEvent)
                             res=es.index(index='events',doc_type='okta',doc=jbody)
                             logger.debug(res)
                         except Exception as e:
