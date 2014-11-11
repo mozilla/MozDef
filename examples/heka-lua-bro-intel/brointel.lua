@@ -6,60 +6,49 @@
 -- Contributors:
 -- Anthony Verez averez@mozilla.com
 -- Mike Trinkala mtrinkala@mozilla.com
+-- Jeff Bryner jbryner@mozilla.com
 
-require "lpeg"
-require "string"
--- Some magic for parsing tab-separated logs
-local sep = lpeg.P"\t"
-local elem = lpeg.C((1-sep)^0)
-local grammar = -lpeg.P"#" * lpeg.Ct(elem * (sep * elem)^0) -- ignore comment, split on tabs, return as table
-
-local msg = {
-    Type = "brointel_log",
-    Logger = "nsm",
-    Fields = {
-        -- Initializing our fields
-        ['details.ts'] = nil,
-        ['details.uid'] = nil,
-        ['details.sourceipaddress'] = nil,
-        ['details.sourceport'] = nil,
-        ['details.destinationipaddress'] = nil,
-        ['details.destinationport'] = nil,
-        ['details.fuid'] = nil,
-        ['details.filemimetype'] = nil,
-        ['details.filedesc'] = nil,
-        ['details.seenindicator'] = nil,
-        ['details.seenwhere'] = nil,
-        ['details.seenindicatortype'] = nil,
-        ['details.sources'] = nil,
-        ['summary'] = nil,
-        summary = nil,
-        severity = "NOTICE",
-        category = "brointel",
-        tags = "nsm,bro,intel"
-    }
-}
+local l=require "lpeg"
+local string=require "string"
+l.locale(l) --add locale entries in the lpeg table
+local space = l.space^0  --define a space constant
+local sep = l.P"\t"
+local elem = l.C((1-sep)^0)
+grammar = l.Ct(elem * (sep * elem)^0) -- split on tabs, return as table
 
 function process_message()
     local log = read_message("Payload")
 
-    local matches = grammar:match(log)
-    if not matches then return -1 end
+    --set a default msg that heka's
+    --message matcher will ignore
+    local msg = {
+        Type = "IGNORE",
+        Fields={}
+    }    
 
-    msg.Fields['details.ts'] = matches[1]
-    msg.Fields['details.uid'] = matches[2]
-    msg.Fields['details.sourceipaddress'] = matches[3]
-    msg.Fields['details.sourceport'] = matches[4]
-    msg.Fields['details.destinationipaddress'] = matches[5]
-    msg.Fields['details.destinationport'] = matches[6]
-    msg.Fields['details.fuid'] = matches[7]
-    msg.Fields['details.filemimetype'] = matches[8]
-    msg.Fields['details.filedesc'] = matches[9]
-    msg.Fields['details.seenindicator'] = matches[10]
-    msg.Fields['details.seenwhere'] = matches[11]
-    msg.Fields['details.seenindicatortype'] = matches[12]
-    msg.Fields['details.sources'] = matches[13]
-    msg.Fields['summary'] = "Bro intel match: " .. msg.Fields['details.seenindicator']
+    local matches = grammar:match(log)
+    if not matches then
+        --return 0 to not propogate errors to heka's log.
+        --return a message with IGNORE type to not match heka's message matcher
+        inject_message(msg)
+        return 0 
+    end
+    msg['Type']='brointel'
+    msg['Logger']='nsm'
+    msg.Fields['ts'] = matches[1]
+    msg.Fields['uid'] = matches[2]
+    msg.Fields['sourceipaddress'] = matches[3]
+    msg.Fields['sourceport'] = matches[4]
+    msg.Fields['destinationipaddress'] = matches[5]
+    msg.Fields['destinationport'] = matches[6]
+    msg.Fields['fuid'] = matches[7]
+    msg.Fields['filemimetype'] = matches[8]
+    msg.Fields['filedesc'] = matches[9]
+    msg.Fields['seenindicator'] = matches[10]
+    msg.Fields['seenwhere'] = matches[11]
+    msg.Fields['seenindicatortype'] = matches[12]
+    msg.Fields['sources'] = matches[13]
+    msg.Fields['summary'] = "Bro intel match: " .. msg.Fields['seenindicator']
     inject_message(msg)
     return 0
 end

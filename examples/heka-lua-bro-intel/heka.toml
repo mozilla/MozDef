@@ -16,12 +16,15 @@ message_matcher = "TRUE"
 #payload_only = true
 # Finish commenting here
 
-[ElasticSearchOutput]
-message_matcher = 'Type !~ /^heka\./'
-cluster = "mozdefqa"
+[ESJsonEncoder]
 index = "events"
+es_index_from_timestamp = false
 type_name = "event"
+
+[ElasticSearchOutput]
+message_matcher = "Type =='brointel'"
+encoder = "ESJsonEncoder"
 server = "http://mozdef.example.com:8080"
-format = "clean"
 flush_interval = 1000
 flush_count = 10
+
