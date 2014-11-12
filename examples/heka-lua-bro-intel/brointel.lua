@@ -16,11 +16,33 @@ local sep = l.P"\t"
 local elem = l.C((1-sep)^0)
 grammar = l.Ct(elem * (sep * elem)^0) -- split on tabs, return as table
 
+function toString(value)
+    if value == "-" then
+        return nil
+    end
+    return value
+end
+
+function nilToString(value)
+    if value == nil then
+        return ""
+    end
+    return value
+end
+
+function toNumber(value)
+    if value == "-" then
+        return nil
+    end
+    return tonumber(value)
+end
+
 function process_message()
     local log = read_message("Payload")
 
     --set a default msg that heka's
-    --message matcher will ignore
+    --message matcher can ignore via a message matcher:
+    -- message_matcher = "( Type!='heka.all-report' && Type != 'IGNORE' )"
     local msg = {
         Type = "IGNORE",
         Fields={}
@@ -35,20 +57,20 @@ function process_message()
     end
     msg['Type']='brointel'
     msg['Logger']='nsm'
-    msg.Fields['ts'] = matches[1]
-    msg.Fields['uid'] = matches[2]
-    msg.Fields['sourceipaddress'] = matches[3]
-    msg.Fields['sourceport'] = matches[4]
-    msg.Fields['destinationipaddress'] = matches[5]
-    msg.Fields['destinationport'] = matches[6]
-    msg.Fields['fuid'] = matches[7]
-    msg.Fields['filemimetype'] = matches[8]
-    msg.Fields['filedesc'] = matches[9]
-    msg.Fields['seenindicator'] = matches[10]
-    msg.Fields['seenwhere'] = matches[11]
-    msg.Fields['seenindicatortype'] = matches[12]
-    msg.Fields['sources'] = matches[13]
-    msg.Fields['summary'] = "Bro intel match: " .. msg.Fields['seenindicator']
+    msg['ts'] = toString(matches[1])
+    msg.Fields['uid'] = toString(matches[2])
+    msg.Fields['sourceipaddress'] = toString(matches[3])
+    msg.Fields['sourceport'] = toNumber(matches[4])
+    msg.Fields['destinationipaddress'] = toString(matches[5])
+    msg.Fields['destinationport'] = toNumber(matches[6])
+    msg.Fields['fuid'] = toString(matches[7])
+    msg.Fields['filemimetype'] = toString(matches[8])
+    msg.Fields['filedesc'] = toString(matches[9])
+    msg.Fields['seenindicator'] = toString(matches[10])
+    msg.Fields['seenwhere'] = toString(matches[11])
+    msg.Fields['seenindicatortype'] = toString(matches[12])
+    msg.Fields['sources'] = toString(string.sub(matches[13], 1, -2)) -- remove last "\n"
+    msg['Payload'] = "Bro intel match: " .. nilToString(msg.Fields['seenindicator'])
     inject_message(msg)
     return 0
 end
