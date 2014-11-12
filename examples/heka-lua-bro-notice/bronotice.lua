@@ -64,6 +64,11 @@ function process_message()
         return 0 
     end
 
+    if string.sub(log,1,1)=='#' then
+        --it's a comment line
+        inject_message(msg)
+    end
+    
     msg['Type']='bronotice'
     msg['Logger']='nsm'
     msg['ts'] = toString(matches[1])

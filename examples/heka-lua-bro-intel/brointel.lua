@@ -48,6 +48,11 @@ function process_message()
         Fields={}
     }    
 
+    if string.sub(log,1,1)=='#' then
+        --it's a comment line
+        inject_message(msg)
+    end
+    
     local matches = grammar:match(log)
     if not matches then
         --return 0 to not propogate errors to heka's log.
