@@ -16,12 +16,41 @@ local sep = l.P"\t"
 local elem = l.C((1-sep)^0)
 grammar = l.Ct(elem * (sep * elem)^0) -- split on tabs, return as table
 
+function toString(value)
+    if value == "-" then
+        return nil
+    end
+    return value
+end
+
+function nilToString(value)
+    if value == nil then
+        return ""
+    end
+    return value
+end
+
+function toNumber(value)
+    if value == "-" then
+        return nil
+    end
+    return tonumber(value)
+end
+
+function lastField(value)
+    -- remove last "\n" if there's one
+    if value ~= nil and string.len(value) > 1 and string.sub(value, -2) == "\n" then
+        return string.sub(value, 1, -2)
+    end
+    return value
+end
 
 function process_message()
     local log = read_message("Payload")
 
     --set a default msg that heka's
-    --message matcher will ignore
+    --message matcher can ignore via a message matcher:
+    -- message_matcher = "( Type!='heka.all-report' && Type != 'IGNORE' )"
     local msg = {
         Type = "IGNORE",
         Fields={}
@@ -35,21 +64,35 @@ function process_message()
         return 0 
     end
 
-    -- populating our fields
     msg['Type']='bronotice'
-    msg['Logger']='nsm'    
-    msg.Fields['ts'] = matches[1]
-    msg.Fields['uid'] = matches[2]
-    msg.Fields['sourceipaddress'] = matches[3]
-    msg.Fields['sourceport'] = matches[4]
-    msg.Fields['destinationipaddress'] = matches[5]
-    msg.Fields['destinationport'] = matches[6]
-    msg.Fields['proto'] = matches[10]
-    msg.Fields['note'] = matches[11]
-    msg.Fields['msg'] = matches[12]
-    msg.Fields['sub'] = matches[13]
-    -- Our summary is the concatenation of other fields
-    msg.Fields['summary'] = string.format("%s %s %s", msg.Fields['note'], msg.Fields['msg'], msg.Fields['sub'])
+    msg['Logger']='nsm'
+    msg['ts'] = toString(matches[1])
+    msg.Fields['uid'] = toString(matches[2])
+    msg.Fields['sourceipaddress'] = toString(matches[3])
+    msg.Fields['sourceport'] = toNumber(matches[4])
+    msg.Fields['destinationipaddress'] = toString(matches[5])
+    msg.Fields['destinationport'] = toNumber(matches[6])
+    msg.Fields['fuid'] = toString(matches[7])
+    msg.Fields['file_mime_type'] = toString(matches[8])
+    msg.Fields['file_desc'] = toString(matches[9])
+    msg.Fields['proto'] = toString(matches[10])
+    msg.Fields['note'] = toString(matches[11])
+    msg.Fields['msg'] = toString(matches[12])
+    msg.Fields['sub'] = toString(matches[13])
+    msg.Fields['src'] = toString(matches[14])
+    msg.Fields['dst'] = toString(matches[15])
+    msg.Fields['p'] = toString(matches[16])
+    msg.Fields['n'] = toString(matches[17])
+    msg.Fields['peer_descr'] = toString(matches[18])
+    msg.Fields['actions'] = toString(matches[19])
+    msg.Fields['suppress_for'] = toString(matches[20])
+    msg.Fields['dropped'] = toString(matches[21])
+    msg.Fields['remote_location.country_code'] = toString(matches[22])
+    msg.Fields['remote_location.region'] = toString(matches[23])
+    msg.Fields['remote_location.city'] = toString(matches[24])
+    msg.Fields['remote_location.latitude_float'] = toNumber(matches[25])
+    msg.Fields['remote_location.longitude_float'] = toNumber(lastField(matches[26]))
+    msg['Payload'] = nilToString(msg.Fields['note']) .. " " .. nilToString(msg.Fields['msg']) .. " " .. nilToString(msg.Fields['sub'])
     inject_message(msg)
     return 0
 end
