@@ -130,17 +130,14 @@ def main():
                         messages_unacknowledged=munack)
             
                     if 'deliver_details' in m['message_stats'].keys():
-                        queueinfo['deliver_eps'] = \
-                            m['message_stats']['deliver_details']['rate']
-                        healthlog['details']['total_deliver_eps'] += m['message_stats']['deliver_details']['rate']
+                        queueinfo['deliver_eps'] = round(m['message_stats']['deliver_details']['rate'], 2)
+                        healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_details']['rate'], 2)
                     if 'deliver_no_ack_details' in m['message_stats'].keys():
-                        queueinfo['deliver_eps'] = \
-                            m['message_stats']['deliver_no_ack_details']['rate']
-                        healthlog['details']['total_deliver_eps'] += m['message_stats']['deliver_no_ack_details']['rate']
+                        queueinfo['deliver_eps'] = round(m['message_stats']['deliver_no_ack_details']['rate'], 2)
+                        healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_no_ack_details']['rate'], 2)
                     if 'publish_details' in m['message_stats'].keys():
-                        queueinfo['publish_eps'] = \
-                            m['message_stats']['publish_details']['rate']
-                        healthlog['details']['total_publish_eps'] += m['message_stats']['publish_details']['rate']
+                        queueinfo['publish_eps'] = round(m['message_stats']['publish_details']['rate'], 2)
+                        healthlog['details']['total_publish_eps'] += round(m['message_stats']['publish_details']['rate'], 2)
                     healthlog['details']['queues'].append(queueinfo)
 
             # post to elastic search servers directly without going through
