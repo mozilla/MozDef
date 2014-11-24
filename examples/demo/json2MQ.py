@@ -49,6 +49,7 @@ event = dict()
 event['timestamp'] = pytz.timezone('UTC').localize(datetime.utcnow()).isoformat()
 event['summary'] = 'just a test, only a test'
 event['category'] = 'testing'
+event['severity'] = 'INFO'
 event['processid']=os.getpid()
 event['processname']=sys.argv[0]
 event['tags'] = list()
