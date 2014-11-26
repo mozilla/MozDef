@@ -37,7 +37,7 @@ formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 def makeToken(gpghome, keyid):
     gpg = gnupg.GPG(gnupghome=gpghome)
     version = "1"
-    timestamp = strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     nonce = str(random.randint(10000, 18446744073709551616))
     token = version + ";" + timestamp + ";" + nonce
     sig = gpg.sign(token + "\n",
@@ -96,7 +96,8 @@ def main():
         token = makeToken(options.gpghome, options.keyid)
         r = requests.get(url,
             headers={'X-PGPAUTHORIZATION': token},
-            timeout=240) # timeout at 4 minutes. those are big requests.
+            timeout=240, # timeout at 4 minutes. those are big requests.
+            verify=True)
         if r.status_code == 200:
             migjson=r.json()
             logger.debug(url)
