@@ -7,6 +7,7 @@
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
+# Julien Vehent jvehent@mozilla.com
 
 import os
 import sys
@@ -26,10 +27,30 @@ import pytz
 import requests
 import pprint as pp
 import hashlib
+import gnupg
+import random
 
 logger = logging.getLogger(sys.argv[0])
 logger.level=logging.INFO
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+
+def makeToken(gpghome, keyid):
+    gpg = gnupg.GPG(gnupghome=gpghome)
+    version = "1"
+    timestamp = strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+    nonce = str(random.randint(10000, 18446744073709551616))
+    token = version + ";" + timestamp + ";" + nonce
+    sig = gpg.sign(token + "\n",
+        keyid=keyid,
+        detach=True, clearsign=True)
+    token += ";"
+    linectr=0
+    for line in iter(str(sig).splitlines()):
+        linectr+=1
+        if linectr < 4 or line.startswith('-') or not line:
+            continue
+        token += line
+    return token
 
 def toUTC(suspectedDate,localTimeZone=None):
     '''make a UTC date out of almost anything'''
@@ -70,9 +91,11 @@ def main():
         # set the max num of items to 50k. At 600kB per item, that's already ~30MB of json body.
         url = options.mighost+'/api/v1/search?type=command&status=success&threatfamily=compliance&report=complianceitems&limit=50000&before='+today+'&after='+lastrun
         url = url.replace('+00:00', 'Z')
+
+        # Prepare the request, make an authorization token using the local keyring
+        token = makeToken(options.gpghome, options.keyid)
         r = requests.get(url,
-            cert=(options.sslclientcert, options.sslclientkey),
-            verify=options.sslcacert,
+            headers={'X-PGPAUTHORIZATION': token},
             timeout=240) # timeout at 4 minutes. those are big requests.
         if r.status_code == 200:
             migjson=r.json()
@@ -114,9 +137,8 @@ def initConfig():
     options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     # Z = UTC, -07:00 = PDT
     options.mighost=getConfig('mighost','https://localhost',options.configfile)
-    options.sslclientcert=getConfig('sslclientcert','mig.crt',options.configfile)
-    options.sslclientkey=getConfig('sslclientkey','mig.key',options.configfile)
-    options.sslcacert = getConfig('sslcacert', '', options.configfile)
+    options.gpghome=getConfig('gpghome','/home/someuser/.gnupg',options.configfile)
+    options.keyid=getConfig('keyid','E60892BB9BD89A69F759A1A0A3D652173B763E8F',options.configfile)
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(minutes=15)),options.configfile))
 
