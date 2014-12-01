@@ -18,11 +18,17 @@ if (Meteor.isClient) {
     };
 
     Template.mozdefhealth.frontendhealthitems = function () {
-        return healthfrontend.find();
+        return healthfrontend.find({},
+                                   {fields:{},
+                                    sort: {hostname: 1}
+                                   });
     };
 
     Template.mozdefhealth.esnodeshealthitems = function () {
-        return healthesnodes.find();
+        return healthesnodes.find({},
+                                  {fields:{},
+                                  sort: {hostname: 1}
+                                  });
     };
 
     Template.mozdefhealth.eshotthreadshealthitems = function () {
