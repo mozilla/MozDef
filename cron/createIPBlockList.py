@@ -72,8 +72,8 @@ def aggregateIPs(attackers):
     iplist=[]
     ips=attackers.aggregate([
         {"$sort": {"lastseentimestamp":-1}},
-        {"$match": {"indicators.ipv4address":{"$exists": True}}},
         {"$match": {"category":options.category}},
+        {"$match": {"indicators.ipv4address":{"$exists": True}}},
         {"$group": {"_id": {"ipv4address":"$indicators.ipv4address"}}},
         {"$unwind": "$_id.ipv4address"},
         {"$limit": options.iplimit}
@@ -107,6 +107,8 @@ def main():
         # use meteor db/attackers collection
         mozdefdb = client.meteor
         attackers=mozdefdb['attackers']
+        attackers.ensure_index([('lastseentimestamp',-1)])
+        attackers.ensure_index([('category',1)])
         IPList = aggregateIPs(attackers)
         with open(options.outputfile, 'w') as outputfile:
             for ip in IPList:
