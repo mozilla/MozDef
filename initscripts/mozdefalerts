@@ -1,0 +1,69 @@
+#!/bin/bash
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2014 Mozilla Corporation
+#
+# supervisord   This scripts turns supervisord on in order to manage the mozdef alerts/celery process
+#
+# Author:       Jeff Bryner < jbryner@mozilla.com> based off Mike McGrath <mmcgrath@redhat.com> (based off yumupdatesd)
+#
+# chkconfig:	- 95 04
+#
+# description:  supervisor is a process control utility.  It has a web based
+#               xmlrpc interface as well as a few other nifty features.
+# processname:  supervisord
+#
+#
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+source /home/mozdef/envs/mozdef/bin/activate
+DAEMON_OPTS="-c /home/mozdef/envs/mozdef/initscripts/supervisord.alerts.conf $DAEMON_OPTS"
+
+start() {
+	echo -n $"Starting supervisord: "
+	daemon supervisord $DAEMON_OPTS
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/mozdefalerts
+}
+
+stop() {
+	echo -n $"Stopping supervisord: "
+	killproc supervisord
+	echo
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/mozdefalerts
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop) 
+	stop
+	;;
+  restart|force-reload|reload)
+	restart
+	;;
+  condrestart)
+	[ -f /var/lock/subsys/supervisord ] && restart
+	;;
+  status)
+	status supervisord
+	RETVAL=$?
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+	exit 1
+esac
+
+exit $RETVAL
