@@ -27,21 +27,21 @@ def discover():
     config_rotation = []
     config_pruning = []
     for index in indices.keys():
-    	index_template = index
-    	freq = 'none'
-    	pruning = '0'
-    	if re.search(r'-[0-9]{8}', index):
-    		freq = 'daily'
-    		pruning = '20'
-    		index_template = index[:-9]
-    	elif re.search(r'-[0-9]{6}', index):
-    		freq = 'monthly'
-    		index_template = index[:-7]
-    	if index_template not in config_indices:
-    		config_indices.append(index_template)
-    		config_dobackup.append('1')
-    		config_rotation.append(freq)
-    		config_pruning.append(pruning)
+        index_template = index
+        freq = 'none'
+        pruning = '0'
+        if re.search(r'-[0-9]{8}', index):
+            freq = 'daily'
+            pruning = '20'
+            index_template = index[:-9]
+        elif re.search(r'-[0-9]{6}', index):
+            freq = 'monthly'
+            index_template = index[:-7]
+        if index_template not in config_indices:
+            config_indices.append(index_template)
+            config_dobackup.append('1')
+            config_rotation.append(freq)
+            config_pruning.append(pruning)
     setConfig('backup_indices', ','.join(config_indices), options.configfile)
     setConfig('backup_dobackup', ','.join(config_dobackup), options.configfile)
     setConfig('backup_rotation', ','.join(config_rotation), options.configfile)
