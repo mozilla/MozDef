@@ -7,71 +7,125 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Anthony Verez averez@mozilla.com
 
 # set this to run as a cronjob at 00:00 UTC to create the indexes
 # necessary for mozdef
 
 import sys
 import pyes
+import logging
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
 
 
+logger = logging.getLogger(sys.argv[0])
+logger.level=logging.INFO
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+
+
 def esRotateIndexes():
-    es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-
-    indexes = es.indices.stats()['indices'].keys()
-    # print('[*]\tcurrent indexes: {0}'.format(indexes))
-
-    # set index names events-YYYYMMDD, alerts-YYYYMM, etc.
-    dtNow = datetime.utcnow()
-    indexSuffix = date.strftime(dtNow, '%Y%m%d')
-    # rotate daily
-    eventsIndexName = 'events-{0}'.format(indexSuffix)
-    # rotate monthly
-    indexSuffix = date.strftime(dtNow, '%Y%m')
-    alertsIndexName = 'alerts-{0}'.format(indexSuffix)
-    correlationsIndexName = 'correlations-{0}'.format(indexSuffix)
-    print('[*]\tlooking for current daily indexes: {0},{1},{2}'.format(
-        eventsIndexName,
-        alertsIndexName,
-        correlationsIndexName))
-
-    if eventsIndexName not in indexes:
-        print('[*]\tcreating: {0}'.format(eventsIndexName))
-        es.indices.create_index(eventsIndexName)
-    if alertsIndexName not in indexes:
-        print('[*]\tcreating: {0}'.format(alertsIndexName))
-        es.indices.create_index(alertsIndexName)
-    # not yet
-    # if correlationsIndexName not in indexes:
-        # print('[*]\tcreating: {0}'.format(correlationsIndexName))
-        # es.indices.create_index(correlationsIndexName)
-
-    print('[*]\tensuring aliases are current')
-    es.indices.set_alias('events', eventsIndexName)
-    es.indices.set_alias('alerts', alertsIndexName)
-    # es.indices.set_alias('correlations', correlationsIndexName)
-
-    # set an alias for yesterday's events to make it easier
-    # to limit queries by indexes
-    # for alert/correlation searches.
-    previousSuffix = date.strftime(dtNow - timedelta(days=1), '%Y%m%d')
-    eventsPrevious = 'events-{0}'.format(previousSuffix)
-    if eventsPrevious in indexes:
-        es.indices.set_alias('events-previous', eventsPrevious)
+    if options.output == 'syslog':
+        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
     else:
-        # we must be brand new, set previous alias to the same as now
-        es.indices.set_alias('events-previous', eventsIndexName)
+        sh = logging.StreamHandler(sys.stderr)
+        sh.setFormatter(formatter)
+        logger.addHandler(sh)
 
+    logger.debug('started')
+    try:
+        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+        indices = es.indices.stats()['indices'].keys()
+        odate_day = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m%d')
+        odate_month = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m')
+        ndate_day = date.strftime(datetime.utcnow(),'%Y%m%d')
+        ndate_month = date.strftime(datetime.utcnow(),'%Y%m')
+        for (index, dobackup, rotation, pruning) in zip(options.indices,
+            options.dobackup, options.rotation, options.pruning):
+            try:
+                if rotation != 'none':
+                    oldindex = index
+                    newindex = index
+                    if rotation == 'daily':
+                        oldindex += '-%s' % odate_day
+                        newindex += '-%s' % ndate_day
+                    elif rotation == 'monthly':
+                        oldindex += '-%s' % odate_month
+                        newindex += '-%s' % ndate_month
+                        # do not rotate before the month ends
+                        if oldindex == newindex:
+                            logger.debug('do not rotate %s index, month has not changed yet' % index)
+                            continue
+                    logger.debug('Creating %s index' % newindex)
+                    es.indices.create_index(newindex)
+                    logger.debug('Updating %s alias to new index' % index)
+                    es.indices.set_alias(index, newindex)
+                    if oldindex in indices:
+                        logger.debug('Updating %s-previous alias to old index' % index)
+                        es.indices.set_alias('%s-previous' % index, oldindex)
+                    else:
+                        logger.debug('Old index %s is missing, do not change %s-previous alias' % oldindex, index)
+            except Exception as e:
+                logger.error("Unhandled exception while rotating %s, terminating: %r" % (index, e))
+
+    except Exception as e:
+        logger.error("Unhandled exception, terminating: %r"%e)
 
 def initConfig():
+    # output our log to stdout or syslog
+    options.output = getConfig(
+        'output',
+        'stdout',
+        options.configfile
+        )
+    # syslog hostname
+    options.sysloghostname = getConfig(
+        'sysloghostname',
+        'localhost',
+        options.configfile
+        )
+    options.syslogport = getConfig(
+        'syslogport',
+        514,
+        options.configfile
+        )
     options.esservers = list(getConfig(
         'esservers',
         'http://localhost:9200',
         options.configfile).split(',')
+        )
+    options.indices = list(getConfig(
+        'backup_indices',
+        'events,alerts,kibana-int',
+        options.configfile).split(',')
+        )
+    options.dobackup = list(getConfig(
+        'backup_dobackup',
+        '1,1,1',
+        options.configfile).split(',')
+        )
+    options.rotation = list(getConfig(
+        'backup_rotation',
+        'daily,monthly,none',
+        options.configfile).split(',')
+        )
+    options.pruning = list(getConfig(
+        'backup_pruning',
+        '20,0,0',
+        options.configfile).split(',')
+        )
+    # aws credentials to use to send files to s3
+    options.aws_access_key_id = getConfig(
+        'aws_access_key_id',
+        '',
+        options.configfile
+        )
+    options.aws_secret_access_key = getConfig(
+        'aws_secret_access_key',
+        '',
+        options.configfile
         )
 
 if __name__ == '__main__':

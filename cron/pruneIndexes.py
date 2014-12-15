@@ -7,62 +7,118 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Anthony Verez averez@mozilla.com
 
-# set this to run as a cronjob 
-# to reguarly remove indexes 
+# set this to run as a cronjob
+# to regularly remove indexes
 # run it after backup of course
 
 import sys
 import pyes
+import logging
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
 
 
+logger = logging.getLogger(sys.argv[0])
+logger.level=logging.INFO
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+
+
 def esPruneIndexes():
-    es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+    if options.output == 'syslog':
+        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
+    else:
+        sh = logging.StreamHandler(sys.stderr)
+        sh.setFormatter(formatter)
+        logger.addHandler(sh)
 
-    indexes = es.indices.stats()['indices'].keys()
-    # print('[*]\tcurrent indexes: {0}'.format(indexes))
+    logger.debug('started')
+    try:
+        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+        indices = es.indices.stats()['indices'].keys()
+        # do the pruning
+        for (index, dobackup, rotation, pruning) in zip(options.indices,
+            options.dobackup, options.rotation, options.pruning):
+            try:
+                if pruning != '0':
+                    index_to_prune = index
+                    if rotation == 'daily':
+                        idate = date.strftime(datetime.utcnow()-timedelta(days=int(pruning)),'%Y%m%d')
+                        index_to_prune += '-%s' % idate
+                    elif rotation == 'monthly':
+                        idate = date.strftime(datetime.utcnow()-timedelta(days=31*int(pruning)),'%Y%m')
+                        index_to_prune += '-%s' % idate
 
-    # set index names events-YYYYMMDD, alerts-YYYYMM, etc.
-    dtNow = datetime.utcnow()
-    targetSuffix=date.strftime(dtNow- timedelta(days=options.days),'%Y%m%d')
-    
-    # rotate daily
-    eventsIndexName = 'events-{0}'.format(targetSuffix)
-    
-    # rotate monthly
-    targetSuffix = date.strftime(dtNow- timedelta(days=options.months*30), '%Y%m')
-    alertsIndexName = 'alerts-{0}'.format(targetSuffix)
-    correlationsIndexName = 'correlations-{0}'.format(targetSuffix)
-      
-    print('[*]\tlooking for old indexes: {0},{1},{2}'.format(
-        eventsIndexName,
-        alertsIndexName,
-        correlationsIndexName))
+                    logger.debug('Deleting index %s...' % index_to_prune)
+                    if index_to_prune in indices:
+                        es.indices.delete_index(index_to_prune)
+                        logger.debug('Deletion successful')
+                    else:
+                        logger.error('Error deleting index %s, index missing' % index_to_prune)
+            except Exception as e:
+                logger.error("Unhandled exception while deleting %s, terminating: %r" % (index_to_prune, e))
 
-    if eventsIndexName in indexes:
-        print('[*]\tdeleting: {0}'.format(eventsIndexName))
-        es.indices.delete_index(eventsIndexName)
-    if alertsIndexName in indexes:
-        print('[*]\tdeleting: {0}'.format(alertsIndexName))
-        es.indices.delete_index(alertsIndexName)
-    if correlationsIndexName in indexes:
-        print('[*]\tdeleting: {0}'.format(correlationsIndexName))
-        es.indices.delete_index(correlationsIndexName)
+    except Exception as e:
+        logger.error("Unhandled exception, terminating: %r"%e)
+
 
 def initConfig():
+    # output our log to stdout or syslog
+    options.output = getConfig(
+        'output',
+        'stdout',
+        options.configfile
+        )
+    # syslog hostname
+    options.sysloghostname = getConfig(
+        'sysloghostname',
+        'localhost',
+        options.configfile
+        )
+    options.syslogport = getConfig(
+        'syslogport',
+        514,
+        options.configfile
+        )
     options.esservers = list(getConfig(
         'esservers',
         'http://localhost:9200',
         options.configfile).split(',')
         )
-    # how many days of events to retain for daily rotations
-    options.days = getConfig('days', 20, options.configfile)
-    # how many months of events to retain for monthly rotations
-    options.months = getConfig('months', 3, options.configfile)
+    options.indices = list(getConfig(
+        'backup_indices',
+        'events,alerts,kibana-int',
+        options.configfile).split(',')
+        )
+    options.dobackup = list(getConfig(
+        'backup_dobackup',
+        '1,1,1',
+        options.configfile).split(',')
+        )
+    options.rotation = list(getConfig(
+        'backup_rotation',
+        'daily,monthly,none',
+        options.configfile).split(',')
+        )
+    options.pruning = list(getConfig(
+        'backup_pruning',
+        '20,0,0',
+        options.configfile).split(',')
+        )
+    # aws credentials to use to send files to s3
+    options.aws_access_key_id = getConfig(
+        'aws_access_key_id',
+        '',
+        options.configfile
+        )
+    options.aws_secret_access_key = getConfig(
+        'aws_secret_access_key',
+        '',
+        options.configfile
+        )
 
 if __name__ == '__main__':
     parser = OptionParser()
