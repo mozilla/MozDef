@@ -15,12 +15,12 @@ class message(object):
         self.registration = ['complianceitems']
         self.priority = 20
 
-    def validate(message):
+    def validate(self,message):
         """
             Validate that a compliance item has all the necessary keys
         """
         for key in ['target', 'policy', 'check', 'compliance',
-                    'link', 'timestamp']:
+                    'link', 'utctimestamp']:
             if key not in message.keys():
                 return False
         for key in ['level', 'name', 'url']:
@@ -34,7 +34,7 @@ class message(object):
                 return False
         return True
 
-    def cleanup_item(message):
+    def cleanup_item(self,message):
         ci = {}
         ci['target'] = message['target']
         ci['policy'] = {}
@@ -48,9 +48,10 @@ class message(object):
         ci['check']['test'] = {}
         ci['check']['test']['type'] = message['check']['test']['type']
         ci['check']['test']['value'] = message['check']['test']['value']
+        ci['check']['ref'] = message['check']['ref']
         ci['compliance'] = message['compliance']
         ci['link'] = message['link']
-        ci['timestamp'] = message['timestamp']
+        ci['utctimestamp'] = message['utctimestamp']
         return ci
 
     def onMessage(self, message, metadata):
@@ -61,15 +62,14 @@ class message(object):
             index, with doctype last_known_state
         """
         if metadata['doc_type'] == 'complianceitems':
-            if not validate(message):
-                sys.stdout.write('error: invalid format for complianceitem ' +
-                                 message['id'])
+            if not self.validate(message):
+                sys.stderr.write('error: invalid format for complianceitem {0}'.format(message))
                 return (None, None)
-            ci = cleanup_item(message)
+            message = self.cleanup_item(message)
             docidstr = 'complianceitems'
-            docidstr += complianceitem['check']['ref']
-            docidstr += complianceitem['check']['test']['value']
-            docidstr += complianceitem['target']
+            docidstr += message['check']['ref']
+            docidstr += message['check']['test']['value']
+            docidstr += message['target']
             metadata['id'] = hashlib.md5(docidstr).hexdigest()
             metadata['doc_type'] = 'last_known_state'
             metadata['index'] = 'complianceitems'
