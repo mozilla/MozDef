@@ -7,8 +7,17 @@
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
+# Jeff Bryner jbryner@mozilla.com
 
 # Snapshot configured backups
+# Meant to be run once/day
+# Each run creates a snapshot of indexname-epochtimestamp
+# .conf file will determine what indexes are operated on
+# Create a starter .conf file with backupDiscover.py
+# You must create the s3 bucket "mozdefesbackups" first paying attention to
+# the region assigned to the bucket.
+# Snapshots will be placed in:
+# mozdefesbackups/elasticsearch/YYYY-MM/servername/indices/indexname
 
 import sys
 import os
@@ -18,6 +27,7 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import date
 from configlib import getConfig, OptionParser, setConfig
+import calendar
 import socket
 import boto
 import boto.s3
@@ -26,7 +36,7 @@ import json
 from os.path import expanduser
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.INFO
+logger.level=logging.DEBUG
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -46,25 +56,24 @@ def main():
             aws_secret_access_key=options.aws_secret_access_key
         )
         idate = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m%d')
+        bucketdate = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y-%m')
         hostname = socket.gethostname()
 
-        # Create snapshot repo if not registered
-        r = requests.get('%s/_snapshot/s3backup2' % esserver)
-        if r.json().has_key('status') and r.json()['status'] == 404:
-            logger.debug('Configuring snapshot repository (first time run only)...')
-            snapshot_config = {
-                "type": "s3",
-                "settings": {
-                    "bucket": "mozdefesbackups",
-                    "base_path": "elasticsearch/%s" % hostname,
-                    "region": "us-west"
-                }
+        # Create or update snapshot configuration
+        logger.debug('Configuring snapshot repository')
+        snapshot_config = {
+            "type": "s3",
+            "settings": {
+                "bucket": "mozdefesbackups",
+                "base_path": "elasticsearch/{0}/{1}".format(bucketdate, hostname),
+                "region": "{0}".format(options.aws_region)
             }
-            r = requests.put('%s/_snapshot/s3backup2' % esserver, data=json.dumps(snapshot_config))
-            if r.json().has_key('status'):
-                logger.error("Error while registering snapshot repo: %s" % r.text)
-            else:
-                logger.debug('snapshot repo registered')
+        }
+        r = requests.put('%s/_snapshot/s3backup' % esserver, data=json.dumps(snapshot_config))
+        if r.json().has_key('status'):
+            logger.error("Error while registering snapshot repo: %s" % r.text)
+        else:
+            logger.debug('snapshot repo registered')
 
         # do the actual snapshotting
         for (index, dobackup, rotation, pruning) in zip(options.indices,
@@ -80,8 +89,8 @@ def main():
                 snapshot_config = {
                     'indices': index_to_snapshot
                 }
-                # register snapshots to myindex-YYYYMMDD even for monthly rotated indices
-                r = requests.put('%s/_snapshot/s3backup2/%s-%s?wait_for_completion=true' % (esserver, index, idate),
+                epoch=calendar.timegm(datetime.utcnow().utctimetuple())
+                r = requests.put('{0}/_snapshot/s3backup/{1}-{2}?wait_for_completion=true'.format(esserver,index_to_snapshot,epoch),
                     data=json.dumps(snapshot_config))
                 if r.json().has_key('status'):
                     logger.error('Error snapshotting %s: %s' % (index_to_snapshot, r.json()))
@@ -89,6 +98,7 @@ def main():
                     logger.debug('snapshot %s finished' % index_to_snapshot)
 
                 # create a restore script
+                # referencing the latest snapshot
                 localpath = '%s/%s-restore.sh' % (expanduser("~"), index)
 
                 with open(localpath, 'w') as f:
@@ -97,15 +107,15 @@ def main():
 #!/bin/bash
 
 echo -n "Restoring the snapshot..."
-curl -s -XPOST "%s/_snapshot/s3backup2/%s-%s/_restore?wait_for_completion=true"
+curl -s -XPOST "%s/_snapshot/s3backup/%s-%s/_restore?wait_for_completion=true"
 
 echo "DONE!"
-                    """ % (esserver, index, idate))
+                    """ % (esserver, index_to_snapshot, epoch))
 
                 # upload the restore script
                 bucket = s3.get_bucket('mozdefesbackups')
-                key = bucket.new_key('elasticsearch/%s/%s-%s-restore.sh' % (
-                    hostname, index, idate))
+                key = bucket.new_key('elasticsearch/%s/%s/%s-%s-%s-restore.sh' % (
+                    bucketdate, hostname, index, idate, epoch))
                 key.set_contents_from_filename(localpath)
 
                 # removing local file
@@ -168,6 +178,11 @@ def initConfig():
     options.aws_secret_access_key = getConfig(
         'aws_secret_access_key',
         '',
+        options.configfile
+        )
+    options.aws_region = getConfig(
+        'aws_region',
+        'us-east',
         options.configfile
         )
 
