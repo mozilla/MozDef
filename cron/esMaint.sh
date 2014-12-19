@@ -9,5 +9,5 @@
 # Jeff Bryner jbryner@mozilla.com
 
 source  /home/mozdef/envs/mozdef/bin/activate
-/home/mozdef/envs/mozdef/cron/rotateIndexes.py -c /home/mozdef/envs/mozdef/cron/rotateIndexes.conf
+/home/mozdef/envs/mozdef/cron/rotateIndexes.py -c /home/mozdef/envs/mozdef/cron/backup.conf
 

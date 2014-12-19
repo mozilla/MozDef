@@ -9,5 +9,5 @@
 # Jeff Bryner jbryner@mozilla.com
 
 source  /home/mozdef/envs/mozdef/bin/activate
-/home/mozdef/envs/mozdef/cron/pruneIndexes.py -c /home/mozdef/envs/mozdef/cron/pruneIndexes.conf
+/home/mozdef/envs/mozdef/cron/pruneIndexes.py -c /home/mozdef/envs/mozdef/cron/backup.conf
 
