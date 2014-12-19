@@ -9,9 +9,11 @@
 # Jeff Bryner jbryner@mozilla.com
 # Anthony Verez averez@mozilla.com
 
-# set this to run as a cronjob
+# set this to run as a cronjob (after backup has completed)
 # to regularly remove indexes
-# run it after backup of course
+
+# .conf file will determine what indexes are operated on
+# Create a starter .conf file with backupDiscover.py
 
 import sys
 import pyes
@@ -52,10 +54,9 @@ def esPruneIndexes():
                         idate = date.strftime(datetime.utcnow()-timedelta(days=31*int(pruning)),'%Y%m')
                         index_to_prune += '-%s' % idate
 
-                    logger.debug('Deleting index %s...' % index_to_prune)
                     if index_to_prune in indices:
+                        logger.info('Deleting index: %s' % index_to_prune)
                         es.indices.delete_index(index_to_prune)
-                        logger.debug('Deletion successful')
                     else:
                         logger.error('Error deleting index %s, index missing' % index_to_prune)
             except Exception as e:
@@ -107,17 +108,6 @@ def initConfig():
         'backup_pruning',
         '20,0,0',
         options.configfile).split(',')
-        )
-    # aws credentials to use to send files to s3
-    options.aws_access_key_id = getConfig(
-        'aws_access_key_id',
-        '',
-        options.configfile
-        )
-    options.aws_secret_access_key = getConfig(
-        'aws_secret_access_key',
-        '',
-        options.configfile
         )
 
 if __name__ == '__main__':
