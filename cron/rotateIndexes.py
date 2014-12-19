@@ -72,7 +72,7 @@ def esRotateIndexes():
                     logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
                     es.indices.set_alias(index, newindex)
                     if oldindex in indices:
-                        logger.debug('Setting {0}-previous alias to index: {1}'.format(index, newindex))
+                        logger.debug('Setting {0}-previous alias to index: {1}'.format(index, oldindex))
                         es.indices.set_alias('%s-previous' % index, oldindex)
                     else:
                         logger.debug('Old index %s is missing, do not change %s-previous alias' % oldindex, index)
