@@ -11,6 +11,8 @@
 
 # set this to run as a cronjob at 00:00 UTC to create the indexes
 # necessary for mozdef
+# .conf file will determine what indexes are operated on
+# Create a starter .conf file with backupDiscover.py
 
 import sys
 import pyes
@@ -22,7 +24,7 @@ from configlib import getConfig, OptionParser
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.INFO
+logger.level=logging.DEBUG
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -38,10 +40,14 @@ def esRotateIndexes():
     try:
         es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
         indices = es.indices.stats()['indices'].keys()
+        # calc dates for use in index names events-YYYYMMDD, alerts-YYYYMM, etc.
         odate_day = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m%d')
         odate_month = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m')
         ndate_day = date.strftime(datetime.utcnow(),'%Y%m%d')
         ndate_month = date.strftime(datetime.utcnow(),'%Y%m')
+        
+        # examine each index in the .conf file
+        # for rotation settings
         for (index, dobackup, rotation, pruning) in zip(options.indices,
             options.dobackup, options.rotation, options.pruning):
             try:
@@ -58,12 +64,15 @@ def esRotateIndexes():
                         if oldindex == newindex:
                             logger.debug('do not rotate %s index, month has not changed yet' % index)
                             continue
-                    logger.debug('Creating %s index' % newindex)
-                    es.indices.create_index(newindex)
-                    logger.debug('Updating %s alias to new index' % index)
+                    if newindex not in indices:
+                        logger.debug('Creating %s index' % newindex)
+                        es.indices.create_index(newindex)
+                    # set aliases: events to events-YYYYMMDD
+                    # and events-previous to events-YYYYMMDD-1 for example
+                    logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
                     es.indices.set_alias(index, newindex)
                     if oldindex in indices:
-                        logger.debug('Updating %s-previous alias to old index' % index)
+                        logger.debug('Setting {0}-previous alias to index: {1}'.format(index, newindex))
                         es.indices.set_alias('%s-previous' % index, oldindex)
                     else:
                         logger.debug('Old index %s is missing, do not change %s-previous alias' % oldindex, index)
@@ -116,17 +125,7 @@ def initConfig():
         '20,0,0',
         options.configfile).split(',')
         )
-    # aws credentials to use to send files to s3
-    options.aws_access_key_id = getConfig(
-        'aws_access_key_id',
-        '',
-        options.configfile
-        )
-    options.aws_secret_access_key = getConfig(
-        'aws_secret_access_key',
-        '',
-        options.configfile
-        )
+
 
 if __name__ == '__main__':
     parser = OptionParser()
