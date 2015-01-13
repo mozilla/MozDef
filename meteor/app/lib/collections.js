@@ -204,7 +204,7 @@ if (Meteor.isServer) {
     });    
 
     Meteor.publish("kibanadashboards", function () {
-        return kibanadashboards.find({},{sort:{name:1}, limit:20});
+        return kibanadashboards.find({},{sort:{name:1}, limit:30});
     });    
 
    //access rules from clients
