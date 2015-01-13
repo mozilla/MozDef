@@ -18,29 +18,28 @@ Jeff Bryner jbryner@mozilla.com
 </style>
     <form id="addincidentform" class="form-horizontal" style="margin: 0px 30% 20px;">
         <legend>New Incident</legend>
-        <fieldset>
             <!-- Summary -->        
-            <div class="control-group">
-              <label class="control-label" for="summary">Incident Summary</label>
-              <div class="controls">
-                <input id="summary" name="summary" placeholder="summary" class="input-xxlarge summary" required="" type="text">
+            <div class="form-group">
+              <label class="col-xs-3 control-label" for="summary">Incident Summary</label>
+              <div class="col-xs-5">
+                <input id="summary" name="summary" placeholder="summary" class="form-control summary" required="" type="text">
               </div>
             </div>            
             <!-- date Opened -->
-            <div class="control-group">
-                <label class="control-label" for="dateOpened">Date Opened</label>
-                <div class="controls">
+            <div class="form-group">
+                <label class="col-xs-3 control-label" for="dateOpened">Date Opened</label>
+                <div class="col-xs-5">
                     <div class="input-prepend input-group">
                         <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="input dateOpened calendarfield" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{uiDateFormat now}}">
+                        <input class="input form-control dateOpened calendarfield" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{uiDateFormat now}}">
                     </div>
                 </div>
             </div>
             <!-- Phase -->
-            <div class="control-group">
-              <label class="control-label" for="phase">Phase</label>
-              <div class="controls">
-                <select id="phase" name="phase" class="input-xlarge">
+            <div class="form-group">
+              <label class="col-xs-3 control-label" for="phase">Phase</label>
+              <div class="col-xs-5">
+                <select id="phase" name="phase" class="form-control">
                   <option>Identification</option>
                   <option>Containment</option>
                   <option>Eradication</option>
@@ -51,12 +50,11 @@ Jeff Bryner jbryner@mozilla.com
             </div>
             
             <!-- Button -->
-            <div class="control-group">
-              <label class="control-label" for="submit"></label>
-              <div class="controls">
-                <button id="submit" type="submit" name="submit" class="btn btn-primary submit">Save</button>
+            <div class="form-group">
+              <label class="col-xs-3 control-label" for="submit"></label>
+              <div class="col-xs-3">
+                <button id="submit" type="submit" name="submit" class="form-control btn btn-primary submit">Save</button>
               </div>
-            </div>            
-        </fieldset>
+            </div>
     </form>
 </template>

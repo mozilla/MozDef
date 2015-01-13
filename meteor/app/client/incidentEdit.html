@@ -31,14 +31,15 @@ Jeff Bryner jbryner@mozilla.com
 
 </style>
 <div class="container">
-    <div class="row span4 center">
+    <div class="row col-xs-4 center">
         <div id="changesbox" class="alert alert-info">
           <b><span id="saving"></span></b><br>
           <a href=# id="saveChanges"><b>Save changes now</b></a> - <a href=# id="undo"><b>Undo</b></a> - <a href=# id="redo"><b>Redo</b></a>
         </div>        
     </div>
-
-    <div class="row span7 center">
+</div>
+<div class="container">
+    <div class="row col-xs-9 center ">
         <ul class="nav nav-tabs">
             <li class="tabnav active"><a href="#maintab">Main</a></li>
             <li class="tabnav"><a href="#notestab">Notes</a></li>
@@ -49,197 +50,207 @@ Jeff Bryner jbryner@mozilla.com
             <li class="tabnav"><a href="#lessonstab">Lessons Learned</a></li>
         </ul>
     </div>
-    <div id="maintab" class="row span11 offset1 tabcontent active">
-        <div class="span6">
-        <form id="editincidentform" class="form-horizontal" >
-        <fieldset>
-            <div class="control-group">
-              <label class="control-label" for="summary">Summary</label>
-              <div class="controls">
-                <input id="summary" name="summary" placeholder="short description" class="input-block-level summary" required=""
-                type="text" value="{{summary}}">
-              </div>
-            </div>
-
-            <div class="control-group">
-              <label class="control-label" for="description">Description</label>
-              <div class="controls">
-                <textarea id="description" name="description" placeholder="long description" class="input-xxlarge description" rows=4>{{description}}</textarea>
-              </div>
-            </div>               
-
-            <div class="control-group">
-                <label class="control-label" for="dateOpened">Date Opened</label>
-                <div class="controls">
-                    <div class="input-prepend input-group">
-                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="input dateOpened calendarfield" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{uiDateFormat dateOpened}}">
+</div>
+<div class="container">
+    <div id="maintab" class="tabcontent active ">
+        <div class="row col-xs-12">
+            <div class="col-xs-9">
+            <form id="editincidentform" class="form-horizontal  col-xs-10 col-xs-offset-2">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label" for="summary">Summary</label>
+                    <div class="col-xs-10">
+                        <input id="summary" name="summary" placeholder="short description" class="summary form-control" required type="text" value="{{summary}}">
                     </div>
                 </div>
-            </div>
-            
-            <div class="control-group">
-                <label class="control-label" for="dateClosed">Date Closed</label>
-                <div class="controls">
-                    <div class="input-prepend input-group">
-                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateClosed calendarfield" name="dateClosed" id="dateClosed" type="text" value="{{uiDateFormat dateClosed}}">
+    
+                <div class="form-group">
+                    <label class="col-xs-2 control-label" for="description">Description</label>
+                    <div class="col-xs-10">
+                        <textarea id="description" name="description" placeholder="long description" class="form-control description" rows=4>{{description}}</textarea>
                     </div>
                 </div>
-            </div>                
-            <!-- Phase -->
-            <div class="control-group">
-              <label class="control-label" for="phase">Phase</label>
-              <div class="controls">
-                <select id="phase" name="phase" class="input-xlarge">
-                  <option {{ isselected 'Identification' phase }}>Identification</option>
-                  <option {{ isselected 'Containment' phase }}>Containment</option>
-                  <option {{ isselected 'Eradication' phase }}>Eradication</option>
-                  <option {{ isselected 'Recovery' phase }}>Recovery</option>
-                  <option {{ isselected 'Lessons Learned' phase }}>Lessons Learned</option>
-                  <option {{ isselected 'Closed' phase }}>Closed</option>
-                </select>
-              </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="tags">Tags</label>
-                <div class="controls" id="tags">
-                    <ul class="unstyled">
-                    {{#each tags}}
-                    <li>
-                        <div>{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
-                    </li>
-                    {{/each}}
-                    </ul>
-                    <div class="tags"><span class="alert alert-info">drag here to add a tag</span></div>
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="dateReported">Timeline</label>
-                <div class="controls">
-                    <div class="input-prepend input-group input-append">
+                <div class="form-group">
+                    <label class="col-xs-2 control-label" for="dateOpened">Date Opened</label>
+                    <div class="col-xs-10">
+                    <div class="input-group">
                         <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateReported calendarfield" name="dateReported" id="dateReported" type="text" value="{{uiDateFormat dateReported}}">
-                        <span class="add-on" style="padding-right:12px">Reported</span>
+                        <input class="dateOpened calendarfield form-control" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{uiDateFormat dateOpened}}">
                     </div>
-                    <div class="input-prepend input-group input-append">
-                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateVerified calendarfield" name="dateVerified" id="dateVerified" type="text" value="{{uiDateFormat dateVerified}}"><span class="add-on" style="padding-right: 20px">Verified</span>
                     </div>
-                    <div class="input-prepend input-group input-append">
-                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateMitigated calendarfield" name="dateMitigated" id="dateMitigated" type="text" value="{{uiDateFormat dateMitigated}}"><span class="add-on" style="padding-right:10px">Mitigated</span> 
-                    </div>                            
-                    <div class="input-prepend input-group input-append">
-                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="form-control dateContained calendarfield" name="dateContained" id="dateContained" type="text" value="{{uiDateFormat dateContained}}"><span class="add-on" style="padding-right:7px">Contained</span> 
-                    </div>                            
                 </div>
-                    
+                
+                <div class="form-group">
+                    <label class="col-xs-2 control-label" for="dateClosed">Date Closed</label>
+                    <div class="col-xs-10">
+                    <div class="input-group">
+                        <span class="input-group-addon"></span>
+                        <input class="form-control dateClosed calendarfield form-control" name="dateClosed" id="dateClosed" type="text" value="{{uiDateFormat dateClosed}}">
+                    </div>
+                    </div>
+                </div>                
+                <!-- Phase -->
+                <div class="form-group">
+                    <label class="col-xs-2 control-label" for="phase">Phase</label>
+                    <div class="col-xs-10">
+                      <select id="phase" name="phase" class="form-control">
+                          <option {{ isselected 'Identification' phase }}>Identification</option>
+                          <option {{ isselected 'Containment' phase }}>Containment</option>
+                          <option {{ isselected 'Eradication' phase }}>Eradication</option>
+                          <option {{ isselected 'Recovery' phase }}>Recovery</option>
+                          <option {{ isselected 'Lessons Learned' phase }}>Lessons Learned</option>
+                          <option {{ isselected 'Closed' phase }}>Closed</option>
+                      </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-2 control-label" for="tags">Tags</label>                
+                    <div class="tags col-xs-10">
+                        <span class="form-control alert alert-info">drag here to add a tag
+                            <ul class="pull-left list-unstyled">
+                            {{#each tags}}
+                                <li class="list-unstyled pull-left">
+                                    <div class="form-control">{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
+                                </li>
+                            {{/each}}
+                            </ul>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="dateReported">Timeline</label>
+                    <div class="col-xs-10">
+                        <div class="input-prepend input-group input-append">
+                            <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
+                            <input class="form-control dateReported calendarfield form-control" name="dateReported" id="dateReported" type="text" value="{{uiDateFormat dateReported}}">
+                            <span class="input-group-addon" style="padding-right:12px">Reported</span>
+                        </div>
+                        <div class="input-prepend input-group input-append">
+                            <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
+                            <input class="form-control dateVerified calendarfield form-control" name="dateVerified" id="dateVerified" type="text" value="{{uiDateFormat dateVerified}}">
+                            <span class="input-group-addon" style="padding-right: 23px">Verified</span>
+                        </div>
+                        <div class="input-prepend input-group input-append">
+                            <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
+                            <input class="form-control dateMitigated calendarfield form-control" name="dateMitigated" id="dateMitigated" type="text" value="{{uiDateFormat dateMitigated}}">
+                            <span class="input-group-addon" style="padding-right:10px">Mitigated</span> 
+                        </div>                            
+                        <div class="input-prepend input-group input-append">
+                            <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
+                            <input class="form-control dateContained calendarfield form-control" name="dateContained" id="dateContained" type="text" value="{{uiDateFormat dateContained}}">
+                            <span class="input-group-addon" style="padding-right:4px">Contained</span> 
+                        </div>
+                    </div>
+                </div>
+            </form>
             </div>
-        </fieldset>
-        </form>
+            <div class="vtagholders col-xs-3">
+                {{>veristags}}
+            </div>
         </div>
-        <div class="span4 pull-right">
-            {{>veristags}}
-        </div>        
     </div>
     
-    <div id="referencestab" class="row span8 center tabcontent">
-        <form id="referencesform" class="form-horizontal" >
-            <fieldset>
-                <div class="control-group">
-                  <label class="control-label" for="references">Reference</label>
-                  <div class="controls" id="references">
-                    <input id="newReference" class="input-xlarge" type="text" value=""><button id="saveReference" type="submit" class="btn btn-primary submit">Save</button>
-                    <ul class="unstyled">
-                        {{#each references}}
-                        <li>
-                            <div>{{.}}<button type="button" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>
-                        </li>
-                        {{/each}}
-                    </ul>
-                  </div>
+    <div id="referencestab" class="tabcontent">
+        <div class="row col-xs-8">
+            <form id="referencesform" class="form-horizontal col-xs-12 col-xs-offset-3" >
+                <div class="form-group">
+                    <div class="row">
+                        <label class="control-label col-xs-2" for="newReference">Reference</label>
+                        <div class="col-xs-8">
+                          <input id="newReference" class="form-control" type="text" value="">
+                        </div>
+                        <div class="col-xs-2">
+                            <button id="saveReference" type="submit" class="form-control btn btn-primary submit">Save</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <ul class="list-unstyled col-xs-offset-2">
+                            {{#each references}}
+                            <li>
+                                <div class="col-xs-12">{{.}}<button type="button" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>
+                            </li>
+                            {{/each}}
+                        </ul>
+                    </div>
                 </div>
-            </fieldset>
-        </form>
+            </form>
+        </div>
     </div>
     
-    <div id="theoriestab" class="row span8 center tabcontent">
-        <form id="theoriesform" class="form-horizontal" >
-            <fieldset>
-                <div class="control-group">
-                    <label class="control-label" for="theorySummary">Theory:</label>
-                    <div class="controls">
-                        <input id="theorySummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+    <div id="theoriestab" class="row tabcontent">
+        <div class="row col-xs-8">
+        <form id="theoriesform" class="form-horizontal col-xs-12 col-xs-offset-3" >
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="theorySummary">Theory:</label>
+                    <div class="col-xs-9">
+                        <input id="theorySummary" class="form-control" type="text" value="" placeholder="short summary" required>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="theoryDescription">Description:</label>
-                    <div class="controls">
-                        <textarea id="theoryDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="theoryDescription">Description:</label>
+                    <div class="col-xs-10">
+                        <textarea id="theoryDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
-                <div class="control-group">
-                    <div class="controls">
+                <div class="form-group">
+                    <div class="col-xs-2 col-xs-offset-2">
                         <button id="saveTheory" type="submit" class="btn btn-primary submit">Save</button>
                     </div>
                 </div>
                 <!-- table of existing items-->
-                <div class="control-group">
-                <label class="pull-left" >Existing Theories:</label>
-                <table id="theories" class="table table-striped table-hover table-condensed">
-                    <thead>
-                        <tr>
-                            <td></td>
-                            <td>Summary</td>
-                            <td>Description</td>
-                            <td>Created</td>
-                            <td>Creator</td>
-                            <td>Status</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {{#each theories}}
-                        <tr>
-                            <td><button class="btn theoryedit" data-theoryid={{_id}}>edit</button></td>
-                            <td>{{summary}}</td>
-                            <td>{{description}}</td>
-                            <td>{{dateCreated}}</td>
-                            <td>{{creator}}</td>
-                            <td>{{status}}</td>
-                            <td><button class="btn btn-danger theorydelete" data-theoryid={{_id}}>delete</button></td>
-                        </tr>
-                    {{/each}}
-                    </tbody>
-                </table>
+                <div class="form-group">
+                    <label class="pull-left" >Existing Theories:</label>
+                    <table id="theories" class="table table-striped table-hover table-condensed">
+                        <thead>
+                            <tr>
+                                <td></td>
+                                <td>Summary</td>
+                                <td>Description</td>
+                                <td>Created</td>
+                                <td>Creator</td>
+                                <td>Status</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {{#each theories}}
+                            <tr>
+                                <td><button class="btn btn-primary theoryedit" data-theoryid={{_id}}>edit</button></td>
+                                <td>{{summary}}</td>
+                                <td>{{description}}</td>
+                                <td>{{dateCreated}}</td>
+                                <td>{{creator}}</td>
+                                <td>{{status}}</td>
+                                <td><button class="btn btn-danger theorydelete" data-theoryid={{_id}}>delete</button></td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
                 </div>
-            </fieldset>
         </form>
+        </div>
     </div>
 
-    <div id="timestampstab" class="row span8 center tabcontent">
-        <form id="timestampsform" class="form-horizontal" >
-            <fieldset>
-                <div class="control-group">
-                    <label class="control-label" for="timestamp">Timestamp:</label>
-                    <div class="controls">
-                        <input id="timestamp" class="input-xlarge" type="text" value="" placeholder="date/time" required>
+    <div id="timestampstab" class="row tabcontent">
+        <div class="row col-xs-8">
+            <form id="timestampsform" class="form-horizontal col-xs-12 col-xs-offset-3" >
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="timestamp">Timestamp:</label>
+                    <div class="col-xs-9">
+                        <input id="timestamp" class="form-control" type="text" value="" placeholder="date/time" required>
                     </div>
                 </div>
-                <div class="control-group">
-                    <label class="control-label" for="timestampDescription">Description:</label>
-                    <div class="controls">
-                        <textarea id="timestampDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="timestampDescription">Description:</label>
+                    <div class="col-xs-10">
+                        <textarea id="timestampDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
-                <div class="control-group">
-                    <div class="controls">
+                <div class="form-group">
+                    <div class="col-xs-2 col-xs-offset-2">
                         <button id="saveTimestamp" type="submit" class="btn btn-primary submit">Save</button>
                     </div>
                 </div>
                 <!-- table of existing items-->
-                <div class="control-group">
+                <div class="form-group">
                 <label class="pull-left" >Existing Timestamps:</label>
                 <table id="timeline" class="table table-striped table-hover table-condensed">
                     <thead>
@@ -255,7 +266,7 @@ Jeff Bryner jbryner@mozilla.com
                     <tbody>
                     {{#each timestamps}}
                         <tr>
-                            <td><button class="btn timestampedit" data-timestampid={{_id}}>edit</button></td>
+                            <td><button class="btn btn-default timestampedit" data-timestampid={{_id}}>edit</button></td>
                             <td>{{timestamp}}</td>
                             <td>{{description}}</td>
                             <td>{{dateCreated}}</td>
@@ -267,39 +278,38 @@ Jeff Bryner jbryner@mozilla.com
                     </tbody>
                 </table>
                 </div>
-            </fieldset>
-        </form>
+            </form>
+        </div>
     </div>    
 
-    <div id="mitigationstab" class="row span8 center tabcontent">
-        <form id="mitigationsform" class="form-horizontal" >
-            <fieldset>
-                <div class="control-group">
-                    <label class="control-label" for="mitigationSummary">Mitigation:</label>
-                    <div class="controls">
-                        <input id="mitigationSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+    <div id="mitigationstab" class="row tabcontent">
+        <div class="row col-xs-8">
+            <form id="mitigationsform" class="form-horizontal col-xs-12 col-xs-offset-3" >
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="mitigationSummary">Mitigation:</label>
+                    <div class="col-xs-9">
+                        <input id="mitigationSummary" class="form-control" type="text" value="" placeholder="short summary" required>
                     </div>
                 </div>
-                <div class="control-group">
-                    <div class="controls">
-                    <label class="checkbox">
-                        <input type="checkbox" id="mitigationTemporary"> Temporary?
-                    </label>
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="mitigationTemporary">Temporary?</label>
+                    <div class="col-xs-2">
+                        <input type="checkbox"  class="form-control" id="mitigationTemporary">
                     </div>
                 </div>                
-                <div class="control-group">
-                    <label class="control-label" for="mitigationDescription">Description:</label>
-                    <div class="controls">
-                        <textarea id="mitigationDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="mitigationDescription">Description:</label>
+                    <div class="col-xs-10">
+                        <textarea id="mitigationDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
-                <div class="control-group">
-                    <div class="controls">
+                <div class="form-group">
+                    <div class="col-xs-2 col-xs-offset-2">
                         <button id="saveMitigation" type="submit" class="btn btn-primary submit">Save</button>
                     </div>
                 </div>
                 <!-- table of existing items-->
-                <div class="control-group">
+                <div class="form-group">
                 <label class="pull-left" >Existing Mitigations:</label>
                 <table id="mitigations" class="table table-striped table-hover table-condensed">
                     <thead>
@@ -316,7 +326,7 @@ Jeff Bryner jbryner@mozilla.com
                     <tbody>
                     {{#each mitigations}}
                         <tr>
-                            <td><button class="btn mitigationedit" data-mitigationid={{_id}}>edit</button></td>
+                            <td><button class="btn btn-primary mitigationedit" data-mitigationid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
                             <td>{{temporary}}</td>
@@ -329,32 +339,32 @@ Jeff Bryner jbryner@mozilla.com
                     </tbody>
                 </table>
                 </div>
-            </fieldset>
-        </form>
+            </form>
+        </div>
     </div>
     
-    <div id="lessonstab" class="row span8 center tabcontent">
-        <form id="lessonsform" class="form-horizontal" >
-            <fieldset>
-                <div class="control-group">
-                    <label class="control-label" for="lessonSummary">Lesson:</label>
-                    <div class="controls">
-                        <input id="lessonSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+    <div id="lessonstab" class="row tabcontent">
+        <div class="row col-xs-8">
+            <form id="lessonsform" class="form-horizontal col-xs-12 col-xs-offset-3" >
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="lessonSummary">Lesson:</label>
+                    <div class="col-xs-9">
+                        <input id="lessonSummary" class="form-control" type="text" value="" placeholder="short summary" required>
                     </div>
                 </div>              
-                <div class="control-group">
-                    <label class="control-label" for="lessonDescription">Description:</label>
-                    <div class="controls">
-                        <textarea id="lessonDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="lessonDescription">Description:</label>
+                    <div class="col-xs-10">
+                        <textarea id="lessonDescription" placeholder="long description" class="form-control" rows=4 required></textarea>
                     </div>
                 </div>
-                <div class="control-group">
-                    <div class="controls">
+                <div class="form-group">
+                    <div class="col-xs-2 col-xs-offset-2">
                         <button id="saveLesson" type="submit" class="btn btn-primary submit">Save</button>
                     </div>
                 </div>
                 <!-- table of existing items-->
-                <div class="control-group">
+                <div class="form-group">
                 <label class="pull-left" >Existing Lessons:</label>
                 <table id="lessons" class="table table-striped table-hover table-condensed">
                     <thead>
@@ -370,7 +380,7 @@ Jeff Bryner jbryner@mozilla.com
                     <tbody>
                     {{#each lessons}}
                         <tr>
-                            <td><button class="btn lessonedit" data-lessonid={{_id}}>edit</button></td>
+                            <td><button class="btn btn-primary lessonedit" data-lessonid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
                             <td>{{dateCreated}}</td>
@@ -382,32 +392,32 @@ Jeff Bryner jbryner@mozilla.com
                     </tbody>
                 </table>
                 </div>
-            </fieldset>
-        </form>
+            </form>
+        </div>
     </div>
 
-    <div id="notestab" class="row span8 center tabcontent">
-        <form id="notesform" class="form-horizontal" >
-            <fieldset>
-                <div class="control-group">
-                    <label class="control-label" for="noteSummary">Note:</label>
-                    <div class="controls">
-                        <input id="noteSummary" class="input-xlarge" type="text" value="" placeholder="short summary" required>
+    <div id="notestab" class="row tabcontent">
+        <div class="row col-xs-8">
+            <form id="notesform" class="form-horizontal col-xs-12 col-xs-offset-3" >
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="noteSummary">Note:</label>
+                    <div class="col-xs-9">
+                        <input id="noteSummary" class="form-=control" type="text" value="" placeholder="short summary" required>
                     </div>
                 </div>              
-                <div class="control-group">
-                    <label class="control-label" for="noteDescription">Description:</label>
-                    <div class="controls">
-                        <textarea id="noteDescription" placeholder="long description" class="input-xxlarge"  rows=4 required></textarea>
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="noteDescription">Description:</label>
+                    <div class="col-xs-10">
+                        <textarea id="noteDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
-                <div class="control-group">
-                    <div class="controls">
+                <div class="form-group">
+                    <div class="col-xs-2 col-xs-offset-2">
                         <button id="saveNote" type="submit" class="btn btn-primary submit">Save</button>
                     </div>
                 </div>
                 <!-- table of existing items-->
-                <div class="control-group">
+                <div class="form-group">
                 <label class="pull-left" >Existing Notes:</label>
                 <table id="notes" class="table table-striped table-hover table-condensed">
                     <thead>
@@ -423,7 +433,7 @@ Jeff Bryner jbryner@mozilla.com
                     <tbody>
                     {{#each notes}}
                         <tr>
-                            <td><button class="btn noteedit" data-noteid={{_id}}>edit</button></td>
+                            <td><button class="btn btn-primary noteedit" data-noteid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
                             <td>{{dateCreated}}</td>
@@ -435,8 +445,8 @@ Jeff Bryner jbryner@mozilla.com
                     </tbody>
                 </table>
                 </div>
-            </fieldset>
-        </form>
+            </form>
+        </div>
     </div>
 
 </div>

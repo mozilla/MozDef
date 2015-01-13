@@ -15,7 +15,8 @@ modal: for  Session.set('ipcifipaddress','1,2.3.4') then
 
 <template name="ipcif">
 <style>
-    .row { color: white;
+    .row {
+        color: white;
     }
 </style>
 <body>
@@ -62,52 +63,57 @@ modal: for  Session.set('ipcifipaddress','1,2.3.4') then
 
 <template name="cifmodal">
     <style>
-    .modal-body .row { color: black;
+    .modal-body .row {
+        color: black;
     }
     </style>
-<div class="modal hide" id="modalcifwindow">
-    <div class="modal-header">
-       <button type="button" class="close" data-dismiss="modal">&times;</button>
-       <h3>CIF Results</h3>
-    </div>
-    <div class="modal-body">
-            <div class="row center">
-                <div class="well">
-                    cif: {{cif.status}}
+    <div class="modal fade" id="modalcifwindow">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                   <button type="button" class="close" data-dismiss="modal">&times;</button>
+                   <h4>CIF Results</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row center">
+                        <div class="well">
+                            cif: {{cif.status}}
+                        </div>
+                    </div>
+                    <div class="row center">{{cif.error}}</div>
+                    <div class="row  center">
+                        <ul class="list-unstyled">
+                        {{#each objKeyValue cif.data}}
+                
+                            {{#if isAnObject value}}
+                                <li><ul class="list-unstyled">{{key}}
+                                {{#with value}}
+                                    {{#each objKeyValue this}}
+                                        <li>{{key}}:
+                                        {{value}}</li>                    
+                                    {{/each}}
+                                {{/with}}
+                                </ul></li>
+                            {{else}}
+                                <li>
+                                    {{key}}:
+                                    {{value}}
+                                </li>            
+                            {{/if}}
+                        {{/each}}
+                        </ul>
+                    </div>
+                    <div class="row span2 center">
+                        <span>raw json:</span>
+                        <span class="unstyled">
+                                {{cif.content}}
+                        </span>
+                    </div>            
+                </div>
+                <div class="modal-footer">
+                  <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
                 </div>
             </div>
-            <div class="row center">{{cif.error}}</div>
-            <div class="row  center">
-                <ul class="unstyled">
-                {{#each objKeyValue cif.data}}
-        
-                    {{#if isAnObject value}}
-                        <li><ul class="unstyled">{{key}}
-                        {{#with value}}
-                            {{#each objKeyValue this}}
-                                <li>{{key}}:
-                                {{value}}</li>                    
-                            {{/each}}
-                        {{/with}}
-                        </ul></li>
-                    {{else}}
-                        <li>
-                            {{key}}:
-                            {{value}}
-                        </li>            
-                    {{/if}}
-                {{/each}}
-                </ul>
-            </div>
-            <div class="row span2 center">
-                <span>raw json:</span>
-                <span class="unstyled">
-                        {{cif.content}}
-                </span>
-            </div>            
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn" data-dismiss="modal">Close</a>
-  </div>
- </div>
+        </div>
+    </div>
 </template>

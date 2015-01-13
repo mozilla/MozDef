@@ -16,8 +16,8 @@ Jeff Bryner jbryner@mozilla.com
 <style>
 .veristagform{
     float:right;
-    max-width: 320px;
-    padding-left: 7px;
+    padding-left: 20px;
+    padding-right: 20px;
     font-size: 95%;
     background: #999;
     color: #fff;    
@@ -36,26 +36,30 @@ li {
 
 </style>
 
-<form class="veristagform form-search" role="form">
+<form class="veristagform form-horizontal" role="form">
     <div class="form-group">
-      <input type="search" class="form-control search-query tagfilter pull-left" id="tagfilter" placeholder="tag filter">
-        <div class="dropdown pull-right">
-            <a class="dropdown-toggle" data-toggle="dropdown" id="dLabel" data-target="#"><span class="label label-info">common</span><b class="caret"></b></a>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                <li>actor</li>
-                <li>asset</li>
-                <li>action</li>
-                <li>impact</li>
-                <li>discovery</li>
-                <li>motive</li>
-                <li>confidence</li>
-            </ul>
-        </div>        
-    </div>
-    <div class="veristags">
-          {{#each veris}}
-              <div class="tag" draggable="true">{{tag}}</div>
-          {{/each}}    
+            <div class="nothing">
+                <input type="search" class="form-control search-query tagfilter" id="tagfilter" placeholder="tag filter">
+            </div>
+            <div class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" id="dLabel" data-target="#"><span class="label label-info">common</span><b class="caret"></b></a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                    <li>actor</li>
+                    <li>asset</li>
+                    <li>action</li>
+                    <li>impact</li>
+                    <li>discovery</li>
+                    <li>motive</li>
+                    <li>confidence</li>
+                </ul>
+            </div>        
+    
+            <div class="veristags">
+                  {{#each veris}}
+                      <div class="tag" draggable="true">{{tag}}</div>
+                  {{/each}}    
+            </div>
+
     </div>
 </form>
 

@@ -15,7 +15,7 @@ Anthony Verez averez@mozilla.com
 sidenav
 {
     position: fixed;
-    left: -16em;
+    left: -14em;
     top: 0;
     bottom: 0;
     /*background-color: #654;*/
@@ -40,9 +40,9 @@ sidenav:after
     content: ' ';
     width: 0;
     height: 0;
-    right: -50px;
+    right: -75px;
     top: 50%;
-    border-width: 20px 20px;
+    border-width: 30px 30px;
     border-style: solid;
     border-color: transparent transparent transparent #765;
 }
@@ -57,7 +57,7 @@ sidenav ul
 
 sidenav div{
     margin:auto;
-    padding-left: 2em;
+    padding-left: 1em;
 }
 
 sidenav:hover
@@ -77,20 +77,22 @@ sidenav
 </style>
 <!-- menu -->
 <sidenav>
-    <ul>
-        <li>Last X Attackers:
-            <select id="attackerLimit" class="input-small" title="limit how many attackers are retrieved">
-              <option value='5'>5</option>
-              <option value='10'>10</option>
-              <option value='15'>15</option>
-              <option value='20'>20</option>
-              <option value='25'>25</option>
-              <option value='30'>30</option>
-              <option value='35'>35</option>
-              <option value='40'>40</option>
-            </select>            
-        </li>
-    </ul>
+    <div class="row">
+        <ul>
+            <li>Last X Attackers:
+                <select id="attackerLimit" class="input-small" title="limit how many attackers are retrieved">
+                  <option value='5'>5</option>
+                  <option value='10'>10</option>
+                  <option value='15'>15</option>
+                  <option value='20'>20</option>
+                  <option value='25'>25</option>
+                  <option value='30'>30</option>
+                  <option value='35'>35</option>
+                  <option value='40'>40</option>
+                </select>            
+            </li>
+        </ul>
+    </div>
     <div class="row">
         <div id="ringChart-category" class="text-center"><h5 class="upperwhite" id="Categories">Categories:</h5></div>
     </div>
@@ -102,7 +104,7 @@ sidenav
 
     <div id="bottom-toolbar">
         <center>
-        <ul class="inline">
+        <ul class="list-inline">
             <li><button id="btnReset" class="btn btn-primary">Reset Layout</button></li>
             <li><button id="btnWireFrame" class="btn btn-primary">WireFrame</button></li>
         </ul>

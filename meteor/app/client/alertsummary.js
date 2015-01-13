@@ -276,9 +276,9 @@ if (Meteor.isClient) {
                             },
                         function(d) {
                             if ( d.acknowledged ) {
-                                return '<button class="btn btn-mini btn-warning btnAlertAck" disabled data-target="' + d._id + '">ack</button>';
+                                return '<button class="btn btn-xs btn-warning btnAlertAck" disabled data-target="' + d._id + '">ack</button>';
                             }else{
-                                return '<button class="btn btn-mini btn-warning btnAlertAck" data-target="' + d._id + '">ack</button>';
+                                return '<button class="btn btn-xs btn-warning btnAlertAck" data-target="' + d._id + '">ack</button>';
                             }
                         }
                         ])

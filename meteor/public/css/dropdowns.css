@@ -6,12 +6,13 @@
 ul.dropdown {
     position: relative;
     display: inline-block;
-    width: max-content;
+    width: min-content;
     border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 3px;
     box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
     margin: 0em 0em -.5em 0em;
     list-style: none;
+    padding: 1px;
 }
 ul.sub_menu{
     z-index: 99;
@@ -56,13 +57,15 @@ ul.dropdown li.hover a  {
 	LEVEL TWO
 */
 ul.dropdown ul {
-    min-width: 5em;
+    min-width: 10em;
     visibility: hidden;
     position: absolute;
     top: 100%;
-    left: 0;
+    left: -3em;
     margin: 0px 0px 0px 0px;
     list-style: none;
+    
+
 }
 
 ul.dropdown ul li {
@@ -72,6 +75,7 @@ ul.dropdown ul li {
     border-bottom: 1px solid #ccc;
     float: none;
     border-radius: 3px;
+    width: 100%;
 }
 
 

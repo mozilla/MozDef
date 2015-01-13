@@ -26,20 +26,24 @@ Anthony Verez averez@mozilla.com
                     </tr>
                 </thead>
                 <tbody>
-			<tr>
-				<td class="alerttimestamp">{{utctimestamp}}</td>
-                <td><a target="_blank" href="{{kibanaurl}}">open in kibana</a></td>
-				<td>{{severity}}</td>
-				<td>{{category}}</td>
-                <td class="alertsummary">{{summary}}</td>
-			</tr>
+                    <tr>
+                        <td class="alerttimestamp">{{utctimestamp}}</td>
+                        <td><a target="_blank" href="{{kibanaurl}}">open in kibana</a></td>
+                        <td>{{severity}}</td>
+                        <td>{{category}}</td>
+                        <td class="alertsummary">{{summary}}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
-    {{#each this.events}}
-        <div class="row center">{{>alert_event}}</div>
-    {{/each}}
+    <table class="table table-reactive table-hover table-condensed" id="alert-events-table">
+        <tbody class="table-striped">
+            {{#each this.events}}
+                {{>alert_event}}
+            {{/each}}
+        </tbody>
+    </table>
     
    
 </div>
@@ -49,7 +53,7 @@ Anthony Verez averez@mozilla.com
 
 <!--each individual event -->
 <template name="alert_event">
-    <table class="table table-reactive table-hover table-condensed" id="alert-events-table">
+    
         <tr>
             <td>{{documentindex}}</td>
             <td>{{documentid}}</td>
@@ -57,5 +61,5 @@ Anthony Verez averez@mozilla.com
             <td>{{documentsource.summary}}</td>
             <td>{{>eventdetails}}</td>
         </tr>
-    </table>
+
 </template>

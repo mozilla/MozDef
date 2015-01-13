@@ -56,46 +56,51 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
 
 <template name="whoismodal">
     <style>
-    .modal-body .row { color: black;
+    .modal-body .row {
+        color: black;
     }
     </style>
-<div class="modal hide" id="modalwhoiswindow">
-    <div class="modal-header">
-       <button type="button" class="close" data-dismiss="modal">&times;</button>
-       <h3>Whois Results</h3>
-    </div>
-    <div class="modal-body">
-            <div class="row center">
-                <div class="well">
-                    whois: {{whois.status}} {{whois.error}}
+    <div class="modal fade" id="modalwhoiswindow">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                   <button type="button" class="close" data-dismiss="modal">&times;</button>
+                   <h4>Whois Results</h4>
                 </div>
-            </div>
-            <div class="row  center">
-                <ul class="unstyled">
-                    {{#each objKeyValue whois.data false}}
-                            {{#if isNotEqual value null}}
-                                <li>{{key}}: {{value}}</li>
-                            {{/if}}
-                    {{/each}}
-                </ul>
-                <ul class="unstyled">
-                    {{#each whois.data.nets}}
-                        {{#each objKeyValue this}}
-                                <li>{{key}}: {{value}}</li>
-                        {{/each}}                
-                    {{/each}}
-                    
-                </ul>
-            </div>
-            <div class="row span2 center">
-                <span>raw json:</span>
-                <span class="unstyled">
-                        {{whois.content}}
-                </span>
-            </div>            
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn" data-dismiss="modal">Close</a>
-  </div>
- </div>
+                <div class="modal-body">
+                    <div class="row center">
+                        <div class="well">
+                            whois: {{whois.status}} {{whois.error}}
+                        </div>
+                    </div>
+                    <div class="row  center">
+                        <ul class="list-unstyled">
+                            {{#each objKeyValue whois.data false}}
+                                    {{#if isNotEqual value null}}
+                                        <li>{{key}}: {{value}}</li>
+                                    {{/if}}
+                            {{/each}}
+                        </ul>
+                        <ul class="list-unstyled">
+                            {{#each whois.data.nets}}
+                                {{#each objKeyValue this}}
+                                        <li>{{key}}: {{value}}</li>
+                                {{/each}}                
+                            {{/each}}
+                            
+                        </ul>
+                    </div>
+                    <div class="row span2 center">
+                        <span>raw json:</span>
+                        <span class="unstyled">
+                                {{whois.content}}
+                        </span>
+                    </div>            
+                </div>
+                <div class="modal-footer">
+                  <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+                </div>
+          </div>
+        </div>
+    </div>
 </template>

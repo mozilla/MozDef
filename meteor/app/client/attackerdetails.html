@@ -12,7 +12,6 @@ Jeff Bryner jbryner@mozilla.com
 <div class="container">
     <div class="row center">
         <div id="attacker" >
-
             <table class="table table-reactive table-hover table-condensed" id="alert-table">
                 <thead>
                     <tr>
@@ -31,7 +30,7 @@ Jeff Bryner jbryner@mozilla.com
                 <td>{{eventscount}}</td>
 				<td>{{alertscount}}</td>
                 <td>
-                    <select id="attackerCategory" name="category" class="input-medium" title="category of this attacker">
+                    <select id="attackerCategory" name="category" class="form-control" title="category of this attacker">
                         <option {{ isselected 'unknown' category }} value='unknown'>Unknown</option>
                         <option {{ isselected 'skiddie' category }} value='skiddie'>Script Kiddie</option>
                         <option {{ isselected 'bruteforcer' category }} value='bruteforcer'>Brute Forcer</option>
@@ -48,17 +47,25 @@ Jeff Bryner jbryner@mozilla.com
     </div>
     <div class="row center">
         <caption><h5>Alerts</h5></caption>
-        {{#each this.alerts}}
-            {{#with thisalert this.alertid}}
-                <div class="row center">{{>attacker_alert}}</div>
-            {{/with}}
-        {{/each}}
+        <table class="table table-reactive table-hover table-condensed " id="attacker-alerts-table">
+            <tbody class="table-striped">
+                {{#each this.alerts}}
+                    {{#with thisalert this.alertid}}
+                        {{>attacker_alert}}
+                    {{/with}}
+                {{/each}}
+            </tbody>
+        </table>
     </div>
     <div class="row center">
     <caption><h5>Events</h5></caption>
-        {{#each this.events}}
-            <div class="row center">{{>attacker_event}}</div>
-        {{/each}}
+    <table class="table table-reactive table-hover table-condensed" id="attacker-events-table">
+        <tbody class="table-striped">
+            {{#each this.events}}
+                {{>attacker_event}}
+            {{/each}}
+        </tbody>
+    </table>
     </div>
     
    
@@ -69,7 +76,7 @@ Jeff Bryner jbryner@mozilla.com
 
 <!--each individual alert -->
 <template name="attacker_alert">
-    <table class="table table-reactive table-hover table-condensed" id="attacker-alerts-table">
+    
         <tr>
             <td><a href="{{getAlertURL _id}}" target="_blank">MozDef</a></td>
             <td>{{utctimestamp}}</td>
@@ -77,13 +84,12 @@ Jeff Bryner jbryner@mozilla.com
             <td>{{category}}</td>
             <td>{{summary}}</td>
         </tr>
-    </table>
+
 </template>
 
 <!--each individual event -->
 <template name="attacker_event">
-    <table class="table table-reactive table-hover table-condensed" id="attacker-events-table">
-        
+
         <tr>
             <td>{{documentindex}}</td>
             <td>{{documentid}}</td>
@@ -92,7 +98,6 @@ Jeff Bryner jbryner@mozilla.com
             <td>{{>eventdetails}}</td>
         </tr>
 
-    </table>
 </template>
 
 

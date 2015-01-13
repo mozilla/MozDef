@@ -30,7 +30,7 @@ body{
     /*font-family: monospace;*/
     /*font-family: sans-serif;*/
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 90%;
+    font-size: small;
     /*margin: 0;*/
     /*min-width: 990px;*/
     padding: 0;
@@ -46,6 +46,10 @@ body{
     text-transform: uppercase;
 }
 
+caption, legend {
+    color: #FFF;
+}
+
 .shadow {
     text-shadow: #000 .7px .7px .7px;
 }
@@ -54,6 +58,7 @@ body{
   color: #FFF;
   font-style: normal;
   font-weight: normal;
+
 }
 
 #header a.mozilla {
@@ -62,7 +67,7 @@ body{
     display: block;
     height: 40px;
     width: 100px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 #bottom-toolbar {
@@ -126,6 +131,17 @@ body{
 
 /*bootstrap overrides*/
 
+.btn {
+  border: 1px outset;
+  border-radius: 4px;    
+}
+
+
+input[type="search"] {
+  border-radius: 15px;
+}
+
+
 [class*="span"].centerspan {
     margin: 0 auto;
     float: none;
@@ -138,21 +154,27 @@ body{
 
 .table-striped tbody > tr:nth-child(odd) > td,
 .table-striped tbody > tr:nth-child(odd) > th {
-  background-color: rgba(211, 202, 193,.2);
+  background-color: rgba(30,87,153,.7);
 }
 
 .table-hover tbody tr:hover > td,
 .table-hover tbody tr:hover > th {
-  background-color: rgba(211, 202, 193,.7);
+  background-color: rgba(30,87,153,.5);
 }
 
 td{
   color:white;
 }
 
+
 .welcome {
     text-align: center;
 }    
+
+.tabcontent{
+    margin-top: 20px;
+}
+
 
 /*login ui css to hide the local account/password signup options */
 .logins-wrapper .svgtextlabel {
@@ -328,7 +350,7 @@ circle:hover{
 
 #nav-main li:hover ul,
 .js #nav-main li.hover ul {
-    margin-top: 47px;
+    margin-top: 2.5em;
     left: 0;
     opacity: 1;
     -moz-transition: opacity 0.2s ease-in-out;
@@ -385,7 +407,7 @@ circle:hover{
 #nav-main ul ul a:link,
 #nav-main ul ul a:visited {
     overflow: hidden;
-    padding: 8px 10px;
+    padding: 3px 10px;
     margin: 0px;
     height: auto;
     float: none;

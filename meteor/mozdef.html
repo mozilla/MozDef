@@ -38,8 +38,8 @@ Anthony Verez averez@mozilla.com
     {{> menu}}
       
         {{#if loggingIn}}
-                <div class="span5 center">
-                    <div class="alert alert-info alert-dismissible" role="alert">
+                <div class="row center">
+                    <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                        <strong>loading</strong>
                    </div>
@@ -48,8 +48,8 @@ Anthony Verez averez@mozilla.com
             {{#if currentUser}}
                 {{>yield}}
             {{else}}
-                <div class="span5 center">
-                    <div class="alert alert-info alert-dismissible" role="alert">
+                <div class="row center">
+                    <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                        <strong>Please login</strong>
                    </div>
