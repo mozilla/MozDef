@@ -23,6 +23,7 @@ import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from dateutil.parser import parse
+from time import sleep
 
 greetz = ["mozdef bot in da house",
           "mozdef here..what's up",
@@ -97,10 +98,12 @@ def run_async(func):
     return async_func
 
 
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
+def toUTC(suspectedDate, localTimeZone=None):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
+    if localTimeZone is None:
+        localTimeZone = options.defaultTimeZone    
     if type(suspectedDate) == str:
         objDate = parse(suspectedDate, fuzzy=True)
     elif type(suspectedDate) == datetime:
@@ -172,7 +175,7 @@ class alertsListener(threading.Thread):
         self.kill = False
         self.lastRunTime = datetime.now()
         self.client = client
-        self.lastalerts = []
+        self.lastalert = toUTC ('yesterday')
         self.openMQ()
         self.mqError = False
         self.connection = None
@@ -183,6 +186,10 @@ class alertsListener(threading.Thread):
             " [x]event {0}:{1}".format(method.routing_key, bodyin))
         try:
             jbody = json.loads(bodyin)
+
+            # delay ourselves so as not to overrun IRC receiveQ?
+            if abs(toUTC(datetime.now()) - toUTC(self.lastalert)).seconds < 2:
+                sleep(2)
             
             # see where we send this alert
             ircchannel = options.alertircchannel
@@ -191,6 +198,8 @@ class alertsListener(threading.Thread):
                     ircchannel = jbody['ircchannel']
 
             self.client.msg(ircchannel, formatAlert(jbody))
+            # set a timestamp to rate limit ourselves
+            self.lastalert = toUTC(datetime.now())            
 
         except Exception as e:
             self.client.root_logger.error(
@@ -326,7 +335,7 @@ class mozdefBot():
 
                 if "!help" in message:
                     self.client.msg(
-                        recipient, "I just send alerts and taunt arcsight..for now..but try these:")
+                        recipient, "Help on it's way...try these:")
                     self.client.msg(
                         recipient, "!quote  --get a quote from my buddy Mos Def")
                     self.client.msg(recipient, "!panic  --panic (or not )")
@@ -378,6 +387,8 @@ class mozdefBot():
 def initConfig():
     # initialize config options
     # sets defaults or overrides from config file.
+    # change this to your default zone for when it's not specified
+    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)    
     options.host = getConfig('host', 'irc.somewhere.com', options.configfile)
     options.nick = getConfig('nick', 'mozdefnick', options.configfile)
     options.port = getConfig('port', 6697, options.configfile)
