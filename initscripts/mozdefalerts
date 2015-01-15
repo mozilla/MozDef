@@ -22,7 +22,7 @@
 
 RETVAL=0
 source /home/mozdef/envs/mozdef/bin/activate
-DAEMON_OPTS="-c /home/mozdef/envs/mozdef/initscripts/supervisord.alerts.conf $DAEMON_OPTS"
+DAEMON_OPTS="-c /home/mozdef/envs/mozdef/alerts/supervisord.alerts.conf $DAEMON_OPTS"
 
 start() {
 	echo -n $"Starting supervisord: "
