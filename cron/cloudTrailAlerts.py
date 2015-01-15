@@ -66,7 +66,7 @@ def alertToMessageQueue(alertDict):
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=options.mqserver))
         channel = connection.channel()
         #declare the exchanges
-        channel.exchange_declare(exchange=options.alertexchange,type='topic')
+        channel.exchange_declare(exchange=options.alertexchange,type='topic', durable=True)
         
         #cherry pick items from the alertDict to send to the alerts messageQueue
         mqAlert=dict(severity='INFO',category='')
