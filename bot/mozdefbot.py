@@ -218,7 +218,7 @@ class alertsListener(threading.Thread):
                 if self.channel is None:
                     self.channel = self.connection.channel()
                     self.channel.exchange_declare(
-                        exchange=options.alertexchange, type='topic')
+                        exchange=options.alertexchange, type='topic', durable=True)
                     result = self.channel.queue_declare(exclusive=False)
                     queue_name = result.method.queue
                     self.channel.queue_bind(
