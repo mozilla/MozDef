@@ -85,9 +85,7 @@ ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/d
 RUN (curl -L https://install.meteor.com/ | /bin/sh \
 	&& npm install -g meteorite \
 	&& ln -s /usr/bin/nodejs /usr/bin/node \
-	&& cd /opt/MozDef/meteor \
-	&& /usr/local/bin/mrt add iron-router \
-	&& /usr/local/bin/mrt add accounts-persona)
+	&& cd /opt/MozDef/meteor )
 
 
 # VOLUMES
