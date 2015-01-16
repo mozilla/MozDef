@@ -124,7 +124,7 @@ class AlertTask(Task):
                 max_retries=10)
             ensurePublish(alertDict,
                 exchange=self.alertExchange,
-                routing_key=RABBITMQ['alertexchange'])
+                routing_key=RABBITMQ['alertqueue'])
             self.log.debug('alert sent to the alert queue')
         except Exception as e:
             self.log.error('Exception while sending alert to message queue: {0}'.format(e))
