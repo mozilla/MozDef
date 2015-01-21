@@ -236,12 +236,14 @@ if (Meteor.isClient) {
         sceneControls.dynamicDampingFactor = 0.3;
 
         //setup ogro
+        //categories and skins should match the skin you want for a particular category
         var configOgro = {
             baseUrl: "/other/ogro/",
             body: "ogro-light.js",
-            skins: [ "grok.jpg", "ogrobase.png", "arboshak.png", "ctf_r.png", "ctf_b.png", "darkam.png", "freedom.png",
+            skins: [ "ogrobase.png", "grok.jpg", "arboshak.png", "ctf_r.png", "ctf_b.png", "darkam.png", "freedom.png",
                      "gib.png", "gordogh.png", "igdosh.png", "khorne.png", "nabogro.png",
                      "sharokh.png" ],
+            categories: ["unknown","falsepositive","skiddie","apt", "bountyhunter", "bruteforcer"],
             weapons:  [ [ "weapon-light.js", "weapon.jpg" ] ],
             animations: {
                 move: "run",
@@ -362,6 +364,7 @@ if (Meteor.isClient) {
             //no weapons for now..
             //this.setWeapon(Math.floor((Math.random()*1)));
             character.setSkin(Math.floor((Math.random() * 10)));
+            character.setSkin(_.indexOf(configOgro.categories,dbrecord.category));
             //this.setAnimation(configOgro.animations["stand"]);
     
             //create the character's nameplate
@@ -390,7 +393,10 @@ if (Meteor.isClient) {
                   'href':getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
                   'target':"_blank",
                   text: 'events: ' + dbrecord.eventscount
-                })));           
+                })));
+            adetails.append($('<li/>',{
+                text: dbrecord.category
+            }));
             adetails.wrap($('<div class="row-fluid"></div>'));
             
             var abuttons=$('<div class="row-fluid"/>');
@@ -513,7 +519,7 @@ if (Meteor.isClient) {
                                             events:0,
                                             alerts:0
                                             },
-                                        reactive:false,
+                                        reactive:true,
                                         sort: {lastseentimestamp: 'desc'},
                                         limit: parseInt(Session.get('attackerlimit'))}).fetch();
             ////parse, group data for the d3 charts
@@ -559,18 +565,45 @@ if (Meteor.isClient) {
                 redrawCharacters();
             }
         };
-        Deps.autorun(function() {
+        
+        hookCategories = function(){
+            //setup an observe changes hook
+            //to watch for category changes in attackers
+            //to force a screen refresh
+            //addedBefore is required if using limits apparently, but doesn't do anything
+            //changed just signals a screen redraw for now
+            //TODO: hook the database record ID and only update the one character
+            var cursorAttackers=attackers.find({},
+                                        {fields:{
+                                            category:1
+                                            },
+                                        reactive:true,
+                                        sort: {lastseentimestamp: 'desc'},
+                                        limit: parseInt(Session.get('attackerlimit'))}).observeChanges(
+                                                                                                       {addedBefore: function(){},
+                                                                                                        changed:function(id,fields){
+                                                                                                                //debugLog('category changed.');
+                                                                                                                waitForBaseCharacter();
+                                                                                                                }
+                                                                                                        });            
+        };
+        Tracker.autorun(function() {
             //debugLog('running dep orgro autorun');
             
             $("#attackerLimit").val(Session.get('attackerlimit'));
             Meteor.subscribe("attackers-summary", onReady=function() {
                 //load the base character meshes, etc to allow resource sharing
                 //when this completes it triggers a clear/dataload and filtering of characters.
+                //debugLog('Invalidated attackers-summary via subscribe');
+                
+                hookCategories();
                 waitForBaseCharacter();
             });
             //Changing the session.attackerlimit should
             //make us redraw a new set of attackers.
-            Deps.onInvalidate(function () {
+            Tracker.onInvalidate(function () {
+                //debugLog('Invalidated attackers-summary');
+                hookCategories();
                 waitForBaseCharacter();
             });            
 
