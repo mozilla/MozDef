@@ -33,8 +33,8 @@ class AlertBruteforceSsh(AlertTask):
 
         # Search aggregations on field 'sourceipaddress', keep 50 samples of events at most
         self.searchEventsAggreg('sourceipaddress', samplesLimit=50)
-        # alert when >= 5 matching events in an aggregation
-        self.walkAggregations(threshold=2)
+        # alert when >= X matching events in an aggregation
+        self.walkAggregations(threshold=10)
 
     # Set alert properties
     def onAggreg(self, aggreg):
