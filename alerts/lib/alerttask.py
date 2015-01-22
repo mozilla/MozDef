@@ -157,6 +157,7 @@ class AlertTask(Task):
             from_value=begindateUTC, to_value=enddateUTC))
         q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
         must_not.append(pyes.ExistsFilter('alerttimestamp'))
+        must.append(qDate)
         q.filters.append(pyes.BoolFilter(
             must=must,
             should=should,
