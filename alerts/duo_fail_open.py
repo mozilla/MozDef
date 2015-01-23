@@ -21,15 +21,13 @@ class AlertDuoFailOpen(AlertTask):
         date_timedelta = dict(minutes=15)
         # Configure filters using pyes
         must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('_source.tags', 'openvpn,duosecurity'),
-            pyes.QueryFilter(pyes.MatchQuery('summary','DuoAPI contact failed','phrase')),
-            pyes.QueryFilter(pyes.MatchQuery('summary','DuoAPI contact failed','phrase')),
+            pyes.ExistsFilter('details.hostname'),
+            pyes.QueryFilter(pyes.MatchQuery('summary','DuoAPI contact failed','phrase'))
         ]
         self.filtersManual(date_timedelta, must=must)
 
-        # Search aggregations on field 'sourceipaddress', keep 50 samples of events at most
-        self.searchEventsAggreg('hostname', samplesLimit=1)
+        # Search aggregations on field 'sourceipaddress', keep X samples of events at most
+        self.searchEventsAggreg('hostname', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         # in this case, always
         self.walkAggregations(threshold=1)
@@ -43,7 +41,8 @@ class AlertDuoFailOpen(AlertTask):
         tags = ['openvpn', 'duosecurity']
         severity = 'WARNING'
 
-        summary = ('DuoSecurity OpenVPN contact failed, fail open triggered on {0}'.aggreg['value']))
+        summary = ('DuoSecurity OpenVPN contact failed, fail open triggered on {0}'.aggreg['value'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+
