@@ -13,7 +13,7 @@ if (Meteor.isClient) {
     Template.incidentsveris.rendered = function () {
         var ndx = crossfilter();
         var container=document.getElementById('veris-wrapper')
-        var margin = {top: 20, right: 20, bottom: 20, left: 20},
+        var margin = {top: 30, right: 20, bottom: 30, left: 20},
             width = window.innerWidth - margin.left - margin.right,
             height = window.innerHeight - margin.top - margin.bottom,
             minRadius=3,

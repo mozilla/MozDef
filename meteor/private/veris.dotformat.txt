@@ -189,11 +189,12 @@ targeted.Targeted
 targeted.Unknown
 targeted.NA
 attribute.integrity.variety.Created account
+attribute.integrity.variety.Defacement
 attribute.integrity.variety.Hardware tampering
 attribute.integrity.variety.Alter behavior
 attribute.integrity.variety.Fraudulent transaction
 attribute.integrity.variety.Log tampering
-attribute.integrity.variety.Misappropriation
+attribute.integrity.variety.Repurpose
 attribute.integrity.variety.Misrepresentation
 attribute.integrity.variety.Modify configuration
 attribute.integrity.variety.Modify privileges
@@ -209,6 +210,13 @@ attribute.availability.variety.Acceleration
 attribute.availability.variety.Obscuration
 attribute.availability.variety.Unknown
 attribute.availability.variety.Other
+attribute.confidentiality.data_victim.Customer
+attribute.confidentiality.data_victim.Employee
+attribute.confidentiality.data_victim.Other
+attribute.confidentiality.data_victim.Partner
+attribute.confidentiality.data_victim.Patient
+attribute.confidentiality.data_victim.Student
+attribute.confidentiality.data_victim.Unknown
 attribute.confidentiality.state.Stored
 attribute.confidentiality.state.Stored encrypted
 attribute.confidentiality.state.Stored unencrypted
@@ -221,12 +229,15 @@ attribute.confidentiality.data.variety.Credentials
 attribute.confidentiality.data.variety.Bank
 attribute.confidentiality.data.variety.Classified
 attribute.confidentiality.data.variety.Copyrighted
+attribute.confidentiality.data.variety.Digital certificate
 attribute.confidentiality.data.variety.Medical
 attribute.confidentiality.data.variety.Payment
 attribute.confidentiality.data.variety.Personal
 attribute.confidentiality.data.variety.Internal
+attribute.confidentiality.data.variety.Source code
 attribute.confidentiality.data.variety.System
 attribute.confidentiality.data.variety.Secrets
+attribute.confidentiality.data.variety.Virtual currency
 attribute.confidentiality.data.variety.Unknown
 attribute.confidentiality.data.variety.Other
 attribute.confidentiality.data_disclosure.Yes
@@ -237,21 +248,32 @@ discovery_method.Ext - actor disclosure
 discovery_method.Ext - fraud detection
 discovery_method.Ext - monitoring service
 discovery_method.Ext - customer
-discovery_method.Ext - unrelated party
 discovery_method.Ext - audit
 discovery_method.Ext - unknown
 discovery_method.Int - antivirus
 discovery_method.Int - incident response
+discovery_method.Int - infrastructure monitoring
 discovery_method.Int - financial audit
 discovery_method.Int - fraud detection
 discovery_method.Int - HIDS
-discovery_method.Int - IT audit
+discovery_method.Int - IT review
 discovery_method.Int - log review
 discovery_method.Int - NIDS
 discovery_method.Ext - law enforcement
 discovery_method.Int - security alarm
-discovery_method.Int - reported by user
+discovery_method.Int - reported by employee
 discovery_method.Int - unknown
+discovery_method.Prt - monitoring service
+discovery_method.Prt - audit
+discovery_method.Prt - antivirus
+discovery_method.Prt - incident response
+discovery_method.Prt - unknown
+discovery_method.Prt - other
+discovery_method.Ext - incident response
+discovery_method.Ext - found documents
+discovery_method.Ext - suspicious traffic
+discovery_method.Ext - emergency response team
+discovery_method.Int - data loss prevention
 discovery_method.Unknown
 discovery_method.Other
 actor.motive.NA
@@ -262,8 +284,21 @@ actor.motive.Fun
 actor.motive.Grudge
 actor.motive.Ideology
 actor.motive.Convenience
+actor.motive.Secondary
 actor.motive.Unknown
 actor.motive.Other
+actor.internal.job_change.Hired
+actor.internal.job_change.Promoted
+actor.internal.job_change.Lateral move
+actor.internal.job_change.Resigned
+actor.internal.job_change.Let go
+actor.internal.job_change.Demoted
+actor.internal.job_change.Passed over
+actor.internal.job_change.Unknown
+actor.internal.job_change.Other
+actor.internal.job_change.Reprimanded
+actor.internal.job_change.Job eval
+actor.internal.job_change.Personal issues
 actor.internal.variety.Auditor
 actor.internal.variety.Call center
 actor.internal.variety.Cashier
@@ -301,10 +336,20 @@ security_incident.Confirmed
 security_incident.Suspected
 security_incident.False positive
 security_incident.Near miss
-asset.management.Internal
-asset.management.External
-asset.management.Unknown
-asset.management.NA
+asset.governance.Personally owned
+asset.governance.3rd party owned
+asset.governance.3rd party managed
+asset.governance.3rd party hosted
+asset.governance.Internally isolated
+asset.governance.Unknown
+asset.cloud.Hypervisor
+asset.cloud.Partner application
+asset.cloud.Hosting governance
+asset.cloud.Customer attack
+asset.cloud.Hosting error
+asset.cloud.User breakout
+asset.cloud.Unknown
+asset.cloud.Other
 asset.variety.S - Authentication
 asset.variety.S - Backup
 asset.variety.S - Database
@@ -326,6 +371,7 @@ asset.variety.S - Web application
 asset.variety.S - Code repository
 asset.variety.S - VM host
 asset.variety.S - Other
+asset.variety.S - Unknown
 asset.variety.N - Access reader
 asset.variety.N - Camera
 asset.variety.N - Firewall
@@ -386,31 +432,6 @@ asset.variety.P - Manager
 asset.variety.P - Partner
 asset.variety.P - Other
 asset.variety.Unknown
-asset.accessibility.External
-asset.accessibility.Internal
-asset.accessibility.Isolated
-asset.accessibility.Unknown
-asset.accessibility.NA
-asset.hosting.Internal
-asset.hosting.External shared
-asset.hosting.External dedicated
-asset.hosting.External
-asset.hosting.Unknown
-asset.hosting.NA
-asset.ownership.Victim
-asset.ownership.Employee
-asset.ownership.Partner
-asset.ownership.Customer
-asset.ownership.Unknown
-asset.ownership.NA
-asset.cloud.Hypervisor
-asset.cloud.Partner application
-asset.cloud.Hosting governance
-asset.cloud.Customer attack
-asset.cloud.Hosting error
-asset.cloud.User breakout
-asset.cloud.Unknown
-asset.cloud.Other
 victim.employee_count.1 to 10
 victim.employee_count.11 to 100
 victim.employee_count.101 to 1000
@@ -682,6 +703,7 @@ action.malware.vector.Instant messaging
 action.malware.vector.Network propagation
 action.malware.vector.Remote injection
 action.malware.vector.Removable media
+action.malware.vector.Software update
 action.malware.vector.Web drive-by
 action.malware.vector.Web download
 action.malware.vector.Unknown
@@ -813,7 +835,7 @@ action.misuse.vector.Unknown
 action.misuse.vector.Other
 action.misuse.variety.Knowledge abuse
 action.misuse.variety.Privilege abuse
-action.misuse.variety.Embezzlement
+action.misuse.variety.Possession abuse
 action.misuse.variety.Data mishandling
 action.misuse.variety.Email misuse
 action.misuse.variety.Net misuse
@@ -857,6 +879,7 @@ action.hacking.variety.MitM
 action.hacking.variety.Null byte injection
 action.hacking.variety.Offline cracking
 action.hacking.variety.OS commanding
+action.hacking.variety.Pass-the-hash
 action.hacking.variety.Path traversal
 action.hacking.variety.RFI
 action.hacking.variety.Reverse engineering
@@ -879,27 +902,26 @@ action.hacking.variety.XQuery injection
 action.hacking.variety.Virtual machine escape
 action.hacking.variety.Unknown
 action.hacking.variety.Other
-action.physical.vector.Privileged access
+action.physical.vector.Partner facility
+action.physical.vector.Partner vehicle
+action.physical.vector.Personal residence
+action.physical.vector.Personal vehicle
+action.physical.vector.Public facility
+action.physical.vector.Public vehicle
+action.physical.vector.Victim secure area
+action.physical.vector.Victim work area
+action.physical.vector.Victim public area
+action.physical.vector.Victim grounds
 action.physical.vector.Visitor privileges
-action.physical.vector.Bypassed controls
-action.physical.vector.Disabled controls
 action.physical.vector.Uncontrolled location
+action.physical.vector.Privileged access
 action.physical.vector.Unknown
 action.physical.vector.Other
-action.physical.location.Partner facility
-action.physical.location.Partner vehicle
-action.physical.location.Personal residence
-action.physical.location.Personal vehicle
-action.physical.location.Public facility
-action.physical.location.Public vehicle
-action.physical.location.Victim secure area
-action.physical.location.Victim work area
-action.physical.location.Victim public area
-action.physical.location.Victim grounds
-action.physical.location.Unknown
-action.physical.location.Other
 action.physical.variety.Assault
-action.physical.variety.Sabotage
+action.physical.variety.Bypassed controls
+action.physical.variety.Destruction
+action.physical.variety.Disabled controls
+action.physical.variety.Skimmer
 action.physical.variety.Snooping
 action.physical.variety.Surveillance
 action.physical.variety.Tampering
@@ -918,3 +940,11 @@ timeline.unit.Months
 timeline.unit.Years
 timeline.unit.Never
 timeline.unit.Unknown
+workeffort.Minutes
+workeffort.Hours
+workeffort.Days
+workeffort.Weeks
+workeffort.Months
+workeffort.Years
+workeffort.Never
+workeffort.Unknown
