@@ -17,7 +17,8 @@ if (Meteor.isServer) {
         'ipwhois': ipwhois,
         'ipcif': ipcif,
         'ipdshield': ipdshield,
-        'verisstats': verisstats
+        'verisstats': verisstats,
+        'logincounts': logincounts
     });
 
     function saySomething() {
@@ -79,7 +80,6 @@ if (Meteor.isServer) {
             //console.log(ipdshieldResponse);
             return ipdshieldResponse;
         }
-
     }
 
     function ipcif(ipaddress){
@@ -93,7 +93,6 @@ if (Meteor.isServer) {
             //console.log(ipdshieldResponse);
             return ipcifResponse;
         }
-
     }
 
     function verisstats(){
@@ -107,6 +106,18 @@ if (Meteor.isServer) {
             //console.log(verisstatsResponse);
             return verisstatsResponse;
         }
+    }
 
-    }    
+    function logincounts(){
+        //console.log('Calling ' + mozdef.rootAPI + '/ldapLogins/');
+        var logincountsResponse = HTTP.get(mozdef.rootAPI + '/ldapLogins/');
+
+        if ( typeof logincountsResponse == 'undefined') {
+            console.log("logincountsResponse: no response from server")
+            return "";
+        } else {
+            //console.log(logincountsResponse);
+            return logincountsResponse;
+        }
+    } 
 };
