@@ -9,6 +9,7 @@ Jeff Bryner jbryner@mozilla.com
  */
 
 if (Meteor.isClient) {
+    var verisstatsResult = new Object;
 
     Template.incidentsveris.rendered = function () {
         var ndx = crossfilter();
@@ -48,26 +49,35 @@ if (Meteor.isClient) {
             .range([0, maxRadius]);
 
         container.style.cursor='wait'
-        d3.json(getSetting('rootAPI') + '/veris' , function(error, jsondata) {
-            //console.log(jsondata)
-            //jsondata.forEach(function(d){
-            //    console.log(d);    
-            //});
-            ndx.add(jsondata);
-            container.style.cursor='auto';
-            if ( ndx.size() >0 ){
-                var all = ndx.groupAll();
-                var tagsDim = ndx.dimension(function(d) {return d.tags;});
-                var phaseDim = ndx.dimension(function(d) {return d.phase});
-            }
-            r.domain([0, d3.max(tagsDim.group().all(), function(d) { return d.value; })]);
-            tagsDim.group().all().forEach(function(d){
-                d.r = r(d.value);
-                d.cr = Math.max(minRadius, d.r);
-                nodes.push(d);
-            });
-            start();
-        });
+        Meteor.apply('verisstats',
+            [],
+            onResultReceived = function(err,result){
+                //debugLog(err,result);
+                if (typeof err == 'undefined') {
+                    verisstatsResult.status='completed';
+                    verisstatsResult.result = result;
+                    verisstatsResult.content=result.content;
+                    verisstatsResult.data=result.data;
+                    ndx.add(result.data);
+                    container.style.cursor='auto';
+                    if ( ndx.size() >0 ){
+                        var all = ndx.groupAll();
+                        var tagsDim = ndx.dimension(function(d) {return d.tags;});
+                        var phaseDim = ndx.dimension(function(d) {return d.phase});
+                    }
+                    r.domain([0, d3.max(tagsDim.group().all(), function(d) { return d.value; })]);
+                    tagsDim.group().all().forEach(function(d){
+                        d.r = r(d.value);
+                        d.cr = Math.max(minRadius, d.r);
+                        nodes.push(d);
+                    });
+                    start();                   
+               } else {
+                    //debugLog(err,result);
+                    verisstatsResult.status='error';
+                    verisstatsResult.error=err;
+               }
+           });
 
         container.style.cursor='auto';
 
