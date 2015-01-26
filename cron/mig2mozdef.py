@@ -121,8 +121,8 @@ def main():
             migjson=r.json()
             raise Exception("API returned HTTP code %s and error '%s:%s'" %
                                 (r.status_code,
-                                migjson['collection']['code'],
-                                migjson['collection']['message'])
+                                migjson['collection']['error']['code'],
+                                migjson['collection']['error']['message'])
                             )
         else:
             # another type of failure that's unlikely to have an error body
