@@ -564,8 +564,7 @@ if (Meteor.isClient) {
         
         //set up reactive data 
         Deps.autorun(function() {
-            //Meteor.subscribe("incidents-details",Session.get('incidentID'));
-            Meteor.subscribe("incidents-details",Session.get('incidentID'), onReady=function(){
+            Meteor.subscribe("incident-details",Session.get('incidentID'), onReady=function(){
                 initDatePickers();
             });            
         }); //end deps.autorun

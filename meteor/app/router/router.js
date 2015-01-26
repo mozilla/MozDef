@@ -49,7 +49,7 @@ Router.map(function () {
         path: '/incident/:_id/edit',
         waitOn: function() {
             Session.set('incidentID', this.params._id);
-            return Meteor.subscribe('incidents-details', Session.get('incidentID'))
+            return Meteor.subscribe('incident-details', Session.get('incidentID'))
             },        
         data: function() {
             if (!Session.get('revisionsundo')) {

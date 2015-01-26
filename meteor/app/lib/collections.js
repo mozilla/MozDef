@@ -12,9 +12,10 @@ Anthony Verez averez@mozilla.com
 
 //collections shared by client/server
 
-    incidents = new Meteor.Collection("incidents");
     events = new Meteor.Collection("events");
     alerts = new Meteor.Collection("alerts");
+    investigations = new Meteor.Collection("investigations");
+    incidents = new Meteor.Collection("incidents");
     veris = new Meteor.Collection("veris");
     kibanadashboards = new Meteor.Collection("kibanadashboards");
     mozdefsettings = new Meteor.Collection("mozdefsettings");
@@ -24,7 +25,6 @@ Anthony Verez averez@mozilla.com
     healtheshotthreads = new Meteor.Collection("healtheshotthreads");
     attackers = new Meteor.Collection("attackers");
     actions = new Meteor.Collection("actions"); 
-
 
 if (Meteor.isServer) {
     //Publishing setups
@@ -46,19 +46,20 @@ if (Meteor.isServer) {
         
         if ( timeperiod ==='tail' || timeperiod == 'none' ){
             return alerts.find(
-                            {summary: {$regex:searchregex}},
-                            {fields:{
-                                    _id:1,
-                                    esmetadata:1,
-                                    utctimestamp:1,
-                                    utcepoch:1,
-                                    summary:1,
-                                    severity:1,
-                                    category:1,
-                                    acknowledged:1
-                                    },
-                               sort: {utcepoch: -1},
-                               limit:recordlimit});
+                {summary: {$regex:searchregex}},
+                {fields:{
+                        _id:1,
+                        esmetadata:1,
+                        utctimestamp:1,
+                        utcepoch:1,
+                        summary:1,
+                        severity:1,
+                        category:1,
+                        acknowledged:1
+                        },
+                   sort: {utcepoch: -1},
+                   limit:recordlimit}
+            );
         } else {
             //determine the utcepoch range
             beginningtime=moment().utc();
@@ -67,20 +68,21 @@ if (Meteor.isServer) {
             timeunits=timeperiod.split(" ")[1];
             beginningtime.subtract(timevalue,timeunits);
             return alerts.find(
-                            {summary: {$regex:searchregex},
-                            utcepoch: {$gte: beginningtime.unix()}},
-                            {fields:{
-                                    _id:1,
-                                    esmetadata:1,
-                                    utctimestamp:1,
-                                    utcepoch:1,
-                                    summary:1,
-                                    severity:1,
-                                    category:1,
-                                    acknowledged:1
-                                    },
-                               sort: {utcepoch: -1},
-                               limit:recordlimit});            
+                {summary: {$regex:searchregex},
+                utcepoch: {$gte: beginningtime.unix()}},
+                {fields:{
+                        _id:1,
+                        esmetadata:1,
+                        utctimestamp:1,
+                        utcepoch:1,
+                        summary:1,
+                        severity:1,
+                        category:1,
+                        acknowledged:1
+                        },
+                   sort: {utcepoch: -1},
+                   limit:recordlimit}
+            );            
         }
     });
     
@@ -89,10 +91,10 @@ if (Meteor.isServer) {
        //alert ids can be either mongo or elastic search IDs
        //look for both to publish to the collection.
        return alerts.find({
-        $or:[
-             {'esmetadata.id': alertid},
-             {'_id': alertid},
-             ]
+            $or:[
+                    {'esmetadata.id': alertid},
+                    {'_id': alertid},
+                ]
         });
     });
     
@@ -142,23 +144,7 @@ if (Meteor.isServer) {
         handle.stop();
       });
     });    
-    
-    
-    
 
-    Meteor.publish("incidents-summary", function () {
-        return incidents.find({},
-                              {fields: {
-                                        _id:1,
-                                        summary:1,
-                                        phase:1,
-                                        dateOpened:1,
-                                        dateClosed:1
-                                },
-                              sort: {dateOpened: -1},
-                              limit:100});
-    });
-    
     Meteor.publish("attackers", function () {
         return attackers.find({}, {limit:100});
     });
@@ -178,8 +164,21 @@ if (Meteor.isServer) {
                        sort: {lastseentimestamp: -1},
                        limit:100});
     });
-    
-    Meteor.publish("incidents-details",function(incidentid){
+
+    Meteor.publish("incidents-summary", function () {
+        return incidents.find({},
+                              {fields: {
+                                        _id:1,
+                                        summary:1,
+                                        phase:1,
+                                        dateOpened:1,
+                                        dateClosed:1
+                                },
+                              sort: {dateOpened: -1},
+                              limit:100});
+    });
+
+    Meteor.publish("incident-details",function(incidentid){
        return incidents.find({'_id': incidentid});
     });    
 
@@ -241,6 +240,13 @@ if (Meteor.isServer) {
         return (userId);
       }
     });
+
+    investigations.allow({
+      update: function (userId, doc, fields, modifier) {
+        // the user must be logged in 
+        return (userId);
+      }
+    });    
 };
 
 if (Meteor.isClient) {
