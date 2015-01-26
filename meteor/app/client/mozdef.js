@@ -10,7 +10,7 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
-    //defaults:
+    //default session variables:
     Meteor.startup(function () {
       Session.set('verisfilter','  ');
       Session.set('alertssearchtext','');

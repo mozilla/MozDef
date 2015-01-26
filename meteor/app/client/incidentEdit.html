@@ -192,6 +192,12 @@ Jeff Bryner jbryner@mozilla.com
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="control-label col-xs-2" for="theoryStatus">Status:</label>
+                    <div class="col-xs-5">
+                        <input id="theoryStatus" placeholder="status" class="form-control" type="text">
+                    </div>
+                </div>                
+                <div class="form-group">
                     <div class="col-xs-2 col-xs-offset-2">
                         <button id="saveTheory" type="submit" class="btn btn-primary submit">Save</button>
                     </div>
@@ -260,7 +266,6 @@ Jeff Bryner jbryner@mozilla.com
                             <td>Description</td>
                             <td>Created</td>
                             <td>Creator</td>
-                            <td>Status</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -271,7 +276,6 @@ Jeff Bryner jbryner@mozilla.com
                             <td>{{description}}</td>
                             <td>{{dateCreated}}</td>
                             <td>{{creator}}</td>
-                            <td>{{status}}</td>
                             <td><button class="btn btn-danger timestampdelete" data-timestampid={{_id}}>delete</button></td>
                         </tr>
                     {{/each}}
@@ -296,13 +300,20 @@ Jeff Bryner jbryner@mozilla.com
                     <div class="col-xs-2">
                         <input type="checkbox"  class="form-control" id="mitigationTemporary">
                     </div>
-                </div>                
+                </div>
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="mitigationDescription">Description:</label>
                     <div class="col-xs-10">
                         <textarea id="mitigationDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="mitigationStatus">Status:</label>
+                    <div class="col-xs-5">
+                        <input id="mitigationStatus" placeholder="status" class="form-control" type="text">
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <div class="col-xs-2 col-xs-offset-2">
                         <button id="saveMitigation" type="submit" class="btn btn-primary submit">Save</button>
@@ -374,7 +385,6 @@ Jeff Bryner jbryner@mozilla.com
                             <td>Description</td>
                             <td>Created</td>
                             <td>Creator</td>
-                            <td>Status</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -385,7 +395,6 @@ Jeff Bryner jbryner@mozilla.com
                             <td>{{description}}</td>
                             <td>{{dateCreated}}</td>
                             <td>{{creator}}</td>
-                            <td>{{status}}</td>
                             <td><button class="btn btn-danger lessondelete" data-lessonid={{_id}}>delete</button></td>
                         </tr>
                     {{/each}}

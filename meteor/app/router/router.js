@@ -7,6 +7,10 @@ Copyright (c) 2014 Mozilla Corporation
 Contributors:
 Jeff Bryner jbryner@mozilla.com
 */
+Router.configure({
+    // the default layout
+    layoutTemplate: 'layout'
+});
 
 Router.map(function () {
     this.route('home', {
@@ -21,9 +25,53 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
 
-    this.route('events', {
-        path: '/events/*',
-        template: 'hello',
+    this.route('alertssummary', {
+        path: '/alerts',
+        template: 'alertssummary',
+        layoutTemplate: 'layout'
+    });
+
+    this.route('alertdetails', {
+        path: '/alert/:alert_id',
+        template: 'alertdetails',
+        waitOn: function() {
+            Session.set('alertID', this.params.alert_id);
+            return Meteor.subscribe('alerts-details', Session.get('alertID'))
+            },
+        data: function() {
+          return alerts.findOne({'esmetadata.id':Session.get('alertID')});
+        },
+        layoutTemplate: 'layout'
+    });
+
+    this.route('investigations', {
+        path: '/investigations',
+        template: 'investigations',
+        layoutTemplate: 'layout'
+    });
+
+    this.route('investigationsnew', {
+        path: '/investigation/new',
+        template: 'addinvestigationform',
+        layoutTemplate: 'layout'
+    });
+
+    this.route('investigationsveris', {
+        path: '/investigations/veris',
+        template: 'investigationsveris',
+        layoutTemplate: 'layout'
+    });
+
+    this.route('investigationedit', {
+        path: '/investigation/:_id/edit',
+        waitOn: function() {
+            Session.set('investigationID', this.params._id);
+            return Meteor.subscribe('investigation-details', Session.get('investigationID'))
+            },        
+        data: function() {
+            return investigations.findOne(this.params._id);
+        },
+        template: 'editinvestigationform',
         layoutTemplate: 'layout'
     });
 
@@ -34,7 +82,7 @@ Router.map(function () {
     });
 
     this.route('incidentnew', {
-        path: '/incidents/new',
+        path: '/incident/new',
         template: 'addincidentform',
         layoutTemplate: 'layout'
     });
@@ -95,31 +143,6 @@ Router.map(function () {
         template: 'logincounts',
         layoutTemplate: 'layout'
     });
-
-    this.route('alertssummary', {
-        path: '/alerts',
-        template: 'alertssummary',
-        layoutTemplate: 'layout'
-    });
-    
-    this.route('veris',{
-       path: '/veris',
-       template:'veristags',
-       layoutTemplate: 'layout'
-    });
-
-    this.route('alertdetails', {
-        path: '/alert/:alert_id',
-        template: 'alertdetails',
-        waitOn: function() {
-            Session.set('alertID', this.params.alert_id);
-            return Meteor.subscribe('alerts-details', Session.get('alertID'))
-            },
-        data: function() {
-          return alerts.findOne({'esmetadata.id':Session.get('alertID')});
-        },
-        layoutTemplate: 'layout'
-    });
     
     this.route('blockip', {
         path: '/incidents/blockip/:_ipaddr',
@@ -152,7 +175,13 @@ Router.map(function () {
         data: function() {
           Session.set('ipcifipaddress', this.params._ipaddress);
         }
-    });    
+    });
+
+    this.route('veris',{
+       path: '/veris',
+       template:'veristags',
+       layoutTemplate: 'layout'
+    });
 });
 
 

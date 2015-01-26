@@ -15,13 +15,15 @@ var today=new Date();
 
 models={
 
-    incident: function() {
+    investigation: function() {
         return {
             summary:"",
             description: "",
             dateOpened: today,
             dateClosed:"",
             creator: Meteor.user().profile.email,
+            indicators: [],
+            evidence: [],
             theories:[],
             notes:[],
             tags:[],
@@ -30,26 +32,31 @@ models={
             mitigations:[],
             timestamps:[],
             phase:"Identification",
-            timeline: {reported:"",
-                        verified:"",
-                        mitigationAvailable:"",
-                        contained:"",
-                        disclosed:"",
-                        timeToCompromise:"",
-                        timeToDiscovery:"",
-                        timeToContainment:"",
-                        timeToExfiltration:""
-                      },
-            action:"",
-            asset:"",
-            attribute:"",
-            discovery:"",
-            verification:"",
-            accessibility:"",
-            confidence:"",
-            actor:"",
-            motive:"",            
-            impact:""
+            timeline: { dateBegin:"",
+                        dateEnd:""
+                      }
+        };
+    },
+
+    incident: function() {
+        return {
+            summary:"",
+            description: "",
+            dateOpened: today,
+            dateClosed: "",
+            dateReported: "",
+            dateVerified: "",
+            dateMitigated: "",
+            dateContained: "",
+            creator: Meteor.user().profile.email,
+            theories:[],
+            notes:[],
+            tags:[],
+            references:[],
+            lessons:[],
+            mitigations:[],
+            timestamps:[],
+            phase:"Identification"
         };
     },
 
@@ -73,7 +80,6 @@ models={
             'timestamp': today,
             'description': '',
             'creator': '',
-            'status': '',
             'lastModifier': ''
         };
     },    
@@ -98,7 +104,6 @@ models={
             'summary': '',
             'description': '',
             'creator': '',
-            'status': '',
             'lastModifier': ''
         };
     },

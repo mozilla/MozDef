@@ -265,6 +265,7 @@ if (Meteor.isClient) {
 
             theory.summary=$('#theorySummary').val();
             theory.description=$('#theoryDescription').val();
+            theory.status=$('#theoryStatus').val();
             theory.lastModifier=Meteor.user().profile.email;
 
             if ( theory.summary && theory.description ) {
@@ -279,6 +280,7 @@ if (Meteor.isClient) {
 
                 $('#theorySummary').val('');
                 $('#theoryDescription').val('');
+                $('#theoryStatus').val('');
                 theory=null;
                 e.preventDefault();
             }
@@ -288,7 +290,7 @@ if (Meteor.isClient) {
         "click .theoryedit": function(e){
             theory=models.theory();
             theory._id= $(e.target).attr('data-theoryid');
-            //elemMatch not available on client side..iterate the theories for a match.
+            //elemMatch not available on client side..iterate the items for a match.
             theories=incidents.findOne({'_id':Session.get('incidentID')},
                                   {theories:{$elemMatch:{'_id': theory._id}}},
                                   { "theories.$": 1 }
@@ -297,6 +299,7 @@ if (Meteor.isClient) {
             if (theory != undefined) {
                 $('#theorySummary').val(theory.summary);
                 $('#theoryDescription').val(theory.description);
+                $('#theoryStatus').val(theory.status);
             }
             e.preventDefault();
         },        
@@ -340,7 +343,7 @@ if (Meteor.isClient) {
         "click .timestampedit": function(e){
             timestamp=models.timestamp();
             timestamp._id= $(e.target).attr('data-timestampid');
-            //elemMatch not available on client side..iterate the theories for a match.
+            //elemMatch not available on client side..iterate the items for a match.
             timestamps=incidents.findOne({'_id':Session.get('incidentID')},
                                   {timestamps:{$elemMatch:{'_id': timestamp._id}}},
                                   { "timestamps.$": 1 }
@@ -368,6 +371,7 @@ if (Meteor.isClient) {
             }
             mitigation.summary=$('#mitigationSummary').val();
             mitigation.description=$('#mitigationDescription').val();
+            mitigation.status=$('#mitigationStatus').val();
             mitigation.temporary=$('#mitigationTemporary').is(':checked');
             mitigation.lastModifier=Meteor.user().profile.email;
 
@@ -381,6 +385,7 @@ if (Meteor.isClient) {
                 });
                 $('#mitigationSummary').val('');
                 $('#mitigationDescription').val('');
+                $('#mitigationStatus').val('');
                 $('#mitigationTemporary').prop('checked', false);
                 mitigation=null;
                 e.preventDefault();
@@ -390,7 +395,7 @@ if (Meteor.isClient) {
         "click .mitigationedit": function(e){
             mitigation=models.mitigation();
             mitigation._id= $(e.target).attr('data-mitigationid');
-            //elemMatch not available on client side..iterate the theories for a match.
+            //elemMatch not available on client side..iterate the items for a match.
             mitigations=incidents.findOne({'_id':Session.get('incidentID')},
                                   {mitigations:{$elemMatch:{'_id': mitigation._id}}},
                                   { "mitigations.$": 1 }
@@ -399,6 +404,7 @@ if (Meteor.isClient) {
             if (mitigation != undefined) {
                 $('#mitigationSummary').val(mitigation.summary);
                 $('#mitigationDescription').val(mitigation.description);
+                $('#mitigationStatus').val(mitigation.status);
                 $('#mitigationTemporary').prop('checked', mitigation.temporary);
             }
             e.preventDefault();

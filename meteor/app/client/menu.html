@@ -17,18 +17,24 @@ Anthony Verez averez@mozilla.com
             </span>
             <span id="nav-main">
                 <ul>
-                    <li class="first"><a href="#">Kibana dashboards</a>
+                    <li class="first"><a href="#">Kibanas</a>
                         <ul>
                             {{#each kibanadashboards as item}}
                                 {{>kibanaDashboardItem}}
                             {{/each}}
                         </ul>
-                    </li> 
+                    </li>
                     <li><a href="/alerts/">Alerts</a>
                     </li>
-                    <li><a href="/Incidents">Incidents</a>
+                    <li><a href="/investigations">Investigations</a>
                         <ul>
-                            <li class="first"><a href="/incidents/new/">new incident</a></li>
+                            <li class="first"><a href="/investigation/new/">new investigation</a></li>
+                            <li class="last"><a href="/investigations/veris/">veris stats</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="/incidents">Incidents</a>
+                        <ul>
+                            <li class="first"><a href="/incident/new/">new incident</a></li>
                             <li class="last"><a href="/incidents/veris/">veris stats</a></li>
                         </ul>
                     </li>
@@ -36,7 +42,7 @@ Anthony Verez averez@mozilla.com
                         <ul>
                             <li class="first"><a href="/logincounts/">logincounts</a></li>
                             <li><a href="/attackers">attackers</a></li>
-                            <li class="last"><a href="/globe">globe</a></li>                            
+                            <li class="last"><a href="/globe">globe</a></li>
                         </ul>
                     </li>
                     <li><a href="/about">About</a></li>
@@ -46,10 +52,10 @@ Anthony Verez averez@mozilla.com
                 <label>
                     {{#if loggingIn}}
                             loading
-                    {{else}}        
+                    {{else}}
                         {{#if currentUser}}
                             {{currentUser.profile.email}}
-                        {{/if}}        
+                        {{/if}}
                     {{/if}}
                     {{> loginButtons align="right"}}
                 </label>
