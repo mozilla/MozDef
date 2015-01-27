@@ -111,8 +111,28 @@ models={
     note: function() {
         return {
             '_id': Meteor.uuid(),
-            'title': '',
-            'content': '',
+            'summary': '',
+            'description': '',
+            'dateCreated': today,
+            'creator': '',
+            'lastModifier': ''
+        };
+    },
+    indicator: function() {
+        return {
+            '_id': Meteor.uuid(),
+            'summary': '',
+            'description': '',
+            'dateCreated': today,
+            'creator': '',
+            'lastModifier': ''
+        };
+    },
+    evidence: function() {
+        return {
+            '_id': Meteor.uuid(),
+            'summary': '',
+            'description': '',
             'dateCreated': today,
             'creator': '',
             'lastModifier': ''

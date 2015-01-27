@@ -165,6 +165,23 @@ if (Meteor.isServer) {
                        limit:100});
     });
 
+    Meteor.publish("investigations-summary", function () {
+        return investigations.find({},
+                              {fields: {
+                                        _id:1,
+                                        summary:1,
+                                        phase:1,
+                                        dateOpened:1,
+                                        dateClosed:1
+                                },
+                              sort: {dateOpened: -1},
+                              limit:100});
+    });    
+
+    Meteor.publish("investigation-details",function(investigationid){
+       return investigations.find({'_id': investigationid});
+    });    
+
     Meteor.publish("incidents-summary", function () {
         return incidents.find({},
                               {fields: {
@@ -176,7 +193,7 @@ if (Meteor.isServer) {
                                 },
                               sort: {dateOpened: -1},
                               limit:100});
-    });
+    });   
 
     Meteor.publish("incident-details",function(incidentid){
        return incidents.find({'_id': incidentid});
@@ -242,10 +259,19 @@ if (Meteor.isServer) {
     });
 
     investigations.allow({
-      update: function (userId, doc, fields, modifier) {
-        // the user must be logged in 
+      insert: function (userId, doc) {
+        // the user must be logged in
         return (userId);
-      }
+      },
+      update: function (userId, doc, fields, modifier) {
+        // the user must be logged in
+        return (userId);
+      },
+      remove: function (userId, doc) {
+        // can only remove one's own items
+        return doc.creator === Meteor.user().profile.email;
+      },
+      fetch: ['creator']
     });    
 };
 
