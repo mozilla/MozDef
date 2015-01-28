@@ -26,6 +26,7 @@ from datetime import timedelta
 from dateutil.parser import parse
 from ipwhois import IPWhois
 from bson.son import SON
+from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
 
@@ -55,7 +56,9 @@ def index():
     ip = request.environ.get('REMOTE_ADDR')
     # response.headers['X-IP'] = '{0}'.format(ip)
     response.status = 200
-
+    
+    sendMessgeToPlugins(request, response, 'test')
+    return response
 
 @route('/status')
 @route('/status/')
@@ -65,7 +68,9 @@ def index():
         request.body.close()
     response.status = 200
     response.content_type = "application/json"
-    return(json.dumps(dict(status='ok')))
+    response.body = json.dumps(dict(status='ok'))
+    sendMessgeToPlugins(request, response, 'status')
+    return response
 
 
 @route('/ldapLogins')
@@ -76,6 +81,7 @@ def index():
         request.body.read()
         request.body.close()
     response.content_type = "application/json"
+    sendMessgeToPlugins(request, response, 'ldapLogins')
     return(esLdapResults())
 
 
@@ -87,7 +93,9 @@ def index():
         request.body.read()
         request.body.close()
     response.content_type = "application/json"
-    return(verisSummary())
+    response.body = verisSummary()
+    sendMessgeToPlugins(request, response, 'veris')
+    return response
 
 
 @route('/kibanadashboards')
@@ -97,8 +105,11 @@ def index():
     if request.body:
         request.body.read()
         request.body.close()
+
     response.content_type = "application/json"
-    return(kibanaDashboards())
+    response.body = kibanaDashboards()
+    sendMessgeToPlugins(request, response, 'kibanadashboards')
+    return response
 
 
 @post('/blockip', methods=['POST'])
@@ -107,10 +118,11 @@ def index():
 def index():
     if options.enableBlockIP:
         try:
-            return(banhammer(request.json))
+            request.body = banhammer(request.json)
         except Exception as e:
             sys.stderr.write('Error parsing json sent to POST /banhammer\n')
-
+    sendMessgeToPlugins(request, response, 'blockip')
+    return response
 
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
@@ -125,13 +137,15 @@ def index():
         requestDict = json.loads(arequest)
     except ValueError as e:
         response.status = 500
-        return        
+     
     if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
         response.content_type = "application/json"
-        return(getWhois(requestDict['ipaddress']))
+        response.body = getWhois(requestDict['ipaddress'])
     else:
         response.status = 500
-        return
+
+    sendMessgeToPlugins(request, response, 'ipwhois')
+    return response    
 
 @post('/ipcifquery', methods=['POST'])
 @post('/ipcifquery/', methods=['POST'])
@@ -146,13 +160,15 @@ def index():
         requestDict = json.loads(arequest)
     except ValueError as e:
         response.status = 500
-        return        
+
     if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
         response.content_type = "application/json"
-        return(getIPCIF(requestDict['ipaddress']))
+        response.body = getIPCIF(requestDict['ipaddress'])
     else:
         response.status = 500
-        return    
+
+    sendMessgeToPlugins(request, response, 'ipcifquery')
+    return response    
 
 @post('/ipdshieldquery', methods=['POST'])
 @post('/ipdshieldquery/', methods=['POST'])
@@ -177,14 +193,15 @@ def index():
         dresponse = requests.get('{0}{1}?json'.format(url, requestDict['ipaddress']))
         if dresponse.status_code == 200:
             response.content_type = "application/json"
-            return(dresponse.content)
+            response.body = dresponse.content
         else:
             response.status = dresponse.status_code
-            return
+
     else:
         response.status = 500
-        return
 
+    sendMessgeToPlugins(request, response, 'ipdshieldquery')
+    return response
 
 @route('/plugins', methods=['GET'])
 @route('/plugins/', methods=['GET'])
@@ -215,7 +232,10 @@ def getPluginList(endpoint=None):
                 pdict['registration'] = plugin[3]
                 pdict['priority'] = plugin[4]
                 pluginResponse.append(pdict)                
-    return json.dumps(pluginResponse)
+    response.body = json.dumps(pluginResponse)
+
+    sendMessgeToPlugins(request, response, 'plugins')
+    return response
 
 
 def registerPlugins():
@@ -255,6 +275,19 @@ def registerPlugins():
                     if isinstance(mreg, list):
                         print('[*] plugin {0} registered to receive messages from /{1}'.format(mfile, mreg))
                         pluginList.append((mfile, mname, mdescription, mreg, mpriority, mclass))
+
+
+def sendMessgeToPlugins(request, response, endpoint):
+    '''
+       iterate the registered plugins
+       sending the response/request to any that have
+       registered for this rest endpoint
+    '''
+    # sort by priority
+    for plugin in sorted(pluginList, key=itemgetter(4), reverse=False):
+        if endpoint in plugin[3]:
+            (request, response) = plugin[5].onMessage(request, response)
+
 
 def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
