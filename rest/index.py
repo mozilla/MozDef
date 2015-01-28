@@ -11,8 +11,10 @@ import bottle
 import json
 import MySQLdb
 import netaddr
+import os
 import pyes
 import pytz
+import pynsive
 import requests
 import sys
 from bottle import debug, route, run, response, request, default_app, post
@@ -30,7 +32,7 @@ from bson import json_util
 options = None
 dbcursor = None
 mysqlconn = None
-
+pluginList = list()   # tuple of module,registration dict,priority
 
 # cors decorator for rest/ajax
 def enable_cors(fn):
@@ -183,6 +185,60 @@ def index():
         response.status = 500
         return
 
+
+@route('/plugins', methods=['GET'])
+@route('/plugins/', methods=['GET'])
+@route('/plugins/<endpoint>', methods=['GET'])
+def getPluginList(endpoint=None):
+    # return a json representation of the plugin tuple 
+    # (mname, mclass, mreg, mpriority)
+    # minus the actual class
+    # which isn't json-able
+    pluginResponse = list()
+    if endpoint is None: 
+        for plugin in pluginList:
+            pdict = {}
+            pdict['title'] = plugin[0]
+            pdict['registration'] = plugin[2]
+            pdict['priority'] = plugin[3]
+            pluginResponse.append(pdict)
+    else:
+        # filter the list to just the endpoint requested
+        for plugin in pluginList:
+            if endpoint in plugin[2]:
+                pdict = {}
+                pdict['title'] = plugin[0]
+                pdict['registration'] = plugin[2]
+                pdict['priority'] = plugin[3]
+                pluginResponse.append(pdict)                
+    return json.dumps(pluginResponse)
+
+
+def registerPlugins():
+    '''walk the ./plugins directory
+       and register modules in pluginList
+       as a tuple: name,class,registration,priority
+    '''
+
+    plugin_manager = pynsive.PluginManager()
+    if os.path.exists('plugins'):
+        modules = pynsive.list_modules('plugins')
+        for mname in modules:
+            module = pynsive.import_module(mname)
+            reload(module)
+            if not module:
+                raise ImportError('Unable to load module {}'.format(mname))
+            else:
+                if 'message' in dir(module):
+                    mclass = module.message()
+                    mreg = mclass.registration
+                    if 'priority' in dir(mclass):
+                        mpriority = mclass.priority
+                    else:
+                        mpriority = 100
+                    if isinstance(mreg, list):
+                        print('[*] plugin {0} registered to receive messages from /{1}'.format(mname, mreg))
+                        pluginList.append((mname, mclass, mreg, mpriority))
 
 def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
@@ -481,7 +537,8 @@ if __name__ == "__main__":
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-
+    registerPlugins()
+    
     run(host="localhost", port=8081)
 else:
     parser = OptionParser()
@@ -490,5 +547,6 @@ else:
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-
+    registerPlugins()
+    
     application = default_app()
