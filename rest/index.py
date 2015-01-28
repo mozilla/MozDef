@@ -198,18 +198,22 @@ def getPluginList(endpoint=None):
     if endpoint is None: 
         for plugin in pluginList:
             pdict = {}
-            pdict['title'] = plugin[0]
-            pdict['registration'] = plugin[2]
-            pdict['priority'] = plugin[3]
+            pdict['file'] = plugin[0]
+            pdict['name'] = plugin[1]
+            pdict['description'] = plugin[2]
+            pdict['registration'] = plugin[3]
+            pdict['priority'] = plugin[4]
             pluginResponse.append(pdict)
     else:
         # filter the list to just the endpoint requested
         for plugin in pluginList:
-            if endpoint in plugin[2]:
+            if endpoint in plugin[3]:
                 pdict = {}
-                pdict['title'] = plugin[0]
-                pdict['registration'] = plugin[2]
-                pdict['priority'] = plugin[3]
+                pdict['file'] = plugin[0]
+                pdict['name'] = plugin[1]
+                pdict['description'] = plugin[2]
+                pdict['registration'] = plugin[3]
+                pdict['priority'] = plugin[4]
                 pluginResponse.append(pdict)                
     return json.dumps(pluginResponse)
 
@@ -217,28 +221,40 @@ def getPluginList(endpoint=None):
 def registerPlugins():
     '''walk the ./plugins directory
        and register modules in pluginList
-       as a tuple: name,class,registration,priority
+       as a tuple: (mfile, mname, mdescription, mreg, mpriority, mclass)
     '''
 
     plugin_manager = pynsive.PluginManager()
     if os.path.exists('plugins'):
         modules = pynsive.list_modules('plugins')
-        for mname in modules:
-            module = pynsive.import_module(mname)
+        for mfile in modules:
+            module = pynsive.import_module(mfile)
             reload(module)
             if not module:
-                raise ImportError('Unable to load module {}'.format(mname))
+                raise ImportError('Unable to load module {}'.format(mfile))
             else:
                 if 'message' in dir(module):
                     mclass = module.message()
                     mreg = mclass.registration
+                    
+                    
                     if 'priority' in dir(mclass):
                         mpriority = mclass.priority
                     else:
                         mpriority = 100
+                    if 'name' in dir(mclass):
+                        mname = mclass.name
+                    else:
+                        mname = mfile
+                    
+                    if 'description' in dir(mclass):
+                        mdescription = mclass.description
+                    else:
+                        mdescription = mfile
+                    
                     if isinstance(mreg, list):
-                        print('[*] plugin {0} registered to receive messages from /{1}'.format(mname, mreg))
-                        pluginList.append((mname, mclass, mreg, mpriority))
+                        print('[*] plugin {0} registered to receive messages from /{1}'.format(mfile, mreg))
+                        pluginList.append((mfile, mname, mdescription, mreg, mpriority, mclass))
 
 def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
