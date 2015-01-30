@@ -7,6 +7,7 @@
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
+# Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
 import pyes
@@ -31,8 +32,8 @@ class AlertBruteforceSsh(AlertTask):
         ]
         self.filtersManual(date_timedelta, must=must, must_not=must_not)
 
-        # Search aggregations on field 'sourceipaddress', keep 50 samples of events at most
-        self.searchEventsAggreg('sourceipaddress', samplesLimit=50)
+        # Search aggregations on field 'sourceipaddress', keep X samples of events at most
+        self.searchEventsAggreg('sourceipaddress', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         self.walkAggregations(threshold=10)
 
