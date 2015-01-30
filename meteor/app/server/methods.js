@@ -18,7 +18,8 @@ if (Meteor.isServer) {
         'ipcif': ipcif,
         'ipdshield': ipdshield,
         'verisstats': verisstats,
-        'logincounts': logincounts
+        'logincounts': logincounts,
+        'getplugins': getplugins
     });
 
     function saySomething() {
@@ -119,5 +120,17 @@ if (Meteor.isServer) {
             //console.log(logincountsResponse);
             return logincountsResponse;
         }
-    } 
+    }
+
+    function getplugins(endpoint){
+        //console.log('Looking up  plugins registered for ' + endpoint + ' from ' + mozdef.rootAPI + '/plugins/' + endpoint);
+        if ( typeof endpoint == 'undefined') {
+            var response = HTTP.get(mozdef.rootAPI + '/plugins/');
+            
+        } else {
+            var response = HTTP.get(mozdef.rootAPI + '/plugins/' + endpoint);
+        }
+        console.log(response);
+        return response
+    }
 };

@@ -18,8 +18,20 @@ if (Meteor.isClient) {
       Session.set('alertsfiltertext','');
       Session.set('alertsrecordlimit',100);
       Session.set('attackerlimit','10');
-    });    
-    
+    });
+
+    getPlugins=function(){
+        Meteor.apply('getplugins',[],
+            onResultReceived = function(err,result){
+
+               if (typeof err == 'undefined') {
+                    console.log(err,result);
+               } else {
+                    console.log(err.result);
+               }
+           })
+        }
+
     //helper functions for UI templates
     //and other client javascript routines
     dateOrNull=function(maybeDate){
@@ -30,7 +42,7 @@ if (Meteor.isClient) {
             return null;
         }
     };
-    
+
     dateFormat=function(adate){
         mdate=moment(adate || null);
         if (mdate.isValid()) {
@@ -47,7 +59,7 @@ if (Meteor.isClient) {
           console.log(logthis);
         }
     };
-    
+
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')
             console.log("mozdef starting");
@@ -66,7 +78,7 @@ if (Meteor.isClient) {
         Meteor.call('loadKibanaDashboards');
         return kibanadashboards.find();
     };
-    
+
     UI.registerHelper('uiDateFormat',function(adate){
         return dateFormat(adate);
     });
@@ -77,11 +89,11 @@ if (Meteor.isClient) {
     });
 
     UI.registerHelper('mozdef',function(){
-        //return the mozdef server settings object.    
-        return mozdef 
+        //return the mozdef server settings object.
+        return mozdef
     });
 
-    
+
     UI.registerHelper('getAlertURL', function(alertid){
         //could be mongo id or es id
         //assume mongo
@@ -100,39 +112,39 @@ if (Meteor.isClient) {
             return ''
         }
     });
-    
+
     UI.registerHelper('eachSorted',function(context,options){
             var ret = "";
-          
+
             for(var i=0, j=context.length; i<j; i++) {
               ret = ret + options.fn(context.sort()[i]);
             }
-          
-            return ret; 
+
+            return ret;
     });
-    
+
     UI.registerHelper('isEqual', function (var1,var2){
         //easy comparison operator for template engine
         return var1 === var2;
     });
-    
+
     UI.registerHelper('isNotEqual', function (var1,var2){
         //easy comparison operator for template engine
         return var1 !== var2
     });
-    
+
     UI.registerHelper('isAnObject', function (var1){
         //help the template engine figure out objects for "each" iteration
         return _.isObject(var1)
     });
-    
+
     UI.registerHelper('objKeyValue', function (obj,yieldObject) {
         //given an object, return key:value pairs
         //for easy iteration.
-        
+
         //decide whether to return objects natively:
         yieldObject = typeof yieldObject !== 'undefined' ? yieldObject : true;
-        
+
         return _.map(obj, function(i, k) {
                 if ( ! _.isObject(i) ) {
                     return {key: k, value: i};
@@ -143,10 +155,10 @@ if (Meteor.isClient) {
                         return { key: null, value: null};
                     }
                 }
-                
+
         });
-    });    
-    
+    });
+
 
     //auto run to handle session variable changes
     Deps.autorun(function() {
@@ -164,6 +176,6 @@ if (Meteor.isClient) {
         }
     });
 
- 
+
 
 };
