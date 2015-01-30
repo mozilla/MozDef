@@ -267,13 +267,17 @@ class AlertTask(Task):
                 idict = {
                     'value': i[0],
                     'count': i[1],
-                    'events': []
+                    'events': [],
+                    'allevents': []
                 }
                 for r in results:
                     if r['_source']['details'][aggregField].encode('ascii', 'ignore') == i[0]:
                         # copy events detail into this aggregation up to our samples limit
                         if len(idict['events']) < samplesLimit:
                             idict['events'].append(r)
+                        # also copy all events to a non-sampled list
+                        # so we mark all events as alerted and don't re-alert
+                        idict['allevents'].append(r)
                 aggregList.append(idict)
 
             self.aggregations = aggregList
@@ -306,7 +310,7 @@ class AlertTask(Task):
                     self.log.debug(alert)
                     if alert:
                         alertResultES = self.alertToES(alert)
-                        self.tagEventsAlert(aggreg['events'], alertResultES)
+                        self.tagEventsAlert(aggreg['allevents'], alertResultES)
                         self.alertToMessageQueue(alert)
 
     def createAlertDict(self, summary, category, tags, events, severity='NOTICE'):
