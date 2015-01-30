@@ -113,7 +113,7 @@ def searchMongoAlerts(mozdefdb):
         {"$group": {"_id": {"ipaddress":"$events.documentsource.details.sourceipaddress"}}}, # grab ip address from the events
         {"$unwind": "$_id.ipaddress"}, # separate all ips from their alerts
         {"$group": {"_id": "$_id.ipaddress", "hitcount": {"$sum": 1}}}, # count by ip
-        {"$match":{"hitcount":{"$gt":10}}}, # limit to those with 10 observances
+        {"$match":{"hitcount":{"$gt":5}}}, # limit to those with X observances
         {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort 
         {"$limit": 10} # top 10
         ])
