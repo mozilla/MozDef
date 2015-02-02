@@ -14,8 +14,8 @@ import pyes
 
 class AlertBruteforceSsh(AlertTask):
     def main(self):
-        # look for events in last 15 mins
-        date_timedelta = dict(minutes=15)
+        # look for events in last X mins
+        date_timedelta = dict(minutes=2)
         # Configure filters using pyes
         must = [
             pyes.TermFilter('_type', 'event'),
@@ -49,7 +49,7 @@ class AlertBruteforceSsh(AlertTask):
         summary = ('{0} ssh bruteforce attempts by {1}'.format(aggreg['count'], aggreg['value']))
         # append first 3 hostnames
         for e in aggreg['events'][:3]:
-            if 'details' in e.keys() and 'hostname' in e['details']:
+            if 'details' in e['_source'].keys() and 'hostname' in e['_source']['details'].keys():
                 summary += ' on {0}'.format(e['_source']['details']['hostname'])
 
         # Create the alert object based on these properties
