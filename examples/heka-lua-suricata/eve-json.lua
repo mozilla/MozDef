@@ -1,4 +1,5 @@
 local cjson = require "cjson"
+-- example of the input JSON from Suricata
 -- local dt = require "date_time"
 
 -- {
