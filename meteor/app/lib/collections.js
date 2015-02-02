@@ -144,16 +144,33 @@ if (Meteor.isServer) {
         handle.stop();
       });
     });    
-
-//testing effect of unpublish by default
-//    Meteor.publish("attackers", function () {
-//        return attackers.find({}, {limit:1});
-//    });
     
-    Meteor.publish("attacker-details",function(attackerid){
-       return attackers.find({'_id': attackerid});
-    });  
+    //publish the last X event/alerts
+    //using document index instead of date
+//    Meteor.publish("attacker-details",function(attackerid){
+//       return attackers.find({'_id': attackerid},
+//                             {fields: {
+//                                events:{$slice: 20,
+//                                        $sort: { documentindex: -1 }},
+//                                alerts:{$slice: -10}
+//                             }}
+//                             );
+//    });
 
+     Meteor.publish("attacker-details",function(attackerid){
+       return attackers.find({'_id': attackerid},
+                             {fields: {
+                                events:{$slice: -20},
+                                alerts:{$slice: -10}
+                             },
+                             sort: { 'events.documentsource.utctimestamp': -1 },
+                             reactive:false
+                             }
+                             );
+    });   
+    
+    
+    
     Meteor.publish("attackers-summary", function () {
     //limit to the last 100 records by default
     //to ease the sync transfer to dc.js/crossfilter
@@ -283,6 +300,5 @@ if (Meteor.isClient) {
     Meteor.subscribe("mozdefsettings");
     Meteor.subscribe("veris");
     Meteor.subscribe("kibanadashboards");
-    //Meteor.subscribe("attackers");
 };
 

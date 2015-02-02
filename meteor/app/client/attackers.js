@@ -32,6 +32,7 @@ if (Meteor.isClient) {
     var agoDim = null;
     var ringChartAttackerCategory = null;
     var ringChartLastSeen = null;
+    var ringChartCountry = null;
     var ndx = null;
 
     Template.attackers.events({
@@ -222,6 +223,7 @@ if (Meteor.isClient) {
         //console.log('entering draw attackers');
         ringChartAttackerCategory   = dc.pieChart("#ringChart-category","attackers");
         ringChartLastSeen   = dc.pieChart("#ringChart-lastseen","attackers");
+        ringChartCountry = dc.pieChart("#ringChart-country","attackers");
         ndx = crossfilter();
 
         scene.name='attackerScene';
@@ -500,7 +502,11 @@ if (Meteor.isClient) {
             categoryFilters=ringChartAttackerCategory.filters();
             if (categoryFilters.length>0) {
                 $('#Categories').prop('title', categoryFilters);
-            }            
+            }
+            countryFilters=ringChartCountry.filters();
+            if (countryFilters.length>0) {
+                $('#Countries').prop('title', countryFilters);
+            }
             createCharacters(agoDim.top(Infinity));
         };
         
@@ -519,7 +525,7 @@ if (Meteor.isClient) {
                                             events:0,
                                             alerts:0
                                             },
-                                        reactive:true,
+                                        reactive:false,
                                         sort: {lastseentimestamp: 'desc'},
                                         limit: parseInt(Session.get('attackerlimit'))}).fetch();
             ////parse, group data for the d3 charts
@@ -530,12 +536,14 @@ if (Meteor.isClient) {
                 //d.hour = d.dd.get('hour');
                 //d.epoch=d.dd.unix();
                 d.ago=d.dd.fromNow();
-            });        
+            });
+            ndx = crossfilter();
             ndx = crossfilter(attackerData);
             if ( ndx.size() >0){
                 allGroup = ndx.groupAll();
                 categoryDim = ndx.dimension(function(d) {return d.category;});
                 agoDim = ndx.dimension(function (d) {return d.ago;});
+                countryDim = ndx.dimension(function(d) {return d.geocoordinates.countrycode;});
                 ringChartAttackerCategory
                     .width(150).height(150)
                     .dimension(categoryDim)
@@ -551,7 +559,23 @@ if (Meteor.isClient) {
                     .label(function(d) {return d.key; })
                     .innerRadius(30)
                     .expireCache()
-                    .on('filtered',filterCharacters);                    
+                    .on('filtered',filterCharacters);
+                ringChartCountry
+                    .width(150).height(150)
+                    .dimension(countryDim)
+                    .group(countryDim.group())
+                    .label(function(d) {return d.key; })
+                    .innerRadius(30)
+                    .expireCache()
+                    .on('filtered',filterCharacters);
+                
+                //clear categories and dc charts
+                categoryDim.filter();
+                agoDim.filter();
+                countryDim.filter();
+                ringChartAttackerCategory.filterAll();
+                ringChartCountry.filterAll();
+                ringChartLastSeen.filterAll();
                 dc.renderAll('attackers');
             }
         };//end refreshAttackerData
