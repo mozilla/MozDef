@@ -145,9 +145,10 @@ if (Meteor.isServer) {
       });
     });    
 
-    Meteor.publish("attackers", function () {
-        return attackers.find({}, {limit:100});
-    });
+//testing effect of unpublish by default
+//    Meteor.publish("attackers", function () {
+//        return attackers.find({}, {limit:1});
+//    });
     
     Meteor.publish("attacker-details",function(attackerid){
        return attackers.find({'_id': attackerid});
@@ -282,6 +283,6 @@ if (Meteor.isClient) {
     Meteor.subscribe("mozdefsettings");
     Meteor.subscribe("veris");
     Meteor.subscribe("kibanadashboards");
-    Meteor.subscribe("attackers");
+    //Meteor.subscribe("attackers");
 };
 
