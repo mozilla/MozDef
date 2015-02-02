@@ -1,4 +1,5 @@
 <template name="eventdetails">
+        <div><span>{{this.documentsource.utctimestamp}}</span></div>
         {{#each objKeyValue this.documentsource.details}}
             {{#if isAnObject value}}
                 <div><span>{{key}}</span>
