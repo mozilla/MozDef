@@ -18,17 +18,22 @@ if (Meteor.isClient) {
       Session.set('alertsfiltertext','');
       Session.set('alertsrecordlimit',100);
       Session.set('attackerlimit','10');
+      getAllPlugins();
     });
 
-    getPlugins=function(){
+    getAllPlugins=function(){
         Meteor.apply('getplugins',[],
             onResultReceived = function(err,result){
-
-               if (typeof err == 'undefined') {
-                    console.log(err,result);
-               } else {
-                    console.log(err.result);
-               }
+                plugins=[]
+                if (typeof err == 'undefined') {
+                     //console.log(result);
+                     if ( result.statusCode == 200){
+                         plugins=result.data;
+                     }
+                } else {
+                     console.log(err);
+                }
+                Session.set('plugins',plugins);
            })
         }
 

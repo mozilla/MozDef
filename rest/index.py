@@ -231,7 +231,8 @@ def getPluginList(endpoint=None):
                 pdict['description'] = plugin[2]
                 pdict['registration'] = plugin[3]
                 pdict['priority'] = plugin[4]
-                pluginResponse.append(pdict)                
+                pluginResponse.append(pdict)
+    response.content_type = "application/json"
     response.body = json.dumps(pluginResponse)
 
     sendMessgeToPlugins(request, response, 'plugins')

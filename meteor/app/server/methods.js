@@ -130,7 +130,6 @@ if (Meteor.isServer) {
         } else {
             var response = HTTP.get(mozdef.rootAPI + '/plugins/' + endpoint);
         }
-        console.log(response);
         return response
     }
 };
