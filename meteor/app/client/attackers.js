@@ -537,7 +537,7 @@ if (Meteor.isClient) {
                 //d.epoch=d.dd.unix();
                 d.ago=d.dd.fromNow();
             });
-            ndx = crossfilter();
+
             ndx = crossfilter(attackerData);
             if ( ndx.size() >0){
                 allGroup = ndx.groupAll();
