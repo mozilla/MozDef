@@ -291,7 +291,8 @@ if (Meteor.isClient) {
                     .height(150)
                     .dimension(hourDim)
                     .group(volumeByHourGroup)
-                    .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]));
+                    .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]))
+                    .xUnits(d3.time.hours);
                     //.expireCache();
                 dc.renderAll("alertssummary");
             }
