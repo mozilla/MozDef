@@ -189,7 +189,7 @@ class alertsListener(threading.Thread):
 
             # delay ourselves so as not to overrun IRC receiveQ?
             if abs(toUTC(datetime.now()) - toUTC(self.lastalert)).seconds < 2:
-                sleep(2)
+                sleep(4)
             
             # see where we send this alert
             ircchannel = options.alertircchannel
@@ -218,8 +218,11 @@ class alertsListener(threading.Thread):
                 if self.channel is None:
                     self.channel = self.connection.channel()
                     self.channel.exchange_declare(
-                        exchange=options.alertexchange, type='topic', durable=True)
-                    result = self.channel.queue_declare(exclusive=False)
+                        exchange=options.alertexchange,
+                        type='topic',
+                        durable=True)
+                    result = self.channel.queue_declare(exclusive=False,
+                                                        auto_delete=True )
                     queue_name = result.method.queue
                     self.channel.queue_bind(
                         exchange=options.alertexchange,
