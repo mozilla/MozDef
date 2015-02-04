@@ -1,13 +1,3 @@
--- This Source Code Form is subject to the terms of the Mozilla Public
--- License, v. 2.0. If a copy of the MPL was not distributed with this
--- file, You can obtain one at http://mozilla.org/MPL/2.0/.
--- Copyright (c) 2014 Mozilla Corporation
---
--- Contributors:
--- Anthony Verez averez@mozilla.com
--- Jeff Bryner jbryner@mozilla.com
--- Michal Purzynski mpurzynski@mozilla.com
-
 local l=require "lpeg"
 local string=require "string"
 l.locale(l) --add locale entries in the lpeg table
@@ -74,8 +64,8 @@ function process_message()
     msg.Fields['filemimetype'] = toString(matches[8])
     msg.Fields['filedesc'] = toString(matches[9])
     msg.Fields['seenindicator'] = toString(matches[10])
-    msg.Fields['seenwhere'] = toString(matches[11])
-    msg.Fields['seenindicatortype'] = toString(matches[12])
+    msg.Fields['seenindicatortype'] = toString(matches[11])
+    msg.Fields['seenwhere'] = toString(matches[12])
     msg.Fields['sources'] = lastField(toString(matches[13]))
     msg['Payload'] = "Bro intel match: " .. toString(msg.Fields['seenindicator'])
     inject_message(msg)
