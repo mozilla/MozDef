@@ -46,7 +46,7 @@ if (Meteor.isClient) {
         "submit form": function(event, template) {
             event.preventDefault();
             blockIP();
-            Router.go('/incidents/attackers');
+            Router.go('/attackers');
         }
     });
     
