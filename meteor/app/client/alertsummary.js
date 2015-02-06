@@ -226,9 +226,9 @@ if (Meteor.isClient) {
                 var all = ndx.groupAll();
                 var severityDim = ndx.dimension(function(d) {return d.severity;});
                 var categoryDim = ndx.dimension(function(d) {return d.category;});
-                var hourDim = ndx.dimension(function (d) {return d3.time.hour(d.jdate);});
+                var timeDim = ndx.dimension(function (d) {return d3.time.minute(d.jdate);});
                 var epochDim = ndx.dimension(function(d) {return d.utcepoch;});
-                var volumeByHourGroup = hourDim.group().reduceCount();
+                var volumeByHourGroup = timeDim.group().reduceCount();
                 
                 ringChartCategory
                     .width(150).height(150)
@@ -289,10 +289,10 @@ if (Meteor.isClient) {
                 volumeChart
                     .width(600)
                     .height(150)
-                    .dimension(hourDim)
+                    .dimension(timeDim)
                     .group(volumeByHourGroup)
-                    .x(d3.time.scale().domain([moment(hourDim.bottom(1)[0].dd).subtract('hours', 1)._d, moment(hourDim.top(1)[0].dd).add('hours', 1)._d]))
-                    .xUnits(d3.time.hours);
+                    .x(d3.time.scale().domain([moment(timeDim.bottom(1)[0].dd).subtract('minutes', 5)._d, moment(timeDim.top(1)[0].dd).add('minutes', 5)._d]))
+                    .xUnits(d3.time.minutes);
                     //.expireCache();
                 dc.renderAll("alertssummary");
             }
