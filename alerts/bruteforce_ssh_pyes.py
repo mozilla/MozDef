@@ -50,7 +50,8 @@ class AlertBruteforceSsh(AlertTask):
         # append first 3 hostnames
         for e in aggreg['events'][:3]:
             if 'details' in e['_source'].keys() and 'hostname' in e['_source']['details'].keys():
-                summary += ' on {0}'.format(e['_source']['details']['hostname'])
+                if e['_source']['details']['hostname'] not in summary: 
+                    summary += ' on {0}'.format(e['_source']['details']['hostname'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
