@@ -47,141 +47,23 @@ if (Meteor.isClient) {
                 Router.go('/incident/' + this._id + '/edit');
             }
         },
-        
+
         "click .incidentdelete": function(e){
             incidents.remove(this._id);
         }        
     });
 
-    
     Template.incidents.rendered = function(){
         Deps.autorun(function() {
             Meteor.subscribe("incidents-summary");
         });
+        
     };
-
-
-    var incidentRevision = function() {
-      this.save = function(e, template) {
-        // Stop the timer if it was running
-        incidentSaveTimer.clear();
-
-        // tags are saved in real realtime (without timer)
-        // other tabs are saved as they are changed
-        // this is only for the main tab
-
-        var incidentobj = {
-          summary: template.find("#summary").value,
-          description: template.find("#description").value,
-          dateOpened: dateOrNull(template.find("#dateOpened").value),
-          dateClosed: dateOrNull(template.find("#dateClosed").value),
-          phase: template.find("#phase").value,
-          dateReported: dateOrNull(template.find("#dateReported").value),
-          dateVerified: dateOrNull(template.find("#dateVerified").value),
-          dateMitigated: dateOrNull(template.find("#dateMitigated").value),
-          dateContained: dateOrNull(template.find("#dateContained").value)
-        }
-
-        incidents.update(Session.get('incidentID'),
-        {$set: incidentobj},
-        {},
-        function(error, nobj) {
-          if (!error && nobj === 1) {
-            $('#saving').text('Changes Saved');
-          }
-        });
-
-        var revisionsundo = Session.get('revisionsundo');
-        revisionsundo.push(incidentobj);
-        Session.set('revisionsundo', revisionsundo);
-      }
-
-      this.undo = function(e, template) {
-        if (Session.get('revisionsundo').length >= 1 && Session.get('revisionsundo')[0] != null) {
-          var revisionsundo = Session.get('revisionsundo');
-          if (revisionsundo.length > 1) {
-            var incident = revisionsundo.splice(revisionsundo.length-1, 1)[0];
-            var revisionsredo = Session.get('revisionsredo');
-            revisionsredo.unshift(incident);
-            Session.set('revisionsredo', revisionsredo);
-          }
-          else {
-            var incident = revisionsundo[0];
-          }
-          Session.set('revisionsundo', revisionsundo);
-
-          template.find("#summary").value = incident.summary;
-          template.find("#description").value = incident.description;
-          template.find("#dateOpened").value = dateFormat(incident.dateOpened);
-          template.find("#dateClosed").value = dateFormat(incident.dateClosed);
-          template.find("#phase").value = incident.phase;
-          template.find("#dateReported").value = dateFormat(incident.dateReported);
-          template.find("#dateVerified").value = dateFormat(incident.dateVerified);
-          template.find("#dateMitigated").value = dateFormat(incident.dateMitigated);
-          template.find("#dateContained").value = dateFormat(incident.dateContained);
-        }
-      }
-
-      this.redo = function(e, template) {
-        if (Session.get('revisionsredo').length >= 1) {
-          var revisionsredo = Session.get('revisionsredo');
-          var incident = revisionsredo.splice(0, 1)[0];
-          var revisionsundo = Session.get('revisionsundo');
-          revisionsundo.push(incident);
-          Session.set('revisionsundo', revisionsundo);
-          Session.set('revisionsredo', revisionsredo);
-
-          template.find("#summary").value = incident.summary;
-          template.find("#description").value = incident.description;
-          template.find("#dateOpened").value = dateFormat(incident.dateOpened);
-          template.find("#dateClosed").value = dateFormat(incident.dateClosed);
-          template.find("#phase").value = incident.phase;
-          template.find("#dateReported").value = dateFormat(incident.dateReported);
-          template.find("#dateVerified").value = dateFormat(incident.dateVerified);
-          template.find("#dateMitigated").value = dateFormat(incident.dateMitigated);
-          template.find("#dateContained").value = dateFormat(incident.dateContained);
-        }
-      }
-
-      return this;
-    }();
-
-    var incidentSaveTimer = function() {
-      var timer;
-
-      this.set = function(saveFormCB) {
-        $('#saving').text('');
-        timer = Meteor.setTimeout(function() {
-          saveFormCB();
-          Meteor.setTimeout(function() {
-            $('#saving').text('');
-          }, 3000);
-        }, 3000);
-      };
-
-      this.clear = function() {
-        Meteor.clearInterval(timer);
-      };
-
-      this.run = function(e, t) {
-        // Save user input after 3 seconds of not typing
-        this.clear();
- 
-        this.set(function() {
-          // We should update our document.
-          $('#saving').text('Saving...');
-          // If update is successful, then
-          incidentRevision.save(e, t);
-        });
-      };
-
-      return this;    
-    }();
 
     //edit events
     Template.editincidentform.events({
         "dragover .tags": function(e){
-          e.preventDefault();   //allow the drag  
+            e.preventDefault();   //allow the drag  
         },
         "keyup .tagfilter":function(e,template){
             //var letter_pressed = String.fromCharCode(e.keyCode);
@@ -190,13 +72,13 @@ if (Meteor.isClient) {
             
         },
         "drop .tags": function(e){
-          e.preventDefault();
-          tagtext = e.originalEvent.dataTransfer.getData("text/plain");
-          //e.target.textContent=droptag
-          //console.log(tagtext)
-          incidents.update(Session.get('incidentID'), {
-            $addToSet: {tags:tagtext}
-          });
+            e.preventDefault();
+            tagtext = e.originalEvent.dataTransfer.getData("text/plain");
+            //e.target.textContent=droptag
+            //console.log(tagtext)
+            incidents.update(Session.get('incidentID'), {
+                $addToSet: {tags:tagtext}
+            });
         },
         
         "click .tagdelete": function(e){
@@ -205,33 +87,31 @@ if (Meteor.isClient) {
                 $pull: {tags:tagtext}
             });
         },
-        "keyup": function(e, t) {
-           // Save user input after 3 seconds of not typing
-           incidentSaveTimer.run(e, t);
+
+        "keypress .description, keypress .summary": function (e,t){
+            e.stopImmediatePropagation();
+            incidentSaveTimer.run(e, t);
+        },
+
+        "blur .description, blur .summary": function(e, t) {
+            e.stopImmediatePropagation();
+            saveIncident(e,t);
         },
 
         "blur .calendarfield": function(e, t) {
-           // Save user input after 3 seconds of not typing
-           incidentSaveTimer.run(e, t);
+            saveIncident(e,t);
         },
 
         "change #phase": function(e, t) {
-           // Save user input after 3 seconds of not typing
-           incidentSaveTimer.run(e, t);
+            saveIncident(e,t);
          },
 
-        "click #saveChanges": function(e, template) {
-          incidentRevision.save(e, template);
-        },
-        
-        "click #undo": function(e, template) {
-          incidentRevision.undo(e, template);
+        "click #saveIncident": function(e, template) {
+            saveIncident(e,template);
+            e.preventDefault();
+            e.stopPropagation();
         },
 
-        "click #redo": function(e, template) {
-          incidentRevision.redo(e, template);
-        },
-        
         "click .tabnav": function (e,template){
             //set the tab and tab content to active to display
             //and hide the non active ones.
@@ -240,7 +120,7 @@ if (Meteor.isClient) {
             $(e.target.hash).addClass('active').siblings().removeClass('active');
             $(e.target.hash).fadeIn(400);
         },
-        
+
         "click #saveReference": function(e,template){
             tValue=$('#newReference').val();
             if ( tValue.length > 0 ) {
@@ -250,6 +130,7 @@ if (Meteor.isClient) {
             }
             $('#newReference').val('');
         },
+
         "click .referencedelete": function(e){
             reftext = e.target.parentNode.firstChild.wholeText;
             incidents.update(Session.get('incidentID'), {
@@ -392,6 +273,7 @@ if (Meteor.isClient) {
             }
 
         },
+
         "click .mitigationedit": function(e){
             mitigation=models.mitigation();
             mitigation._id= $(e.target).attr('data-mitigationid');
@@ -409,6 +291,7 @@ if (Meteor.isClient) {
             }
             e.preventDefault();
         },         
+
         "click .mitigationdelete": function(e){
             id = $(e.target).attr('data-mitigationid');
             incidents.update(Session.get('incidentID'), {
@@ -441,6 +324,7 @@ if (Meteor.isClient) {
             }
 
         },
+
         "click .lessonedit": function(e){
             lesson=models.lesson();
             lesson._id= $(e.target).attr('data-lessonid');
@@ -504,6 +388,7 @@ if (Meteor.isClient) {
             }
             e.preventDefault();
         },
+
         "click .notedelete": function(e){
             id = $(e.target).attr('data-noteid');
             incidents.update(Session.get('incidentID'), {
@@ -574,6 +459,67 @@ if (Meteor.isClient) {
                 initDatePickers();
             });            
         }); //end deps.autorun
+
+        //code to save the main tab data
+        saveIncident=function(e,template){
+            var incidentobj = {
+              summary: template.find("#summary").value,
+              description: template.find("#description").value,
+              dateOpened: dateOrNull(template.find("#dateOpened").value),
+              dateClosed: dateOrNull(template.find("#dateClosed").value),
+              phase: template.find("#phase").value,
+              dateReported: dateOrNull(template.find("#dateReported").value),
+              dateVerified: dateOrNull(template.find("#dateVerified").value),
+              dateMitigated: dateOrNull(template.find("#dateMitigated").value),
+              dateContained: dateOrNull(template.find("#dateContained").value)
+            }
+            
+            incidents.update(
+                Session.get('incidentID'),
+                {$set: incidentobj},
+                {},
+                function(error, nobj) {
+                  if (!error && nobj === 1) {
+                    $('#saveMessage').text('Changes Saved');
+                  }else{
+                    $('#saveMessage').text('Changes Not Saved');
+                    console.log(error);
+                  }
+                }
+            );
+            //clear the info message after a bit
+            Meteor.setTimeout(function() {
+                    $('#saveMessage').text('');
+                },3000);
+
+        };
+
+        incidentSaveTimer = function() {
+          var timer;
+    
+          this.set = function(saveFormCB) {
+            timer = Meteor.setTimeout(function() {
+              saveFormCB();
+            }, 3000);
+          };
+    
+          this.clear = function() {
+            if ( timer != undefined ){
+                Meteor.clearTimeout(timer);
+            }
+          };
+    
+          this.run = function(e, t) {
+            // Save user input after X seconds of not typing
+            this.clear();
+     
+            this.set(function() {
+              saveIncident(e, t);
+            });
+          };
+    
+          return this;    
+        }();
     };
     
     Template.addincidentform.rendered = function() {

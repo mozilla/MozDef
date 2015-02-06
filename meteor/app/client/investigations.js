@@ -16,8 +16,6 @@ if (Meteor.isClient) {
     var lesson = null;
     var indicator = null;
     var evidence = null;
-    
-    
 
     //return all investigations
     Template.investigations.investigation = function () {
@@ -46,136 +44,27 @@ if (Meteor.isClient) {
     };
 
 
-    var investigationRevision = function() {
-      this.save = function(e, template) {
-        // Stop the timer if it was running
-        investigationSaveTimer.clear();
-
-        // tags are saved in real realtime (without timer)
-        // other tabs are saved as they are changed
-        // this is only for the main tab
-
-        var investigationobj = {
-          summary: template.find("#summary").value,
-          description: template.find("#description").value,
-          dateOpened: dateOrNull(template.find("#dateOpened").value),
-          dateClosed: dateOrNull(template.find("#dateClosed").value),
-          phase: template.find("#phase").value,
-          dateBegin: dateOrNull(template.find("#dateBegin").value),
-          dateEnd: dateOrNull(template.find("#dateEnd").value)
-        }
-
-        investigations.update(Session.get('investigationID'),
-        {$set: investigationobj},
-        {},
-        function(error, nobj) {
-          if (!error && nobj === 1) {
-            $('#saving').text('Changes Saved');
-          }
-        });
-
-        var revisionsundo = Session.get('revisionsundo');
-        revisionsundo.push(investigationobj);
-        Session.set('revisionsundo', revisionsundo);
-      }
-
-      this.undo = function(e, template) {
-        if (Session.get('revisionsundo').length >= 1 && Session.get('revisionsundo')[0] != null) {
-          var revisionsundo = Session.get('revisionsundo');
-          if (revisionsundo.length > 1) {
-            var investigation = revisionsundo.splice(revisionsundo.length-1, 1)[0];
-            var revisionsredo = Session.get('revisionsredo');
-            revisionsredo.unshift(investigation);
-            Session.set('revisionsredo', revisionsredo);
-          }
-          else {
-            var investigation = revisionsundo[0];
-          }
-          Session.set('revisionsundo', revisionsundo);
-
-          template.find("#summary").value = investigation.summary;
-          template.find("#description").value = investigation.description;
-          template.find("#dateOpened").value = dateFormat(investigation.dateOpened);
-          template.find("#dateClosed").value = dateFormat(investigation.dateClosed);
-          template.find("#phase").value = investigation.phase;
-          template.find("#dateBegin").value = dateFormat(investigation.dateBegin);
-          template.find("#dateEnd").value = dateFormat(investigation.dateEnd);
-        }
-      }
-
-      this.redo = function(e, template) {
-        if (Session.get('revisionsredo').length >= 1) {
-          var revisionsredo = Session.get('revisionsredo');
-          var investigation = revisionsredo.splice(0, 1)[0];
-          var revisionsundo = Session.get('revisionsundo');
-          revisionsundo.push(investigation);
-          Session.set('revisionsundo', revisionsundo);
-          Session.set('revisionsredo', revisionsredo);
-
-          template.find("#summary").value = investigation.summary;
-          template.find("#description").value = investigation.description;
-          template.find("#dateOpened").value = dateFormat(investigation.dateOpened);
-          template.find("#dateClosed").value = dateFormat(investigation.dateClosed);
-          template.find("#phase").value = investigation.phase;
-          template.find("#dateBegin").value = dateFormat(investigation.dateBegin);
-          template.find("#dateEnd").value = dateFormat(investigation.dateEnd);
-        }
-      }
-
-      return this;
-    }();
-
-    var investigationSaveTimer = function() {
-      var timer;
-
-      this.set = function(saveFormCB) {
-        $('#saving').text('');
-        timer = Meteor.setTimeout(function() {
-          saveFormCB();
-          Meteor.setTimeout(function() {
-            $('#saving').text('');
-          }, 3000);
-        }, 3000);
-      };
-
-      this.clear = function() {
-        Meteor.clearInterval(timer);
-      };
-
-      this.run = function(e, t) {
-        // Save user input after 3 seconds of not typing
-        this.clear();
- 
-        this.set(function() {
-          // We should update our document.
-          $('#saving').text('Saving...');
-          // If update is successful, then
-          investigationRevision.save(e, t);
-        });
-      };
-
-      return this;    
-    }();
-
     //edit events
     Template.editinvestigationform.events({
         "dragover .tags": function(e){
-          e.preventDefault();   //allow the drag  
+            e.preventDefault();   //allow the drag  
         },
+
         "keyup .tagfilter":function(e,template){
             //var letter_pressed = String.fromCharCode(e.keyCode);
             //console.log(template.find("#tagfilter").value);
             Session.set('verisfilter',template.find("#tagfilter").value);
             
         },
+
         "drop .tags": function(e){
-          e.preventDefault();
-          tagtext = e.originalEvent.dataTransfer.getData("text/plain");
-          //e.target.textContent=droptag
-          //console.log(tagtext)
-          investigations.update(Session.get('investigationID'), {
-            $addToSet: {tags:tagtext}
-          });
+            e.preventDefault();
+            tagtext = e.originalEvent.dataTransfer.getData("text/plain");
+            //e.target.textContent=droptag
+            //console.log(tagtext)
+            investigations.update(Session.get('investigationID'), {
+              $addToSet: {tags:tagtext}
+            });
         },
         
         "click .tagdelete": function(e){
@@ -184,6 +73,12 @@ if (Meteor.isClient) {
                 $pull: {tags:tagtext}
             });
         },
+
+        "blur .description, blur .summary": function(e, t) {
+            e.stopImmediatePropagation();
+            saveInvestigation(e,t);
+        },        
+
         "keyup": function(e, t) {
            // Save user input after 3 seconds of not typing
            investigationSaveTimer.run(e, t);
@@ -195,22 +90,16 @@ if (Meteor.isClient) {
         },
 
         "change #phase": function(e, t) {
-           // Save user input after 3 seconds of not typing
-           investigationSaveTimer.run(e, t);
+            // Save user input after 3 seconds of not typing
+            investigationSaveTimer.run(e, t);
          },
 
-        "click #saveChanges": function(e, template) {
-          investigationRevision.save(e, template);
-        },
-        
-        "click #undo": function(e, template) {
-          investigationRevision.undo(e, template);
+        "click #saveInvestigation": function(e, template) {
+            saveInvestigation(e,template);
+            e.preventDefault();
+            e.stopPropagation();
         },
 
-        "click #redo": function(e, template) {
-          investigationRevision.redo(e, template);
-        },
-        
         "click .tabnav": function (e,template){
             //set the tab and tab content to active to display
             //and hide the non active ones.
@@ -229,6 +118,7 @@ if (Meteor.isClient) {
             }
             $('#newReference').val('');
         },
+
         "click .referencedelete": function(e){
             reftext = e.target.parentNode.firstChild.wholeText;
             investigations.update(Session.get('investigationID'), {
@@ -371,6 +261,7 @@ if (Meteor.isClient) {
             }
 
         },
+
         "click .mitigationedit": function(e){
             mitigation=models.mitigation();
             mitigation._id= $(e.target).attr('data-mitigationid');
@@ -388,6 +279,7 @@ if (Meteor.isClient) {
             }
             e.preventDefault();
         },         
+
         "click .mitigationdelete": function(e){
             id = $(e.target).attr('data-mitigationid');
             investigations.update(Session.get('investigationID'), {
@@ -420,6 +312,7 @@ if (Meteor.isClient) {
             }
 
         },
+
         "click .lessonedit": function(e){
             lesson=models.lesson();
             lesson._id= $(e.target).attr('data-lessonid');
@@ -435,6 +328,7 @@ if (Meteor.isClient) {
             }
             e.preventDefault();
         },
+
         "click .lessondelete": function(e){
             id = $(e.target).attr('data-lessonid');
             investigations.update(Session.get('investigationID'), {
@@ -483,6 +377,7 @@ if (Meteor.isClient) {
             }
             e.preventDefault();
         },
+
         "click .notedelete": function(e){
             id = $(e.target).attr('data-noteid');
             investigations.update(Session.get('investigationID'), {
@@ -531,6 +426,7 @@ if (Meteor.isClient) {
             }
             e.preventDefault();
         },
+
         "click .indicatordelete": function(e){
             id = $(e.target).attr('data-indicatorid');
             investigations.update(Session.get('investigationID'), {
@@ -579,6 +475,7 @@ if (Meteor.isClient) {
             }
             e.preventDefault();
         },
+
         "click .evidencedelete": function(e){
             id = $(e.target).attr('data-evidenceid');
             investigations.update(Session.get('investigationID'), {
@@ -635,6 +532,72 @@ if (Meteor.isClient) {
                 initDatePickers();
             });            
         }); //end deps.autorun
+
+        saveInvestigation = function(e, template) {
+            // Stop the timer if it was running
+            investigationSaveTimer.clear();
+    
+          // tags are saved in real realtime (without timer)
+          // other tabs are saved as they are changed
+          // this is only for the main tab
+    
+            var investigationobj = {
+                summary: template.find("#summary").value,
+                description: template.find("#description").value,
+                dateOpened: dateOrNull(template.find("#dateOpened").value),
+                dateClosed: dateOrNull(template.find("#dateClosed").value),
+                phase: template.find("#phase").value,
+                dateBegin: dateOrNull(template.find("#dateBegin").value),
+                dateEnd: dateOrNull(template.find("#dateEnd").value)
+            }
+    
+            investigations.update(Session.get('investigationID'),
+                {$set: investigationobj},
+                {},
+                function(error, nobj) {
+                  if (!error && nobj === 1) {
+                    $('#saveMessage').text('Changes Saved');
+                  }else{
+                    $('#saveMessage').text('Changes Not Saved');
+                    console.log(error);
+                  }
+                }
+            );
+    
+            //clear the info message after a bit
+            Meteor.setTimeout(function() {
+                    $('#saveMessage').text('');
+                },3000);
+        }
+
+
+
+        investigationSaveTimer = function() {
+          var timer;
+    
+          this.set = function(saveFormCB) {
+            timer = Meteor.setTimeout(function() {
+              saveFormCB();
+            }, 3000);
+          };
+    
+          this.clear = function() {
+            if ( timer != undefined ){
+                Meteor.clearTimeout(timer);
+            }
+          };
+    
+          this.run = function(e, t) {
+            // Save user input after X seconds of not typing
+            this.clear();
+     
+            this.set(function() {
+              saveInvestigation(e, t);
+            });
+          };
+    
+          return this;    
+        }();
     };
     
     Template.addinvestigationform.rendered = function() {
