@@ -52,6 +52,8 @@ class message(object):
         ci['compliance'] = message['compliance']
         ci['link'] = message['link']
         ci['utctimestamp'] = message['utctimestamp']
+        if 'tags' in message:
+            ci['tags'] = message['tags']
         return ci
 
     def onMessage(self, message, metadata):
