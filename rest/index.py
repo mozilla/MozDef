@@ -9,7 +9,6 @@
 
 import bottle
 import json
-import MySQLdb
 import netaddr
 import os
 import pyes
@@ -116,11 +115,6 @@ def index():
 @post('/blockip/', methods=['POST'])
 @enable_cors
 def index():
-    if options.enableBlockIP:
-        try:
-            request.body = banhammer(request.json)
-        except Exception as e:
-            sys.stderr.write('Error parsing json sent to POST /banhammer\n')
     sendMessgeToPlugins(request, response, 'blockip')
     return response
 
@@ -257,7 +251,7 @@ def registerPlugins():
                 if 'message' in dir(module):
                     mclass = module.message()
                     mreg = mclass.registration
-                    
+                    mclass.restoptions = options
                     
                     if 'priority' in dir(mclass):
                         mpriority = mclass.priority
@@ -404,59 +398,6 @@ def kibanaDashboards():
         sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
 
 
-def banhammer(action):
-    try:
-        mysqlconn = MySQLdb.connect(
-            host=options.banhammerdbhost,
-            user=options.banhammerdbuser,
-            passwd=options.banhammerdbpasswd,
-            db=options.banhammerdbdb)
-        dbcursor = mysqlconn.cursor()
-        # Look if attacker already in the DB, if yes get id
-        dbcursor.execute("""SELECT id FROM blacklist_offender
-              WHERE address = "%s" AND cidr = %d""" % (action['address'], int(action['cidr'])))
-        qresult = dbcursor.fetchone()
-        if not qresult:
-            # insert new attacker in banhammer DB
-            created_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-            dbcursor.execute("""
-                INSERT INTO blacklist_offender(address, cidr)
-                VALUES ("%s", %d)
-            """ % (action['address'], action['cidr']))
-            # get the ID of this query
-            dbcursor.execute("""SELECT id FROM blacklist_offender
-              WHERE address = "%s" AND cidr = %d""" % (action['address'], int(action['cidr'])))
-            qresult = dbcursor.fetchone()
-        (attacker_id,) = qresult
-        # Compute start and end dates
-        start_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        end_date = datetime.utcnow() + timedelta(hours=1)
-        if action['duration'] == '12hr':
-            end_date = datetime.utcnow() + timedelta(hours=12)
-        elif action['duration'] == '1d':
-            end_date = datetime.utcnow() + timedelta(days=1)
-        elif action['duration'] == '1w':
-            end_date = datetime.utcnow() + timedelta(days=7)
-        elif action['duration'] == '30d':
-            end_date = datetime.utcnow() + timedelta(days=30)
-
-        if action['bugid']:
-            # Insert in DB
-            dbcursor.execute("""
-                INSERT INTO blacklist_blacklist(offender_id, start_date, end_date, comment, reporter, bug_number)
-                VALUES (%d, "%s", "%s", "%s", "%s", %d)
-                """ % (attacker_id, start_date, end_date, action['comment'], action['reporter'], int(action['bugid'])))
-        else:
-            dbcursor.execute("""
-                INSERT INTO blacklist_blacklist(offender_id, start_date, end_date, comment, reporter)
-                VALUES (%d, "%s", "%s", "%s", "%s")
-                """ % (attacker_id, start_date, end_date, action['comment'], action['reporter']))
-        mysqlconn.commit()
-        sys.stderr.write('%s/%d: banhammered\n' % (action['address'], action['cidr']))
-    except Exception as e:
-        sys.stderr.write('Error while banhammering %s/%d: %s\n' % (action['address'], action['cidr'], e))
-
-
 def getWhois(ipaddress):
     try:
         whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup()
@@ -487,20 +428,6 @@ def getIPCIF(ipaddress):
 
     except Exception as e:
         sys.stderr.write('Error looking up CIF results for {0}: {1}\n'.format(ipaddress, e))
-
-        
-def checkBlockIPService():
-    if options.enableBlockIP:
-        try:
-            mysqlconn = MySQLdb.connect(
-                host=options.banhammerdbhost,
-                user=options.banhammerdbuser,
-                passwd=options.banhammerdbpasswd,
-                db=options.banhammerdbdb)
-            dbcursor = mysqlconn.cursor()
-        except Exception as e:
-            sys.stderr.write('Failed to connect to the Banhammer DB\n')    
-
 
 def verisSummary(verisRegex=None):
     try:
@@ -546,26 +473,6 @@ def initConfig():
                                   'http://localhost:9090',
                                   options.configfile)
     
-    # options for your custom/internal ip blocking service
-    # mozilla's is called banhammer
-    # and uses an intermediary mysql DB
-    # here we set credentials
-    options.enableBlockIP = getConfig('enableBlockIP',
-                                      False,
-                                      options.configfile)
-    options.banhammerdbhost = getConfig('banhammerdbhost',
-                                        'localhost',
-                                        options.configfile)
-    options.banhammerdbuser = getConfig('banhammerdbuser',
-                                        'auser',
-                                        options.configfile)
-    options.banhammerdbpasswd = getConfig('banhammerdbpasswd',
-                                          '',
-                                          options.configfile)
-    options.banhammerdbdb = getConfig('banhammerdbdb',
-                                      'banhammer',
-                                      options.configfile)
-    
     # options for your CIF service
     options.cifapikey = getConfig('cifapikey', '', options.configfile)
     options.cifhosturl = getConfig('cifhosturl',
@@ -574,10 +481,6 @@ def initConfig():
     # mongo connectivity options
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
-
-    # check any service you'd like at startup rather than waiting
-    # for a client request.
-    checkBlockIPService()
 
 
 if __name__ == "__main__":

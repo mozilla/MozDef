@@ -19,7 +19,19 @@ if (Meteor.isClient) {
       Session.set('alertsrecordlimit',100);
       Session.set('attackerlimit','10');
       getAllPlugins();
+      //console.log(pluginsForEndPoint("test"));
     });
+    
+    //find plugins registered for a
+    //specific endpoint
+    pluginsForEndPoint=function(endpoint){
+        matches=[]
+        matches=_.filter(Session.get('plugins'),
+                    function(e){
+                        return _.indexOf(e.registration,endpoint) >-1 ;
+                        });
+        return matches;
+    };
 
     getAllPlugins=function(){
         Meteor.apply('getplugins',[],
@@ -35,7 +47,7 @@ if (Meteor.isClient) {
                 }
                 Session.set('plugins',plugins);
            })
-        }
+    };
 
     //helper functions for UI templates
     //and other client javascript routines
@@ -63,6 +75,29 @@ if (Meteor.isClient) {
         if (typeof console !== 'undefined') {
           console.log(logthis);
         }
+    };
+    
+    formToObject=function(selector){
+        //send a selctor like "#formID :input"
+        //get back an object you can JSON.stringify
+        //as an array of key:value pairs
+        //for each named item in a form
+        var inputs = $(selector);
+        var formobj = $.map(inputs, function(n, i)
+        {
+            var o = {};
+            switch($(n).attr("type")){
+                case "radio":
+                case "checkbox":
+                    o[n.name] = $(n).prop('checked');
+                    break;
+                default: 
+                    o[n.name] = $(n).val();
+                    break;
+            }
+            return o;
+        });
+        return formobj;
     };
 
     Template.hello.greeting = function () {
@@ -162,6 +197,10 @@ if (Meteor.isClient) {
                 }
 
         });
+    });
+    
+    UI.registerHelper('pluginsForEndPoint',function(endpoint){
+        return pluginsForEndPoint(endpoint);
     });
 
 

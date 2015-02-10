@@ -47,13 +47,13 @@ if (Meteor.isServer) {
         }
     }
 
-    function blockIP(actionobj) {
-        var blockIPRequest = HTTP.post(mozdef.rootAPI + '/blockip', {data: actionobj});
+    function blockIP(formobj) {
+        var blockIPRequest = HTTP.post(mozdef.rootAPI + '/blockip', {data: formobj});
 
         if (blockIPRequest.statusCode==200) {
-            console.log(actionobj.address+"/"+actionobj.cidr+" blocked for "+actionobj.duration);
+            console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
         } else {
-            console.log("Could not block "+actionobj.address+"/"+actionobj.cidr+" for "+actionobj.duration);
+            console.log("Could not send to "+ mozdef.rootAPI + '/blockip ' + JSON.stringify(formobj) );
         }
     }
 
