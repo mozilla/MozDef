@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import json
 import netaddr
 import boto.sqs
-from boto.sqs.message import Message
+from boto.sqs.message import RawMessage
 
 def isIPv4(ip):
     try:
@@ -102,12 +102,16 @@ class message(object):
             if ipaddress is not None and self.options is not None:
                 # connect and send a message like:
                 # '{"Message": {"ban": {"ip": "192.168.0.2"}}}'
+                # encoded like this:
+                # {"Message":"{\"ban\":{\"ip\":\"192.168.0.2\"}}"}
+                
                 conn = boto.sqs.connect_to_region(self.options.region,
                                                   aws_access_key_id=self.options.aws_access_key_id,
                                                   aws_secret_access_key=self.options.aws_secret_access_key)
                 queue = conn.get_queue(self.options.aws_queue_name)
-                banMessage=dict(Message=dict(ban=dict(ip=ipaddress)))
-                m = Message()
+
+                banMessage = dict(Message=json.dumps(dict(ban=dict(ip=ipaddress))))
+                m = RawMessage()
                 m.set_body(json.dumps(banMessage))
                 queue.write(m)
                 sys.stdout.write('Sent {0} to customs server\n'.format(ipaddress))
