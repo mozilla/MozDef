@@ -20,7 +20,10 @@ if (Meteor.isClient) {
     Template.attackerdetails.thisalert = function (mongoalertid) {
         //attackers store a ref mongo id to alerts attacker.alerts.alertid
         //return an alert given it's mongo id
-        return alerts.findOne({'_id': mongoalertid});
+        return alerts.findOne({'_id': mongoalertid},
+                              {fields:{
+                                        events:0}
+                                });
     };    
     
     Template.attackerdetails.rendered = function() {
