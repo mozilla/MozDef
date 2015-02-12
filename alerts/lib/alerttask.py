@@ -9,6 +9,7 @@
 # Anthony Verez averez@mozilla.com
 # Jeff Bryner jbryner@mozilla.com
 
+import collections
 import json
 import kombu
 import pytz
@@ -42,6 +43,30 @@ def toUTC(suspectedDate, localTimeZone=None):
         objDate = utc.normalize(objDate)
 
     return objDate
+
+
+# utility functions used by AlertTask.mostCommon
+# determine most common values
+# in a list of dicts
+def keypaths(nested):
+    ''' return a list of nested dict key paths
+        like: [u'_source', u'details', u'hostname']
+    '''
+    for key, value in nested.iteritems():
+        if isinstance(value, collections.Mapping):
+            for subkey, subvalue in keypaths(value):
+                yield [key] + subkey, subvalue
+        else:
+            yield [key], value
+
+
+def dictpath(path):
+    ''' split a string representing a
+        nested dictionary path key.subkey.subkey
+    '''
+    for i in path.split('.'):
+        yield '{0}'.format(i)
+
 
 
 class AlertTask(Task):
@@ -91,6 +116,7 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Exception while configuring kombu for alerts: {0}'.format(e))
 
+
     def _configureES(self):
         """
         Configure pyes for elasticsearch
@@ -100,6 +126,26 @@ class AlertTask(Task):
             self.log.debug('ES configured')
         except Exception as e:
             self.log.error('Exception while configuring ES for alerts: {0}'.format(e))
+
+
+    def mostCommon(self, listofdicts,dictkeypath):
+        """
+            Given a list containing dictionaries,
+            return the most common entries
+            along a key path separated by .
+            i.e. dictkey.subkey.subkey
+            returned as a list of tuples
+            [(value,count),(value,count)]
+        """
+        inspectlist=list()
+        path=list(dictpath(dictkeypath))
+        for i in listofdicts:
+            for k in list(keypaths(i)):
+                if not (set(k[0]).symmetric_difference(path)):
+                    inspectlist.append(k[1])
+    
+        return Counter(inspectlist).most_common()
+
 
     def alertToMessageQueue(self, alertDict):
         """
@@ -129,6 +175,7 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Exception while sending alert to message queue: {0}'.format(e))
 
+
     def alertToES(self, alertDict):
         """
         Send alert to elasticsearch
@@ -140,6 +187,7 @@ class AlertTask(Task):
             return res
         except Exception as e:
             self.log.error('Exception while pushing alert to ES: {0}'.format(e))
+
 
     def filtersManual(self, date_timedelta, must=[], should=[], must_not=[]):
         """
@@ -163,6 +211,7 @@ class AlertTask(Task):
             should=should,
             must_not=must_not))
         self.filter = q
+
 
     def filtersFromKibanaDash(self, fp, date_timedelta):
         """
@@ -230,6 +279,7 @@ class AlertTask(Task):
         f.close()
         self.filtersManual(date_timedelta, must=must, should=should, must_not=must_not)
 
+
     def searchEventsSimple(self):
         """
         Search events matching filters, store events in self.events
@@ -243,6 +293,7 @@ class AlertTask(Task):
             self.log.debug(self.events)
         except Exception as e:
             self.log.error('Error while searching events in ES: {0}'.format(e))
+
 
     def searchEventsAggreg(self, aggregField, samplesLimit=5):
         """
@@ -285,6 +336,7 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Error while searching events in ES: {0}'.format(e))
 
+
     def walkEvents(self):
         """
         Walk through events, provide some methods to hook in alerts
@@ -299,6 +351,7 @@ class AlertTask(Task):
                     self.alertToMessageQueue(alert)
                     self.hookAfterInsertion(alert)
 
+
     def walkAggregations(self, threshold):
         """
         Walk through aggregations, provide some methods to hook in alerts
@@ -312,6 +365,7 @@ class AlertTask(Task):
                         alertResultES = self.alertToES(alert)
                         self.tagEventsAlert(aggreg['allevents'], alertResultES)
                         self.alertToMessageQueue(alert)
+
 
     def createAlertDict(self, summary, category, tags, events, severity='NOTICE'):
         """
@@ -334,6 +388,7 @@ class AlertTask(Task):
         self.log.debug(alert)
         return alert
 
+
     def onEvent(self, event):
         """
         To be overriden by children to run their code
@@ -341,6 +396,7 @@ class AlertTask(Task):
         must return an alert dict or None
         """
         pass
+
 
     def onAggreg(self, aggreg):
         """
@@ -350,12 +406,14 @@ class AlertTask(Task):
         """
         pass
 
+
     def hookAfterInsertion(self, alert):
         """
         To be overriden by children to run their code
         to be used when creating an alert using an aggregation
         """
         pass
+
 
     def tagEventsAlert(self, events, alertResultES):
         """
@@ -379,11 +437,13 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 
+
     def main(self):
         """
         To be overriden by children to run their code
         """
         pass
+
 
     def run(self):
         """
