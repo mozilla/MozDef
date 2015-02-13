@@ -10,7 +10,8 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
-    //default session variables:
+    //default session variables
+    //and session init actions
     Meteor.startup(function () {
       Session.set('verisfilter','  ');
       Session.set('alertssearchtext','');
@@ -19,7 +20,9 @@ if (Meteor.isClient) {
       Session.set('alertsrecordlimit',100);
       Session.set('attackerlimit','10');
       getAllPlugins();
+      //debug
       //console.log(pluginsForEndPoint("test"));
+      //console.log(Blaze.isTemplate(Template.about));
     });
     
     //find plugins registered for a

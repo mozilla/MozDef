@@ -86,16 +86,29 @@ if (Meteor.isServer) {
         }
     });
     
-    Meteor.publish("alerts-details",function(alertid){
+    Meteor.publish("alerts-details",function(alertid,includeEvents){
        //return alerts.find({'esmetadata.id': alertid});
        //alert ids can be either mongo or elastic search IDs
        //look for both to publish to the collection.
-       return alerts.find({
-            $or:[
-                    {'esmetadata.id': alertid},
-                    {'_id': alertid},
-                ]
-        });
+        //default parameters
+        includeEvents = typeof includeEvents !== 'undefined' ? includeEvents: true;
+        if ( includeEvents ){
+            return alerts.find({
+                                $or:[
+                                        {'esmetadata.id': alertid},
+                                        {'_id': alertid},
+                                    ]
+             });
+        }else{
+            return alerts.find({
+                                $or:[
+                                        {'esmetadata.id': alertid},
+                                        {'_id': alertid},
+                                    ]
+                                },
+                                {fields:{events:0},
+             });
+        }
     });
     
     Meteor.publish("alerts-count", function () {

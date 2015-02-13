@@ -32,8 +32,10 @@ if (Meteor.isClient) {
             Meteor.subscribe('attacker-details', Session.get('attackerID'),onReady=function(){
 
                 attackerAlerts=attackers.findOne({"_id":Session.get('attackerID')}).alerts;
+                //subscribe to each alert minus the event details since
+                //we already have sample events in the attacker data structure.
                 attackerAlerts.forEach(function(a){
-                    Meteor.subscribe('alerts-details',a.alertid);
+                    Meteor.subscribe('alerts-details',a.alertid,false);
                 });
             });
 
