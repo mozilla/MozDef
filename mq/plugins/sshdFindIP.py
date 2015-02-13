@@ -16,7 +16,7 @@ def isIPv4(ip):
         # Use IPNetwork instead of valid_ipv4 to allow CIDR
         if '.' in ip and len(ip.split('.'))==4:
             # some ips are quoted
-            netaddr.IPNetwork(ip.strip("'").strip('"'))
+            netaddr.IPNetwork(ip)
             return True
         else:
             return False
@@ -51,7 +51,8 @@ class message(object):
             
             if doSearch:
                 for word in message['summary'].strip().split():
-                    saneword = word.strip().strip('"').strip("'")
+                    # strip any surrounding quotes, commas, etc.
+                    saneword = word.strip().strip('"').strip("'").strip(",")
                     if isIPv4(saneword):
                         foundIPv4 = saneword
                         break
