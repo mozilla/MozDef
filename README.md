@@ -21,7 +21,7 @@ Goals:
 
 Status:
 --------
-MozDef is in early proof of concept phases at Mozilla.
+MozDef is in production at Mozilla where we are using it to process over 300 million events per day.
 
 DOCS:
 -----
