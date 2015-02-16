@@ -11,6 +11,7 @@ Anthony Verez averez@mozilla.com
 
 if (Meteor.isClient) {
 
+    //template variables
     var scene = null;
     var sceneCamera = null;
     var sceneControls = null;
@@ -34,6 +35,7 @@ if (Meteor.isClient) {
     var ringChartLastSeen = null;
     var ringChartCountry = null;
     var ndx = null;
+    var cursorAttackers = null;
 
     Template.attackers.events({
         "click #btnReset": function(e){
@@ -129,10 +131,12 @@ if (Meteor.isClient) {
                     var intersects = raycaster.intersectObject( plane );
                     selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
                     //console.log(selectedObject.parent.dbid);
-                    nameplate=selectedObject.parent.getObjectByName('nameplate:' + selectedObject.dbid,true)
-                    if ( nameplate ){
-                        nameplate.position.copy( selectedObject.position);
-                        nameplate.position.add(nameplate.offset);
+                    if (selectedObject.parent){
+                        nameplate=selectedObject.parent.getObjectByName('nameplate:' + selectedObject.dbid,true)
+                        if ( nameplate ){
+                            nameplate.position.copy( selectedObject.position);
+                            nameplate.position.add(nameplate.offset);
+                        }
                     }
                     return;         
                 }
@@ -200,6 +204,8 @@ if (Meteor.isClient) {
     });
     
     Template.attackers.created = function (){
+        //console.log('attackers.created',this);
+       
         //new instances of THREE objects for this template
         scene = new THREE.Scene();
         sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
@@ -220,7 +226,7 @@ if (Meteor.isClient) {
     };
 
     Template.attackers.rendered = function () {
-        //console.log('entering draw attackers');
+        //console.log('attackers rendered');
         ringChartAttackerCategory   = dc.pieChart("#ringChart-category","attackers");
         ringChartLastSeen   = dc.pieChart("#ringChart-lastseen","attackers");
         ringChartCountry = dc.pieChart("#ringChart-country","attackers");
@@ -352,7 +358,12 @@ if (Meteor.isClient) {
             character.id=dbrecord._id;
             character.name=dbrecord._id;
             character.scale = .05;
-            character.dbrecord=dbrecord;
+            //character.dbrecord=dbrecord;
+            character.dbrecord=attackers.findOne({_id:dbrecord._id},
+                                                 {fields:{
+                                                        events:0,
+                                                        alerts:0}
+                                                 });
             character.animationFPS=Math.floor((Math.random() * 5)+1);
             character.controls = ogroControls;
             character.root.position.x=x;
@@ -366,40 +377,40 @@ if (Meteor.isClient) {
             //no weapons for now..
             //this.setWeapon(Math.floor((Math.random()*1)));
             character.setSkin(Math.floor((Math.random() * 10)));
-            character.setSkin(_.indexOf(configOgro.categories,dbrecord.category));
+            character.setSkin(_.indexOf(configOgro.categories,character.dbrecord.category));
             //this.setAnimation(configOgro.animations["stand"]);
     
             //create the character's nameplate
             var acallout=$('<div class="container-fluid attackercallout"></div>');
-            var aid=$('<div class="row-fluid"></div>');
-            aid.append(
-                       $('<span/>',{
-                'class': 'id',
-                text: dbrecord.indicators[0].ipv4address
-            }));
-            
-            var adetails=$('<ul/>',{
-                'class':'details',
-            });
-            adetails.append($('<li/>',{
-                text: 'Last Seen: ' + dbrecord.lastseentimestamp
-            }));
-            adetails.append($('<li/>')
-                .append($('<a/>',{
-                  'href': getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
-                  'target':"_blank",
-                  text: 'alerts: ' + dbrecord.alertscount
-                })));
-            adetails.append($('<li/>')
-                .append($('<a/>',{
-                  'href':getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
-                  'target':"_blank",
-                  text: 'events: ' + dbrecord.eventscount
-                })));
-            adetails.append($('<li/>',{
-                text: dbrecord.category
-            }));
-            adetails.wrap($('<div class="row-fluid"></div>'));
+            //var aid=$('<div class="row-fluid"></div>');
+            //aid.append(
+            //           $('<span/>',{
+            //    'class': 'id',
+            //    text: character.dbrecord.indicators[0].ipv4address
+            //}));
+            //
+            //var adetails=$('<ul/>',{
+            //    'class':'details',
+            //});
+            //adetails.append($('<li/>',{
+            //    text: 'Last Seen: ' + dbrecord.lastseentimestamp
+            //}));
+            //adetails.append($('<li/>')
+            //    .append($('<a/>',{
+            //      'href': getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
+            //      'target':"_blank",
+            //      text: 'alerts: ' + dbrecord.alertscount
+            //    })));
+            //adetails.append($('<li/>')
+            //    .append($('<a/>',{
+            //      'href':getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
+            //      'target':"_blank",
+            //      text: 'events: ' + dbrecord.eventscount
+            //    })));
+            //adetails.append($('<li/>',{
+            //    text: dbrecord.category
+            //}));
+            //adetails.wrap($('<div class="row-fluid"></div>'));
             
             var abuttons=$('<div class="row-fluid"/>');
             if (getSetting('enableBlockIP')) {            
@@ -409,8 +420,23 @@ if (Meteor.isClient) {
                     text: 'Block IP'
                 }));
             }
-            
-            acallout.append(aid,adetails,abuttons);
+
+
+            //render reactive data with
+            //meteor/blaze template
+            //instead of:
+            //acallout.append(aid,adetails,abuttons);
+            Blaze.renderWithData(Template.nameplate,
+                                function() {
+                                            return attackers.findOne({_id: dbrecord._id},
+                                                                        {fields:{
+                                                                        events:0,
+                                                                        alerts:0}
+                                                                        });
+                                        },
+                                 acallout.get()[0]);
+            //add the 'blockip' button
+            acallout.append(abuttons);
             
             var nameplate=new THREE.CSS3DObject(acallout.get()[0]);
             var npOffset=new THREE.Vector3();
@@ -440,6 +466,27 @@ if (Meteor.isClient) {
         }; //end createCharacter
     
         sceneSetup(this);
+
+        var updateCharacterCategory= function(newDoc){
+            //find the character and update it's skin
+            //to match it's category
+            var objs = _.rest(scene.children,1);
+            _.each(objs,function(object){
+                //dbid matches both the nameplate and the ogre since
+                //both are representing the same attacker through different
+                //renderers (webgl vs css)
+                //make sure we gind the webgl one
+                if ( _.has(object,'dbid') ){
+                    
+                    if ( object.dbid === newDoc._id  && _.has(object,'base') ){
+                        //console.log('setting skin ' + newDoc._id);
+                        //update the dbrecord while we are here.
+                        object.base.dbrecord=newDoc;
+                        object.base.setSkin(_.indexOf(configOgro.categories,object.base.dbrecord.category));
+                    }
+                }
+            });
+        };
 
         var clearCharacters = function() {
             //inspect scene children
@@ -525,7 +572,7 @@ if (Meteor.isClient) {
                                             events:0,
                                             alerts:0
                                             },
-                                        reactive:false,
+                                        reactive:true,
                                         sort: {lastseentimestamp: 'desc'},
                                         limit: parseInt(Session.get('attackerlimit'))}).fetch();
             ////parse, group data for the d3 charts
@@ -590,26 +637,29 @@ if (Meteor.isClient) {
             }
         };
         
-        hookCategories = function(){
+        hookAttackers = function(){
             //setup an observe changes hook
-            //to watch for category changes in attackers
+            //to watch for changes in attackers
             //to force a screen refresh
             //addedBefore is required if using limits apparently, but doesn't do anything
-            //changed just signals a screen redraw for now
-            //TODO: hook the database record ID and only update the one character
-            var cursorAttackers=attackers.find({},
+            //changedAt required when using limits.
+            cursorAttackers=attackers.find({},
                                         {fields:{
-                                            category:1
+                                            category:1,
+                                            indicators:1,
+                                            lastseentimestamp:1,
+                                            alertscount:1,
+                                            eventscount:1
                                             },
                                         reactive:true,
                                         sort: {lastseentimestamp: 'desc'},
-                                        limit: parseInt(Session.get('attackerlimit'))}).observeChanges(
-                                                                                                       {addedBefore: function(){},
-                                                                                                        changed:function(id,fields){
-                                                                                                                //debugLog('category changed.');
-                                                                                                                waitForBaseCharacter();
-                                                                                                                }
-                                                                                                        });            
+                                        limit: parseInt(Session.get('attackerlimit'))})
+                                        .observe(
+                                                {addedBefore: function(){},
+                                                 changedAt:function(newDoc,oldDoc,atIndex){
+                                                         updateCharacterCategory(newDoc);
+                                                         }
+                                        });            
         };
         Tracker.autorun(function() {
             //debugLog('running dep orgro autorun');
@@ -620,14 +670,14 @@ if (Meteor.isClient) {
                 //when this completes it triggers a clear/dataload and filtering of characters.
                 //debugLog('Invalidated attackers-summary via subscribe');
                 
-                hookCategories();
+                hookAttackers();
                 waitForBaseCharacter();
             });
             //Changing the session.attackerlimit should
             //make us redraw a new set of attackers.
             Tracker.onInvalidate(function () {
                 //debugLog('Invalidated attackers-summary');
-                hookCategories();
+                hookAttackers();
                 waitForBaseCharacter();
             });            
 
@@ -660,6 +710,10 @@ if (Meteor.isClient) {
         ringChartAttackerCategory = null;
         ringChartLastSeen = null;
         ndx = null;
+        if (cursorAttackers){
+            cursorAttackers.stop();
+        }
+        cursorAttackers=null;
         
 
     };//end template.attackers.destroyed

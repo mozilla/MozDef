@@ -136,7 +136,6 @@ if (Meteor.isClient) {
         return mozdef
     });
 
-
     UI.registerHelper('getAlertURL', function(alertid){
         //could be mongo id or es id
         //assume mongo
@@ -147,6 +146,16 @@ if (Meteor.isClient) {
             return(getSetting('rootURL') + '/alert/' +  alertid);
         }
     });
+
+    UI.registerHelper('getAttackerURL', function(attackerid){
+        //return the router URL for a specific attacker
+        return(getSetting('rootURL') + '/attacker/' +  attackerid);
+    });
+    
+    UI.registerHelper('getAttackerIndicator', function(attackerid){
+        //return the first indicator from a specific attacker
+        return(attackers.findOne({'_id':attackerid}).indicators[0].ipv4address);
+    });    
 
     UI.registerHelper('isselected',function(optionvalue,datavalue){
         if (optionvalue==datavalue){
