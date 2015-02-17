@@ -1,0 +1,13 @@
+<template name="nameplate">
+<div class="row-fluid">
+    <span class="id">{{category}}</span>
+</div>
+<div class="row-fluid">
+    <ul class="details">
+        <li class="indicator">{{getAttackerIndicator _id}}</li>
+        <li>Last Seen: {{lastseentimestamp}}</li>
+        <li><a href="{{getAttackerURL _id}}" target="_blank">alerts: {{alertscount}}</a></li>
+        <li><a href="{{getAttackerURL _id}}" target="_blank">events: {{eventscount}}</a></li>
+    </ul>
+</div>
+</template>
