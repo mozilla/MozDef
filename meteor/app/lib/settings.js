@@ -16,6 +16,7 @@ mozdef = {
   port: "3000",
   rootAPI: "http://localhost:8081",
   kibanaURL: "http://localhost:9090",
-  enableBlockIP: false
+  enableBlockIP: true
+  enableClientAccountCreation: true
 }
 
