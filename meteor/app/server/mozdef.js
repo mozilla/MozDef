@@ -30,10 +30,14 @@ if (Meteor.isServer) {
         mozdefsettings.insert({ key:'kibanaURL',
                                 value : mozdef.kibanaURL });
         mozdefsettings.insert({ key:'enableBlockIP', 
-                                value : mozdef.enableBlockIP }); 
+                                value : mozdef.enableBlockIP });
+        //allow local account creation?
+        //http://docs.meteor.com/#/full/accounts_config
+        mozdefsettings.insert({ key:'enableClientAccountCreation', 
+                                value : mozdef.enableClientAccountCreation || false});         
 
         Accounts.config({
-            forbidClientAccountCreation:true,
+            forbidClientAccountCreation: ! mozdef.enableClientAccountCreation,
         });
 
         Accounts.onCreateUser(function(options, user) {
