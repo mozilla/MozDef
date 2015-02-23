@@ -39,7 +39,7 @@ if (Meteor.isServer) {
         Accounts.onCreateUser(function(options, user) {
           console.log('creating user');
           console.log(user);
-          if ( user.services.persona.email ) {
+          if ( user.services.persona && user.services.persona.email ) {
             user.profile = {};
             user.profile.email = user.services.persona.email;
             console.log('User email is: ' + user.profile.email);
