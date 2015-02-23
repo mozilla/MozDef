@@ -43,12 +43,42 @@ if (Meteor.isServer) {
         Accounts.onCreateUser(function(options, user) {
           console.log('creating user');
           console.log(user);
+          //meteor doesn't store a readily accessible email address
+          //so lets create a common location for it
+          //as user.profile.email
+          user.profile = {};
           if ( user.services.persona && user.services.persona.email ) {
-            user.profile = {};
+            //make an emails list so persona acts like every other service
+            user.emails=[{verified: true, address: user.services.persona.email}];
             user.profile.email = user.services.persona.email;
             console.log('User email is: ' + user.profile.email);
+          } else if (user.emails){
+            user.profile.email=user.emails[0].address;
           }
+          //return the user object to be saved
+          //in Meteor.users
           return user;
+        });
+        
+        Accounts.onLogin(function(loginSuccess){
+            //fixup the user record on successful login
+            //if needed
+            //loginSuccess object has:
+            //type: 'persona'
+            //allowed: true/false
+            //methodArguments
+            //user (the same user object in onCreateUser)
+            //connection (id/close/onclose/clientAddress/httpHeaders)
+            user=loginSuccess.user
+            if (user.services.persona && !user.emails){
+                //make an emails list so persona acts like every other service
+                user.emails=[{verified: true, address: user.services.persona.email}];
+                user.profile.email = user.services.persona.email;
+                Meteor.users.update(user._id,
+                                    {$set: {emails:user.emails}});
+                //console.log('User email set to : ' + user.profile.email);    
+            }
+            console.log('login success', user);
         });
         
         //update veris if missing:
