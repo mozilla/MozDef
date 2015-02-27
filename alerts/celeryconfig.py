@@ -1,5 +1,5 @@
 from celery import Celery
-from lib.config import ALERTS, LOGGING
+from lib.config import ALERTS, LOGGING, RABBITMQ
 from logging.config import dictConfig
 
 print ALERTS
@@ -12,12 +12,11 @@ alerts_include = list(set(alerts_include))
 
 print alerts_include
 
-app = Celery('alerts',
-             broker='amqp://',
-             backend='amqp://',
-             include=alerts_include)
-
-
+BROKER_URL =  'amqp://{0}:{1}@{2}:{3}//'.format(
+                RABBITMQ['mquser'],
+                RABBITMQ['mqpassword'],
+                RABBITMQ['mqserver'],
+                RABBITMQ['mqport'])
 CELERY_DISABLE_RATE_LIMITS = True
 CELERYD_CONCURRENCY = 1
 CELERY_IGNORE_RESULT = True
@@ -30,7 +29,6 @@ CELERY_QUEUES = {
         "binding_key": "celery-default",
     },
 }
-
 
 CELERYBEAT_SCHEDULE = {}
 
@@ -51,8 +49,9 @@ dictConfig(LOGGING)
 # app.conf.update(
 #     CELERY_TASK_RESULT_EXPIRES=3600,
 # )
-
-app.config_from_object('celeryconfig')
+app = Celery('alerts',
+             include=alerts_include)
+app.config_from_object('celeryconfig', force=True)
 
 if __name__ == '__main__':
     app.start()
