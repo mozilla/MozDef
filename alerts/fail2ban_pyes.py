@@ -33,8 +33,7 @@ class AlertFail2ban(AlertTask):
         tags = ['fail2ban']
         severity = 'NOTICE'
 
-        # the summary of the alert is the same as the event
-        summary = event['_source']['summary']
+        summary='{0}: {1}'.format(event['_source']['details']['hostname'], event['_source']['summary'].strip())
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, [event], severity)

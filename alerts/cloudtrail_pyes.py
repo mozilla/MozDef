@@ -13,8 +13,8 @@ import pyes
 
 class AlertCloudtrail(AlertTask):
     def main(self):
-        # look for events in last 160 hours
-        date_timedelta = dict(hours=160)
+        # look for events in last x hours
+        date_timedelta = dict(hours=1)
         # Configure filters using pyes
         must = [
             pyes.TermFilter('_type', 'cloudtrail'),
