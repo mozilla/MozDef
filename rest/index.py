@@ -16,6 +16,7 @@ import pytz
 import pynsive
 import requests
 import sys
+import socket
 from bottle import debug, route, run, response, request, default_app, post
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
@@ -400,7 +401,12 @@ def kibanaDashboards():
 
 def getWhois(ipaddress):
     try:
-        whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup()
+        whois = dict()
+        ip = netaddr.IPNetwork(ipaddress)[0]
+        if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
+            whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup()
+            
+        whois['fqdn']=socket.getfqdn(str(netaddr.IPNetwork(ipaddress)[0]))
         return (json.dumps(whois))
     except Exception as e:
         sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
