@@ -1,0 +1,7 @@
+<template name="alertsummaryack">
+    {{#if acknowledged}}
+        <button class="btn btn-xs btn-warning btnAlertAck" disabled data-target="{{_id}}">acked</button>
+    {{else}}
+        <button class="btn btn-xs btn-warning btnAlertAck" data-target="{{_id}}">ack</button>
+    {{/if}}
+</template>

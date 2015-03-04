@@ -478,7 +478,35 @@ if (Meteor.isClient) {
             });
             //console.log('ipdropdown time ',moment().diff(begin,'milliseconds'))
         };
-        
+
+        addAckButtons=function(){
+            //seek out the ack button divs and add a reactive blaze template
+            //so the buttons are reactive when alerts are acked.
+            $('.ackButton').each(function( index ) {
+                id=$(this).attr('data-id');
+                Blaze.renderWithData(Template.alertsummaryack,
+                                    function() {
+                                                return alerts.findOne({_id: id},
+                                                                            {fields:{
+                                                                            _id:1,
+                                                                            acknowledged:1,
+                                                                            acknowledgedby:1}
+                                                                            });
+                                            },
+                                     this);
+                
+            });
+        };
+
+        addTableFeatures=function(){
+            //dc.js takes one function to run
+            //on render/redraw, etc.
+            //use this hook to run multiple UI feature updates
+            //using jquery/blaze
+            addIPDropDowns();
+            addAckButtons();
+        };
+
         refreshVolumeChartXAxis=function(){
             //re-read the dimension max/min dates
             //and set the x attribute accordingly.
@@ -542,17 +570,13 @@ if (Meteor.isClient) {
                         return colObj.prop('outerHTML');
                         },
                     function(d) {
-                        if ( d.acknowledged ) {
-                            return '<button class="btn btn-xs btn-warning btnAlertAck" disabled data-target="' + d._id + '">ack</button>';
-                        }else{
-                            return '<button class="btn btn-xs btn-warning btnAlertAck" data-target="' + d._id + '">ack</button>';
+                            //return enough of a hook for jquery/blaze to use after render
+                            return '<div class="ackButton" data-id='+ d._id +'></div>';
                         }
-                    }
                     ])
-                .on('postRedraw',addIPDropDowns)
-                .on('postRender',addIPDropDowns)
+                .on('postRedraw',addTableFeatures)
+                .on('postRender',addTableFeatures)
                 .expireCache();
-            //alertsTable.mongoField='utcepoch';
             
             volumeChart
                 .width(600)
