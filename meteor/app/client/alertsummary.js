@@ -92,6 +92,7 @@ if (Meteor.isClient) {
         var volumeChart         = dc.barChart("#volumeChart","alertssummary");
         var alertsTable         = dc.dataTable(".alerts-data-table","alertssummary");
         var chartsInitialized   =false;
+        var blazeItems=[];  //list of sub templates we create/destroy.
 
         //faux crossfilter to retrieve it's data from meteor/mongo:
         var mongoCrossfilter = {}
@@ -480,11 +481,18 @@ if (Meteor.isClient) {
         };
 
         addAckButtons=function(){
+            //remove any existing blaze views
+            //console.log('existing blazeitems:',blazeItems.length);
+            blazeItems.forEach(function(i){
+               Blaze.remove(i);
+            });
+            blazeItems=[];
+            
             //seek out the ack button divs and add a reactive blaze template
             //so the buttons are reactive when alerts are acked.
             $('.ackButton').each(function( index ) {
                 id=$(this).attr('data-id');
-                Blaze.renderWithData(Template.alertsummaryack,
+                blazeView=Blaze.renderWithData(Template.alertsummaryack,
                                     function() {
                                                 return alerts.findOne({_id: id},
                                                                             {fields:{
@@ -494,7 +502,7 @@ if (Meteor.isClient) {
                                                                             });
                                             },
                                      this);
-                
+                blazeItems.push(blazeView);
             });
         };
 
