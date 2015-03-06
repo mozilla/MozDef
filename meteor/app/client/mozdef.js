@@ -73,6 +73,16 @@ if (Meteor.isClient) {
         }
     };
 
+    isIPv4=function(entry) {
+      var blocks = entry.split(".");
+      if(blocks.length === 4) {
+        return blocks.every(function(block) {
+          return parseInt(block,10) >=0 && parseInt(block,10) <= 255;
+        });
+      }
+      return false;
+    };
+
     //debug/testing functions
     debugLog=function(logthis){
         if (typeof console !== 'undefined') {
@@ -215,6 +225,45 @@ if (Meteor.isClient) {
         return pluginsForEndPoint(endpoint);
     });
 
+    UI.registerHelper('ipDecorate',function(elementText){
+        //decorate text containing an ipv4 address
+        var anelement=$($.parseHTML('<span>' + elementText + '</span>'))
+        var words=anelement.text().split(' ');
+        words.forEach(function(w){
+            //clean up potential interference chars
+            w=w.replace(/,|:|;/g,'')
+            if ( isIPv4(w) ){
+                    //console.log(w);
+                anelement.
+                highlight(  w,
+                            {wordsOnly:false,
+                            element: "em",
+                            className:"ipaddress"});
+            }
+          });
+        //add a drop down menu to any .ipaddress
+        anelement.children( '.ipaddress').each(function( index ) {
+            iptext=$(this).text();
+            //add a caret so it looks drop downy
+            $(this).append('<b class="caret"></b>');
+          
+            //wrap the whole thing in a ul dropdown class
+            $(this).wrap( "<ul class='dropdown'><li><a href='#'></a><li></ul>" );
+        
+            //add the drop down menu
+            ipmenu=$("<ul class='sub_menu' />");
+            whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
+            dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
+            cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
+            blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
+            
+            ipmenu.append(whoisitem,dshielditem,cifitem,blockIPitem);
+            
+            $(this).parent().parent().append(ipmenu);              
+        });
+        //return raw html, consume as {{{ ipDecorate fieldname }} in a meteor template
+        return anelement.prop('outerHTML');
+    });
 
     //auto run to handle session variable changes
     Deps.autorun(function() {

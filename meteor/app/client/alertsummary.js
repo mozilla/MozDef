@@ -10,8 +10,36 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
-    var currentCount = 0;
     var currentSearch=null;
+    Session.set('alertsSearch',null);
+    Session.set('alertsDisplayed',0);
+
+    Template.alertssummary.selectedalerts = function () {
+        //console.log(moment().format(),Session.get('alertsSearch'));
+        
+        Session.set('alertsDisplayed',
+                    alerts.find(Session.get('alertsSearch'),
+                            {limit: Session.get('alertsrecordlimit'),
+                            reactive:false}).count()
+                    );
+        
+        //return just what's needed for the summary table
+        return alerts.find(Session.get('alertsSearch'),
+                            {fields:{
+                                    _id:1,
+                                    esmetadata:1,
+                                    utctimestamp:1,
+                                    utcepoch:1,
+                                    summary:1,
+                                    severity:1,
+                                    category:1,
+                                    acknowledged:1
+                                    },
+                            sort: {utcepoch: -1},
+                            limit: Session.get('alertsrecordlimit'),
+                            reactive:true})
+    };
+    
 
     Template.alertssummary.events({
         "click .reset": function(e,t){
@@ -83,6 +111,10 @@ if (Meteor.isClient) {
             }else{
                 return 0;
             }
+        },
+        displayedAlerts: function(){
+            //how many alerts displayed in the table
+            return Session.get('alertsDisplayed');
         }
     });
      
@@ -90,9 +122,7 @@ if (Meteor.isClient) {
         var ringChartCategory   = dc.pieChart("#ringChart-category","alertssummary");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity","alertssummary");
         var volumeChart         = dc.barChart("#volumeChart","alertssummary");
-        var alertsTable         = dc.dataTable(".alerts-data-table","alertssummary");
         var chartsInitialized   =false;
-        var blazeItems=[];  //list of sub templates we create/destroy.
 
         //faux crossfilter to retrieve it's data from meteor/mongo:
         var mongoCrossfilter = {}
@@ -179,13 +209,22 @@ if (Meteor.isClient) {
                 //use the criteria in the other charts
                 //to return values to simulate crossfilter.
                 criteria=getSearchCriteria();
+                //build the alerts table criteria which is the intersection of all charts
+                currentSearch=getSearchCriteria();
                 //console.log(filters[chartID].field.valueOf());
                 for (cID in filters){
                     if (cID !==chartID && filters[cID].criteria){
                         //console.log(chartID + ' use:', filters[cID].criteria);
                         criteria.$and.push(filters[cID].criteria);
                     }
+                    if (filters[cID].criteria){
+                        //build the alerts table criteria
+                        currentSearch.$and.push(filters[cID].criteria);
+                    }
                 }
+                //save the culmination of all filter criteria
+                //for use in displaying the alerts table.
+                Session.set('alertsSearch',currentSearch);
                 //console.log('getting alerts data for '+ filters[chartID].field.valueOf(),criteria);
                 //console.log('get raw mongo data' + moment().format());
                 resultsData=alerts.find(criteria,
@@ -360,7 +399,7 @@ if (Meteor.isClient) {
             }
             function top(k){
                 //console.log('top called for', dimension.mongoField)
-                $('#displayCount').text(utcepochDim.values.length);
+                //fixme $('#displayCount').text(utcepochDim.values.length);
                 return _.first(dimension.values,k);
             }
             function bottom(k){
@@ -388,7 +427,6 @@ if (Meteor.isClient) {
         //declare dimensions using the mongoCrossfilter
         var categoryDim = mongoCrossfilter.dimension('category',ringChartCategory);
         var severityDim = mongoCrossfilter.dimension('severity',ringChartSeverity);
-        var utcepochDim = mongoCrossfilter.dimension('utcepoch',alertsTable);
         //dimension with date as javascript date object
         var jdateDim =mongoCrossfilter.dimension('utcepoch',
                                                  volumeChart,
@@ -398,123 +436,7 @@ if (Meteor.isClient) {
         function descNumbers(a, b) {
             return b-a;
         }
-        
-        function isIPv4(entry) {
-          var blocks = entry.split(".");
-          if(blocks.length === 4) {
-            return blocks.every(function(block) {
-              return parseInt(block,10) >=0 && parseInt(block,10) <= 255;
-            });
-          }
-          return false;
-        }         
-        
-        ipHighlight=function(anelement){
-          var words=anelement.text().split(' ');
-          //console.log(words);
-          words.forEach(function(w){
-            //clean up potential interference chars
-            w=w.replace(/,|:|;/g,'')
-            if ( isIPv4(w) ){
-                //console.log(w);
-              anelement.
-                highlight(w,
-                          {wordsOnly:false,
-                           element: "em",
-                          className:"ipaddress"});
-            }
-          });
-        };
-        
-        addBootstrapIPDropDowns=function(){
-            //bootstrap version: disabled for now due to getElementByID bug in v2 until mozdef meets bootstrap v3.
-            //fix up anything with an ipaddress class
-            //by making them into a pull down bootstrap menu                
-            $( '.ipaddress').each(function( index ) {
-                iptext=$(this).text();
-                //add a caret so it looks drop downy
-                $(this).append('<b class="caret"></b>');
-              
-                //wrap the whole thing in a dropdown class
-                $(this).wrap( "<span class='dropdown' id='ipdropdown" + index + "'></span>" );
     
-                //add the drop down menu
-                ipmenu=$("<ul class='dropdown-menu' role='menu' aria-labelledby='dLabel" + index + "'>'");
-                whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
-                dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
-                cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
-                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
-                
-                ipmenu.append(whoisitem,dshielditem,cifitem,blockIPitem);
-                
-                $('#ipdropdown'+index).append(ipmenu);
-              
-                //wrap just the ip in a bootstrap dropdown with a unique id
-                $(this).wrap( "<a class='dropdown-toggle' data-toggle='dropdown' href='#' id='dLabel" + index +"'></a>" );
-            });                        
-        };
-
-        addIPDropDowns=function(){
-            //begin=moment();
-            //fix up anything with an ipaddress class
-            //by making them into a pull down menu driven by jquery                
-            $( '.ipaddress').each(function( index ) {
-                iptext=$(this).text();
-                //add a caret so it looks drop downy
-                $(this).append('<b class="caret"></b>');
-              
-                //wrap the whole thing in a ul dropdown class
-                $(this).wrap( "<ul class='dropdown'><li><a href='#'></a><li></ul>" );
-
-                //add the drop down menu
-                ipmenu=$("<ul class='sub_menu' />");
-                whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
-                dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
-                cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
-                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
-                
-                ipmenu.append(whoisitem,dshielditem,cifitem,blockIPitem);
-                
-                $(this).parent().parent().append(ipmenu);              
-            });
-            //console.log('ipdropdown time ',moment().diff(begin,'milliseconds'))
-        };
-
-        addAckButtons=function(){
-            //remove any existing blaze views
-            //console.log('existing blazeitems:',blazeItems.length);
-            blazeItems.forEach(function(i){
-               Blaze.remove(i);
-            });
-            blazeItems=[];
-            
-            //seek out the ack button divs and add a reactive blaze template
-            //so the buttons are reactive when alerts are acked.
-            $('.ackButton').each(function( index ) {
-                id=$(this).attr('data-id');
-                blazeView=Blaze.renderWithData(Template.alertsummaryack,
-                                    function() {
-                                                return alerts.findOne({_id: id},
-                                                                            {fields:{
-                                                                            _id:1,
-                                                                            acknowledged:1,
-                                                                            acknowledgedby:1}
-                                                                            });
-                                            },
-                                     this);
-                blazeItems.push(blazeView);
-            });
-        };
-
-        addTableFeatures=function(){
-            //dc.js takes one function to run
-            //on render/redraw, etc.
-            //use this hook to run multiple UI feature updates
-            //using jquery/blaze
-            addIPDropDowns();
-            addAckButtons();
-        };
-
         refreshVolumeChartXAxis=function(){
             //re-read the dimension max/min dates
             //and set the x attribute accordingly.
@@ -553,39 +475,6 @@ if (Meteor.isClient) {
                 .innerRadius(30)
                 .expireCache();
 
-            alertsTable
-                .dimension(utcepochDim)
-                .size(100)
-                .order(descNumbers)
-                .sortBy(function(d) {
-                    return d.utcepoch;
-                })                    
-                .group(function (d) {
-                        return moment.utc(d.utctimestamp).local().format("ddd, hhA"); 
-                    })
-                .columns([
-                    function(d) {return d.utctimestamp;},
-                    function(d) {return '<a href="/alert/' + d.esmetadata.id + '">mozdef</a><br> <a href="' + getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + d.esmetadata.id + '"  target="_blank">kibana</a>';},
-                    function(d) {return d.severity;},
-                    function(d) {return d.category;},
-                    function(d) {
-                        //create a jquery object of the summary
-                        //and send it through iphighlight to append a class to any ip address we find
-                        var colObj=$($.parseHTML('<span>' + d.summary + '</span>'))
-                        ipHighlight(colObj);
-                        
-                        //return just the html we created as the column
-                        return colObj.prop('outerHTML');
-                        },
-                    function(d) {
-                            //return enough of a hook for jquery/blaze to use after render
-                            return '<div class="ackButton" data-id='+ d._id +'></div>';
-                        }
-                    ])
-                .on('postRedraw',addTableFeatures)
-                .on('postRender',addTableFeatures)
-                .expireCache();
-            
             volumeChart
                 .width(600)
                 .height(150)
@@ -615,13 +504,13 @@ if (Meteor.isClient) {
             refreshVolumeChartXAxis();
             //re-render
             dc.renderAll("alertssummary");
-            $('#displayCount').text(utcepochDim.values.length);
+            //fixme $('#displayCount').text(utcepochDim.values.length);
         }
 
         hookAlertsCount = function(){
             //setup an observe changes hook
             //to watch for new alerts
-            //to force a screen refresh
+            //to force a chart update
             //addedAt is triggered on a document addition
             //but is triggered also on initial collection subscription for each doc
             //so use the 'before' !=null as an indicator of an insert into a settled collection
@@ -650,12 +539,9 @@ if (Meteor.isClient) {
                 //console.log('alerts-summary ready');
                 drawAlertsCharts();
                 hookAlertsCount();
-                
             });
             //get the real total count of alerts
-            Meteor.subscribe("alerts-count", onReady=function(){
-               currentCount=alertsCount.findOne().count;
-            });
+            Meteor.subscribe("alerts-count");
             $('#searchTime').val(Session.get('alertssearchtime'));
             $('#alertsfiltertext').val(Session.get('alertsfiltertext'));
             $('#alertssearchtext').val(Session.get('alertssearchtext'));

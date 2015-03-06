@@ -68,7 +68,7 @@ Anthony Verez averez@mozilla.com
     <div class="row col-xs-10">
         <div class="col-xs-1"><button class="btn btn-xs reset">reset filters</button></div>
         <div class="col-xs-4 record-count">
-            <span id="displayCount"></span> displayed/total: <span id="totalAlerts">{{totalAlerts}}</span>
+            <span id="displayCount"></span>{{displayedAlerts}} displayed/total: <span id="totalAlerts">{{totalAlerts}}</span>
         </div>
         <div class="col-xs-5"><input type="search" class="form-control"  id="alertsfiltertext" placeholder="summary field regex filter"></div>
     </div>
@@ -81,9 +81,14 @@ Anthony Verez averez@mozilla.com
                 <td class="upperwhite">Severity</td>
                 <td class="upperwhite">Category</td>
                 <td class="upperwhite">Summary</td>
+                <td></td>
                 </tr>
                 </thead>
-            <!-- data rows will be filled in here -->
+                <tbody>
+                    {{#each selectedalerts}}
+                        {{>alertTableItem}}
+                    {{/each}}
+                </tbody>            
             </table>
         </div>
     </div>
@@ -92,4 +97,21 @@ Anthony Verez averez@mozilla.com
     {{>cifmodal}}
     {{>blockIPModal}}
 </div>
+</template>
+
+<template name="alertTableItem">
+    <tr>
+        <td>{{utctimestamp}}</td>
+        <td><a href="/alert/{{esmetadata.id}}">mozdef</a><br><a href="{{mozdef.kibanaURL}}/#dashboard/script.alert.js?id={{esmetadata.id}}" target="_blank">kibana</a></td>
+        <td>{{severity}}</td>
+        <td>{{category}}</td>
+        <td>{{{ipDecorate summary}}}</td>
+        <td>
+            {{#if acknowledged}}
+                <button class="btn btn-xs btn-warning btnAlertAck" disabled data-target="{{_id}}">acked</button>
+            {{else}}
+                <button class="btn btn-xs btn-warning btnAlertAck" data-target="{{_id}}">ack</button>
+            {{/if}}            
+        </td>
+    </tr>
 </template>
