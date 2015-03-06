@@ -399,7 +399,6 @@ if (Meteor.isClient) {
             }
             function top(k){
                 //console.log('top called for', dimension.mongoField)
-                //fixme $('#displayCount').text(utcepochDim.values.length);
                 return _.first(dimension.values,k);
             }
             function bottom(k){
@@ -504,7 +503,6 @@ if (Meteor.isClient) {
             refreshVolumeChartXAxis();
             //re-render
             dc.renderAll("alertssummary");
-            //fixme $('#displayCount').text(utcepochDim.values.length);
         }
 
         hookAlertsCount = function(){
