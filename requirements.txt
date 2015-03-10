@@ -15,8 +15,8 @@ pyes==0.90.1
 pymongo==2.6.3
 python-dateutil==2.2
 pytz==2013.9
-requests==2.2.1
-requests-futures==0.9.4
+requests==2.5.3
+requests-futures==0.9.5
 s3cmd==1.0.1
 simplejson==3.3.3
 six==1.5.2
