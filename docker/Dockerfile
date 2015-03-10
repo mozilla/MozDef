@@ -48,6 +48,7 @@ ADD conf/nginx.conf /etc/nginx/
 
 #Mozdef
 RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysqlclient-dev\
+        && pip install -U pip \
         && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
         && /bin/ln -s /opt/MozDef-master /opt/MozDef \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
