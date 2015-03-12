@@ -242,6 +242,7 @@ def main():
                     
                         nfevent = dict(utctimestamp=toUTC(datetime.now()).isoformat())
                         nfevent['tags'] = ['netflow', 'network']
+                        nfevent['category'] = 'netflow'
                         nfevent['summary'] = '{0}:{1} --> {2}:{3}'.format(record['sourceipaddress'], record['sourceport'], record['destinationipaddress'], record['destinationport'])
                         nfevent['details'] = record
                         logcache.put(json.dumps(nfevent))
