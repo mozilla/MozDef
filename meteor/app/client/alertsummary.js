@@ -33,7 +33,8 @@ if (Meteor.isClient) {
                                     summary:1,
                                     severity:1,
                                     category:1,
-                                    acknowledged:1
+                                    acknowledged:1,
+                                    acknowledgedby:1
                                     },
                             sort: {utcepoch: -1},
                             limit: Session.get('alertsrecordlimit'),
@@ -544,6 +545,9 @@ if (Meteor.isClient) {
             $('#alertsfiltertext').val(Session.get('alertsfiltertext'));
             $('#alertssearchtext').val(Session.get('alertssearchtext'));
             $('#recordLimit').val(Session.get('alertsrecordlimit'));
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
         }); //end deps.autorun
 
     };
