@@ -19,11 +19,9 @@ class AlertBruteforceSsh(AlertTask):
         # Configure filters using pyes
         must = [
             pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('eventsource', 'systemslogs'),
-            pyes.ExistsFilter('details.sourceipaddress'),
             pyes.QueryFilter(pyes.MatchQuery('summary','failed','phrase')),
             pyes.TermFilter('program','sshd'),
-            pyes.QueryFilter(pyes.MatchQuery('summary', 'login ldap_count_entries', 'boolean'))
+            pyes.QueryFilter(pyes.MatchQuery('summary', 'login invalid ldap_count_entries', 'boolean'))
         ]
         must_not = [
             pyes.QueryFilter(pyes.MatchQuery('summary','10.22.8.128','phrase')),
