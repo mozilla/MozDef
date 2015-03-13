@@ -64,16 +64,15 @@ class message(object):
             Compliance items are stored in the complianceitems
             index, with doctype last_known_state
         """
-        if metadata['doc_type'] == 'complianceitems':
-            if not self.validate(message['details']):
-                sys.stderr.write('error: invalid format for complianceitem {0}'.format(message))
-                return (None, None)
-            item = self.cleanup_item(message['details'])
-            docidstr = 'complianceitems'
-            docidstr += item['check']['ref']
-            docidstr += item['check']['test']['value']
-            docidstr += item['target']
-            metadata['id'] = hashlib.md5(docidstr).hexdigest()
-            metadata['doc_type'] = 'last_known_state'
-            metadata['index'] = 'complianceitems'
+        if not self.validate(message['details']):
+            sys.stderr.write('error: invalid format for complianceitem {0}'.format(message))
+            return (None, None)
+        item = self.cleanup_item(message['details'])
+        docidstr = 'complianceitems'
+        docidstr += item['check']['ref']
+        docidstr += item['check']['test']['value']
+        docidstr += item['target']
+        metadata['id'] = hashlib.md5(docidstr).hexdigest()
+        metadata['doc_type'] = 'last_known_state'
+        metadata['index'] = 'complianceitems'
         return (item, metadata)
