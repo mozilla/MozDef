@@ -5,6 +5,7 @@
 #
 # Contributors:
 # Julien Vehent jvehent@mozilla.com
+# Aaron Meihm   ameihm@mozilla.com
 
 import hashlib
 import sys
@@ -15,45 +16,45 @@ class message(object):
         self.registration = ['complianceitems']
         self.priority = 20
 
-    def validate(self,message):
+    def validate(self,item):
         """
             Validate that a compliance item has all the necessary keys
         """
         for key in ['target', 'policy', 'check', 'compliance',
                     'link', 'utctimestamp']:
-            if key not in message.keys():
+            if key not in item.keys():
                 return False
         for key in ['level', 'name', 'url']:
-            if key not in message['policy'].keys():
+            if key not in item['policy'].keys():
                 return False
         for key in ['description', 'location', 'name', 'test']:
-            if key not in message['check'].keys():
+            if key not in item['check'].keys():
                 return False
         for key in ['type', 'value']:
-            if key not in message['check']['test'].keys():
+            if key not in item['check']['test'].keys():
                 return False
         return True
 
-    def cleanup_item(self,message):
+    def cleanup_item(self,item):
         ci = {}
-        ci['target'] = message['target']
+        ci['target'] = item['target']
         ci['policy'] = {}
-        ci['policy']['level'] = message['policy']['level']
-        ci['policy']['name'] = message['policy']['name']
-        ci['policy']['url'] = message['policy']['url']
+        ci['policy']['level'] = item['policy']['level']
+        ci['policy']['name'] = item['policy']['name']
+        ci['policy']['url'] = item['policy']['url']
         ci['check'] = {}
-        ci['check']['description'] = message['check']['description']
-        ci['check']['location'] = message['check']['location']
-        ci['check']['name'] = message['check']['name']
+        ci['check']['description'] = item['check']['description']
+        ci['check']['location'] = item['check']['location']
+        ci['check']['name'] = item['check']['name']
         ci['check']['test'] = {}
-        ci['check']['test']['type'] = message['check']['test']['type']
-        ci['check']['test']['value'] = message['check']['test']['value']
-        ci['check']['ref'] = message['check']['ref']
-        ci['compliance'] = message['compliance']
-        ci['link'] = message['link']
-        ci['utctimestamp'] = message['utctimestamp']
-        if 'tags' in message:
-            ci['tags'] = message['tags']
+        ci['check']['test']['type'] = item['check']['test']['type']
+        ci['check']['test']['value'] = item['check']['test']['value']
+        ci['check']['ref'] = item['check']['ref']
+        ci['compliance'] = item['compliance']
+        ci['link'] = item['link']
+        ci['utctimestamp'] = item['utctimestamp']
+        if 'tags' in item:
+            ci['tags'] = item['tags']
         return ci
 
     def onMessage(self, message, metadata):
@@ -64,15 +65,15 @@ class message(object):
             index, with doctype last_known_state
         """
         if metadata['doc_type'] == 'complianceitems':
-            if not self.validate(message):
+            if not self.validate(message['details']):
                 sys.stderr.write('error: invalid format for complianceitem {0}'.format(message))
                 return (None, None)
-            message = self.cleanup_item(message)
+            item = self.cleanup_item(message['details'])
             docidstr = 'complianceitems'
-            docidstr += message['check']['ref']
-            docidstr += message['check']['test']['value']
-            docidstr += message['target']
+            docidstr += item['check']['ref']
+            docidstr += item['check']['test']['value']
+            docidstr += item['target']
             metadata['id'] = hashlib.md5(docidstr).hexdigest()
             metadata['doc_type'] = 'last_known_state'
             metadata['index'] = 'complianceitems'
-        return (message, metadata)
+        return (item, metadata)
