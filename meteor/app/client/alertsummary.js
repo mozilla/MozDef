@@ -75,8 +75,7 @@ if (Meteor.isClient) {
             //acknowledge the alert
             alerts.update(id, {$set: {'acknowledged':new Date()}});
             alerts.update(id, {$set: {'acknowledgedby':Meteor.user().profile.email}});
-            //disable the button once ack'd
-            $(e.target).prop('disabled', true);
+
         },
         "keyup #alertsfiltertext": function(e,t){
             var code = e.which;
@@ -504,6 +503,7 @@ if (Meteor.isClient) {
             refreshVolumeChartXAxis();
             //re-render
             dc.renderAll("alertssummary");
+           
         }
 
         hookAlertsCount = function(){
@@ -545,9 +545,6 @@ if (Meteor.isClient) {
             $('#alertsfiltertext').val(Session.get('alertsfiltertext'));
             $('#alertssearchtext').val(Session.get('alertssearchtext'));
             $('#recordLimit').val(Session.get('alertsrecordlimit'));
-            $('[data-toggle="tooltip"]').tooltip({
-                'placement': 'top'
-            });
         }); //end deps.autorun
 
     };

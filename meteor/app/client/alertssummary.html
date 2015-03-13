@@ -100,7 +100,7 @@ Anthony Verez averez@mozilla.com
 </template>
 
 <template name="alertTableItem">
-    <tr>
+    <tr class="alert-row">
         <td>{{utctimestamp}}</td>
         <td><a href="/alert/{{esmetadata.id}}">mozdef</a><br><a href="{{mozdef.kibanaURL}}/#dashboard/script.alert.js?id={{esmetadata.id}}" target="_blank">kibana</a></td>
         <td>{{severity}}</td>
@@ -112,7 +112,7 @@ Anthony Verez averez@mozilla.com
                     <button class="btn btn-xs btn-warning btnAlertAck" disabled data-target="{{_id}}">acked</button>
                 </span>
             {{else}}
-                <button class="btn btn-xs btn-warning btnAlertAck" data-target="{{_id}}" data-toggle="tooltip" title="click to ack">ack</button>
+                <button class="btn btn-xs btn-warning btnAlertAck" data-target="{{_id}}">ack</button>
             {{/if}}            
         </td>
     </tr>
