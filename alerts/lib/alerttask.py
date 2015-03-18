@@ -74,6 +74,8 @@ class AlertTask(Task):
     def __init__(self):
         self.alert_name = self.__class__.__name__
         self.filter = None
+        self.begindateUTC = None
+        self.enddateUTC = None
         # List of events
         self.events = None
         # List of aggregations
@@ -199,10 +201,10 @@ class AlertTask(Task):
         must, should and must_not are pyes filter objects lists
         see http://pyes.readthedocs.org/en/latest/references/pyes.filters.html
         """
-        begindateUTC = toUTC(datetime.now() - timedelta(**date_timedelta))
-        enddateUTC = toUTC(datetime.now())
+        self.begindateUTC = toUTC(datetime.now() - timedelta(**date_timedelta))
+        self.enddateUTC = toUTC(datetime.now())
         qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-            from_value=begindateUTC, to_value=enddateUTC))
+            from_value=self.begindateUTC, to_value=self.enddateUTC))
         q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
         must_not.append(pyes.ExistsFilter('alerttimestamp'))
         must.append(qDate)
@@ -350,6 +352,15 @@ class AlertTask(Task):
                     self.tagEventsAlert([i], alertResultES)
                     self.alertToMessageQueue(alert)
                     self.hookAfterInsertion(alert)
+        # did we not match anything?
+        # can also be used as an alert trigger
+        if len(self.events) == 0:
+            alert = self.onNoEvent()
+            if alert:
+                self.log.debug(alert)
+                alertResultES = self.alertToES(alert)
+                self.alertToMessageQueue(alert)
+                self.hookAfterInsertion(alert)         
 
 
     def walkAggregations(self, threshold):
@@ -397,6 +408,17 @@ class AlertTask(Task):
         """
         pass
 
+
+    def onNoEvent(self):
+        """
+        To be overriden by children to run their code
+        when NOTHING matches a filter
+        which can be used to trigger on the absence of
+        events much like a dead man switch.
+        This is to be used when creating an alert using an event
+        must return an alert dict or None
+        """
+        pass
 
     def onAggreg(self, aggreg):
         """
