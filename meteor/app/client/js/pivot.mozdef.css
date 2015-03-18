@@ -14,7 +14,18 @@ table.pvtTable tr td{padding:5px;border:1px solid #CDCDCD;vertical-align:top;tex
 .pvtHorizList li{display:inline}
 .pvtVertList{vertical-align:top}
 .pvtFilteredAttribute{font-style:italic}
-.pvtFilterBox{z-index:100;width:280px;border:1px solid gray;position:absolute;padding:20px;text-align:center}
+.pvtFilterBox{
+    background: #848F91;
+    z-index:100;
+    width:400px;
+    border:2px solid black;
+    position:absolute;
+    padding:4px;
+    text-align:left}
 .pvtFilterBox h4{margin:0}
-.pvtCheckContainer{text-align:left;overflow:scroll;width:100%;max-height:200px}
-.pvtCheckContainer p{margin:5px}
+.pvtCheckContainer{
+    text-align:left;
+    overflow: auto;
+    width: auto;
+    max-height:400px}
+.pvtCheckContainer p{margin:2px}
