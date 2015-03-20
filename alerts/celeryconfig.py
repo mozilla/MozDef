@@ -36,9 +36,14 @@ CELERYBEAT_SCHEDULE = {}
 for alert in ALERTS.keys():
     CELERYBEAT_SCHEDULE[alert] = {
         'task': alert,
-        'schedule': ALERTS[alert],
+        'schedule': ALERTS[alert]['schedule'],
         'options': {'queue': 'celery-default', "exchange": "celery-default"},
     }
+    # add optional parameters:
+    if 'args' in ALERTS[alert].keys():
+        CELERYBEAT_SCHEDULE[alert]['args']=ALERTS[alert]['args']
+    if 'kwargs' in ALERTS[alert].keys():
+        CELERYBEAT_SCHEDULE[alert]['kwargs']=ALERTS[alert]['kwargs']
 
 # Load logging config
 dictConfig(LOGGING)

@@ -200,13 +200,19 @@ class AlertTask(Task):
 
         must, should and must_not are pyes filter objects lists
         see http://pyes.readthedocs.org/en/latest/references/pyes.filters.html
+        
+
         """
         self.begindateUTC = toUTC(datetime.now() - timedelta(**date_timedelta))
         self.enddateUTC = toUTC(datetime.now())
         qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
             from_value=self.begindateUTC, to_value=self.enddateUTC))
         q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-        must_not.append(pyes.ExistsFilter('alerttimestamp'))
+
+        #Don't fire on already alerted events
+        if pyes.ExistsFilter('alerttimestamp') not in must_not:
+            must_not.append(pyes.ExistsFilter('alerttimestamp'))
+
         must.append(qDate)
         q.filters.append(pyes.BoolFilter(
             must=must,
@@ -339,13 +345,13 @@ class AlertTask(Task):
             self.log.error('Error while searching events in ES: {0}'.format(e))
 
 
-    def walkEvents(self):
+    def walkEvents(self, **kwargs):
         """
         Walk through events, provide some methods to hook in alerts
         """
         if len(self.events) > 0:
             for i in self.events:
-                alert = self.onEvent(i)
+                alert = self.onEvent(i, **kwargs)
                 if alert:
                     self.log.debug(alert)
                     alertResultES = self.alertToES(alert)
@@ -355,7 +361,7 @@ class AlertTask(Task):
         # did we not match anything?
         # can also be used as an alert trigger
         if len(self.events) == 0:
-            alert = self.onNoEvent()
+            alert = self.onNoEvent(**kwargs)
             if alert:
                 self.log.debug(alert)
                 alertResultES = self.alertToES(alert)
@@ -400,7 +406,7 @@ class AlertTask(Task):
         return alert
 
 
-    def onEvent(self, event):
+    def onEvent(self, event, *args, **kwargs):
         """
         To be overriden by children to run their code
         to be used when creating an alert using an event
@@ -409,7 +415,7 @@ class AlertTask(Task):
         pass
 
 
-    def onNoEvent(self):
+    def onNoEvent(self, *args, **kwargs):
         """
         To be overriden by children to run their code
         when NOTHING matches a filter
@@ -467,12 +473,12 @@ class AlertTask(Task):
         pass
 
 
-    def run(self):
+    def run(self, *args, **kwargs):
         """
         Main method launched by celery periodically
         """
         try:
-            self.main()
+            self.main(*args, **kwargs)
             self.log.debug('finished')
         except Exception as e:
             self.log.error('Exception in main() method: {0}'.format(e))
