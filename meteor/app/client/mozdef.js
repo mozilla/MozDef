@@ -83,6 +83,16 @@ if (Meteor.isClient) {
       return false;
     };
 
+    //used to take a dot notation string and get that object.field
+    //from a javascript object
+    objectIndex=function(obj,i){
+        return(obj[i])
+    }
+
+    objectField=function(obj,dotstring){
+        return(dotstring.split('.').reduce(objectIndex,obj));
+    }
+
     //debug/testing functions
     debugLog=function(logthis){
         if (typeof console !== 'undefined') {

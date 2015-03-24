@@ -10,6 +10,7 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
+    Session.set('attackersSearch',null);
 
     //template variables
     var scene = null;
@@ -29,13 +30,9 @@ if (Meteor.isClient) {
     var cssRenderer = null;
     var clock = null;
     var container = null;
-    var categoryDim = null;
-    var agoDim = null;
-    var ringChartAttackerCategory = null;
-    var ringChartLastSeen = null;
-    var ringChartCountry = null;
-    var ndx = null;
     var cursorAttackers = null;
+
+    
 
     Template.attackers.events({
         "click #btnReset": function(e){
@@ -173,24 +170,6 @@ if (Meteor.isClient) {
                 }
             }
         },
-        "dblclick": function(event,template){
-            //select this for modification
-            if ( intersectedObject ){
-                //find this one's name plate and mark it sticky
-                nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
-                if (nameplate){
-                    nameplate.element.style.display='inline';
-                    nameplate.lookAt( sceneCamera.position );
-                    if (! nameplate.sticky ){
-                        nameplate.sticky=true;
-                    }else{
-                        nameplate.sticky=false;
-                    }
-                }                
-                
-            }
-
-        },
         "mouseup": function(event,template){
         //clear selected objects
             //event.preventDefault();
@@ -226,12 +205,325 @@ if (Meteor.isClient) {
     };
 
     Template.attackers.rendered = function () {
-        //console.log('attackers rendered');
-        ringChartAttackerCategory   = dc.pieChart("#ringChart-category","attackers");
-        ringChartLastSeen   = dc.pieChart("#ringChart-lastseen","attackers");
-        ringChartCountry = dc.pieChart("#ringChart-country","attackers");
-        ndx = crossfilter();
+        
+        //setup charts, dimensions and mongoCrossfilter
+        var ringChartAttackerCategory   = dc.pieChart("#ringChart-category","attackers");
+        var ringChartLastSeen   = dc.pieChart("#ringChart-lastseen","attackers");
+        var ringChartCountry = dc.pieChart("#ringChart-country","attackers");
+        var chartsInitialized   =false;
+        var currentSearch=null;
 
+        //faux crossfilter to retrieve it's data from meteor/mongo:
+        var mongoCrossfilter = {}
+        function getSearchCriteria(){
+            //default selection criteria
+            //$and will be used by the charts
+            basecriteria={$and: [
+                                {lastseentimestamp: {$gte: moment(0)._d}}
+                                ]
+                    }
+            return basecriteria;
+        }
+    
+        function _getFilters() {
+            //build a list of what charts are selecting what.
+            //expects chart.mongoField to specify
+            //what field use for the filters.
+            result = {};
+            list = dc.chartRegistry.list('attackers');
+            for (e in list) {
+                chart = list[e];
+                //check for .mongoField attribute of chart
+                //to include in filter selection
+                if ( _.has(chart.dimension(),'mongoField')){
+                    //describe this chart's selections by field/values
+                    if (chart.dimension().mongoField){
+                        result[chart.chartID()] = { 'field':chart.dimension().mongoField, 'filters':chart.filters()}
+                    }
+                }
+            }
+            //console.log('getfilters result is', result);
+            return result;
+        }
+    
+        function _fetchDataFor(filters) {
+            results = {};
+
+            for (chartID in filters){
+                //build criteria for each chart
+                //with criteria respresented as
+                // { field:{$in: [value,value,value]}}
+                //or special case for 'x hrs ago' since it's not a DB field,
+                //create criteria as _id fields of _id: $in [array]
+                field=filters[chartID].field;
+                values=filters[chartID].filters;
+                //console.log('filters',filters);
+
+                var chartCriteria= {};
+                if (values.length>0){
+                    //use the values as mongo selection criteria
+                    if (field=='_id'){
+                        //console.log('_id criteria:',filters[chartID],values);
+                        //values is the fromNow() text
+                        //filters[chartID].criteria._id['$in'] should be a list of _ids
+                        //that match the fromNow() text
+                        idlist=[];
+                        //get the chart.group().values by finding the chart in the registry:
+                        list = dc.chartRegistry.list('attackers');
+                        for (x in list){
+                            if (list[x].chartID() == chartID){
+                                chart=list[x];
+                                //create an _id:'x time ago' mapping to use to pick out _ids
+                                idagos=_.map(chart.group().values,function(d){return {_id:d._id,ago:moment.utc(d.lastseentimestamp).fromNow()}});
+                                
+                                //now for each chart value (can be non-contiguous)
+                                //build a list of _ids
+                                for (value in values){
+                                    //console.log('looking for id fields with last seen of',values[value])
+                                    matches=_.pluck(_.where(idagos,{ago:values[value].valueOf()}),'_id')
+                                    for (i in matches){
+                                        idlist.push(matches[i]);
+                                    };
+                                }
+                            }
+                        }
+                        chartCriteria[field.valueOf()]={$in: idlist};
+                        filters[chartID].criteria=chartCriteria;
+                    }else{
+                        //console.log('criteria:',values);
+                        chartCriteria[field.valueOf()]={$in: values};
+                        filters[chartID].criteria=chartCriteria;
+                    }
+                    //console.log('criteria: ' + field, chartCriteria);
+                }
+            }
+
+            for (chartID in filters){
+                //begFetch=moment();
+                //for each chart
+                //use the criteria in the other charts
+                //to return values to simulate crossfilter.
+                criteria=getSearchCriteria();
+                //build criteria which is the intersection of all charts
+                currentSearch=getSearchCriteria();                
+                //console.log(filters[chartID].field.valueOf());
+                for (cID in filters){
+                    if (cID !==chartID && filters[cID].criteria){
+                        //console.log(chartID + ' use:', filters[cID].criteria);
+                        criteria.$and.push(filters[cID].criteria);
+                    }
+                    if (filters[cID].criteria){
+                        //build the attacker list criteria
+                        currentSearch.$and.push(filters[cID].criteria);
+                    }
+                }
+                //save the culmination of all filter criteria
+                //for use in displaying the attackers.
+                Session.set('attackersSearch',currentSearch);
+                //console.log('get raw mongo data' + moment().format());
+                var resultsData=attackers.find(criteria,
+                                        {fields:{
+                                            events:0,
+                                            alerts:0
+                                            },
+                                        reactive:false,
+                                        sort: {lastseentimestamp: 'desc'},
+                                        limit: parseInt(Session.get('attackerlimit'))}).fetch();
+                //console.log('fetch time',moment().diff(begFetch,'milliseconds'))
+                results[chartID]=resultsData;
+            }
+            return results;
+        }
+
+        function _fetchData() {
+            if (mongoCrossfilter._dataChanged){
+                mongoCrossfilter._dataChanged = false; // no more fetches, until a chart has had another filter applied.
+                filters = mongoCrossfilter._getFilters();
+                results = mongoCrossfilter._fetchDataFor(filters);
+                list = dc.chartRegistry.list('attackers');
+                //save current data for each chart
+                for (e in results) {
+                    for (x in list){
+                        if (list[x].chartID() == e) {
+                            chart = list[x];
+                            if (chart.group().setValues ){
+                                chart.group().setValues(results[e]);
+                            }
+                            if (chart.dimension().setValues){
+                                chart.dimension().setValues(results[e]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+                
+        //helper functions to make
+        //mongo look like crossfilter
+        mongoCrossfilter._dataChanged = true;        
+        mongoCrossfilter._fetchData =  _fetchData;
+        mongoCrossfilter._fetchDataFor = _fetchDataFor;
+        mongoCrossfilter._getFilters = _getFilters;
+
+        mongoCrossfilter.group = function(mongoFilterField,homeChart,fieldFunction){
+            var group={
+                setValues: setValues,
+                top: top,
+                all: all
+                //,
+                //reduce: reduce,
+                //reduceCount: reduceCount,
+                //reduceSum: reduceSum,
+                //order: order,
+                //orderNatural: orderNatural,
+                //size: size,
+                //dispose: dispose,
+                //remove: dispose // for backwards-compatibility                
+            }
+            group.values=[];
+            group.mongoField=mongoFilterField;
+            group.chart=homeChart;
+            group.fieldFunction=fieldFunction;
+            function setValues(values){
+                if (group.fieldFunction){
+                    values.forEach(group.fieldFunction);
+                }
+                group.values=values;
+            }
+            function top(){
+                //console.log('group.top called for ',group.chart.anchorName());
+                mongoCrossfilter._fetchData();
+                chartCounts=_.countBy(group.values, function(d){ return objectField(d,group.mongoField); });
+                chartResults=_.map(chartCounts,
+                    function(count,field){
+                      return {'key':field,'value':count}
+                    });
+                return chartResults;
+            }
+            function all(){
+                //console.log('group.all called for ',group.chart.anchorName());
+                mongoCrossfilter._fetchData();
+                if ( group.chart.anchorName()=='ringChart-lastseen'){
+                    //console.log('creating ago field from db record',group.values);
+                    chartCounts=_.countBy(group.values, function(d){ return moment.utc(d.lastseentimestamp).fromNow() ;});
+                }else{
+                    chartCounts=_.countBy(group.values, function(d){ return objectField(d,group.mongoField); });
+                }
+                chartResults=_.map(chartCounts,
+                    function(count,field){
+                        return {'key':field,'value':count}
+                    });
+                //console.log(chartResults);
+                return chartResults;
+
+            }
+            return group;
+        }
+        mongoCrossfilter.dimension=function(mongoFilterField,homeChart,fieldFunction){
+            //present an object mimicing crossfilter dimension
+            //we are passed the chart for easy access to filter values
+            //etc since the chart registry only lists
+            //chartIDs
+            //fieldFunction is optional and can be passed to
+            //facilitate transformation of a mongo value
+            //as it is sent to a chart
+            //ala function (d) {return d3.time.minute(d.jdate);}
+            var dimension={
+                setValues: setValues,
+                filter: filter,
+                filterExact: filterExact,
+                filterRange: filterRange,
+                filterAll: filterAll,
+                filterFunction:filterFunction,
+                top: top,
+                bottom: bottom,
+                group: group,
+                groupAll: groupAll,
+                dispose: dispose,
+                remove: dispose // for backwards-compatibility
+                };
+            //public variables
+            dimension.values=[];
+            dimension.mongoField=mongoFilterField;
+            dimension.chart=homeChart;
+            dimension.fieldFunction=fieldFunction;
+            function setValues(values){
+                //console.log('setValues called for', dimension.mongoField, values);
+                if (dimension.fieldFunction){
+                    values.forEach(dimension.fieldFunction);
+                }
+                dimension.values=values;
+
+            }
+            function filter(){
+                //console.log('filter called for', dimension.mongoField,values);
+                mongoCrossfilter._dataChanged = true;
+                if ( dimension.fieldFunction ){
+                    //console.log('function modifier for dimension');
+                    dimension.values.forEach(fieldFunction);
+                }
+                return dimension.values;
+            }
+            function filterAll(){
+                //console.log('filterAll called for', dimension.mongoField);
+                mongoCrossfilter._dataChanged = true;
+                return dimension.values;
+            }
+            function filterExact(){
+                //console.log('filterExact for', dimension.mongoField);
+                mongoCrossfilter._dataChanged = true;
+                return dimension.values;
+            }
+            function filterRange(){
+                //console.log('filterRange called for', dimension.mongoField);
+                mongoCrossfilter._dataChanged = true;
+                return dimension.values;
+            }
+            function filterFunction(){
+            }
+            function top(k){
+                console.log('top called for', dimension.mongoField)
+                return _.first(dimension.values,k);
+            }
+            function bottom(k){
+                //console.log('bottom called for', dimension.mongoField)
+                return _.last(dimension.values,k);
+            }
+            function group(){
+                //console.log('group called for', dimension.mongoField)
+                return dimension.values;
+            }
+            function groupAll(){
+                console.log('groupAll called for', dimension.mongoField)
+                return dimension.values;
+            }
+            function dispose(){
+                
+            }
+            function remove(){
+            }
+            //console.log('dimension init with field',dimension.mongoField,dimension.chart);
+            return dimension;
+        };//end dimension
+
+
+        //declare dimensions using the mongoCrossfilter
+        var categoryDim = mongoCrossfilter.dimension('category',ringChartAttackerCategory);
+        //var agoDim = mongoCrossfilter.dimension('utcepoch',
+        //                                        ringChartLastSeen,
+        //                                        function(d){d.utcepoch=moment.utc(d.lastseentimestamp).fromNow()});
+        
+        //graph a grouping on lastseentimestamp, but keep a list of record ids
+        //to allow folks to select non-contiguous time ranges
+        //that are shown as 'x minutes/hours/days ago'
+        //in the chart.
+        var agoDim = mongoCrossfilter.dimension('_id',
+                                                 ringChartLastSeen);
+        
+        var countryDim = mongoCrossfilter.dimension('geocoordinates.countrycode',
+                                                    ringChartCountry);
+
+        //setup three.js scene
         scene.name='attackerScene';
 
         //setup the scene controls
@@ -357,13 +649,8 @@ if (Meteor.isClient) {
             var character = new THREE.MD2CharacterComplex();
             character.id=dbrecord._id;
             character.name=dbrecord._id;
-            character.scale = .05;
-            //character.dbrecord=dbrecord;
-            character.dbrecord=attackers.findOne({_id:dbrecord._id},
-                                                 {fields:{
-                                                        events:0,
-                                                        alerts:0}
-                                                 });
+            character.scale = .05; //+ .2*(dbrecord.alertscount/dbrecord.eventscount);
+            character.dbrecord=dbrecord;
             character.animationFPS=Math.floor((Math.random() * 5)+1);
             character.controls = ogroControls;
             character.root.position.x=x;
@@ -382,36 +669,6 @@ if (Meteor.isClient) {
     
             //create the character's nameplate
             var acallout=$('<div class="container-fluid attackercallout"></div>');
-            //var aid=$('<div class="row-fluid"></div>');
-            //aid.append(
-            //           $('<span/>',{
-            //    'class': 'id',
-            //    text: character.dbrecord.indicators[0].ipv4address
-            //}));
-            //
-            //var adetails=$('<ul/>',{
-            //    'class':'details',
-            //});
-            //adetails.append($('<li/>',{
-            //    text: 'Last Seen: ' + dbrecord.lastseentimestamp
-            //}));
-            //adetails.append($('<li/>')
-            //    .append($('<a/>',{
-            //      'href': getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
-            //      'target':"_blank",
-            //      text: 'alerts: ' + dbrecord.alertscount
-            //    })));
-            //adetails.append($('<li/>')
-            //    .append($('<a/>',{
-            //      'href':getSetting('rootURL')+ '/attacker/' +  dbrecord._id,
-            //      'target':"_blank",
-            //      text: 'events: ' + dbrecord.eventscount
-            //    })));
-            //adetails.append($('<li/>',{
-            //    text: dbrecord.category
-            //}));
-            //adetails.wrap($('<div class="row-fluid"></div>'));
-            
             var abuttons=$('<div class="row-fluid"/>');
             if (getSetting('enableBlockIP')) {            
                 abuttons.append($('<button/>',{
@@ -421,11 +678,8 @@ if (Meteor.isClient) {
                 }));
             }
 
-
             //render reactive data with
             //meteor/blaze template
-            //instead of:
-            //acallout.append(aid,adetails,abuttons);
             Blaze.renderWithData(Template.nameplate,
                                 function() {
                                             return attackers.findOne({_id: dbrecord._id},
@@ -475,7 +729,7 @@ if (Meteor.isClient) {
                 //dbid matches both the nameplate and the ogre since
                 //both are representing the same attacker through different
                 //renderers (webgl vs css)
-                //make sure we gind the webgl one
+                //make sure we find the webgl one
                 if ( _.has(object,'dbid') ){
                     
                     if ( object.dbid === newDoc._id  && _.has(object,'base') ){
@@ -532,12 +786,16 @@ if (Meteor.isClient) {
         };
 
         var filterCharacters = function(chart,filter){
-            //debugLog(chart);
-            //debugLog(filter);
-            //debugLog(agoDim.top(Infinity));
-            //debugLog(categoryDim.top(Infinity));
             clearCharacters();
-            
+            //walk the chartRegistry
+            list = dc.chartRegistry.list('attackers')
+            for (e in list){
+                chart = list[e];
+                //apply current filters
+                chart.dimension().filter();
+            }
+            //re-render
+            dc.renderAll("attackers");            
             //set tooltips on the chart titles
             //to display the current filters.
             $('#LastSeen').prop('title', "");
@@ -554,78 +812,75 @@ if (Meteor.isClient) {
             if (countryFilters.length>0) {
                 $('#Countries').prop('title', countryFilters);
             }
-            createCharacters(agoDim.top(Infinity));
-        };
-        
-        var redrawCharacters = function(){
-            //debugLog('redrawCharacters');
-            refreshAttackerData(parseInt(Session.get('attackerlimit')));
-            filterCharacters();
-        };
-        
-        var refreshAttackerData=function(attackerlimit){
-            //debugLog('refreshAttackerData is called ' + new Date() + ' to get: ' + attackerlimit + ' attackers');
-            //load dc.js selector charts
 
-            var attackerData=attackers.find({},
+            //create characters based on
+            //the intersection of all chart filters/selection criteria.
+            //console.log(Session.get('attackersSearch'));
+            createCharacters(
+                attackers.find(Session.get('attackersSearch'),
                                         {fields:{
                                             events:0,
                                             alerts:0
                                             },
-                                        reactive:true,
-                                        sort: {lastseentimestamp: 'desc'},
-                                        limit: parseInt(Session.get('attackerlimit'))}).fetch();
-            ////parse, group data for the d3 charts
-            attackerData.forEach(function (d) {
-                d.jdate=new Date(Date.parse(d.lastseentimestamp));
-                d.dd=moment.utc(d.lastseentimestamp)
-                //d.month = d.dd.get('month');
-                //d.hour = d.dd.get('hour');
-                //d.epoch=d.dd.unix();
-                d.ago=d.dd.fromNow();
-            });
+                                        reactive:false,
+                                        sort: {
+                                            lastseentimestamp: 'desc',
+                                            alertscount: 'desc'},
+                                        limit: parseInt(Session.get('attackerlimit'))}).fetch()
+            );
 
-            ndx = crossfilter(attackerData);
-            if ( ndx.size() >0){
-                allGroup = ndx.groupAll();
-                categoryDim = ndx.dimension(function(d) {return d.category;});
-                agoDim = ndx.dimension(function (d) {return d.ago;});
-                countryDim = ndx.dimension(function(d) {return d.geocoordinates.countrycode;});
-                ringChartAttackerCategory
-                    .width(150).height(150)
-                    .dimension(categoryDim)
-                    .group(categoryDim.group())
-                    .label(function(d) {return d.key; })
-                    .innerRadius(30)
-                    .expireCache()
-                    .on('filtered',filterCharacters);
-                ringChartLastSeen
-                    .width(150).height(150)
-                    .dimension(agoDim)
-                    .group(agoDim.group())
-                    .label(function(d) {return d.key; })
-                    .innerRadius(30)
-                    .expireCache()
-                    .on('filtered',filterCharacters);
-                ringChartCountry
-                    .width(150).height(150)
-                    .dimension(countryDim)
-                    .group(countryDim.group())
-                    .label(function(d) {return d.key; })
-                    .innerRadius(30)
-                    .expireCache()
-                    .on('filtered',filterCharacters);
-                
-                //clear categories and dc charts
-                categoryDim.filter();
-                agoDim.filter();
-                countryDim.filter();
-                ringChartAttackerCategory.filterAll();
-                ringChartCountry.filterAll();
-                ringChartLastSeen.filterAll();
-                dc.renderAll('attackers');
+        };
+
+        var drawAttackerCharts=function(){
+            if (chartsInitialized){
+                //draw only once
+                return;
             }
-        };//end refreshAttackerData
+            //console.log('drawAlertsCharts called');
+            ringChartAttackerCategory
+                .width(150).height(150)
+                .dimension(categoryDim)
+                .group(mongoCrossfilter.group('category',ringChartAttackerCategory))
+                .label(function(d) {return d.key; })
+                .innerRadius(30)
+                .expireCache()
+                .on('filtered',filterCharacters);
+
+            ringChartLastSeen
+                .width(150).height(150)
+                .dimension(agoDim)
+                .group(mongoCrossfilter.group('_id',ringChartLastSeen))
+                .label(function(d) {return d.key; })
+                .innerRadius(30)
+                .expireCache()
+                .on('filtered',filterCharacters);
+
+            ringChartCountry
+                .width(150).height(150)
+                .dimension(countryDim)
+                .group(mongoCrossfilter.group('geocoordinates.countrycode',ringChartCountry))
+                .label(function(d) {return d.key; })
+                .innerRadius(30)
+                .expireCache()
+                .on('filtered',filterCharacters);
+
+            mongoCrossfilter._fetchData();
+            dc.renderAll("attackers");
+            chartsInitialized=true;
+
+        };
+
+        var refreshAttackerData=function(){
+            //walk the chartRegistry
+            list = dc.chartRegistry.list('attackers')
+            for (e in list){
+                chart = list[e];
+                //apply current filters
+                chart.dimension().filter();
+            }
+            //re-render
+            dc.renderAll("attackers");
+        }
 
         waitForBaseCharacter = function(){
             //console.log(baseCharacter.loadCounter);
@@ -633,7 +888,7 @@ if (Meteor.isClient) {
                 setTimeout(function(){waitForBaseCharacter()},100);
             }else{
                 //debugLog('base character is fully loaded');
-                redrawCharacters();
+                filterCharacters();
             }
         };
         
@@ -661,6 +916,7 @@ if (Meteor.isClient) {
                                                          }
                                         });            
         };
+
         Tracker.autorun(function() {
             //debugLog('running dep orgro autorun');
             
@@ -669,7 +925,7 @@ if (Meteor.isClient) {
                 //load the base character meshes, etc to allow resource sharing
                 //when this completes it triggers a clear/dataload and filtering of characters.
                 //debugLog('Invalidated attackers-summary via subscribe');
-                
+                drawAttackerCharts();
                 hookAttackers();
                 waitForBaseCharacter();
             });
@@ -714,7 +970,6 @@ if (Meteor.isClient) {
             cursorAttackers.stop();
         }
         cursorAttackers=null;
-        
 
     };//end template.attackers.destroyed
 
