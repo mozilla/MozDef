@@ -102,7 +102,12 @@ Anthony Verez averez@mozilla.com
 <template name="alertTableItem">
     <tr class="alert-row">
         <td>{{utctimestamp}}</td>
-        <td><a href="/alert/{{esmetadata.id}}">mozdef</a><br><a href="{{mozdef.kibanaURL}}/#dashboard/script.alert.js?id={{esmetadata.id}}" target="_blank">kibana</a></td>
+        <td><a href="/alert/{{esmetadata.id}}">mozdef</a><br>
+            <a href="{{mozdef.kibanaURL}}/#dashboard/script.alert.js?id={{esmetadata.id}}" target="_blank">kibana</a>
+            {{#if url}}
+                <br><a href="{{url}}" target ="_blank">docs</a>
+            {{/if}}
+        </td>
         <td>{{severity}}</td>
         <td>{{category}}</td>
         <td>{{{ipDecorate summary}}}</td>

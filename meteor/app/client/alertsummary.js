@@ -34,7 +34,8 @@ if (Meteor.isClient) {
                                     severity:1,
                                     category:1,
                                     acknowledged:1,
-                                    acknowledgedby:1
+                                    acknowledgedby:1,
+                                    url:1
                                     },
                             sort: {utcepoch: -1},
                             limit: Session.get('alertsrecordlimit'),
@@ -237,7 +238,8 @@ if (Meteor.isClient) {
                                             severity:1,
                                             category:1,
                                             acknowledged:1,
-                                            acknowledgedby:1
+                                            acknowledgedby:1,
+                                            url:1
                                             },
                                     sort: {utcepoch: -1},
                                     limit: Session.get('alertsrecordlimit'),

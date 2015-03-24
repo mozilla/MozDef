@@ -384,7 +384,7 @@ class AlertTask(Task):
                         self.alertToMessageQueue(alert)
 
 
-    def createAlertDict(self, summary, category, tags, events, severity='NOTICE'):
+    def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None):
         """
         Create an alert dict
         """
@@ -396,6 +396,9 @@ class AlertTask(Task):
             'tags': tags,
             'events': []
         }
+        if url:
+            alert['url'] = url
+
         for e in events:
             alert['events'].append({
                 'documentindex': e['_index'],

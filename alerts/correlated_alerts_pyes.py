@@ -35,10 +35,11 @@ class AlertCorrelatedIntelNotice(AlertTask):
         tags = ['nsm,bro,correlated']
         severity = 'NOTICE'
         hostname = event['_source']['hostname']
+        url = "https://mana.mozilla.org/wiki/display/SECURITY/NSM+IR+procedures"
 
         # the summary of the alert is the same as the event
         summary = '{0} {1}'.format(hostname, event['_source']['summary'])
 
         # Create the alert object based on these properties
-        return self.createAlertDict(summary, category, tags, [event], severity)
+        return self.createAlertDict(summary, category, tags, [event], severity=severity, url=url)
 

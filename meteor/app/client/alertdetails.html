@@ -30,7 +30,12 @@ Anthony Verez averez@mozilla.com
                 <tbody>
                     <tr>
                         <td class="alerttimestamp">{{utctimestamp}}</td>
-                        <td><a target="_blank" href="{{kibanaurl}}">open in kibana</a></td>
+                        <td>
+                            <a target="_blank" href="{{kibanaurl}}">open in kibana</a>
+                            {{#if url}}
+                                <br><a href="{{url}}" target ="_blank">docs</a>
+                            {{/if}}
+                        </td>
                         <td>{{severity}}</td>
                         <td>{{category}}</td>
                         <td class="alertsummary">{{summary}}</td>
