@@ -10,20 +10,26 @@
 """mozdef bot using KitnIRC."""
 import json
 import kitnirc.client
+import kombu
 import logging
 import netaddr
 import os
-import pika
 import pygeoip
 import pytz
 import random
 import select
+import sys
 import threading
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from dateutil.parser import parse
 from time import sleep
+from kombu import Connection, Queue, Exchange
+from kombu.mixins import ConsumerMixin
+
+logger = logging.getLogger()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 greetz = ["mozdef bot in da house",
           "mozdef here..what's up",
@@ -167,122 +173,6 @@ def formatAlert(jsonDictIn):
                                           summary))
 
 
-class alertsListener(threading.Thread):
-
-    def __init__(self, client):
-        threading.Thread.__init__(self)
-        # A flag to notify the thread that it should finish up and exit
-        self.kill = False
-        self.lastRunTime = datetime.now()
-        self.client = client
-        self.lastalert = toUTC ('yesterday')
-        self.openMQ()
-        self.mqError = False
-        self.connection = None
-        self.channel = None
-
-    def alertsCallback(self, ch, method, properties, bodyin):
-        self.client.root_logger.debug(
-            " [x]event {0}:{1}".format(method.routing_key, bodyin))
-        try:
-            jbody = json.loads(bodyin)
-
-            # delay ourselves so as not to overrun IRC receiveQ?
-            if abs(toUTC(datetime.now()) - toUTC(self.lastalert)).seconds < 2:
-                sleep(4)
-            
-            # see where we send this alert
-            ircchannel = options.alertircchannel
-            if 'ircchannel' in jbody.keys():
-                if jbody['ircchannel'] in options.join.split(","):
-                    ircchannel = jbody['ircchannel']
-
-            self.client.msg(ircchannel, formatAlert(jbody))
-            # set a timestamp to rate limit ourselves
-            self.lastalert = toUTC(datetime.now())            
-
-        except Exception as e:
-            self.client.root_logger.error(
-                'Exception on message queue callback {0}'.format(e))
-
-    @run_async
-    def openMQ(self):
-        try:
-            if self.connection is None and not self.kill:
-                self.mqError = False
-                self.connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(host=options.mqserver, heartbeat_interval=10))
-                # give the irc client visibility to our connection state.
-                self.client.mqconnection = self.connection
-                self.client.root_logger.info('opening message queue channel')
-                if self.channel is None:
-                    self.channel = self.connection.channel()
-                    self.channel.exchange_declare(
-                        exchange=options.alertexchange,
-                        type='topic',
-                        durable=True)
-                    result = self.channel.queue_declare(exclusive=False,
-                                                        auto_delete=True )
-                    queue_name = result.method.queue
-                    self.channel.queue_bind(
-                        exchange=options.alertexchange,
-                        queue=queue_name,
-                        routing_key=options.alertqueue)
-
-                self.client.root_logger.info(
-                    'INFO consuming message queue {0}'.format(options.alertqueue))
-                self.client.msg(
-                    options.alertircchannel, 'consuming message queue {0}'.format(options.alertqueue))
-                self.channel.basic_consume(
-                    self.alertsCallback,
-                    queue=queue_name,
-                    no_ack=True)
-                self.channel.start_consuming()
-        except pika.exceptions.ConnectionClosed as e:
-            self.client.root_logger.error("MQ Connection closed {0}".format(e))
-            self.client.msg(
-                options.alertircchannel, "ERROR: Message queue is closed. Will retry.")
-            self.mqError = True
-            try:
-                self.connection = None
-                self.channel = None
-            except:
-                pass
-        except AttributeError:
-            pass
-        except select.error:
-            pass
-        except Exception as e:
-            self.mqError = True
-            self.client.root_logger.error(
-                "Exception {0} while processing alerts message queue.".format(type(e)))
-            self.client.msg(
-                options.alertircchannel, "ERROR: Exception {0} while processing alerts message queue".format(e))
-
-            try:
-                if self.connection is not None:
-                    self.connection.close()
-            except:
-                pass
-            finally:
-                self.connection = None
-                self.channel = None
-
-    def run(self):
-        while not self.kill:
-            try:
-                self.client.root_logger.debug('checking mq connections')
-                if self.connection is None or self.mqError or not self.connection.is_open:
-                    self.openMQ()
-                    self.client.root_logger.info('opening mq connection')
-                    time.sleep(20)
-
-            except Exception as e:
-                self.client.root_logger.error(
-                    "Exception {0} while polling alerts message queue health.".format(e))
-            time.sleep(int(10))
-
-
 class mozdefBot():
 
     def __init__(self, ):
@@ -304,8 +194,10 @@ class mozdefBot():
             password=options.password,
             ssl=True
         )
-        self.threads = []
-        self.mqconnection = None
+        #self.threads = []
+        #self.mqconnection = None
+        self.mqConsumer = None
+
 
     def run(self):
         try:
@@ -318,9 +210,9 @@ class mozdefBot():
                         client.join(chan, options.channelkeys[chan])
                     else:
                         client.join(chan)
-                t = alertsListener(self.client)
-                self.threads.append(t)
-                t.start()
+                # start the mq consumer
+                consumeAlerts(self)
+
 
             @self.client.handle('LINE')
             def line_handler(client, *params):
@@ -330,6 +222,7 @@ class mozdefBot():
                     # catch error in kitnrc : chan.remove(actor) where channel
                     # object has no attribute remove
                     pass
+
 
             @self.client.handle('PRIVMSG')
             def priv_handler(client, actor, recipient, message):
@@ -362,6 +255,7 @@ class mozdefBot():
                                 self.client.msg(
                                     recipient, "{0}: hrm..loopback? private ip?".format(i))
 
+
             @self.client.handle('JOIN')
             def join_handler(client, user, channel, *params):
                 self.root_logger.debug('%r' % channel)
@@ -370,28 +264,120 @@ class mozdefBot():
             self.client.run()
 
         except KeyboardInterrupt:
-            for t in self.threads:
-                t.kill = True
+            #for t in self.threads:
+                #t.kill = True
             self.client.disconnect()
-            if self.client.mqconnection is not None:
+            if self.mqConsumer:
                 try:
-                    self.client.mqconnection.close()
+                    self.mqConsumer.should_stop = True
                 except:
                     pass
+
         except Exception as e:
             self.client.root_logger.error('bot error..quitting {0}'.format(e))
-            for t in self.threads:
-                t.kill = True
             self.client.disconnect()
-            if self.client.mqconnection is not None:
-                self.client.mqconnection.close()
+            if self.mqConsumer:
+                try:
+                    self.mqConsumer.should_stop = True
+                except:
+                    pass
+
+
+class alertConsumer(ConsumerMixin):
+    '''read in alerts and hand back to the
+       kitnirc class for publishing
+    '''
+
+    def __init__(self, mqAlertsConnection, alertQueue, alertExchange, ircBot):
+        self.connection = mqAlertsConnection  # default connection for the kombu mixin
+        self.alertsConnection = mqAlertsConnection
+        self.alertQueue = alertQueue
+        self.alertExchange = alertExchange
+        self.ircBot = ircBot
+        ircBot.mqConsumer = self
+
+
+    def get_consumers(self, Consumer, channel):
+        consumer = Consumer(
+            self.alertQueue,
+            callbacks=[self.on_message],
+            accept=['json'])
+        consumer.qos(prefetch_count=options.prefetch)
+        return [consumer]
+
+
+    def on_message(self, body, message):
+        try:
+            # just to be safe..check what we were sent.
+            if isinstance(body, dict):
+                bodyDict = body
+            elif isinstance(body, str) or isinstance(body, unicode):
+                try:
+                    bodyDict = json.loads(body)  # lets assume it's json
+                except ValueError as e:
+                    # not json..ack but log the message
+                    logger.exception(
+                        "alertworker exception: unknown body type received %r" % body)
+                    return
+            else:
+                logger.exception(
+                    "alertworker exception: unknown body type received %r" % body)
+                return
+            # process valid message
+            # see where we send this alert
+            ircchannel = options.alertircchannel
+            if 'ircchannel' in bodyDict.keys():
+                if bodyDict['ircchannel'] in options.join.split(","):
+                    ircchannel = bodyDict['ircchannel']
+
+            self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
+
+            message.ack()
+        except ValueError as e:
+            logger.exception(
+                "alertworker exception while processing events queue %r" % e)
+
+@run_async
+def consumeAlerts(ircBot):
+    # connect and declare the message queue/kombu objects.
+    # server/exchange/queue
+    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,
+                                                        options.mqpassword,
+                                                        options.mqalertserver,
+                                                        options.mqport)
+    mqAlertConn = Connection(mqConnString)
+
+    # Exchange for alerts we pass to plugins
+    alertExchange = Exchange(name=options.alertExchange,
+                             type='topic',
+                             durable=True,
+                             delivery_mode=1)
+
+    alertExchange(mqAlertConn).declare()
+
+    # Queue for the exchange
+    alertQueue = Queue(options.queueName,
+                       exchange=alertExchange,
+                       routing_key=options.alerttopic,
+                       durable=False,
+                       no_ack=(not options.mqack))
+    alertQueue(mqAlertConn).declare()
+
+    # consume our alerts.
+    alertConsumer(mqAlertConn, alertQueue, alertExchange, ircBot).run()
 
 
 def initConfig():
     # initialize config options
     # sets defaults or overrides from config file.
+    
     # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)    
+    # in time strings
+    options.defaultTimeZone = getConfig('defaulttimezone',
+                                        'US/Pacific',
+                                        options.configfile)
+    
+    # irc options
     options.host = getConfig('host', 'irc.somewhere.com', options.configfile)
     options.nick = getConfig('nick', 'mozdefnick', options.configfile)
     options.port = getConfig('port', 6697, options.configfile)
@@ -399,15 +385,6 @@ def initConfig():
     options.realname = getConfig('realname', 'realname', options.configfile)
     options.password = getConfig('password', '', options.configfile)
     options.join = getConfig('join', '#mzdf', options.configfile)
-    options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
-    options.alertqueue = getConfig(
-        'alertqueue',
-        'mozdef.alert',
-        options.configfile)
-    options.alertexchange = getConfig(
-        'alertexchange',
-        'alerts',
-        options.configfile)
     options.alertircchannel = getConfig(
         'alertircchannel',
         '',
@@ -417,19 +394,59 @@ def initConfig():
         '{"#somechannel": "somekey"}',
         options.configfile))
 
+    # message queue options
+    # server hostname
+    options.mqalertserver = getConfig(
+        'mqalertserver',
+        'localhost',
+        options.configfile)
+
+    # queue exchange name
+    options.alertExchange = getConfig(
+        'alertexchange',
+        'alerts',
+        options.configfile)
+
+    # queue name
+    options.queueName = getConfig(
+        'alertqueuename',
+        'alertBot',
+        options.configfile)
+
+    # queue topic
+    options.alerttopic = getConfig(
+        'alerttopic',
+        'mozdef.*',
+        options.configfile)
+
+    # how many messages to ask for at once
+    options.prefetch = getConfig('prefetch', 50, options.configfile)
+    options.mquser = getConfig('mquser', 'guest', options.configfile)
+    options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
+    options.mqport = getConfig('mqport', 5672, options.configfile)
+    # mqack=True sets persistant delivery, False sets transient delivery
+    options.mqack = getConfig('mqack', True, options.configfile)
+
     if options.alertircchannel == '':
         options.alertircchannel = options.join.split(",")[0]
 
+
 if __name__ == "__main__":
+    sh = logging.StreamHandler(sys.stderr)
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)
+    
     parser = OptionParser()
     parser.add_option(
         "-c", dest='configfile',
-        default='',
+        default=sys.argv[0].replace('.py', '.conf'),
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
 
-    thebot = mozdefBot()
-    thebot.run()
+    # run the IRC class
+    # which in turn starts the mq consumer
+    theBot = mozdefBot()
+    theBot.run()
 
 # vim: set ts=4 sts=4 sw=4 et:
