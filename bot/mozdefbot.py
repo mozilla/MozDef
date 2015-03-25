@@ -196,8 +196,6 @@ class mozdefBot():
             password=options.password,
             ssl=True
         )
-        #self.threads = []
-        #self.mqconnection = None
         self.mqConsumer = None
 
 
@@ -266,8 +264,6 @@ class mozdefBot():
             self.client.run()
 
         except KeyboardInterrupt:
-            #for t in self.threads:
-                #t.kill = True
             self.client.disconnect()
             if self.mqConsumer:
                 try:
