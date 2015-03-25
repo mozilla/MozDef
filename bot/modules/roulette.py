@@ -26,6 +26,7 @@ _log = logging.getLogger(__name__)
 class Roulette(Module):
     """A basic KitnIRC module responding to !r with some fun."""
     def start(self, *args, **kwargs):
+        super(Roulette, self).start(*args, **kwargs)
         self.gun_max_load = 6
         self.gun_bullet_slot = random.randint(1, self.gun_max_load)
         self.gun_current_slot = 0
