@@ -1,3 +1,6 @@
 [submodule "lib/mozdef_client"]
 	path = lib/mozdef_client
 	url = https://github.com/gdestuynder/mozdef_client
+[submodule "bot/modules/bugzilla"]
+	path = bot/modules/bugzilla
+	url = https://github.com/gdestuynder/simple_bugzilla
