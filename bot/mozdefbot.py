@@ -10,6 +10,7 @@
 """mozdef bot using KitnIRC."""
 import json
 import kitnirc.client
+import kitnirc.modular
 import kombu
 import logging
 import netaddr
@@ -20,11 +21,9 @@ import random
 import select
 import sys
 import threading
-import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from dateutil.parser import parse
-from time import sleep
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 
@@ -186,6 +185,9 @@ class mozdefBot():
         self.root_logger.setLevel(logging.INFO)
 
         self.client = kitnirc.client.Client(options.host, options.port)
+        self.controller  = kitnirc.modular.Controller(self.client, options.configfile)
+        self.controller.load_config()
+        self.controller.start()
         self.client.root_logger = self.root_logger
         self.client.connect(
             nick=options.nick,
