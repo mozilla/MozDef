@@ -132,6 +132,14 @@ caption, legend {
     color: yellow;
 }
 
+.veris-wrapper td{
+    color: black
+}
+
+.veris-wrapper {
+    background-color: rgba(245,245,245,.7)
+}
+
 /*bootstrap overrides*/
 
 .btn {
