@@ -71,7 +71,7 @@ class Zilla(Module):
             except:
                 return
             for bug in res['bugs']:
-                self.controller.client.msg(self.channel, "[zilla] NEW bug: {summary} {url}{bugid}".format(summary=bug['summary'],
+                self.controller.client.msg(self.channel, "\x038\x02WARNING\x03\x02 \x032\x02NEW\x03\x02 bug: {url}{bugid} {summary}".format(summary=bug['summary'],
                     url=self.url, bugid=bug['id']))
 
     def start(self, *args, **kwargs):
