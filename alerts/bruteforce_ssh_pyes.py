@@ -24,9 +24,8 @@ class AlertBruteforceSsh(AlertTask):
             pyes.QueryFilter(pyes.MatchQuery('summary', 'login invalid ldap_count_entries', 'boolean'))
         ]
         must_not = [
-            pyes.QueryFilter(pyes.MatchQuery('summary','10.22.8.128','phrase')),
-            pyes.QueryFilter(pyes.MatchQuery('summary','10.8.75.35','phrase')),
-            pyes.QueryFilter(pyes.MatchQuery('summary','208.118.237.','phrase'))
+            pyes.QueryFilter(pyes.MatchQuery('summary','10.22.75.203','phrase')),
+            pyes.QueryFilter(pyes.MatchQuery('summary','10.8.75.144','phrase'))
         ]
         self.filtersManual(date_timedelta, must=must, must_not=must_not)
 
