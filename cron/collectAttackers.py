@@ -9,6 +9,8 @@
 # Jeff Bryner jbryner@mozilla.com
 
 import calendar
+import collections
+import json
 import logging
 import pyes
 import pytz
@@ -23,7 +25,7 @@ from logging.handlers import SysLogHandler
 from dateutil.parser import parse
 from pymongo import MongoClient
 from pymongo import collection
-
+from collections import Counter
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -71,6 +73,45 @@ def toUTC(suspectedDate, localTimeZone=None):
 
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
+
+
+def keypaths(nested):
+    ''' return a list of nested dict key paths
+        like: [u'_source', u'details', u'hostname']
+    '''
+    for key, value in nested.iteritems():
+        if isinstance(value, collections.Mapping):
+            for subkey, subvalue in keypaths(value):
+                yield [key] + subkey, subvalue
+        else:
+            yield [key], value
+
+
+def dictpath(path):
+    ''' split a string representing a
+        nested dictionary path key.subkey.subkey
+    '''
+    for i in path.split('.'):
+        yield '{0}'.format(i)
+
+
+def mostCommon(listofdicts,dictkeypath):
+    """
+        Given a list containing dictionaries,
+        return the most common entries
+        along a key path separated by .
+        i.e. dictkey.subkey.subkey
+        returned as a list of tuples
+        [(value,count),(value,count)]
+    """
+    inspectlist=list()
+    path=list(dictpath(dictkeypath))
+    for i in listofdicts:
+        for k in list(keypaths(i)):
+            if not (set(k[0]).symmetric_difference(path)):
+                inspectlist.append(k[1])
+
+    return Counter(inspectlist).most_common()
 
 
 def searchESForBROAttackers(es, threshold):
@@ -209,6 +250,29 @@ def searchMongoAlerts(mozdefdb):
                         attacker['alertscount'] = len(attacker['alerts'])
                         attacker['eventscount'] = len(attacker['events'])
                         attackers.save(attacker)
+
+                    # should we autocategorize the attacker
+                    # based on their alerts? 
+                    if attacker['category'] == 'unknown' and options.autocategorize:
+                        # take a look at recent alerts for this attacker
+                        # and if they are all the same category
+                        # auto-categorize the attacker
+                        matchingalerts = alerts.find(
+                            {"attackerid":attacker['_id']}
+                             ).sort('utcepoch', -1).limit(50)
+                        # summarize the alert categories
+                        # returns list of tuples: [(u'bruteforce', 8)]
+                        categoryCounts= mostCommon(matchingalerts,'category')
+
+                        #are the alerts all the same category?
+                        if len(categoryCounts) == 1:
+                            #is the alert category mapped to an attacker category?
+                            for category in options.categorymapping:
+                                if category.keys()[0] == categoryCounts[0][0]:
+                                    attacker['category'] = category[category.keys()[0]]
+                                    attackers.save(attacker)
+                                    
+                        
 
 
 def genNewAttacker():
@@ -365,6 +429,13 @@ def initConfig():
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
+    # should we automatically categorize
+    # new attackers based on their alerts? 
+    options.autocategorize = getConfig('autocategorize', False, options.configfile)
+    # get the mapping of alert category to attacker category
+    # supply as a list of dicts: 
+    # [{"bruteforce":"bruteforcer"},{"alertcategory":"attackercategory"}]
+    options.categorymapping = json.loads(getConfig('categorymapping', "[]", options.configfile))
 
 if __name__ == '__main__':
     parser = OptionParser()
