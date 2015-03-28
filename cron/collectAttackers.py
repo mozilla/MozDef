@@ -21,6 +21,7 @@ from bson.son import SON
 from datetime import datetime
 from datetime import timedelta
 from configlib import getConfig, OptionParser
+from kombu import Connection, Queue, Exchange
 from logging.handlers import SysLogHandler
 from dateutil.parser import parse
 from pymongo import MongoClient
@@ -151,9 +152,10 @@ def searchMongoAlerts(mozdefdb):
         {"$limit": 100}, #most recent 100
         {"$match": {"events.documentsource.details.sourceipaddress":{"$exists": True}}}, # must have an ip address
         {"$match": {"attackerid":{"$exists": False}}}, # must not be already related to an attacker
-        {"$group": {"_id": {"ipaddress":"$events.documentsource.details.sourceipaddress"}}}, # grab ip address from the events
-        {"$unwind": "$_id.ipaddress"}, # separate all ips from their alerts
-        {"$group": {"_id": "$_id.ipaddress", "hitcount": {"$sum": 1}}}, # count by ip
+        {"$unwind":"$events"}, #make each event into it's own doc
+        {"$project":{"_id":0,
+                     "sourceip":"$events.documentsource.details.sourceipaddress"}}, #emit the source ip only
+        {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}}, # count by ip
         {"$match":{"hitcount":{"$gt":5}}}, # limit to those with X observances
         {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort 
         {"$limit": 10} # top 10
@@ -212,6 +214,9 @@ def searchMongoAlerts(mozdefdb):
                          str(ipcidr.ip),
                          })][-1][0]['documentsource']
                     updateAttackerGeoIP(mozdefdb, newAttacker['_id'], latestGeoIP)
+                    
+                    if options.broadcastattackers:
+                        broadcastAttacker(newAttacker)
 
                 else:
                     logger.debug('found existing attacker in alerts')
@@ -273,7 +278,51 @@ def searchMongoAlerts(mozdefdb):
                                     attackers.save(attacker)
                                     
                         
+def broadcastAttacker(attacker):
+    '''
+    send this attacker info to our message queue
+    '''
+    try:
+        connString = 'amqp://{0}:{1}@{2}:{3}/{4}'.format(options.mquser,
+                                                         options.mqpassword,
+                                                         options.mqserver,
+                                                         options.mqport,
+                                                         options.mqvhost)
+        if options.mqprotocol == 'amqps':
+            mqSSL = True
+        else:
+            mqSSL = False
+        mqConn = Connection(connString, ssl=mqSSL)
 
+        alertExchange = Exchange(
+            name=options.alertexchange,
+            type='topic',
+            durable=True)
+        alertExchange(mqConn).declare()
+        mqproducer = mqConn.Producer(serializer='json')
+        
+        logger.debug('Kombu configured')
+    except Exception as e:
+        logger.error('Exception while configuring kombu for alerts: {0}'.format(e))
+    try:
+        # generate an 'alert' structure for this attacker:
+        mqAlert = dict(severity='NOTICE', category='attacker')
+    
+        if 'datecreated' in attacker.keys():
+            mqAlert['utctimestamp'] = attacker['datecreated'].isoformat()
+    
+        mqAlert['summary'] = 'New Attacker: {0} events: {1}, alerts: {2}'.format(attacker['indicators'], attacker['eventscount'], attacker['alertscount'])
+        logger.debug(mqAlert)
+        ensurePublish = mqConn.ensure(
+            mqproducer,
+            mqproducer.publish,
+            max_retries=10)
+        ensurePublish(mqAlert,
+            exchange=alertExchange,
+            routing_key=options.routingkey)
+    except Exception as e:
+        logger.error('Exception while publishing attacker: {0}'.format(e))
+        
 
 def genNewAttacker():
     newAttacker = dict()
@@ -436,6 +485,20 @@ def initConfig():
     # supply as a list of dicts: 
     # [{"bruteforce":"bruteforcer"},{"alertcategory":"attackercategory"}]
     options.categorymapping = json.loads(getConfig('categorymapping', "[]", options.configfile))
+    
+    # should we broadcast new attackers
+    # to a message queue?
+    options.broadcastattackers = getConfig('broadcastattackers', False, options.configfile)
+    # message queue options
+    options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
+    options.alertexchange = getConfig('alertexchange', 'alerts', options.configfile)
+    options.routingkey = getConfig('routingkey', 'mozdef.alert', options.configfile)
+    options.mquser = getConfig('mquser', 'guest', options.configfile)
+    options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
+    options.mqport = getConfig('mqport', 5672, options.configfile)
+    options.mqvhost = getConfig('mqvhost', '/', options.configfile)
+    # set to either amqp or amqps for ssl
+    options.mqprotocol = getConfig('mqprotocol', 'amqp', options.configfile)
 
 if __name__ == '__main__':
     parser = OptionParser()
