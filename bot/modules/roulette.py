@@ -52,7 +52,8 @@ class Roulette(Module):
                 self.gun_current_slot = 0
             else:
                 client.msg(recipient, '*click* (slot {0})'.format(self.gun_current_slot))
-            return
+            # tell kitnirc that we handled this, no need to pass to other modules.
+            return True
 
 # Let KitnIRC know what module class it should be loading.
 module = Roulette
