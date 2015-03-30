@@ -14,6 +14,7 @@ if (Meteor.isClient) {
     var theory = null;
     var mitigation = null;
     var lesson = null;
+    var timestamp = null;
     
 
     Template.veristags.veris=function(){
@@ -194,12 +195,12 @@ if (Meteor.isClient) {
         },
 
         "click #saveTimestamp": function(e,template){
-            if (! timestamp) {
+            if (! timestamp){
                 timestamp=models.timestamp();
                 timestamp.creator=Meteor.user().profile.email;
             }
 
-            timestamp.timestamp=dateOrNull($('#timestamp').val());
+            timestamp.timestamp=dateOrNull($('#timestampText').val());
             timestamp.description=$('#timestampDescription').val();
             timestamp.lastModifier=Meteor.user().profile.email;
 
@@ -213,12 +214,12 @@ if (Meteor.isClient) {
                     $addToSet: {timestamps:timestamp}
                 });
 
-                $('#timestamp').val('');
+                $('#timestampText').val('');
                 $('#timestampDescription').val('');
                 timestamp=null;
                 e.preventDefault();
             }
-
+            
         },
 
         "click .timestampedit": function(e){
@@ -230,8 +231,9 @@ if (Meteor.isClient) {
                                   { "timestamps.$": 1 }
                                   ).timestamps;
             timestamp=_.findWhere(timestamps, {'_id': timestamp._id});
+            timestamp._id= $(e.target).attr('data-timestampid');
             if (timestamp != undefined) {
-                $('#timestamp').val(timestamp.timestamp);
+                $('#timestampText').val(timestamp.timestamp);
                 $('#timestampDescription').val(timestamp.description);
             }
             e.preventDefault();
