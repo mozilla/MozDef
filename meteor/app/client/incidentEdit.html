@@ -209,19 +209,15 @@ Jeff Bryner jbryner@mozilla.com
                                 <td></td>
                                 <td>Summary</td>
                                 <td>Description</td>
-                                <td>Created</td>
-                                <td>Creator</td>
                                 <td>Status</td>
                             </tr>
                         </thead>
                         <tbody>
                         {{#each theories}}
-                            <tr>
+                            <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateCreated}}" data-toggle="tooltip">
                                 <td><button class="btn btn-primary theoryedit" data-theoryid={{_id}}>edit</button></td>
                                 <td>{{summary}}</td>
                                 <td>{{description}}</td>
-                                <td>{{dateCreated}}</td>
-                                <td>{{creator}}</td>
                                 <td>{{status}}</td>
                                 <td><button class="btn btn-danger theorydelete" data-theoryid={{_id}}>delete</button></td>
                             </tr>
@@ -262,18 +258,14 @@ Jeff Bryner jbryner@mozilla.com
                             <td></td>
                             <td>Timestamp</td>
                             <td>Description</td>
-                            <td>Created</td>
-                            <td>Creator</td>
                         </tr>
                     </thead>
                     <tbody>
                     {{#each timestamps}}
-                        <tr>
+                        <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateCreated}}" data-toggle="tooltip">
                             <td><button class="btn btn-default timestampedit" data-timestampid={{_id}}>edit</button></td>
                             <td>{{timestamp}}</td>
                             <td>{{description}}</td>
-                            <td>{{dateCreated}}</td>
-                            <td>{{creator}}</td>
                             <td><button class="btn btn-danger timestampdelete" data-timestampid={{_id}}>delete</button></td>
                         </tr>
                     {{/each}}
@@ -327,20 +319,16 @@ Jeff Bryner jbryner@mozilla.com
                             <td>Summary</td>
                             <td>Description</td>
                             <td>Temporary?</td>
-                            <td>Created</td>
-                            <td>Creator</td>
                             <td>Status</td>
                         </tr>
                     </thead>
                     <tbody>
                     {{#each mitigations}}
-                        <tr>
+                        <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateCreated}}" data-toggle="tooltip">
                             <td><button class="btn btn-primary mitigationedit" data-mitigationid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
                             <td>{{temporary}}</td>
-                            <td>{{dateCreated}}</td>
-                            <td>{{creator}}</td>
                             <td>{{status}}</td>
                             <td><button class="btn btn-danger mitigationdelete" data-mitigationid={{_id}}>delete</button></td>
                         </tr>
@@ -381,18 +369,14 @@ Jeff Bryner jbryner@mozilla.com
                             <td></td>
                             <td>Summary</td>
                             <td>Description</td>
-                            <td>Created</td>
-                            <td>Creator</td>
                         </tr>
                     </thead>
                     <tbody>
                     {{#each lessons}}
-                        <tr>
+                        <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateCreated}}" data-toggle="tooltip">
                             <td><button class="btn btn-primary lessonedit" data-lessonid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
-                            <td>{{dateCreated}}</td>
-                            <td>{{creator}}</td>
                             <td><button class="btn btn-danger lessondelete" data-lessonid={{_id}}>delete</button></td>
                         </tr>
                     {{/each}}
@@ -432,20 +416,14 @@ Jeff Bryner jbryner@mozilla.com
                             <td></td>
                             <td>Summary</td>
                             <td>Description</td>
-                            <td>Created</td>
-                            <td>Creator</td>
-                            <td>Status</td>
                         </tr>
                     </thead>
                     <tbody>
                     {{#each notes}}
-                        <tr>
+                        <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateCreated}}" data-toggle="tooltip">
                             <td><button class="btn btn-primary noteedit" data-noteid={{_id}}>edit</button></td>
                             <td>{{summary}}</td>
                             <td>{{description}}</td>
-                            <td>{{dateCreated}}</td>
-                            <td>{{creator}}</td>
-                            <td>{{status}}</td>
                             <td><button class="btn btn-danger notedelete" data-noteid={{_id}}>delete</button></td>
                         </tr>
                     {{/each}}

@@ -405,6 +405,12 @@ if (Meteor.isClient) {
               console.log(e)
             }
             
+        },
+        "mouseenter .info-row": function(e,t){
+            //toggle the bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
         }
     });
 
