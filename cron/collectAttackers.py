@@ -177,7 +177,7 @@ def searchMongoAlerts(mozdefdb):
         ])
     for ip in ipv4TopHits['result']:
         #sanity check ip['_id'] which should be the ipv4 address
-        if isIPv4(ip['_id']) and ip['_id'] not in netaddr.IPSet['0.0.0.0']:
+        if isIPv4(ip['_id']) and ip['_id'] not in netaddr.IPSet(['0.0.0.0']):
             ipcidr = netaddr.IPNetwork(ip['_id'])
             # expand it to a /24 CIDR
             # todo: lookup ipwhois for asn_cidr value
