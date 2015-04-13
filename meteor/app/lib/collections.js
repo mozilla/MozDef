@@ -205,7 +205,8 @@ if (Meteor.isServer) {
                                         summary:1,
                                         phase:1,
                                         dateOpened:1,
-                                        dateClosed:1
+                                        dateClosed:1,
+                                        creator:1
                                 },
                               sort: {dateOpened: -1},
                               limit:100});
@@ -222,7 +223,8 @@ if (Meteor.isServer) {
                                         summary:1,
                                         phase:1,
                                         dateOpened:1,
-                                        dateClosed:1
+                                        dateClosed:1,
+                                        creator:1
                                 },
                               sort: {dateOpened: -1},
                               limit:100});

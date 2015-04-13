@@ -16,6 +16,7 @@ if (Meteor.isClient) {
     var lesson = null;
     var indicator = null;
     var evidence = null;
+    var timestamp = null;
 
     //return all investigations
     Template.investigations.investigation = function () {
@@ -35,7 +36,14 @@ if (Meteor.isClient) {
         
         "click .investigationdelete": function(e){
             investigations.remove(this._id);
-        }        
+        },
+
+        "mouseenter .info-row": function(e,t){
+            //toggle the bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
+        }
     });
 
     
@@ -189,7 +197,7 @@ if (Meteor.isClient) {
                 timestamp.creator=Meteor.user().profile.email;
             }
 
-            timestamp.timestamp=dateOrNull($('#timestamp').val());
+            timestamp.timestamp=dateOrNull($('#timestampText').val());
             timestamp.description=$('#timestampDescription').val();
             timestamp.lastModifier=Meteor.user().profile.email;
 
@@ -203,7 +211,7 @@ if (Meteor.isClient) {
                     $addToSet: {timestamps:timestamp}
                 });
 
-                $('#timestamp').val('');
+                $('#timestampText').val('');
                 $('#timestampDescription').val('');
                 timestamp=null;
                 e.preventDefault();
@@ -221,7 +229,7 @@ if (Meteor.isClient) {
                                   ).timestamps;
             timestamp=_.findWhere(timestamps, {'_id': timestamp._id});
             if (timestamp != undefined) {
-                $('#timestamp').val(timestamp.timestamp);
+                $('#timestampText').val(timestamp.timestamp);
                 $('#timestampDescription').val(timestamp.description);
             }
             e.preventDefault();
@@ -491,7 +499,12 @@ if (Meteor.isClient) {
               console.log('readystatechange')
               console.log(e)
             }
-            
+        },
+        "mouseenter .info-row": function(e,t){
+            //toggle the bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
         }
     });
 

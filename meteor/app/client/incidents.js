@@ -53,7 +53,14 @@ if (Meteor.isClient) {
 
         "click .incidentdelete": function(e){
             incidents.remove(this._id);
-        }        
+        },
+
+        "mouseenter .info-row": function(e,t){
+            //toggle the bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
+        }
     });
 
     Template.incidents.rendered = function(){

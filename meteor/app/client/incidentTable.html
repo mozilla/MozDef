@@ -38,7 +38,7 @@ Anthony Verez averez@mozilla.com
 <!--each individual incident -->
 <template name="each_incident">
 
-			<tr>
+			<tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateOpened}}" data-toggle="tooltip">
                 <td><button class="btn btn-xs btn-default incidentedit" data-incidentid={{_id}}>edit</button></td>
 				<td>{{summary}}</td>
                 <td>{{phase}}</td>
