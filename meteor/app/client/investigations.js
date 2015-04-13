@@ -19,7 +19,9 @@ if (Meteor.isClient) {
 
     //return all investigations
     Template.investigations.investigation = function () {
-        return investigations.find();
+        return investigations.find({},{
+                              sort: {dateOpened: -1}
+                            });
     };
 
     //select an investigation for editing

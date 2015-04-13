@@ -37,7 +37,9 @@ if (Meteor.isClient) {
 
     //return all incidents
     Template.incidents.incident = function () {
-        return incidents.find();
+        return incidents.find({},{
+                              sort: {dateOpened: -1}
+                            });
     };
 
     //select an incident for editing
