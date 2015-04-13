@@ -475,12 +475,42 @@ if (Meteor.isClient) {
                                                 startDate: dateOrNull($('#dateContained').val() ) || moment()
                                                 });
         };
+
+        //log the user entering the incident
+        activity=models.userAction();
+        activity.path='incident';
+        activity.itemId=Session.get('incidentID');
+        Template.instance.uaId=userActivity.insert(activity);
+        
         
         //set up reactive data 
         Deps.autorun(function() {
             Meteor.subscribe("incident-details",Session.get('incidentID'), onReady=function(){
                 initDatePickers();
-            });            
+            });
+            
+            Meteor.subscribe("userActivity",onReady=function(){
+            //register a callback for new user activity
+            //to show a notify when someone enters
+            //screens the user is on
+            //only run onReady to avoid initialization 'add' messages.
+            cursorUserActivity=userActivity.find({path:'incident',
+                                                 itemId:Session.get('incidentID'),
+                                                 userId: {$ne: Meteor.user().profile.email}
+                                                 },
+                                        {
+                                        reactive:true})
+                                        .observeChanges(
+                                                {added: function(id,fields){
+                                                    console.log(fields);
+                                                    Session.set('displayMessage',fields.userId + '& is viewing this incident')
+                                                }
+                                        }); 
+            })
+            
+
+
+            
         }); //end deps.autorun
 
         //code to save the main tab data
@@ -545,6 +575,11 @@ if (Meteor.isClient) {
         }();
     };
     
+    Template.editincidentform.destroyed = function () {
+        //remove the record of the user entering the incident
+        userActivity.remove(Template.instance.uaId);
+    }
+
     Template.addincidentform.rendered = function() {
         $('#dateOpened').daterangepicker({
                                             singleDatePicker: true,

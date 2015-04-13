@@ -100,12 +100,6 @@ Router.map(function () {
             return Meteor.subscribe('incident-details', Session.get('incidentID'))
             },        
         data: function() {
-            if (!Session.get('revisionsundo')) {
-                Session.set('revisionsundo', [incidents.findOne(this.params._id)]);
-            }
-            if (!Session.get('revisionsredo')) {
-                Session.set('revisionsredo', []);
-            }
             return incidents.findOne(this.params._id);
         },
         template: 'editincidentform',

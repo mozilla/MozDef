@@ -24,7 +24,8 @@ Anthony Verez averez@mozilla.com
     healthesnodes = new Meteor.Collection("healthesnodes");
     healtheshotthreads = new Meteor.Collection("healtheshotthreads");
     attackers = new Meteor.Collection("attackers");
-    actions = new Meteor.Collection("actions"); 
+    actions = new Meteor.Collection("actions");
+    userActivity = new Meteor.Collection("userActivity");
 
 if (Meteor.isServer) {
     //Publishing setups
@@ -258,6 +259,10 @@ if (Meteor.isServer) {
         return kibanadashboards.find({},{sort:{name:1}, limit:30});
     });    
 
+    Meteor.publish("userActivity", function () {
+        return userActivity.find({},{sort:{userID:1}, limit:100});
+    });
+
    //access rules from clients
    //barebones to allow you to specify rules
    //currently incidents collection is the only one updated by clients
@@ -307,7 +312,18 @@ if (Meteor.isServer) {
         return doc.creator === Meteor.user().profile.email;
       },
       fetch: ['creator']
-    });    
+    });
+    
+    userActivity.allow({
+      insert: function (userId, doc) {
+        // the user must be logged in
+        return (userId);
+      },
+      remove: function (userId, doc) {
+        // can only remove one's own items
+        return doc.userId === Meteor.user().profile.email;
+      },
+    });
 };
 
 if (Meteor.isClient) {
@@ -317,5 +333,6 @@ if (Meteor.isClient) {
     Meteor.subscribe("mozdefsettings");
     Meteor.subscribe("veris");
     Meteor.subscribe("kibanadashboards");
+    Meteor.subscribe("userActivity");
 };
 

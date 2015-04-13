@@ -20,11 +20,9 @@ if (Meteor.isClient) {
       Session.set('alertsrecordlimit',100);
       Session.set('attackerlimit','10');
       getAllPlugins();
-      //debug
-      //console.log(pluginsForEndPoint("test"));
-      //console.log(Blaze.isTemplate(Template.about));
+      
     });
-    
+
     //find plugins registered for a
     //specific endpoint
     pluginsForEndPoint=function(endpoint){
@@ -284,16 +282,26 @@ if (Meteor.isClient) {
        return isURL(astring); 
     });
 
-    //auto run to handle session variable changes
+    //Notify messages for the UI
     Deps.autorun(function() {
+        //set Session.set('displayMessage','title&text')
+        //to have a pnotify message
+        //created with that title/text
+        
         var message = Session.get('displayMessage');
         //console.log('Got new session message');
         if (message) {
             var stringArray = message.split('&');
-            //notify({
-            //  title : stringArray[0],
-            //  content: stringArray[1]
-            //});
+            new PNotify({
+              title : stringArray[0],
+              text: stringArray[1],
+              type: 'info',
+              delay: 2000,
+              buttons:{
+                closer:true,
+                closer_hover:false
+              }
+            });
             if (typeof console !== 'undefined')
               console.log(message)
             Session.set('displayMessage', null);
