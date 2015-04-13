@@ -21,8 +21,7 @@ class AlertDuoFailOpen(AlertTask):
         date_timedelta = dict(minutes=15)
         # Configure filters using pyes
         must = [
-            pyes.ExistsFilter('details.hostname'),
-            pyes.QueryFilter(pyes.MatchQuery('summary','DuoAPI contact failed','phrase'))
+            pyes.QueryFilter(pyes.MatchQuery('summary','Failsafe Duo login','phrase'))
         ]
         self.filtersManual(date_timedelta, must=must)
 
@@ -41,7 +40,7 @@ class AlertDuoFailOpen(AlertTask):
         tags = ['openvpn', 'duosecurity']
         severity = 'WARNING'
 
-        summary = ('DuoSecurity OpenVPN contact failed, fail open triggered on {0}'.aggreg['value'])
+        summary = 'DuoSecurity contact failed, fail open triggered on {0}'.format(aggreg['value'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
