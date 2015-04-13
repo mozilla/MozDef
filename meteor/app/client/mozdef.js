@@ -82,6 +82,10 @@ if (Meteor.isClient) {
       }
       return false;
     };
+    
+    isURL=function(astring){
+        return validator.isURL(astring);
+    };
 
     //used to take a dot notation string and get that object.field
     //from a javascript object
@@ -273,6 +277,11 @@ if (Meteor.isClient) {
         });
         //return raw html, consume as {{{ ipDecorate fieldname }} in a meteor template
         return anelement.prop('outerHTML');
+    });
+    
+    UI.registerHelper('isURL',function(astring){
+        //template access to isURL function
+       return isURL(astring); 
     });
 
     //auto run to handle session variable changes

@@ -130,7 +130,13 @@ if (Meteor.isClient) {
         },
 
         "click .referencedelete": function(e){
-            reftext = e.target.parentNode.firstChild.wholeText;
+            //wholeText if it's not a url,
+            //text if it's a url
+            if (e.target.parentNode.firstChild.wholeText){
+                reftext = e.target.parentNode.firstChild.wholeText
+            }else{
+                reftext = e.target.parentNode.firstChild.text;
+            }
             investigations.update(Session.get('investigationID'), {
                 $pull: {references:reftext}
             });

@@ -155,7 +155,12 @@ Jeff Bryner jbryner@mozilla.com
                         <ul class="list-unstyled col-xs-offset-2">
                             {{#each references}}
                             <li>
-                                <div class="col-xs-12">{{.}}<button type="button" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>
+                                {{#if isURL . }}
+                                    <div class="col-xs-12"><a href="{{.}}" target="_blank">{{.}}</a><button type="button" class="referencedelete close btn btn-danger pull-left" aria-hidden="false">&times;</button></div>
+                                
+                                {{else}}
+                                    <div class="col-xs-12">{{.}}<button type="btn" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>    
+                                {{/if}}
                             </li>
                             {{/each}}
                         </ul>
