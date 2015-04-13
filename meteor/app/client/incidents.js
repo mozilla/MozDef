@@ -476,7 +476,7 @@ if (Meteor.isClient) {
                                                 });
         };
 
-        //log the user entering the incident
+        //log the user entering the template
         activity=models.userAction();
         activity.path='incident';
         activity.itemId=Session.get('incidentID');
@@ -506,10 +506,7 @@ if (Meteor.isClient) {
                                                     Session.set('displayMessage',fields.userId + '& is viewing this incident')
                                                 }
                                         }); 
-            })
-            
-
-
+            });
             
         }); //end deps.autorun
 
@@ -576,7 +573,7 @@ if (Meteor.isClient) {
     };
     
     Template.editincidentform.destroyed = function () {
-        //remove the record of the user entering the incident
+        //remove the record of the user entering the template
         userActivity.remove(Template.instance.uaId);
     }
 

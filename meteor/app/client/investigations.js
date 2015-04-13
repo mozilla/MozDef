@@ -546,12 +546,36 @@ if (Meteor.isClient) {
                                                 startDate: dateOrNull($('#dateEnd').val() ) || moment()
                                                 });
         };
-        
+
+        //log the user entering the template
+        activity=models.userAction();
+        activity.path='investigation';
+        activity.itemId=Session.get('investigationID');
+        Template.instance.uaId=userActivity.insert(activity);
+
         //set up reactive data 
         Deps.autorun(function() {
             Meteor.subscribe("investigation-details",Session.get('investigationID'), onReady=function(){
                 initDatePickers();
-            });            
+            });
+            Meteor.subscribe("userActivity",onReady=function(){
+            //register a callback for new user activity
+            //to show a notify when someone enters
+            //screens the user is on
+            //only run onReady to avoid initialization 'add' messages.
+            cursorUserActivity=userActivity.find({path:'investigation',
+                                                 itemId:Session.get('investigationID'),
+                                                 userId: {$ne: Meteor.user().profile.email}
+                                                 },
+                                        {
+                                        reactive:true})
+                                        .observeChanges(
+                                                {added: function(id,fields){
+                                                    console.log(fields);
+                                                    Session.set('displayMessage',fields.userId + '& is viewing this investigation')
+                                                }
+                                        }); 
+            });
         }); //end deps.autorun
 
         saveInvestigation = function(e, template) {
@@ -620,6 +644,11 @@ if (Meteor.isClient) {
           return this;    
         }();
     };
+
+    Template.editinvestigationform.destroyed = function () {
+        //remove the record of the user entering the template
+        userActivity.remove(Template.instance.uaId);
+    }
     
     Template.addinvestigationform.rendered = function() {
         $('#dateOpened').daterangepicker({
