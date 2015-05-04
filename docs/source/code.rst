@@ -64,31 +64,31 @@ To create a REST API plugin simply create a python class that presents a registr
 
 ::
 
-class message(object):
-    def __init__(self):
-        '''register our criteria for being passed a message
-           as a list of lower case strings to match with an rest endpoint
-           (i.e. blockip matches /blockip)
-           set the priority if you have a preference for order of plugins
-           0 goes first, 100 is assumed/default if not sent
-           
-           Plugins will register in Meteor with attributes:
-           name: (as below)
-           description: (as below)
-           priority: (as below)
-           file: "plugins.filename" where filename.py is the plugin code.
-           
-           Plugin gets sent main rest options as:
-           self.restoptions
-           self.restoptions['configfile'] will be the .conf file
-           used by the restapi's index.py file.
-           
-        '''
-
-        self.registration = ['blockip']
-        self.priority = 10
-        self.name = "Banhammer"
-        self.description = "BGP Blackhole"
+    class message(object):
+        def __init__(self):
+            '''register our criteria for being passed a message
+               as a list of lower case strings to match with an rest endpoint
+               (i.e. blockip matches /blockip)
+               set the priority if you have a preference for order of plugins
+               0 goes first, 100 is assumed/default if not sent
+               
+               Plugins will register in Meteor with attributes:
+               name: (as below)
+               description: (as below)
+               priority: (as below)
+               file: "plugins.filename" where filename.py is the plugin code.
+               
+               Plugin gets sent main rest options as:
+               self.restoptions
+               self.restoptions['configfile'] will be the .conf file
+               used by the restapi's index.py file.
+               
+            '''
+    
+            self.registration = ['blockip']
+            self.priority = 10
+            self.name = "Banhammer"
+            self.description = "BGP Blackhole"
         
 
 The registration is the REST endpoint for which your plugin will receive a copy of the request/response objects to use or modify.
@@ -131,7 +131,7 @@ and it will recognize the plugin and pass it events as it sees them.
 
 
 .. _plugins: https://github.com/jeffbryner/MozDef/tree/master/mq/plugins
-.. _python_plugins: https://github.com/jeffbryner/MozDef/tree/master/rest/plugins
+.. _python plugins: https://github.com/jeffbryner/MozDef/tree/master/rest/plugins
 
 
 
