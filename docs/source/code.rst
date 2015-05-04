@@ -52,6 +52,7 @@ Plugin Registration
 Simply place the .py file in the plugins directory where the esworker.py is located, restart the esworker.py process
 and it will recognize the plugin and pass it events as it sees them. 
 
+
 REST Plugins
 ============
 
@@ -98,6 +99,7 @@ to include/exclude plugins. For example the /blockip endpoint allows you to regi
 to match your environment: firewalls, BGP tables, DNS blackholes can all be independently implemented and chosen by the user
 at run time.
 
+
 Message Processing
 ++++++++++++++++++
 
@@ -123,11 +125,13 @@ return the request, response object once done:
     return (request, response)
 
 
+
 Plugin Registration
 +++++++++++++++++++
 
 Simply place the .py file in the rest/plugins directory, restart the REST API process
 and it will recognize the plugin and pass it events as it sees them. 
+
 
 
 .. _plugins: https://github.com/jeffbryner/MozDef/tree/master/mq/plugins
