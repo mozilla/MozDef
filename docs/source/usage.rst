@@ -23,7 +23,7 @@ The MozDef UI is focused on incident handling and adding security-specific visua
 Alerts
 ******
 
-Alerts are generally implemented as Elastic Search searches, or realtime examination of the incoming message queues. MozDef provides a plugin interface to allow open access to event data for enrichment, hooks into other systems, etc.
+Alerts are implemented as Elastic Search searches. MozDef provides a plugin interface to allow open access to event data for enrichment, hooks into other systems, etc.
 
 
 Incident handling
@@ -80,8 +80,8 @@ If your program doesn't log anything it doesn't exist. If it logs everything tha
 +------------------+---------------------------+---------------------------------------+
 | Password/Key     | Password changed, expired,| If your application takes on the      |
 | Events           | reset. Key expired,       | responsibility of storing a user's    |
-|                  | changed, reset.           | password (instead of using            |
-|                  |                           | centralized LDAP/persona) it is       |
+|                  | changed, reset.           | password (instead of using a          |
+|                  |                           | centralized source) it is             |
 |                  |                           | important to note changes to a users  |
 |                  |                           | credentials or crypto keys.           |
 +------------------+---------------------------+---------------------------------------+
@@ -263,7 +263,7 @@ Examples
 	{
 	    "timestamp": "2014-02-14T11:48:19.035762739-05:00",
 	    "hostname": "fedbox",
-	    "processname": "/tmp/go-build278925522/command-line-arguments/_obj/exe/log_json",
+	    "processname": "/path/to/your/program.exe",
 	    "processid": 3380,
 	    "severity": "INFO",
 	    "summary": "joe login failed",
@@ -281,19 +281,6 @@ Examples
 	}
 
 
-BanHammer
----------
-
-MozDef integrates `BanHammer`_ in its web interface to easily ban attackers from your network.
-To enable this feature, in ``meteor/app/lib/settings``, change the ``enableBanhammer`` option to ``true``, and modify set your BanHammer DB parameters in ``rest/index.conf``::
-
-    banhammerenable=True
-    banhammerdbhost="localhost"
-    banhammerdbuser="root"
-    banhammerdbpasswd=""
-    banhammerdbdb="banhammer"
-
-.. _BanHammer: https://github.com/XioNoX/BanHammer
 
 Writing alerts
 --------------
