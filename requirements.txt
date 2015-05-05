@@ -3,7 +3,7 @@ anyjson==0.3.3
 boto==2.26.1
 bottle==0.12.4
 configlib==1.0.0
-configparser==3.3.0r2
+configparser==3.5.0b2
 docutils==0.11
 elasticutils==0.8.2
 futures==2.1.6

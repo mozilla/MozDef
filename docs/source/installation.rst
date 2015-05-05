@@ -164,6 +164,13 @@ Step by Step::
 .. _installing docker: https://docs.docker.com/installation/#installation
 .. _instructions: http://mozdef.readthedocs.org/en/latest/installation.html#dockerfile
 
+MozDef manual installation process
+----------------------------------
+This section explains the manual installation process for the MozDef system.
+  git clone https://github.com/jeffbryner/MozDef.git
+
+
+
 Elasticsearch nodes
 -------------------
 
@@ -225,6 +232,8 @@ Then::
   make
   make install
 
+  cd /home/mozdef
+
   wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
   export LD_LIBRARY_PATH=/home/mozdef/python2.7/lib/
   ./python2.7/bin/python get-pip.py
@@ -251,8 +260,8 @@ On Yum-based systems::
 
 You can then install the rabbitmq server::
 
-  rpm --import http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
-  yum install rabbitmq-server-3.2.4-1.noarch.rpm
+  sudo rpm --import http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
+  sudo yum install rabbitmq-server
 
 To start rabbitmq at startup::
 
@@ -300,13 +309,13 @@ For meteor, in a terminal::
   cd node-v0.10.26
   ./configure
   make
-  make install
+  sudo make install
 
-Make sure you have meteorite/mrt::
+Make sure you have meteorite/mrt (run as root/admin)::
 
   npm install -g meteorite
 
-Then from the meteor subdirectory of this git repository run::
+Then from the meteor subdirectory of this git repository (/home/mozdef/MozDef/meteor)  run::
 
   mrt add iron-router
   mrt add accounts-persona
@@ -403,12 +412,17 @@ We use `uwsgi`_ to interface python and nginx::
 
   wget http://projects.unbit.it/downloads/uwsgi-2.0.2.tar.gz
   tar zxvf uwsgi-2.0.2.tar.gz
+  cd uwsgi-2.0.2
   ~/python2.7/bin/python uwsgiconfig.py --build
   ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/mozdef/bin/
   cp uwsgi ~/envs/mozdef/bin/
 
-  cd rest
+  cp -r ~/MozDef/rest   ~/envs/mozdef/
+  cp -r ~/MozDef/loginput   ~/envs/mozdef/
+  mkdir ~/envs/mozdef/logs
+
+  cd ~/envs/mozdef/rest
   # modify settings.py
   vim settings.py
   # modify uwsgi.ini
