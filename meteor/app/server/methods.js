@@ -17,6 +17,7 @@ if (Meteor.isServer) {
         'ipwhois': ipwhois,
         'ipcif': ipcif,
         'ipdshield': ipdshield,
+        'ipintel': ipintel,
         'verisstats': verisstats,
         'logincounts': logincounts,
         'getplugins': getplugins
@@ -65,7 +66,7 @@ if (Meteor.isServer) {
             console.log("ipwhois: no response from server")
             return "";
         } else {
-            console.log(ipwhoisResponse);
+            //console.log(ipwhoisResponse);
             return ipwhoisResponse;
         }
     }
@@ -93,6 +94,19 @@ if (Meteor.isServer) {
         } else {
             //console.log(ipdshieldResponse);
             return ipcifResponse;
+        }
+    }
+
+    function ipintel(ipaddress){
+        //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipintel/');
+        var ipintelResponse = HTTP.post(mozdef.rootAPI + '/ipintel/',{data: {'ipaddress':ipaddress}});
+
+        if ( typeof ipintelResponse == 'undefined') {
+            console.log("ipintel: no response from server")
+            return "";
+        } else {
+            //console.log(ipdshieldResponse);
+            return ipintelResponse;
         }
     }
 

@@ -31,12 +31,12 @@ from pymongo import MongoClient
 from bson import json_util
 
 options = None
-dbcursor = None
-mysqlconn = None
 pluginList = list()   # tuple of module,registration dict,priority
 
-# cors decorator for rest/ajax
+
+
 def enable_cors(fn):
+    ''' cors decorator for rest/ajax'''
     def _enable_cors(*args, **kwargs):
         # set CORS headers
         response.headers['Access-Control-Allow-Origin'] = '*'
@@ -52,17 +52,19 @@ def enable_cors(fn):
 
 @route('/test')
 @route('/test/')
-def index():
+def test():
+    '''test endpoint for..testing'''
     ip = request.environ.get('REMOTE_ADDR')
     # response.headers['X-IP'] = '{0}'.format(ip)
     response.status = 200
-    
+
     sendMessgeToPlugins(request, response, 'test')
     return response
 
 @route('/status')
 @route('/status/')
-def index():
+def status():
+    '''endpoint for a status/health check'''
     if request.body:
         request.body.read()
         request.body.close()
@@ -77,6 +79,7 @@ def index():
 @route('/ldapLogins/')
 @enable_cors
 def index():
+    '''an endpoint to return success/failed login counts'''
     if request.body:
         request.body.read()
         request.body.close()
@@ -89,6 +92,7 @@ def index():
 @route('/veris/')
 @enable_cors
 def index():
+    '''returns a count of veris tags'''
     if request.body:
         request.body.read()
         request.body.close()
@@ -102,6 +106,7 @@ def index():
 @route('/kibanadashboards/')
 @enable_cors
 def index():
+    '''returns a list of dashboards to show on the UI'''
     if request.body:
         request.body.read()
         request.body.close()
@@ -116,8 +121,10 @@ def index():
 @post('/blockip/', methods=['POST'])
 @enable_cors
 def index():
+    '''will receive a call to block an ip address'''
     sendMessgeToPlugins(request, response, 'blockip')
     return response
+
 
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
@@ -132,7 +139,7 @@ def index():
         requestDict = json.loads(arequest)
     except ValueError as e:
         response.status = 500
-     
+
     if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
         response.content_type = "application/json"
         response.body = getWhois(requestDict['ipaddress'])
@@ -140,7 +147,30 @@ def index():
         response.status = 500
 
     sendMessgeToPlugins(request, response, 'ipwhois')
-    return response    
+    return response
+
+
+@post('/ipintel', methods=['POST'])
+@post('/ipintel/', methods=['POST'])
+@enable_cors
+def ipintel():
+    '''send an IP address through plugins for intel enhancement'''
+    if request.body:
+        arequest = request.body.read()
+        #request.body.close()
+    # valid json?
+    try:
+        requestDict = json.loads(arequest)
+    except ValueError as e:
+        response.status = 500
+    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
+        response.content_type = "application/json"
+    else:
+        response.status = 500
+
+    sendMessgeToPlugins(request, response, 'ipintel')
+    return response
+
 
 @post('/ipcifquery', methods=['POST'])
 @post('/ipcifquery/', methods=['POST'])
@@ -163,7 +193,7 @@ def index():
         response.status = 500
 
     sendMessgeToPlugins(request, response, 'ipcifquery')
-    return response    
+    return response
 
 @post('/ipdshieldquery', methods=['POST'])
 @post('/ipdshieldquery/', methods=['POST'])
@@ -181,10 +211,10 @@ def index():
         requestDict = json.loads(arequest)
     except ValueError as e:
         response.status = 500
-        return        
+        return
     if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
         url="https://isc.sans.edu/api/ip/"
-        
+
         dresponse = requests.get('{0}{1}?json'.format(url, requestDict['ipaddress']))
         if dresponse.status_code == 200:
             response.content_type = "application/json"
@@ -202,12 +232,13 @@ def index():
 @route('/plugins/', methods=['GET'])
 @route('/plugins/<endpoint>', methods=['GET'])
 def getPluginList(endpoint=None):
-    # return a json representation of the plugin tuple 
-    # (mname, mclass, mreg, mpriority)
-    # minus the actual class
-    # which isn't json-able
+    ''' return a json representation of the plugin tuple
+        (mname, mclass, mreg, mpriority)
+         minus the actual class (which isn't json-able)
+         for all plugins, or for a specific endpoint
+    '''
     pluginResponse = list()
-    if endpoint is None: 
+    if endpoint is None:
         for plugin in pluginList:
             pdict = {}
             pdict['file'] = plugin[0]
@@ -253,7 +284,7 @@ def registerPlugins():
                     mclass = module.message()
                     mreg = mclass.registration
                     mclass.restoptions = options
-                    
+
                     if 'priority' in dir(mclass):
                         mpriority = mclass.priority
                     else:
@@ -262,12 +293,12 @@ def registerPlugins():
                         mname = mclass.name
                     else:
                         mname = mfile
-                    
+
                     if 'description' in dir(mclass):
                         mdescription = mclass.description
                     else:
                         mdescription = mfile
-                    
+
                     if isinstance(mreg, list):
                         print('[*] plugin {0} registered to receive messages from /{1}'.format(mfile, mreg))
                         pluginList.append((mfile, mname, mdescription, mreg, mpriority, mclass))
@@ -320,6 +351,7 @@ def isIPv4(ip):
         return False
 
 def esLdapResults(begindateUTC=None, enddateUTC=None):
+    '''an ES query/facet to count success/failed logins'''
     resultsList = list()
     if begindateUTC is None:
         begindateUTC = datetime.now() - timedelta(hours=1)
@@ -405,15 +437,17 @@ def getWhois(ipaddress):
         ip = netaddr.IPNetwork(ipaddress)[0]
         if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
             whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup()
-            
+
         whois['fqdn']=socket.getfqdn(str(netaddr.IPNetwork(ipaddress)[0]))
         return (json.dumps(whois))
     except Exception as e:
         sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
 
+
 def getIPCIF(ipaddress):
-    # query a CIF service for information on this IP address per:
-    # https://code.google.com/p/collective-intelligence-framework/wiki/API_HTTP_v1
+    ''' query a CIF service for information on this IP address per:
+        https://code.google.com/p/collective-intelligence-framework/wiki/API_HTTP_v1
+    '''
     try:
         resultsList = []
         url='{0}api?apikey={1}&limit=20&confidence=65&q={2}'.format(options.cifhosturl,
@@ -446,26 +480,26 @@ def verisSummary(verisRegex=None):
                                    #{"$unwind" : "$tags" },
                                    #{"$match":{"tags":{"$regex":''}}}, #regex for tag querying
                                    #{"$group": {"_id": "$tags", "hitcount": {"$sum": 1}}}, # count by tag
-                                   #{"$sort": SON([("hitcount", -1), ("_id", -1)])}, #sort 
+                                   #{"$sort": SON([("hitcount", -1), ("_id", -1)])}, #sort
                                    #])
-        
+
         iveris=incidents.aggregate([
-                                    
+
                                    {"$match":{"tags":{"$exists":True}}},
                                    {"$unwind" : "$tags" },
                                    {"$match":{"tags":{"$regex":''}}}, #regex for tag querying
-                                   { "$project" : { "dateOpened" : 1 , 
+                                   { "$project" : { "dateOpened" : 1 ,
                                                    "tags" : 1 ,
                                                    "phase": 1,
                                                    "_id": 0
                                                    } }
-                                   ])        
+                                   ])
         if 'ok' in iveris.keys() and 'result' in iveris.keys():
             return json.dumps(iveris['result'], default=json_util.default)
         else:
             return json.dumps(list())
     except Exception as e:
-            sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))            
+            sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
 
 def initConfig():
     #change this to your default zone for when it's not specified
@@ -478,7 +512,7 @@ def initConfig():
     options.kibanaurl = getConfig('kibanaurl',
                                   'http://localhost:9090',
                                   options.configfile)
-    
+
     # options for your CIF service
     options.cifapikey = getConfig('cifapikey', '', options.configfile)
     options.cifhosturl = getConfig('cifhosturl',
@@ -497,7 +531,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     initConfig()
     registerPlugins()
-    
+
     run(host="localhost", port=8081)
 else:
     parser = OptionParser()
@@ -507,5 +541,5 @@ else:
     (options, args) = parser.parse_args()
     initConfig()
     registerPlugins()
-    
+
     application = default_app()

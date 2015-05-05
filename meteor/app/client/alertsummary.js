@@ -66,7 +66,11 @@ if (Meteor.isClient) {
         "click .ipmenu-cif": function(e,t){
             Session.set('ipcifipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalcifwindow').modal()
-        },        
+        },
+        "click .ipmenu-intel": function(e,t){
+            Session.set('ipintelipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalintelwindow').modal()
+        }, 
         "click .dropdown": function(e,t){
             $(e.target).addClass("hover");
             $('ul:first',$(e.target)).css('visibility', 'visible');

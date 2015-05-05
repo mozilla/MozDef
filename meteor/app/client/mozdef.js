@@ -10,17 +10,32 @@ Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
+    //global myo (if we have one)
+    myMyo=null;
     //default session variables
     //and session init actions
     Meteor.startup(function () {
-      Session.set('verisfilter','  ');
-      Session.set('alertssearchtext','');
-      Session.set('alertssearchtime','tail');
-      Session.set('alertsfiltertext','');
-      Session.set('alertsrecordlimit',100);
-      Session.set('attackerlimit','10');
-      getAllPlugins();
-      
+        Session.set('verisfilter','  ');
+        Session.set('alertssearchtext','');
+        Session.set('alertssearchtime','tail');
+        Session.set('alertsfiltertext','');
+        Session.set('alertsrecordlimit',100);
+        Session.set('attackerlimit','10');
+        getAllPlugins();
+        //see if we have a myo armband
+        try{
+            myMyo = Myo;
+            myMyo.onError=function(e){
+                if ( e.target instanceof WebSocket ){
+                    console.log('Could not connect to myo, is MyoConnect present and running? ')
+                }else{
+                    console.log('error',e)
+                }
+            };
+            myMyo.create();
+        }catch(e){
+            debugLog(e,'No myo found..you really should get one.')
+        }
     });
 
     //find plugins registered for a
@@ -233,6 +248,11 @@ if (Meteor.isClient) {
         });
     });
     
+    UI.registerHelper('stringify',function(obj) {
+       //given a json objects, simply stringify it
+       return JSON.stringify(obj,null,2)
+    });
+    
     UI.registerHelper('pluginsForEndPoint',function(endpoint){
         return pluginsForEndPoint(endpoint);
     });
@@ -266,10 +286,11 @@ if (Meteor.isClient) {
             ipmenu=$("<ul class='sub_menu' />");
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
+            intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
             cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
             blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
             
-            ipmenu.append(whoisitem,dshielditem,cifitem,blockIPitem);
+            ipmenu.append(whoisitem,dshielditem,intelitem,cifitem,blockIPitem);
             
             $(this).parent().parent().append(ipmenu);              
         });
