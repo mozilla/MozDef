@@ -7,6 +7,7 @@ Copyright (c) 2014 Mozilla Corporation
 Contributors:
 Jeff Bryner jbryner@mozilla.com
 */
+
 Router.configure({
     // the default layout
     layoutTemplate: 'layout'
@@ -67,7 +68,7 @@ Router.map(function () {
         waitOn: function() {
             Session.set('investigationID', this.params._id);
             return Meteor.subscribe('investigation-details', Session.get('investigationID'))
-            },        
+            },
         data: function() {
             return investigations.findOne(this.params._id);
         },
@@ -98,7 +99,7 @@ Router.map(function () {
         waitOn: function() {
             Session.set('incidentID', this.params._id);
             return Meteor.subscribe('incident-details', Session.get('incidentID'))
-            },        
+            },
         data: function() {
             return incidents.findOne(this.params._id);
         },
@@ -125,24 +126,24 @@ Router.map(function () {
         },
         layoutTemplate: 'layout'
     });
-   
+
     this.route('globe', {
         path: '/globe',
         template: 'globe',
         layoutTemplate: 'layout'
-    }); 
-    
+    });
+
     this.route('logincounts', {
         path: '/logincounts',
         template: 'logincounts',
         layoutTemplate: 'layout'
     });
-    
+
     this.route('blockip', {
         path: '/incidents/blockip/:_ipaddr',
         template: 'blockIPform',
         data: function() {
-          Session.set('blockIPipaddress', this.params._ipaddr);
+            Session.set('blockIPipaddress', this.params._ipaddr);
         },
         layoutTemplate: 'layout'
     });
@@ -151,15 +152,15 @@ Router.map(function () {
         path: '/ipwhois/:_ipaddress',
         template: 'ipwhois',
         data: function() {
-          Session.set('ipwhoisipaddress', this.params._ipaddress);
+            Session.set('ipwhoisipaddress', this.params._ipaddress);
         }
-    });    
+    });
 
     this.route('ipdshield', {
         path: '/ipdshield/:_ipaddress',
         template: 'ipdshield',
         data: function() {
-          Session.set('ipdshieldipaddress', this.params._ipaddress);
+            Session.set('ipdshieldipaddress', this.params._ipaddress);
         }
     });
 
@@ -167,8 +168,17 @@ Router.map(function () {
         path: '/ipcif/:_ipaddress',
         template: 'ipcif',
         data: function() {
-          Session.set('ipcifipaddress', this.params._ipaddress);
+            Session.set('ipcifipaddress', this.params._ipaddress);
         }
+    });
+
+    this.route('ipintel',{
+        path: '/ipintel/:_ipaddress',
+        template: 'ipintel',
+        data: function(){
+            Session.set('ipintelipaddress',this.params._ipaddress)
+        }
+
     });
 
     this.route('veris',{
@@ -177,5 +187,3 @@ Router.map(function () {
        layoutTemplate: 'layout'
     });
 });
-
-

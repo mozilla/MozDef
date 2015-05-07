@@ -95,7 +95,7 @@ if (Meteor.isClient) {
       }
       return false;
     };
-    
+
     isURL=function(astring){
         return validator.isURL(astring);
     };
@@ -116,7 +116,7 @@ if (Meteor.isClient) {
           console.log(logthis);
         }
     };
-    
+
     formToObject=function(selector){
         //send a selctor like "#formID :input"
         //get back an object you can JSON.stringify
@@ -131,7 +131,7 @@ if (Meteor.isClient) {
                 case "checkbox":
                     o[n.name] = $(n).prop('checked');
                     break;
-                default: 
+                default:
                     o[n.name] = $(n).val();
                     break;
             }
@@ -139,6 +139,19 @@ if (Meteor.isClient) {
         });
         return formobj;
     };
+
+    // given an object, recurse it and
+    // return a list of it's key/value pairs
+    listFlatten = function(x, result, prefix) {
+        if(_.isObject(x)) {
+            _.each(x, function(v, k) {
+                listFlatten(v, result,  k)
+            })
+        } else {
+            result.push({key:prefix,value: x})
+        }
+        return result
+    }
 
     Template.hello.greeting = function () {
         if (typeof console !== 'undefined')
@@ -188,11 +201,11 @@ if (Meteor.isClient) {
         //return the router URL for a specific attacker
         return(getSetting('rootURL') + '/attacker/' +  attackerid);
     });
-    
+
     UI.registerHelper('getAttackerIndicator', function(attackerid){
         //return the first indicator from a specific attacker
         return(attackers.findOne({'_id':attackerid}).indicators[0].ipv4address);
-    });    
+    });
 
     UI.registerHelper('isselected',function(optionvalue,datavalue){
         if (optionvalue==datavalue){
@@ -247,12 +260,16 @@ if (Meteor.isClient) {
 
         });
     });
-    
+
+    UI.registerHelper('objFlatten', function(obj){
+        return listFlatten(obj,[]);
+    });
+
     UI.registerHelper('stringify',function(obj) {
        //given a json objects, simply stringify it
        return JSON.stringify(obj,null,2)
     });
-    
+
     UI.registerHelper('pluginsForEndPoint',function(endpoint){
         return pluginsForEndPoint(endpoint);
     });
@@ -278,10 +295,10 @@ if (Meteor.isClient) {
             iptext=$(this).text();
             //add a caret so it looks drop downy
             $(this).append('<b class="caret"></b>');
-          
+
             //wrap the whole thing in a ul dropdown class
             $(this).wrap( "<ul class='dropdown'><li><a href='#'></a><li></ul>" );
-        
+
             //add the drop down menu
             ipmenu=$("<ul class='sub_menu' />");
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
@@ -289,18 +306,18 @@ if (Meteor.isClient) {
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
             cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
             blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
-            
+
             ipmenu.append(whoisitem,dshielditem,intelitem,cifitem,blockIPitem);
-            
-            $(this).parent().parent().append(ipmenu);              
+
+            $(this).parent().parent().append(ipmenu);
         });
         //return raw html, consume as {{{ ipDecorate fieldname }} in a meteor template
         return anelement.prop('outerHTML');
     });
-    
+
     UI.registerHelper('isURL',function(astring){
         //template access to isURL function
-       return isURL(astring); 
+       return isURL(astring);
     });
 
     //Notify messages for the UI
@@ -308,7 +325,7 @@ if (Meteor.isClient) {
         //set Session.set('displayMessage','title&text')
         //to have a pnotify message
         //created with that title/text
-        
+
         var message = Session.get('displayMessage');
         //console.log('Got new session message');
         if (message) {
