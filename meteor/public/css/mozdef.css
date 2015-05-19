@@ -187,7 +187,7 @@ td{
 }
 
 
-/*login ui css to hide the local account/password signup options */
+/* uncomment this login ui css to hide the local account/password signup options 
 .logins-wrapper .svgtextlabel {
   font-size: 20px;
   color: white;
@@ -204,6 +204,11 @@ td{
 
 .or {
   display: none;
+}
+*/
+/* don't float the 'create account' link*/
+#login-buttons #signup-link{
+    float: none;
 }
 
 /* d3 circle styles */
