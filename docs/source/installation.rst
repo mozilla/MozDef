@@ -459,3 +459,26 @@ To initialize elasticsearch indices and load some sample data::
 
 .. _Kibana: http://www.elasticsearch.org/overview/kibana
 
+Start Services
+******
+
+Start the following services
+
+  cd ~/MozDef/mq
+  ./esworker.py
+  
+  cd ~/MozDef/alerts
+  celery -A celeryconfig worker --loglevel=info --beat 
+  
+  cd ~/MozDef/examples/demo
+  ./syncalerts.sh
+  ./sampleevents.sh
+  
+  
+  
+  
+
+
+
+
+
