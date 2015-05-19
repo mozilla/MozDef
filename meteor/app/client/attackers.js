@@ -858,7 +858,6 @@ if (Meteor.isClient) {
                 if ( exists === undefined ) {
                     //debugLog('adding character ')
                     x=startingPosition.x + (i*2);
-                    console.log(sizer(element.eventscount));
                     createCharacter(element,x,startingPosition.y,startingPosition.z,sizer(element.eventscount))
                     }
                 else{
