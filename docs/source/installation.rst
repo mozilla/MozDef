@@ -18,13 +18,14 @@ After `installing docker`_, use this to build a new image::
 Running the container::
 
   sudo make run
+  (once inside as root)
+  /etc/init.d/supervisor start
 
 You're done! Now go to:
 
  * http://localhost:3000 < meteor (main web interface)
  * http://localhost:9090 < kibana
  * http://localhost:9200 < elasticsearch
- * http://localhost:9200/\_plugin/marvel < marvel (monitoring for elasticsearch)
  * http://localhost:8080 < loginput
  * http://localhost:8081 < rest api
 
@@ -33,7 +34,8 @@ Get a terminal in the container
 
 An common problem in Docker is that once you start a container, you cannot enter it as there is no ssh by default.
 
-To solve this, a solution is to use `nsenter` present in the `util-linux` > 2.23 package.
+When you make the container, you will enter it as root by default, but if you
+would like to enter it manually use `nsenter` present in the `util-linux` > 2.23 package.
 Debian and Ubuntu currently provide the 2.20 version so you need to download and compile the source code::
 
   cd /tmp
@@ -93,20 +95,20 @@ Step by Step::
     Choose next and add any tags you may want
     Choose next and select any security group you may want to limit incoming traffic.
     Choose launch and select an ssh key-pair or create a new one for ssh access to the instance.
-    
+
     For easy connect instructions, select your instance in the Ec2 dashboard->instances menu and choose connect for instructions.
     ssh into your new instance according to the instructions ^^
-    
+
     clone the github repo to get the latest code:
     from your home directory (/home/ubuntu if using the AMI instance from above)
         sudo apt-get update
         sudo apt-get install git
         git clone https://github.com/jeffbryner/MozDef.git
-        
+
     change the settings.js file to match your install:
     vim /home/ubuntu/MozDef/docker/conf/settings.js
         <change rootURL,rootAPI, kibanaURL from localhost to the FQDN or ip address of your AMI instance: i.e. http://1.2.3.4 >
-        
+
     Inbound port notes:
     You will need to allow the AWS/docker instance to talk to the FQDN or ip address you specify in settings.js
     or the web ui will likely fail as it tries to contact internal services.
@@ -117,7 +119,7 @@ Step by Step::
         cd MozDef/docker
         sudo apt-get install make
         sudo make build (this will take awhile)
-            [ make build-no-cache     (if needed use to disable docker caching routines or rebuild) 
+            [ make build-no-cache     (if needed use to disable docker caching routines or rebuild)
             [ at the end you should see a message like: Successfully built e8e075e66d8d ]
 
     starting docker:
@@ -129,19 +131,22 @@ Step by Step::
             ./configure --without-ncurses
             make nsenter
             sudo cp nsenter /usr/local/bin
-            
+
             sudo vim /usr/local/bin/dkenter
                 #!/bin/bash
-                
+
                 CNAME=$1
                 CPID=$(docker inspect --format '{{ .State.Pid }}' $CNAME)
                 nsenter --target $CPID --mount --uts --ipc --net --pid
-                
+
             sudo chmod +x /usr/local/bin/dkenter
 
         cd && cd MozDef/docker/
-        screen (running docker will not run in background session)
+        screen
         sudo make run
+        (once inside the container)
+        #/etc/init.d/supervisor start
+        
         Browse to http://youripaddress:3000 for the MozDef UI
 
     Build notes:
@@ -156,10 +161,10 @@ Step by Step::
         2) sudo dkenter <containerid>
         3) supervisorctl
         4) stop realTimeEvents
-            
 
-    
-    
+
+
+
 .. _docker: https://www.docker.io/
 .. _installing docker: https://docs.docker.com/installation/#installation
 .. _instructions: http://mozdef.readthedocs.org/en/latest/installation.html#dockerfile
@@ -299,7 +304,7 @@ Then you can install mongodb::
 On APT-based systems::
 
   sudo apt-get install mongodb-server
-  
+
 For meteor, in a terminal::
 
   curl https://install.meteor.com/ | sh
@@ -466,19 +471,10 @@ Start the following services
 
   cd ~/MozDef/mq
   ./esworker.py
-  
+
   cd ~/MozDef/alerts
-  celery -A celeryconfig worker --loglevel=info --beat 
-  
+  celery -A celeryconfig worker --loglevel=info --beat
+
   cd ~/MozDef/examples/demo
   ./syncalerts.sh
   ./sampleevents.sh
-  
-  
-  
-  
-
-
-
-
-
