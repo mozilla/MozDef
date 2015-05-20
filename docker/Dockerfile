@@ -52,7 +52,7 @@ RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysq
         && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
         && /bin/ln -s /opt/MozDef-master /opt/MozDef \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
-	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi gevent celery \
+	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi celery \
 	&& mkdir /var/log/mozdef \
 	&& mkdir -p /run/uwsgi/apps/ \
 	&& touch /run/uwsgi/apps/loginput.socket && chmod 666 /run/uwsgi/apps/loginput.socket \
