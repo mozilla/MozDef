@@ -64,11 +64,11 @@ ADD conf/settings.js /opt/MozDef/meteor/app/lib/settings.js
 ADD conf/config.py /opt/MozDef/alerts/lib/config.py
 ADD conf/sampleData2MozDef.conf /opt/MozDef/examples/demo/sampleData2MozDef.conf
 ADD conf/mozdef.localloginenabled.css /opt/MozDef/meteor/public/css/mozdef.css
+ADD conf/syncalerts.sh /opt/MozDef/examples/demo/syncalerts.sh
 
 # elasticsearch
 RUN (curl -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.2.tar.gz  | tar -C /opt -xz \
 	&& /bin/ln -s /opt/elasticsearch-1.3.2 /opt/elasticsearch \
-	&& /opt/elasticsearch/bin/plugin --install elasticsearch/marvel/latest \
 	&& rm /opt/elasticsearch/config/elasticsearch.yml)
 # ADD conf/elasticsearch/elasticsearch.yml /opt/elasticsearch/config/ # BUG https://github.com/dotcloud/docker/issues/2446
 ADD conf/elasticsearch.yml /opt/elasticsearch-1.3.2/config/
@@ -114,5 +114,5 @@ EXPOSE 8081
 RUN apt-get clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
 # Launch rabbit and sleep 10s for it to start
-CMD /etc/init.d/rabbitmq-server start && sleep 10 && /usr/bin/supervisord
+#CMD /etc/init.d/rabbitmq-server start && sleep 10 && /usr/bin/supervisord
 
