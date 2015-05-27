@@ -28,12 +28,12 @@ class AlertMultipleIntelHits(AlertTask):
         self.filtersManual(date_timedelta, must=must)
 
         # Search aggregations on field 'seenindicator', keep X samples of events at most
-        self.searchEventsAggreg('seenindicator', samplesLimit=10)
+        self.searchEventsAggregated('details.seenindicator', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         self.walkAggregations(threshold=10)
 
     # Set alert properties
-    def onAggreg(self, aggreg):
+    def onAggregation(self, aggreg):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
@@ -43,7 +43,7 @@ class AlertMultipleIntelHits(AlertTask):
         hostname = aggreg['events'][0]['_source']['hostname']
 
         summary = '{0} {1} {2} on {3}'.format(aggreg['count'], hostname, ' Bro intel match for indicator:', aggreg['value'])
-        
+
         summary += ' sample hosts that hit it: '
         for e in aggreg['events'][:3]:
             if 'details' in e['_source'].keys() \

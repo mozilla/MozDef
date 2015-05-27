@@ -30,12 +30,12 @@ class AlertBruteforceSsh(AlertTask):
         self.filtersManual(date_timedelta, must=must, must_not=must_not)
 
         # Search aggregations on field 'sourceipaddress', keep X samples of events at most
-        self.searchEventsAggreg('sourceipaddress', samplesLimit=10)
+        self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         self.walkAggregations(threshold=10)
 
     # Set alert properties
-    def onAggreg(self, aggreg):
+    def onAggregation(self, aggreg):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
@@ -46,7 +46,7 @@ class AlertBruteforceSsh(AlertTask):
         summary = ('{0} ssh bruteforce attempts by {1}'.format(aggreg['count'], aggreg['value']))
         hosts = self.mostCommon(aggreg['allevents'],'_source.details.hostname')
         for i in hosts[:5]:
-            summary += ' {0} ({1} hits)'.format(i[0], i[1])        
+            summary += ' {0} ({1} hits)'.format(i[0], i[1])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

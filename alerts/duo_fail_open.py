@@ -26,13 +26,13 @@ class AlertDuoFailOpen(AlertTask):
         self.filtersManual(date_timedelta, must=must)
 
         # Search aggregations on field 'sourceipaddress', keep X samples of events at most
-        self.searchEventsAggreg('hostname', samplesLimit=10)
+        self.searchEventsAggregated('details.hostname', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         # in this case, always
         self.walkAggregations(threshold=1)
 
     # Set alert properties
-    def onAggreg(self, aggreg):
+    def onAggregation(self, aggreg):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
