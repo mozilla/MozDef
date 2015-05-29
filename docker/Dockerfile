@@ -7,7 +7,7 @@
 # Yohann Lepage yohann@lepage.info
 # Anthony Verez averez@mozilla.com
 
-FROM debian:testing
+FROM debian:stable
 
 MAINTAINER Jeff Bryner <jbryner@mozilla.com>
 
