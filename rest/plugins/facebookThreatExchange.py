@@ -161,10 +161,12 @@ class message(object):
                     if not ipcidr.ip.is_loopback() \
                        and not ipcidr.ip.is_private() \
                        and not ipcidr.ip.is_reserved():
-                        #split the ip vs cidr mask
-                        ipaddress, CIDR =  str(ipcidr.cidr).split('/')
+                        # split the ip vs cidr mask
+                        # threat exchange can't accept CIDR addresses
+                        # so send the most significant bit
+                        ipaddress, CIDR =  str(ipcidr).split('/')
                         self.sendToThreatExchange(ipaddress, comment)
-                        sys.stdout.write ('Sent {0}/{1} to threat exchange\n'.format(ipaddress, CIDR))
+                        sys.stdout.write ('Sent {0} to threat exchange\n'.format(ipaddress))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
