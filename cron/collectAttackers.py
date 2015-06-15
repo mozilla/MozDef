@@ -50,6 +50,21 @@ def initLogger():
         logger.addHandler(sh)
 
 
+def isIPv4(ip):
+    try:
+        # netaddr on it's own considers 1 and 0 to be valid_ipv4
+        # so a little sanity check prior to netaddr.
+        # Use IPNetwork instead of valid_ipv4 to allow CIDR
+        if '.' in ip and len(ip.split('.'))==4:
+            # some ips are quoted
+            netaddr.IPNetwork(ip.strip("'").strip('"'))
+            return True
+        else:
+            return False
+    except:
+        return False
+
+
 def toUTC(suspectedDate, localTimeZone=None):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
@@ -161,7 +176,8 @@ def searchMongoAlerts(mozdefdb):
         {"$limit": 10} # top 10
         ])
     for ip in ipv4TopHits['result']:
-        if netaddr.valid_ipv4(ip['_id']):
+        #sanity check ip['_id'] which should be the ipv4 address
+        if isIPv4(ip['_id']) and ip['_id'] not in netaddr.IPSet(['0.0.0.0']):
             ipcidr = netaddr.IPNetwork(ip['_id'])
             # expand it to a /24 CIDR
             # todo: lookup ipwhois for asn_cidr value

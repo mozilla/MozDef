@@ -167,6 +167,16 @@ models={
             'password': '',
             'hash': ''
         };
-    }	
+    },
+    
+    userAction: function(){
+        return {
+            '_id': Meteor.uuid(),
+            'userId':Meteor.user().profile.email,
+            'path':'',
+            'itemId':'',
+            'dateCreated': today
+        };
+    },
 
 };

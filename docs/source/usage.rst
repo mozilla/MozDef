@@ -23,7 +23,7 @@ The MozDef UI is focused on incident handling and adding security-specific visua
 Alerts
 ******
 
-Alerts are generally implemented as Elastic Search searches, or realtime examination of the incoming message queues. MozDef provides a plugin interface to allow open access to event data for enrichment, hooks into other systems, etc.
+Alerts are implemented as Elastic Search searches. MozDef provides a plugin interface to allow open access to event data for enrichment, hooks into other systems, etc.
 
 
 Incident handling
@@ -80,8 +80,8 @@ If your program doesn't log anything it doesn't exist. If it logs everything tha
 +------------------+---------------------------+---------------------------------------+
 | Password/Key     | Password changed, expired,| If your application takes on the      |
 | Events           | reset. Key expired,       | responsibility of storing a user's    |
-|                  | changed, reset.           | password (instead of using            |
-|                  |                           | centralized LDAP/persona) it is       |
+|                  | changed, reset.           | password (instead of using a          |
+|                  |                           | centralized source) it is             |
 |                  |                           | important to note changes to a users  |
 |                  |                           | credentials or crypto keys.           |
 +------------------+---------------------------+---------------------------------------+
@@ -262,16 +262,17 @@ Examples
 
 	{
 	    "timestamp": "2014-02-14T11:48:19.035762739-05:00",
-	    "hostname": "fedbox",
-	    "processname": "/tmp/go-build278925522/command-line-arguments/_obj/exe/log_json",
+	    "hostname": "somemachine.in.your.company.com",
+	    "processname": "/path/to/your/program.exe",
 	    "processid": 3380,
 	    "severity": "INFO",
 	    "summary": "joe login failed",
 	    "category": "authentication",
-	    "source": "",
+	    "source": "ldap",
 	    "tags": [
-	        "MySystem",
-	        "Authentication"
+	        "ldap",
+	        "adminAccess",
+            "failure"
 	    ],
 	    "details": {
 	        "user": "joe",
@@ -281,19 +282,65 @@ Examples
 	}
 
 
-BanHammer
----------
+.. code-block:: javascript
+    {
+        "category": "netflow",
+        "tags": [
+          "netflow",
+          "network"
+        ],
+        "timestamp": "2015-05-04T16:36:52.336527+00:00",
+        "summary": "10.247.28.2:60469 --> 2.192.38.177:6824",
+        "details": {
+          "protocol": 6,
+          "destinationmask": 0,
+          "sourceipv4address": "10.247.28.2",
+          "nexthop": "0.0.0.0",
+          "unixnanoseconds": 0,
+          "site": "site1",
+          "tcpflags": 16,
+          "enginetype": 0,
+          "engineid": 0,
+          "uptime": 96215086,
+          "tos": 0,
+          "hostname": "fw1.site1.somewhere.net",
+          "version": 5,
+          "unixseconds": 1430757412,
+          "sourceport": 60469,
+          "destinationport": 6824,
+          "flowsequence": 93808622,
+          "octets": 1656,
+          "destinationipgeolocation": {
+            "city": "Beijing",
+            "region_code": "22",
+            "area_code": 0,
+            "time_zone": "Asia/Harbin",
+            "dma_code": 0,
+            "metro_code": null,
+            "country_code3": "CHN",
+            "latitude": 39.9289,
+            "postal_code": null,
+            "longitude": 116.38830000000002,
+            "country_code": "CN",
+            "country_name": "China",
+            "continent": "AS"
+          },
+          "samplinginterval": 100,
+          "sourceasn": 0,
+          "sourceipaddress": "10.247.28.2",
+          "count": 29,
+          "destinationipaddress": "2.192.38.177",
+          "last": 96205073,
+          "sourcemask": 21,
+          "packets": 4,
+          "destinationasn": 0,
+          "sitetype": "office",
+          "destinationipv4address": "2.192.38.177",
+          "first": 96161074
+        }
+    }
 
-MozDef integrates `BanHammer`_ in its web interface to easily ban attackers from your network.
-To enable this feature, in ``meteor/app/lib/settings``, change the ``enableBanhammer`` option to ``true``, and modify set your BanHammer DB parameters in ``rest/index.conf``::
 
-    banhammerenable=True
-    banhammerdbhost="localhost"
-    banhammerdbuser="root"
-    banhammerdbpasswd=""
-    banhammerdbdb="banhammer"
-
-.. _BanHammer: https://github.com/XioNoX/BanHammer
 
 Writing alerts
 --------------

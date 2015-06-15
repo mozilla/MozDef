@@ -90,11 +90,11 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
                             
                         </ul>
                     </div>
-                    <div class="row span2 center">
-                        <span>raw json:</span>
-                        <span class="unstyled">
-                                {{whois.content}}
-                        </span>
+                    <div class="col-xs-1"><button class="btn btn-xs" data-toggle="collapse" data-target="#rawwhoisjson">raw json</button></div>
+                    <div class="col-xs-7 col-xs-offset-1">
+                        <div id='rawwhoisjson' class="collapse">
+                            <pre>{{whois.content}}</pre>
+                        </div>
                     </div>            
                 </div>
                 <div class="modal-footer">

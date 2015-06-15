@@ -37,7 +37,9 @@ if (Meteor.isClient) {
 
     //return all incidents
     Template.incidents.incident = function () {
-        return incidents.find();
+        return incidents.find({},{
+                              sort: {dateOpened: -1}
+                            });
     };
 
     //select an incident for editing
@@ -51,7 +53,14 @@ if (Meteor.isClient) {
 
         "click .incidentdelete": function(e){
             incidents.remove(this._id);
-        }        
+        },
+
+        "mouseenter .info-row": function(e,t){
+            //toggle the bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
+        }
     });
 
     Template.incidents.rendered = function(){
@@ -133,7 +142,13 @@ if (Meteor.isClient) {
         },
 
         "click .referencedelete": function(e){
-            reftext = e.target.parentNode.firstChild.wholeText;
+            //wholeText if it's not a url,
+            //text if it's a url
+            if (e.target.parentNode.firstChild.wholeText){
+                reftext = e.target.parentNode.firstChild.wholeText
+            }else{
+                reftext = e.target.parentNode.firstChild.text;
+            }
             incidents.update(Session.get('incidentID'), {
                 $pull: {references:reftext}
             });
@@ -405,6 +420,12 @@ if (Meteor.isClient) {
               console.log(e)
             }
             
+        },
+        "mouseenter .info-row": function(e,t){
+            //toggle the bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
         }
     });
 
@@ -454,12 +475,39 @@ if (Meteor.isClient) {
                                                 startDate: dateOrNull($('#dateContained').val() ) || moment()
                                                 });
         };
+
+        //log the user entering the template
+        activity=models.userAction();
+        activity.path='incident';
+        activity.itemId=Session.get('incidentID');
+        Template.instance.uaId=userActivity.insert(activity);
+        
         
         //set up reactive data 
         Deps.autorun(function() {
             Meteor.subscribe("incident-details",Session.get('incidentID'), onReady=function(){
                 initDatePickers();
-            });            
+            });
+            
+            Meteor.subscribe("userActivity",onReady=function(){
+            //register a callback for new user activity
+            //to show a notify when someone enters
+            //screens the user is on
+            //only run onReady to avoid initialization 'add' messages.
+            cursorUserActivity=userActivity.find({path:'incident',
+                                                 itemId:Session.get('incidentID'),
+                                                 userId: {$ne: Meteor.user().profile.email}
+                                                 },
+                                        {
+                                        reactive:true})
+                                        .observeChanges(
+                                                {added: function(id,fields){
+                                                    console.log(fields);
+                                                    Session.set('displayMessage',fields.userId + '& is viewing this incident')
+                                                }
+                                        }); 
+            });
+            
         }); //end deps.autorun
 
         //code to save the main tab data
@@ -524,6 +572,11 @@ if (Meteor.isClient) {
         }();
     };
     
+    Template.editincidentform.destroyed = function () {
+        //remove the record of the user entering the template
+        userActivity.remove(Template.instance.uaId);
+    }
+
     Template.addincidentform.rendered = function() {
         $('#dateOpened').daterangepicker({
                                             singleDatePicker: true,

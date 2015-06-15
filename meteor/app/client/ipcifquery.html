@@ -103,11 +103,11 @@ modal: for  Session.set('ipcifipaddress','1,2.3.4') then
                         {{/each}}
                         </ul>
                     </div>
-                    <div class="row span2 center">
-                        <span>raw json:</span>
-                        <span class="unstyled">
-                                {{cif.content}}
-                        </span>
+                    <div class="col-xs-1"><button class="btn btn-xs" data-toggle="collapse" data-target="#rawcifjson">raw json</button></div>
+                    <div class="col-xs-7 col-xs-offset-1">
+                        <div id='rawcifjson' class="collapse">
+                            <pre>{{cif.content}}</pre>
+                        </div>
                     </div>            
                 </div>
                 <div class="modal-footer">

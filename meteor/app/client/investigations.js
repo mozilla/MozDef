@@ -16,10 +16,13 @@ if (Meteor.isClient) {
     var lesson = null;
     var indicator = null;
     var evidence = null;
+    var timestamp = null;
 
     //return all investigations
     Template.investigations.investigation = function () {
-        return investigations.find();
+        return investigations.find({},{
+                              sort: {dateOpened: -1}
+                            });
     };
 
     //select an investigation for editing
@@ -33,7 +36,14 @@ if (Meteor.isClient) {
         
         "click .investigationdelete": function(e){
             investigations.remove(this._id);
-        }        
+        },
+
+        "mouseenter .info-row": function(e,t){
+            //toggle the bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
+        }
     });
 
     
@@ -120,7 +130,13 @@ if (Meteor.isClient) {
         },
 
         "click .referencedelete": function(e){
-            reftext = e.target.parentNode.firstChild.wholeText;
+            //wholeText if it's not a url,
+            //text if it's a url
+            if (e.target.parentNode.firstChild.wholeText){
+                reftext = e.target.parentNode.firstChild.wholeText
+            }else{
+                reftext = e.target.parentNode.firstChild.text;
+            }
             investigations.update(Session.get('investigationID'), {
                 $pull: {references:reftext}
             });
@@ -187,7 +203,7 @@ if (Meteor.isClient) {
                 timestamp.creator=Meteor.user().profile.email;
             }
 
-            timestamp.timestamp=dateOrNull($('#timestamp').val());
+            timestamp.timestamp=dateOrNull($('#timestampText').val());
             timestamp.description=$('#timestampDescription').val();
             timestamp.lastModifier=Meteor.user().profile.email;
 
@@ -201,7 +217,7 @@ if (Meteor.isClient) {
                     $addToSet: {timestamps:timestamp}
                 });
 
-                $('#timestamp').val('');
+                $('#timestampText').val('');
                 $('#timestampDescription').val('');
                 timestamp=null;
                 e.preventDefault();
@@ -219,7 +235,7 @@ if (Meteor.isClient) {
                                   ).timestamps;
             timestamp=_.findWhere(timestamps, {'_id': timestamp._id});
             if (timestamp != undefined) {
-                $('#timestamp').val(timestamp.timestamp);
+                $('#timestampText').val(timestamp.timestamp);
                 $('#timestampDescription').val(timestamp.description);
             }
             e.preventDefault();
@@ -489,7 +505,12 @@ if (Meteor.isClient) {
               console.log('readystatechange')
               console.log(e)
             }
-            
+        },
+        "mouseenter .info-row": function(e,t){
+            //toggle the bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip({
+                'placement': 'top'
+            });
         }
     });
 
@@ -525,12 +546,36 @@ if (Meteor.isClient) {
                                                 startDate: dateOrNull($('#dateEnd').val() ) || moment()
                                                 });
         };
-        
+
+        //log the user entering the template
+        activity=models.userAction();
+        activity.path='investigation';
+        activity.itemId=Session.get('investigationID');
+        Template.instance.uaId=userActivity.insert(activity);
+
         //set up reactive data 
         Deps.autorun(function() {
             Meteor.subscribe("investigation-details",Session.get('investigationID'), onReady=function(){
                 initDatePickers();
-            });            
+            });
+            Meteor.subscribe("userActivity",onReady=function(){
+            //register a callback for new user activity
+            //to show a notify when someone enters
+            //screens the user is on
+            //only run onReady to avoid initialization 'add' messages.
+            cursorUserActivity=userActivity.find({path:'investigation',
+                                                 itemId:Session.get('investigationID'),
+                                                 userId: {$ne: Meteor.user().profile.email}
+                                                 },
+                                        {
+                                        reactive:true})
+                                        .observeChanges(
+                                                {added: function(id,fields){
+                                                    console.log(fields);
+                                                    Session.set('displayMessage',fields.userId + '& is viewing this investigation')
+                                                }
+                                        }); 
+            });
         }); //end deps.autorun
 
         saveInvestigation = function(e, template) {
@@ -599,6 +644,11 @@ if (Meteor.isClient) {
           return this;    
         }();
     };
+
+    Template.editinvestigationform.destroyed = function () {
+        //remove the record of the user entering the template
+        userActivity.remove(Template.instance.uaId);
+    }
     
     Template.addinvestigationform.rendered = function() {
         $('#dateOpened').daterangepicker({

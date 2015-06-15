@@ -32,7 +32,7 @@ if (Meteor.isClient) {
     var container = null;
     var cursorAttackers = null;
 
-    
+
 
     Template.attackers.events({
         "click #btnReset": function(e){
@@ -57,13 +57,13 @@ if (Meteor.isClient) {
                     }
                 }
             }
-            
+
             if ( event.currentTarget.textContent=='WireFrame' ){
                 event.currentTarget.textContent='Color';
             } else {
                 event.currentTarget.textContent='WireFrame';
             }
-            
+
         },
         "click .blockip": function(e,t){
             Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
@@ -85,7 +85,7 @@ if (Meteor.isClient) {
         },
         "change #attackerLimit": function(e,t){
             Session.set('attackerlimit', $('#attackerLimit').val());
-        },         
+        },
         "mousedown": function(event,template){
         //if mouse is over a character
         //set the selected object
@@ -102,7 +102,7 @@ if (Meteor.isClient) {
                 var intersects = raycaster.intersectObject( plane );
                 offset.copy( intersects[ 0 ].point ).sub( plane.position );
                 container.style.cursor = 'move';
-            }          
+            }
         },
         "mousemove": function(event,template){
             //x = right/left
@@ -115,15 +115,15 @@ if (Meteor.isClient) {
             //if intersected objects
             //    move the 2D plane
             //if no selected object we are moving the scene camera
-            
-            if ( sceneControls  ) {           
+
+            if ( sceneControls  ) {
                 //event.preventDefault();
                 mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
                 mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
                 var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
                 projector.unprojectVector( vector, sceneCamera );
                 var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
-    
+
                 if ( selectedObject ){
                     var intersects = raycaster.intersectObject( plane );
                     selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
@@ -135,25 +135,25 @@ if (Meteor.isClient) {
                             nameplate.position.add(nameplate.offset);
                         }
                     }
-                    return;         
+                    return;
                 }
-                
+
                 var intersects = raycaster.intersectObjects( sceneObjects, true );
                 if ( intersects.length > 0 ) {
                     if ( intersectedObject != intersects[ 0 ].object.parent ) {
                         intersectedObject = intersects[ 0 ].object.parent;
                         plane.position.copy( intersectedObject.position );
                         plane.lookAt( sceneCamera.position );
-                        
+
                         nameplate=intersectedObject.parent.getObjectByName('nameplate:' + intersectedObject.dbid,true)
                         if (nameplate){
                             nameplate.element.style.display='inline';
                             nameplate.lookAt( sceneCamera.position );
                         }
-                        
+
                     }
                     container.style.cursor = 'pointer';
-    
+
                 } else {
                     intersectedObject = null;
                     container.style.cursor = 'auto';
@@ -181,10 +181,10 @@ if (Meteor.isClient) {
             container.style.cursor = 'auto';
         }
     });
-    
+
     Template.attackers.created = function (){
         //console.log('attackers.created',this);
-       
+
         //new instances of THREE objects for this template
         scene = new THREE.Scene();
         sceneCamera= new THREE.PerspectiveCamera(25, window.innerWidth/window.innerHeight, 0.1, 100);
@@ -205,13 +205,86 @@ if (Meteor.isClient) {
     };
 
     Template.attackers.rendered = function () {
-        
+
         //setup charts, dimensions and mongoCrossfilter
         var ringChartAttackerCategory   = dc.pieChart("#ringChart-category","attackers");
         var ringChartLastSeen   = dc.pieChart("#ringChart-lastseen","attackers");
         var ringChartCountry = dc.pieChart("#ringChart-country","attackers");
         var chartsInitialized   =false;
         var currentSearch=null;
+
+        if (myMyo){
+            //set a default reference orientation
+            myMyo.orientation=new THREE.Quaternion(0,0,0,0);
+            myMyo.zero = new THREE.Quaternion(0,0,0,0);
+            myMyo.panZoom = false;
+            myMyo.rotate = false;
+
+            myMyo.on('fist', function(edge){
+                if(!edge) return;
+                    debugLog('Myo pan/zoom: ' + !myMyo.panZoom);
+                    this.vibrate('short');
+
+                    this.zeroOrientation();
+                    myMyo.panZoom=!myMyo.panZoom;
+                });
+            myMyo.on('wave_out', function(edge){
+                if(!edge) return;
+                    debugLog('Myo rotate: ' + !myMyo.rotate);
+                    this.vibrate('short');
+
+                    this.zeroOrientation();
+                    myMyo.rotate=!myMyo.rotate;
+                });
+            myMyo.on('orientation',function(data){
+
+                var newOrientation = new THREE.Quaternion(data.x,data.y,data.z,data.w);
+
+                //are we just initialized?
+                //accept our starting position as this data
+                if ( myMyo.orientation.equals(myMyo.zero) ){
+                    //console.log('setting orientation to',newOrientation)
+                    myMyo.orientation.copy(newOrientation);
+                }
+
+                //did we put it on backwards?
+                //logo should face elbow, 'on light' closes to wrist.
+                var inverse = (this.direction == 'toward_elbow') ? 1 : -1;
+
+                //what's the difference in this data vs our last
+                delta = myMyo.orientation.slerp(newOrientation,.5);
+
+                if (myMyo.rotate){
+                    //rotate
+                    var vector = sceneControls.target.clone();
+                    var up = sceneCamera.up.clone();
+                    var quaternion = new THREE.Quaternion();
+                    quaternion.setFromAxisAngle(up, delta.y/50);
+                    sceneCamera.position.applyQuaternion(quaternion);
+                    sceneCamera.lookAt(vector);
+                }
+
+                if (myMyo.panZoom){
+                    //pan/zoom
+                    //clone existing object.position and target
+                    //and move their X to pan
+                    panAmount=( inverse * delta.z)
+                    zoomAmount=(-1* inverse * delta.y)
+                    newTarget=sceneControls.object.position.clone();
+                    var v = new THREE.Vector3(panAmount,0,zoomAmount);
+                    newTarget.add(v)
+                    sceneControls.object.position.copy(newTarget);
+                    newTarget=sceneControls.target.clone();
+                    newTarget.add(v)
+                    sceneControls.target.copy(newTarget);
+                }
+
+                //save our new position for next diff
+                myMyo.orientation.copy(newOrientation);
+                sceneControls.update();
+                sceneCamera.updateProjectionMatrix();
+            });
+        };
 
         //faux crossfilter to retrieve it's data from meteor/mongo:
         var mongoCrossfilter = {}
@@ -224,7 +297,7 @@ if (Meteor.isClient) {
                     }
             return basecriteria;
         }
-    
+
         function _getFilters() {
             //build a list of what charts are selecting what.
             //expects chart.mongoField to specify
@@ -245,7 +318,7 @@ if (Meteor.isClient) {
             //console.log('getfilters result is', result);
             return result;
         }
-    
+
         function _fetchDataFor(filters) {
             results = {};
 
@@ -275,7 +348,7 @@ if (Meteor.isClient) {
                                 chart=list[x];
                                 //create an _id:'x time ago' mapping to use to pick out _ids
                                 idagos=_.map(chart.group().values,function(d){return {_id:d._id,ago:moment.utc(d.lastseentimestamp).fromNow()}});
-                                
+
                                 //now for each chart value (can be non-contiguous)
                                 //build a list of _ids
                                 for (value in values){
@@ -305,7 +378,7 @@ if (Meteor.isClient) {
                 //to return values to simulate crossfilter.
                 criteria=getSearchCriteria();
                 //build criteria which is the intersection of all charts
-                currentSearch=getSearchCriteria();                
+                currentSearch=getSearchCriteria();
                 //console.log(filters[chartID].field.valueOf());
                 for (cID in filters){
                     if (cID !==chartID && filters[cID].criteria){
@@ -357,10 +430,10 @@ if (Meteor.isClient) {
                 }
             }
         }
-                
+
         //helper functions to make
         //mongo look like crossfilter
-        mongoCrossfilter._dataChanged = true;        
+        mongoCrossfilter._dataChanged = true;
         mongoCrossfilter._fetchData =  _fetchData;
         mongoCrossfilter._fetchDataFor = _fetchDataFor;
         mongoCrossfilter._getFilters = _getFilters;
@@ -378,7 +451,7 @@ if (Meteor.isClient) {
                 //orderNatural: orderNatural,
                 //size: size,
                 //dispose: dispose,
-                //remove: dispose // for backwards-compatibility                
+                //remove: dispose // for backwards-compatibility
             }
             group.values=[];
             group.mongoField=mongoFilterField;
@@ -482,7 +555,7 @@ if (Meteor.isClient) {
             function filterFunction(){
             }
             function top(k){
-                console.log('top called for', dimension.mongoField)
+                //console.log('top called for', dimension.mongoField)
                 return _.first(dimension.values,k);
             }
             function bottom(k){
@@ -494,11 +567,11 @@ if (Meteor.isClient) {
                 return dimension.values;
             }
             function groupAll(){
-                console.log('groupAll called for', dimension.mongoField)
+                //console.log('groupAll called for', dimension.mongoField)
                 return dimension.values;
             }
             function dispose(){
-                
+
             }
             function remove(){
             }
@@ -512,14 +585,14 @@ if (Meteor.isClient) {
         //var agoDim = mongoCrossfilter.dimension('utcepoch',
         //                                        ringChartLastSeen,
         //                                        function(d){d.utcepoch=moment.utc(d.lastseentimestamp).fromNow()});
-        
+
         //graph a grouping on lastseentimestamp, but keep a list of record ids
         //to allow folks to select non-contiguous time ranges
         //that are shown as 'x minutes/hours/days ago'
         //in the chart.
         var agoDim = mongoCrossfilter.dimension('_id',
                                                  ringChartLastSeen);
-        
+
         var countryDim = mongoCrossfilter.dimension('geocoordinates.countrycode',
                                                     ringChartCountry);
 
@@ -577,10 +650,10 @@ if (Meteor.isClient) {
         var sceneSetup = function(thistemplate){
                 //console.log('scene setup');
                 sceneObjects=[];
-                window.addEventListener( 'resize', onWindowResize, false );         
+                window.addEventListener( 'resize', onWindowResize, false );
                 container=thistemplate.find('#attackers-wrapper');
                 renderer.setSize( window.innerWidth-scenePadding,window.innerHeight-scenePadding );
-                //no background for renderer..let the gradient show 
+                //no background for renderer..let the gradient show
                 renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
                 renderer.shadowMapEnabled = false;
                 //renderer.shadowMapCascade = false;
@@ -609,10 +682,10 @@ if (Meteor.isClient) {
                 //light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
                 //light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
                 scene.add( light );
-    
+
                 sceneCamera.position.z = 50;
                 //console.log('scene loaded');
-                var render = function () { 
+                var render = function () {
                     rid=requestAnimationFrame(render);
                     if (clock) {
                         var delta = clock.getDelta();
@@ -631,7 +704,7 @@ if (Meteor.isClient) {
                     }
                 };
                 thistemplate.find("#attackers-wrapper").appendChild(renderer.domElement);
-                thistemplate.find("#attackers-wrapper").appendChild(cssRenderer.domElement);                
+                thistemplate.find("#attackers-wrapper").appendChild(cssRenderer.domElement);
                 render();
         };
 
@@ -644,12 +717,14 @@ if (Meteor.isClient) {
         //load base character
         baseCharacter.loadParts(configOgro);
 
-        //ogro setup 
-        var createCharacter=function(dbrecord,x,y,z){
+        //ogro setup
+        var createCharacter=function(dbrecord,x,y,z,scale){
+            scale = typeof scale !== 'undefined' ? scale: .05;
             var character = new THREE.MD2CharacterComplex();
             character.id=dbrecord._id;
             character.name=dbrecord._id;
-            character.scale = .05; //+ .2*(dbrecord.alertscount/dbrecord.eventscount);
+            character.scale = scale;
+
             character.dbrecord=dbrecord;
             character.animationFPS=Math.floor((Math.random() * 5)+1);
             character.controls = ogroControls;
@@ -660,17 +735,17 @@ if (Meteor.isClient) {
             character.root.dbid=dbrecord._id;
             character.root.base=character;
             character.shareParts(baseCharacter);
-            
+
             //no weapons for now..
             //this.setWeapon(Math.floor((Math.random()*1)));
             character.setSkin(Math.floor((Math.random() * 10)));
             character.setSkin(_.indexOf(configOgro.categories,character.dbrecord.category));
             //this.setAnimation(configOgro.animations["stand"]);
-    
+
             //create the character's nameplate
             var acallout=$('<div class="container-fluid attackercallout"></div>');
             var abuttons=$('<div class="row-fluid"/>');
-            if (getSetting('enableBlockIP')) {            
+            if (getSetting('enableBlockIP')) {
                 abuttons.append($('<button/>',{
                     'class': 'blockip btn btn-danger btn-mini center',
                     'data-ipaddress': dbrecord.indicators[0].ipv4address,
@@ -691,7 +766,7 @@ if (Meteor.isClient) {
                                  acallout.get()[0]);
             //add the 'blockip' button
             acallout.append(abuttons);
-            
+
             var nameplate=new THREE.CSS3DObject(acallout.get()[0]);
             var npOffset=new THREE.Vector3();
             nameplate.name='nameplate:' + character.id;
@@ -700,25 +775,25 @@ if (Meteor.isClient) {
             npOffset.y=0;
             npOffset.z=.5;
             nameplate.offset=npOffset;
-            nameplate.scale.x=.01;
-            nameplate.scale.y=.01;
-            nameplate.scale.z=.01;
+            nameplate.scale.x=character.scale/5;
+            nameplate.scale.y=character.scale/5;
+            nameplate.scale.z=character.scale/5;
             nameplate.position.copy(character.root.position);
             nameplate.position.add(npOffset);
             nameplate.element.style.display='none';
-                
+
             //add everything.
             //threejs doesn't take children that aren't threejs object3d instances
-            //so add the nameplate manually. 
+            //so add the nameplate manually.
             character.root.children.push(nameplate);
             nameplate.parent=character.root;
             scene.add(nameplate);
-            
+
             scene.add(character.root);
             characters.push( character );
             sceneObjects.push(character.root);
         }; //end createCharacter
-    
+
         sceneSetup(this);
 
         var updateCharacterCategory= function(newDoc){
@@ -731,7 +806,7 @@ if (Meteor.isClient) {
                 //renderers (webgl vs css)
                 //make sure we find the webgl one
                 if ( _.has(object,'dbid') ){
-                    
+
                     if ( object.dbid === newDoc._id  && _.has(object,'base') ){
                         //console.log('setting skin ' + newDoc._id);
                         //update the dbrecord while we are here.
@@ -759,7 +834,7 @@ if (Meteor.isClient) {
             characters=[];
             sceneObjects=[];
         };
-        
+
         var createCharacters = function(dataArray){
             //pick a starting position for the group
             var startingPosition = new THREE.Vector3();
@@ -767,14 +842,23 @@ if (Meteor.isClient) {
             startingPosition.y=_.random(-1,1);
             startingPosition.z=_.random(-1,1);
             i=0;
+            //build the scale of attackers based on their # events;
+            eventCountDomain=[];
+            dataArray.forEach(function(element){
+                eventCountDomain.push(element.eventscount)
+            });
+            small = .05
+            medium= .07
+            large = .10
+            sizer=d3.scale.quantize().domain(eventCountDomain.sort(d3.ascending)).range([small, medium, large]);
             //attackers.find({},{fields:{events:0,alerts:0},reactive:false,limit:100}).forEach(function(element,index,array){
             dataArray.forEach(function(element,index,array){
                 //add to the scene if it's new
                 var exists = _.find(sceneObjects,function(c){return c.id==element._id;});
                 if ( exists === undefined ) {
-                    //debugLog('adding character')
+                    //debugLog('adding character ')
                     x=startingPosition.x + (i*2);
-                    createCharacter(element,x,startingPosition.y,startingPosition.z)
+                    createCharacter(element,x,startingPosition.y,startingPosition.z,sizer(element.eventscount))
                     }
                 else{
                     debugLog('updating character')
@@ -782,7 +866,7 @@ if (Meteor.isClient) {
                     //exists.root.position.z=z;
                 }
                 i+=1;
-            });            
+            });
         };
 
         var filterCharacters = function(chart,filter){
@@ -795,7 +879,7 @@ if (Meteor.isClient) {
                 chart.dimension().filter();
             }
             //re-render
-            dc.renderAll("attackers");            
+            dc.renderAll("attackers");
             //set tooltips on the chart titles
             //to display the current filters.
             $('#LastSeen').prop('title', "");
@@ -891,7 +975,7 @@ if (Meteor.isClient) {
                 filterCharacters();
             }
         };
-        
+
         hookAttackers = function(){
             //setup an observe changes hook
             //to watch for changes in attackers
@@ -914,12 +998,12 @@ if (Meteor.isClient) {
                                                  changedAt:function(newDoc,oldDoc,atIndex){
                                                          updateCharacterCategory(newDoc);
                                                          }
-                                        });            
+                                        });
         };
 
         Tracker.autorun(function() {
             //debugLog('running dep orgro autorun');
-            
+
             $("#attackerLimit").val(Session.get('attackerlimit'));
             Meteor.subscribe("attackers-summary", onReady=function() {
                 //load the base character meshes, etc to allow resource sharing
@@ -935,11 +1019,11 @@ if (Meteor.isClient) {
                 //debugLog('Invalidated attackers-summary');
                 hookAttackers();
                 waitForBaseCharacter();
-            });            
+            });
 
         }); //end deps.autorun
        };//end template.attackers.rendered
-       
+
     Template.attackers.destroyed = function () {
         //container=document.getElementById('attackers-wrapper');
         //container.removeChild( renderer.domElement );
@@ -970,6 +1054,12 @@ if (Meteor.isClient) {
             cursorAttackers.stop();
         }
         cursorAttackers=null;
+
+        if (myMyo){
+            //remove our callback events
+            //since they are scene specific
+            myMyo.events=[]
+        }
 
     };//end template.attackers.destroyed
 
