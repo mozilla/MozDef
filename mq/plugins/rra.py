@@ -19,6 +19,7 @@ class message(object):
     def validate_field(self, field, keys):
         for k in keys:
             if not k in field.keys():
+                sys.stderr.write('warning: key {0} not in expected list {1}\n'.format(k, field.keys()))
                 return False
         return True
 
@@ -35,9 +36,10 @@ class message(object):
             return False
         if not self.validate_field(message['details']['risk'], ['integrity', 'confidentiality', 'availability']):
             return False
-        for f in ['integrity', 'confidentiality', 'availability']:
-            if not self.validate_field(message['details']['risk'][f], ['rationale', 'impact', 'probability']):
-                return False
+        for cia in ['integrity', 'confidentiality', 'availability']:
+            for rpf in ['productivity', 'finances', 'reputation']:
+                if not self.validate_field(message['details']['risk'][cia][rpf], ['rationale', 'impact', 'probability']):
+                    return False
 
         if (len(message['details']['metadata']['service']) == 0):
             return False
@@ -54,7 +56,7 @@ class message(object):
         if metadata['doc_type'] != 'rra':
             return (message, metadata)
         if not self.validate(message):
-            sys.stderr.write('error: invalid format for RRA {0}'.format(message))
+            sys.stderr.write('error: invalid format for RRA {0}\n'.format(message))
             return (None, None)
         metadata['id'] = self.calculate_id(message)
         metadata['doc_type'] = 'rra_state'
@@ -64,7 +66,6 @@ class message(object):
 class MessageTestFunctions(unittest.TestCase):
     def setUp(self):
         self.msgobj = message()
-
         self.msg = {}
         self.msg['utctimestamp'] = '2015-06-12T23:00:18.381000+00:00'
         self.msg['summary'] = 'an RRA event'
@@ -81,17 +82,44 @@ class MessageTestFunctions(unittest.TestCase):
         self.msg['details']['metadata']['description'] = ''
         self.msg['details']['risk'] = {}
         self.msg['details']['risk']['integrity'] = {}
-        self.msg['details']['risk']['integrity']['rationale'] = {}
-        self.msg['details']['risk']['integrity']['impact'] = {}
-        self.msg['details']['risk']['integrity']['probability'] = {}
+        self.msg['details']['risk']['integrity']['reputation'] = {}
+        self.msg['details']['risk']['integrity']['reputation']['rationale'] = ''
+        self.msg['details']['risk']['integrity']['reputation']['impact'] = ''
+        self.msg['details']['risk']['integrity']['reputation']['probability'] = ''
+        self.msg['details']['risk']['integrity']['productivity'] = {}
+        self.msg['details']['risk']['integrity']['productivity']['impact'] = ''
+        self.msg['details']['risk']['integrity']['productivity']['rationale'] = ''
+        self.msg['details']['risk']['integrity']['productivity']['probability'] = ''
+        self.msg['details']['risk']['integrity']['finances'] = {}
+        self.msg['details']['risk']['integrity']['finances']['probability'] = ''
+        self.msg['details']['risk']['integrity']['finances']['impact'] = ''
+        self.msg['details']['risk']['integrity']['finances']['rationale'] = ''
         self.msg['details']['risk']['availability'] = {}
-        self.msg['details']['risk']['availability']['rationale'] = {}
-        self.msg['details']['risk']['availability']['impact'] = {}
-        self.msg['details']['risk']['availability']['probability'] = {}
+        self.msg['details']['risk']['availability']['productivity'] = {}
+        self.msg['details']['risk']['availability']['productivity']['rationale'] = ''
+        self.msg['details']['risk']['availability']['productivity']['impact'] = ''
+        self.msg['details']['risk']['availability']['productivity']['probability'] = ''
+        self.msg['details']['risk']['availability']['finances'] = {}
+        self.msg['details']['risk']['availability']['finances']['impact'] = ''
+        self.msg['details']['risk']['availability']['finances']['rationale'] = ''
+        self.msg['details']['risk']['availability']['finances']['probability'] = ''
+        self.msg['details']['risk']['availability']['reputation'] = {}
+        self.msg['details']['risk']['availability']['reputation']['probability'] = ''
+        self.msg['details']['risk']['availability']['reputation']['impact'] = ''
+        self.msg['details']['risk']['availability']['reputation']['rationale'] = ''
         self.msg['details']['risk']['confidentiality'] = {}
-        self.msg['details']['risk']['confidentiality']['rationale'] = {}
-        self.msg['details']['risk']['confidentiality']['impact'] = {}
-        self.msg['details']['risk']['confidentiality']['probability'] = {}
+        self.msg['details']['risk']['confidentiality']['finances']= {}
+        self.msg['details']['risk']['confidentiality']['finances']['rationale'] = ''
+        self.msg['details']['risk']['confidentiality']['finances']['impact'] = ''
+        self.msg['details']['risk']['confidentiality']['finances']['probability'] = ''
+        self.msg['details']['risk']['confidentiality']['reputation'] = {}
+        self.msg['details']['risk']['confidentiality']['reputation']['impact'] = ''
+        self.msg['details']['risk']['confidentiality']['reputation']['rationale'] = ''
+        self.msg['details']['risk']['confidentiality']['reputation']['probability'] = ''
+        self.msg['details']['risk']['confidentiality']['productivity'] = {}
+        self.msg['details']['risk']['confidentiality']['productivity']['probability'] = ''
+        self.msg['details']['risk']['confidentiality']['productivity']['rationale'] = ''
+        self.msg['details']['risk']['confidentiality']['productivity']['impact'] = ''
         self.msg['details']['data'] = {}
         self.msg['details']['data']['Unknown'] = {}
         self.msg['details']['data']['PUBLIC'] = {}
