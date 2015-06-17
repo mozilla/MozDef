@@ -32,7 +32,17 @@ if (Meteor.isClient) {
                     console.log('error',e)
                 }
             };
-            myMyo.create();
+            if ( typeof mozdef.myoURL =='string' ){
+                // use a custom URL to contact Myo
+                // use this if you have the UI hosted using TLS
+                // to setup a local proxy on 127.0.0.1 that uses TLS
+                // to avoid browsers complaining about insecure websocket connections
+                // set to something like: wss://127.0.0.1:8444/myo
+                // and install a local nginx proxy with a valid TLS cert
+
+                myMyo.options.socket_url=mozdef.myoURL
+            }
+            myMyo.create(0,myMyo.options);
         }catch(e){
             debugLog(e,'No myo found..you really should get one.')
         }
