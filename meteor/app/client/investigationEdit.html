@@ -156,7 +156,7 @@ Jeff Bryner jbryner@mozilla.com
                             {{#each references}}
                             <li>
                                 {{#if isURL . }}
-                                    <div class="col-xs-12"><a href="{{.}}" target="_blank">{{.}}</a><button type="button" class="referencedelete close btn btn-danger pull-left" aria-hidden="false">&times;</button></div>
+                                    <div class="col-xs-12"><a href="{{.}}" class="brightURL" target="_blank">{{.}}</a><button type="button" class="referencedelete close btn btn-danger pull-left" aria-hidden="false">&times;</button></div>
                                 
                                 {{else}}
                                     <div class="col-xs-12">{{.}}<button type="btn" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>    

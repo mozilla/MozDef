@@ -174,9 +174,16 @@ input[type="search"] {
 }
 
 td{
-  color:white;
+    color:white;
 }
 
+.brightURL{
+    color:white;
+}
+
+.brightURL:hover{
+    color:white;
+}
 
 .welcome {
     text-align: center;
@@ -187,7 +194,7 @@ td{
 }
 
 
-/* uncomment this login ui css to hide the local account/password signup options 
+/*login ui css to hide the local account/password signup options */
 .logins-wrapper .svgtextlabel {
   font-size: 20px;
   color: white;
@@ -204,11 +211,6 @@ td{
 
 .or {
   display: none;
-}
-*/
-/* don't float the 'create account' link*/
-#login-buttons #signup-link{
-    float: none;
 }
 
 /* d3 circle styles */
