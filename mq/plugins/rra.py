@@ -42,8 +42,10 @@ class message(object):
                     return False
 
         if (len(message['details']['metadata']['service']) == 0):
+            sys.stderr.write('warning: no service name for {0}\n'.format(message['source']))
             return False
         if (message['details']['metadata']['service'] == 'RRA for '):
+            sys.stderr.write('warning: Invalid service name for {0}\n'.format(message['source']))
             return False
 
         return True
