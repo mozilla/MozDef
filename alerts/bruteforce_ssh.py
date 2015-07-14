@@ -18,12 +18,12 @@ class AlertBruteforceSsh(AlertTask):
         self.filtersFromKibanaDash('bruteforce_ssh_dashboard.json', date_timedelta)
 
         # Search aggregations on field 'sourceipaddress', keep 50 samples of events at most
-        self.searchEventsAggreg('sourceipaddress', samplesLimit=50)
+        self.searchEventsAggregated('sourceipaddress', samplesLimit=50)
         # alert when >= 5 matching events in an aggregation
         self.walkAggregations(threshold=2)
 
     # Set alert properties
-    def onAggreg(self, aggreg):
+    def onAggregation(self, aggreg):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation

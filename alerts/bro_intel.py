@@ -18,12 +18,12 @@ class AlertBroIntel(AlertTask):
         self.filtersFromKibanaDash('bro_intel_dashboard.json', date_timedelta)
 
         # Search aggregations on field 'seenindicator', keep 50 samples of events at most
-        self.searchEventsAggreg('seenindicator', samplesLimit=50)
+        self.searchEventsAggregated('seenindicator', samplesLimit=50)
         # alert when >= 5 matching events in an aggregation
         self.walkAggregations(threshold=5)
 
     # Set alert properties
-    def onAggreg(self, aggreg):
+    def onAggregation(self, aggreg):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
