@@ -8,7 +8,9 @@
 
 import requests
 import json
-
+import os
+import sys
+from configlib import getConfig, OptionParser
 
 class message(object):
     def __init__(self):
@@ -36,6 +38,14 @@ class message(object):
         self.name = "cymon"
         self.description = "IP intel from the cymon.io api"
 
+        # set my own conf file
+        # relative path to the rest index.py file
+        self.configfile = './plugins/cymon.conf'
+        self.options = None
+        if os.path.exists(self.configfile):
+            sys.stdout.write('found conf file {0}\n'.format(self.configfile))
+            self.initConfiguration()
+
 
     def onMessage(self, request, response):
         '''
@@ -54,9 +64,16 @@ class message(object):
 
         print(requestDict, requestDict.keys())
         if 'ipaddress' in requestDict.keys():
-            url="https://cymon.io/api/public/nexus?ip="
+            url="https://cymon.io/api/nexus/v1/ip/{0}/timeline?combined=true&format=json".format(requestDict['ipaddress'])
 
-            dresponse = requests.get('{0}{1}&format=json'.format(url, requestDict['ipaddress']))
+            # add the cymon api key?
+            if self.options is not None:
+                headers = {'Authorization': 'Token {0}'.format(self.options.cymonapikey)}
+
+            else:
+                headers = None
+
+            dresponse = requests.get(url, headers=headers)
             if dresponse.status_code == 200:
                 response.content_type = "application/json"
                 response.body = dresponse.content
@@ -67,3 +84,17 @@ class message(object):
             response.status = 500
 
         return (request, response)
+
+
+    def initConfiguration(self):
+        myparser = OptionParser()
+        # setup self.options by sending empty list [] to parse_args
+        (self.options, args) = myparser.parse_args([])
+
+        # fill self.options with plugin-specific options
+
+        # cymon options
+        self.options.cymonapikey = getConfig('cymonapikey',
+                                        '',
+                                        self.configfile)
+
