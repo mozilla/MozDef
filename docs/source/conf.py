@@ -29,7 +29,7 @@ import os
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.viewcode',
+	'sphinx.ext.viewcode',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -228,8 +228,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'mozdef', u'MozDef Documentation',
-     [u'Jeff Bryner, Anthony Verez'], 1)
+	('index', 'mozdef', u'MozDef Documentation',
+	 [u'Jeff Bryner, Anthony Verez'], 1)
 ]
 
 # If true, show URL addresses after external links.

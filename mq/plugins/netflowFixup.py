@@ -8,19 +8,19 @@
 
 
 class message(object):
-    def __init__(self):
-        '''
-        takes an incoming message
-        and sets the doc_type
-        '''
-    
-        self.registration = ['netflow']
-        self.priority = 5
+	def __init__(self):
+		'''
+		takes an incoming message
+		and sets the doc_type
+		'''
+	
+		self.registration = ['netflow']
+		self.priority = 5
  
-    def onMessage(self, message, metadata):
-        # set the doc type
-        # to avoid data type conflicts with other doc types 
-        # (int v string, etc)
-        metadata['doc_type']= 'netflow'
+	def onMessage(self, message, metadata):
+		# set the doc type
+		# to avoid data type conflicts with other doc types 
+		# (int v string, etc)
+		metadata['doc_type']= 'netflow'
 
-        return (message, metadata) 
+		return (message, metadata) 

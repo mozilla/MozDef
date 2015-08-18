@@ -13,11 +13,11 @@ import time
 import logging
 
 ALERTS = {
-    'bro_intel.AlertBroIntel': crontab(minute='*/1'),
-    'bro_notice.AlertBroNotice': crontab(minute='*/1'),
-    'bruteforce_ssh.AlertBruteforceSsh': crontab(minute='*/1'),
-    'cloudtrail.AlertCloudtrail': crontab(minute='*/1'),
-    'fail2ban.AlertFail2ban': crontab(minute='*/1'),
+	'bro_intel.AlertBroIntel': crontab(minute='*/1'),
+	'bro_notice.AlertBroNotice': crontab(minute='*/1'),
+	'bruteforce_ssh.AlertBruteforceSsh': crontab(minute='*/1'),
+	'cloudtrail.AlertCloudtrail': crontab(minute='*/1'),
+	'fail2ban.AlertFail2ban': crontab(minute='*/1'),
 }
 
 
@@ -35,41 +35,41 @@ ES = {
 }
 
 OPTIONS = {
-    'defaulttimezone': 'UTC',
+	'defaulttimezone': 'UTC',
 }
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'simple': {
-            'format': '%(levelname)s %(message)s',
-            'datefmt': '%y %b %d, %H:%M:%S',
-        },
-        'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s %(filename)s:%(lineno)d: %(message)s'
-        }
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        'celery': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'celery.log',
-            'formatter': 'standard',
-            'maxBytes': 1024 * 1024 * 100,  # 100 mb
-        },
-    },
-    'loggers': {
-        'celery': {
-            'handlers': ['celery', 'console'],
-            'level': 'DEBUG',
-        },
-    }
+	'version': 1,
+	'disable_existing_loggers': True,
+	'formatters': {
+		'simple': {
+			'format': '%(levelname)s %(message)s',
+			'datefmt': '%y %b %d, %H:%M:%S',
+		},
+		'standard': {
+			'format': '%(asctime)s [%(levelname)s] %(name)s %(filename)s:%(lineno)d: %(message)s'
+		}
+	},
+	'handlers': {
+		'console': {
+			'level': 'DEBUG',
+			'class': 'logging.StreamHandler',
+			'formatter': 'simple'
+		},
+		'celery': {
+			'level': 'DEBUG',
+			'class': 'logging.handlers.RotatingFileHandler',
+			'filename': 'celery.log',
+			'formatter': 'standard',
+			'maxBytes': 1024 * 1024 * 100,  # 100 mb
+		},
+	},
+	'loggers': {
+		'celery': {
+			'handlers': ['celery', 'console'],
+			'level': 'DEBUG',
+		},
+	}
 }
 
 logging.Formatter.converter = time.gmtime

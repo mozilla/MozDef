@@ -12,28 +12,28 @@ from lib.alerttask import AlertTask
 import pyes
 
 class AlertFail2ban(AlertTask):
-    def main(self):
-        # look for events in last 10 mins
-        date_timedelta = dict(minutes=10)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('program', 'fail2ban'),
-            pyes.QueryFilter(pyes.MatchQuery("summary","banned for","phrase"))
-        ]
-        self.filtersManual(date_timedelta, must=must)
+	def main(self):
+		# look for events in last 10 mins
+		date_timedelta = dict(minutes=10)
+		# Configure filters using pyes
+		must = [
+			pyes.TermFilter('_type', 'event'),
+			pyes.TermFilter('program', 'fail2ban'),
+			pyes.QueryFilter(pyes.MatchQuery("summary","banned for","phrase"))
+		]
+		self.filtersManual(date_timedelta, must=must)
 
-        # Search events
-        self.searchEventsSimple()
-        self.walkEvents()
+		# Search events
+		self.searchEventsSimple()
+		self.walkEvents()
 
-    # Set alert properties
-    def onEvent(self, event):
-        category = 'fail2ban'
-        tags = ['fail2ban']
-        severity = 'NOTICE'
+	# Set alert properties
+	def onEvent(self, event):
+		category = 'fail2ban'
+		tags = ['fail2ban']
+		severity = 'NOTICE'
 
-        summary='{0}: {1}'.format(event['_source']['details']['hostname'], event['_source']['summary'].strip())
+		summary='{0}: {1}'.format(event['_source']['details']['hostname'], event['_source']['summary'].strip())
 
-        # Create the alert object based on these properties
-        return self.createAlertDict(summary, category, tags, [event], severity)
+		# Create the alert object based on these properties
+		return self.createAlertDict(summary, category, tags, [event], severity)

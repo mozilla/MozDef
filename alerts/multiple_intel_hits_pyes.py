@@ -14,55 +14,55 @@ from lib.alerttask import AlertTask
 import pyes
 
 class AlertMultipleIntelHits(AlertTask):
-    def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=2)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'bro'),
-            pyes.TermFilter('eventsource', 'nsm'),
-            pyes.TermFilter('category', 'brointel'),
-            pyes.ExistsFilter('seenindicator'),
-            pyes.QueryFilter(pyes.MatchQuery('hostname', 'sensor1 sensor2 sensor3', 'boolean'))
-        ]
-        self.filtersManual(date_timedelta, must=must)
+	def main(self):
+		# look for events in last X mins
+		date_timedelta = dict(minutes=2)
+		# Configure filters using pyes
+		must = [
+			pyes.TermFilter('_type', 'bro'),
+			pyes.TermFilter('eventsource', 'nsm'),
+			pyes.TermFilter('category', 'brointel'),
+			pyes.ExistsFilter('seenindicator'),
+			pyes.QueryFilter(pyes.MatchQuery('hostname', 'sensor1 sensor2 sensor3', 'boolean'))
+		]
+		self.filtersManual(date_timedelta, must=must)
 
-        # Search aggregations on field 'seenindicator', keep X samples of events at most
-        self.searchEventsAggreg('seenindicator', samplesLimit=10)
-        # alert when >= X matching events in an aggregation
-        self.walkAggregations(threshold=10)
+		# Search aggregations on field 'seenindicator', keep X samples of events at most
+		self.searchEventsAggreg('seenindicator', samplesLimit=10)
+		# alert when >= X matching events in an aggregation
+		self.walkAggregations(threshold=10)
 
-    # Set alert properties
-    def onAggreg(self, aggreg):
-        # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
-        # aggreg['value']: value of the aggregation field, ex: toto@example.com
-        # aggreg['events']: list of events in the aggregation
-        category = 'bro'
-        tags = ['nsm,bro,intel']
-        severity = 'NOTICE'
-        hostname = aggreg['events'][0]['_source']['hostname']
+	# Set alert properties
+	def onAggreg(self, aggreg):
+		# aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
+		# aggreg['value']: value of the aggregation field, ex: toto@example.com
+		# aggreg['events']: list of events in the aggregation
+		category = 'bro'
+		tags = ['nsm,bro,intel']
+		severity = 'NOTICE'
+		hostname = aggreg['events'][0]['_source']['hostname']
 
-        summary = '{0} {1} {2} on {3}'.format(aggreg['count'], hostname, ' Bro intel match for indicator:', aggreg['value'])
-        
-        summary += ' sample hosts that hit it: '
-        for e in aggreg['events'][:3]:
-            if 'details' in e['_source'].keys() \
-               and 'sourceipaddress' in e['_source']['details'].keys() \
-               and 'seenwhere' in e['_source']['details'].keys():
-                interestingaddres = ''
-                # someone talking to a bad guy, I want to know who
-                # someone resolving bad guy's domain name, I want to know who
-                # bad guy talking to someone, I want to know to whom
-                if 'Conn::IN_RESP' in e['_source']['details']['seenwhere'] \
-                    or 'HTTP::IN_HOST_HEADER' in e['_source']['details']['seenwhere'] \
-                    or 'DNS::IN_REQUEST' in e['_source']['details']['seenwhere']:
-                    interestingaddres = e['_source']['details']['sourceipaddress']
-                elif 'Conn::IN_ORIG' in e['_source']['details']['seenwhere'] \
-                    or 'HTTP::IN_X_CLUSTER_CLIENT_IP_HEADER' in e['_source']['details']['seenwhere'] \
-                    or 'HTTP::IN_X_FORWARDED_FOR_HEADER' in e['_source']['details']['seenwhere']:
-                    interestingaddres = e['_source']['details']['destinationipaddress']
+		summary = '{0} {1} {2} on {3}'.format(aggreg['count'], hostname, ' Bro intel match for indicator:', aggreg['value'])
+		
+		summary += ' sample hosts that hit it: '
+		for e in aggreg['events'][:3]:
+			if 'details' in e['_source'].keys() \
+			   and 'sourceipaddress' in e['_source']['details'].keys() \
+			   and 'seenwhere' in e['_source']['details'].keys():
+				interestingaddres = ''
+				# someone talking to a bad guy, I want to know who
+				# someone resolving bad guy's domain name, I want to know who
+				# bad guy talking to someone, I want to know to whom
+				if 'Conn::IN_RESP' in e['_source']['details']['seenwhere'] \
+					or 'HTTP::IN_HOST_HEADER' in e['_source']['details']['seenwhere'] \
+					or 'DNS::IN_REQUEST' in e['_source']['details']['seenwhere']:
+					interestingaddres = e['_source']['details']['sourceipaddress']
+				elif 'Conn::IN_ORIG' in e['_source']['details']['seenwhere'] \
+					or 'HTTP::IN_X_CLUSTER_CLIENT_IP_HEADER' in e['_source']['details']['seenwhere'] \
+					or 'HTTP::IN_X_FORWARDED_FOR_HEADER' in e['_source']['details']['seenwhere']:
+					interestingaddres = e['_source']['details']['destinationipaddress']
 
-                summary += '{0} in {1} '.format(interestingaddres, e['_source']['details']['seenwhere'])
+				summary += '{0} in {1} '.format(interestingaddres, e['_source']['details']['seenwhere'])
 
-        # Create the alert object based on these properties
-        return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+		# Create the alert object based on these properties
+		return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

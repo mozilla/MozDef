@@ -11,24 +11,24 @@
 from lib.alerttask import AlertTask
 
 class AlertFail2ban(AlertTask):
-    def main(self):
-        # look for events in last 10 mins
-        date_timedelta = dict(minutes=10)
-        # Configure filters by importing a kibana dashboard
-        self.filtersFromKibanaDash('fail2ban_dashboard.json', date_timedelta)
+	def main(self):
+		# look for events in last 10 mins
+		date_timedelta = dict(minutes=10)
+		# Configure filters by importing a kibana dashboard
+		self.filtersFromKibanaDash('fail2ban_dashboard.json', date_timedelta)
 
-        # Search events
-        self.searchEventsSimple()
-        self.walkEvents()
+		# Search events
+		self.searchEventsSimple()
+		self.walkEvents()
 
-    # Set alert properties
-    def onEvent(self, event):
-        category = 'fail2ban'
-        tags = ['fail2ban']
-        severity = 'NOTICE'
+	# Set alert properties
+	def onEvent(self, event):
+		category = 'fail2ban'
+		tags = ['fail2ban']
+		severity = 'NOTICE'
 
-        # the summary of the alert is the same as the event
-        summary = event['_source']['summary']
+		# the summary of the alert is the same as the event
+		summary = event['_source']['summary']
 
-        # Create the alert object based on these properties
-        return self.createAlertDict(summary, category, tags, [event], severity)
+		# Create the alert object based on these properties
+		return self.createAlertDict(summary, category, tags, [event], severity)
