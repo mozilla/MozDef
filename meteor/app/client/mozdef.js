@@ -163,11 +163,13 @@ if (Meteor.isClient) {
         return result
     }
 
-    Template.hello.greeting = function () {
-        if (typeof console !== 'undefined')
-            console.log("mozdef starting");
-        return "MozDef: The Mozilla Defense Platform";
-    };
+    Template.hello.helpers({
+        greeting: function() {
+            if (typeof console !== 'undefined')
+                console.log("mozdef starting");
+            return "MozDef: The Mozilla Defense Platform";
+        }
+    });
 
     Template.hello.events({
         'click' : function () {
@@ -177,10 +179,12 @@ if (Meteor.isClient) {
     });
 
     // loads kibana dashboards
-    Template.menu.kibanadashboards = function() {
-        Meteor.call('loadKibanaDashboards');
-        return kibanadashboards.find();
-    };
+    Template.menu.helpers({
+        kibanadashboards: function() {
+            Meteor.call('loadKibanaDashboards');
+            return kibanadashboards.find();
+        }
+    });
 
     UI.registerHelper('uiDateFormat',function(adate){
         return dateFormat(adate);
