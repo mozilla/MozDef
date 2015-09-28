@@ -19,6 +19,7 @@ import pytz
 import pynsive
 import re
 import sys
+import socket
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
@@ -154,6 +155,7 @@ def keyMapping(aDict):
 
     # set the timestamp when we received it, i.e. now
     returndict['receivedtimestamp'] = toUTC(datetime.now())
+    returndict['mozdefhostname'] = options.mozdefhostname
     try:
         for k, v in aDict.iteritems():
             k = removeAt(k).lower()
@@ -567,6 +569,9 @@ def main():
 def initConfig():
     # change this to your default zone for when it's not specified
     options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
+
+    #capture the hostname
+    options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
