@@ -14,34 +14,35 @@ if (Meteor.isClient) {
     Session.set('alertsSearch',null);
     Session.set('alertsDisplayed',0);
 
-    Template.alertssummary.selectedalerts = function () {
-        //console.log(moment().format(),Session.get('alertsSearch'));
-        
-        Session.set('alertsDisplayed',
-                    alerts.find(Session.get('alertsSearch'),
-                            {limit: Session.get('alertsrecordlimit'),
-                            reactive:false}).count()
-                    );
-        
-        //return just what's needed for the summary table
-        return alerts.find(Session.get('alertsSearch'),
-                            {fields:{
-                                    _id:1,
-                                    esmetadata:1,
-                                    utctimestamp:1,
-                                    utcepoch:1,
-                                    summary:1,
-                                    severity:1,
-                                    category:1,
-                                    acknowledged:1,
-                                    acknowledgedby:1,
-                                    url:1
-                                    },
-                            sort: {utcepoch: -1},
-                            limit: Session.get('alertsrecordlimit'),
-                            reactive:true})
-    };
-    
+    Template.alertssummary.helpers({
+        selectedalerts: function () {
+            //console.log(moment().format(),Session.get('alertsSearch'));
+            
+            Session.set('alertsDisplayed',
+                        alerts.find(Session.get('alertsSearch'),
+                                {limit: Session.get('alertsrecordlimit'),
+                                reactive:false}).count()
+                        );
+            
+            //return just what's needed for the summary table
+            return alerts.find(Session.get('alertsSearch'),
+                                {fields:{
+                                        _id:1,
+                                        esmetadata:1,
+                                        utctimestamp:1,
+                                        utcepoch:1,
+                                        summary:1,
+                                        severity:1,
+                                        category:1,
+                                        acknowledged:1,
+                                        acknowledgedby:1,
+                                        url:1
+                                        },
+                                sort: {utcepoch: -1},
+                                limit: Session.get('alertsrecordlimit'),
+                                reactive:true})
+        }
+    });    
 
     Template.alertssummary.events({
         "click .reset": function(e,t){
