@@ -138,7 +138,7 @@ if (Meteor.isClient) {
       mesh.scale.set( 1.1, 1.1, 1.1 );
       scene.add(mesh);
 
-      geometry = new THREE.CubeGeometry(0.75, 0.75, 1);
+      geometry = new THREE.BoxGeometry(0.75, 0.75, 1);
       geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.5));
 
       point = new THREE.Mesh(geometry);
@@ -227,7 +227,7 @@ if (Meteor.isClient) {
       var phi = (90 - lat) * Math.PI / 180;
       var theta = (180 - lng) * Math.PI / 180;
 
-      var geometry = new THREE.CubeGeometry(0.75, 0.75, 1);
+      var geometry = new THREE.BoxGeometry(0.75, 0.75, 1);
       geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.5));
 
       var mypoint = new THREE.Mesh(geometry);
