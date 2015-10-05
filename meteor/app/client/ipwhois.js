@@ -47,15 +47,19 @@ if (Meteor.isClient) {
         }
         });
             
-    Template.ipwhois.whois= function(){
-        whoisDep.depend();
-        return whoisresult;
-    };
+    Template.ipwhois.helpers({
+        whois: function() {
+            whoisDep.depend();
+            return whoisresult;
+        }
+    });
     
-    Template.whoismodal.whois= function(){
-        whoisDep.depend();
-        return whoisresult;
-    };
+    Template.whoismodal.helpers({
+        whois: function() {
+            whoisDep.depend();
+            return whoisresult;
+        }
+    });
 
     Template.whoismodal.rendered = function () {
         //console.log(Session.get('ipwhoisipaddress'));

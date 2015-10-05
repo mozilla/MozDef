@@ -45,17 +45,21 @@ if (Meteor.isClient) {
         "click .showmodal": function(event, template) {
             $("#modalcifwindow").modal()
         }
-        });
+    });
             
-    Template.ipcif.cif= function(){
-        cifDep.depend();
-        return cifresult;
-    };
+    Template.ipcif.helpers({
+        cif: function() {
+            cifDep.depend();
+            return cifresult;
+        }
+    });
     
-    Template.cifmodal.cif= function(){
-        cifDep.depend();
-        return cifresult;
-    };
+    Template.cifmodal.helpers({
+        cif: function() {
+            cifDep.depend();
+            return cifresult;
+        }
+    });
 
     Template.cifmodal.rendered = function () {
         //console.log(Session.get('ipcifipaddress'));

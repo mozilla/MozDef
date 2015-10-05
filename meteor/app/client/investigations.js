@@ -19,11 +19,13 @@ if (Meteor.isClient) {
     var timestamp = null;
 
     //return all investigations
-    Template.investigations.investigation = function () {
-        return investigations.find({},{
-                              sort: {dateOpened: -1}
-                            });
-    };
+    Template.investigations.helpers({
+        investigation: function () {
+            return investigations.find({},{
+                                  sort: {dateOpened: -1}
+                                });
+        }
+    });
 
     //select an investigation for editing
     Template.investigations.events({

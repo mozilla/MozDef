@@ -47,15 +47,19 @@ if (Meteor.isClient) {
         }
         });
             
-    Template.ipdshield.dshield= function(){
-        dshieldDep.depend();
-        return dshieldresult;
-    };
+    Template.ipdshield.helpers({
+        dshield: function() {
+            dshieldDep.depend();
+            return dshieldresult;
+        }
+    });
     
-    Template.dshieldmodal.dshield= function(){
-        dshieldDep.depend();
-        return dshieldresult;
-    };
+    Template.dshieldmodal.helpers({
+        dshield: function() {
+            dshieldDep.depend();
+            return dshieldresult;
+        }
+    });
 
     Template.dshieldmodal.rendered = function () {
         //console.log(Session.get('ipdshieldipaddress'));
