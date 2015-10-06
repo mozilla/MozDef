@@ -12,14 +12,16 @@ Anthony Verez averez@mozilla.com
 if (Meteor.isClient) {
 
     //alert details helpers
-    Template.alertdetails.thisalertevents = function () {
-        return alerts.findOne({'esmetadata.id': Session.get('alertID')}).events;
-    };
+    Template.alertdetails.helpers ({
+        thisalertevents: function () {
+            return alerts.findOne({'esmetadata.id': Session.get('alertID')}).events;
+        },
     
-    Template.alertdetails.kibanaurl = function () {
-        url=getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + Session.get('alertID');
-        return url;
-    };
+        kibanaurl: function () {
+            url=getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + Session.get('alertID');
+            return url;
+        }
+    });
     
     Template.alertdetails.events({
         "click .makeinvestigation": function(event, template) {
