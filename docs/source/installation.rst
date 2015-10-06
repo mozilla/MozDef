@@ -478,3 +478,83 @@ Start the following services
   cd ~/MozDef/examples/demo
   ./syncalerts.sh
   ./sampleevents.sh
+
+Manual Installation (Alpha Phase)
+---------------------------------
+
+*Note: This is still under testing.*
+
+**(Currently only for apt-based systems)**
+
+
+1. Cloning repository ::
+
+    $ export MOZDEF_PATH=/opt/MozDef
+    $ git clone git@github.com:jeffbryner/MozDef.git $MOZ_PATH
+
+2. Installing dependencies ::
+
+    # RabbitMQ
+    $ apt-get install -y rabbitmq-server
+    $ rabbitmq-plugins enable rabbitmq_management
+
+    # MongoDB
+    $ apt-get install -y mongodb
+
+    # NodeJS and NPM
+    $ curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
+    $ apt-get install -y nodejs npm
+
+    # Nginx
+    $ apt-get install -y nginx-full
+    $ cp $MOZDEF_PATH/docker/conf/nginx.conf /etc/nginx/nginx.conf
+
+    # Libraries
+    $ apt-get install -y python2.7-dev python-pip curl supervisor wget libmysqlclient-dev
+    $ pip install -U pip
+
+3. Installing python libraries ::
+
+    $ pip install uwsgi celery virtualenv
+
+    $ export PATH_TO_VENV=$HOME/.mozdef_env
+    $ virtualenv $PATH_TO_VENV
+    $ source $PATH_TO_VENV/bin/activate
+
+    (mozdef_env)$ pip install -r $MOZDEF_PATH/requirements.txt
+
+4. Setting up uwsgi for rest and loginput ::
+
+    $ mkdir /var/log/mozdef
+    $ mkdir -p /run/uwsgi/apps/
+    $ touch /run/uwsgi/apps/loginput.socket
+    $ chmod 666 /run/uwsgi/apps/loginput.socket
+    $ touch /run/uwsgi/apps/rest.socket
+    $ chmod 666 /run/uwsgi/apps/rest.socket
+
+5. Setting up local settings ::
+
+    $ cp $MOZ_PATH/docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
+    $ cp $MOZ_PATH/docker/conf/settings.js $MOZ_PATH/meteor/app/lib/settings.js
+    $ cp $MOZ_PATH/docker/conf/config.py $MOZ_PATH/alerts/lib/config.py
+    $ cp $MOZ_PATH/docker/conf/sampleData2MozDef.conf $MOZ_PATH/examples/demo/sampleData2MozDef.conf
+    $ cp $MOZ_PATH/docker/conf/mozdef.localloginenabled.css $MOZ_PATH/meteor/public/css/mozdef.css
+
+6. Installing Kibana ::
+
+    $ cd /tmp/
+    $ curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz | tar -C /opt -xz
+    $ /bin/ln -s /opt/kibana-3.1.0 /opt/kibana
+    $ cp $MOZDEF_PATH/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
+    $ cp $MOZDEF_PATH/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
+
+7. Installing Elasticsearch ::
+
+    $
+
+8. Setting up Meteor ::
+
+    $ curl -L https://install.meteor.com/ | /bin/sh
+    $ npm install -g meteorite
+    $ cd $MOZ_PATH/meteor
+    $ meteor
