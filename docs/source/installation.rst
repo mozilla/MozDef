@@ -483,6 +483,7 @@ Manual Installation (Alpha Phase)
 ---------------------------------
 
 *Note: This is still under testing.*
+*Use sudo whereever required*
 
 **(Currently only for apt-based systems)**
 
@@ -550,7 +551,9 @@ Manual Installation (Alpha Phase)
 
 7. Installing Elasticsearch ::
 
-    $
+    $ wget https://gist.githubusercontent.com/yashmehrotra/3209a7e2c696c2ac5110/raw/9161ffb32ee79d48f4bce224f8710ac8c7e85922/ElasticSearch.sh
+    # You can download any version of ELasticSearch
+    $ ./ElasticSearch.sh 1.6.0
 
 8. Setting up Meteor ::
 
