@@ -208,7 +208,8 @@ if (Meteor.isClient) {
         points.forEach(function(element, index, array) {
           if (element !== undefined && element.geometry !== undefined) {
             var subgeo = new THREE.Geometry();
-            THREE.GeometryUtils.merge(subgeo, element);
+            element.updateMatrix();
+            subgeo.merge(element.geometry, element.matrix);
             var mymesh = new THREE.Mesh(subgeo, new THREE.MeshBasicMaterial({
                   color: 0xffffff,
                   vertexColors: THREE.FaceColors,
