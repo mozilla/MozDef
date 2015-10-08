@@ -486,6 +486,9 @@ def dict2List(inObj):
             elif isinstance(v, list):
                 for l in dict2List(v):
                     yield l
+            elif isinstance(v,dict):
+                for d in dict2List(v):
+                    yield d
             else:
                 yield v
     else:
