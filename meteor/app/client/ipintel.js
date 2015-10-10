@@ -45,17 +45,21 @@ if (Meteor.isClient) {
         "click .showmodal": function(event, template) {
             $("#modalintelwindow").modal()
         }
-        });
+    });
             
-    Template.ipintel.intel= function(){
-        intelDep.depend();
-        return intelresult;
-    };
+    Template.ipintel.helpers({
+        intel: function(){
+            intelDep.depend();
+            return intelresult;
+        }
+    });
     
-    Template.intelmodal.intel= function(){
-        intelDep.depend();
-        return intelresult;
-    };
+    Template.intelmodal.helpers({
+        intel: function() {
+            intelDep.depend();
+            return intelresult;
+        }
+    });
 
     Template.intelmodal.rendered = function () {
         //console.log(Session.get('ipintelipaddress'));

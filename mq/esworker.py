@@ -19,6 +19,7 @@ import pytz
 import pynsive
 import re
 import sys
+import socket
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
@@ -154,6 +155,7 @@ def keyMapping(aDict):
 
     # set the timestamp when we received it, i.e. now
     returndict['receivedtimestamp'] = toUTC(datetime.now())
+    returndict['mozdefhostname'] = options.mozdefhostname
     try:
         for k, v in aDict.iteritems():
             k = removeAt(k).lower()
@@ -256,11 +258,10 @@ def esConnect(conn):
 
 class taskConsumer(ConsumerMixin):
 
-    def __init__(self, mqConnection, taskQueue, topicExchange, esConnection):
+    def __init__(self, mqConnection, taskQueue,  esConnection):
         self.connection = mqConnection
         self.esConnection = esConnection
         self.taskQueue = taskQueue
-        self.topicExchange = topicExchange
         self.mqproducer = self.connection.Producer(serializer='json')
         if hasUWSGI:
             self.muleid = uwsgi.mule_id()
@@ -378,10 +379,7 @@ class taskConsumer(ConsumerMixin):
                 except kombu.exceptions.MessageStateError:
                     # state may be already set.
                     return
-            # post the dict (kombu serializes it to json) to the events topic queue
-            # using the ensure function to shortcut connection/queue drops/stalls, etc.
-            # ensurePublish = self.connection.ensure(self.mqproducer, self.mqproducer.publish, max_retries=10)
-            # ensurePublish(normalizedDict, exchange=self.topicExchange, routing_key='mozdef.event')
+
             message.ack()
         except ValueError as e:
             sys.stderr.write("esworker exception in events queue %r\n" % e)
@@ -488,6 +486,9 @@ def dict2List(inObj):
             elif isinstance(v, list):
                 for l in dict2List(v):
                     yield l
+            elif isinstance(v,dict):
+                for d in dict2List(v):
+                    yield d
             else:
                 yield v
     else:
@@ -529,66 +530,93 @@ def sendEventToPlugins(anevent, metadata, pluginList):
 
 def main():
     # connect and declare the message queue/kombu objects.
-    # only py-amqp supports ssl and doesn't recognize amqps
-    # so fix up the connection string accordingly
-    connString = 'amqp://{0}:{1}@{2}:{3}/{4}'.format(options.mquser, options.mqpassword, options.mqserver, options.mqport, options.mqvhost)
-    if options.mqprotocol == 'amqps':
-        mqSSL = True
-    else:
-        mqSSL = False
-    mqConn = Connection(connString, ssl=mqSSL)
-    # Task Exchange for events sent via http for us to normalize and post to elastic search
-    if options.mqack:
-        # conservative, store msgs to disk, ack each message
-        eventTaskExchange = Exchange(name=options.taskexchange, type='direct', durable=True, delivery_mode=2)
-    else:
-        # fast, transient delivery, store in memory only, auto-ack messages
-        eventTaskExchange = Exchange(name=options.taskexchange, type='direct', durable=True, delivery_mode=1)
-    eventTaskExchange(mqConn).declare()
-    # Queue for the exchange
-    if options.mqack:
-        eventTaskQueue = Queue(options.taskexchange, exchange=eventTaskExchange, routing_key=options.taskexchange, durable=True, no_ack=False)
-    else:
-        eventTaskQueue = Queue(options.taskexchange, exchange=eventTaskExchange, routing_key=options.taskexchange, durable=True, no_ack=True)
-    eventTaskQueue(mqConn).declare()
 
-    # topic exchange for anyone who wants to queue and listen for mozdef.event
-    eventTopicExchange = Exchange(name=options.eventexchange, type='topic', durable=False, delivery_mode=1)
-    eventTopicExchange(mqConn).declare()
+    # what sort of message queue are we talking to?
+    if options.mqprotocol in ('amqp', 'amqps'):
+
+        # only py-amqp supports ssl and doesn't recognize amqps
+        # so fix up the connection string accordingly
+        connString = 'amqp://{0}:{1}@{2}:{3}/{4}'.format(options.mquser, options.mqpassword, options.mqserver, options.mqport, options.mqvhost)
+        if options.mqprotocol == 'amqps':
+            mqSSL = True
+        else:
+            mqSSL = False
+        mqConn = Connection(connString, ssl=mqSSL)
+        # Task Exchange for events sent via http for us to normalize and post to elastic search
+        if options.mqack:
+            # conservative, store msgs to disk, ack each message
+            eventTaskExchange = Exchange(name=options.taskexchange, type='direct', durable=True, delivery_mode=2)
+        else:
+            # fast, transient delivery, store in memory only, auto-ack messages
+            eventTaskExchange = Exchange(name=options.taskexchange, type='direct', durable=True, delivery_mode=1)
+        eventTaskExchange(mqConn).declare()
+        # Queue for the exchange
+        if options.mqack:
+            eventTaskQueue = Queue(options.taskexchange, exchange=eventTaskExchange, routing_key=options.taskexchange, durable=True, no_ack=False)
+        else:
+            eventTaskQueue = Queue(options.taskexchange, exchange=eventTaskExchange, routing_key=options.taskexchange, durable=True, no_ack=True)
+        eventTaskQueue(mqConn).declare()
+
+        # topic exchange for anyone who wants to queue and listen for mozdef.event
+        # commented out to begin deprecation for this feature
+        # eventTopicExchange = Exchange(name=options.eventexchange, type='topic', durable=False, delivery_mode=1)
+        # eventTopicExchange(mqConn).declare()
+
+    if options.mqprotocol in ('sqs'):
+        # amazon SQS
+        connString = 'sqs://%s:%s@' % (urllib.quote(options.accesskey, safe=''), urllib.quote(options.secretkey, safe=''))
+
+        mqConn = Connection(connString, transport_options=dict(region=options.region))
+        # for sqs, set taskexchange to the sqs queue name.
+        eventTaskQueue = mqConn.SimpleQueue(options.taskexchange)
+
 
     if hasUWSGI:
         sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
     else:
         sys.stdout.write('started without uwsgi\n')
-    # consume our queue and publish on the topic exchange
-    taskConsumer(mqConn, eventTaskQueue, eventTopicExchange, es).run()
+    # consume our queue
+    taskConsumer(mqConn, eventTaskQueue, es).run()
 
 
 def initConfig():
     # change this to your default zone for when it's not specified
     options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
 
+    #capture the hostname
+    options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
+
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
     options.esbulksize = getConfig('esbulksize', 0, options.configfile)
     options.esbulktimeout = getConfig('esbulktimeout', 30, options.configfile)
 
-    # message queue options
+    # set to either amqp or amqps for rabbitmq without/with ssl
+    # set to sqs for Amazon
+    options.mqprotocol = getConfig('mqprotocol', 'amqp', options.configfile)
+
+    # rabbit message queue options
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
     options.taskexchange = getConfig('taskexchange', 'eventtask', options.configfile)
     options.eventexchange = getConfig('eventexchange', 'events', options.configfile)
-    # how many messages to ask for at once from the message queue
+    # rabbit: how many messages to ask for at once from the message queue
     options.prefetch = getConfig('prefetch', 50, options.configfile)
+    # rabbit: user creds
     options.mquser = getConfig('mquser', 'guest', options.configfile)
     options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
+    # rabbit: port/vhost
     options.mqport = getConfig('mqport', 5672, options.configfile)
     options.mqvhost = getConfig('mqvhost', '/', options.configfile)
-    # set to either amqp or amqps for ssl
-    options.mqprotocol = getConfig('mqprotocol', 'amqp', options.configfile)
-    # run with message acking?
+
+    # rabbit: run with message acking?
     # also toggles transient/persistant delivery (messages in memory only or stored on disk)
     # ack=True sets persistant delivery, False sets transient delivery
     options.mqack = getConfig('mqack', True, options.configfile)
+
+    # aws options
+    options.accesskey = getConfig('accesskey', '', options.configfile)
+    options.secretkey = getConfig('secretkey', '', options.configfile)
+    options.region = getConfig('region', 'us-west-1', options.configfile)
 
     # plugin options
     # secs to pass before checking for new/updated plugins

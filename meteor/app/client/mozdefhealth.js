@@ -13,27 +13,30 @@ if (Meteor.isClient) {
 
     //elastic search cluster template functions
     //return es health items
-    Template.mozdefhealth.esclusterhealthitems = function () {
-        return healthescluster.find();
-    };
+    Template.mozdefhealth.helpers({
+        
+        esclusterhealthitems: function () {
+            return healthescluster.find();
+        },
 
-    Template.mozdefhealth.frontendhealthitems = function () {
-        return healthfrontend.find({},
+        frontendhealthitems: function () {
+            return healthfrontend.find({},
                                    {fields:{},
                                     sort: {hostname: 1}
                                    });
-    };
+        },
 
-    Template.mozdefhealth.esnodeshealthitems = function () {
-        return healthesnodes.find({},
+        esnodeshealthitems: function () {
+            return healthesnodes.find({},
                                   {fields:{},
                                   sort: {hostname: 1}
                                   });
-    };
+        },
 
-    Template.mozdefhealth.eshotthreadshealthitems = function () {
-        return healtheshotthreads.find();
-    };
+        eshotthreadshealthitems: function () {
+            return healtheshotthreads.find();
+        }
+    });
  
    Template.mozdefhealth.rendered = function () {
         var ringChartEPS   = dc.pieChart("#ringChart-EPS");

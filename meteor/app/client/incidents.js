@@ -17,9 +17,11 @@ if (Meteor.isClient) {
     var timestamp = null;
     
 
-    Template.veristags.veris=function(){
-        return veris.find({tag:{$regex:'.*' +Session.get('verisfilter') + '.*',$options:'i'}},{limit:50});
-    };
+    Template.veristags.helpers({
+        veris: function() {
+            return veris.find({tag:{$regex:'.*' +Session.get('verisfilter') + '.*',$options:'i'}},{limit:50});
+        }
+    });
 
     Template.veristags.events({
         'dragstart .tag': function(e){
@@ -36,11 +38,13 @@ if (Meteor.isClient) {
     
 
     //return all incidents
-    Template.incidents.incident = function () {
-        return incidents.find({},{
-                              sort: {dateOpened: -1}
-                            });
-    };
+    Template.incidents.helpers({
+        incident: function () {
+            return incidents.find({},{
+                                   sort: {dateOpened: -1}
+                                });
+        }
+    });
 
     //select an incident for editing
     Template.incidents.events({
