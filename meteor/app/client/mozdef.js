@@ -113,7 +113,8 @@ if (Meteor.isClient) {
     //used to take a dot notation string and get that object.field
     //from a javascript object
     objectIndex=function(obj,i){
-        return(obj[i])
+        return !(i.match(/\[(\d+)\]/)) ? obj[i] :
+            (obj[i.replace(i.match(/\[(\d+)\]/)[0], '')])[i.match(/\[(\d+)\]/)[1]];
     }
 
     objectField=function(obj,dotstring){
