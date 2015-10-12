@@ -32,7 +32,7 @@ class message(object):
             'service', 'description']):
             return False
         if not self.validate_field(message['details']['data'], ['Unknown', 'PUBLIC', 'INTERNAL', 'RESTRICTED', 'SECRET',
-            'default']):
+            'default', 'CONFIDENTIAL INTERNAL', 'CONFIDENTIAL RESTRICTED', 'CONFIDENTIAL SECRET']):
             return False
         if not self.validate_field(message['details']['risk'], ['integrity', 'confidentiality', 'availability']):
             return False
@@ -126,8 +126,11 @@ class MessageTestFunctions(unittest.TestCase):
         self.msg['details']['data']['Unknown'] = {}
         self.msg['details']['data']['PUBLIC'] = {}
         self.msg['details']['data']['INTERNAL'] = {}
+        self.msg['details']['data']['CONFIDENTIAL INTERNAL'] = {}
         self.msg['details']['data']['RESTRICTED'] = {}
+        self.msg['details']['data']['CONFIDENTIAL RESTRICTED'] = {}
         self.msg['details']['data']['SECRET'] = {}
+        self.msg['details']['data']['CONFIDENTIAL SECRET'] = {}
         self.msg['details']['data']['default'] = ''
 
     def test_onMessage(self):
