@@ -74,6 +74,14 @@ if (Meteor.isClient) {
             });
             $('#modalBlockIPWindow').modal();
         },
+        "click #btnResetFilter": function() {
+            // Reset all currently applied filters for all the charts
+            list = dc.chartRegistry.list('attackers')
+            for (e in list) {
+                chart = list[e];
+                chart.filterAll()
+            }
+        },
         "mouseenter #attackerLimit": function(e,t){
             //debugLog(e.currentTarget);
             //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
