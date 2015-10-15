@@ -16,29 +16,49 @@ class message(object):
         self.registration = ['rra']
         self.priority = 20
 
-    def validate_field(self, field, keys):
-        for k in keys:
-            if not k in field.keys():
-                sys.stderr.write('warning: key {0} not in expected list {1}\n'.format(k, field.keys()))
-                return False
+    def validate_field_subset(self, field, keys):
+        '''are all "field" part of "keys? (there could be more "keys" than "fields" but all "fields must be part of "keys")'''
+        f = set(field.keys())
+        k = set(keys)
+        if (not f.issubset(k)):
+            sys.stderr.write('warning: input RRA "{0}" must only be part of these required fields: "{1}"\n'.format(f.__str__(), k.__str__()))
+            return False
+        return True
+
+    def validate_field_superset(self, field, keys):
+        '''do we have at least all "keys" in "field?"'''
+        f = set(field.keys())
+        k = set(keys)
+        if (not f.issuperset(k)):
+            sys.stderr.write('warning: input RRA "{0}" does not include at least these required fields: "{1}"\n'.format(f.__str__(), k.__str__()))
+            return False
+        return True
+
+    def validate_field_equal(self, field, keys):
+        '''keys must == field"'''
+        f = set(field.keys())
+        k = set(keys)
+        if (f != k):
+            sys.stderr.write('warning: input RRA "{0}" does not match: "{1}"\n'.format(f.__str__(), k.__str__()))
+            return False
         return True
 
     def validate(self, message):
-        if not self.validate_field(message, ['details', 'utctimestamp', 'summary', 'source', 'lastmodified']):
+        if not self.validate_field_superset(message, ['details', 'utctimestamp', 'summary', 'source', 'lastmodified']):
             return False
-        if not self.validate_field(message['details'], ['data', 'risk', 'metadata']):
-            return false
-        if not self.validate_field(message['details']['metadata'], ['operator', 'scope', 'owner', 'developer',
+        if not self.validate_field_superset(message['details'], ['data', 'risk', 'metadata']):
+            return False
+        if not self.validate_field_superset(message['details']['metadata'], ['operator', 'scope', 'owner', 'developer',
             'service', 'description']):
             return False
-        if not self.validate_field(message['details']['data'], ['Unknown', 'PUBLIC', 'INTERNAL', 'RESTRICTED', 'SECRET',
+        if not self.validate_field_subset(message['details']['data'], ['Unknown', 'PUBLIC', 'INTERNAL', 'RESTRICTED', 'SECRET',
             'default', 'CONFIDENTIAL INTERNAL', 'CONFIDENTIAL RESTRICTED', 'CONFIDENTIAL SECRET']):
             return False
-        if not self.validate_field(message['details']['risk'], ['integrity', 'confidentiality', 'availability']):
+        if not self.validate_field_equal(message['details']['risk'], ['integrity', 'confidentiality', 'availability']):
             return False
         for cia in ['integrity', 'confidentiality', 'availability']:
             for rpf in ['productivity', 'finances', 'reputation']:
-                if not self.validate_field(message['details']['risk'][cia][rpf], ['rationale', 'impact', 'probability']):
+                if not self.validate_field_equal(message['details']['risk'][cia][rpf], ['rationale', 'impact', 'probability']):
                     return False
 
         if (len(message['details']['metadata']['service']) == 0):
