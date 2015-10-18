@@ -74,6 +74,14 @@ if (Meteor.isClient) {
             });
             $('#modalBlockIPWindow').modal();
         },
+        "click #btnResetFilter": function() {
+            // Reset all currently applied filters for all the charts
+            list = dc.chartRegistry.list('attackers')
+            for (e in list) {
+                chart = list[e];
+                chart.filterAll()
+            }
+        },
         "mouseenter #attackerLimit": function(e,t){
             //debugLog(e.currentTarget);
             //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
@@ -210,6 +218,7 @@ if (Meteor.isClient) {
         var ringChartAttackerCategory   = dc.pieChart("#ringChart-category","attackers");
         var ringChartLastSeen   = dc.pieChart("#ringChart-lastseen","attackers");
         var ringChartCountry = dc.pieChart("#ringChart-country","attackers");
+        var ringChartIP = dc.pieChart("#ringChart-ip","attackers");
         var chartsInitialized   =false;
         var currentSearch=null;
 
@@ -364,7 +373,17 @@ if (Meteor.isClient) {
                         filters[chartID].criteria=chartCriteria;
                     }else{
                         //console.log('criteria:',values);
-                        chartCriteria[field.valueOf()]={$in: values};
+                        var isArrIndex = field.valueOf().match(/\[(\d+)\]/);
+                        if (isArrIndex !== null) {
+                            var arrCriteriaObj = {};
+                            arrCriteriaObj[(field.valueOf().split(isArrIndex[0])[1]).substr(1)] = {$in: values};
+                            chartCriteria[field.valueOf().split(isArrIndex[0])[0]] = {
+                                $elemMatch: arrCriteriaObj
+                            };
+                        }
+                        else {
+                            chartCriteria[field.valueOf()] = {$in: values};
+                        }
                         filters[chartID].criteria=chartCriteria;
                     }
                     //console.log('criteria: ' + field, chartCriteria);
@@ -595,6 +614,9 @@ if (Meteor.isClient) {
 
         var countryDim = mongoCrossfilter.dimension('geocoordinates.countrycode',
                                                     ringChartCountry);
+
+        var IPDim = mongoCrossfilter.dimension('indicators[0].ipv4address',
+                                                    ringChartIP);
 
         //setup three.js scene
         scene.name='attackerScene';
@@ -837,6 +859,7 @@ if (Meteor.isClient) {
 
         var createCharacters = function(dataArray){
             //pick a starting position for the group
+
             var startingPosition = new THREE.Vector3();
             startingPosition.x=_.random(-5,5);
             startingPosition.y=_.random(-1,1);
@@ -896,6 +919,10 @@ if (Meteor.isClient) {
             if (countryFilters.length>0) {
                 $('#Countries').prop('title', countryFilters);
             }
+            IPFilters=ringChartIP.filters();
+            if (IPFilters.length>0) {
+                $('#IPs').prop('title', IPFilters);
+            }
 
             //create characters based on
             //the intersection of all chart filters/selection criteria.
@@ -912,7 +939,6 @@ if (Meteor.isClient) {
                                             alertscount: 'desc'},
                                         limit: parseInt(Session.get('attackerlimit'))}).fetch()
             );
-
         };
 
         var drawAttackerCharts=function(){
@@ -943,6 +969,15 @@ if (Meteor.isClient) {
                 .width(150).height(150)
                 .dimension(countryDim)
                 .group(mongoCrossfilter.group('geocoordinates.countrycode',ringChartCountry))
+                .label(function(d) {return d.key; })
+                .innerRadius(30)
+                .expireCache()
+                .on('filtered',filterCharacters);
+
+            ringChartIP
+                .width(150).height(150)
+                .dimension(IPDim)
+                .group(mongoCrossfilter.group('indicators[0].ipv4address',ringChartIP))
                 .label(function(d) {return d.key; })
                 .innerRadius(30)
                 .expireCache()
@@ -1049,6 +1084,7 @@ if (Meteor.isClient) {
         dc.deregisterAllCharts('attackers');
         ringChartAttackerCategory = null;
         ringChartLastSeen = null;
+        ringChartIP = null;
         ndx = null;
         if (cursorAttackers){
             cursorAttackers.stop();

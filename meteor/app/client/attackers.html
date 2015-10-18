@@ -11,11 +11,11 @@ Anthony Verez averez@mozilla.com
 
 <template name="attackers">
 <style>
-/* http://www.sitepoint.com/css3-sliding-menu/ */    
+/* http://www.sitepoint.com/css3-sliding-menu/ */
 sidenav
 {
     position: fixed;
-    left: -14em;
+    left: -25em;
     top: 0;
     bottom: 0;
     /*background-color: #654;*/
@@ -24,7 +24,7 @@ sidenav
     box-shadow: 4px 0 5px rgba(0,0,0,0.2);
     z-index: 1;
 
-    
+
     text-align: left;
     font-weight: bolder;
     display: inline-block;
@@ -33,7 +33,7 @@ sidenav
     line-height: normal;
 }
 
-/*pull out triangle*/ 
+/*pull out triangle*/
 sidenav:after
 {
     position: absolute;
@@ -57,12 +57,21 @@ sidenav ul
 
 sidenav div{
     margin:auto;
-    padding-left: 1em;
 }
 
 sidenav:hover
 {
     left: 0;
+}
+
+sidenav .filters-col .row {
+    margin-top: 45px;
+    padding: 0 0.5em;
+}
+
+sidenav .reset-filter {
+    text-align: center;
+    margin-top: 20px;
 }
 
 sidenav
@@ -89,18 +98,28 @@ sidenav
                   <option value='30'>30</option>
                   <option value='35'>35</option>
                   <option value='40'>40</option>
-                </select>            
+                </select>
             </li>
         </ul>
     </div>
-    <div class="row">
-        <div id="ringChart-category" class="text-center"><h5 class="upperwhite" id="Categories">Categories:</h5></div>
+    <div class="row reset-filter">
+        <button id="btnResetFilter" class="btn">Reset Filters</button>
     </div>
-    <div class="row">
-        <div id="ringChart-lastseen" class="text-center"><h5 class="upperwhite" id="LastSeen">Last Seen:</h5></div>
+    <div class="col-md-6 filters-col">
+          <div class="row">
+            <div id="ringChart-category" class="text-center"><h5 class="upperwhite" id="Categories">Categories:</h5></div>
+        </div>
+        <div class="row">
+            <div id="ringChart-lastseen" class="text-center"><h5 class="upperwhite" id="LastSeen">Last Seen:</h5></div>
+        </div>
     </div>
-    <div class="row">
-        <div id="ringChart-country" class="text-center"><h5 class="upperwhite" id="LastSeen">Country:</h5></div>
+    <div class="col-md-6 filters-col">
+        <div class="row">
+            <div id="ringChart-country" class="text-center"><h5 class="upperwhite" id="Countries">Country:</h5></div>
+        </div>
+        <div class="row">
+            <div id="ringChart-ip" class="text-center"><h5 class="upperwhite" id="IPs">IP Address:</h5></div>
+        </div>
     </div>
 </sidenav>
 <div class="attackers-wrapper" id="attackers-wrapper">
