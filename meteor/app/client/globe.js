@@ -6,7 +6,9 @@ Copyright (c) 2014 Mozilla Corporation
 
 Contributors:
 Anthony Verez averez@mozilla.com
- */
+Yash Mehrotra yashmehrotra95@gmail.com
+Avijit Gupta 526avijit@gmail.com
+*/
 
 if (Meteor.isClient) {
 

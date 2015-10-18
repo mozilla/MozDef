@@ -7,7 +7,8 @@ Copyright (c) 2014 Mozilla Corporation
 Contributors:
 Jeff Bryner jbryner@mozilla.com
 Anthony Verez averez@mozilla.com
- */
+Yash Mehrotra yashmehrotra95@gmail.com
+*/
 
 if (Meteor.isClient) {
     var whoisresult = new Object;

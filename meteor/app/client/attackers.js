@@ -7,7 +7,9 @@ Copyright (c) 2014 Mozilla Corporation
 Contributors:
 Jeff Bryner jbryner@mozilla.com
 Anthony Verez averez@mozilla.com
- */
+Avijit Gupta 526avijit@gmail.com
+Yash Mehrotra yashmehrotra95@gmail.com
+*/
 
 if (Meteor.isClient) {
     Session.set('attackersSearch',null);
