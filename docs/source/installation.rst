@@ -465,7 +465,7 @@ To initialize elasticsearch indices and load some sample data::
 .. _Kibana: http://www.elasticsearch.org/overview/kibana
 
 Start Services
-******
+**************
 
 Start the following services
 
@@ -522,7 +522,7 @@ Manual Installation (Alpha Phase)
     $ virtualenv $PATH_TO_VENV
     $ source $PATH_TO_VENV/bin/activate
 
-    (mozdef_env)$ pip install -r $MOZDEF_PATH/requirements.txt
+    (.mozdef_env)$ pip install -r $MOZDEF_PATH/requirements.txt
 
 4. Setting up uwsgi for rest and loginput ::
 
@@ -562,31 +562,36 @@ Manual Installation (Alpha Phase)
     $ cd $MOZDEF_PATH/meteor
     $ meteor
 
+9. Inserting some sample data ::
+
+    # Elasticsearch server should be running
+    $ service elasticsearch start
+    $ source $PATH_TO_VENV/bin/activate
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/es-docs && python inject.py
+
 Start Services
 ***************
 
-Start the following services
+Start the following services ::
 
-  invoke-rc.d rabbitmq-server start
+    $ invoke-rc.d rabbitmq-server start
 
-  service elasticsearch start
+    $ service elasticsearch start
 
-  service nginx start
+    $ service nginx start
 
-  cd $MOZDEF_PATH/loginput && uwsgi --socket /run/uwsgi/apps/loginput.socket --wsgi-file index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/loginput --chmod-socket --logto /var/log/mozdef/uwsgi.loginput.log
+    $ uwsgi --socket /run/uwsgi/apps/loginput.socket --wsgi-file $MOZDEF_PATH/loginput/index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/loginput --chmod-socket --logto /var/log/mozdef/uwsgi.loginput.log -H $PATH_TO_VENV
 
-  cd $MOZDEF_PATH/rest && uwsgi --socket /run/uwsgi/apps/rest.socket --wsgi-file index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/rest --chmod-socket --logto /var/log/mozdef/uwsgi.rest.log
+    $ uwsgi --socket /run/uwsgi/apps/rest.socket --wsgi-file $MOZDEF_PATH/restindex.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/rest --chmod-socket --logto /var/log/mozdef/uwsgi.rest.log -H $PATH_TO_VENV
 
-  cd $MOZDEF_PATH/mq && uwsgi --socket /run/uwsgi/apps/esworker.socket --mule=esworker.py --mule=esworker.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/mq --stats 127.0.0.1:9192  --logto /var/log/mozdef/uwsgi.esworker.log --master-fifo /run/uwsgi/apps/esworker.fifo
+    $ cd $MOZDEF_PATH/mq && uwsgi --socket /run/uwsgi/apps/esworker.socket --mule=esworker.py --mule=esworker.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/mq --stats 127.0.0.1:9192  --logto /var/log/mozdef/uwsgi.esworker.log --master-fifo /run/uwsgi/apps/esworker.fifo -H $PATH_TO_VENV
 
-  cd $MOZDEF_PATH/meteor && meteor run
+    $ cd $MOZDEF_PATH/meteor && meteor run
 
-  cd $MOZDEF_PATH/alerts && celery -A celeryconfig worker --loglevel=info --beat
+    # Activate the virtualenv to run background jobs
+    $ source $PATH_TO_VENV/bin/activate
 
-  cd $MOZDEF_PATH/examples/es-docs && python inject.py
-
-  cd $MOZDEF_PATH/examples/demo && ./healthjobs.sh
-
-  cd $MOZDEF_PATH/examples/demo && ./sampleevents.sh
-
-  cd $MOZDEF_PATH/examples/demo && ./syncalerts.sh
+    (.mozdef_env)$ cd $MOZDEF_PATH/alerts && celery -A celeryconfig worker --loglevel=info --beat
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./healthjobs.sh
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./sampleevents.sh
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./syncalerts.sh
