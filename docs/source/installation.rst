@@ -561,3 +561,32 @@ Manual Installation (Alpha Phase)
     $ npm install -g meteorite
     $ cd $MOZDEF_PATH/meteor
     $ meteor
+
+Start Services
+***************
+
+Start the following services
+
+  invoke-rc.d rabbitmq-server start
+
+  service elasticsearch start
+
+  service nginx start
+
+  cd $MOZDEF_PATH/loginput && uwsgi --socket /run/uwsgi/apps/loginput.socket --wsgi-file index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/loginput --chmod-socket --logto /var/log/mozdef/uwsgi.loginput.log
+
+  cd $MOZDEF_PATH/rest && uwsgi --socket /run/uwsgi/apps/rest.socket --wsgi-file index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/rest --chmod-socket --logto /var/log/mozdef/uwsgi.rest.log
+
+  cd $MOZDEF_PATH/mq && uwsgi --socket /run/uwsgi/apps/esworker.socket --mule=esworker.py --mule=esworker.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/mq --stats 127.0.0.1:9192  --logto /var/log/mozdef/uwsgi.esworker.log --master-fifo /run/uwsgi/apps/esworker.fifo
+
+  cd $MOZDEF_PATH/meteor && meteor run
+
+  cd $MOZDEF_PATH/alerts && celery -A celeryconfig worker --loglevel=info --beat
+
+  cd $MOZDEF_PATH/examples/es-docs && python inject.py
+
+  cd $MOZDEF_PATH/examples/demo && ./healthjobs.sh
+
+  cd $MOZDEF_PATH/examples/demo && ./sampleevents.sh
+
+  cd $MOZDEF_PATH/examples/demo && ./syncalerts.sh
