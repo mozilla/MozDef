@@ -491,7 +491,7 @@ Manual Installation (Alpha Phase)
 1. Cloning repository ::
 
     $ export MOZDEF_PATH=/opt/MozDef
-    $ git clone git@github.com:jeffbryner/MozDef.git $MOZ_PATH
+    $ git clone https://github.com/jeffbryner/MozDef.git $MOZDEF_PATH
 
 2. Installing dependencies ::
 
@@ -535,11 +535,11 @@ Manual Installation (Alpha Phase)
 
 5. Setting up local settings ::
 
-    $ cp $MOZ_PATH/docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
-    $ cp $MOZ_PATH/docker/conf/settings.js $MOZ_PATH/meteor/app/lib/settings.js
-    $ cp $MOZ_PATH/docker/conf/config.py $MOZ_PATH/alerts/lib/config.py
-    $ cp $MOZ_PATH/docker/conf/sampleData2MozDef.conf $MOZ_PATH/examples/demo/sampleData2MozDef.conf
-    $ cp $MOZ_PATH/docker/conf/mozdef.localloginenabled.css $MOZ_PATH/meteor/public/css/mozdef.css
+    $ cp $MOZDEF_PATH/docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
+    $ cp $MOZDEF_PATH/docker/conf/settings.js $MOZDEF_PATH/meteor/app/lib/settings.js
+    $ cp $MOZDEF_PATH/docker/conf/config.py $MOZDEF_PATH/alerts/lib/config.py
+    $ cp $MOZDEF_PATH/docker/conf/sampleData2MozDef.conf $MOZDEF_PATH/examples/demo/sampleData2MozDef.conf
+    $ cp $MOZDEF_PATH/docker/conf/mozdef.localloginenabled.css $MOZDEF_PATH/meteor/public/css/mozdef.css
 
 6. Installing Kibana ::
 
@@ -559,5 +559,5 @@ Manual Installation (Alpha Phase)
 
     $ curl -L https://install.meteor.com/ | /bin/sh
     $ npm install -g meteorite
-    $ cd $MOZ_PATH/meteor
+    $ cd $MOZDEF_PATH/meteor
     $ meteor
