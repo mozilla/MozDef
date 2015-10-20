@@ -31,6 +31,8 @@ from dateutil.parser import parse
 from operator import itemgetter
 from boto.sqs.connection import SQSConnection
 import boto.sqs
+from boto.sqs.message import RawMessage
+import base64
 from threading import Timer
 
 
@@ -273,6 +275,9 @@ class taskConsumer(object):
             Timer(options.esbulktimeout, self.flush_es_bulk).start()
 
     def run(self):
+        # Boto expects base64 encoded messages - but if the writer is not boto it's not necessarily base64 encoded
+        # Thus we've to detect that and decode or not decode accordingly
+        self.taskQueue.set_message_class(RawMessage)
         while True:
             try:
                 records=self.taskQueue.get_messages(options.prefetch)  #10 max
@@ -281,12 +286,19 @@ class taskConsumer(object):
                     # get_body() should be json
 
                     # pre process the message a bit
+                    tmp = msg.get_body()
                     try:
-                        msgbody = json.loads(msg.get_body())
+                        msgbody = json.loads(tmp)
                     except ValueError:
-                        #sys.stdout.write('invalid message, not json <dropping message and continuing>: %r' % msg.get_body())
-                        self.taskQueue.delete_message(msg)
-                        continue
+                        # If Boto wrote to the queue, it might be base64 encoded, so let's decode that
+                        try:
+                            tmp = base64.b64decode(tmp)
+                            msgbody = json.loads(tmp)
+                        except:
+                            sys.stdout.write('invalid message, not JSON <dropping message and continuing>: %r\n' % msg.get_body())
+                            self.taskQueue.delete_message(msg)
+                            continue
+
                     event = dict()
                     event['tags'] = [options.taskexchange]
                     event['details'] = msgbody
