@@ -264,6 +264,78 @@ def getPluginList(endpoint=None):
     sendMessgeToPlugins(request, response, 'plugins')
     return response
 
+@post('/incident', methods=['POST'])
+@post('/incident/', methods=['POST'])
+def createIncident():
+    '''
+    endpoint to create an incident
+    '''
+
+    response.content_type = "application/json"
+
+    if not request.body:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='No data provided'))
+
+        return response
+
+    try:
+        body = json.loads(request.body.read())
+        request.body.close()
+    except ValueError:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Invalid JSON'))
+
+        return response
+
+    incident = dict()
+
+    validIncidentPhases = ('Identification', 'Containment', 'Eradication',
+                           'Recovery', 'Lessons Learned', 'Closed')
+
+    try:
+        incident['summary'] = body['summary']
+        incident['phase'] = body['phase']
+        incident['creator'] = body['creator']
+        incident['creatorVerified'] = False
+    except KeyError:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Missing required keys'\
+                                              '(summary, phase, creator)'))
+        return response
+
+    if (type(incident['phase']) not in (str, unicode) or
+        incident['phase'] not in validIncidentPhases):
+        # Wrong Incident phase type
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Invalid incident phase'))
+        return response
+
+    incident['description'] = body.get('description')
+
+    incident['tags'] = body.get('tags')
+
+    if incident['tags'] and type(incident['tags']) is not list:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='tags field must be a list'))
+        return response
+
+    incident['references'] = body.get('references')
+
+    if incident['references'] and type(incident['references']) is not list:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='references field must be a list'))
+        return response
+
+
+    response.body = json.dumps({'status':'success'})
+    return response
 
 def registerPlugins():
     '''walk the ./plugins directory
