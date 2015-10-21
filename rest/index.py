@@ -14,6 +14,7 @@ import os
 import pyes
 import pytz
 import pynsive
+import random
 import re
 import requests
 import sys
@@ -270,6 +271,9 @@ def createIncident():
     endpoint to create an incident
     '''
 
+    client = MongoClient(options.mongohost, options.mongoport)
+    incidentsMongo = client.meteor['incidents']
+
     response.content_type = "application/json"
     EMAIL_REGEX = r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$"
 
@@ -295,6 +299,7 @@ def createIncident():
     validIncidentPhases = ('Identification', 'Containment', 'Eradication',
                            'Recovery', 'Lessons Learned', 'Closed')
 
+    incident['_id'] = generateMeteorID()
     try:
         incident['summary'] = body['summary']
         incident['phase'] = body['phase']
@@ -362,8 +367,19 @@ def createIncident():
                                         error='references field must be a list'))
         return response
 
+    # Inserting incident dict into mongodb
+    try:
+        incidentsMongo.insert(incident)
+    except Exception as err:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error=err))
 
-    response.body = json.dumps({'status':'success'})
+    response.status = 200
+    response.body = json.dumps(dict(status='success',
+                                    message='Incident {} added.'.format(
+                                        incident['summary'])
+                                    ))
     return response
 
 def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
@@ -386,6 +402,9 @@ def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
         dateObj = None
     finally:
         return dateObj
+
+def generateMeteorID():
+    return('%024x' % random.randrange(16**24))
 
 def registerPlugins():
     '''walk the ./plugins directory
