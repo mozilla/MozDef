@@ -269,6 +269,27 @@ def getPluginList(endpoint=None):
 def createIncident():
     '''
     endpoint to create an incident
+
+    request body eg.
+    {
+        "summary": <string>,
+        "phase": <enum: case-insensitive>
+                        Choose from ('Identification', 'Containment', 'Eradication',
+                                     'Recovery', 'Lessons Learned', 'Closed')
+        "creator": <email>,
+
+        // Optional Arguments
+
+        "description": <string>,
+        "dateOpened": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateClosed": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateReported": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateVerified": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateMitigated": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateContained": <string: yyyy-mm-dd hh:mm am/pm>,
+        "tags": <list <string>>,
+        "references": <list <string>>
+    }
     '''
 
     client = MongoClient(options.mongohost, options.mongoport)
@@ -312,9 +333,10 @@ def createIncident():
                                               '(summary, phase, creator)'))
         return response
 
+    # Validating Incident phase type
     if (type(incident['phase']) not in (str, unicode) or
         incident['phase'] not in validIncidentPhases):
-        # Wrong Incident phase type
+
         response.status = 500
         response.body = json.dumps(dict(status='failed',
                                         error='Invalid incident phase'))
@@ -342,8 +364,8 @@ def createIncident():
               incident['dateMitigated'],
               incident['dateContained'] ]
 
+    # Validating all the dates for the format
     if False in dates:
-        # Wrong Dateformat
         response.status = 500
         response.body = json.dumps(dict(status='failed',
                                         error='Wrong format of date. Please '\
@@ -377,7 +399,7 @@ def createIncident():
 
     response.status = 200
     response.body = json.dumps(dict(status='success',
-                                    message='Incident {} added.'.format(
+                                    message='Incident: <{}> added.'.format(
                                         incident['summary'])
                                     ))
     return response
