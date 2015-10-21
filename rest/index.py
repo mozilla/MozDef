@@ -14,6 +14,7 @@ import os
 import pyes
 import pytz
 import pynsive
+import re
 import requests
 import sys
 import socket
@@ -21,8 +22,6 @@ from bottle import debug, route, run, response, request, default_app, post
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from elasticutils import S
-from datetime import datetime
-from datetime import timedelta
 from dateutil.parser import parse
 from ipwhois import IPWhois
 from bson.son import SON
@@ -314,6 +313,13 @@ def createIncident():
         response.status = 500
         response.body = json.dumps(dict(status='failed',
                                         error='Invalid incident phase'))
+        return response
+
+    # Validating creator email
+    if not re.match(EMAIL_REGEX, incident['creator']):
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Invalid creator email'))
         return response
 
     incident['description'] = body.get('description')
