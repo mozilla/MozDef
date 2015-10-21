@@ -272,6 +272,7 @@ def createIncident():
     '''
 
     response.content_type = "application/json"
+    EMAIL_REGEX = r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$"
 
     if not request.body:
         response.status = 500
@@ -316,6 +317,28 @@ def createIncident():
         return response
 
     incident['description'] = body.get('description')
+    incident['dateOpened'] = validateDate(body.get('dateOpened', datetime.now()))
+    incident['dateClosed'] = validateDate(body.get('dateClosed'))
+    incident['dateReported'] = validateDate(body.get('dateReported'))
+    incident['dateVerified'] = validateDate(body.get('dateVerified'))
+    incident['dateMitigated'] = validateDate(body.get('dateMitigated'))
+    incident['dateContained'] = validateDate(body.get('dateContained'))
+
+    dates = [ incident['dateOpened'],
+              incident['dateClosed'],
+              incident['dateReported'],
+              incident['dateVerified'],
+              incident['dateMitigated'],
+              incident['dateContained'] ]
+
+    if False in dates:
+        # Wrong Dateformat
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Wrong format of date. Please '\
+                                              'use yyyy-mm-dd hh:mm am/pm'))
+        return response
+
 
     incident['tags'] = body.get('tags')
 
@@ -336,6 +359,27 @@ def createIncident():
 
     response.body = json.dumps({'status':'success'})
     return response
+
+def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
+    '''
+    Converts a date string into a datetime object based
+    on the dateFormat keyworded arg.
+    Default dateFormat: %Y-%m-%d %I:%M %p (example: 2015-10-21 2:30 pm)
+    '''
+
+    dateObj = None
+
+    if type(date) == datetime:
+        return date
+
+    try:
+        dateObj = datetime.strptime(date, dateFormat)
+    except ValueError:
+        dateObj = False
+    except TypeError:
+        dateObj = None
+    finally:
+        return dateObj
 
 def registerPlugins():
     '''walk the ./plugins directory
