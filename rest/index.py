@@ -6,6 +6,7 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 # Anthony Verez averez@mozilla.com
+# Yash Mehrotra yashmehrotra95@gmail.com
 
 import bottle
 import json
