@@ -88,7 +88,8 @@ class message(object):
         if 'ident' in details.keys():
             tmp = details['ident']
             details['program'] = tmp
-            if not 'processname' in message.keys(): message['processname'] = 'fluentd'
+            if (not 'processname' in message.keys()) and ('program' in details.keys()):
+                message['processname'] = details['program']
             if (not 'processid' in message.keys()) and ('pid' in details.keys()):
                 message['processid'] = details['pid']
             else:
