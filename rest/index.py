@@ -397,6 +397,7 @@ def createIncident():
         response.status = 500
         response.body = json.dumps(dict(status='failed',
                                         error=err))
+        return response
 
     response.status = 200
     response.body = json.dumps(dict(status='success',
