@@ -193,20 +193,25 @@ def get_role_arn(account, default=None):
                  and x.split(':')[4].lstrip('0') == account.lstrip('0')), default)
 
 def process_file(s3file, es):
-    logger.info("Attempting to fetch %s" % s3file.name)
-    compressedData=s3file.read()
-    databuf=StringIO(compressedData)
-    f=gzip.GzipFile(fileobj=databuf)
-    jlog=json.loads(f.read())
-    for r in jlog['Records']:
-        try:
-            r['utctimestamp']=toUTC(r['eventTime']).isoformat()
-            jbody=json.dumps(r)
-            res=es.index(index='events',doc_type='cloudtrail',doc=jbody)
-            #logger.debug(res)
-        except Exception as e:
-            logger.error('Error handling log record {0} {1}'.format(r, e))
-            continue
+    logger.info("Fetching %s" % s3file.name)
+    try:
+        compressedData=s3file.read()
+        databuf=StringIO(compressedData)
+        f=gzip.GzipFile(fileobj=databuf)
+        jlog=json.loads(f.read())
+        for r in jlog['Records']:
+            try:
+                r['utctimestamp']=toUTC(r['eventTime']).isoformat()
+                jbody=json.dumps(r)
+                res=es.index(index='events',doc_type='cloudtrail',doc=jbody)
+                #logger.debug(res)
+            except Exception as e:
+                logger.error('Error handling log record {0} {1}'.format(r, e))
+                continue
+    except Exception as e:
+        logger.error('Unable to process file %s due to %s' % (s3file.read, 
+                                                              e.message))
+
 
 def toUTC(suspectedDate,localTimeZone=None):
     '''make a UTC date out of almost anything'''
@@ -305,24 +310,47 @@ def main():
                         continue
 
 
-                    ctbucket=s3.get_bucket(trail['S3BucketName'])
-                    #ctbucket.get_all_keys()
+                    try:
+                        ctbucket=s3.get_bucket(trail['S3BucketName'])
+                    except Exception as e:
+                        logger.error("Unable to access bucket %s as %s due to %s" %
+                            (trail['S3BucketName'],
+                             bucket_account_assumed_role_arn,
+                             e.message))
+                        continue
+                        
                     filelist=list()
                     for search_date in search_dates:
                         # TODO it's possible that if the AWS account id is 11 instead of 12 digits, CloudTrail
                         # will either 0 pad to 12 digits or remove the 0 padding when creating the s3 bucket
                         # directory. Depending on this behavior,
                         # we should either aws_account.lstrip('0') or aws_account.lstrip('0').zfill(12)
-                        for bfile in ctbucket.list(
-                                 'AWSLogs/%(accountid)s/CloudTrail/%(region)s/%(year)s/%(month)s/%(day)s/' % 
-                                 {'accountid': aws_account,
-                                  'region': region,
-                                  'year': date.strftime(search_date, '%Y'),
-                                  'month': date.strftime(search_date, '%m'),
-                                  'day': date.strftime(search_date, '%d')}):
-                            filelist.append(bfile.key)
+                        prefix = ('AWSLogs/%(accountid)s/CloudTrail/%(region)s/%(year)s/%(month)s/%(day)s/' % 
+                                     {'accountid': aws_account,
+                                      'region': region,
+                                      'year': date.strftime(search_date, '%Y'),
+                                      'month': date.strftime(search_date, '%m'),
+                                      'day': date.strftime(search_date, '%d')})
+                        try:
+                            for bfile in ctbucket.list(prefix):
+                                filelist.append(bfile.key)
+                        except Exception as e:
+                            logger.error("Unable to list keys in s3 bucket %s "
+                                         "and path %s due to %s" %
+                                (trail['S3BucketName'],
+                                 prefix,
+                                 e.message))
+                            continue                        
                     for afile in filelist:
-                        s3file=ctbucket.get_key(afile)
+                        try:
+                            s3file=ctbucket.get_key(afile)
+                        except Exception as e:
+                            logger.error("Unable to HEAD key %s in s3 bucket %s "
+                                         "due to %s" %
+                                (afile.name,
+                                 trail['S3BucketName'],
+                                 e.message))
+                            continue                        
                         logger.debug('{0} {1}'.format(afile,s3file.last_modified))
                         if 'lastrun' not in state.data[aws_account][region]:
                             if toUTC(s3file.last_modified) > toUTC(datetime.utcnow()-timedelta(seconds=3600)):
