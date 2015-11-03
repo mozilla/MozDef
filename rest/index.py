@@ -6,6 +6,7 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 # Anthony Verez averez@mozilla.com
+# Yash Mehrotra yashmehrotra95@gmail.com
 
 import bottle
 import json
@@ -14,6 +15,8 @@ import os
 import pyes
 import pytz
 import pynsive
+import random
+import re
 import requests
 import sys
 import socket
@@ -21,8 +24,6 @@ from bottle import debug, route, run, response, request, default_app, post
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from elasticutils import S
-from datetime import datetime
-from datetime import timedelta
 from dateutil.parser import parse
 from ipwhois import IPWhois
 from bson.son import SON
@@ -264,6 +265,170 @@ def getPluginList(endpoint=None):
     sendMessgeToPlugins(request, response, 'plugins')
     return response
 
+@post('/incident', methods=['POST'])
+@post('/incident/', methods=['POST'])
+def createIncident():
+    '''
+    endpoint to create an incident
+
+    request body eg.
+    {
+        "summary": <string>,
+        "phase": <enum: case-insensitive>
+                        Choose from ('Identification', 'Containment', 'Eradication',
+                                     'Recovery', 'Lessons Learned', 'Closed')
+        "creator": <email>,
+
+        // Optional Arguments
+
+        "description": <string>,
+        "dateOpened": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateClosed": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateReported": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateVerified": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateMitigated": <string: yyyy-mm-dd hh:mm am/pm>,
+        "dateContained": <string: yyyy-mm-dd hh:mm am/pm>,
+        "tags": <list <string>>,
+        "references": <list <string>>
+    }
+    '''
+
+    client = MongoClient(options.mongohost, options.mongoport)
+    incidentsMongo = client.meteor['incidents']
+
+    response.content_type = "application/json"
+    EMAIL_REGEX = r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$"
+
+    if not request.body:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='No data provided'))
+
+        return response
+
+    try:
+        body = json.loads(request.body.read())
+        request.body.close()
+    except ValueError:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Invalid JSON'))
+
+        return response
+
+    incident = dict()
+
+    validIncidentPhases = ('Identification', 'Containment', 'Eradication',
+                           'Recovery', 'Lessons Learned', 'Closed')
+
+    incident['_id'] = generateMeteorID()
+    try:
+        incident['summary'] = body['summary']
+        incident['phase'] = body['phase']
+        incident['creator'] = body['creator']
+        incident['creatorVerified'] = False
+    except KeyError:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Missing required keys'\
+                                              '(summary, phase, creator)'))
+        return response
+
+    # Validating Incident phase type
+    if (type(incident['phase']) not in (str, unicode) or
+        incident['phase'] not in validIncidentPhases):
+
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Invalid incident phase'))
+        return response
+
+    # Validating creator email
+    if not re.match(EMAIL_REGEX, incident['creator']):
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Invalid creator email'))
+        return response
+
+    incident['description'] = body.get('description')
+    incident['dateOpened'] = validateDate(body.get('dateOpened', datetime.now()))
+    incident['dateClosed'] = validateDate(body.get('dateClosed'))
+    incident['dateReported'] = validateDate(body.get('dateReported'))
+    incident['dateVerified'] = validateDate(body.get('dateVerified'))
+    incident['dateMitigated'] = validateDate(body.get('dateMitigated'))
+    incident['dateContained'] = validateDate(body.get('dateContained'))
+
+    dates = [ incident['dateOpened'],
+              incident['dateClosed'],
+              incident['dateReported'],
+              incident['dateVerified'],
+              incident['dateMitigated'],
+              incident['dateContained'] ]
+
+    # Validating all the dates for the format
+    if False in dates:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='Wrong format of date. Please '\
+                                              'use yyyy-mm-dd hh:mm am/pm'))
+        return response
+
+
+    incident['tags'] = body.get('tags')
+
+    if incident['tags'] and type(incident['tags']) is not list:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='tags field must be a list'))
+        return response
+
+    incident['references'] = body.get('references')
+
+    if incident['references'] and type(incident['references']) is not list:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error='references field must be a list'))
+        return response
+
+    # Inserting incident dict into mongodb
+    try:
+        incidentsMongo.insert(incident)
+    except Exception as err:
+        response.status = 500
+        response.body = json.dumps(dict(status='failed',
+                                        error=err))
+        return response
+
+    response.status = 200
+    response.body = json.dumps(dict(status='success',
+                                    message='Incident: <{}> added.'.format(
+                                        incident['summary'])
+                                    ))
+    return response
+
+def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
+    '''
+    Converts a date string into a datetime object based
+    on the dateFormat keyworded arg.
+    Default dateFormat: %Y-%m-%d %I:%M %p (example: 2015-10-21 2:30 pm)
+    '''
+
+    dateObj = None
+
+    if type(date) == datetime:
+        return date
+
+    try:
+        dateObj = datetime.strptime(date, dateFormat)
+    except ValueError:
+        dateObj = False
+    except TypeError:
+        dateObj = None
+    finally:
+        return dateObj
+
+def generateMeteorID():
+    return('%024x' % random.randrange(16**24))
 
 def registerPlugins():
     '''walk the ./plugins directory
