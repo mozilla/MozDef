@@ -66,19 +66,19 @@ def main():
         s.headers.update({'Accept': 'application/json'})
         s.headers.update({'Content-type': 'application/json'})
         s.headers.update({'Authorization':'SSWS {0}'.format(options.apikey)})
-        
+
         #capture the time we start running so next time we catch any events created while we run.
         lastrun=toUTC(datetime.now()).isoformat()
         #in case we don't archive files..only look at today and yesterday's files.
         yesterday=date.strftime(datetime.utcnow()-timedelta(days=1),'%Y/%m/%d')
         today = date.strftime(datetime.utcnow(),'%Y/%m/%d')
-        
+
         r = s.get('https://{0}/api/v1/events?startDate={1}&limit={2}'.format(
             options.oktadomain,
             toUTC(options.lastrun).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
             options.recordlimit
         ))
-        
+
         if r.status_code == 200:
             oktaevents = json.loads(r.text)
             for event in oktaevents:
@@ -100,7 +100,7 @@ def main():
                             continue
                 else:
                     logger.error('Okta event does not contain published date: {0}'.format(event))
-            setConfig('lastrun',lastrun,options.configfile)                            
+            setConfig('lastrun',lastrun,options.configfile)
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
 
@@ -115,7 +115,7 @@ def initConfig():
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(hours=1)),options.configfile))
     options.recordlimit = getConfig('recordlimit', 10000, options.configfile)                    #max number of records to request
-    
+
 
 if __name__ == '__main__':
     parser=OptionParser()
