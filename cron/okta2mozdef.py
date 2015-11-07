@@ -124,6 +124,20 @@ def main():
                             if 'action' in event.keys() and 'message' in event['action'].keys():
                                 mozdefEvent['summary'] = event['action']['message']
                             mozdefEvent['details'] = event
+                            # Actor parsing
+                            # While there are various objectTypes attributes, we just take any attribute that matches
+                            # in case Okta changes it's structure around a bit
+                            # This means the last instance of each attribute in all actors will be recorded in mozdef
+                            # while others will be discarded
+                            # Which ends up working out well in Okta's case.
+                            if 'actors' in event.keys():
+                                for actor in event['actors']:
+                                    if 'ipAddress' in actor.keys():
+                                        mozdefEvent['details']['sourceipaddress'] = actor['ipAddress']
+                                    if 'login' in actor.keys():
+                                        mozdefEvent['details']['username'] = actor['login']
+                                    if 'requestUri' in actor.keys():
+                                        mozdefEvent['details']['source_uri'] = actor['requestUri']
                             jbody=json.dumps(mozdefEvent)
                             res=es.index(index='events',doc_type='okta',doc=jbody)
                             logger.debug(res)
