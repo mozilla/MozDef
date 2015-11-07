@@ -195,65 +195,39 @@ Mandatory Fields
 |            | the timezone offset                 |                                   |
 +------------+-------------------------------------+-----------------------------------+
 
-Details substructure (optional fields)
-**************************************
+Details substructure (mandatory if such data is sent, otherwise optional)
+*************************************************************************
 
-+----------------------+--------------------------+---------------+------------------------------+
-|        Field         |         Purpose          |   Used In     |       Sample Value           |
-+======================+==========================+===============+==============================+
-| destinationipaddress | Destination IP of a      | NSM/Bro/Intel | 8.8.8.8                      |
-|                      | network flow             |               |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| destinationport      | Destination port of a    | NSM/Bro/Intel | 80                           |
-|                      | network flow             |               |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| dn                   | Distinguished Name in    | event/ldap    | john@example.org,o=org,      |
-|                      | LDAP, mean unique ID in  |               | dc=example                   |
-|                      | the ldap hierarchy       |               |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| filedesc             |                          | NSM/Bro/Intel |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| filemimetype         |                          | NSM/Bro/Intel |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| fuid                 |                          | NSM/Bro/Intel |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| result               | Result of an event,      | event/ldap    | LDAP_SUCCESS                 |
-|                      | success or failure       |               |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| seenindicator        | Intel indicator that     | NSM/Bro/Intel | evil.com/setup.exe           |
-|                      | matched as seen by our   |               |                              |
-|                      | system                   |               |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| seenindicator_type   | Type of intel indicator  | NSM/Bro/Intel | HTTP::IN_URL                 |
-+----------------------+--------------------------+---------------+------------------------------+
-| seenwhere            | Where the intel indicator| NSM/Bro/Intel | Intel::URL                   |
-|                      | matched (which protocol, |               |                              |
-|                      | which field)             |               |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| source               | Source of the connection | event/ldap    | Mar 19 15:36:25 ldap1        |
-|                      |                          |               | slapd[31031]: conn=6633594   |
-|                      |                          |               | fd=49 ACCEPT                 |
-|                      |                          |               | from IP=10.54.70.109:23957   |
-|                      |                          |               | (IP=0.0.0.0:389)             |
-|                      |                          |               |                              |
-|                      |                          |               | Mar 19 15:36:25 ldap1        |
-|                      |                          |               | slapd[31031]: conn=6633594   |
-|                      |                          |               | op=0 BIND                    |
-+----------------------+--------------------------+---------------+------------------------------+
-| sourceipaddress      | Source IP of a network   | NSM/Bro/Intel | 8.8.8.8                      |
-|                      | flow                     |               |                              |
-|                      |                          | event/ldap    |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| sourceport           | Source port of a network | NSM/Bro/Intel | 42297                        |
-|                      | flow                     |               |                              |
-+----------------------+--------------------------+---------------+------------------------------+
-| sources              | Source feed              | NSM/Bro/Intel | CIF - need-to-know           |
-+----------------------+--------------------------+---------------+------------------------------+
-| success              | Auth success             | event/ldap    | True                         |
-+----------------------+--------------------------+---------------+------------------------------+
-| uid                  | Bro connection uid       | NSM/Bro/Intel | CZqhEs40odso1tFNx3           |
-+----------------------+--------------------------+---------------+------------------------------+
-
++----------------------+--------------------------+---------------------------------+
+|        Field         |         Purpose          |          Sample Value           |
++======================+==========================+=================================+
+| destinationipaddress | Destination IP of a      | 8.8.8.8                         |
+|                      | network flow             |                                 |
++----------------------+--------------------------+---------------------------------+
+| destinationport      | Destination port of a    |  80                             |
+|                      | network flow             |                                 |
++----------------------+--------------------------+---------------------------------+
+| sourceipaddress      | Source IP of a network   | 8.8.8.8                         |
+|                      | flow                     |                                 |
++----------------------+--------------------------+---------------------------------+
+| sourceport           | Source port of a network | 42297                           |
+|                      | flow                     |                                 |
++----------------------+--------------------------+---------------------------------+
+| sourceuri            | Source URI such as a     | https://www.mozilla.org/        |
+|                      | referer                  |                                 |
++----------------------+--------------------------+---------------------------------+
+| destinationuri       | Destination URI as in    | https://www.mozilla.org/        |
+|                      | "wget this URI"          |                                 |
++----------------------+--------------------------+---------------------------------+
+| error                | Action resulted in an    | true/false                      |
+|                      | error or failure         |                                 |
++----------------------+--------------------------+---------------------------------+
+| username             | Username, email, login,  | kang@mozilla.com                |
+|                      | etc.                     |                                 |
++----------------------+--------------------------+---------------------------------+
+| useragent            | Program agent string     | curl/1.76 (Windows; 5.1)        |
+|                      |                          |                                 |
++----------------------+--------------------------+---------------------------------+
 
 Examples
 ********
@@ -272,73 +246,14 @@ Examples
 	    "tags": [
 	        "ldap",
 	        "adminAccess",
-            "failure"
+                "failure"
 	    ],
 	    "details": {
-	        "user": "joe",
+	        "username": "joe",
 	        "task": "access to admin page /admin_secret_radioactiv",
 	        "result": "10 authentication failures in a row"
 	    }
 	}
-
-
-.. code-block:: javascript
-    {
-        "category": "netflow",
-        "tags": [
-          "netflow",
-          "network"
-        ],
-        "timestamp": "2015-05-04T16:36:52.336527+00:00",
-        "summary": "10.247.28.2:60469 --> 2.192.38.177:6824",
-        "details": {
-          "protocol": 6,
-          "destinationmask": 0,
-          "sourceipv4address": "10.247.28.2",
-          "nexthop": "0.0.0.0",
-          "unixnanoseconds": 0,
-          "site": "site1",
-          "tcpflags": 16,
-          "enginetype": 0,
-          "engineid": 0,
-          "uptime": 96215086,
-          "tos": 0,
-          "hostname": "fw1.site1.somewhere.net",
-          "version": 5,
-          "unixseconds": 1430757412,
-          "sourceport": 60469,
-          "destinationport": 6824,
-          "flowsequence": 93808622,
-          "octets": 1656,
-          "destinationipgeolocation": {
-            "city": "Beijing",
-            "region_code": "22",
-            "area_code": 0,
-            "time_zone": "Asia/Harbin",
-            "dma_code": 0,
-            "metro_code": null,
-            "country_code3": "CHN",
-            "latitude": 39.9289,
-            "postal_code": null,
-            "longitude": 116.38830000000002,
-            "country_code": "CN",
-            "country_name": "China",
-            "continent": "AS"
-          },
-          "samplinginterval": 100,
-          "sourceasn": 0,
-          "sourceipaddress": "10.247.28.2",
-          "count": 29,
-          "destinationipaddress": "2.192.38.177",
-          "last": 96205073,
-          "sourcemask": 21,
-          "packets": 4,
-          "destinationasn": 0,
-          "sitetype": "office",
-          "destinationipv4address": "2.192.38.177",
-          "first": 96161074
-        }
-    }
 
 
 
