@@ -186,4 +186,10 @@ Router.map(function () {
        template:'veristags',
        layoutTemplate: 'layout'
     });
+
+    this.route('vr', {
+        path: '/vr',
+        template: 'vr',
+        layoutTemplate: 'layout'
+    });
 });
