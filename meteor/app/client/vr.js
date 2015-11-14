@@ -84,21 +84,87 @@ if (Meteor.isClient) {
         requestAnimationFrame(render);
         renderer.render(scene, camera);
     }
+    
+    var start = null;
+    function rotateCube() {
+      document.removeEventListener("keydown", listener);
+      cube.rotation.y+=1;
+      if(cube.rotation.y<40)
+        window.requestAnimationFrame(rotateCube);
+      else if(cube.rotation.y >=40 && cube.rotation.y <80){
+        cube.material.opacity-=0.02;
+        window.requestAnimationFrame(rotateCube);    
+      }
+      else{
+        document.addEventListener("keydown", listener);
+        scene.remove(cube);
+      }
+    }
+    function rotateSphere() {
+      document.removeEventListener("keydown", listener);
+      sphere.rotation.y+=1;
+      if(sphere.rotation.y<40)
+        window.requestAnimationFrame(rotateSphere);
+      else if(sphere.rotation.y >=40 && sphere.rotation.y <80){
+        sphere.material.opacity-=0.02;
+        window.requestAnimationFrame(rotateSphere);    
+      }
+      else{
+        document.addEventListener("keydown", listener);
+        scene.remove(sphere);
+      }
+    }
+
+    var cube;
+    function cubeMake(x,y,z){
+        var geometry = new THREE.CubeGeometry( 5, 5, 5 );
+        var material = new THREE.MeshBasicMaterial( {color: 0x00ff00, wireframe: true} );
+        cube = new THREE.Mesh( geometry, material );
+        cube.position.x = x;
+        cube.position.y = y;
+        cube.position.z = z;
+        cube.material.transparent = true;
+        rotateCube();
+        scene.add( cube );
+    }
+    var sphere;
+    function sphereMake(x,y,z){
+        var geometry = new THREE.SphereGeometry( 5, 32, 32 );
+        var material = new THREE.MeshBasicMaterial( {color: "blue", wireframe: true} );
+        sphere = new THREE.Mesh( geometry, material );
+        sphere.position.x = x;
+        sphere.position.y = y;
+        sphere.position.z = z;
+        sphere.material.transparent = true;
+        rotateSphere();
+        scene.add( sphere );
+    }
+
+    function listener(evt) {
+      if(evt.keyCode === 37)
+        camera.position.x -= 2;
+      else if(evt.keyCode === 39)
+        camera.position.x += 2;
+      else if(evt.keyCode === 38)
+        camera.position.y += 2;
+      else if(evt.keyCode === 40)
+        camera.position.y -= 2;
+      else if(evt.keyCode === 49)
+        cubeMake(10,15,35);
+      else if(evt.keyCode === 50)
+        cubeMake(15,15,-30);
+      else if(evt.keyCode === 51)
+        sphereMake(10,15,35);
+      else if(evt.keyCode === 52)
+        sphereMake(15,15,-30);
+      else if(evt.keyCode === 53)
+        sphereMake(-5,20,-65);
+    }
 
     Template.vr.rendered = function () {
         init();
         render();
-        document.addEventListener("keydown", function(evt) {
-          if(evt.keyCode === 37)
-            camera.position.x -= 2;
-          else if(evt.keyCode === 39)
-            camera.position.x += 2;
-          else if(evt.keyCode === 38)
-            camera.position.y += 2;
-          else if(evt.keyCode === 40)
-            camera.position.y -= 2;
-        })
-
+        document.addEventListener("keydown", listener);
        };//end template.attackers.rendered
 
     Template.vr.destroyed = function () {
@@ -109,6 +175,7 @@ if (Meteor.isClient) {
         WIDTH  = window.innerWidth;
         HEIGHT = window.innerHeight;
         SPEED = 0.01;
+        document.removeEventListener("keydown",listener);
 
     };//end template.attackers.destroyed
 
