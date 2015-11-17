@@ -91,8 +91,7 @@ if (Meteor.isClient) {
       cube.rotation.y+=1;
       if(cube.rotation.y<40)
         window.requestAnimationFrame(rotateCube);
-      else if(cube.rotation.y >=40 && cube.rotation.y <80){
-        cube.material.opacity-=0.02;
+      else if(cube.rotation.y >=40){
         window.requestAnimationFrame(rotateCube);    
       }
       else{
@@ -105,8 +104,7 @@ if (Meteor.isClient) {
       sphere.rotation.y+=1;
       if(sphere.rotation.y<40)
         window.requestAnimationFrame(rotateSphere);
-      else if(sphere.rotation.y >=40 && sphere.rotation.y <80){
-        sphere.material.opacity-=0.02;
+      else if(sphere.rotation.y >=40){
         window.requestAnimationFrame(rotateSphere);    
       }
       else{
@@ -160,11 +158,49 @@ if (Meteor.isClient) {
       else if(evt.keyCode === 53)
         sphereMake(-5,20,-65);
     }
+    function parsedb() {
+        coords = {
+            'a': {'x': 37, 'y': 12, 'z': -7},
+            'b': {'x': 15, 'y': 15, 'z': -30},
+            'c': {'x': -33, 'y': 15, 'z': -1}
+        }
+
+        Meteor.subscribe("attackers-summary", onReady=function() {
+            console.log("Inside parsedb");
+            console.log(attackers.find().count());
+            attackers.find().forEach(function(element, index, array) {
+                console.log('xx',element.creator);
+                var anitack;
+                if (element.attacktype == 'avijit') {
+                    anitack = sphereMake;
+                } else if (element.attacktype == 'sanchit') {
+                    anitack = cubeMake;
+                }
+                switch (element.service) {
+                    case 'a':
+                        anitack(coords.a.x, coords.a.y, coords.a.z);
+                        console.log('Attack on a');
+                        break;
+                    case 'b':
+                        anitack(coords.b.x, coords.b.y, coords.b.z);
+                        console.log('Attack on b');
+                        break;
+                    case 'c':
+                        anitack(coords.c.x,coords.c.y,coords.c.z);
+                        console.log('Attack on c');
+                        break;
+                    default:
+                        break;
+                }
+            });
+        });
+    }
 
     Template.vr.rendered = function () {
         init();
         render();
         document.addEventListener("keydown", listener);
+        parsedb();
        };//end template.attackers.rendered
 
     Template.vr.destroyed = function () {
