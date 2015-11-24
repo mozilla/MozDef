@@ -16,7 +16,7 @@ class AlertGeomodel(AlertTask):
         date_timedelta = dict(minutes=30)
 
         must = [
-            pyes.TermFilter('_type', 'geomodel'),
+            pyes.TermFilter('_type', 'event'),
             pyes.TermFilter('category', 'geomodelnotice'),
         ]
         self.filtersManual(date_timedelta, must=must, must_not=[])
