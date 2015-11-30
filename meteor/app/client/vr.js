@@ -715,7 +715,7 @@ if (Meteor.isClient) {
     }
 
     function initCamera() {
-        camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 1, 1000);
+        camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 1, 10000);
         camera.position.set(-39.52908903855581, -4.352138336979161, 40.70626794923796);
         var lookAt = { x: -30.52908903855581, y: -4.352138336979161, z: 37.70626794923796 }
         camera.lookAt(lookAt);
@@ -731,7 +731,7 @@ if (Meteor.isClient) {
 
     function initLights() {
       var spotLight = new THREE.SpotLight( 0xffffff , 1);
-      spotLight.position.set( 100, 1000, 100 );
+      spotLight.position.set( 100, 10000, 100 );
       scene.add(spotLight);
       spotLight.castShadow = true;
     }
@@ -747,6 +747,43 @@ if (Meteor.isClient) {
         mesh.translation = THREE.GeometryUtils.center(geometry);
         mesh.castShadow = true;
         scene.add(mesh);
+        console.log(mesh);
+/*        mesh.material.color.r=0;
+        mesh.material.color.b=0.1;
+        mesh.material.color.g=0.86;*/
+        mesh1 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+        mesh1.scale.x = mesh1.scale.y = mesh1.scale.z = 50.75;
+        mesh1.translation = THREE.GeometryUtils.center(geometry);
+        mesh1.castShadow = true;
+        mesh1.position.x = -800;
+        mesh1.position.y = -20;
+        scene.add(mesh1);
+/*        mesh1.material.color.r=0;
+        mesh1.material.color.b=0.3;
+        mesh1.material.color.g=1;*/
+        mesh2 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+        mesh2.scale.x = mesh2.scale.y = mesh2.scale.z = 50.75;
+        mesh2.translation = THREE.GeometryUtils.center(geometry);
+        mesh2.castShadow = true;
+        mesh2.position.x = -800;
+        mesh2.position.y = -20;
+        mesh2.position.z = -800
+        mesh2.rotation.y = Math.PI/2;
+        scene.add(mesh2);
+/*        mesh2.material.color.r=0;
+        mesh2.material.color.b=0.3;
+        mesh2.material.color.g=1;*/
+        mesh3 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+        mesh3.scale.x = mesh3.scale.y = mesh3.scale.z = 50.75;
+        mesh3.translation = THREE.GeometryUtils.center(geometry);
+        mesh3.castShadow = true;
+        mesh3.position.y = -20;
+        mesh3.position.z = -800
+        mesh3.rotation.y = 3*Math.PI/2;
+        scene.add(mesh3);
+        /*mesh3.material.color.r=0;
+        mesh3.material.color.b=0.3;
+        mesh3.material.color.g=1;*/
         /*var json = loader.parse(result);
         var geometry = json.geometry;
         var materials = json.materials;
