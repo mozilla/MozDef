@@ -705,11 +705,13 @@ if (Meteor.isClient) {
 
     }
 
-    function restartEngine(parameters)
+    function restartEngine(parameters, x, z)
     {
         
         engine.destroy();
         engine = new ParticleEngine();
+        parameters.positionBase.x=x;
+        parameters.positionBase.z=z;
         engine.setValues( parameters );
         engine.initialize();
     }
@@ -747,8 +749,7 @@ if (Meteor.isClient) {
         mesh.translation = THREE.GeometryUtils.center(geometry);
         mesh.castShadow = true;
         scene.add(mesh);
-        console.log(mesh);
-/*        mesh.material.color.r=0;
+        /*        mesh.material.color.r=0;
         mesh.material.color.b=0.1;
         mesh.material.color.g=0.86;*/
         mesh1 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
@@ -868,15 +869,15 @@ if (Meteor.isClient) {
 
     function listener(evt) {
       if(evt.keyCode === 37)
-        restartEngine(Examples.smoke);
+        restartEngine(Examples.smoke,100,100);
       else if(evt.keyCode === 39)
-        restartEngine(Examples.fireball);
+        restartEngine(Examples.fireball,50,100);
       else if(evt.keyCode === 38)
-        restartEngine(Examples.candle);
+        restartEngine(Examples.candle,10,-800);
       else if(evt.keyCode === 40)
-        restartEngine(Examples.clouds);
+        restartEngine(Examples.clouds,-800,-800);
       else if(evt.keyCode === 49)
-        restartEngine(Examples.rain);
+        restartEngine(Examples.rain,200,-300);
       else if(evt.keyCode === 50)
         restartEngine(Examples.fountain);
       else if(evt.keyCode === 51)
