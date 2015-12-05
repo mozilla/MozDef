@@ -676,17 +676,31 @@ if (Meteor.isClient) {
     document.createElement("div");a.extend(this.domElement.style,{position:"fixed",display:"none",zIndex:"1001",opacity:0,WebkitTransition:"-webkit-transform 0.2s ease-out, opacity 0.2s linear"});document.body.appendChild(this.backgroundElement);document.body.appendChild(this.domElement);var c=this;e.bind(this.backgroundElement,"click",function(){c.hide()})};c.prototype.show=function(){var c=this;this.backgroundElement.style.display="block";this.domElement.style.display="block";this.domElement.style.opacity=
     0;this.domElement.style.webkitTransform="scale(1.1)";this.layout();a.defer(function(){c.backgroundElement.style.opacity=1;c.domElement.style.opacity=1;c.domElement.style.webkitTransform="scale(1)"})};c.prototype.hide=function(){var a=this,c=function(){a.domElement.style.display="none";a.backgroundElement.style.display="none";e.unbind(a.domElement,"webkitTransitionEnd",c);e.unbind(a.domElement,"transitionend",c);e.unbind(a.domElement,"oTransitionEnd",c)};e.bind(this.domElement,"webkitTransitionEnd",
     c);e.bind(this.domElement,"transitionend",c);e.bind(this.domElement,"oTransitionEnd",c);this.backgroundElement.style.opacity=0;this.domElement.style.opacity=0;this.domElement.style.webkitTransform="scale(1.1)"};c.prototype.layout=function(){this.domElement.style.left=window.innerWidth/2-e.getWidth(this.domElement)/2+"px";this.domElement.style.top=window.innerHeight/2-e.getHeight(this.domElement)/2+"px"};return c}(dat.dom.dom,dat.utils.common),dat.dom.dom,dat.utils.common);
-    //template variables
-   scene = null;
-   camera = null;
-   renderer = null;
-   WIDTH  = window.innerWidth;
-   HEIGHT = window.innerHeight;
-   SPEED = 0.01;
-   controls=null;
-   var clock = new THREE.Clock();
-   function init() {
-    scene = new THREE.Scene();
+
+
+  //template variables
+   var geometry = null;
+   var scene = null;
+   var camera = null;
+   var renderer = null;
+   var materials = null;
+   var json = null;
+   var geometry = null;
+   var WIDTH  = window.innerWidth;
+   var HEIGHT = window.innerHeight;
+   var SPEED = 0.01;
+   var controls = null;
+   var clock = null;
+   var mesh = null;
+   var mesh1 = null;
+   var mesh2 = null;
+   var mesh3 = null;
+   var spotlight = null;
+  var loader = null;
+  var coords = {};
+  var projector = null;
+
+  function init() {
     initMesh();
     initCamera();
     initLights();
@@ -705,6 +719,16 @@ if (Meteor.isClient) {
 
     }
 
+  function initVariables() {
+    clock = new THREE.Clock();
+    scene = new THREE.Scene();
+    loader = new THREE.JSONLoader();
+    camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 1, 10000);
+    spotLight = new THREE.SpotLight( 0xffffff , 1);
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    projector = new THREE.Projector();
+  }
+
     function restartEngine(parameters, x, z)
     {
         
@@ -717,22 +741,18 @@ if (Meteor.isClient) {
     }
 
     function initCamera() {
-        camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 1, 10000);
         camera.position.set(-39.52908903855581, -4.352138336979161, 40.70626794923796);
         var lookAt = { x: -30.52908903855581, y: -4.352138336979161, z: 37.70626794923796 }
         camera.lookAt(lookAt);
     }
 
-
     function initRenderer() {
-        renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(WIDTH, HEIGHT);
         renderer.shadowMapEnabled = true;  // enable shadows
       
     }
 
     function initLights() {
-      var spotLight = new THREE.SpotLight( 0xffffff , 1);
       spotLight.position.set( 100, 10000, 100 );
       scene.add(spotLight);
       spotLight.castShadow = true;
@@ -740,11 +760,13 @@ if (Meteor.isClient) {
 
     var mesh = null;
     function initMesh() {
-        var loader = new THREE.JSONLoader();
-        var json = loader.parse(result);
-        var geometry = json.geometry;
-        var materials = json.materials;
-        mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+      json = loader.parse(result);
+      geometry = json.geometry;
+      materials = json.materials;
+      mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+      mesh1 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+      mesh2 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+      mesh3 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
         mesh.scale.x = mesh.scale.y = mesh.scale.z = 50.75;
         mesh.translation = THREE.GeometryUtils.center(geometry);
         mesh.castShadow = true;
@@ -752,7 +774,6 @@ if (Meteor.isClient) {
         /*        mesh.material.color.r=0;
         mesh.material.color.b=0.1;
         mesh.material.color.g=0.86;*/
-        mesh1 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
         mesh1.scale.x = mesh1.scale.y = mesh1.scale.z = 50.75;
         mesh1.translation = THREE.GeometryUtils.center(geometry);
         mesh1.castShadow = true;
@@ -762,7 +783,6 @@ if (Meteor.isClient) {
 /*        mesh1.material.color.r=0;
         mesh1.material.color.b=0.3;
         mesh1.material.color.g=1;*/
-        mesh2 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
         mesh2.scale.x = mesh2.scale.y = mesh2.scale.z = 50.75;
         mesh2.translation = THREE.GeometryUtils.center(geometry);
         mesh2.castShadow = true;
@@ -774,7 +794,6 @@ if (Meteor.isClient) {
 /*        mesh2.material.color.r=0;
         mesh2.material.color.b=0.3;
         mesh2.material.color.g=1;*/
-        mesh3 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
         mesh3.scale.x = mesh3.scale.y = mesh3.scale.z = 50.75;
         mesh3.translation = THREE.GeometryUtils.center(geometry);
         mesh3.castShadow = true;
@@ -926,12 +945,33 @@ if (Meteor.isClient) {
     }
 
 
+    Template.vr.created = function () {
+      initVariables();
+    }
+
+
     Template.vr.rendered = function () {
         init();
         render();
         document.addEventListener("keydown", listener);
         parsedb();
        };//end template.attackers.rendered
+
+  Template.vr.events({
+    "mousemove": function(e) {
+      // console.log(e);
+      var mouse = {};
+      mouse.x = ( e.clientX / WIDTH ) * 2 - 1;
+      mouse.y = - ( e.clientY / HEIGHT ) * 2 + 1;
+      var vector = new THREE.Vector3( mouse.x, mouse.y);
+      projector.unprojectVector( vector, camera );
+      var dir = vector.sub( camera.position ).normalize();
+      var distance = - camera.position.z / dir.z;
+      var pos = camera.position.clone().add( dir.multiplyScalar( distance ));
+      console.log(pos.x, pos.y);
+      // checkForNameplateVisible();
+    }
+  })
 
     Template.vr.destroyed = function () {
         container.removeChild(renderer.domElement);
