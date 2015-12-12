@@ -906,42 +906,88 @@ if (Meteor.isClient) {
       else if(evt.keyCode === 53)
         sphereMake(-5,20,-65);
     }
-    function parsedb() {
-        coords = {
-            'a': {'x': 37, 'y': 12, 'z': -7},
-            'b': {'x': 15, 'y': 15, 'z': -30},
-            'c': {'x': -33, 'y': 15, 'z': -1}
-        }
 
-        Meteor.subscribe("attackers-summary", onReady=function() {
+    rank_coord_mapping = {
+        0:[-286,-115],
+        1:[-15,11],
+        2:[-234,232],
+        3:[-69,-142],
+        4:[124,293],
+        5:[153,-869],
+        6:[124,-1122],
+        7:[-261,-1031],
+        8:[87,-583],
+        9:[-288,-625],
+        10:[265,-501],
+        11:[-850,-134],
+        12:[-1094,-74],
+        13:[-576,-190],
+        14:[-605,98],
+        15:[-964,293],
+        16:[-1084,-554],
+        17:[-899,-628],
+        18:[-589,-716],
+        19:[-992,-962],
+        20:[-754,-1087]
+    }
+
+    attack_animation_mapping = {
+        'broxss': Examples.fireball,
+        'bro_notice': Examples.smoke,
+        'brosqli': Examples.candle,
+        'brotunnel': Examples.rain,
+        'brointel': Examples.clouds
+    }
+    var world = {};
+
+    function parsedb() {
+
+        Meteor.subscribe("attackers-summary-yash", onReady=function() {
             console.log("Inside parsedb");
             console.log(attackers.find().count());
             attackers.find().forEach(function(element, index, array) {
-                console.log('xx',element.creator);
-                var anitack;
-                if (element.attacktype == 'avijit') {
-                    anitack = sphereMake;
-                } else if (element.attacktype == 'sanchit') {
-                    anitack = cubeMake;
-                }
-                switch (element.service) {
-                    case 'a':
-                        anitack(coords.a.x, coords.a.y, coords.a.z);
-                        console.log('Attack on a');
-                        break;
-                    case 'b':
-                        anitack(coords.b.x, coords.b.y, coords.b.z);
-                        console.log('Attack on b');
-                        break;
-                    case 'c':
-                        anitack(coords.c.x,coords.c.y,coords.c.z);
-                        console.log('Attack on c');
-                        break;
-                    default:
-                        break;
+                // TODO: Take care of timestamp
+                //console.log(element);
+                //console.log('Index ',index);
+                for(ev in element.events) {
+                    var evt = element.events[ev];
+                    //console.log(evt.documentsource.details.host);
+                    if (world[evt.documentsource.details.host]) { 
+                            world[evt.documentsource.details.host].push(evt.documentsource);
+                    } else { 
+                       world[evt.documentsource.details.host] = [evt.documentsource];
+                    }
                 }
             });
+            console.log('world below');
+            console.log(world);
+            console.log('world above');
+
+            var attacks = Object.keys(world).map(function(key) {
+                return [key, world[key].length];
+            }).sort(function(first, second) {
+                return second[1] - first[1];
+            }).map(function(arr){
+                return arr[0];
+            });
+
+            console.log(attacks);
+            for (att in attacks) {
+                var service = attacks[att];
+                console.log(attacks.length);
+                console.log('service', service);
+                for (i in world[service]) {
+                    attack_type = world[service][i].category;
+                    console.log(att, i, attack_type);
+                    if (Object.keys(attack_animation_mapping).indexOf(attack_type) > -1) {
+                        attack = attack_animation_mapping[attack_type];
+                        console.log(att, i, attack_type);
+                        restartEngine(attack, rank_coord_mapping[att][0], rank_coord_mapping[att][1])
+                    }
+                }
+            }
         });
+        
     }
 
 
