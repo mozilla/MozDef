@@ -25,10 +25,12 @@ if (Meteor.isClient) {
                     verisstatsResult.data=result.data;
                     container.style.cursor='auto';
                     result.data.forEach(function(d){
-                        //grab just the year from the python datetime object
-                        d.yearOpened=moment(d.dateOpened['$date']).format("YYYY");
-                        //reformat dateOpened from a python datetime object to month date
-                        d.dateOpened=moment(d.dateOpened['$date']).format("MMMM YYYY");
+                        if ( d.dateOpened && d.dateOpened['$date'] ){
+                            //grab just the year from the python datetime object
+                            d.yearOpened=moment(d.dateOpened['$date']).format("YYYY");
+                            //reformat dateOpened from a python datetime object to month date
+                            d.dateOpened=moment(d.dateOpened['$date']).format("MMMM YYYY");
+                        }
                     });
                     startPivotTable(result.data);
                } else {
