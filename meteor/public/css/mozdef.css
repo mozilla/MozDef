@@ -90,6 +90,15 @@ caption, legend {
   line-height: 13px;
 }
 
+
+.attackshoverboard {
+    width: 500px;
+    height: 500px;
+    background-color: green;
+    display: none;
+}
+
+
 .attackercallout {
     width: 120px;
     height: 160px;
