@@ -702,7 +702,6 @@ if (Meteor.isClient) {
   var sceneObjects = [];
   var attackedIds = 0;
   var cssRenderer = null;
-  var nameplatesList = [];
   var intersectedObject = null;
 
   function init() {
@@ -955,7 +954,7 @@ if (Meteor.isClient) {
   function parsedb() {
 
     attackedIds = 0;
-    Meteor.subscribe("attackers-summary-yash", onReady=function() {
+    Meteor.subscribe("attackers-summary-yash", onReady = function() {
       console.log("Inside parsedb");
       console.log(attackers.find().count());
       attackers.find().forEach(function(element) {
@@ -986,7 +985,6 @@ if (Meteor.isClient) {
       console.log('ATTACKS: ', attacks);
 
       sceneObjects = [];
-      nameplatesList = [];
       for (att in attacks) {
         // console.log('ATT: ', att);
         var attackRank = world[attacks[att]].rank;
@@ -1001,46 +999,6 @@ if (Meteor.isClient) {
         sphere.rank = attackRank;
         console.log('SPHERE: ', sphere);
         sceneObjects.push(sphere);
-  
-        // Create nameplate to be displayed on hover over the transparent sphere
-        var hoverElm = $('<div class="container-fluid attackshoverboard">' + 
-          '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style=" display: block; position: static; margin-bottom: 5px; *width: 180px;">' +
-            '<li class="row id"><a tabindex="-1" href="#">Rank #' + attackRank + '</a></li>' +
-            '<li class="row id"><a tabindex="-1" href="#">' + attacks[att] + '</a></li>' +
-            '<li class="divider"></li>' +
-            '<li class="dropdown-submenu"><a tabindex="-1" href="#">List of attacks</a>' +
-            '<ul class="dropdown-menu attacks-list">' +
-              '<li><a tabindex="-1" href="#">Attack #1</a></li>' +
-              '<li><a tabindex="-1" href="#">Attack #2</a></li>' +
-              '<li><a tabindex="-1" href="#">Attack #3</a></li>' +
-            '</ul>' +
-            '</li>' +
-          '</ul>' +
-        '</div>');
-        var nameplate = new THREE.CSS3DObject(hoverElm.get()[0]);
-        var npOffset = new THREE.Vector3();
-        nameplate.name = 'nameplate' + attackRank;
-        nameplate.rank = attackRank;
-        nameplate.parent = sphere;
-        npOffset.x = 0;
-        npOffset.y = 0;
-        npOffset.z = 0.5;
-        nameplate.offset = npOffset;
-        nameplate.scale.x = sphere.scale;
-        nameplate.scale.y = sphere.scale;
-        nameplate.scale.z = sphere.scale;
-        nameplate.position.copy(sphere.position);
-        nameplate.position.add(npOffset);
-        nameplate.element.style.display='none';
-        
-        //add everything.
-        //threejs doesn't take children that aren't threejs object3d instances
-        //so add the nameplate manually.
-        
-        sphere.children.push(nameplate);
-        nameplatesList.push(nameplate);
-        nameplate.parent=sphere;
-        scene.add(nameplate);
         scene.add( sphere );
 
         var service = attacks[att];
@@ -1073,39 +1031,19 @@ if (Meteor.isClient) {
   };//end template.attackers.rendered
 
   Template.vr.events({
-    "mousemove": function(e) {
+
+   "click #container": function(e) {
       var mouse = {
         x: (e.clientX / WIDTH ) * 2 - 1,
         y: (e.clientY / HEIGHT ) * 2 - 1,
       };
-      var mouseVector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+      var mouseVector = new THREE.Vector3( mouse.x, mouse.y, 0. );
       projector.unprojectVector( mouseVector, camera );
       var raycaster = new THREE.Raycaster( camera.position, mouseVector.sub( camera.position ).normalize() );
       var intersects = raycaster.intersectObjects(sceneObjects, true);
-      if (intersects.length > 0) {
-        var rank = intersects[ 0 ].object.rank;
-        if (intersectedObject !== intersects[ 0 ].object.parent) {
-          intersectedObject = intersects[ 0 ].object.parent;
-          nameplate = intersectedObject.getObjectByName('nameplate' + rank);
-          if (nameplate) {
-            nameplate.element.style.display = 'inline';
-            nameplate.lookAt( camera.position );
-            nameplate.position.copy(intersectedObject.position);
-          }
-        }
-      }
-      else {
-        if  (intersectedObject) {
-          intersectedObject = null;
-          scene.children.forEach(function(obj) {
-            if (obj instanceof THREE.CSS3DObject) {
-              obj.element.style.display = 'none';
-            }
-          });
-        }
-      }
-
+      console.log(intersects);
    }
+
   });
 
   Template.vr.destroyed = function () {
