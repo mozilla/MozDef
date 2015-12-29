@@ -53,7 +53,7 @@ modal: for  Session.set('ipintelipaddress','1,2.3.4') then
                             intel: {{intel.status}} {{intel.error}}
                         </div>
                     </div>
-                    {{#if isEqual intel.data.status 200}}
+                    {{#if isEqual intel.result.statusCode 200}}
                         <div class="row center">
                             <pre>{{ stringify intel.data }}</pre>
                         </div>

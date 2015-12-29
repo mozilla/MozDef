@@ -64,7 +64,7 @@ class message(object):
 
         print(requestDict, requestDict.keys())
         if 'ipaddress' in requestDict.keys():
-            url="https://cymon.io/api/nexus/v1/ip/{0}/timeline?combined=true&format=json".format(requestDict['ipaddress'])
+            url="https://cymon.io/api/nexus/v1/ip/{0}/events?combined=true&format=json".format(requestDict['ipaddress'])
 
             # add the cymon api key?
             if self.options is not None:
@@ -77,6 +77,7 @@ class message(object):
             if dresponse.status_code == 200:
                 response.content_type = "application/json"
                 response.body = dresponse.content
+                response.status=200
             else:
                 response.status = dresponse.status_code
 
