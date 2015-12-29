@@ -700,7 +700,7 @@ if (Meteor.isClient) {
   var coords = {};
   var projector = null;
   var sceneObjects = [];
-  var count = 0;
+  var attackedIds = 0;
   var cssRenderer = null;
   var nameplatesList = [];
   var intersectedObject = null;
@@ -738,51 +738,11 @@ if (Meteor.isClient) {
   function restartEngine(parameters, x, z)
   {
     engine.destroy();
-    sceneObjects = [];
     engine = new ParticleEngine();
     parameters.positionBase.x=x;
     parameters.positionBase.z=z;
 
-    nameplatesList = [];
-    // Create enclosing transparent sphere
-    var tempSphere = new THREE.SphereGeometry(70);
-    var material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } );
-    var sphere = new THREE.Mesh( tempSphere, material );
-    sphere.position.x = x;
-    sphere.position.z = z;
-    sphere.name = "EnclosingSphere";
-    sceneObjects.push(sphere);
-
-    // Create nameplate to be displayed on hover over the transparent sphere
-    var hoverElm = $('<div class="attackshoverboard container-fluid"> This is some random data </div>');
-    var nameplate = new THREE.CSS3DObject(hoverElm.get()[0]);
-    var npOffset = new THREE.Vector3();
-    nameplate.name = 'nameplate' + count++;
-    npOffset.x = 0;
-    npOffset.y = 0;
-    npOffset.z = 0.5;
-    nameplate.offset = npOffset;
-    nameplate.scale.x = sphere.scale;
-    nameplate.scale.y = sphere.scale;
-    nameplate.scale.z = sphere.scale;
-    nameplate.position.copy(sphere.position);
-    nameplate.position.add(npOffset);
-    // nameplate.element.style.display='none';
-    // nameplate.element.style.backgroundColor='green';
-    // nameplate.element.style.height='1000px';
-    // nameplate.element.style.width='1000px';
-    // nameplate.element.style.zIndex='9999';
-
-    //add everything.
-    //threejs doesn't take children that aren't threejs object3d instances
-  //so add the nameplate manually.
     
-    sphere.children.push(nameplate);
-    nameplatesList.push(nameplate);
-    nameplate.parent=sphere;
-    scene.add(nameplate);
-    scene.add( sphere );
-
     engine.setValues( parameters );
     engine.initialize();
   }
@@ -994,27 +954,27 @@ if (Meteor.isClient) {
 
   function parsedb() {
 
+    attackedIds = 0;
     Meteor.subscribe("attackers-summary-yash", onReady=function() {
       console.log("Inside parsedb");
       console.log(attackers.find().count());
-      attackers.find().forEach(function(element, index, array) {
+      attackers.find().forEach(function(element) {
         // TODO: Take care of timestamp
-        //console.log(element);
-        //console.log('Index ',index);
+        console.log(element);
         for(ev in element.events) {
           var evt = element.events[ev];
-          console.log(evt.documentsource.details.host);
           if (world[evt.documentsource.details.host]) {
             world[evt.documentsource.details.host].push(evt.documentsource);
-          } else {
+            } else {
             world[evt.documentsource.details.host] = [evt.documentsource];
+            world[evt.documentsource.details.host].rank = attackedIds++;
+            console.log('ID' , world[evt.documentsource.details.host].id);
           }
         }
       });
-      console.log('world below');
-      console.log(world);
-      console.log('world above');
 
+      console.log('WORLD: ', world);
+      
       var attacks = Object.keys(world).map(function(key) {
         return [key, world[key].length];
       }).sort(function(first, second) {
@@ -1023,10 +983,67 @@ if (Meteor.isClient) {
         return arr[0];
       });
 
-      console.log(attacks);
+      console.log('ATTACKS: ', attacks);
+
+      sceneObjects = [];
+      nameplatesList = [];
       for (att in attacks) {
+        // console.log('ATT: ', att);
+        var attackRank = world[attacks[att]].rank;
+        // Create enclosing transparent sphere
+        var tempSphere = new THREE.SphereGeometry(70);
+        // var material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } );
+        var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+        var sphere = new THREE.Mesh( tempSphere, material );
+        sphere.position.x = rank_coord_mapping[attackRank].x;
+        sphere.position.z = rank_coord_mapping[attackRank].z;
+        sphere.name = "EnclosingSphere" + attackRank;
+        sphere.rank = attackRank;
+        console.log('SPHERE: ', sphere);
+        sceneObjects.push(sphere);
+  
+        // Create nameplate to be displayed on hover over the transparent sphere
+        var hoverElm = $('<div class="container-fluid attackshoverboard">' + 
+          '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style=" display: block; position: static; margin-bottom: 5px; *width: 180px;">' +
+            '<li class="row id"><a tabindex="-1" href="#">Rank #' + attackRank + '</a></li>' +
+            '<li class="row id"><a tabindex="-1" href="#">' + attacks[att] + '</a></li>' +
+            '<li class="divider"></li>' +
+            '<li class="dropdown-submenu"><a tabindex="-1" href="#">List of attacks</a>' +
+            '<ul class="dropdown-menu attacks-list">' +
+              '<li><a tabindex="-1" href="#">Attack #1</a></li>' +
+              '<li><a tabindex="-1" href="#">Attack #2</a></li>' +
+              '<li><a tabindex="-1" href="#">Attack #3</a></li>' +
+            '</ul>' +
+            '</li>' +
+          '</ul>' +
+        '</div>');
+        var nameplate = new THREE.CSS3DObject(hoverElm.get()[0]);
+        var npOffset = new THREE.Vector3();
+        nameplate.name = 'nameplate' + attackRank;
+        nameplate.rank = attackRank;
+        nameplate.parent = sphere;
+        npOffset.x = 0;
+        npOffset.y = 0;
+        npOffset.z = 0.5;
+        nameplate.offset = npOffset;
+        nameplate.scale.x = sphere.scale;
+        nameplate.scale.y = sphere.scale;
+        nameplate.scale.z = sphere.scale;
+        nameplate.position.copy(sphere.position);
+        nameplate.position.add(npOffset);
+        nameplate.element.style.display='none';
+        
+        //add everything.
+        //threejs doesn't take children that aren't threejs object3d instances
+        //so add the nameplate manually.
+        
+        sphere.children.push(nameplate);
+        nameplatesList.push(nameplate);
+        nameplate.parent=sphere;
+        scene.add(nameplate);
+        scene.add( sphere );
+
         var service = attacks[att];
-        console.log(attacks.length);
         console.log('service', service);
         for (i in world[service]) {
           attack_type = world[service][i].category;
@@ -1064,14 +1081,12 @@ if (Meteor.isClient) {
       var mouseVector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
       projector.unprojectVector( mouseVector, camera );
       var raycaster = new THREE.Raycaster( camera.position, mouseVector.sub( camera.position ).normalize() );
-  
       var intersects = raycaster.intersectObjects(sceneObjects, true);
-      
       if (intersects.length > 0) {
+        var rank = intersects[ 0 ].object.rank;
         if (intersectedObject !== intersects[ 0 ].object.parent) {
           intersectedObject = intersects[ 0 ].object.parent;
-          console.log(intersectedObject);
-          nameplate = intersectedObject.getObjectByName('nameplate1');
+          nameplate = intersectedObject.getObjectByName('nameplate' + rank);
           if (nameplate) {
             nameplate.element.style.display = 'inline';
             nameplate.lookAt( camera.position );
@@ -1082,45 +1097,16 @@ if (Meteor.isClient) {
       else {
         if  (intersectedObject) {
           intersectedObject = null;
-          scene.getObjectByName('nameplate1').element.style.display = 'none';
+          scene.children.forEach(function(obj) {
+            if (obj instanceof THREE.CSS3DObject) {
+              obj.element.style.display = 'none';
+            }
+          });
         }
-        
-        // for (var i = 0, l = scene.children.length; i < l; i ++ ) {
-        //   if ( scene.children[i].getObjectByName('nameplate1')){
-        //     console.log('Found');
-        //   }
-        //     // aplate=scene.children[i];
-        //     // if (! aplate.sticky ){
-        //         // aplate.element.style.display='none';
-        //     // }
-        //   // }
-        // }
-
-        // nameplatesList.forEach(function(nameplate) {
-        //   nameplate.element.style.display = 'none';
-        // });
-        
       }
 
-
-
-      // intersects.forEach(function(intersectedObj) {
-      //   // console.log(intersectedObj.object.name, intersectedObj.name);
-        // console.log(intersectedObj.parent.getObjectByName("EnclosingSphere"));
-      //     console.log('Hey');
-      //   }
-      // });
-
-
-      // var vector = new THREE.Vector3( mouse.x, mouse.y);
-      // projector.unprojectVector( vector, camera );
-      // var dir = vector.sub( camera.position ).normalize();
-      // var distance = - camera.position.z / dir.z;
-      // var pos = camera.position.clone().add( dir.multiplyScalar( distance ));
-      // checkIfDisplayNameplate(pos);
-      // checkForNameplateVisible();
-    }
-  })
+   }
+  });
 
   Template.vr.destroyed = function () {
     container.removeChild(renderer.domElement);
