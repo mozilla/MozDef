@@ -1,3 +1,13 @@
+-- This Source Code Form is subject to the terms of the Mozilla Public
+-- License, v. 2.0. If a copy of the MPL was not distributed with this
+-- file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-- Copyright (c) 2014 Mozilla Corporation
+--
+-- Contributors:
+-- Anthony Verez averez@mozilla.com
+-- Jeff Bryner jbryner@mozilla.com
+-- Michal Purzynski mpurzynski@mozilla.com
+
 local l=require "lpeg"
 local string=require "string"
 l.locale(l) --add locale entries in the lpeg table
@@ -80,7 +90,7 @@ function process_message()
     msg.Fields['tunnelparents'] = toString(matches[21])
     msg.Fields['orig_cc'] = toString(matches[22])
     msg.Fields['resp_cc'] = toString(matches[23])
-    msg.Fields['sensorname'] = lastField(toString(matches[24]))
+    msg.Fields['peername'] = lastField(toString(matches[24]))
     msg['Payload'] = toString(msg.Fields['sourceipaddress']) .. ":" .. toString(msg.Fields['sourceport']) .. " -> " .. toString(msg.Fields['destinationipaddress']) .. ":" .. toString(msg.Fields['destinationport']) .. " " .. toString(msg.Fields['history']) .. " " .. toString(msg.Fields['originipbytes_int']) .. " bytes / " .. toString(msg.Fields['responseipbytes_int']) .. " bytes"
     inject_message(msg)
     return 0

@@ -1,3 +1,13 @@
+-- This Source Code Form is subject to the terms of the Mozilla Public
+-- License, v. 2.0. If a copy of the MPL was not distributed with this
+-- file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-- Copyright (c) 2014 Mozilla Corporation
+--
+-- Contributors:
+-- Anthony Verez averez@mozilla.com
+-- Jeff Bryner jbryner@mozilla.com
+-- Michal Purzynski mpurzynski@mozilla.com
+
 local l=require "lpeg"
 local string=require "string"
 l.locale(l) --add locale entries in the lpeg table
@@ -67,8 +77,6 @@ function process_message()
         inject_message(msg)
         return 0
     end
-#fields ts  uid id.orig_h   id.orig_p   id.resp_h   id.resp_p   trans_depth method  uri date    request_from    request_to  response_from   response_to reply_to    call_id seq subject request_path    response_path   user_agent  status_code status_msg  warning request_body_len    response_body_len   content_type
-#types  time    string  addr    port    addr    port    count   string  string  string  string  string  string  string  string  string  string  string  vector[string]  vector[string]  string  count   string  string  string  string  string
 
     msg['Type']='brosip'
     msg['Logger']='nsm'
