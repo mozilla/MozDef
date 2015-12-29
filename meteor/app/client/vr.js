@@ -992,8 +992,8 @@ if (Meteor.isClient) {
         var attackRank = world[attacks[att]].rank;
         // Create enclosing transparent sphere
         var tempSphere = new THREE.SphereGeometry(70);
-        // var material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } );
-        var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+        var material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } );
+        // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
         var sphere = new THREE.Mesh( tempSphere, material );
         sphere.position.x = rank_coord_mapping[attackRank].x;
         sphere.position.z = rank_coord_mapping[attackRank].z;
