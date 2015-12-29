@@ -67,13 +67,10 @@ function process_message()
         inject_message(msg)
         return 0
     end
+#fields ts  uid id.orig_h   id.orig_p   id.resp_h   id.resp_p   trans_depth method  uri date    request_from    request_to  response_from   response_to reply_to    call_id seq subject request_path    response_path   user_agent  status_code status_msg  warning request_body_len    response_body_len   content_type
+#types  time    string  addr    port    addr    port    count   string  string  string  string  string  string  string  string  string  string  string  vector[string]  vector[string]  string  count   string  string  string  string  string
 
-    if string.find(matches[10], "^SSH-2.0-check_ssh_") then
-        inject_message(msg)
-        return 0
-    end
-
-    msg['Type']='brossh'
+    msg['Type']='brosip'
     msg['Logger']='nsm'
     msg.Fields['ts'] = toString(matches[1])
     msg.Fields['uid'] = toString(matches[2])
@@ -81,18 +78,28 @@ function process_message()
     msg.Fields['sourceport'] = toNumber(matches[4])
     msg.Fields['destinationipaddress'] = toString(matches[5])
     msg.Fields['destinationport'] = toNumber(matches[6])
-    msg.Fields['version'] = toNumber(matches[7])
-    msg.Fields['authsuccess'] = toString(matches[8])
-    msg.Fields['direction'] = toString(matches[9])
-    msg.Fields['client'] = toString(matches[10])
-    msg.Fields['server'] = toString(matches[11])
-    msg.Fields['cipher_alg'] = toString(matches[12])
-    msg.Fields['mac_alg'] = toString(matches[13])
-    msg.Fields['compression_alg'] = toString(matches[14])
-    msg.Fields['kex_alg'] = toString(matches[15])
-    msg.Fields['host_key_alg'] = toString(matches[16])
-    msg.Fields['host_key'] = lastField(toString(matches[17]))
-    msg.Fields['summary'] = "SSH: " .. nilToString(msg.Fields['sourceipaddress']) .. " -> " .. nilToString(msg.Fields['destinationipaddress']) .. ":" .. nilToString(msg.Fields['destinationport']) .. " status " .. nilToString(msg.Fields['authsuccess'])
+    msg.Fields['transdepth'] = toNumber(matches[7])
+    msg.Fields['method'] = toString(matches[8])
+    msg.Fields['uri'] = toString(matches[9])
+    msg.Fields['date'] = toString(matches[10])
+    msg.Fields['requestfrom'] = toString(matches[11])
+    msg.Fields['requestto'] = toString(matches[12])
+    msg.Fields['responsefrom'] = toString(matches[13])
+    msg.Fields['responseto'] = toString(matches[14])
+    msg.Fields['replyto'] = toString(matches[15])
+    msg.Fields['callid'] = toString(matches[16])
+    msg.Fields['seq'] = toString(matches[17])
+    msg.Fields['subject'] = toString(matches[18])
+    msg.Fields['requestpath'] = toString(matches[19])
+    msg.Fields['responsepath'] = toString(matches[20])
+    msg.Fields['useragent'] = toString(matches[21])
+    msg.Fields['statuscode'] = toNumber(matches[22])
+    msg.Fields['statusmsg'] = toString(matches[23])
+    msg.Fields['warning'] = toString(matches[24])
+    msg.Fields['requestbodylen'] = toNumber(matches[25])
+    msg.Fields['responsebodylen'] = toNumber(matches[26])
+    msg.Fields['contenttype'] = lastField(toString(matches[27]))
+    msg.Fields['summary'] = "SIP: " .. nilToString(msg.Fields['sourceipaddress']) .. " -> " .. nilToString(msg.Fields['destinationipaddress']) .. ":" .. nilToString(msg.Fields['destinationport']) .. " method " .. nilToString(msg.Fields['method']) .. " uri " .. nilToString(msg.Fields['uri']) .. " status " .. nilToString(msg.Fields['statusmsg'])
     inject_message(msg)
     return 0
 end

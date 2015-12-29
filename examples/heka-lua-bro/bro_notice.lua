@@ -1,13 +1,3 @@
--- This Source Code Form is subject to the terms of the Mozilla Public
--- License, v. 2.0. If a copy of the MPL was not distributed with this
--- file, You can obtain one at http://mozilla.org/MPL/2.0/.
--- Copyright (c) 2014 Mozilla Corporation
---
--- Contributors:
--- Anthony Verez averez@mozilla.com
--- Jeff Bryner jbryner@mozilla.com
--- Michal Purzynski mpurzynski@mozilla.com
-
 local l=require "lpeg"
 local string=require "string"
 l.locale(l) --add locale entries in the lpeg table
@@ -84,14 +74,14 @@ function process_message()
     end
     
     if string.find(matches[13], toString("unknown-")) then
-        --noise from incorrect ssl parsing, should be fixed in Bro 2.4
+        --noise from incorrect ssl parsing
         --unknown-6518900,unknown-11273317,unknown-4522550,unknown-12624352,unknown-4609124,unknown-12586245
         inject_message(msg)
         return 0
     end
 
     if string.find(matches[13], toString("empty")) then
-        --noise from incorrect ssl parsing, should be fixed in Bro 2.4
+        --noise from incorrect ssl parsing
 	-- (empty)
         inject_message(msg)
         return 0
@@ -119,7 +109,7 @@ function process_message()
     msg.Fields['peer_descr'] = toString(matches[18])
     msg.Fields['actions'] = toString(matches[19])
     msg.Fields['suppress_for'] = toString(matches[20])
-    msg.Fields['dropped'] = lastField(toString(matches[21]))
+    msg.Fields['dropped'] = toString(matches[21])
     msg['Payload'] = toString(msg.Fields['note']) .. " " .. toString(msg.Fields['msg']) .. " " .. toString(msg.Fields['sub'])
     inject_message(msg)
     return 0

@@ -1,13 +1,3 @@
--- This Source Code Form is subject to the terms of the Mozilla Public
--- License, v. 2.0. If a copy of the MPL was not distributed with this
--- file, You can obtain one at http://mozilla.org/MPL/2.0/.
--- Copyright (c) 2014 Mozilla Corporation
---
--- Contributors:
--- Anthony Verez averez@mozilla.com
--- Jeff Bryner jbryner@mozilla.com
--- Michal Purzynski mpurzynski@mozilla.com
-
 local l=require "lpeg"
 local string=require "string"
 l.locale(l) --add locale entries in the lpeg table
@@ -107,13 +97,18 @@ function process_message()
     msg.Fields['orig_mime_types'] = truncate(toString(matches[25]))
     msg.Fields['resp_fuids'] = truncate(toString(matches[26]))
     msg.Fields['resp_mime_types'] = truncate(toString(matches[27]))
-    if lastField(toString(matches[28])) ~= nil then
-        msg.Fields['cluster_client_ip'] = lastField(toString(matches[28]))
+    if toString(matches[28]) ~= nil then
+        msg.Fields['cluster_client_ip'] = toString(matches[28])
     end
     if msg.Fields['cluster_client_ip'] ~= nil then
         msg.Fields['summary'] = nilToString(msg.Fields['cluster_client_ip'])
     else
         msg.Fields['summary'] = nilToString(msg.Fields['sourceipaddress'])
+    end
+    if lastField(toString(matches[29])) ~= nil then
+        msg.Fields['backend_server'] = lastField(truncate(toString(matches[29])))
+    else
+        msg.Fields['resp_mime_types'] = lastField(truncate(toString(matches[27])))
     end
     msg.Fields['summary'] = msg.Fields['summary'] .. " - " .. nilToString(msg.Fields['method']) .. " " .. nilToString(msg.Fields['host']) .. nilToString(msg.Fields['uri']) .. " " .. nilToString(msg.Fields['status_code_int'])
     inject_message(msg)

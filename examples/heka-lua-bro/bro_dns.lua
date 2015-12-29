@@ -1,13 +1,3 @@
--- This Source Code Form is subject to the terms of the Mozilla Public
--- License, v. 2.0. If a copy of the MPL was not distributed with this
--- file, You can obtain one at http://mozilla.org/MPL/2.0/.
--- Copyright (c) 2014 Mozilla Corporation
---
--- Contributors:
--- Anthony Verez averez@mozilla.com
--- Jeff Bryner jbryner@mozilla.com
--- Michal Purzynski mpurzynski@mozilla.com
-
 local l=require "lpeg"
 local string=require "string"
 l.locale(l) --add locale entries in the lpeg table
@@ -78,15 +68,26 @@ function process_message()
         return 0
     end
 
-    if string.find(matches[9], "domainiignore.com$") then
+    if string.find(matches[9], "mozilla.com$") then
 	inject_message(msg)
 	return 0
     end
-    if string.find(matches[9], "anotherignoreddomain.org$") then
+    if string.find(matches[9], "mozilla.org$") then
 	inject_message(msg)
 	return 0
     end
-    -- avoid logging SMB DNS queries and answers. Remove this if you care.
+    if string.find(matches[9], "allizom.org$") then
+	inject_message(msg)
+	return 0
+    end
+    if matches[9] == "ssh.github.com" then
+	inject_message(msg)
+	return 0
+    end
+    if matches[9] == "js-agent.newrelic.com" then
+	inject_message(msg)
+	return 0
+    end
     if matches[13] == "NBSTAT" then
         inject_message(msg)
         return 0

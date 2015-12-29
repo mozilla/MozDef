@@ -27,6 +27,14 @@ function toNumber(value)
     return tonumber(value)
 end
 
+function lastField(value)
+    -- remove last "\n" if there's one
+    if value ~= nil and string.len(value) > 1 and string.sub(value, -2) == "\n" then
+        return string.sub(value, 1, -2)
+    end
+    return value
+end
+
 function truncate(value)
     -- truncate the URI if too long (heka limited to 63KiB messages)
     if toString(value) then
@@ -36,14 +44,6 @@ function truncate(value)
             return value
         end
     end
-end
-
-function lastField(value)
-    -- remove last "\n" if there's one
-    if value ~= nil and string.len(value) > 1 and string.sub(value, -2) == "\n" then
-        return string.sub(value, 1, -2)
-    end
-    return value
 end
 
 function process_message()
@@ -68,19 +68,25 @@ function process_message()
         return 0
     end
 
-    msg['Type'] = 'brodhcp'
-    msg['Logger'] = 'nsm'
+    if string.find(matches[9], "^SSH-2.0-check_ssh_") then
+        inject_message(msg)
+        return 0
+    end
+
+    msg['Type']='brossh'
+    msg['Logger']='nsm'
     msg.Fields['ts'] = toString(matches[1])
     msg.Fields['uid'] = toString(matches[2])
     msg.Fields['sourceipaddress'] = toString(matches[3])
     msg.Fields['sourceport'] = toNumber(matches[4])
     msg.Fields['destinationipaddress'] = toString(matches[5])
     msg.Fields['destinationport'] = toNumber(matches[6])
-    msg.Fields['mac'] = toString(matches[7])
-    msg.Fields['assigned_ip'] = toString(matches[8])
-    msg.Fields['lease_time_float'] = toNumber(matches[9])
-    msg.Fields['trans_id_int'] = toNumber(lastField(matches[10])) -- remove last "\n"
-    msg.Fields['summary'] = nilToString(msg.Fields['assigned_ip']) .. " assigned to " .. nilToString(msg.Fields['mac'])
+    msg.Fields['status'] = toString(matches[7])
+    msg.Fields['direction'] = toString(matches[8])
+    msg.Fields['client'] = truncate(toString(matches[9]))
+    -- surprise - no truncating of '\n' here because that's not the last field
+    msg.Fields['server'] = truncate(toString(matches[10]))
+    msg.Fields['summary'] = "SSH: " .. nilToString(msg.Fields['sourceipaddress']) .. " -> " .. nilToString(msg.Fields['destinationipaddress']) .. ":" .. nilToString(msg.Fields['destinationport']) .. " status " .. nilToString(msg.Fields['status'])
     inject_message(msg)
     return 0
 end

@@ -27,6 +27,14 @@ function toNumber(value)
     return tonumber(value)
 end
 
+function lastField(value)
+    -- remove last "\n" if there's one
+    if value ~= nil and string.len(value) > 1 and string.sub(value, -2) == "\n" then
+        return string.sub(value, 1, -2)
+    end
+    return value
+end
+
 function truncate(value)
     -- truncate the URI if too long (heka limited to 63KiB messages)
     if toString(value) then
@@ -36,14 +44,6 @@ function truncate(value)
             return value
         end
     end
-end
-
-function lastField(value)
-    -- remove last "\n" if there's one
-    if value ~= nil and string.len(value) > 1 and string.sub(value, -2) == "\n" then
-        return string.sub(value, 1, -2)
-    end
-    return value
 end
 
 function process_message()
@@ -68,19 +68,26 @@ function process_message()
         return 0
     end
 
-    msg['Type'] = 'brodhcp'
-    msg['Logger'] = 'nsm'
+    msg['Type']='brope'
+    msg['Logger']='nsm'
     msg.Fields['ts'] = toString(matches[1])
     msg.Fields['uid'] = toString(matches[2])
-    msg.Fields['sourceipaddress'] = toString(matches[3])
-    msg.Fields['sourceport'] = toNumber(matches[4])
-    msg.Fields['destinationipaddress'] = toString(matches[5])
-    msg.Fields['destinationport'] = toNumber(matches[6])
-    msg.Fields['mac'] = toString(matches[7])
-    msg.Fields['assigned_ip'] = toString(matches[8])
-    msg.Fields['lease_time_float'] = toNumber(matches[9])
-    msg.Fields['trans_id_int'] = toNumber(lastField(matches[10])) -- remove last "\n"
-    msg.Fields['summary'] = nilToString(msg.Fields['assigned_ip']) .. " assigned to " .. nilToString(msg.Fields['mac'])
+    msg.Fields['machine'] = toString(matches[3])
+    msg.Fields['compilets'] = toString(matches[4])
+    msg.Fields['os'] = toString(matches[5])
+    msg.Fields['subsystem'] = toString(matches[6])
+    msg.Fields['isexe'] = toString(matches[7])
+    msg.Fields['is64bit'] = toString(matches[8])
+    msg.Fields['usesaslr'] = toString(matches[9])
+    msg.Fields['usesdep'] = toString(matches[10])
+    msg.Fields['usescodeintegrity'] = toString(matches[11])
+    msg.Fields['usesseh'] = toString(matches[12])
+    msg.Fields['hasimporttable'] = toString(matches[13])
+    msg.Fields['hasexporttable'] = toString(matches[14])
+    msg.Fields['hascerttable'] = toString(matches[15])
+    msg.Fields['hasdebugdata'] = toString(matches[16])
+    msg.Fields['sectionnames'] = lastField(toString(matches[16]))
+    msg.Fields['summary'] = "PE file: " .. nilToString(msg.Fields['os']) .. " " .. nilToString(msg.Fields['subsystem']) .. " " .. nilToString(msg.Fields['sectionnames'])
     inject_message(msg)
     return 0
 end

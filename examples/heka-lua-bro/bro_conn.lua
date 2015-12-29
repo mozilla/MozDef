@@ -1,13 +1,3 @@
--- This Source Code Form is subject to the terms of the Mozilla Public
--- License, v. 2.0. If a copy of the MPL was not distributed with this
--- file, You can obtain one at http://mozilla.org/MPL/2.0/.
--- Copyright (c) 2014 Mozilla Corporation
---
--- Contributors:
--- Anthony Verez averez@mozilla.com
--- Jeff Bryner jbryner@mozilla.com
--- Michal Purzynski mpurzynski@mozilla.com
-
 local l=require "lpeg"
 local string=require "string"
 l.locale(l) --add locale entries in the lpeg table
@@ -60,7 +50,6 @@ function process_message()
         return 0
     end
     
-    -- avoid logging UDP/TCP connections for UDP, remove that if you care
     if matches[8] == "dns" then 
         inject_message(msg)
         return 0 
@@ -81,13 +70,17 @@ function process_message()
     msg.Fields['responsebytes_int'] = toNumber(matches[11])
     msg.Fields['connectionstate'] = toString(matches[12])
     msg.Fields['local_origin'] = toString(matches[13])
-    msg.Fields['missedbytes_int'] = toNumber(matches[14])
-    msg.Fields['history'] = toString(matches[15])
-    msg.Fields['originpkts_int'] = toNumber(matches[16])
-    msg.Fields['originipbytes_int'] = toNumber(matches[17])
-    msg.Fields['responsepackets_int'] = toNumber(matches[18])
-    msg.Fields['responseipbytes_int'] = toNumber(matches[19])
-    msg.Fields['tunnelparents'] = lastField(toString(matches[20]))
+    msg.Fields['local_resp'] = toString(matches[14])
+    msg.Fields['missedbytes_int'] = toNumber(matches[15])
+    msg.Fields['history'] = toString(matches[16])
+    msg.Fields['originpkts_int'] = toNumber(matches[17])
+    msg.Fields['originipbytes_int'] = toNumber(matches[18])
+    msg.Fields['responsepackets_int'] = toNumber(matches[19])
+    msg.Fields['responseipbytes_int'] = toNumber(matches[20])
+    msg.Fields['tunnelparents'] = toString(matches[21])
+    msg.Fields['orig_cc'] = toString(matches[22])
+    msg.Fields['resp_cc'] = toString(matches[23])
+    msg.Fields['sensorname'] = lastField(toString(matches[24]))
     msg['Payload'] = toString(msg.Fields['sourceipaddress']) .. ":" .. toString(msg.Fields['sourceport']) .. " -> " .. toString(msg.Fields['destinationipaddress']) .. ":" .. toString(msg.Fields['destinationport']) .. " " .. toString(msg.Fields['history']) .. " " .. toString(msg.Fields['originipbytes_int']) .. " bytes / " .. toString(msg.Fields['responseipbytes_int']) .. " bytes"
     inject_message(msg)
     return 0

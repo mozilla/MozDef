@@ -1,13 +1,3 @@
--- This Source Code Form is subject to the terms of the Mozilla Public
--- License, v. 2.0. If a copy of the MPL was not distributed with this
--- file, You can obtain one at http://mozilla.org/MPL/2.0/.
--- Copyright (c) 2014 Mozilla Corporation
---
--- Contributors:
--- Anthony Verez averez@mozilla.com
--- Jeff Bryner jbryner@mozilla.com
--- Michal Purzynski mpurzynski@mozilla.com
-
 local l=require "lpeg"
 local string=require "string"
 l.locale(l) --add locale entries in the lpeg table
@@ -98,17 +88,18 @@ function process_message()
         msg.Fields['curve'] = toString(matches[9])
     end
     msg.Fields['server_name'] = truncate(toString(matches[10]))
-    msg.Fields['session_id'] = truncate(toString(matches[11]))
+    msg.Fields['resumed'] = truncate(toString(matches[11]))
     msg.Fields['last_alert'] = toString(matches[12])
-    msg.Fields['established'] = toString(matches[13])
-    msg.Fields['cert_chain_fuids'] = truncate(toString(matches[14]))
-    msg.Fields['client_cert_chain_fuids'] = truncate(toString(matches[15]))
-    msg.Fields['subject'] = truncate(toString(matches[16]))
-    msg.Fields['issuer'] = truncate(toString(matches[17]))
-    msg.Fields['client_subject'] = truncate(toString(matches[18]))
-    msg.Fields['client_issuer'] = truncate(toString(matches[19]))
-    msg.Fields['weak_cipher'] = toString(matches[20])
-    msg.Fields['pfs'] = lastField(toString(matches[21]))
+    msg.Fields['nextprotocol'] = toString(matches[13])
+    msg.Fields['established'] = toString(matches[14])
+    msg.Fields['cert_chain_fuids'] = truncate(toString(matches[15]))
+    msg.Fields['client_cert_chain_fuids'] = truncate(toString(matches[16]))
+    msg.Fields['subject'] = truncate(toString(matches[17]))
+    msg.Fields['issuer'] = truncate(toString(matches[18]))
+    msg.Fields['client_subject'] = truncate(toString(matches[19]))
+    msg.Fields['client_issuer'] = truncate(toString(matches[20]))
+    msg.Fields['weak_cipher'] = toString(matches[21])
+    msg.Fields['pfs'] = lastField(toString(matches[22]))
     if msg.Fields['server_name'] ~= nil then
         msg['Payload'] = "SSL: " .. nilToString(msg.Fields['sourceipaddress']) .. " -> " .. nilToString(msg.Fields['destinationipaddress']) .. ":" .. nilToString(msg.Fields['destinationport']) .. " " .. msg.Fields['server_name']
     else
