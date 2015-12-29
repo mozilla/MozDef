@@ -78,12 +78,7 @@ function process_message()
         return 0
     end
 
-    if string.find(matches[10], "^SSH-2.0-check_ssh_") then
-        inject_message(msg)
-        return 0
-    end
-
-    msg['Type']='brossh'
+    msg['Type']='brordp'
     msg['Logger']='nsm'
     msg.Fields['ts'] = toString(matches[1])
     msg.Fields['uid'] = toString(matches[2])
@@ -91,18 +86,22 @@ function process_message()
     msg.Fields['sourceport'] = toNumber(matches[4])
     msg.Fields['destinationipaddress'] = toString(matches[5])
     msg.Fields['destinationport'] = toNumber(matches[6])
-    msg.Fields['version'] = toNumber(matches[7])
-    msg.Fields['authsuccess'] = toString(matches[8])
-    msg.Fields['direction'] = toString(matches[9])
-    msg.Fields['client'] = toString(matches[10])
-    msg.Fields['server'] = toString(matches[11])
-    msg.Fields['cipher_alg'] = toString(matches[12])
-    msg.Fields['mac_alg'] = toString(matches[13])
-    msg.Fields['compression_alg'] = toString(matches[14])
-    msg.Fields['kex_alg'] = toString(matches[15])
-    msg.Fields['host_key_alg'] = toString(matches[16])
-    msg.Fields['host_key'] = lastField(toString(matches[17]))
-    msg.Fields['summary'] = "SSH: " .. nilToString(msg.Fields['sourceipaddress']) .. " -> " .. nilToString(msg.Fields['destinationipaddress']) .. ":" .. nilToString(msg.Fields['destinationport']) .. " status " .. nilToString(msg.Fields['authsuccess'])
+    msg.Fields['cookie'] = toString(matches[7])
+    msg.Fields['result'] = toString(matches[8])
+    msg.Fields['securityprotocol'] = toString(matches[9])
+    msg.Fields['keyboardlayout'] = toString(matches[10])
+    msg.Fields['clientbuild'] = toString(matches[11])
+    msg.Fields['clientname'] = toString(matches[12])
+    msg.Fields['clientdigproductid'] = toString(matches[13])
+    msg.Fields['desktop_width'] = toNumber(matches[14])
+    msg.Fields['desktop_height'] = toNumber(matches[15])
+    msg.Fields['requestedcolordepth'] = toString(matches[16])
+    msg.Fields['certtype'] = toString(matches[17])
+    msg.Fields['certcount'] = toString(matches[18])
+    msg.Fields['certpermanent'] = toString(matches[19])
+    msg.Fields['encryptionlevel'] = toString(matches[20])
+    msg.Fields['encryptionmethod'] = lastField(toString(matches[21]))
+    msg.Fields['summary'] = "RDP: " .. msg.Fields['sourceipaddress']) .. " -> " .. msg.Fields['destinationipaddress'] .. ":" .. nilToString(msg.Fields['destinationport']) .. " user " .. nilToString(msg.Fields['cookie'])
     inject_message(msg)
     return 0
 end
