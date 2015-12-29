@@ -79,14 +79,35 @@ function process_message()
     end
 
     -- filter out IP addresses ending with laod balancer range. Otherwise we would log thousands of client's versions.
-    -- use this only if your NSM can see client's traffic between the load balancer and web nodes
-    -- this bypasses logging of all IP addresses ending with .111
-    if string.find(matches[2], "111$") then
+    if string.find(matches[2], "208$") then
         inject_message(msg)
         return 0
     end
-    -- filter out noise from the load balancer check if alive scripts
-    if string.find(matches[5], "my happy HTTP check if alive script user agent") then
+    if string.find(matches[2], "209$") then
+        inject_message(msg)
+        return 0
+    end
+    if string.find(matches[2], "210$") then
+        inject_message(msg)
+        return 0
+    end
+    if string.find(matches[2], "211$") then
+        inject_message(msg)
+        return 0
+    end
+    if string.find(matches[2], "212$") then
+        inject_message(msg)
+        return 0
+    end
+    if string.find(matches[2], "213$") then
+        inject_message(msg)
+        return 0
+    end
+    if string.find(matches[5], "check_http") then
+        inject_message(msg)
+        return 0
+    end
+    if string.find(matches[5], "HTTP-Monitor") then
         inject_message(msg)
         return 0
     end
@@ -104,7 +125,7 @@ function process_message()
     msg.Fields['version.minor3_int'] = toNumber(matches[9])
     msg.Fields['version.addl'] = truncate(toString(matches[10]))
     msg.Fields['unparsed_version'] = truncate(toString(lastField(matches[11]))) -- remove last "\n"
-    msg.Fields['summary'] = "Found " .. nilToString(msg.Fields['software_type']) .. nilToString(msg.Fields['name']) .. " on ".. nilToString(msg.Fields['host']) .. ":" .. nilToString(msg.Fields['host_p_int'])
+    msg.Fields['summary'] = "Found " .. nilToString(msg.Fields['software_type']) .. " " .. nilToString(msg.Fields['name']) .. " on ".. nilToString(msg.Fields['host']) .. ":" .. nilToString(msg.Fields['host_p_int'])
     inject_message(msg)
     return 0
 end

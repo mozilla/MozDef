@@ -78,31 +78,26 @@ function process_message()
         return 0
     end
 
-    if string.find(matches[10], "^SSH-2.0-check_ssh_") then
-        inject_message(msg)
-        return 0
-    end
-
-    msg['Type']='brossh'
+    msg['Type']='brope'
     msg['Logger']='nsm'
     msg.Fields['ts'] = toString(matches[1])
     msg.Fields['uid'] = toString(matches[2])
-    msg.Fields['sourceipaddress'] = toString(matches[3])
-    msg.Fields['sourceport'] = toNumber(matches[4])
-    msg.Fields['destinationipaddress'] = toString(matches[5])
-    msg.Fields['destinationport'] = toNumber(matches[6])
-    msg.Fields['version'] = toNumber(matches[7])
-    msg.Fields['authsuccess'] = toString(matches[8])
-    msg.Fields['direction'] = toString(matches[9])
-    msg.Fields['client'] = toString(matches[10])
-    msg.Fields['server'] = toString(matches[11])
-    msg.Fields['cipher_alg'] = toString(matches[12])
-    msg.Fields['mac_alg'] = toString(matches[13])
-    msg.Fields['compression_alg'] = toString(matches[14])
-    msg.Fields['kex_alg'] = toString(matches[15])
-    msg.Fields['host_key_alg'] = toString(matches[16])
-    msg.Fields['host_key'] = lastField(toString(matches[17]))
-    msg.Fields['summary'] = "SSH: " .. nilToString(msg.Fields['sourceipaddress']) .. " -> " .. nilToString(msg.Fields['destinationipaddress']) .. ":" .. nilToString(msg.Fields['destinationport']) .. " status " .. nilToString(msg.Fields['authsuccess'])
+    msg.Fields['machine'] = toString(matches[3])
+    msg.Fields['compilets'] = toString(matches[4])
+    msg.Fields['os'] = toString(matches[5])
+    msg.Fields['subsystem'] = toString(matches[6])
+    msg.Fields['isexe'] = toString(matches[7])
+    msg.Fields['is64bit'] = toString(matches[8])
+    msg.Fields['usesaslr'] = toString(matches[9])
+    msg.Fields['usesdep'] = toString(matches[10])
+    msg.Fields['usescodeintegrity'] = toString(matches[11])
+    msg.Fields['usesseh'] = toString(matches[12])
+    msg.Fields['hasimporttable'] = toString(matches[13])
+    msg.Fields['hasexporttable'] = toString(matches[14])
+    msg.Fields['hascerttable'] = toString(matches[15])
+    msg.Fields['hasdebugdata'] = toString(matches[16])
+    msg.Fields['sectionnames'] = lastField(toString(matches[16]))
+    msg.Fields['summary'] = "PE file: " .. nilToString(msg.Fields['os']) .. " " .. nilToString(msg.Fields['subsystem']) .. " " .. nilToString(msg.Fields['sectionnames'])
     inject_message(msg)
     return 0
 end

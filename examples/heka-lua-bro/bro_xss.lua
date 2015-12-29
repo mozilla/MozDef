@@ -32,17 +32,9 @@ end
 
 function toNumber(value)
     if value == "-" then
-        return nil
+        return 0
     end
     return tonumber(value)
-end
-
-function lastField(value)
-    -- remove last "\n" if there's one
-    if value ~= nil and string.len(value) > 1 and string.sub(value, -2) == "\n" then
-        return string.sub(value, 1, -2)
-    end
-    return value
 end
 
 function truncate(value)
@@ -54,6 +46,14 @@ function truncate(value)
             return value
         end
     end
+end
+
+function lastField(value)
+    -- remove last "\n" if there's one
+    if value ~= nil and string.len(value) > 1 and string.sub(value, -2) == "\n" then
+        return string.sub(value, 1, -2)
+    end
+    return value
 end
 
 function process_message()
@@ -78,32 +78,28 @@ function process_message()
         return 0
     end
 
-    if string.find(matches[10], "^SSH-2.0-check_ssh_") then
-        inject_message(msg)
-        return 0
-    end
-
-    msg['Type']='brossh'
-    msg['Logger']='nsm'
+    msg['Type'] = 'broxss'
+    msg['Logger'] = 'nsm'
     msg.Fields['ts'] = toString(matches[1])
     msg.Fields['uid'] = toString(matches[2])
     msg.Fields['sourceipaddress'] = toString(matches[3])
     msg.Fields['sourceport'] = toNumber(matches[4])
     msg.Fields['destinationipaddress'] = toString(matches[5])
     msg.Fields['destinationport'] = toNumber(matches[6])
-    msg.Fields['version'] = toNumber(matches[7])
-    msg.Fields['authsuccess'] = toString(matches[8])
-    msg.Fields['direction'] = toString(matches[9])
-    msg.Fields['client'] = toString(matches[10])
-    msg.Fields['server'] = toString(matches[11])
-    msg.Fields['cipher_alg'] = toString(matches[12])
-    msg.Fields['mac_alg'] = toString(matches[13])
-    msg.Fields['compression_alg'] = toString(matches[14])
-    msg.Fields['kex_alg'] = toString(matches[15])
-    msg.Fields['host_key_alg'] = toString(matches[16])
-    msg.Fields['host_key'] = lastField(toString(matches[17]))
-    msg.Fields['summary'] = "SSH: " .. nilToString(msg.Fields['sourceipaddress']) .. " -> " .. nilToString(msg.Fields['destinationipaddress']) .. ":" .. nilToString(msg.Fields['destinationport']) .. " status " .. nilToString(msg.Fields['authsuccess'])
+    if toString(matches[7]) ~= nil then
+        msg.Fields['cluster_client_ip'] = toString(matches[7])
+    end
+    msg.Fields['status_code'] = toNumber(matches[8])
+    msg.Fields['host'] = toString(matches[9])
+    msg.Fields['uri'] = toString(matches[10])
+    msg.Fields['sig_id'] = truncate(toString(matches[11]))
+    msg.Fields['tags'] = lastField(toString(matches[12]))
+    if msg.Fields['cluster_client_ip'] ~= nil then
+        msg.Fields['summary'] = nilToString(msg.Fields['cluster_client_ip'])
+    else
+        msg.Fields['summary'] = nilToString(msg.Fields['sourceipaddress'])
+    end
+    msg.Fields['summary'] = msg.Fields['summary'] .. " - " .. nilToString(msg.Fields['sig_id']) .. " " .. nilToString(msg.Fields['host']) .. nilToString(msg.Fields['uri']) .. " " .. nilToString(msg.Fields['status_code_int'])
     inject_message(msg)
     return 0
 end
-
