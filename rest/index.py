@@ -532,7 +532,7 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         q = pyes.FilteredQuery(q, qDate)
         q = pyes.FilteredQuery(q, pyes.TermFilter('tags', 'ldap'))
         q = pyes.FilteredQuery(q,
-            pyes.TermFilter('details.result', 'ldap_invalid_credentials'))
+            pyes.TermFilter('details.result', 'LDAP_INVALID_CREDENTIALS'))
         q2 = q.search()
         q2.facet.add_term_facet('details.result')
         q2.facet.add_term_facet('details.dn', size=20)
@@ -561,9 +561,9 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
 
             for t in results.facets['details.result'].terms:
                 #print(t['term'],t['count'])
-                if t['term'] == 'ldap_success':
+                if t['term'] == 'LDAP_SUCCESS':
                     success = t['count']
-                if t['term'] == 'ldap_invalid_credentials':
+                if t['term'] == 'LDAP_INVALID_CREDENTIALS':
                     failures = t['count']
             resultsList.append(dict(dn=dn, failures=failures,
                 success=success, begin=begindateUTC.isoformat(),
