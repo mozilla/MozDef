@@ -7,7 +7,7 @@ Copyright (c) 2014 Mozilla Corporation
 Contributors:
 Jeff Bryner jbryner@mozilla.com
 Anthony Verez averez@mozilla.com
-
+Yash Mehrotra yashmehrotra95@gmail.com
 */
 
 //collections shared by client/server
