@@ -37,24 +37,21 @@ if (Meteor.isClient) {
   var attackedIds = 0;
   var cssRenderer = null;
   var intersectedObject = null;
+  var engine = null;
+  var jsonData = {};
 
   function init() {
-    initMesh();
-    initCamera();
-    initLights();
-    initRenderer();
+    Meteor.call('getVrJson', function(err, response) {
+      jsonData = JSON.parse(response);
+      initMesh();
+      initCamera();
+      initLights();
+      initRenderer();
+      initStats();
 
-    document.getElementById("container").appendChild(renderer.domElement);
-    document.getElementById("container").appendChild(cssRenderer.domElement);
-    controls = new THREE.OrbitControls( camera );
-
-    stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.bottom = '0px';
-    stats.domElement.style.zIndex = 100;
-    this.engine = new ParticleEngine();
-    engine.setValues( Examples.rain );
-    engine.initialize(scene);
+      document.getElementById("container").appendChild(renderer.domElement);
+      document.getElementById("container").appendChild(cssRenderer.domElement);
+    });
   }
 
   function initVariables() {
@@ -66,6 +63,10 @@ if (Meteor.isClient) {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     projector = new THREE.Projector();
     cssRenderer = new THREE.CSS3DRenderer();
+    controls = new THREE.OrbitControls( camera );
+    stats = new Stats();
+    engine = new ParticleEngine();
+    engine.initialize(scene);
   }
 
   function restartEngine(parameters, x, z)
@@ -78,6 +79,12 @@ if (Meteor.isClient) {
     
     engine.setValues( parameters );
     engine.initialize(scene);
+  }
+
+  function initStats() {
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.bottom = '0px';
+    stats.domElement.style.zIndex = 100;
   }
 
   function initCamera() {
@@ -104,7 +111,7 @@ if (Meteor.isClient) {
 
   var mesh = null;
   function initMesh() {
-    json = loader.parse(result);
+    json = loader.parse(jsonData);
     geometry = json.geometry;
     materials = json.materials;
     mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
@@ -115,18 +122,12 @@ if (Meteor.isClient) {
     mesh.translation = THREE.GeometryUtils.center(geometry);
     mesh.castShadow = true;
     scene.add(mesh);
-    /*        mesh.material.color.r=0;
-              mesh.material.color.b=0.1;
-              mesh.material.color.g=0.86;*/
     mesh1.scale.x = mesh1.scale.y = mesh1.scale.z = 50.75;
     mesh1.translation = THREE.GeometryUtils.center(geometry);
     mesh1.castShadow = true;
     mesh1.position.x = -800;
     mesh1.position.y = -20;
     scene.add(mesh1);
-    /*        mesh1.material.color.r=0;
-              mesh1.material.color.b=0.3;
-              mesh1.material.color.g=1;*/
     mesh2.scale.x = mesh2.scale.y = mesh2.scale.z = 50.75;
     mesh2.translation = THREE.GeometryUtils.center(geometry);
     mesh2.castShadow = true;
@@ -135,9 +136,6 @@ if (Meteor.isClient) {
     mesh2.position.z = -800
     mesh2.rotation.y = Math.PI/2;
     scene.add(mesh2);
-    /*        mesh2.material.color.r=0;
-              mesh2.material.color.b=0.3;
-              mesh2.material.color.g=1;*/
     mesh3.scale.x = mesh3.scale.y = mesh3.scale.z = 50.75;
     mesh3.translation = THREE.GeometryUtils.center(geometry);
     mesh3.castShadow = true;
@@ -145,22 +143,6 @@ if (Meteor.isClient) {
     mesh3.position.z = -800
     mesh3.rotation.y = 3*Math.PI/2;
     scene.add(mesh3);
-    /*mesh3.material.color.r=0;
-      mesh3.material.color.b=0.3;
-      mesh3.material.color.g=1;*/
-    /*var json = loader.parse(result);
-      var geometry = json.geometry;
-      var materials = json.materials;
-      mesh1 = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
-      mesh1.scale.x = mesh1.scale.y = mesh1.scale.z = 5.75;
-      mesh1.translation = THREE.GeometryUtils.center(geometry);
-      mesh1.castShadow = true
-      mesh1.position.x =0;
-      mesh1.position.y=9.7;
-      mesh1.position.z=-65;
-      mesh1.scale.x= 9.7;
-      mesh1.rotation.y=Math.PI;
-      scene.add(mesh1);*/
   }
 
   function update()

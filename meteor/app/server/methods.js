@@ -20,7 +20,8 @@ if (Meteor.isServer) {
         'ipintel': ipintel,
         'verisstats': verisstats,
         'logincounts': logincounts,
-        'getplugins': getplugins
+        'getplugins': getplugins,
+        'getVrJson': getVrJson
     });
 
     function saySomething() {
@@ -145,5 +146,10 @@ if (Meteor.isServer) {
             var response = HTTP.get(mozdef.rootAPI + '/plugins/' + endpoint);
         }
         return response
+    }
+
+    function getVrJson() {
+        var response = Assets.getText('vr.config.json');
+        return response;
     }
 };
