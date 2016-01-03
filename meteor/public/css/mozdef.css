@@ -537,4 +537,10 @@ circle:hover{
 }
 
 
+.vr-sidenav a {
+    height: 4em;
+}
 
+.vr-sidenav a.attacks-list:hover {
+    cursor: pointer;
+}
