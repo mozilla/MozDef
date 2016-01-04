@@ -27,12 +27,25 @@ if (Meteor.isClient) {
   var SPEED = 0.01;
   var controls = null;
   var clock = null;
+  var MESHPROPERTIES = {
+    count: 4,
+    position: [
+      {x: 0, y: 0, z: 0},
+      {x: -800, y: -20, z: 0},
+      {x: -800, y: -20, z: -800},
+      {x: 0 , y: -20, z: -800}
+    ],
+    rotationY: [
+      0,
+      0,
+      Math.PI/2,
+      Math.PI/2
+    ]
+  };
   var mesh = null;
-  var mesh1 = null;
-  var mesh2 = null;
-  var mesh3 = null;
   var spotlight = null;
   var loader = null;
+  var cube = null;
   var coords = {};
   var projector = null;
   var sceneObjects = [];
@@ -45,7 +58,7 @@ if (Meteor.isClient) {
   function init() {
     Meteor.call('getVrJson', function(err, response) {
       jsonData = JSON.parse(response);
-      initMesh();
+      initMeshes();
       initCamera();
       initLights();
       initRenderer();
@@ -71,14 +84,12 @@ if (Meteor.isClient) {
     engine.initialize(scene);
   }
 
-  function restartEngine(parameters, x, z)
-  {
-    engine.destroy(scene);
-    engine = new ParticleEngine();
+  function restartEngine(parameters, x, z) {
+    // engine.destroy(scene);
+    // engine = new ParticleEngine();
     parameters.positionBase.x=x;
     parameters.positionBase.z=z;
 
-    
     engine.setValues( parameters );
     engine.initialize(scene);
   }
@@ -102,7 +113,6 @@ if (Meteor.isClient) {
     cssRenderer.setSize(WIDTH, HEIGHT);
     cssRenderer.domElement.style.position = 'absolute';
     cssRenderer.domElement.style.top = 0;
-
   }
 
   function initLights() {
@@ -111,50 +121,30 @@ if (Meteor.isClient) {
     spotLight.castShadow = true;
   }
 
-  var mesh = null;
-  function initMesh() {
+  function initMeshes() {
     json = loader.parse(jsonData);
     geometry = json.geometry;
     materials = json.materials;
-    mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
-    mesh1 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
-    mesh2 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
-    mesh3 = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
-    mesh.scale.x = mesh.scale.y = mesh.scale.z = 50.75;
-    mesh.translation = THREE.GeometryUtils.center(geometry);
-    mesh.castShadow = true;
-    scene.add(mesh);
-    mesh1.scale.x = mesh1.scale.y = mesh1.scale.z = 50.75;
-    mesh1.translation = THREE.GeometryUtils.center(geometry);
-    mesh1.castShadow = true;
-    mesh1.position.x = -800;
-    mesh1.position.y = -20;
-    scene.add(mesh1);
-    mesh2.scale.x = mesh2.scale.y = mesh2.scale.z = 50.75;
-    mesh2.translation = THREE.GeometryUtils.center(geometry);
-    mesh2.castShadow = true;
-    mesh2.position.x = -800;
-    mesh2.position.y = -20;
-    mesh2.position.z = -800
-    mesh2.rotation.y = Math.PI/2;
-    scene.add(mesh2);
-    mesh3.scale.x = mesh3.scale.y = mesh3.scale.z = 50.75;
-    mesh3.translation = THREE.GeometryUtils.center(geometry);
-    mesh3.castShadow = true;
-    mesh3.position.y = -20;
-    mesh3.position.z = -800
-    mesh3.rotation.y = 3*Math.PI/2;
-    scene.add(mesh3);
+
+    for (var i = 0; i < MESHPROPERTIES.count; i++) {
+      mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+      mesh.scale.x = mesh.scale.y = mesh.scale.z = 50.75;
+      mesh.translation = THREE.GeometryUtils.center(geometry);
+      mesh.castShadow = true;
+      mesh.position.copy(MESHPROPERTIES.position[i]);
+      mesh.rotation.y = MESHPROPERTIES.rotationY[i];
+      scene.add(mesh);
+    }
   }
 
-  function update()
-  {
+  function update() {
     controls.update();
     stats.update();
 
     var dt = clock.getDelta();
     engine.update( dt * 0.5 );
   }
+
   function render() {
     requestAnimationFrame(render);
     update();
@@ -162,10 +152,9 @@ if (Meteor.isClient) {
     cssRenderer.render(scene, camera);
   }
 
-  var start = null;
-  function rotateCube() {
+  function rotateCube(cube) {
     document.removeEventListener("keydown", listener);
-    cube.rotation.y+=1;
+    cube.rotation._y += 1;
     if(cube.rotation.y<40)
       window.requestAnimationFrame(rotateCube);
     else if(cube.rotation.y >=40){
@@ -176,9 +165,11 @@ if (Meteor.isClient) {
       scene.remove(cube);
     }
   }
-  function rotateSphere() {
+
+  function rotateSphere(sphere) {
     document.removeEventListener("keydown", listener);
-    sphere.rotation.y+=1;
+    console.log(sphere);
+    sphere.rotation.y += 1;
     if(sphere.rotation.y<40)
       window.requestAnimationFrame(rotateSphere);
     else if(sphere.rotation.y >=40){
@@ -190,29 +181,28 @@ if (Meteor.isClient) {
     }
   }
 
-  var cube;
-  function cubeMake(x,y,z){
-    var geometry = new THREE.CubeGeometry( 5, 5, 5 );
-    var material = new THREE.MeshBasicMaterial( {color: 0x00ff00, wireframe: true} );
-    cube = new THREE.Mesh( geometry, material );
+  function cubeMake(x,y,z) {
+    var geometry = new THREE.CubeGeometry(5, 5, 5);
+    var material = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true});
+    var cube = new THREE.Mesh( geometry, material );
     cube.position.x = x;
     cube.position.y = y;
     cube.position.z = z;
     cube.material.transparent = true;
-    rotateCube();
-    scene.add( cube );
+    rotateCube(cube);
+    scene.add(cube);
   }
-  var sphere;
-  function sphereMake(x,y,z){
-    var geometry = new THREE.SphereGeometry( 5, 32, 32 );
-    var material = new THREE.MeshBasicMaterial( {color: "blue", wireframe: true} );
-    sphere = new THREE.Mesh( geometry, material );
+
+  function sphereMake(x,y,z) {
+    var geometry = new THREE.SphereGeometry(5, 32, 32);
+    var material = new THREE.MeshBasicMaterial({color: "blue", wireframe: true});
+    var sphere = new THREE.Mesh(geometry, material);
     sphere.position.x = x;
     sphere.position.y = y;
     sphere.position.z = z;
     sphere.material.transparent = true;
-    rotateSphere();
-    scene.add( sphere );
+    rotateSphere(sphere);
+    scene.add(sphere);
   }
 
   function listener(evt) {
@@ -282,7 +272,7 @@ if (Meteor.isClient) {
           var evt = element.events[ev];
           if (world[evt.documentsource.details.host]) {
             world[evt.documentsource.details.host].push(evt.documentsource);
-            } else {
+          } else {
             world[evt.documentsource.details.host] = [evt.documentsource];
             world[evt.documentsource.details.host].rank = attackedIds++;
             console.log('ID' , world[evt.documentsource.details.host].id);
@@ -291,7 +281,7 @@ if (Meteor.isClient) {
       });
 
       console.log('WORLD: ', world);
-      
+
       var attacks = Object.keys(world).map(function(key) {
         return [key, world[key].length];
       }).sort(function(first, second) {
@@ -350,7 +340,7 @@ if (Meteor.isClient) {
 
   Template.vr.events({
 
-   "click #container": function(e) {
+    "click #container": function(e) {
       var mouse = {
         x: (e.clientX / WIDTH ) * 2 - 1,
         y: (e.clientY / HEIGHT ) * 2 - 1,
@@ -360,7 +350,7 @@ if (Meteor.isClient) {
       var raycaster = new THREE.Raycaster( camera.position, mouseVector.sub( camera.position ).normalize() );
       var intersects = raycaster.intersectObjects(sceneObjects, true);
       console.log(intersects);
-   }
+    }
 
   });
 
