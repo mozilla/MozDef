@@ -25,7 +25,13 @@ Avijit Gupta 526avijit@gmail.com
     <h3>Summary</h3>
     <a><em>{{attackDetails.region}}</em></a>
     <a>Rank <em># {{attackDetails.rank}}</em></a>
-    <a class="text-left attacks-list">List of attacks <span class="pull-right glyphicon glyphicon-arrow-right"></span></a>
+    <!-- <a class="text-left attacks-list" id="show-attacks-list">List of attacks <span class="pull-right glyphicon glyphicon-arrow-right"></span></a> -->
+    <ul class="text-center" id="attacks-list" style="list-style: none; color: white;">
+        {{#each attackDetails.attacks}}
+        <li class="text-center">{{name}}</li>
+        {{/each}}
+    </ul>
+
 </nav>
 
 </template>
