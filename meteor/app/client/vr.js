@@ -55,6 +55,7 @@ if (Meteor.isClient) {
   var WIDTH  = window.innerWidth;
   var HEIGHT = window.innerHeight;
   var SPEED = 0.01;
+  var OPENNAV = 'cbp-spmenu-open';
 
   var geometry = null;
   var scene = null;
@@ -262,6 +263,10 @@ if (Meteor.isClient) {
     parsedb();
   };//end template.attackers.rendered
 
+  Template.vr.attackDetails = function() {
+    return { region: 'MozWiki', rank: '1' }
+  }
+
   Template.vr.events({
 
     "click #container": function(e) {
@@ -273,7 +278,25 @@ if (Meteor.isClient) {
       projector.unprojectVector(mouseVector, camera);
       var raycaster = new THREE.Raycaster(camera.position, mouseVector.sub( camera.position).normalize() );
       var intersects = raycaster.intersectObjects(sceneObjects, true);
+      var sideNav = $('#attack-sidenav');
       console.log(intersects);
+
+      if (intersects.length) {
+        // Blaze.renderWithData(Template.vrSidenav,
+        //                      function() {
+        //                        return attackers.findOne({})
+        //                      });
+
+        intersects.forEach(function(intersect) {
+          // console.log(intersect);
+          if (intersect.object.rank) {
+            // Open the nav if not already opened
+            if (!sideNav.hasClass(OPENNAV)) {
+              sideNav.addClass(OPENNAV);
+            }
+          }
+        });
+      }
     }
 
   });
