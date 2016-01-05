@@ -14,19 +14,6 @@
 
 if (Meteor.isClient) {
 
-  //template variables
-  var geometry = null;
-  var scene = null;
-  var camera = null;
-  var renderer = null;
-  var materials = null;
-  var json = null;
-  var geometry = null;
-  var WIDTH  = window.innerWidth;
-  var HEIGHT = window.innerHeight;
-  var SPEED = 0.01;
-  var controls = null;
-  var clock = null;
   var MESHPROPERTIES = {
     count: 4,
     position: [
@@ -42,27 +29,62 @@ if (Meteor.isClient) {
       Math.PI/2
     ]
   };
+  var RANKCOORDINATES = [
+    {x: -286, z: -115},
+    {x: -15, z: 11},
+    {x: -234, z: 232},
+    {x: -69, z: -142},
+    {x: 124, z: 293},
+    {x: 153, z: -869},
+    {x: 124, z: -1122},
+    {x: -261, z: -1031},
+    {x: 87, z: -583},
+    {x: -288, z: -625},
+    {x: 265, z: -501},
+    {x: -850, z: -134},
+    {x: -1094, z: -74},
+    {x: -576, z: -190},
+    {x: -605, z: 98},
+    {x: -964, z: 293},
+    {x: -1084, z: -554},
+    {x: -899, z: -628},
+    {x: -589, z: -716},
+    {x: -992, z: -962},
+    {x: -754, z: -1087}
+  ];
+  var WIDTH  = window.innerWidth;
+  var HEIGHT = window.innerHeight;
+  var SPEED = 0.01;
+
+  var geometry = null;
+  var scene = null;
+  var camera = null;
+  var renderer = null;
+  var material = null;
+  var json = null;
+  var geometry = null;
+  var controls = null;
+  var clock = null;
   var mesh = null;
   var spotlight = null;
   var loader = null;
-  var cube = null;
-  var coords = {};
   var projector = null;
   var sceneObjects = [];
   var attackedIds = 0;
   var cssRenderer = null;
   var intersectedObject = null;
   var engine = null;
+  var world = {};
   var jsonData = {};
 
   function init() {
     Meteor.call('getVrJson', function(err, response) {
       jsonData = JSON.parse(response);
       initMeshes();
-      initCamera();
-      initLights();
-      initRenderer();
-      initStats();
+      setCamera();
+      setLights();
+      setRenderers();
+      setStats();
 
       document.getElementById("container").appendChild(renderer.domElement);
       document.getElementById("container").appendChild(cssRenderer.domElement);
@@ -74,11 +96,11 @@ if (Meteor.isClient) {
     scene = new THREE.Scene();
     loader = new THREE.JSONLoader();
     camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 1, 10000);
-    spotLight = new THREE.SpotLight( 0xffffff , 1);
+    spotLight = new THREE.SpotLight(0xffffff, 1);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     projector = new THREE.Projector();
     cssRenderer = new THREE.CSS3DRenderer();
-    controls = new THREE.OrbitControls( camera );
+    controls = new THREE.OrbitControls(camera);
     stats = new Stats();
     engine = new ParticleEngine();
     engine.initialize(scene);
@@ -94,19 +116,19 @@ if (Meteor.isClient) {
     engine.initialize(scene);
   }
 
-  function initStats() {
+  function setStats() {
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.bottom = '0px';
     stats.domElement.style.zIndex = 100;
   }
 
-  function initCamera() {
+  function setCamera() {
     camera.position.set(-39.52908903855581, -4.352138336979161, 40.70626794923796);
     var lookAt = { x: -30.52908903855581, y: -4.352138336979161, z: 37.70626794923796 }
     camera.lookAt(lookAt);
   }
 
-  function initRenderer() {
+  function setRenderers() {
     renderer.setSize(WIDTH, HEIGHT);
     renderer.shadowMapEnabled = true;  // enable shadows
 
@@ -115,7 +137,7 @@ if (Meteor.isClient) {
     cssRenderer.domElement.style.top = 0;
   }
 
-  function initLights() {
+  function setLights() {
     spotLight.position.set( 100, 10000, 100 );
     scene.add(spotLight);
     spotLight.castShadow = true;
@@ -124,10 +146,9 @@ if (Meteor.isClient) {
   function initMeshes() {
     json = loader.parse(jsonData);
     geometry = json.geometry;
-    materials = json.materials;
-
+    material = new THREE.MeshPhongMaterial(json.materials);
     for (var i = 0; i < MESHPROPERTIES.count; i++) {
-      mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materials));
+      mesh = new THREE.Mesh(geometry, material);
       mesh.scale.x = mesh.scale.y = mesh.scale.z = 50.75;
       mesh.translation = THREE.GeometryUtils.center(geometry);
       mesh.castShadow = true;
@@ -140,9 +161,7 @@ if (Meteor.isClient) {
   function update() {
     controls.update();
     stats.update();
-
-    var dt = clock.getDelta();
-    engine.update( dt * 0.5 );
+    engine.update(clock.getDelta()*0.5);
   }
 
   function render() {
@@ -150,59 +169,6 @@ if (Meteor.isClient) {
     update();
     renderer.render(scene, camera);
     cssRenderer.render(scene, camera);
-  }
-
-  function rotateCube(cube) {
-    document.removeEventListener("keydown", listener);
-    cube.rotation._y += 1;
-    if(cube.rotation.y<40)
-      window.requestAnimationFrame(rotateCube);
-    else if(cube.rotation.y >=40){
-      window.requestAnimationFrame(rotateCube);
-    }
-    else{
-      document.addEventListener("keydown", listener);
-      scene.remove(cube);
-    }
-  }
-
-  function rotateSphere(sphere) {
-    document.removeEventListener("keydown", listener);
-    console.log(sphere);
-    sphere.rotation.y += 1;
-    if(sphere.rotation.y<40)
-      window.requestAnimationFrame(rotateSphere);
-    else if(sphere.rotation.y >=40){
-      window.requestAnimationFrame(rotateSphere);
-    }
-    else{
-      document.addEventListener("keydown", listener);
-      scene.remove(sphere);
-    }
-  }
-
-  function cubeMake(x,y,z) {
-    var geometry = new THREE.CubeGeometry(5, 5, 5);
-    var material = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true});
-    var cube = new THREE.Mesh( geometry, material );
-    cube.position.x = x;
-    cube.position.y = y;
-    cube.position.z = z;
-    cube.material.transparent = true;
-    rotateCube(cube);
-    scene.add(cube);
-  }
-
-  function sphereMake(x,y,z) {
-    var geometry = new THREE.SphereGeometry(5, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: "blue", wireframe: true});
-    var sphere = new THREE.Mesh(geometry, material);
-    sphere.position.x = x;
-    sphere.position.y = y;
-    sphere.position.z = z;
-    sphere.material.transparent = true;
-    rotateSphere(sphere);
-    scene.add(sphere);
   }
 
   function listener(evt) {
@@ -226,30 +192,6 @@ if (Meteor.isClient) {
       sphereMake(-5,20,-65);
   }
 
-  rank_coord_mapping = [
-    {x:-286,z:-115},
-    {x:-15,z:11},
-    {x:-234,z:232},
-    {x:-69,z:-142},
-    {x:124,z:293},
-    {x:153,z:-869},
-    {x:124,z:-1122},
-    {x:-261,z:-1031},
-    {x:87,z:-583},
-    {x:-288,z:-625},
-    {x:265,z:-501},
-    {x:-850,z:-134},
-    {x:-1094,z:-74},
-    {x:-576,z:-190},
-    {x:-605,z:98},
-    {x:-964,z:293},
-    {x:-1084,z:-554},
-    {x:-899,z:-628},
-    {x:-589,z:-716},
-    {x:-992,z:-962},
-    {x:-754,z:-1087}
-  ];
-
   attack_animation_mapping = {
     'broxss': Examples.fireball,
     'bro_notice': Examples.smoke,
@@ -257,17 +199,12 @@ if (Meteor.isClient) {
     'brotunnel': Examples.rain,
     'brointel': Examples.clouds
   }
-  var world = {};
 
   function parsedb() {
-
-    attackedIds = 0;
     Meteor.subscribe("attackers-summary-yash", onReady = function() {
-      console.log("Inside parsedb");
-      console.log(attackers.find().count());
+
       attackers.find().forEach(function(element) {
         // TODO: Take care of timestamp
-        console.log(element);
         for(ev in element.events) {
           var evt = element.events[ev];
           if (world[evt.documentsource.details.host]) {
@@ -275,12 +212,9 @@ if (Meteor.isClient) {
           } else {
             world[evt.documentsource.details.host] = [evt.documentsource];
             world[evt.documentsource.details.host].rank = attackedIds++;
-            console.log('ID' , world[evt.documentsource.details.host].id);
           }
         }
       });
-
-      console.log('WORLD: ', world);
 
       var attacks = Object.keys(world).map(function(key) {
         return [key, world[key].length];
@@ -290,46 +224,36 @@ if (Meteor.isClient) {
         return arr[0];
       });
 
-      console.log('ATTACKS: ', attacks);
-
-      sceneObjects = [];
       for (att in attacks) {
-        // console.log('ATT: ', att);
         var attackRank = world[attacks[att]].rank;
         // Create enclosing transparent sphere
-        var tempSphere = new THREE.SphereGeometry(70);
-        var material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } );
-        // var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-        var sphere = new THREE.Mesh( tempSphere, material );
-        sphere.position.x = rank_coord_mapping[attackRank].x;
-        sphere.position.z = rank_coord_mapping[attackRank].z;
+        var sphereGeometry = new THREE.SphereGeometry(80);
+        var sphereMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+        // var sphereMaterial = new THREE.MeshBasicMaterial();
+        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.x = RANKCOORDINATES[attackRank].x;
+        sphere.position.z = RANKCOORDINATES[attackRank].z;
         sphere.name = "EnclosingSphere" + attackRank;
         sphere.rank = attackRank;
-        console.log('SPHERE: ', sphere);
         sceneObjects.push(sphere);
-        scene.add( sphere );
+        scene.add(sphere);
 
         var service = attacks[att];
-        console.log('service', service);
         for (i in world[service]) {
           attack_type = world[service][i].category;
-          console.log(att, i, attack_type);
           if (Object.keys(attack_animation_mapping).indexOf(attack_type) > -1) {
             attack = attack_animation_mapping[attack_type];
-            console.log(att, i, attack_type);
-            restartEngine(attack, rank_coord_mapping[att].x, rank_coord_mapping[att].z);
+            restartEngine(attack, RANKCOORDINATES[att].x, RANKCOORDINATES[att].z);
           }
         }
       }
+
     });
-
   }
-
 
   Template.vr.created = function () {
     initVariables();
   }
-
 
   Template.vr.rendered = function () {
     init();
@@ -342,12 +266,12 @@ if (Meteor.isClient) {
 
     "click #container": function(e) {
       var mouse = {
-        x: (e.clientX / WIDTH ) * 2 - 1,
-        y: (e.clientY / HEIGHT ) * 2 - 1,
+        x: (e.clientX / WIDTH)*2 - 1,
+        y: (e.clientY / HEIGHT)*2 - 1,
       };
-      var mouseVector = new THREE.Vector3( mouse.x, mouse.y, 0. );
-      projector.unprojectVector( mouseVector, camera );
-      var raycaster = new THREE.Raycaster( camera.position, mouseVector.sub( camera.position ).normalize() );
+      var mouseVector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+      projector.unprojectVector(mouseVector, camera);
+      var raycaster = new THREE.Raycaster(camera.position, mouseVector.sub( camera.position).normalize() );
       var intersects = raycaster.intersectObjects(sceneObjects, true);
       console.log(intersects);
     }
