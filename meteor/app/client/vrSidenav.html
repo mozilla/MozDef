@@ -1,0 +1,26 @@
+<!--
+     This Source Code Form is subject to the terms of the Mozilla Public
+     License, v. 2.0. If a copy of the MPL was not distributed with this
+     file, You can obtain one at http://mozilla.org/MPL/2.0/.
+     Copyright (c) 2014 Mozilla Corporation
+
+     Contributors:
+     Avijit Gupta 526avijit@gmail.com
+   -->
+
+<template name="vrSidenav">
+
+<nav class="vr-sidenav cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right text-center" id="attack-sidenav">
+    <h3>Summary</h3>
+    <a><em>{{attackDetails.region}}</em></a>
+    <a>Rank <em># {{attackDetails.rank}}</em></a>
+    <!-- <a class="text-left attacks-list" id="show-attacks-list">List of attacks <span class="pull-right glyphicon glyphicon-arrow-right"></span></a> -->
+    <ul class="text-center" id="attacks-list" style="list-style: none; color: white;">
+        {{#each attackDetails.attacks}}
+        <li class="text-center">{{name}}</li>
+        {{/each}}
+    </ul>
+
+</nav>
+
+</template>
