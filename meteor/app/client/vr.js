@@ -210,6 +210,7 @@ if (Meteor.isClient) {
           }
         });
       });
+      console.log(" world = ",  world);
 
       var attacks = Object.keys(world).sort(function(prev, current) {
         return world[current].length - world[prev].length;
@@ -227,18 +228,21 @@ if (Meteor.isClient) {
         sphere.name = "EnclosingSphere" + attackRank;
         sphere.rank = attackRank;
         sphere.host = host || 'hard-coded';
-        sceneObjects.push(sphere);
-        scene.add(sphere);
+        sphere.attacks = [];
 
         world[host].forEach(function(attack, index) {
           if (typeof attack === "object") {
             attackType = attack.category;
+            sphere.attacks.push(attack);
             if (Object.keys(ATTACKANIMATIONS).indexOf(attackType) > -1) {
               mappedAttack = ATTACKANIMATIONS[attackType];
               restartEngine(mappedAttack, RANKCOORDINATES[index].x, RANKCOORDINATES[index].z);
             }
           }
         });
+
+        sceneObjects.push(sphere);
+        scene.add(sphere);
       });
 
     });
@@ -256,11 +260,8 @@ if (Meteor.isClient) {
   };//end template.attackers.rendered
 
   Template.vr.helpers({
-    attackRank: function() {
-      return Session.get('attackRank');
-    },
-    attackRegion: function() {
-      return Session.get('attackRegion');
+    attackDetails: function() {
+      return Session.get('attackDetails');
     }
   });
 
@@ -283,13 +284,18 @@ if (Meteor.isClient) {
           // console.log(intersect);
           var attackRank = intersect.object.rank;
           var attackRegion = intersect.object.host;
+          var attacks = intersect.object.attacks;
           if (typeof attackRank !== "undefined") {
+            var sessionAttackObj = {
+              host: attackRegion,
+              rank: attackRank,
+              attacks: attacks
+            };
+            Session.set('attackDetails', sessionAttackObj);
             // Open the nav if not already opened
             if (!sideNav.hasClass(OPENNAV)) {
               sideNav.addClass(OPENNAV);
             }
-            Session.set('attackRank', attackRank);
-            Session.set('attackRegion', attackRegion);
           }
         });
       }
