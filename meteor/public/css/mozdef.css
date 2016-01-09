@@ -537,11 +537,33 @@ circle:hover{
     padding: 8px 10px;
 }
 
-
-.vr-sidenav a {
-    height: 4em;
+.vr-sidenav {
+    color: white;
 }
 
-.vr-sidenav a.attacks-list:hover {
+.vr-sidenav .back-button {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    color: white;
+    font-size: 18px;
+}
+
+.vr-sidenav .back-button:hover {
     cursor: pointer;
+}
+
+.vr-sidenav .attacks-list {
+    list-style: none;
+    color: white;
+    margin-left: -40px;
+}
+
+.vr-sidenav .attacks-list .attacks-list-item {
+    padding: 5px;
+}
+
+.vr-sidenav .attacks-list .attacks-list-item:hover {
+    cursor: pointer;
+    text-decoration: underline;
 }

@@ -210,7 +210,6 @@ if (Meteor.isClient) {
           }
         });
       });
-      console.log(" world = ",  world);
 
       var attacks = Object.keys(world).sort(function(prev, current) {
         return world[current].length - world[prev].length;
@@ -262,6 +261,9 @@ if (Meteor.isClient) {
   Template.vr.helpers({
     attackDetails: function() {
       return Session.get('attackDetails');
+    },
+    isShowAttackDetails: function() {
+      return Session.get('isShowAttackDetails');
     }
   });
 
@@ -286,6 +288,7 @@ if (Meteor.isClient) {
           var attackRegion = intersect.object.host;
           var attacks = intersect.object.attacks;
           if (typeof attackRank !== "undefined") {
+            Session.set('isShowAttackDetails', false);
             var sessionAttackObj = {
               host: attackRegion,
               rank: attackRank,
@@ -302,11 +305,15 @@ if (Meteor.isClient) {
       else if(sideNav.hasClass(OPENNAV)) {
         sideNav.removeClass(OPENNAV);
       }
+    },
+
+    "click .attacks-list-item": function() {
+      Session.set('isShowAttackDetails', true);
+    },
+
+    "click .back-button": function() {
+      Session.set('isShowAttackDetails', false);
     }
-
-    // "click #show-attacks-list": function() {
-
-    // }
 
   });
 
