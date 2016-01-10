@@ -541,6 +541,10 @@ circle:hover{
     color: white;
 }
 
+.vr-sidenav #specific-attack-details {
+    display: none;
+}
+
 .vr-sidenav .back-button {
     position: absolute;
     left: 5px;
@@ -553,17 +557,17 @@ circle:hover{
     cursor: pointer;
 }
 
-.vr-sidenav .attacks-list {
+.vr-sidenav #attacks-list {
     list-style: none;
     color: white;
     margin-left: -40px;
 }
 
-.vr-sidenav .attacks-list .attacks-list-item {
+.vr-sidenav #attacks-list .attacks-list-item {
     padding: 5px;
 }
 
-.vr-sidenav .attacks-list .attacks-list-item:hover {
+.vr-sidenav #attacks-list .attacks-list-item:hover {
     cursor: pointer;
     text-decoration: underline;
 }

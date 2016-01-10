@@ -26,16 +26,15 @@ Avijit Gupta 526avijit@gmail.com
     <a><em>{{attackDetails.host}}</em></a>
     <a>Rank <em># {{attackDetails.rank}}</em></a>
 
-    {{#if isShowAttackDetails}}
-    <i class="glyphicon glyphicon-chevron-left back-button"></i>
-    <h5>Hello</h5>
-    {{else}}
-    <ul class="text-center attacks-list">
+    <span id="specific-attack-details">
+        <i class="glyphicon glyphicon-chevron-left back-button"></i>
+        <h5>Hello</h5>
+    </span>
+    <ul class="text-center" id="attacks-list">
         {{#each attackDetails.attacks}}
         <li class="text-center attacks-list-item">{{category}}</li>
         {{/each}}
     </ul>
-    {{/if}}
 
 </nav>
 

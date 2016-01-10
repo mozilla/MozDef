@@ -261,10 +261,10 @@ if (Meteor.isClient) {
   Template.vr.helpers({
     attackDetails: function() {
       return Session.get('attackDetails');
-    },
-    isShowAttackDetails: function() {
-      return Session.get('isShowAttackDetails');
     }
+    // isShowAttackDetails: function() {
+    //   return Session.get('isShowAttackDetails');
+    // }
   });
 
   Template.vr.events({
@@ -288,7 +288,7 @@ if (Meteor.isClient) {
           var attackRegion = intersect.object.host;
           var attacks = intersect.object.attacks;
           if (typeof attackRank !== "undefined") {
-            Session.set('isShowAttackDetails', false);
+            // Session.set('isShowAttackDetails', false);
             var sessionAttackObj = {
               host: attackRegion,
               rank: attackRank,
@@ -308,11 +308,13 @@ if (Meteor.isClient) {
     },
 
     "click .attacks-list-item": function() {
-      Session.set('isShowAttackDetails', true);
+      $('#specific-attack-details').slideToggle();
+      $('#attacks-list').slideToggle();
     },
 
     "click .back-button": function() {
-      Session.set('isShowAttackDetails', false);
+      $('#specific-attack-details').slideToggle();
+      $('#attacks-list').slideToggle();
     }
 
   });
