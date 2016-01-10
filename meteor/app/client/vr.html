@@ -23,16 +23,18 @@ Avijit Gupta 526avijit@gmail.com
 
 <nav class="vr-sidenav cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right text-center" id="attack-sidenav">
     <h3>Summary</h3>
-    <a><em>{{attackDetails.host}}</em></a>
-    <a>Rank <em># {{attackDetails.rank}}</em></a>
+    <a id="attacks-host"><em>{{hostAttacks.host}}</em></a>
+    <a id="attacks-rank">Rank <em># {{hostAttacks.rank}}</em></a>
 
     <span id="specific-attack-details">
         <i class="glyphicon glyphicon-chevron-left back-button"></i>
-        <h5>Hello</h5>
+        <h5>{{attackDetails.category}}</h5>
+        <h5>{{attackDetails.severity}}</h5>
+        <h5>{{attackDetails.details.sourceipv4address}}</h5>
     </span>
     <ul class="text-center" id="attacks-list">
-        {{#each attackDetails.attacks}}
-        <li class="text-center attacks-list-item">{{category}}</li>
+        {{#each hostAttacks.attacks}}
+        <li class="text-center attacks-list-item" data-index="{{index}}">{{category}}</li>
         {{/each}}
     </ul>
 

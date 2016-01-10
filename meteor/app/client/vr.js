@@ -211,6 +211,7 @@ if (Meteor.isClient) {
         });
       });
 
+      console.log(world);
       var attacks = Object.keys(world).sort(function(prev, current) {
         return world[current].length - world[prev].length;
       });
@@ -259,12 +260,18 @@ if (Meteor.isClient) {
   };//end template.attackers.rendered
 
   Template.vr.helpers({
+    hostAttacks: function() {
+      var hostAttacks = Session.get('hostAttacks');
+      if (hostAttacks) {
+        hostAttacks.attacks.forEach(function(attack, index) {
+          attack.index = index;
+        });
+        return hostAttacks;
+      }
+    },
     attackDetails: function() {
       return Session.get('attackDetails');
     }
-    // isShowAttackDetails: function() {
-    //   return Session.get('isShowAttackDetails');
-    // }
   });
 
   Template.vr.events({
@@ -288,13 +295,12 @@ if (Meteor.isClient) {
           var attackRegion = intersect.object.host;
           var attacks = intersect.object.attacks;
           if (typeof attackRank !== "undefined") {
-            // Session.set('isShowAttackDetails', false);
             var sessionAttackObj = {
               host: attackRegion,
               rank: attackRank,
               attacks: attacks
             };
-            Session.set('attackDetails', sessionAttackObj);
+            Session.set('hostAttacks', sessionAttackObj);
             // Open the nav if not already opened
             if (!sideNav.hasClass(OPENNAV)) {
               sideNav.addClass(OPENNAV);
@@ -307,7 +313,12 @@ if (Meteor.isClient) {
       }
     },
 
-    "click .attacks-list-item": function() {
+    "click .attacks-list-item": function(event) {
+      var attackIndex = event.target.getAttribute('data-index');
+      var hostName = document.getElementById('attacks-host').innerText;
+      var attackDetails = world[hostName][attackIndex];
+      console.log(attackDetails);
+      Session.set('attackDetails', attackDetails);
       $('#specific-attack-details').slideToggle();
       $('#attacks-list').slideToggle();
     },
