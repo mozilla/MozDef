@@ -104,6 +104,7 @@ if (Meteor.isClient) {
     scene = new THREE.Scene();
     loader = new THREE.JSONLoader();
     camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 1, 10000);
+    sceneControls = new THREE.TrackballControls(camera);
     spotLight = new THREE.SpotLight(0xffffff, 1);
     renderer = new THREE.WebGLRenderer({ antialias: true });
     projector = new THREE.Projector();
@@ -201,6 +202,9 @@ if (Meteor.isClient) {
         // TODO: Take care of timestamp
         element.events.forEach(function(evt) {
           var evtHost = evt.documentsource.details.host;
+          if (evtHost == undefined) {
+            return;
+          }
           if (world[evtHost]) {
             world[evtHost].push(evt.documentsource);
           } else {
@@ -233,6 +237,7 @@ if (Meteor.isClient) {
         world[host].forEach(function(attack, index) {
           if (typeof attack === "object") {
             attackType = attack.category;
+            console.log("attacks - ", attackType);
             sphere.attacks.push(attack);
             if (Object.keys(ATTACKANIMATIONS).indexOf(attackType) > -1) {
               mappedAttack = ATTACKANIMATIONS[attackType];
@@ -271,6 +276,9 @@ if (Meteor.isClient) {
     },
     attackDetails: function() {
       return Session.get('attackDetails');
+    },
+    displayIndex: function(index) {
+      return index + 1
     }
   });
 
@@ -326,7 +334,20 @@ if (Meteor.isClient) {
     "click .back-button": function() {
       $('#specific-attack-details').slideToggle();
       $('#attacks-list').slideToggle();
-    }
+    },
+
+    "click .blockip": function(e,t){
+      Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
+      //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
+      sceneControls.enabled = false;
+      controls.enabled = false;
+      console.log("BLCOK OPPP");
+      $('#modalBlockIPWindow').on('hidden', function () {
+          sceneControls.enabled=true;
+          controls.enabled = true;
+      });
+      $('#modalBlockIPWindow').modal();
+    },
 
   });
 
