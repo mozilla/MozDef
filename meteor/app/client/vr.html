@@ -38,6 +38,8 @@ Avijit Gupta 526avijit@gmail.com
         <h5>Last Seen: {{attackDetails.details.sourceipv4address}}</h5>
         <h5 class="blockip" data-ipaddress={{attackDetails.details.sourceipv4address}}>BLOCK IP</h5>
         <h5>Create Incident</h5>
+        <!-- <h5>Mark as Read #Checkbox here [On clicking checkbox, an eventlistener will mark it read in Mongo(This will not show up later on unless specifically asked for)]</h5> -->
+        <input type="checkbox" class="cbox" name="attack-isread"/> Mark as Read
     </span>
     <ul class="text-center" id="attacks-list">
         {{#each hostAttacks.attacks}}

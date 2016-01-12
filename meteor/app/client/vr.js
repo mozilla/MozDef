@@ -321,6 +321,16 @@ if (Meteor.isClient) {
       }
     },
 
+    "change .cbox": function(event) {
+      var isChecked = $('.cbox').is(':checked');
+      if (isChecked) {
+        
+      }
+      else {
+        
+      }
+    },
+
     "click .attacks-list-item": function(event) {
       var attackIndex = event.target.getAttribute('data-index');
       var hostName = document.getElementById('attacks-host').innerText;
