@@ -29,6 +29,8 @@ if (Meteor.isClient) {
       Math.PI/2
     ]
   };
+
+  // TODO: WHY_NO_UNDERSCORE @avijit
   var RANKCOORDINATES = [
     {x: -286, z: -115},
     {x: -15, z: 11},
@@ -183,6 +185,7 @@ if (Meteor.isClient) {
   }
 
   function listener(evt) {
+    // TODO: Remove this function
     if(evt.keyCode === 37)
       restartEngine(Examples.smoke,100,100);
     else if(evt.keyCode === 39)
@@ -204,13 +207,16 @@ if (Meteor.isClient) {
         // TODO: Take care of timestamp
         element.events.forEach(function(evt) {
           var evtHost = evt.documentsource.details.host;
+          var doc = evt.documentsource;
+          doc.id = evt.documentid;
           if (evtHost == undefined) {
             return;
           }
           if (world[evtHost]) {
-            world[evtHost].push(evt.documentsource);
+            world[evtHost].push(doc);
           } else {
-            world[evtHost] = [evt.documentsource];
+            world[evtHost] = [doc];
+            // TODO: Is the below line required
             world[evtHost].rank = attackedIds++;
             // world[evtHost].host = evtHost || 'hard-coded';
           }
@@ -326,7 +332,7 @@ if (Meteor.isClient) {
     "change .cbox": function(event) {
       var isChecked = $('.cbox').is(':checked');
       if (isChecked) {
-        
+        // attackers.update()
       }
       else {
         
