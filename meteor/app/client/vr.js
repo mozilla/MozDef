@@ -53,9 +53,9 @@ if (Meteor.isClient) {
     {x: -754, z: -1087}
   ];
   var ATTACKANIMATIONS = {
-    'broxss': Examples.fireball,
+    'broxss': Examples.smoke,
     'bro_notice': Examples.smoke,
-    'brosqli': Examples.candle,
+    'brosqli': Examples.smoke,
     'brotunnel': Examples.rain,
     'brointel': Examples.clouds
   };
@@ -82,6 +82,7 @@ if (Meteor.isClient) {
   var cssRenderer = null;
   var intersectedObject = null;
   var engine = null;
+  var enginesList = [];
   var world = {};
   var jsonData = {};
 
@@ -111,18 +112,17 @@ if (Meteor.isClient) {
     cssRenderer = new THREE.CSS3DRenderer();
     controls = new THREE.OrbitControls(camera);
     stats = new Stats();
-    engine = new ParticleEngine();
-    engine.initialize(scene);
   }
 
   function restartEngine(parameters, x, z) {
-    // engine.destroy(scene);
-    // engine = new ParticleEngine();
     parameters.positionBase.x=x;
     parameters.positionBase.z=z;
 
-    engine.setValues( parameters );
+    engine = new ParticleEngine();
+    engine.setValues(parameters);
     engine.initialize(scene);
+
+    enginesList.push(engine);
   }
 
   function setStats() {
@@ -170,7 +170,9 @@ if (Meteor.isClient) {
   function update() {
     controls.update();
     stats.update();
-    engine.update(clock.getDelta()*0.5);
+    enginesList.forEach(function(engine) {
+      engine.update(0.01*0.5);
+    });
   }
 
   function render() {
