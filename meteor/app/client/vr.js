@@ -56,10 +56,8 @@ if (Meteor.isClient) {
   ];
   var ATTACKANIMATIONS = {
     'broxss': Examples.smoke,
-    'bro_notice': Examples.smoke,
     'brosqli': Examples.smoke,
-    'brotunnel': Examples.rain,
-    'brointel': Examples.clouds
+    'brotunnel': Examples.smoke,
   };
   var WIDTH  = window.innerWidth;
   var HEIGHT = window.innerHeight;
@@ -224,11 +222,12 @@ if (Meteor.isClient) {
       });
 
       console.log(world);
+      
       var attacks = Object.keys(world).sort(function(prev, current) {
         return world[current].length - world[prev].length;
       });
-
-      attacks.forEach(function(host) {
+      console.log('attacks', attacks);
+      attacks.forEach(function(host, index) {
         var attackRank = world[host].rank;
         // Create enclosing transparent sphere
         var sphereGeometry = new THREE.SphereGeometry(70);
@@ -242,7 +241,7 @@ if (Meteor.isClient) {
         sphere.host = host || 'hard-coded';
         sphere.attacks = [];
 
-        world[host].forEach(function(attack, index) {
+        world[host].forEach(function(attack) {
           if (typeof attack === "object") {
             attackType = attack.category;
             console.log("attacks - ", attackType);
@@ -250,6 +249,7 @@ if (Meteor.isClient) {
             if (Object.keys(ATTACKANIMATIONS).indexOf(attackType) > -1) {
               mappedAttack = ATTACKANIMATIONS[attackType];
               restartEngine(mappedAttack, RANKCOORDINATES[index].x, RANKCOORDINATES[index].z);
+              console.log(RANKCOORDINATES[index].x, RANKCOORDINATES[index].z);
             }
           }
         });
