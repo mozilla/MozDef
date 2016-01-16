@@ -182,22 +182,6 @@ if (Meteor.isClient) {
     cssRenderer.render(scene, camera);
   }
 
-  function listener(evt) {
-    // TODO: Remove this function
-    if(evt.keyCode === 37)
-      restartEngine(Examples.smoke,100,100);
-    else if(evt.keyCode === 39)
-      restartEngine(Examples.fireball,50,100);
-    else if(evt.keyCode === 38)
-      restartEngine(Examples.candle,10,-800);
-    else if(evt.keyCode === 40)
-      restartEngine(Examples.clouds,-800,-800);
-    else if(evt.keyCode === 49)
-      restartEngine(Examples.rain,200,-300);
-    else if(evt.keyCode === 50)
-      restartEngine(Examples.fountain);
-  }
-
   function parsedb() {
     Meteor.subscribe("attackers-summary-yash", onReady = function() {
 
@@ -268,7 +252,6 @@ if (Meteor.isClient) {
   Template.vr.rendered = function () {
     init();
     render();
-    document.addEventListener("keydown", listener);
     parsedb();
   };//end template.attackers.rendered
 
@@ -377,8 +360,6 @@ if (Meteor.isClient) {
     WIDTH  = window.innerWidth;
     HEIGHT = window.innerHeight;
     SPEED = 0.01;
-    document.removeEventListener("keydown",listener);
-
   };//end template.attackers.destroyed
 
 
