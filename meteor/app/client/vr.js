@@ -337,13 +337,15 @@ if (Meteor.isClient) {
     "change .cbox": function(event) {
       var isChecked = $('.cbox').is(':checked');
       var attackId = Session.get('attackDetails').id;
-      console.log(attackId, isChecked);
-      if (isChecked) {
-        // attackers.update()
-      }
-      else {
-        
-      }
+      var setModifier = { $set: {}};
+      var element = attackers.findOne({"events.documentid": attackId});
+      
+      element.events.forEach(function(evt, index) {
+        if (evt.documentid === attackId) {
+          setModifier.$set['events.' + index + '.read'] = isChecked;
+          attackers.update({'_id': element._id}, setModifier);
+        }
+      });
     },
 
     "click .attacks-list-item": function(event) {
