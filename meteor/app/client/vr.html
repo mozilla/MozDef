@@ -27,6 +27,11 @@ Avijit Gupta 526avijit@gmail.com
 
 <nav class="vr-sidenav cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right text-center" id="attack-sidenav">
     <h3>Summary</h3>
+    <div class="filter-radios">
+        <input type="radio" name="filter-type" class="filter-type" value="all" checked/>All
+        <input type="radio" name="filter-type" class="filter-type" value="read"/>Read
+        <input type="radio" name="filter-type" class="filter-type" value="unread"/>Unread
+    </div>
     <a id="attacks-host"><em>{{hostAttacks.host}}</em></a>
     <a id="attacks-rank">Priority <em># {{displayIndex hostAttacks.rank}}</em></a>
 
@@ -39,14 +44,18 @@ Avijit Gupta 526avijit@gmail.com
         <h5 class="blockip" data-ipaddress={{attackDetails.details.sourceipv4address}}>BLOCK IP</h5>
         <h5>Create Incident</h5>
         <!-- <h5>Mark as Read #Checkbox here [On clicking checkbox, an eventlistener will mark it read in Mongo(This will not show up later on unless specifically asked for)]</h5> -->
-        <input type="checkbox" class="cbox" name="attack-isread"/> Mark as Read
+        {{#if attackDetails.read}}
+        <input type="checkbox" class="cbox" name="attack-isread" checked/> Mark as Read
+        {{else}}
+        <input type="checkbox" class="cbox" name="attack-isread" /> Mark as Read
+        {{/if}}
     </span>
     <ul class="text-center" id="attacks-list">
         {{#each hostAttacks.attacks}}
         <li class="text-center attacks-list-item" data-index="{{index}}">{{displayIndex index}}. {{category}}</li>
         {{/each}}
     </ul>
+
 </nav>
 {{>blockIPModal}}
-
 </template>

@@ -30,7 +30,7 @@ if (Meteor.isClient) {
     ]
   };
 
-  // TODO: WHY_NO_UNDERSCORE @avijit
+  // TODO: @YASH : BECAUSE YOU REALLY DONT KNOW ANYTHING ABOUT JS
   var RANKCOORDINATES = [
     {x: -286, z: -115},
     {x: -15, z: 11},
@@ -112,6 +112,7 @@ if (Meteor.isClient) {
     cssRenderer = new THREE.CSS3DRenderer();
     controls = new THREE.OrbitControls(camera);
     stats = new Stats();
+    Session.set('filterType', 'all');
   }
 
   function restartEngine(parameters, x, z) {
@@ -185,15 +186,28 @@ if (Meteor.isClient) {
   function parsedb() {
     Meteor.subscribe("attackers-summary-yash", onReady = function() {
 
+      // var filterType = Session.get('filterType');
       attackers.find().forEach(function(element) {
         // TODO: Take care of timestamp
         element.events.forEach(function(evt) {
           var evtHost = evt.documentsource.details.host;
           var doc = evt.documentsource;
           doc.id = evt.documentid;
+          doc.read = evt.read;
           if (evtHost == undefined) {
             return;
           }
+
+          // if (filterType === 'read') {
+          //   if (!doc.read || doc.read == undefined) {
+          //     return;
+          //   }
+          // }
+          // if (filterType === 'unread') {
+          //   if (doc.read) {
+          //     return;
+          //   }
+          // }
           if (world[evtHost]) {
             world[evtHost].push(doc);
           } else {
@@ -206,7 +220,7 @@ if (Meteor.isClient) {
       });
 
       console.log(world);
-      
+
       var attacks = Object.keys(world).sort(function(prev, current) {
         return world[current].length - world[prev].length;
       });
@@ -222,7 +236,7 @@ if (Meteor.isClient) {
         sphere.position.z = RANKCOORDINATES[attackRank].z;
         sphere.name = "EnclosingSphere" + attackRank;
         sphere.rank = attackRank;
-        sphere.host = host || 'hard-coded';
+        sphere.host = host;
         sphere.attacks = [];
 
         world[host].forEach(function(attack) {
@@ -258,11 +272,24 @@ if (Meteor.isClient) {
   Template.vr.helpers({
     hostAttacks: function() {
       var hostAttacks = Session.get('hostAttacks');
+      var isReadOrUnread = Session.get('filterType');
+      var filteredAttacks = { attacks: [] };
       if (hostAttacks) {
+        filteredAttacks.rank = hostAttacks.rank;
+        filteredAttacks.host = hostAttacks.host;
         hostAttacks.attacks.forEach(function(attack, index) {
           attack.index = index;
+          if (isReadOrUnread === 'read' && attack.read) {
+            filteredAttacks.attacks.push(attack);
+          }
+          else if (isReadOrUnread === 'unread' && !attack.read) {
+            filteredAttacks.attacks.push(attack);
+          }
+          else if (isReadOrUnread === 'all') {
+            filteredAttacks.attacks.push(attack);
+          }
         });
-        return hostAttacks;
+        return filteredAttacks;
       }
     },
     attackDetails: function() {
@@ -339,7 +366,7 @@ if (Meteor.isClient) {
       var attackId = Session.get('attackDetails').id;
       var setModifier = { $set: {}};
       var element = attackers.findOne({"events.documentid": attackId});
-      
+
       element.events.forEach(function(evt, index) {
         if (evt.documentid === attackId) {
           setModifier.$set['events.' + index + '.read'] = isChecked;
@@ -348,11 +375,15 @@ if (Meteor.isClient) {
       });
     },
 
+    "change .filter-type": function (event) {
+      Session.set('filterType', $('.filter-radios input[name=filter-type]:checked').val());
+      // filterAttacksType();
+    },
+
     "click .attacks-list-item": function(event) {
       var attackIndex = event.target.getAttribute('data-index');
       var hostName = document.getElementById('attacks-host').innerText;
       var attackDetails = world[hostName][attackIndex];
-      console.log(attackDetails);
       Session.set('attackDetails', attackDetails);
       $('#specific-attack-details').slideToggle();
       $('#attacks-list').slideToggle();
@@ -368,7 +399,6 @@ if (Meteor.isClient) {
       //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
       sceneControls.enabled = false;
       controls.enabled = false;
-      console.log("BLCOK OPPP");
       $('#modalBlockIPWindow').on('hidden', function () {
           sceneControls.enabled=true;
           controls.enabled = true;
