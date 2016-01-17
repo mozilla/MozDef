@@ -312,6 +312,28 @@ if (Meteor.isClient) {
       }
     },
 
+  "mousemove": function(e) {
+      var mouse = {
+        x: (e.clientX / WIDTH)*2 - 1,
+        y: (e.clientY / HEIGHT)*2 - 1
+      };
+      var mouseVector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+      projector.unprojectVector(mouseVector, camera);
+      var raycaster = new THREE.Raycaster(camera.position, mouseVector.sub( camera.position).normalize() );
+      var intersects = raycaster.intersectObjects(sceneObjects, true);
+
+      $('body').removeClass('mousepointer');
+
+      if (intersects.length) {
+        intersects.forEach(function(intersect) {
+          var attackRank = intersect.object.rank;
+          if (typeof attackRank !== "undefined") {
+            $('body').addClass('mousepointer');
+          }
+        });
+      }
+    },
+
     "change .cbox": function(event) {
       var isChecked = $('.cbox').is(':checked');
       var attackId = Session.get('attackDetails').id;

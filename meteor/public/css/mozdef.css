@@ -571,3 +571,7 @@ circle:hover{
     cursor: pointer;
     text-decoration: underline;
 }
+
+.mousepointer {
+    cursor: pointer;
+}
