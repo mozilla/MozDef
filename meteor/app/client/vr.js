@@ -314,6 +314,8 @@ if (Meteor.isClient) {
 
     "change .cbox": function(event) {
       var isChecked = $('.cbox').is(':checked');
+      var attackId = Session.get('attackDetails').id;
+      console.log(attackId, isChecked);
       if (isChecked) {
         // attackers.update()
       }
