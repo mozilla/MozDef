@@ -390,6 +390,13 @@ if (Meteor.isClient) {
         if (evt.documentid === attackId) {
           setModifier.$set['events.' + index + '.read'] = isChecked;
           attackers.update({'_id': element._id}, setModifier);
+          var hostAttacks = Session.get('hostAttacks');
+          hostAttacks.attacks.forEach(function(attack) {
+            if (attack.id === attackId) {
+              attack.read = isChecked;
+            }
+          });
+          Session.set('hostAttacks', hostAttacks);
         }
       });
     },
