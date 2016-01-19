@@ -297,6 +297,19 @@ if (Meteor.isClient) {
     },
     displayIndex: function(index) {
       return index + 1
+    },
+    displayDate: function(date) {
+      MM = {Jan:"January", Feb:"February", Mar:"March", Apr:"April", May:"May", Jun:"June",
+            Jul:"July", Aug:"August", Sep:"September", Oct:"October", Nov:"November", Dec:"December"};
+
+      parsed_date = String(new Date(date)).replace(
+          /\w{3} (\w{3}) (\d{2}) (\d{4}) (\d{2}):(\d{2}):[^(]+\(([A-Z]{3})\)/,
+          function($0,$1,$2,$3,$4,$5,$6){
+              return MM[$1]+" "+$2+", "+$3+" - "+$4%12+":"+$5+(+$4>12?"PM":"AM")+" "+$6
+          }
+      );
+
+      return parsed_date
     }
   });
 

@@ -23,12 +23,15 @@ Yash Mehrotra yashmehrotra95@gmail.com
     .blockip {
         cursor: pointer;
     }
+    #date {
+        font-size: 12px;
+    }
 </style>
 <div id="container"></div>
 
 <nav class="vr-sidenav cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right text-center" id="attack-sidenav">
     <h3>Summary</h3>
-    <div class="filter-radios">
+    <div class="filter-radios"> Filter Attacks:
         <input type="radio" name="filter-type" class="filter-type" value="all" checked/>All
         <input type="radio" name="filter-type" class="filter-type" value="read"/>Read
         <input type="radio" name="filter-type" class="filter-type" value="unread"/>Unread
@@ -40,11 +43,10 @@ Yash Mehrotra yashmehrotra95@gmail.com
         <i class="glyphicon glyphicon-chevron-left back-button"></i>
         <h5>{{displayIndex index}}. {{attackDetails.category}}</h5>
         <h5>Severity: {{attackDetails.severity}}</h5>
-        <h5>{{attackDetails.details.sourceipv4address}}</h5>
-        <h5>Last Seen: {{attackDetails.details.sourceipv4address}}</h5>
+        <h5>IP: {{attackDetails.details.sourceipv4address}}</h5>
+        <h5>Seen: <span id="date">{{displayDate attackDetails.timestamp}}</span></h5>
         <h5 class="blockip" data-ipaddress={{attackDetails.details.sourceipv4address}}>BLOCK IP</h5>
         <h5>Create Incident</h5>
-        <!-- <h5>Mark as Read #Checkbox here [On clicking checkbox, an eventlistener will mark it read in Mongo(This will not show up later on unless specifically asked for)]</h5> -->
         {{#if attackDetails.read}}
         <input type="checkbox" class="cbox" name="attack-isread" checked/> Mark as Read
         {{else}}
