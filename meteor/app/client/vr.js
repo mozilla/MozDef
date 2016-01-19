@@ -193,7 +193,7 @@ if (Meteor.isClient) {
           var evtHost = evt.documentsource.details.host;
           var doc = evt.documentsource;
           doc.id = evt.documentid;
-          doc.read = evt.read;
+          doc.read = evt.read || false;
           if (evtHost == undefined) {
             return;
           }

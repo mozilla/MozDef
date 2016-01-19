@@ -202,7 +202,9 @@ if (Meteor.isServer) {
     Meteor.publish("attackers-summary-landmass", function () {
         //limit to the last 100 records by default
         //to ease the sync transfer to dc.js/crossfilter
-        return attackers.find({});
+        var inModifier = { $in: ["broxss", "brotunnel", "brosqli"]};
+        return attackers.find({"events.documentsource.category": inModifier},
+                              {sort: {lastseentimestamp: -1}});
     });
 
     Meteor.publish("investigations-summary", function () {
