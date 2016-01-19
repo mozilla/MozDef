@@ -22,6 +22,7 @@ Yash Mehrotra yashmehrotra95@gmail.com
 
     .blockip {
         cursor: pointer;
+        margin-bottom: 16px;
     }
     #date {
         font-size: 12px;
@@ -45,8 +46,7 @@ Yash Mehrotra yashmehrotra95@gmail.com
         <h5>Severity: {{attackDetails.severity}}</h5>
         <h5>IP: {{attackDetails.details.sourceipv4address}}</h5>
         <h5>Seen: <span id="date">{{displayDate attackDetails.timestamp}}</span></h5>
-        <h5 class="blockip" data-ipaddress={{attackDetails.details.sourceipv4address}}>BLOCK IP</h5>
-        <h5>Create Incident</h5>
+        <h5 class="blockip btn" data-ipaddress={{attackDetails.details.sourceipv4address}}>BLOCK IP</h5><br/>
         {{#if attackDetails.read}}
         <input type="checkbox" class="cbox" name="attack-isread" checked/> Mark as Read
         {{else}}

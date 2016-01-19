@@ -182,12 +182,10 @@ if (Meteor.isClient) {
     cssRenderer.render(scene, camera);
   }
 
-  function parsedb() {
+  function getAttackers() {
     Meteor.subscribe("attackers-summary-landmass", onReady = function() {
 
-      // var filterType = Session.get('filterType');
       attackers.find().forEach(function(element) {
-        // TODO: Take care of timestamp
         element.events.forEach(function(evt) {
           var evtHost = evt.documentsource.details.host;
           var doc = evt.documentsource;
@@ -197,39 +195,24 @@ if (Meteor.isClient) {
             return;
           }
 
-          // if (filterType === 'read') {
-          //   if (!doc.read || doc.read == undefined) {
-          //     return;
-          //   }
-          // }
-          // if (filterType === 'unread') {
-          //   if (doc.read) {
-          //     return;
-          //   }
-          // }
           if (world[evtHost]) {
             world[evtHost].push(doc);
           } else {
             world[evtHost] = [doc];
-            // TODO: Is the below line required
             world[evtHost].rank = attackedIds++;
-            // world[evtHost].host = evtHost || 'hard-coded';
           }
         });
       });
 
-      console.log(world);
-
       var attacks = Object.keys(world).sort(function(prev, current) {
         return world[current].length - world[prev].length;
       });
-      console.log('attacks', attacks);
+
       attacks.forEach(function(host, index) {
         var attackRank = world[host].rank;
         // Create enclosing transparent sphere
         var sphereGeometry = new THREE.SphereGeometry(70);
         var sphereMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
-        // var sphereMaterial = new THREE.MeshBasicMaterial();
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         sphere.position.x = RANK_COORDINATES[attackRank].x;
         sphere.position.z = RANK_COORDINATES[attackRank].z;
@@ -241,12 +224,11 @@ if (Meteor.isClient) {
         world[host].forEach(function(attack) {
           if (typeof attack === "object") {
             attackType = attack.category;
-            console.log("attacks - ", attackType);
             sphere.attacks.push(attack);
             if (Object.keys(ATTACK_ANIMATIONS).indexOf(attackType) > -1) {
               mappedAttack = ATTACK_ANIMATIONS[attackType];
+              // Display animation
               restartEngine(mappedAttack, RANK_COORDINATES[index].x, RANK_COORDINATES[index].z);
-              console.log(RANK_COORDINATES[index].x, RANK_COORDINATES[index].z);
             }
           }
         });
@@ -265,8 +247,8 @@ if (Meteor.isClient) {
   Template.vr.rendered = function () {
     init();
     render();
-    parsedb();
-  };//end template.attackers.rendered
+    getAttackers();
+  };
 
   Template.vr.helpers({
     hostAttacks: function() {
@@ -298,10 +280,11 @@ if (Meteor.isClient) {
       return index + 1
     },
     displayDate: function(date) {
-      MM = {Jan:"January", Feb:"February", Mar:"March", Apr:"April", May:"May", Jun:"June",
-            Jul:"July", Aug:"August", Sep:"September", Oct:"October", Nov:"November", Dec:"December"};
+      var MM = {Jan:"January", Feb:"February", Mar:"March", Apr:"April",
+                May:"May", Jun:"June", Jul:"July", Aug:"August", Sep:"September",
+                Oct:"October", Nov:"November", Dec:"December"};
 
-      parsed_date = String(new Date(date)).replace(
+      var parsed_date = String(new Date(date)).replace(
           /\w{3} (\w{3}) (\d{2}) (\d{4}) (\d{2}):(\d{2}):[^(]+\(([A-Z]{3})\)/,
           function($0,$1,$2,$3,$4,$5,$6){
               return MM[$1]+" "+$2+", "+$3+" - "+$4%12+":"+$5+(+$4>12?"PM":"AM")+" "+$6
@@ -324,11 +307,9 @@ if (Meteor.isClient) {
       var raycaster = new THREE.Raycaster(camera.position, mouseVector.sub( camera.position).normalize() );
       var intersects = raycaster.intersectObjects(sceneObjects, true);
       var sideNav = $('#attack-sidenav');
-      console.log(intersects);
 
       if (intersects.length) {
         intersects.forEach(function(intersect) {
-          // console.log(intersect);
           var attackRank = intersect.object.rank;
           var attackRegion = intersect.object.host;
           var attacks = intersect.object.attacks;
@@ -442,7 +423,7 @@ if (Meteor.isClient) {
     WIDTH  = window.innerWidth;
     HEIGHT = window.innerHeight;
     SPEED = 0.01;
-  };//end template.attackers.destroyed
+  };
 
 
 }
