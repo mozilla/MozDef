@@ -392,13 +392,11 @@ if (Meteor.isClient) {
       var attackDetails = world[hostName][attackIndex];
       Session.set('attackDetails', attackDetails);
       Session.set('showDetailedAttack', true);
-      $('#specific-attack-details').slideToggle();
-      $('#attacks-list').slideToggle();
+      slideToggle();
     },
 
     "click .back-button": function() {
-      $('#specific-attack-details').slideToggle();
-      $('#attacks-list').slideToggle();
+      slideToggle();
     },
 
     "click .blockip": function(e,t) {
@@ -425,5 +423,9 @@ if (Meteor.isClient) {
     SPEED = 0.01;
   };
 
-
+  function slideToggle() {
+    $('#specific-attack-details').slideToggle();
+    $('#attacks-list').slideToggle();
+    $('#filter-read-unread').slideToggle();
+  }
 }
