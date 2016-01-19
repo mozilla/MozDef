@@ -541,6 +541,16 @@ circle:hover{
     color: white;
 }
 
+.vr-sidenav .filter-radios label:nth-child(1) {
+    margin-top: 5px;
+}
+
+.vr-sidenav .filter-radios label {
+    display: block;
+    text-align: left;
+    padding-left: 33%;
+}
+
 .vr-sidenav #specific-attack-details {
     display: none;
 }

@@ -33,9 +33,18 @@ Yash Mehrotra yashmehrotra95@gmail.com
 <nav class="vr-sidenav cbp-spmenu cbp-spmenu-vertical cbp-spmenu-right text-center" id="attack-sidenav">
     <h3>Summary</h3>
     <div id="filter-read-unread" class="filter-radios"> Filter Attacks:
-        <input type="radio" name="filter-type" class="filter-type" value="all" checked/>All
-        <input type="radio" name="filter-type" class="filter-type" value="read"/>Read
-        <input type="radio" name="filter-type" class="filter-type" value="unread"/>Unread
+        <label>
+            <input type="radio" name="filter-type" class="filter-type" value="all" checked/>
+            All
+        </label>
+        <label>
+            <input type="radio" name="filter-type" class="filter-type" value="read"/>
+            Read
+        </label>
+        <label>
+            <input type="radio" name="filter-type" class="filter-type" value="unread"/>
+            Unread
+        </label>
     </div>
     <a id="attacks-host"><em>{{hostAttacks.host}}</em></a>
     <a id="attacks-rank">Priority <em># {{displayIndex hostAttacks.rank}}</em></a>
