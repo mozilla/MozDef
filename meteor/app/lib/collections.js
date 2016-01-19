@@ -199,7 +199,7 @@ if (Meteor.isServer) {
                        limit:100});
     });
 
-    Meteor.publish("attackers-summary-yash", function () {
+    Meteor.publish("attackers-summary-landmass", function () {
         //limit to the last 100 records by default
         //to ease the sync transfer to dc.js/crossfilter
         return attackers.find({});

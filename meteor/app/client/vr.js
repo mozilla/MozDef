@@ -184,7 +184,7 @@ if (Meteor.isClient) {
   }
 
   function parsedb() {
-    Meteor.subscribe("attackers-summary-yash", onReady = function() {
+    Meteor.subscribe("attackers-summary-landmass", onReady = function() {
 
       // var filterType = Session.get('filterType');
       attackers.find().forEach(function(element) {
@@ -320,6 +320,7 @@ if (Meteor.isClient) {
           var attackRank = intersect.object.rank;
           var attackRegion = intersect.object.host;
           var attacks = intersect.object.attacks;
+
           if (typeof attackRank !== "undefined") {
             var sessionAttackObj = {
               host: attackRegion,
@@ -330,6 +331,11 @@ if (Meteor.isClient) {
             // Open the nav if not already opened
             if (!sideNav.hasClass(OPENNAV)) {
               sideNav.addClass(OPENNAV);
+            }
+            if (Session.get('showDetailedAttack')) {
+              $('#specific-attack-details').slideToggle();
+              $('#attacks-list').slideToggle();
+              Session.set('showDetailedAttack', false);
             }
           }
         });
@@ -385,6 +391,7 @@ if (Meteor.isClient) {
       var hostName = document.getElementById('attacks-host').innerText;
       var attackDetails = world[hostName][attackIndex];
       Session.set('attackDetails', attackDetails);
+      Session.set('showDetailedAttack', true);
       $('#specific-attack-details').slideToggle();
       $('#attacks-list').slideToggle();
     },

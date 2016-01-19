@@ -188,7 +188,7 @@ Router.map(function () {
     });
 
     this.route('vr', {
-        path: '/vr',
+        path: '/landmass',
         template: 'vr',
         layoutTemplate: 'layout'
     });
