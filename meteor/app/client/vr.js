@@ -14,7 +14,7 @@
 
 if (Meteor.isClient) {
 
-  var MESHPROPERTIES = {
+  var MESH_PROPERTIES = {
     count: 4,
     position: [
       {x: 0, y: 0, z: 0},
@@ -30,8 +30,7 @@ if (Meteor.isClient) {
     ]
   };
 
-  // TODO: @YASH : BECAUSE YOU REALLY DONT KNOW ANYTHING ABOUT JS
-  var RANKCOORDINATES = [
+  var RANK_COORDINATES = [
     {x: -286, z: -115},
     {x: -15, z: 11},
     {x: -234, z: 232},
@@ -54,11 +53,12 @@ if (Meteor.isClient) {
     {x: -992, z: -962},
     {x: -754, z: -1087}
   ];
-  var ATTACKANIMATIONS = {
+  var ATTACK_ANIMATIONS = {
     'broxss': Examples.smoke,
     'brosqli': Examples.smoke,
     'brotunnel': Examples.smoke,
   };
+
   var WIDTH  = window.innerWidth;
   var HEIGHT = window.innerHeight;
   var SPEED = 0.01;
@@ -70,7 +70,6 @@ if (Meteor.isClient) {
   var renderer = null;
   var material = null;
   var json = null;
-  var geometry = null;
   var controls = null;
   var clock = null;
   var mesh = null;
@@ -134,7 +133,7 @@ if (Meteor.isClient) {
 
   function setCamera() {
     camera.position.set(-39.52908903855581, -4.352138336979161, 40.70626794923796);
-    var lookAt = { x: -30.52908903855581, y: -4.352138336979161, z: 37.70626794923796 }
+    var lookAt = { x: -30.52908903855581, y: -4.352138336979161, z: 37.70626794923796 };
     camera.lookAt(lookAt);
   }
 
@@ -157,13 +156,13 @@ if (Meteor.isClient) {
     json = loader.parse(jsonData);
     geometry = json.geometry;
     material = new THREE.MeshPhongMaterial(json.materials);
-    for (var i = 0; i < MESHPROPERTIES.count; i++) {
+    for (var i = 0; i < MESH_PROPERTIES.count; i++) {
       mesh = new THREE.Mesh(geometry, material);
       mesh.scale.x = mesh.scale.y = mesh.scale.z = 50.75;
       mesh.translation = THREE.GeometryUtils.center(geometry);
       mesh.castShadow = true;
-      mesh.position.copy(MESHPROPERTIES.position[i]);
-      mesh.rotation.y = MESHPROPERTIES.rotationY[i];
+      mesh.position.copy(MESH_PROPERTIES.position[i]);
+      mesh.rotation.y = MESH_PROPERTIES.rotationY[i];
       scene.add(mesh);
     }
   }
@@ -232,8 +231,8 @@ if (Meteor.isClient) {
         var sphereMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
         // var sphereMaterial = new THREE.MeshBasicMaterial();
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        sphere.position.x = RANKCOORDINATES[attackRank].x;
-        sphere.position.z = RANKCOORDINATES[attackRank].z;
+        sphere.position.x = RANK_COORDINATES[attackRank].x;
+        sphere.position.z = RANK_COORDINATES[attackRank].z;
         sphere.name = "EnclosingSphere" + attackRank;
         sphere.rank = attackRank;
         sphere.host = host;
@@ -244,10 +243,10 @@ if (Meteor.isClient) {
             attackType = attack.category;
             console.log("attacks - ", attackType);
             sphere.attacks.push(attack);
-            if (Object.keys(ATTACKANIMATIONS).indexOf(attackType) > -1) {
-              mappedAttack = ATTACKANIMATIONS[attackType];
-              restartEngine(mappedAttack, RANKCOORDINATES[index].x, RANKCOORDINATES[index].z);
-              console.log(RANKCOORDINATES[index].x, RANKCOORDINATES[index].z);
+            if (Object.keys(ATTACK_ANIMATIONS).indexOf(attackType) > -1) {
+              mappedAttack = ATTACK_ANIMATIONS[attackType];
+              restartEngine(mappedAttack, RANK_COORDINATES[index].x, RANK_COORDINATES[index].z);
+              console.log(RANK_COORDINATES[index].x, RANK_COORDINATES[index].z);
             }
           }
         });
@@ -365,7 +364,7 @@ if (Meteor.isClient) {
       };
       var mouseVector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
       projector.unprojectVector(mouseVector, camera);
-      var raycaster = new THREE.Raycaster(camera.position, mouseVector.sub( camera.position).normalize() );
+      var raycaster = new THREE.Raycaster(camera.position, mouseVector.sub( camera.position).normalize());
       var intersects = raycaster.intersectObjects(sceneObjects, true);
 
       $('body').removeClass('mousepointer');
@@ -421,7 +420,7 @@ if (Meteor.isClient) {
       $('#attacks-list').slideToggle();
     },
 
-    "click .blockip": function(e,t){
+    "click .blockip": function(e,t) {
       Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
       //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
       sceneControls.enabled = false;
