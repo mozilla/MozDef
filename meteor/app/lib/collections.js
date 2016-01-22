@@ -204,7 +204,8 @@ if (Meteor.isServer) {
         //to ease the sync transfer to dc.js/crossfilter
         var inModifier = { $in: ["broxss", "brotunnel", "brosqli"]};
         return attackers.find({"events.documentsource.category": inModifier},
-                              {sort: {lastseentimestamp: -1}});
+                              {sort: {lastseentimestamp: -1},
+                               limit: 100});
     });
 
     Meteor.publish("investigations-summary", function () {

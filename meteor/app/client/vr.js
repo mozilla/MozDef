@@ -195,6 +195,10 @@ if (Meteor.isClient) {
             return;
           }
 
+          if (Object.keys(world).length >=26) {
+              return;
+          }
+
           if (world[evtHost]) {
             world[evtHost].push(doc);
           } else {
