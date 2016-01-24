@@ -6,6 +6,7 @@ Copyright (c) 2014 Mozilla Corporation
 
 Contributors:
 Jeff Bryner jbryner@mozilla.com
+Avijit Gupta 526avijit@gmail.com
 */
 
 /*base css */
@@ -90,6 +91,30 @@ caption, legend {
   line-height: 13px;
 }
 
+
+.attackshoverboard {
+    /*width: 500px;*/
+    /*height: 500px;*/
+    /*background-color: green;*/
+    -moz-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    transform: scaleY(-1);
+    display: none;
+}
+
+.dropdown-submenu{position:relative;}
+.dropdown-submenu>.dropdown-menu{top:0;left:100%;-webkit-border-radius:0 6px 6px 6px;-moz-border-radius:0 6px 6px 6px;border-radius:0 6px 6px 6px;}
+.dropdown-submenu:active>.dropdown-menu, .dropdown-submenu:hover>.dropdown-menu {
+       display: block;
+       right:162px;
+}
+.dropdown-submenu>a:after{display:block;content:" ";float:right;width:0;height:0;border-color:transparent;border-style:solid;border-width:5px 0 5px 5px;border-left-color:#cccccc;margin-top:5px;margin-right:-10px;}
+.dropdown-submenu:active>a:after{border-left-color:#ffffff;}
+.dropdown-submenu.pull-left{float:none;}.dropdown-submenu.pull-left>.dropdown-menu{left:-100%;margin-left:10px;-webkit-border-radius:6px 0 6px 6px;-moz-border-radius:6px 0 6px 6px;border-radius:6px 0 6px 6px;}
+
+
+
 .attackercallout {
     width: 120px;
     height: 160px;
@@ -140,7 +165,6 @@ caption, legend {
     background-color: rgba(245,245,245,.7)
 }
 
-
 /*bootstrap overrides*/
 
 .btn {
@@ -175,16 +199,9 @@ input[type="search"] {
 }
 
 td{
-    color:white;
+  color:white;
 }
 
-.brightURL{
-    color:white;
-}
-
-.brightURL:hover{
-    color:white;
-}
 
 .welcome {
     text-align: center;
@@ -195,7 +212,7 @@ td{
 }
 
 
-/*login ui css to hide the local account/password signup options */
+/* uncomment this login ui css to hide the local account/password signup options 
 .logins-wrapper .svgtextlabel {
   font-size: 20px;
   color: white;
@@ -212,6 +229,11 @@ td{
 
 .or {
   display: none;
+}
+*/
+/* don't float the 'create account' link*/
+#login-buttons #signup-link{
+    float: none;
 }
 
 /* d3 circle styles */
@@ -515,5 +537,51 @@ circle:hover{
     padding: 8px 10px;
 }
 
+.vr-sidenav {
+    color: white;
+}
 
+.vr-sidenav .filter-radios label:nth-child(1) {
+    margin-top: 5px;
+}
 
+.vr-sidenav .filter-radios label {
+    display: block;
+    text-align: left;
+    padding-left: 33%;
+}
+
+.vr-sidenav #specific-attack-details {
+    display: none;
+}
+
+.vr-sidenav .back-button {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    color: white;
+    font-size: 18px;
+}
+
+.vr-sidenav .back-button:hover {
+    cursor: pointer;
+}
+
+.vr-sidenav #attacks-list {
+    list-style: none;
+    color: white;
+    margin-left: -40px;
+}
+
+.vr-sidenav #attacks-list .attacks-list-item {
+    padding: 5px;
+}
+
+.vr-sidenav #attacks-list .attacks-list-item:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.mousepointer {
+    cursor: pointer;
+}

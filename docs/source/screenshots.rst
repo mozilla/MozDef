@@ -61,6 +61,14 @@ to quickly filter attackers by category or timeframe and get easy access to rece
 
 .. image:: images/AttackerOgres.png
 
+3D interactive Attack visualization via Landmass
+-------------------------------------
+MozDef has a service-oriented visualization where you will get see various animations on a landmass service wise.
+There are also options for handling attacks, and a sidebar which gives you detailed info into the attacks
+
+
+.. image:: images/AttacksLandmass.png
+
 Demo Instance
 =============
 

@@ -7,7 +7,7 @@ Copyright (c) 2014 Mozilla Corporation
 Contributors:
 Jeff Bryner jbryner@mozilla.com
 Anthony Verez averez@mozilla.com
-
+Yash Mehrotra yashmehrotra95@gmail.com
 */
 
 //collections shared by client/server
@@ -197,6 +197,15 @@ if (Meteor.isServer) {
                             },
                        sort: {lastseentimestamp: -1},
                        limit:100});
+    });
+
+    Meteor.publish("attackers-summary-landmass", function () {
+        //limit to the last 100 records by default
+        //to ease the sync transfer to dc.js/crossfilter
+        var inModifier = { $in: ["broxss", "brotunnel", "brosqli"]};
+        return attackers.find({"events.documentsource.category": inModifier},
+                              {sort: {lastseentimestamp: -1},
+                               limit: 100});
     });
 
     Meteor.publish("investigations-summary", function () {

@@ -186,4 +186,10 @@ Router.map(function () {
        template:'veristags',
        layoutTemplate: 'layout'
     });
+
+    this.route('vr', {
+        path: '/landmass',
+        template: 'vr',
+        layoutTemplate: 'layout'
+    });
 });

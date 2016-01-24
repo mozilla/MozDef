@@ -6,6 +6,7 @@ Copyright (c) 2014 Mozilla Corporation
 
 Contributors:
 Jeff Bryner jbryner@mozilla.com
+Avijit Gupta 526avijit@gmail.com
 */
 if (Meteor.isServer) {
 
@@ -20,7 +21,8 @@ if (Meteor.isServer) {
         'ipintel': ipintel,
         'verisstats': verisstats,
         'logincounts': logincounts,
-        'getplugins': getplugins
+        'getplugins': getplugins,
+        'getVrJson': getVrJson
     });
 
     function saySomething() {
@@ -145,5 +147,10 @@ if (Meteor.isServer) {
             var response = HTTP.get(mozdef.rootAPI + '/plugins/' + endpoint);
         }
         return response
+    }
+
+    function getVrJson() {
+        var response = Assets.getText('vr.config.json');
+        return response;
     }
 };
