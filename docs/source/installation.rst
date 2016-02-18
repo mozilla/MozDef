@@ -239,7 +239,7 @@ Then::
 
   cd /home/mozdef
 
-  wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+  wget https://bootstrap.pypa.io/get-pip.py
   export LD_LIBRARY_PATH=/home/mozdef/python2.7/lib/
   ./python2.7/bin/python get-pip.py
   ./python2.7/bin/pip install virtualenv
