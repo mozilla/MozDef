@@ -11,7 +11,7 @@ glob2==0.4.1
 kombu==3.0.21
 pika==0.9.13
 pyelasticsearch==0.6.1
-pyes==0.90.1
+pyes==0.99.6
 pymongo==2.6.3
 python-dateutil==2.2
 pytz==2013.9
