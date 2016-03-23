@@ -27,7 +27,7 @@ class message(object):
         '''
         self.registration = ['sourceipaddress', 'destinationipaddress']
         self.priority = 20
-        self.geoip = pygeoip.GeoIP('/home/mozdef/envs/mozdef/bot/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
+        self.geoip = pygeoip.GeoIP('/home/mozdef/envs/mozdef/mq/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
 
     def ipLocation(self, ip):
         location = dict()
