@@ -169,7 +169,7 @@ def formatAlert(jsonDictIn):
     return colorify('{0}: {1} {2}'.format(severity, colors['blue']
                                           + category
                                           + colors['normal'],
-                                          summary))
+                                          summary.encode('ascii', 'replace')))
 
 
 class mozdefBot():
