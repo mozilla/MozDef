@@ -20,6 +20,7 @@ import pytz
 import random
 import select
 import sys
+import time
 import threading
 from configlib import getConfig, OptionParser
 from datetime import datetime
@@ -169,7 +170,7 @@ def formatAlert(jsonDictIn):
     return colorify('{0}: {1} {2}'.format(severity, colors['blue']
                                           + category
                                           + colors['normal'],
-                                          summary))
+                                          summary.encode('ascii', 'replace')))
 
 
 class mozdefBot():
@@ -292,6 +293,7 @@ class alertConsumer(ConsumerMixin):
         self.alertQueue = alertQueue
         self.alertExchange = alertExchange
         self.ircBot = ircBot
+        self.lastalert = None
         ircBot.mqConsumer = self
 
 
@@ -328,6 +330,15 @@ class alertConsumer(ConsumerMixin):
                 if bodyDict['ircchannel'] in options.join.split(","):
                     ircchannel = bodyDict['ircchannel']
 
+            # see if we need to delay a bit before sending the alert, to avoid
+            # flooding the channel
+            if self.lastalert != None:
+                delta = toUTC(datetime.now()) - self.lastalert
+                sys.stdout.write('new alert, delta since last is {}\n'.format(delta))
+                if delta.seconds < 2:
+                    sys.stdout.write('throttling before writing next alert\n')
+                    time.sleep(1)
+            self.lastalert = toUTC(datetime.now())
             self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
 
             message.ack()
