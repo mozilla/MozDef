@@ -339,6 +339,9 @@ class alertConsumer(ConsumerMixin):
                     sys.stdout.write('throttling before writing next alert\n')
                     time.sleep(1)
             self.lastalert = toUTC(datetime.now())
+            if len(bodyDict['summary']) > 450:
+                sys.stdout.write('alert is more than 450 bytes, truncating\n')
+                bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
             self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
 
             message.ack()
