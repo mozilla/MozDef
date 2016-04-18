@@ -68,7 +68,7 @@ class AlertUnauthSSH(AlertTask):
                 sourceipaddress = x['details']['sourceipaddress']
 
         targetuser = 'unknown'
-        expr = re.compile('Accepted publickey for ([A-Za-z0-9]+) from')
+        expr = re.compile('Accepted publickey for ([A-Za-z0-9@.\-]+) from')
         m = expr.match(event['_source']['summary'])
         groups = m.groups()
         if len(groups) > 0:
