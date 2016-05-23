@@ -1,3 +1,16 @@
+category.unauthorized access
+category.data disclosure
+category.data corruption
+category.denial of service
+category.lost or stolen device
+category.unauthorized use
+category.malware
+category.widespread vulnerability
+category.defacement
+category.fraud
+category.abuse
+category.application compromise
+category.other
 impact.loss.rating.Major
 impact.loss.rating.Moderate
 impact.loss.rating.Minor
