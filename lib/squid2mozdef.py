@@ -47,7 +47,7 @@ class MozDefEvent():
     # Turns off needless and repetitive .netrc check for creds
     httpsession.trust_env = False
     debug = False
-    verify_certificate = True
+    verify_certificate = '/etc/ssl/certs/ca-bundle.crt'
     # Never fail (ie no unexcepted exceptions sent to user, such as server/network not responding)
     fire_and_forget_mode = True
     log = {}
