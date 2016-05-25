@@ -7,6 +7,7 @@
 
 # Contributor: gdestuynder@mozilla.com
 # Contributor: jbryner@mozilla.com
+# Contributor: jclaudius@mozilla.com
 
 import copy
 import os
