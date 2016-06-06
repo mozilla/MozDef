@@ -428,8 +428,8 @@ We use `uwsgi`_ to interface python and nginx::
   mkdir ~/envs/mozdef/logs
 
   cd ~/envs/mozdef/rest
-  # modify settings.py
-  vim settings.py
+  # modify config file
+  vim index.conf
   # modify uwsgi.ini
   vim uwsgi.ini
   uwsgi --ini uwsgi.ini
