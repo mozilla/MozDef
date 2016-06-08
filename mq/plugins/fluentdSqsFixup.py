@@ -97,6 +97,10 @@ class message(object):
             # Unknown really, but this field is mandatory.
             if not 'severity' in message.keys(): message['severity'] = 'INFO'
 
+        # We already have the time of event stored in 'timestamp' so we don't need 'time'
+        if 'time' in details.keys():
+          details.pop('time')
+
         return (message, metadata)
 
 class MessageTestFunctions(unittest.TestCase):
@@ -189,12 +193,16 @@ class MessageTestFunctions(unittest.TestCase):
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg['_source'], metadata)
         self.assertEqual(retmessage['category'], 'syslog')
         self.assertEqual(retmessage['details']['program'], 'sshd')
+        with self.assertRaises(KeyError):
+          retmessage['details']['time']
 
     def test_onMessageGeneric(self):
         metadata = {}
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg2['_source'], metadata)
         self.assertEqual(retmessage['category'], 'syslog')
         self.assertEqual(retmessage['hostname'], 'ip-10-162-17-177')
+        with self.assertRaises(KeyError):
+          retmessage['details']['time']
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
