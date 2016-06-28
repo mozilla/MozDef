@@ -18,7 +18,7 @@ class AlertBroIntel(AlertTask):
         # Configure filters using pyes
         must = [
             pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('category', 'bro_intel'),
+            pyes.TermFilter('category', 'brointel'),
             pyes.ExistsFilter('seenindicator')
         ]
         self.filtersManual(date_timedelta, must=must)

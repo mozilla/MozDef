@@ -38,7 +38,7 @@
         "1": {
           "type": "querystring",
           "field": "category",
-          "query": "bro_intel",
+          "query": "brointel",
           "mandate": "must",
           "active": true,
           "alias": "",
