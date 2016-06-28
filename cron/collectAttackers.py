@@ -70,7 +70,7 @@ def toUTC(suspectedDate, localTimeZone=None):
     utc = pytz.UTC
     objDate = None
     if localTimeZone is None:
-        localTimeZone=options.defaulttimezone    
+        localTimeZone=options.defaulttimezone
     if type(suspectedDate) in (str, unicode):
         objDate = parse(suspectedDate, fuzzy=True)
     elif type(suspectedDate) == datetime:
@@ -135,7 +135,7 @@ def searchESForBROAttackers(es, threshold):
     enddateUTC = toUTC(datetime.now())
     qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
     q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    qBro = pyes.QueryFilter(pyes.MatchQuery('category', 'bro_notice', 'phrase'))
+    qBro = pyes.QueryFilter(pyes.MatchQuery('category', 'bronotice', 'phrase'))
     qErr = pyes.QueryFilter(pyes.MatchQuery('details.note', 'MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker', 'phrase'))
     q = pyes.FilteredQuery(q, pyes.BoolFilter(must=[qBro, qErr]))
 
@@ -143,7 +143,7 @@ def searchESForBROAttackers(es, threshold):
     # grab results as native es results to avoid pyes iteration bug
     # and get easier access to es metadata fields
     rawresults = results._search_raw()['hits']['hits']
-    
+
     # Hit count is buried in the 'sub' field
     # as: 'sub': u'6 in 1.0 hr, eps: 0'
     # cull the records for hitcounts over the threshold before returning
@@ -159,7 +159,7 @@ def searchMongoAlerts(mozdefdb):
     alerts=mozdefdb['alerts']
     # search the last X alerts for IP addresses
     # aggregated by CIDR mask/24
-    
+
     # aggregate IPv4 addresses in the most recent alerts
     # to find common attackers.
     ipv4TopHits = alerts.aggregate([
@@ -172,7 +172,7 @@ def searchMongoAlerts(mozdefdb):
                      "sourceip":"$events.documentsource.details.sourceipaddress"}}, #emit the source ip only
         {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}}, # count by ip
         {"$match":{"hitcount":{"$gt":5}}}, # limit to those with X observances
-        {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort 
+        {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort
         {"$limit": 10} # top 10
         ])
     for ip in ipv4TopHits['result']:
@@ -183,7 +183,7 @@ def searchMongoAlerts(mozdefdb):
             # todo: lookup ipwhois for asn_cidr value
             # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
             ipcidr.prefixlen = 24
-    
+
             # append to or create attacker.
             # does this match an existing attacker's indicators
             if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
@@ -214,7 +214,7 @@ def searchMongoAlerts(mozdefdb):
                             # update alert with attackerID
                             alert['attackerid'] = newAttacker['_id']
                             alerts.save(alert)
-                            
+
                             #add the events from this alert:
                             #add the events from this alert:
                             for e in alert['events']:
@@ -230,7 +230,7 @@ def searchMongoAlerts(mozdefdb):
                          str(ipcidr.ip),
                          })][-1][0]['documentsource']
                     updateAttackerGeoIP(mozdefdb, newAttacker['_id'], latestGeoIP)
-                    
+
                     if options.broadcastattackers:
                         broadcastAttacker(newAttacker)
 
@@ -248,7 +248,7 @@ def searchMongoAlerts(mozdefdb):
                     if matchingalerts is not None:
                         #attacker['eventscount'] = len(attacker['events'])
                         logger.debug('matched alert with attacker')
-                        
+
                         # update list of alerts this attacker matched.
                         for alert in matchingalerts:
                             attacker['alerts'].append(
@@ -260,11 +260,11 @@ def searchMongoAlerts(mozdefdb):
                             #add the events from this alert:
                             for e in alert['events']:
                                 attacker['events'].append(e)
-                            
+
                             # geo ip could have changed, update it
                             # to the latest
                             updateAttackerGeoIP(mozdefdb, attacker['_id'], alert['events'][-1]['documentsource'])
-                        
+
                         # update last seen time
                         attacker['lastseentimestamp'] = toUTC(attacker['events'][-1]['documentsource']['utctimestamp'], 'UTC')
                         # update counts
@@ -273,7 +273,7 @@ def searchMongoAlerts(mozdefdb):
                         attackers.save(attacker)
 
                     # should we autocategorize the attacker
-                    # based on their alerts? 
+                    # based on their alerts?
                     if attacker['category'] == 'unknown' and options.autocategorize:
                         # take a look at recent alerts for this attacker
                         # and if they are all the same category
@@ -292,8 +292,8 @@ def searchMongoAlerts(mozdefdb):
                                 if category.keys()[0] == categoryCounts[0][0]:
                                     attacker['category'] = category[category.keys()[0]]
                                     attackers.save(attacker)
-                                    
-                        
+
+
 def broadcastAttacker(attacker):
     '''
     send this attacker info to our message queue
@@ -316,17 +316,17 @@ def broadcastAttacker(attacker):
             durable=True)
         alertExchange(mqConn).declare()
         mqproducer = mqConn.Producer(serializer='json')
-        
+
         logger.debug('Kombu configured')
     except Exception as e:
         logger.error('Exception while configuring kombu for alerts: {0}'.format(e))
     try:
         # generate an 'alert' structure for this attacker:
         mqAlert = dict(severity='NOTICE', category='attacker')
-    
+
         if 'datecreated' in attacker.keys():
             mqAlert['utctimestamp'] = attacker['datecreated'].isoformat()
-    
+
         mqAlert['summary'] = 'New Attacker: {0} events: {1}, alerts: {2}'.format(attacker['indicators'], attacker['eventscount'], attacker['alertscount'])
         logger.debug(mqAlert)
         ensurePublish = mqConn.ensure(
@@ -338,7 +338,7 @@ def broadcastAttacker(attacker):
             routing_key=options.routingkey)
     except Exception as e:
         logger.error('Exception while publishing attacker: {0}'.format(e))
-        
+
 
 def genNewAttacker():
     newAttacker = dict()
@@ -358,7 +358,7 @@ def genNewAttacker():
     newAttacker['attackphase'] = 'unknown'
     newAttacker['datecreated'] = toUTC(datetime.now())
     newAttacker['creator'] = sys.argv[0]
-    
+
     return newAttacker
 
 def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
@@ -400,8 +400,8 @@ def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
     else:
         logger.debug('no details in the dictionary')
         logger.debug(eventDictionary)
-                
-    
+
+
 
 def updateMongoWithESEvents(mozdefdb, results):
     attackers=mozdefdb['attackers']
@@ -412,14 +412,14 @@ def updateMongoWithESEvents(mozdefdb, results):
                 # expand it to a /24 CIDR
                 # todo: lookup ipwhois for asn_cidr value
                 # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
-                sourceIP.prefixlen = 24                
+                sourceIP.prefixlen = 24
                 if not sourceIP.ip.is_loopback() and not sourceIP.ip.is_private() and not sourceIP.ip.is_reserved():
                     esrecord = dict(documentid=r['_id'],
                          documenttype=r['_type'],
                          documentindex=r['_index'],
                          documentsource=r['_source'],
                          read=False)
-                
+
                     logger.debug('searching for ' + str(sourceIP))
                     #attacker = attackers.find_one({'events.details.sourceipaddress': str(sourceIP.ip)})
                     attacker = attackers.find_one({'indicators.ipv4address': str(sourceIP)})
@@ -450,7 +450,7 @@ def updateMongoWithESEvents(mozdefdb, results):
                              'events.documenttype': r['_type'],
                              'events.documentindex': r['_index']
                              })
-                        if matchingevent is None: 
+                        if matchingevent is None:
                             attacker['events'].append(esrecord)
                             attacker['eventscount'] = len(attacker['events'])
                             logger.debug('new event found for matching attacker')
@@ -496,13 +496,13 @@ def initConfig():
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
     # should we automatically categorize
-    # new attackers based on their alerts? 
+    # new attackers based on their alerts?
     options.autocategorize = getConfig('autocategorize', False, options.configfile)
     # get the mapping of alert category to attacker category
-    # supply as a list of dicts: 
+    # supply as a list of dicts:
     # [{"bruteforce":"bruteforcer"},{"alertcategory":"attackercategory"}]
     options.categorymapping = json.loads(getConfig('categorymapping', "[]", options.configfile))
-    
+
     # should we broadcast new attackers
     # to a message queue?
     options.broadcastattackers = getConfig('broadcastattackers', False, options.configfile)

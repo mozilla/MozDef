@@ -1,6 +1,6 @@
 [
   {
-    "category": "bro_notice",
+    "category": "bronotice",
     "processid": "0",
     "severity": "NOTICE",
     "tags": ["nsm","bro","intel"],
