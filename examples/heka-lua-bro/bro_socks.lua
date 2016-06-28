@@ -16,7 +16,7 @@ local elem = lpeg.C((1-sep)^0)
 local grammar = -lpeg.P"#" * lpeg.Ct(elem * (sep * elem)^0) -- ignore comment, split on tabs, return as table
 
 local msg = {
-    Type = "bro_socks",
+    Type = "brosocks",
     Logger = "nsm",
     Fields = {
         -- Initializing our fields
@@ -38,7 +38,7 @@ local msg = {
         ['summary'] = nil,
         summary = nil,
         severity = "INFO",
-        category = "bro_socks",
+        category = "brosocks",
         tags = "nsm,bro,socks"
     }
 }
