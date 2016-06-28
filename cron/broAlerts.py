@@ -30,7 +30,7 @@ def initLogger():
     logger.level=logging.INFO
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     formatter.formatTime = loggerTimeStamp
-    if options.output=='syslog':    
+    if options.output=='syslog':
         logger.addHandler(SysLogHandler(address=(options.sysloghostname,options.syslogport)))
     else:
         sh=logging.StreamHandler(sys.stderr)
@@ -45,7 +45,7 @@ def toUTC(suspectedDate,localTimeZone="US/Pacific"):
         objDate=parse(suspectedDate,fuzzy=True)
     elif type(suspectedDate)==datetime:
         objDate=suspectedDate
-    
+
     if objDate.tzinfo is None:
         objDate=pytz.timezone(localTimeZone).localize(objDate)
         objDate=utc.normalize(objDate)
@@ -53,7 +53,7 @@ def toUTC(suspectedDate,localTimeZone="US/Pacific"):
         objDate=utc.normalize(objDate)
     if objDate is not None:
         objDate=utc.normalize(objDate)
-        
+
     return objDate
 
 def flattenDict(dictIn):
@@ -68,7 +68,7 @@ def alertToMessageQueue(alertDict):
         channel = connection.channel()
         #declare the exchanges
         channel.exchange_declare(exchange=options.alertexchange,type='topic', durable=True)
-        
+
         #cherry pick items from the alertDict to send to the alerts messageQueue
         mqAlert=dict(severity='INFO',category='')
         if 'severity' in alertDict.keys():
@@ -80,7 +80,7 @@ def alertToMessageQueue(alertDict):
         if 'eventtimestamp' in alertDict.keys():
             mqAlert['eventtimestamp']=alertDict['eventtimestamp']
         mqAlert['summary']=alertDict['summary']
-        channel.basic_publish(exchange=options.alertexchange,routing_key=options.alertqueue,body=json.dumps(mqAlert))    
+        channel.basic_publish(exchange=options.alertexchange,routing_key=options.alertqueue,body=json.dumps(mqAlert))
     except Exception as e:
         logger.error('Exception while sending alert to message queue: {0}'.format(e))
 
@@ -93,7 +93,7 @@ def alertToES(es,alertDict):
 
 def esBroIntelEvents():
     begindateUTC= toUTC(datetime.now() - timedelta(minutes=30))
-    enddateUTC= toUTC(datetime.now())        
+    enddateUTC= toUTC(datetime.now())
     #search for events within the date range that haven't already been alerted (i.e. given an alerttimestamp)
     qDate=pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',from_value=begindateUTC,to_value=enddateUTC))
     qType=pyes.TermFilter('_type','event')
@@ -101,7 +101,7 @@ def esBroIntelEvents():
     qalerted=pyes.ExistsFilter('alerttimestamp')
     q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
     q.filters.append(pyes.BoolFilter(
-        must=[qType, 
+        must=[qType,
               qDate,
               qEvents,
               pyes.ExistsFilter('seenindicator')
@@ -117,11 +117,11 @@ def esBroXSSEvents():
     enddateUTC= toUTC(datetime.now())
     qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
     qType = pyes.TermFilter('_type', 'event')
-    qEvents = pyes.TermFilter("category","bro_xss_log")
+    qEvents = pyes.TermFilter("category","broxsslog")
     qalerted = pyes.ExistsFilter('alerttimestamp')
     q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
     q.filters.append(pyes.BoolFilter(
-        must=[qType, 
+        must=[qType,
               qDate,
               qEvents,
               pyes.ExistsFilter('uri')
@@ -161,7 +161,7 @@ def esRunSearch(es, query, aggregateField, detailLimit=5):
         return indicatorList
 
     except pyes.exceptions.NoServerAvailable:
-        logger.error('Elastic Search server could not be reached, check network connectivity')  
+        logger.error('Elastic Search server could not be reached, check network connectivity')
 
 
 def createAlerts(es, indicatorCounts, threshold, description):
@@ -195,14 +195,14 @@ def createAlerts(es, indicatorCounts, threshold, description):
                         # append the relevant events in text format to avoid errant ES issues.
                         # should be able to just set eventsource to i['events'] but different versions of ES 1.0 complain
                         alert['eventsource'].append(flattenDict(e))
-    
+
                     logger.debug(alert['summary'])
                     logger.debug(alert['events'])
                     logger.debug(alert)
-    
+
                     # save alert to alerts index, update events index with alert ID for cross reference
                     alertResult = alertToES(es, alert)
-    
+
                     ##logger.debug(alertResult)
                     # for each event in this list of indicatorCounts
                     # update with the alertid/index
@@ -212,13 +212,13 @@ def createAlerts(es, indicatorCounts, threshold, description):
                             e['_source']['alerts'] = []
                         e['_source']['alerts'].append(dict(index=alertResult['_index'], type=alertResult['_type'], id=alertResult['_id']))
                         e['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
-    
+
                         es.update(e['_index'], e['_type'], e['_id'], document=e['_source'])
-    
+
                     alertToMessageQueue(alert)
     except ValueError as e:
         logger.error("Exception %r when creating alerts " % e)
-        
+
 def main():
     logger.debug('starting')
     logger.debug(options)
@@ -226,14 +226,14 @@ def main():
     # search for brointel
     #indicatorCounts=esSearch(es)
     #createAlerts(es,indicatorCounts)
-    
+
     indicatorCounts=esRunSearch(es,esBroIntelEvents(),'seenindicator', 50)
     createAlerts(es,indicatorCounts, 5, 'bro intel match')
-    
+
     # search for xss events
     indicatorCounts=esRunSearch(es,esBroXSSEvents(),'cluster_client_ip', 50)
-    createAlerts(es,indicatorCounts, 5, 'bro xss')    
-    
+    createAlerts(es,indicatorCounts, 5, 'bro xss')
+
     logger.debug('finished')
 
 def initConfig():
@@ -249,7 +249,7 @@ def initConfig():
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
     #elastic search server settings
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
-    
+
 if __name__ == '__main__':
     parser=OptionParser()
     parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
