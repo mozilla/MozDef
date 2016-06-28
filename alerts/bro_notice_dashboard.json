@@ -38,7 +38,7 @@
         "1": {
           "type": "field",
           "field": "category",
-          "query": "\"bro_notice\"",
+          "query": "\"bronotice\"",
           "mandate": "must",
           "active": true,
           "alias": "",
