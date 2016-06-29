@@ -73,8 +73,8 @@ class message(object):
                     if 'destinationipv4address' not in details.keys():
                         details['destinationipv4address'] = ipText
                 else:
-                    details['destionationipaddress'] = '0.0.0.0'
-                    details['destionationipv4address'] = '0.0.0.0'
+                    details['destinationipaddress'] = '0.0.0.0'
+                    details['destinationipv4address'] = '0.0.0.0'
                     addError(message, 'plugin: {0} error: {1}:{2}'.format('fluentSqsFixUp.py', 'destinationipaddress is invalid', ipText))
             if not 'hostname' in message.keys(): message['hostname'] = tmp
 
