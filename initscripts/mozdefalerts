@@ -9,7 +9,7 @@
 #
 # Author:       Jeff Bryner < jbryner@mozilla.com> based off Mike McGrath <mmcgrath@redhat.com> (based off yumupdatesd)
 #
-# chkconfig:	- 95 04
+# chkconfig:    - 95 04
 #
 # description:  supervisor is a process control utility.  It has a web based
 #               xmlrpc interface as well as a few other nifty features.
@@ -21,49 +21,60 @@
 . /etc/rc.d/init.d/functions
 
 RETVAL=0
+NAME=supervisord
+PROCNAME=mozdefalerts
+DAEMON_PATH="/home/mozdef/envs/mozdef/bin/supervisord"
 source /home/mozdef/envs/mozdef/bin/activate
-DAEMON_OPTS="-c /home/mozdef/envs/mozdef/alerts/supervisord.alerts.conf $DAEMON_OPTS"
+#DAEMON_OPTS="-c /home/mozdef/envs/mozdef/initscripts/supervisord.alerts.conf $DAEMON_OPTS"
+DAEMON_OPTS="-c /home/mozdef/envs/mozdef/alerts/supervisord.alerts.conf ${DAEMON_OPTS}"
+PIDFILE="/home/mozdef/envs/mozdef/alerts/plugins/${NAME}.pid"
+LOCK_FILE="/var/lock/subsys/mozdefalerts"
 
 start() {
-	echo -n $"Starting supervisord: "
-	daemon supervisord $DAEMON_OPTS
-	RETVAL=$?
-	echo
-	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/mozdefalerts
+    echo -n $"Starting ${PROCNAME}: "
+    daemon ${DAEMON_PATH} ${DAEMON_OPTS}
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch ${LOCK_FILE}
+    return $RETVAL
 }
 
 stop() {
-	echo -n $"Stopping supervisord: "
-	killproc supervisord
-	echo
-	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/mozdefalerts
+    echo -n $"Stopping ${PROCNAME}: "
+    echo
+    echo -n $"Stopping supervisord child process: "
+    killproc -p ${PIDFILE}
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f ${LOCK_FILE}
+return $RETVAL
 }
 
 restart() {
-	stop
-	start
+    stop
+    start
 }
 
 case "$1" in
   start)
-	start
-	;;
-  stop) 
-	stop
-	;;
+    start
+    ;;
+  stop)
+    stop
+    ;;
   restart|force-reload|reload)
-	restart
-	;;
+    restart
+    ;;
   condrestart)
-	[ -f /var/lock/subsys/supervisord ] && restart
-	;;
+    [ -f /var/lock/subsys/supervisord ] && restart
+    ;;
   status)
-	status supervisord
-	RETVAL=$?
-	;;
+    status supervisord
+    RETVAL=$?
+    ;;
   *)
-	echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
-	exit 1
+    echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+    exit 1
 esac
 
 exit $RETVAL
