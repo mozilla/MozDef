@@ -52,7 +52,7 @@ def toUTC(suspectedDate, localTimeZone=None):
     utc = pytz.UTC
     objDate = None
     if localTimeZone is None:
-        localTimeZone=options.defaulttimezone    
+        localTimeZone=options.defaulttimezone
     if type(suspectedDate) in (str, unicode):
         objDate = parse(suspectedDate, fuzzy=True)
     elif type(suspectedDate) == datetime:
@@ -70,9 +70,16 @@ def toUTC(suspectedDate, localTimeZone=None):
 
 def aggregateIPs(attackers):
     iplist=[]
+
+    # We don't want to block ips forever,
+    # so only care about the ips the past 7 days
+    threshold_days = 7
+    timelimit = datetime.now() - timedelta(days=threshold_days)
+
     ips=attackers.aggregate([
         {"$sort": {"lastseentimestamp":-1}},
         {"$match": {"category":options.category}},
+        {"$match": {"lastseentimestamp":{"$gte" : timelimit}}},
         {"$match": {"indicators.ipv4address":{"$exists": True}}},
         {"$group": {"_id": {"ipv4address":"$indicators.ipv4address"}}},
         {"$unwind": "$_id.ipv4address"},
@@ -92,7 +99,7 @@ def aggregateIPs(attackers):
 
                 #strip any host bits 192.168.10/24 -> 192.168.0/24
                 ipcidrnet=str(ipcidr.cidr)
-                if ipcidrnet not in iplist and not whitelisted: 
+                if ipcidrnet not in iplist and not whitelisted:
                     iplist.append(ipcidrnet)
             else:
                 logger.debug('invalid:' + ip)
@@ -139,13 +146,13 @@ def initConfig():
     options.ipwhitelist = list()
     for i in list(getConfig('ipwhitelist', '127.0.0.1/32', options.configfile).split(',')):
         options.ipwhitelist.append(netaddr.IPNetwork(i))
-    
+
     # Output File Name
     options.outputfile = getConfig('outputfile', 'ipblocklist.txt', options.configfile)
-    
+
     # Category to choose
     options.category = getConfig('category', 'bruteforcer', options.configfile)
-    
+
     # Max IPs to emit
     options.iplimit = getConfig('iplimit', 1000, options.configfile)
 
