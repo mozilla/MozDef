@@ -11,6 +11,7 @@ from time import sleep
 import requests
 import dateutil.parser
 import datetime
+from dateutil.tz import tzlocal
 import json
 from requests_futures.sessions import FuturesSession
 
@@ -190,7 +191,7 @@ def searchforBind(line,bindDetails):
     for bindConn in bindConnre.findall(line):
         if '{0}:{1}:{2}'.format(bindConn[0],bindConn[1],bindConn[2]) not in bindDetails.keys():
             #a new bind transaction we've not seen with default values
-            bindDetails['{0}:{1}:{2}'.format(bindConn[0],bindConn[1],bindConn[2])]=dict(conn=bindConn[0],op=bindConn[1],dn=bindConn[2],errCode=None,result='unknown',ipAddress='0.0.0.0',eventtime=dateutil.parser.parse(line[:20],fuzzy=True).isoformat())
+            bindDetails['{0}:{1}:{2}'.format(bindConn[0],bindConn[1],bindConn[2])]=dict(conn=bindConn[0],op=bindConn[1],dn=bindConn[2],errCode=None,result='unknown',ipAddress='0.0.0.0',eventtime=dateutil.parser.parse(line[:20],fuzzy=True,tzinfos=tzlocal).isoformat())
 
 def searchforBindResult(line,bindDetails,linecache):
     '''match outstanding binds without results to any new RESULT lines'''
