@@ -48,7 +48,7 @@ is how you can specify servers in your elastic search cluster.
 ::
 
     [options]
-    defaulttimezone=US/Pacific
+    defaulttimezone=UTC
 
 is how you set the default timezone to something other than UTC
 

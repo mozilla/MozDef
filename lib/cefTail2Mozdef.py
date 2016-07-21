@@ -446,7 +446,7 @@ def initConfig():
     options.filemask=getConfig('filemask','*.log',options.configfile)
     options.urls=list(getConfig('urls','http://localhost:8080/cef/',options.configfile).split(','))
      #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
+    options.defaultTimeZone=getConfig('defaulttimezone','UTC',options.configfile)
     
 if __name__ == '__main__':
     parser=OptionParser()

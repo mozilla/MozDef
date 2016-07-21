@@ -374,7 +374,7 @@ def initConfig():
     options.output=getConfig('output','stdout',options.configfile)                      #output our log to stdout or syslog
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)   #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
+    options.defaultTimeZone=getConfig('defaulttimezone','UTC',options.configfile)
     options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to cloudtrail
     options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
