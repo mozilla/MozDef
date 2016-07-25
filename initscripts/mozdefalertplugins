@@ -10,12 +10,12 @@ gi - This script starts and stops uwsgi apps consuming plugins from the mozdef p
 . /etc/rc.d/init.d/functions
 
 # Source the virtual python environment with uwsgi
-source  /opt/mozdef/envs/mozdef/bin/activate
+source  /home/mozdef/envs/mozdef/bin/activate
 
 # all args are in the .ini file, restarts/quit/reload, etc via the fifo instead signalling the PID
-uwsgi="/opt/mozdef/envs/mozdef/bin/uwsgi"
+uwsgi="/home/mozdef/envs/mozdef/bin/uwsgi"
 prog=$(basename "$uwsgi")
-UWSGI_CONF_DIR="/opt/mozdef/envs/mozdef/alerts/"
+UWSGI_CONF_DIR="/home/mozdef/envs/mozdef/alerts/"
 
 each_action() {
     action=$1
@@ -196,7 +196,7 @@ case $1 in
         ;;
     *)
         echo "Usage: $0 {worker-reload|chain-reload|reload|stats|restart|start|status|stop}"
-        echo "Restart options in order of niceness: chain-reload,worker-reload,reload,restart"
+        echo "Restart homeions in order of niceness: chain-reload,worker-reload,reload,restart"
         exit 2
         ;;
 esac
