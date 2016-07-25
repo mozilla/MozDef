@@ -13,7 +13,7 @@ gi - This script starts and stops uwsgi apps consuming plugins from the mozdef p
 source  /opt/mozdef/envs/mozdef/bin/activate
 
 # all args are in the .ini file, restarts/quit/reload, etc via the fifo instead signalling the PID
-uwsgi="/opt/mozdef/envs/mozdef/bin/uwsgi"
+uwsgi="/home/mozdef/envs/mozdef/bin/uwsgi"
 prog=$(basename "$uwsgi")
 UWSGI_CONF_DIR="/opt/mozdef/envs/mozdef/alerts/"
 
