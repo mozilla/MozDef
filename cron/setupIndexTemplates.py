@@ -13,6 +13,7 @@
 # You only need to run it once, it will setup the templates
 # used as future indexes are created
 
+import requests
 import sys
 import os
 from configlib import getConfig, OptionParser
@@ -45,6 +46,6 @@ if __name__ == '__main__':
                       help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    es = es_module.ElasticsearchClient(options.esservers[0])
+    es = es_module.Elasticsearch(options.esservers[0])
     for templatename, templatefile in zip(options.templatenames, options.templatefiles):
         es.setupIndexTemplate(templatename, templatefile)
