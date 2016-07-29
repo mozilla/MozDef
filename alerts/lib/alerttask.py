@@ -82,6 +82,8 @@ def getValueByPath(input_dict, path_string):
 
 class AlertTask(Task):
 
+    abstract = True
+
     def __init__(self):
         self.alert_name = self.__class__.__name__
         self.filter = None
@@ -92,6 +94,8 @@ class AlertTask(Task):
         # List of aggregations
         # e.g. when aggregField is email: [{value:'evil@evil.com',count:1337,events:[...]}, ...]
         self.aggregations = None
+        # Array to store all alert ids
+        self.alert_ids = []
 
         self.log.debug('starting {0}'.format(self.alert_name))
         self.log.debug(RABBITMQ)
@@ -200,6 +204,12 @@ class AlertTask(Task):
             return res
         except Exception as e:
             self.log.error('Exception while pushing alert to ES: {0}'.format(e))
+
+    def saveAlertToSelf(self, saved_alert):
+        """
+        Save alert to self so we can analyze it later
+        """
+        self.alert_ids.append(saved_alert['_id'])
 
 
     def filtersManual(self, date_timedelta, must=[], should=[], must_not=[]):
@@ -381,6 +391,7 @@ class AlertTask(Task):
                     self.tagEventsAlert([i], alertResultES)
                     self.alertToMessageQueue(alert)
                     self.hookAfterInsertion(alert)
+                    self.saveAlertToSelf(alertResultES)
         # did we not match anything?
         # can also be used as an alert trigger
         if len(self.events) == 0:
@@ -390,6 +401,7 @@ class AlertTask(Task):
                 alertResultES = self.alertToES(alert)
                 self.alertToMessageQueue(alert)
                 self.hookAfterInsertion(alert)
+                self.saveAlertToSelf(alertResultES)
 
 
     def walkAggregations(self, threshold):
@@ -408,6 +420,7 @@ class AlertTask(Task):
                         # on events we've already processed.
                         self.tagEventsAlert(aggregation['allevents'], alertResultES)
                         self.alertToMessageQueue(alert)
+                        self.saveAlertToSelf(alertResultES)
 
 
     def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None):
