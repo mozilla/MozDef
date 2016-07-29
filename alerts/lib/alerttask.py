@@ -13,7 +13,6 @@ import collections
 import json
 import kombu
 import pytz
-import pyes
 
 from datetime import datetime
 from datetime import timedelta
@@ -22,6 +21,9 @@ from collections import Counter
 from celery import Task
 from celery.utils.log import get_task_logger
 from config import RABBITMQ, ES, OPTIONS
+
+from query_classes import *
+
 
 def toUTC(suspectedDate, localTimeZone=None):
     '''make a UTC date out of almost anything'''
@@ -132,10 +134,10 @@ class AlertTask(Task):
 
     def _configureES(self):
         """
-        Configure pyes for elasticsearch
+        Configure elasticsearch client
         """
         try:
-            self.es = pyes.ES(ES['servers'])
+            self.es = ESClient(ES['servers'])
             self.log.debug('ES configured')
         except Exception as e:
             self.log.error('Exception while configuring ES for alerts: {0}'.format(e))
@@ -202,7 +204,7 @@ class AlertTask(Task):
             self.log.error('Exception while pushing alert to ES: {0}'.format(e))
 
 
-    def filtersManual(self, date_timedelta, must=[], should=[], must_not=[]):
+    def filtersManual(self, query):
         """
         Configure filters manually
         date_timedelta is a dict in timedelta format
@@ -210,23 +212,24 @@ class AlertTask(Task):
         must, should and must_not are pyes filter objects lists
         see http://pyes.readthedocs.org/en/latest/references/pyes.filters.html
         """
-        self.begindateUTC = toUTC(datetime.now() - timedelta(**date_timedelta))
+
+        self.begindateUTC = toUTC(datetime.now() - timedelta(**query.date_timedelta))
         self.enddateUTC = toUTC(datetime.now())
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-            from_value=self.begindateUTC, to_value=self.enddateUTC))
-        q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
 
-        #Don't fire on already alerted events
-        if pyes.ExistsFilter('alerttimestamp') not in must_not:
-            must_not.append(pyes.ExistsFilter('alerttimestamp'))
+        qDate = RangeQuery(qrange=ESRange('utctimestamp', from_value=self.begindateUTC, to_value=self.enddateUTC))
 
-        must.append(qDate)
-        q.filters.append(pyes.BoolFilter(
-            must=must,
-            should=should,
-            must_not=must_not))
+        q = ConstantScoreQuery(MatchAllQuery())
+
+        # Don't fire on already alerted events
+        if ExistsFilter('alerttimestamp') not in query.must_not:
+            query.add_must_not(ExistsFilter('alerttimestamp'))
+
+        query.add_must(qDate)
+        q.filters.append(BoolFilter(
+            must=query.must,
+            should=query.should,
+            must_not=query.must_not))
         self.filter = q
-
 
     def filtersFromKibanaDash(self, fp, date_timedelta):
         """
@@ -255,39 +258,39 @@ class AlertTask(Task):
                     value = filt['query']
                     if '\"' in value:
                         value = value.split('\"')[1]
-                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, 'phrase'))
+                        esfilt = QueryFilter(MatchQuery(fieldname, value, 'phrase'))
                     else:
-                        pyesfilt = pyes.TermFilter(fieldname, value)
+                        esfilt = TermFilter(fieldname, value)
                 else:
                     # _exists_:field
                     if filt['query'].startswith('_exists_:'):
-                        pyesfilt = pyes.ExistsFilter(value.split('.')[-1])
+                        esfilt = ExistsFilter(value.split('.')[-1])
                         # self.log.info('exists %s' % value.split('.')[-1])
                     # _missing_:field
                     elif filt['query'].startswith('_missing_:'):
-                        pyesfilt = pyes.filters.MissingFilter(value.split('.')[-1])
+                        esfilt = MissingFilter(value.split('.')[-1])
                         # self.log.info('missing %s' % value.split('.')[-1])
                     # field:"value"
                     elif '\"' in value:
                         value = value.split('\"')[1]
-                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, 'phrase'))
+                        esfilt = QueryFilter(MatchQuery(fieldname, value, 'phrase'))
                         # self.log.info("phrase %s %s" % (fieldname, value))
                     # field:(value1 value2 value3)
                     elif '(' in value and ')' in value:
                         value = value.split('(')[1]
                         value = value.split('(')[0]
-                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, "boolean"))
+                        esfilt = QueryFilter(MatchQuery(fieldname, value, "boolean"))
                     # field:value
                     else:
-                        pyesfilt = pyes.TermFilter(fieldname, value)
+                        esfilt = TermFilter(fieldname, value)
                         # self.log.info("terms %s %s" % (fieldname, value))
 
                 if filt['mandate'] == 'must':
-                    must.append(pyesfilt)
+                    must.append(esfilt)
                 elif filt['mandate'] == 'either':
-                    should.append(pyesfilt)
+                    should.append(esfilt)
                 elif filt['mandate'] == 'mustNot':
-                    must_not.append(pyesfilt)
+                    must_not.append(esfilt)
         # self.log.info(must)
         f.close()
         self.filtersManual(date_timedelta, must=must, should=should, must_not=must_not)
@@ -298,11 +301,11 @@ class AlertTask(Task):
         Search events matching filters, store events in self.events
         """
         try:
-            pyesresults = self.es.search(
+            esresults = self.es.search(
                 self.filter,
                 size=1000,
                 indices='events,events-previous')
-            self.events = pyesresults._search_raw()['hits']['hits']
+            self.events = esresults._search_raw()['hits']['hits']
             self.log.debug(self.events)
         except Exception as e:
             self.log.error('Error while searching events in ES: {0}'.format(e))
@@ -322,11 +325,11 @@ class AlertTask(Task):
         ex: details.sourceipaddress
         """
         try:
-            pyesresults = self.es.search(
+            esresults = self.es.search(
                 self.filter,
                 size=1000,
                 indices='events,events-previous')
-            results = pyesresults._search_raw()['hits']['hits']
+            results = esresults._search_raw()['hits']['hits']
 
             # List of aggregation values that can be counted/summarized by Counter
             # Example: ['evil@evil.com','haxoor@noob.com', 'evil@evil.com'] for an email aggregField

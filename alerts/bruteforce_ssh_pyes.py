@@ -10,26 +10,28 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery
 
-class AlertBruteforceSsh(AlertTask):
+
+class AlertBruteforceSshES(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=2)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.QueryFilter(pyes.MatchQuery('summary','failed','phrase')),
-            pyes.TermFilter('program','sshd'),
-            pyes.QueryFilter(pyes.MatchQuery('summary', 'login invalid ldap_count_entries', 'boolean'))
-        ]
-        must_not = [
-            pyes.QueryFilter(pyes.MatchQuery('summary','10.22.75.203','phrase')),
-            pyes.QueryFilter(pyes.MatchQuery('summary','10.8.75.144','phrase'))
-        ]
-        self.filtersManual(date_timedelta, must=must, must_not=must_not)
+        search_query = SearchQuery(minutes=2)
+        search_query.add_musts([
+            TermFilter('_type', 'event'),
+            QueryFilter(MatchQuery('summary', 'failed', 'phrase')),
+            TermFilter('program', 'sshd'),
+            QueryFilter(MatchQuery('summary', 'login invalid ldap_count_entries', 'boolean')),
+        ])
 
-        # Search aggregations on field 'sourceipaddress', keep X samples of events at most
+        search_query.add_must_nots([
+            QueryFilter(MatchQuery('summary', '10.22.75.203', 'phrase')),
+            QueryFilter(MatchQuery('summary', '10.8.75.144', 'phrase'))
+        ])
+
+        self.filtersManual(search_query)
+
+        # Search aggregations on field 'sourceipaddress', keep X samples of
+        # events at most
         self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         self.walkAggregations(threshold=10)
@@ -43,8 +45,10 @@ class AlertBruteforceSsh(AlertTask):
         tags = ['ssh']
         severity = 'NOTICE'
 
-        summary = ('{0} ssh bruteforce attempts by {1}'.format(aggreg['count'], aggreg['value']))
-        hosts = self.mostCommon(aggreg['allevents'],'_source.details.hostname')
+        summary = ('{0} ssh bruteforce attempts by {1}'.format(
+            aggreg['count'], aggreg['value']))
+        hosts = self.mostCommon(
+            aggreg['allevents'], '_source.details.hostname')
         for i in hosts[:5]:
             summary += ' {0} ({1} hits)'.format(i[0], i[1])
 

@@ -13,17 +13,16 @@
 # this case a VPN certificate)
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, QueryFilter, MatchQuery
+
 
 class AlertDuoFailOpen(AlertTask):
     def main(self):
-        # look for events in last 15 mins
-        date_timedelta = dict(minutes=15)
-        # Configure filters using pyes
-        must = [
-            pyes.QueryFilter(pyes.MatchQuery('summary','Failsafe Duo login','phrase'))
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=15)
+
+        search_query.add_must(QueryFilter(MatchQuery('summary','Failsafe Duo login','phrase')))
+
+        self.filtersManual(search_query)
 
         # Search aggregations on field 'sourceipaddress', keep X samples of events at most
         self.searchEventsAggregated('details.hostname', samplesLimit=10)
