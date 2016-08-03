@@ -13,21 +13,22 @@
 # Alicia Smith <asmith@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery
+
 
 class AlertSFTPEvent(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=5)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'auditd'),
-            pyes.TermFilter('category', 'execve'),
-            pyes.TermFilter('processname', 'audisp-json'),
-            pyes.TermFilter('details.processname', 'ssh'),
-            pyes.QueryFilter(pyes.MatchQuery('details.parentprocess', 'sftp', 'phrase')),
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=5)
+
+        search_query.add_must([
+            TermFilter('_type', 'auditd'),
+            TermFilter('category', 'execve'),
+            TermFilter('processname', 'audisp-json'),
+            TermFilter('details.processname', 'ssh'),
+            QueryFilter(MatchQuery('details.parentprocess', 'sftp', 'phrase')),
+        ])
+
+        self.filtersManual(search_query)
         self.searchEventsSimple()
         self.walkEvents()
 

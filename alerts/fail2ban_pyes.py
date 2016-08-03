@@ -9,19 +9,20 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery
+
 
 class AlertFail2ban(AlertTask):
     def main(self):
-        # look for events in last 10 mins
-        date_timedelta = dict(minutes=10)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('program', 'fail2ban'),
-            pyes.QueryFilter(pyes.MatchQuery("summary","banned for","phrase"))
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=10)
+
+        search_query.add_must([
+            TermFilter('_type', 'event'),
+            TermFilter('program', 'fail2ban'),
+            QueryFilter(MatchQuery("summary","banned for","phrase"))
+        ])
+
+        self.filtersManual(search_query)
 
         # Search events
         self.searchEventsSimple()

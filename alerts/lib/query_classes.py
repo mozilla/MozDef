@@ -1,11 +1,20 @@
 import pyes
 
-
+# This file is to ease the transition from pyes to elasticsearch_dsl
+# eventually, this file should go away and move into a folder
 class TermFilter(pyes.TermFilter):
     pass
 
 
+class TermsFilter(pyes.TermsFilter):
+    pass
+
+
 class QueryFilter(pyes.QueryFilter):
+    pass
+
+
+class QueryStringQuery(pyes.QueryStringQuery):
     pass
 
 
@@ -45,6 +54,10 @@ class ESClient(pyes.ES):
     pass
 
 
+class WildcardQuery(pyes.WildcardQuery):
+    pass
+
+
 class SearchQuery():
     def __init__(self, *args, **kwargs):
         self.date_timedelta = dict(kwargs)
@@ -52,24 +65,23 @@ class SearchQuery():
         self.must_not = []
         self.should = []
 
-    def add_must(self, input_obj):
-        self.must.append(input_obj)
+    def append_to_array(self, in_array, in_obj):
+        """
+        Allow a list or a specific filter/query object to
+        get added to build a query
+        """
+        if isinstance(in_obj, list):
+            for key in in_obj:
+                in_array.append(key)
+        else:
+            in_array.append(in_obj)
 
-    def add_musts(self, input_obj):
-        for key in input_obj:
-            self.add_must(key)
+    def add_must(self, input_obj):
+        self.append_to_array(self.must, input_obj)
 
     def add_must_not(self, input_obj):
-        self.must_not.append(input_obj)
-
-    def add_must_nots(self, input_obj):
-        for key in input_obj:
-            self.add_must_not(key)
+        self.append_to_array(self.must_not, input_obj)
 
     def add_should(self, input_obj):
-        self.should.append(input_obj)
-
-    def add_shoulds(self, input_obj):
-        for key in input_obj:
-            self.add_should(key)
+        self.append_to_array(self.should, input_obj)
 

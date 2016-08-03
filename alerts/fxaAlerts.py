@@ -9,25 +9,27 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery, WildcardQuery
+
 
 class AlertAccountCreations(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=10)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('tags', 'firefoxaccounts'),
-            pyes.QueryFilter(pyes.MatchQuery('details.path','/v1/account/create','phrase'))
-        ]
-        #ignore test accounts and attempts to create accounts that already exist.
-        must_not = [
-            pyes.QueryFilter(pyes.WildcardQuery(field='details.email',value='*restmail.net')),
-            pyes.TermFilter('details.code','429')
+        search_query = SearchQuery(minutes=10)
 
-        ]
-        self.filtersManual(date_timedelta, must=must, must_not=must_not)
+        search_query.add_must([
+            TermFilter('_type', 'event'),
+            TermFilter('tags', 'firefoxaccounts'),
+            QueryFilter(MatchQuery('details.path','/v1/account/create','phrase'))
+
+        ])
+
+        #ignore test accounts and attempts to create accounts that already exist.
+        search_query.add_must_not([
+            QueryFilter(WildcardQuery(field='details.email',value='*restmail.net')),
+            TermFilter('details.code','429')
+        ])
+
+        self.filtersManual(search_query)
 
         # Search aggregations on field 'sourceipv4address', keep X samples of events at most
         self.searchEventsAggregated('details.sourceipv4address', samplesLimit=10)

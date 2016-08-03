@@ -9,22 +9,22 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+
 
 class AlertFailedAMOLogin(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=10)
-        # Configure filters
-        must = [
-            pyes.TermFilter('_type', 'addons'),
-            pyes.TermFilter('signatureid', 'authfail'),
-            pyes.ExistsFilter('details.sourceipaddress'),
-            pyes.QueryFilter(pyes.MatchQuery("msg","The password was incorrect","phrase")),
-            pyes.ExistsFilter('suser')
-        ]
+        search_query = SearchQuery(minutes=10)
 
-        self.filtersManual(date_timedelta, must=must)
+        search_query.add_must([
+            TermFilter('_type', 'addons'),
+            TermFilter('signatureid', 'authfail'),
+            ExistsFilter('details.sourceipaddress'),
+            QueryFilter(MatchQuery("msg","The password was incorrect","phrase")),
+            ExistsFilter('suser')
+        ])
+
+        self.filtersManual(search_query)
 
         # Search aggregations, keep X samples of events at most
         self.searchEventsAggregated('details.suser', samplesLimit=15)

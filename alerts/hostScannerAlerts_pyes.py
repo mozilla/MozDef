@@ -10,20 +10,20 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+
 
 class AlertHostScannerFinding(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=15)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'cef'),
-            pyes.ExistsFilter('details.dhost'),
-            pyes.QueryFilter(pyes.MatchQuery("signatureid","sensitivefiles","phrase"))
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=15)
 
+        search_query.add_must([
+            TermFilter('_type', 'cef'),
+            ExistsFilter('details.dhost'),
+            QueryFilter(MatchQuery("signatureid","sensitivefiles","phrase"))
+        ])
+
+        self.filtersManual(search_query)
         # Search aggregations on field 'sourceipaddress', keep X samples of events at most
         self.searchEventsAggregated('details.dhost', samplesLimit=30)
         # alert when >= X matching events in an aggregation

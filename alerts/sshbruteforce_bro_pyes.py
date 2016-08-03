@@ -9,21 +9,22 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+
 
 class AlertSSHManyConns(AlertTask):
     def main(self):
-        # look for events in last 15 mins
-        date_timedelta = dict(minutes=15)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'bro'),
-            pyes.TermFilter('eventsource', 'nsm'),
-            pyes.TermFilter('category', 'bronotice'),
-            pyes.ExistsFilter('details.sourceipaddress'),
-            pyes.QueryFilter(pyes.MatchQuery('details.note','SSH::Password_Guessing','phrase')),
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=15)
+
+        search_query.add_must([
+            TermFilter('_type', 'bro'),
+            TermFilter('eventsource', 'nsm'),
+            TermFilter('category', 'bronotice'),
+            ExistsFilter('details.sourceipaddress'),
+            QueryFilter(MatchQuery('details.note','SSH::Password_Guessing','phrase')),
+        ])
+
+        self.filtersManual(search_query)
 
         # Search events
         self.searchEventsSimple()

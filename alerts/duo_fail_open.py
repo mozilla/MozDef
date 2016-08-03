@@ -20,11 +20,13 @@ class AlertDuoFailOpen(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=15)
 
-        search_query.add_must(QueryFilter(MatchQuery('summary','Failsafe Duo login','phrase')))
+        search_query.add_must(QueryFilter(MatchQuery(
+            'summary', 'Failsafe Duo login', 'phrase')))
 
         self.filtersManual(search_query)
 
-        # Search aggregations on field 'sourceipaddress', keep X samples of events at most
+        # Search aggregations on field 'sourceipaddress', keep X samples of
+        # events at most
         self.searchEventsAggregated('details.hostname', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         # in this case, always
@@ -39,8 +41,8 @@ class AlertDuoFailOpen(AlertTask):
         tags = ['openvpn', 'duosecurity']
         severity = 'WARNING'
 
-        summary = 'DuoSecurity contact failed, fail open triggered on {0}'.format(aggreg['value'])
+        summary = 'DuoSecurity contact failed, fail open triggered on {0}'.format(aggreg[
+                                                                                  'value'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-

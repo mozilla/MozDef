@@ -12,18 +12,20 @@
 
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, ExistsFilter
+
 
 class AlertProxyDrop(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=5)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('category', 'squid'),
-            pyes.ExistsFilter('details.proxyaction'),
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=5)
+
+        search_query.add_must([
+            TermFilter('category', 'squid'),
+            ExistsFilter('details.proxyaction'),
+        ])
+
+        self.filtersManual(search_query)
+
         self.searchEventsSimple()
         self.walkEvents()
 

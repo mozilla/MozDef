@@ -9,21 +9,22 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, ExistsFilter
+
 
 class AlertSSLBlacklistHit(AlertTask):
     def main(self):
-        # look for events in last 15 mins
-        date_timedelta = dict(minutes=15)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'bro'),
-            pyes.TermFilter('eventsource', 'nsm'),
-            pyes.TermFilter('category', 'brointel'),
-            pyes.TermFilter('details.sources', 'abuse.ch SSLBL'),
-            pyes.ExistsFilter('details.sourceipaddress')
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=15)
+
+        search_query.add_must([
+            TermFilter('_type', 'bro'),
+            TermFilter('eventsource', 'nsm'),
+            TermFilter('category', 'brointel'),
+            TermFilter('details.sources', 'abuse.ch SSLBL'),
+            ExistsFilter('details.sourceipaddress')
+        ])
+
+        self.filtersManual(search_query)
 
         # Search events
         self.searchEventsSimple()

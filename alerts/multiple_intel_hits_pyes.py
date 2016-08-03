@@ -11,21 +11,22 @@
 # Michal Purzynski <mpurzynski@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+
 
 class AlertMultipleIntelHits(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=2)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'bro'),
-            pyes.TermFilter('eventsource', 'nsm'),
-            pyes.TermFilter('category', 'brointel'),
-            pyes.ExistsFilter('seenindicator'),
-            pyes.QueryFilter(pyes.MatchQuery('hostname', 'sensor1 sensor2 sensor3', 'boolean'))
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=2)
+
+        search_query.add_must([
+            TermFilter('_type', 'bro'),
+            TermFilter('eventsource', 'nsm'),
+            TermFilter('category', 'brointel'),
+            ExistsFilter('seenindicator'),
+            QueryFilter(MatchQuery('hostname', 'sensor1 sensor2 sensor3', 'boolean'))
+        ])
+
+        self.filtersManual(search_query)
 
         # Search aggregations on field 'seenindicator', keep X samples of events at most
         self.searchEventsAggregated('details.seenindicator', samplesLimit=10)

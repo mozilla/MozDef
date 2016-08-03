@@ -9,20 +9,20 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, ExistsFilter
+
 
 class AlertBroIntel(AlertTask):
     def main(self):
-        # look for events in last 30 mins
-        date_timedelta = dict(minutes=30)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('category', 'brointel'),
-            pyes.ExistsFilter('seenindicator')
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=30)
 
+        search_query.add_must([
+            TermFilter('_type', 'event'),
+            TermFilter('category', 'brointel'),
+            ExistsFilter('seenindicator')
+        ])
+
+        self.filtersManual(search_query)
         # Search aggregations on field 'seenindicator', keep 50 samples of events at most
         self.searchEventsAggregated('details.seenindicator', samplesLimit=50)
         # alert when >= 5 matching events in an aggregation

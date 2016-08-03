@@ -9,19 +9,21 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, TermsFilter
+
 
 class AlertCloudtrail(AlertTask):
     def main(self):
-        # look for events in last x hours
-        date_timedelta = dict(hours=1)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'cloudtrail'),
-            pyes.TermsFilter('eventName',['runinstances','stopinstances','startinstances'])
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(hours=1)
 
+        search_query.add_must([
+            TermFilter('_type', 'cloudtrail'),
+            TermsFilter('eventName', ['runinstances',
+                                      'stopinstances',
+                                      'startinstances'])
+        ])
+
+        self.filtersManual(search_query)
         # Search events
         self.searchEventsSimple()
         self.walkEvents()
@@ -29,10 +31,11 @@ class AlertCloudtrail(AlertTask):
     # Set alert properties
     def onEvent(self, event):
         category = 'AWSCloudtrail'
-        tags = ['cloudtrail','aws']
+        tags = ['cloudtrail', 'aws']
         severity = 'INFO'
 
-        summary = ('{0} called {1} from {2}'.format(event['_source']['userIdentity']['userName'], event['_source']['eventName'], event['_source']['sourceIPAddress']))
+        summary = ('{0} called {1} from {2}'.format(event['_source']['userIdentity'][
+                   'userName'], event['_source']['eventName'], event['_source']['sourceIPAddress']))
         if event['_source']['eventName'] == 'RunInstances':
             for i in event['_source']['responseElements']['instancesSet']['items']:
                 if 'privateDnsName' in i.keys():

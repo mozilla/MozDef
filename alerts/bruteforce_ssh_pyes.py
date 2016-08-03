@@ -16,14 +16,15 @@ from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery
 class AlertBruteforceSshES(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=2)
-        search_query.add_musts([
+
+        search_query.add_must([
             TermFilter('_type', 'event'),
             QueryFilter(MatchQuery('summary', 'failed', 'phrase')),
             TermFilter('program', 'sshd'),
             QueryFilter(MatchQuery('summary', 'login invalid ldap_count_entries', 'boolean')),
         ])
 
-        search_query.add_must_nots([
+        search_query.add_must_not([
             QueryFilter(MatchQuery('summary', '10.22.75.203', 'phrase')),
             QueryFilter(MatchQuery('summary', '10.8.75.144', 'phrase'))
         ])

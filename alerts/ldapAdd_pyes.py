@@ -9,18 +9,19 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter
+
 
 class ldapAdd(AlertTask):
     def main(self):
-        # look for events in last x 
-        date_timedelta = dict(minutes=15)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('category', 'ldapChange'),
-            pyes.TermFilter('changetype', 'add')
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=15)
+
+        search_query.add_must([
+            TermFilter('category', 'ldapChange'),
+            TermFilter('changetype', 'add')
+        ])
+
+        self.filtersManual(search_query)
 
         # Search events
         self.searchEventsSimple()

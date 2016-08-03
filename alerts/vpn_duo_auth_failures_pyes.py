@@ -10,25 +10,22 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
+from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery
 import pyes
 
 class AlertManyVPNDuoAuthFailures(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=2)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('category', 'event'),
-            pyes.TermFilter('tags', 'duosecurity'),
-            pyes.QueryFilter(pyes.MatchQuery('details.integration','global and external openvpn','phrase')),
-            pyes.QueryFilter(pyes.MatchQuery('details.result','FAILURE','phrase')),
-        ]
-#        must_not = [
-#            pyes.QueryFilter(pyes.MatchQuery('summary','10.22.75.203','phrase')),
-#            pyes.QueryFilter(pyes.MatchQuery('summary','10.8.75.144','phrase'))
-#        ]
-        self.filtersManual(date_timedelta, must=must, must_not=must_not)
+        search_query = SearchQuery(minutes=2)
+
+        search_query.add_must([
+            TermFilter('_type', 'event'),
+            TermFilter('category', 'event'),
+            TermFilter('tags', 'duosecurity'),
+            QueryFilter(MatchQuery('details.integration','global and external openvpn','phrase')),
+            QueryFilter(MatchQuery('details.result','FAILURE','phrase')),
+        ])
+
+        self.filtersManual(search_query)
 
         # Search aggregations on field 'username', keep X samples of events at most
         self.searchEventsAggregated('details.username', samplesLimit=5)

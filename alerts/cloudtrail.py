@@ -9,13 +9,13 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
+from lib.query_classes import SearchQuery
 
 class AlertCloudtrail(AlertTask):
     def main(self):
-        # look for events in last 160 hours
-        date_timedelta = dict(hours=160)
-        # Configure filters by importing a kibana dashboard
-        self.filtersFromKibanaDash('cloudtrail_dashboard.json', date_timedelta)
+        search_query = SearchQuery(hours=160)
+
+        self.filtersFromKibanaDash(search_query, 'cloudtrail_dashboard.json')
 
         # Search events
         self.searchEventsSimple()

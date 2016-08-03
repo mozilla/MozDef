@@ -9,17 +9,20 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter
+
 
 class AlertSSHIOC(AlertTask):
     def main(self):
-        date_timedelta = dict(minutes=30)
+        search_query = SearchQuery(minutes=30)
 
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('tags', 'mig-runner-sshioc'),
-        ]
-        self.filtersManual(date_timedelta, must=must, must_not=[])
+        search_query.add_must([
+            TermFilter('_type', 'event'),
+            TermFilter('tags', 'mig-runner-sshioc'),
+        ])
+
+        self.filtersManual(search_query)
+
         self.searchEventsSimple()
         self.walkEvents()
 

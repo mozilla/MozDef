@@ -9,24 +9,26 @@
 # Jonathan Claudius jclaudius@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, QueryFilter, QueryStringQuery
+
 
 class AlertConfluenceShellUsage(AlertTask):
     def main(self):
         # look for events in last X mins
-        date_timedelta = dict(minutes=5)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'auditd'),
-            pyes.TermFilter('details.user', 'confluence'),
-            pyes.QueryFilter(pyes.QueryStringQuery('hostname: /.*(mana|confluence).*/')),
-        ]
-        must_not = [
-            pyes.TermFilter('details.originaluser', 'root'),
-        ]
-        self.filtersManual(date_timedelta, must=must, must_not=must_not)
+        search_query = SearchQuery(minutes=5)
 
-        # Search aggregations on field 'sourceipaddress', keep X samples of events at most
+        search_query.add_must([
+            TermFilter('_type', 'auditd'),
+            TermFilter('details.user', 'confluence'),
+            QueryFilter(QueryStringQuery('hostname: /.*(mana|confluence).*/')),
+        ])
+
+        search_query.add_must_not(TermFilter('details.originaluser', 'root'))
+
+        self.filtersManual(search_query)
+
+        # Search aggregations on field 'sourceipaddress', keep X samples of
+        # events at most
         self.searchEventsAggregated('hostname', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         # in this case, always
@@ -41,8 +43,8 @@ class AlertConfluenceShellUsage(AlertTask):
         tags = ['confluence', 'mana']
         severity = 'CRITICAL'
 
-        summary = 'Confluence user is running shell commands on {0}'.format(aggreg['value'])
+        summary = 'Confluence user is running shell commands on {0}'.format(aggreg[
+                                                                            'value'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-

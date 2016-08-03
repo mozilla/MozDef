@@ -9,7 +9,7 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, QueryFilter, QueryStringQuery, MatchQuery
 import json
 import re
 from configlib import getConfig, OptionParser
@@ -21,27 +21,28 @@ from configlib import getConfig, OptionParser
 # [options]
 # hostfilter <ES compatible regexp>
 # user username
-# skiphosts 1.2.3.4 2.3.4.5 
+# skiphosts 1.2.3.4 2.3.4.5
 
 class AlertUnauthSSH(AlertTask):
     def main(self):
-        date_timedelta = dict(minutes=30)
-
         self.config_file = './unauth_ssh_pyes.conf'
         self.config = None
         self.initConfiguration()
 
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('category', 'syslog'),
-            pyes.TermFilter('details.program', 'sshd'),
-            pyes.QueryFilter(pyes.QueryStringQuery('details.hostname: /{}/'.format(self.config.hostfilter))),
-            pyes.QueryFilter(pyes.MatchQuery('summary', 'Accepted publickey {}'.format(self.config.user), operator='and'))
-        ]
-        must_not = []
+        search_query = SearchQuery(minutes=30)
+
+        search_query.add_must([
+            TermFilter('_type', 'event'),
+            TermFilter('category', 'syslog'),
+            TermFilter('details.program', 'sshd'),
+            QueryFilter(QueryStringQuery('details.hostname: /{}/'.format(self.config.hostfilter))),
+            QueryFilter(MatchQuery('summary', 'Accepted publickey {}'.format(self.config.user), operator='and'))
+        ])
+
         for x in self.config.skiphosts:
-            must_not.append(pyes.QueryFilter(pyes.MatchQuery('summary', x)))
-        self.filtersManual(date_timedelta, must=must, must_not=must_not)
+            search_query.add_must_not(QueryFilter(MatchQuery('summary', x)))
+
+        self.filtersManual(search_query)
         self.searchEventsSimple()
         self.walkEvents()
 

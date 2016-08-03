@@ -40,21 +40,22 @@
 #  ]
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery
+
 
 class AlertHTTPErrors(AlertTask):
     def main(self):
-        # look for events in last 15 mins
-        date_timedelta = dict(minutes=15)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('tags', 'nubis_events_non_prod'),
-            pyes.TermFilter('tags', 'nubis_events_prod'),
-            pyes.TermFilter('category', 'syslog'),
-            pyes.TermFilter('details.__tag', 'ec2.forward.squid.access'),
-            pyes.QueryFilter(pyes.MatchQuery('details.summary','is DENIED, because it matched','phrase')),
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=15)
+
+        search_query.add_must([
+            TermFilter('tags', 'nubis_events_non_prod'),
+            TermFilter('tags', 'nubis_events_prod'),
+            TermFilter('category', 'syslog'),
+            TermFilter('details.__tag', 'ec2.forward.squid.access'),
+            QueryFilter(MatchQuery('details.summary','is DENIED, because it matched','phrase')),
+        ])
+
+        self.filtersManual(search_query)
 
         # Search events
         self.searchEventsSimple()

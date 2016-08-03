@@ -9,13 +9,14 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
+from lib.query_classes import SearchQuery
+
 
 class AlertBroNotice(AlertTask):
     def main(self):
-        # look for events in last 30 mins
-        date_timedelta = dict(minutes=30)
-        # Configure filters by importing a kibana dashboard
-        self.filtersFromKibanaDash('bro_notice_dashboard.json', date_timedelta)
+        search_query = SearchQuery(minutes=30)
+
+        self.filtersFromKibanaDash(search_query, 'bro_notice_dashboard.json')
 
         # Search events
         self.searchEventsSimple()

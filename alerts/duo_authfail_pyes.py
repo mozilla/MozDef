@@ -8,21 +8,22 @@
 # Alicia Smith <asmith@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+
 
 class AlertDuoAuthFail(AlertTask):
     def main(self):
-        # look for events in last X mins
-        date_timedelta = dict(minutes=30)
-        # Configure filters using pyes
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('category', 'event'),
-            pyes.ExistsFilter('details.ip'),
-            pyes.ExistsFilter('details.username'),
-            pyes.QueryFilter(pyes.MatchQuery('details.result', 'FRAUD', 'phrase')),
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=30)
+
+        search_query.add_must([
+            TermFilter('_type', 'event'),
+            TermFilter('category', 'event'),
+            ExistsFilter('details.ip'),
+            ExistsFilter('details.username'),
+            QueryFilter(MatchQuery('details.result', 'FRAUD', 'phrase')),
+        ])
+
+        self.filtersManual(search_query)
         self.searchEventsSimple()
         self.walkEvents()
 

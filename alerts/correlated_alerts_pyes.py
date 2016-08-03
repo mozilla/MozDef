@@ -16,7 +16,7 @@ class AlertCorrelatedIntelNotice(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=15)
 
-        search_query.add_musts([
+        search_query.add_must([
             TermFilter('_type', 'bro'),
             TermFilter('eventsource', 'nsm'),
             TermFilter('category', 'bronotice'),

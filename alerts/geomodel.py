@@ -9,20 +9,22 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from lib.query_classes import SearchQuery, TermFilter
+
 
 class AlertGeomodel(AlertTask):
     # The minimum event severity we will create an alert for
     MINSEVERITY = 2
 
     def main(self):
-        date_timedelta = dict(minutes=30)
+        search_query = SearchQuery(minutes=30)
 
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('category', 'geomodelnotice'),
-        ]
-        self.filtersManual(date_timedelta, must=must, must_not=[])
+        search_query.add_must([
+            TermFilter('_type', 'event'),
+            TermFilter('category', 'geomodelnotice'),
+        ])
+
+        self.filtersManual(search_query)
         self.searchEventsSimple()
         self.walkEvents()
 

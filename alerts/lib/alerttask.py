@@ -22,7 +22,7 @@ from celery import Task
 from celery.utils.log import get_task_logger
 from config import RABBITMQ, ES, OPTIONS
 
-from query_classes import *
+from query_classes import TermFilter, QueryFilter, MatchQuery, ExistsFilter, ESRange, ConstantScoreQuery, RangeQuery, MatchAllQuery, BoolFilter, MissingFilter, ESClient
 
 
 def toUTC(suspectedDate, localTimeZone=None):
@@ -231,7 +231,7 @@ class AlertTask(Task):
             must_not=query.must_not))
         self.filter = q
 
-    def filtersFromKibanaDash(self, fp, date_timedelta):
+    def filtersFromKibanaDash(self, search_query, fp):
         """
         Import filters from a kibana dashboard
         fp is the file path of the json file
@@ -240,9 +240,6 @@ class AlertTask(Task):
         """
         f = open(fp)
         data = json.load(f)
-        must = []
-        should = []
-        must_not = []
         for filtid in data['services']['filter']['list'].keys():
             filt = data['services']['filter']['list'][filtid]
             if filt['active'] and 'query' in filt.keys():
@@ -286,15 +283,13 @@ class AlertTask(Task):
                         # self.log.info("terms %s %s" % (fieldname, value))
 
                 if filt['mandate'] == 'must':
-                    must.append(esfilt)
+                    search_query.add_must(esfilt)
                 elif filt['mandate'] == 'either':
-                    should.append(esfilt)
+                    search_query.add_should(esfilt)
                 elif filt['mandate'] == 'mustNot':
-                    must_not.append(esfilt)
-        # self.log.info(must)
+                    search_query.add_must_not(esfilt)
         f.close()
-        self.filtersManual(date_timedelta, must=must, should=should, must_not=must_not)
-
+        self.filtersManual(search_query)
 
     def searchEventsSimple(self):
         """
@@ -304,7 +299,8 @@ class AlertTask(Task):
             esresults = self.es.search(
                 self.filter,
                 size=1000,
-                indices='events,events-previous')
+                # indices='events,events-previous')
+                indices='events,events-previous,events-20160803')
             self.events = esresults._search_raw()['hits']['hits']
             self.log.debug(self.events)
         except Exception as e:

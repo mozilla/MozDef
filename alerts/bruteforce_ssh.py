@@ -9,13 +9,14 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
+from lib.query_classes import SearchQuery
+
 
 class AlertBruteforceSsh(AlertTask):
     def main(self):
-        # look for events in last 15 mins
-        date_timedelta = dict(minutes=15)
-        # Configure filters by importing a kibana dashboard
-        self.filtersFromKibanaDash('bruteforce_ssh_dashboard.json', date_timedelta)
+        search_query = SearchQuery(minutes=15)
+
+        self.filtersFromKibanaDash(search_query, 'bruteforce_ssh_dashboard.json')
 
         # Search aggregations on field 'sourceipaddress', keep 50 samples of events at most
         self.searchEventsAggregated('sourceipaddress', samplesLimit=50)

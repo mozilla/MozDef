@@ -9,13 +9,14 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
+from lib.query_classes import SearchQuery
+
 
 class AlertFail2ban(AlertTask):
     def main(self):
-        # look for events in last 10 mins
-        date_timedelta = dict(minutes=10)
-        # Configure filters by importing a kibana dashboard
-        self.filtersFromKibanaDash('fail2ban_dashboard.json', date_timedelta)
+        search_query = SearchQuery(minutes=10)
+
+        self.filtersFromKibanaDash(search_query, 'fail2ban_dashboard.json')
 
         # Search events
         self.searchEventsSimple()
