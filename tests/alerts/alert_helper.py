@@ -10,8 +10,10 @@ from datetime import timedelta
 from dateutil.parser import parse
 import pytz
 
+
 class ElasticsearchException(Exception):
-  pass
+    pass
+
 
 class TestHelper():
   def __init__(self, elasticsearch_host):
@@ -58,3 +60,4 @@ class TestHelper():
 
     return custom_date.isoformat()
 
+        return custom_date.isoformat()
