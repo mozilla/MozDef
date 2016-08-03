@@ -4,3 +4,5 @@ meteor/packages
 celebeat-schedule.*
 results
 *.log
+.coverage
+.cache
