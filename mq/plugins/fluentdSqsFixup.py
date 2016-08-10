@@ -73,8 +73,8 @@ class message(object):
                     if 'destinationipv4address' not in details.keys():
                         details['destinationipv4address'] = ipText
                 else:
-                    details['destionationipaddress'] = '0.0.0.0'
-                    details['destionationipv4address'] = '0.0.0.0'
+                    details['destinationipaddress'] = '0.0.0.0'
+                    details['destinationipv4address'] = '0.0.0.0'
                     addError(message, 'plugin: {0} error: {1}:{2}'.format('fluentSqsFixUp.py', 'destinationipaddress is invalid', ipText))
             if not 'hostname' in message.keys(): message['hostname'] = tmp
 
@@ -96,6 +96,10 @@ class message(object):
                 message['processid'] = 0
             # Unknown really, but this field is mandatory.
             if not 'severity' in message.keys(): message['severity'] = 'INFO'
+
+        # We already have the time of event stored in 'timestamp' so we don't need 'time'
+        if 'time' in details.keys():
+          details.pop('time')
 
         return (message, metadata)
 
@@ -189,12 +193,16 @@ class MessageTestFunctions(unittest.TestCase):
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg['_source'], metadata)
         self.assertEqual(retmessage['category'], 'syslog')
         self.assertEqual(retmessage['details']['program'], 'sshd')
+        with self.assertRaises(KeyError):
+          retmessage['details']['time']
 
     def test_onMessageGeneric(self):
         metadata = {}
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg2['_source'], metadata)
         self.assertEqual(retmessage['category'], 'syslog')
         self.assertEqual(retmessage['hostname'], 'ip-10-162-17-177')
+        with self.assertRaises(KeyError):
+          retmessage['details']['time']
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -1,6 +1,6 @@
 [
   {
-    "category": "bro_intel",
+    "category": "brointel",
     "processid": "0",
     "severity": "7",
     "tags": ["nsm","bro","intel"],
@@ -8,7 +8,7 @@
     "summary": "Bro intel match: <randomipaddress>",
     "file": "nsm",
     "details": {
-      "category": "bro_intel",
+      "category": "brointel",
       "destinationipaddress": "0.0.82.27",
       "seenwhere": "Intel::ADDR",
       "uid": "C4RdjhyE2jkvRH54d",

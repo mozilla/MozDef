@@ -7,6 +7,7 @@
 
 # Contributor: gdestuynder@mozilla.com
 # Contributor: jbryner@mozilla.com
+# Contributor: jclaudius@mozilla.com
 
 import copy
 import os
@@ -23,6 +24,7 @@ from logging.handlers import SysLogHandler
 from requests import Session
 from optparse import OptionParser
 from datetime import datetime
+from dateutil.tz import tzlocal
 from os import stat
 from os.path import exists, getsize
 
@@ -46,11 +48,11 @@ class MozDefEvent():
     # Turns off needless and repetitive .netrc check for creds
     httpsession.trust_env = False
     debug = False
-    verify_certificate = True
+    verify_certificate = '/etc/ssl/certs/ca-bundle.crt'
     # Never fail (ie no unexcepted exceptions sent to user, such as server/network not responding)
     fire_and_forget_mode = True
     log = {}
-    log['timestamp'] = datetime.isoformat(datetime.now())
+    log['timestamp'] = datetime.isoformat(datetime.now(tzlocal()))
     log['hostname'] = socket.getfqdn()
     log['processid'] = os.getpid()
     log['processname'] = sys.argv[0]
@@ -146,7 +148,7 @@ def createLogRecord(lineIn):
     log['details']['tcpaction'] = tcpaction
     log['details']['destination'] = destination
     log['details']['mimetype'] = mimetype
-    log['timestamp'] = datetime.isoformat(datetime.now())
+    log['timestamp'] = datetime.isoformat(datetime.now(tzlocal()))
     return(log)
 
 

@@ -12,6 +12,9 @@ from lib.alerttask import AlertTask
 import pyes
 
 class AlertGeomodel(AlertTask):
+    # The minimum event severity we will create an alert for
+    MINSEVERITY = 2
+
     def main(self):
         date_timedelta = dict(minutes=30)
 
@@ -27,7 +30,16 @@ class AlertGeomodel(AlertTask):
     def onEvent(self, event):
         category = 'geomodel'
         tags = ['geomodel']
-        severity = 'NOTICE'
+        severity = 'WARNING'
 
-        summary = event['_source']['summary']
+        ev = event['_source']
+
+        # If the event severity is below what we want, just ignore
+        # the event.
+        if 'details' not in ev or 'severity' not in ev['details']:
+            return None
+        if ev['details']['severity'] < self.MINSEVERITY:
+            return None
+
+        summary = ev['summary']
         return self.createAlertDict(summary, category, tags, [event], severity)

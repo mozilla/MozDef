@@ -8,6 +8,7 @@
 # Aaron Meihm ameihm@mozilla.com
 
 import hashlib
+from dateutil.parser import parse
 import sys
 import unittest
 
@@ -52,7 +53,7 @@ class message(object):
             'service', 'description']):
             return False
         if not self.validate_field_subset(message['details']['data'], ['Unknown', 'PUBLIC', 'INTERNAL', 'RESTRICTED', 'SECRET',
-            'default', 'CONFIDENTIAL INTERNAL', 'CONFIDENTIAL RESTRICTED', 'CONFIDENTIAL SECRET']):
+            'default']):
             return False
         if not self.validate_field_equal(message['details']['risk'], ['integrity', 'confidentiality', 'availability']):
             return False
@@ -83,6 +84,10 @@ class message(object):
         metadata['id'] = self.calculate_id(message)
         metadata['doc_type'] = 'rra_state'
         metadata['index'] = 'rra'
+        #Hack to get a version for this msg
+        #gspread library in rra2json which feeds the rra index does not currently support versions, so we're using a
+        # unix timestamp to emulate that
+        message['version'] = parse(message['lastmodified']).strftime('%s')
         return (message, metadata)
 
 class MessageTestFunctions(unittest.TestCase):
@@ -102,6 +107,7 @@ class MessageTestFunctions(unittest.TestCase):
         self.msg['details']['metadata']['developer'] = '3rd party'
         self.msg['details']['metadata']['scope'] = ''
         self.msg['details']['metadata']['description'] = ''
+        self.msg['details']['metadata']['risk_record'] = 'https://bugzilla..'
         self.msg['details']['risk'] = {}
         self.msg['details']['risk']['integrity'] = {}
         self.msg['details']['risk']['integrity']['reputation'] = {}
@@ -146,11 +152,8 @@ class MessageTestFunctions(unittest.TestCase):
         self.msg['details']['data']['Unknown'] = {}
         self.msg['details']['data']['PUBLIC'] = {}
         self.msg['details']['data']['INTERNAL'] = {}
-        self.msg['details']['data']['CONFIDENTIAL INTERNAL'] = {}
         self.msg['details']['data']['RESTRICTED'] = {}
-        self.msg['details']['data']['CONFIDENTIAL RESTRICTED'] = {}
         self.msg['details']['data']['SECRET'] = {}
-        self.msg['details']['data']['CONFIDENTIAL SECRET'] = {}
         self.msg['details']['data']['default'] = ''
 
     def test_onMessage(self):
