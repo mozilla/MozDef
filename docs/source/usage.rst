@@ -180,9 +180,6 @@ Mandatory Fields
 |            | WARNING, ERROR, CRITICAL, ALERT,    |                                   |
 |            | EMERGENCY                           |                                   |
 +------------+-------------------------------------+-----------------------------------+
-| source     | Source of the event (file name,     | /var/log/syslog/2014.01.02.log    |
-|            | system name, component name)        |                                   |
-+------------+-------------------------------------+-----------------------------------+
 | summary    | Short human-readable version of the | john login attempts over          |
 |            | event suitable for IRC, SMS, etc.   | threshold, account locked         |
 +------------+-------------------------------------+-----------------------------------+
