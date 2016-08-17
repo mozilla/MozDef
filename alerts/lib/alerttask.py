@@ -28,6 +28,9 @@ from celery.utils.log import get_task_logger
 from config import RABBITMQ, ES, OPTIONS
 from operator import itemgetter
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+import utilities
+
 def toUTC(suspectedDate, localTimeZone=None):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
@@ -390,7 +393,7 @@ class AlertTask(Task):
         if os.path.exists('plugins'):
             plugin_manager.plug_into('.')
             modules = pynsive.list_modules('plugins')
-            sys.stderr.write('modules loaded {0}'.format(modules))
+            self.log.debug('modules loaded {0}'.format(modules))
             for mname in modules:
                 module = pynsive.import_module(mname)
                 reload(module)
@@ -405,47 +408,9 @@ class AlertTask(Task):
                         else:
                             mpriority = 100
                         if isinstance(mreg, list):
-                            sys.stderr.write('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
+                            self.log.debug('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
                             pluginList.append((mclass, mreg, mpriority))
         return pluginList
-
-    def dict2List(self, inObj):
-        '''given a dictionary, potentially with multiple sub dictionaries
-           return a list of the dict keys and values
-        '''
-        if isinstance(inObj, dict):
-            for key, value in inObj.iteritems():
-                if isinstance(value, dict):
-                    for d in self.dict2List(value):
-                        yield d
-                elif isinstance(value, list):
-                    yield key.encode('ascii', 'ignore').lower()
-                    for l in self.dict2List(value):
-                        yield l
-                else:
-                    yield key.encode('ascii', 'ignore').lower()
-                    if isinstance(value, str):
-                        yield value.lower()
-                    elif isinstance(value, unicode):
-                        yield value.encode('ascii', 'ignore').lower()
-                    else:
-                        yield value
-        elif isinstance(inObj, list):
-            for v in inObj:
-                if isinstance(v, str):
-                    yield v.lower()
-                elif isinstance(v, unicode):
-                    yield v.encode('ascii', 'ignore').lower()
-                elif isinstance(v, list):
-                    for l in self.dict2List(v):
-                        yield l
-                elif isinstance(v, dict):
-                    for l in self.dict2List(v):
-                        yield l
-                else:
-                    yield v
-        else:
-            yield ''
 
     def sendEventToPlugins(self, anevent, pluginList):
         '''compare the event to the plugin registrations.
@@ -465,10 +430,10 @@ class AlertTask(Task):
             send = False
             if isinstance(plugin[1], list):
                 try:
-                    if (set(plugin[1]).intersection([e for e in self.dict2List(anevent)])):
+                    if (set(plugin[1]).intersection([e for e in utilities.dict2List(anevent)])):
                         send = True
                 except TypeError:
-                    sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
+                    self.log.debug('TypeError on set intersection for dict {0}'.format(anevent))
                     return anevent
             if send:
                 anevent = plugin[0].onMessage(anevent)
