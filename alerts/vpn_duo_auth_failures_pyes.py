@@ -10,8 +10,8 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryFilter, MatchQuery
-import pyes
+from query_models import SearchQuery, TermMatch, PhraseMatch
+
 
 class AlertManyVPNDuoAuthFailures(AlertTask):
     def main(self):
@@ -21,8 +21,8 @@ class AlertManyVPNDuoAuthFailures(AlertTask):
             TermMatch('_type', 'event'),
             TermMatch('category', 'event'),
             TermMatch('tags', 'duosecurity'),
-            QueryFilter(MatchQuery('details.integration','global and external openvpn','phrase')),
-            QueryFilter(MatchQuery('details.result','FAILURE','phrase')),
+            PhraseMatch('details.integration','global and external openvpn','phrase'),
+            PhraseMatch('details.result','FAILURE','phrase'),
         ])
 
         self.filtersManual(search_query)
