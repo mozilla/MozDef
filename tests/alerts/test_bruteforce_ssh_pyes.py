@@ -2,14 +2,14 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts"))
 
-from parent_test_alert import ParentTestAlert
+from alert_test_suite import AlertTestSuite
 from bruteforce_ssh_pyes import AlertBruteforceSshES
 
 # Taken from the specific alert task
 # todo make this dynamic
 THRESHOLD_NUMBER = 10
 
-class ParentBruteforceSshESTest(ParentTestAlert):
+class ParentBruteforceSshESTest(AlertTestSuite):
     def alert_class(self):
         return AlertBruteforceSshES
 
@@ -251,7 +251,7 @@ class TestBruteforceSshESOldTimestampDoesntExist(ParentBruteforceSshESTest):
         events = []
         for a in range(THRESHOLD_NUMBER):
             event = self.generate_default_event()
-            custom_timestamp = self.helper.subtract_from_timestamp(self.helper.current_timestamp(), dict(minutes=3))
+            custom_timestamp = self.subtract_from_timestamp(self.current_timestamp(), dict(minutes=3))
             event['receivedtimestamp'] = custom_timestamp
             event['utctimestamp'] = custom_timestamp
             event['timestamp'] = custom_timestamp

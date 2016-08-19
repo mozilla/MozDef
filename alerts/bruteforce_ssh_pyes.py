@@ -10,23 +10,23 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery
 
+from query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
 
 class AlertBruteforceSshES(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
-            TermFilter('_type', 'event'),
-            QueryFilter(MatchQuery('summary', 'failed', 'phrase')),
-            TermFilter('program', 'sshd'),
-            QueryFilter(MatchQuery('summary', 'login invalid ldap_count_entries', 'boolean')),
+            TermMatch('_type', 'event'),
+            PhraseMatch('summary', 'failed'),
+            TermMatch('program', 'sshd'),
+            TermsMatch('summary', ['login', 'invalid', 'ldap_count_entries']),
         ])
 
         search_query.add_must_not([
-            QueryFilter(MatchQuery('summary', '10.22.75.203', 'phrase')),
-            QueryFilter(MatchQuery('summary', '10.8.75.144', 'phrase'))
+            PhraseMatch('summary', '10.22.75.203'),
+            PhraseMatch('summary', '10.8.75.144'),
         ])
 
         self.filtersManual(search_query)

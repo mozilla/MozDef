@@ -9,7 +9,7 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+from lib.models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertCorrelatedIntelNotice(AlertTask):
@@ -17,11 +17,11 @@ class AlertCorrelatedIntelNotice(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermFilter('_type', 'bro'),
-            TermFilter('eventsource', 'nsm'),
-            TermFilter('category', 'bronotice'),
-            ExistsFilter('details.sourceipaddress'),
-            QueryFilter(MatchQuery('details.note','CrowdStrike::Correlated_Alerts','phrase'))
+            TermMatch('_type', 'bro'),
+            TermMatch('eventsource', 'nsm'),
+            TermMatch('category', 'bronotice'),
+            ExistsMatch('details.sourceipaddress'),
+            PhraseMatch('details.note', 'CrowdStrike::Correlated_Alerts')
         ])
 
         self.filtersManual(search_query)
@@ -43,4 +43,3 @@ class AlertCorrelatedIntelNotice(AlertTask):
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, [event], severity=severity, url=url)
-

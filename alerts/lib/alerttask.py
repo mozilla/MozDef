@@ -22,7 +22,12 @@ from celery import Task
 from celery.utils.log import get_task_logger
 from config import RABBITMQ, ES, OPTIONS
 
-from query_classes import TermFilter, QueryFilter, MatchQuery, ExistsFilter, ESRange, ConstantScoreQuery, RangeQuery, MatchAllQuery, BoolFilter, MissingFilter, ESClient
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+
+from elasticsearch_client import ElasticsearchClient
+from query_models import ExistsMatch, RangeMatch
 
 
 def toUTC(suspectedDate, localTimeZone=None):
@@ -137,7 +142,8 @@ class AlertTask(Task):
         Configure elasticsearch client
         """
         try:
-            self.es = ESClient(ES['servers'])
+            self.es = ElasticsearchClient(ES['servers'])
+            # self.es = ESClient(ES['servers'])
             self.log.debug('ES configured')
         except Exception as e:
             self.log.error('Exception while configuring ES for alerts: {0}'.format(e))
@@ -196,7 +202,7 @@ class AlertTask(Task):
         Send alert to elasticsearch
         """
         try:
-            res = self.es.index(index='alerts', doc_type='alert', doc=alertDict)
+            res = self.es.save_alert(alertDict)
             self.log.debug('alert sent to ES')
             self.log.debug(res)
             return res
@@ -216,20 +222,14 @@ class AlertTask(Task):
         self.begindateUTC = toUTC(datetime.now() - timedelta(**query.date_timedelta))
         self.enddateUTC = toUTC(datetime.now())
 
-        qDate = RangeQuery(qrange=ESRange('utctimestamp', from_value=self.begindateUTC, to_value=self.enddateUTC))
-
-        q = ConstantScoreQuery(MatchAllQuery())
+        range_query = RangeMatch('utctimestamp', self.begindateUTC, self.enddateUTC)
+        query.add_must(range_query)
 
         # Don't fire on already alerted events
-        if ExistsFilter('alerttimestamp') not in query.must_not:
-            query.add_must_not(ExistsFilter('alerttimestamp'))
+        if ExistsMatch('alerttimestamp') not in query.must_not:
+            query.add_must_not(ExistsMatch('alerttimestamp'))
 
-        query.add_must(qDate)
-        q.filters.append(BoolFilter(
-            must=query.must,
-            should=query.should,
-            must_not=query.must_not))
-        self.filter = q
+        self.main_query = query
 
     def filtersFromKibanaDash(self, search_query, fp):
         """
@@ -296,12 +296,7 @@ class AlertTask(Task):
         Search events matching filters, store events in self.events
         """
         try:
-            esresults = self.es.search(
-                self.filter,
-                size=1000,
-                # indices='events,events-previous')
-                indices='events,events-previous,events-20160803')
-            self.events = esresults._search_raw()['hits']['hits']
+            self.events = self.main_query.execute(self.es, indices=['events', 'events-previous'])
             self.log.debug(self.events)
         except Exception as e:
             self.log.error('Error while searching events in ES: {0}'.format(e))
@@ -321,11 +316,7 @@ class AlertTask(Task):
         ex: details.sourceipaddress
         """
         try:
-            esresults = self.es.search(
-                self.filter,
-                size=1000,
-                indices='events,events-previous')
-            results = esresults._search_raw()['hits']['hits']
+            results = self.main_query.execute(self.es)
 
             # List of aggregation values that can be counted/summarized by Counter
             # Example: ['evil@evil.com','haxoor@noob.com', 'evil@evil.com'] for an email aggregField
@@ -480,8 +471,7 @@ class AlertTask(Task):
                 event['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
 
 
-                self.es.update(event['_index'], event['_type'],
-                    event['_id'], document=event['_source'])
+                self.es.update_event(event['_index'], event['_type'], event['_id'], event['_source'])
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 

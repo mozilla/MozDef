@@ -1,7 +1,10 @@
 from positive_test_suite import PositiveTestSuite
 from negative_test_suite import NegativeTestSuite
 
-from models import RangeMatch
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+from query_models import RangeMatch
 
 # The weird thing here is that if events that have the exact same utctimestamp
 # will not show up in either must or must_not. Updating to elasticsearch_dsl, we're

@@ -1,14 +1,21 @@
 import sys
 import os
-import datetime
-sys.path.append("../../alerts/")
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from lib.config import LOGGING, ES
 
-from alert_helper import TestHelper
+from unit_test_suite import UnitTestSuite
 
 
-class ParentTestAlert(object):
+from datetime import datetime
+from datetime import timedelta
+from dateutil.parser import parse
+import pytz
+import random
+
+
+class AlertTestSuite(UnitTestSuite):
 
     def event_type(self):
         # todo normalize all bro events and alerts so the _type is still
@@ -16,33 +23,15 @@ class ParentTestAlert(object):
         return 'event'
 
     def setup(self):
-        self.helper = TestHelper(ES['servers'][0])
-        self.current_index_name = datetime.date.today().strftime('events-%Y%m%d')
-
-        self.helper.delete_index_if_exists("events", False)
-        self.helper.delete_index_if_exists("events-previous", False)
-        self.helper.delete_index_if_exists(self.current_index_name, False)
-        self.helper.delete_index_if_exists("alerts", False)
-
-        self.helper.create_index(self.current_index_name, ["events", "events-previous"])
-        self.helper.create_index("alerts")
-
-        for event in self.events():
-            self.helper.event_to_es(event, "events", self.event_type())
+        super(AlertTestSuite, self).setup()
 
         alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)
 
-    def teardown(self):
-        self.helper.delete_index_if_exists(self.current_index_name, False)
-        self.helper.delete_index_if_exists("events", False)
-        self.helper.delete_index_if_exists("events-previous", False)
-        self.helper.delete_index_if_exists("alerts", False)
-
     def generate_default_event(self):
-        current_timestamp = self.helper.current_timestamp()
+        current_timestamp = self.current_timestamp()
 
-        source_ip = self.helper.random_ip()
+        source_ip = self.random_ip()
 
         event = {
             "category": "bronotice",
@@ -65,6 +54,9 @@ class ParentTestAlert(object):
         return event
 
     def test_alert(self):
+        for event in self.events():
+            self.populate_test_event(event, self.event_type())
+
         # THIS IS A HAX, todo: modify this to call celery with syncronous
         # execution
         import time
@@ -84,12 +76,10 @@ class ParentTestAlert(object):
         assert len(self.alert_task.alert_ids) != 0
 
         for alert_id in self.alert_task.alert_ids:
-            alert = self.helper.get_alert_by_id(alert_id)
+            alert = self.get_alert_by_id(alert_id)
 
-            assert alert['found'] is True
-            assert alert['_type'] == 'alert'
-            assert alert['_version'] == 1
             assert alert['_index'] == 'alerts'
+            assert alert['_type'] == 'alert'
 
             assert alert['_source']['category'] == expected_alert[
                 '_source']['category']
@@ -105,3 +95,19 @@ class ParentTestAlert(object):
 
     def verify_alert_not_fired(self):
         assert len(self.alert_task.alert_ids) == 0
+
+    def get_alert_by_id(self, alert_id):
+        return self.es_client.get_alert(alert_id)
+
+    def random_ip(self):
+        return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
+
+    def current_timestamp(self):
+        return pytz.UTC.normalize(pytz.timezone("UTC").localize(datetime.now())).isoformat()
+
+    def subtract_from_timestamp(self, timestamp, date_timedelta):
+        utc_time = parse(timestamp)
+        custom_date = utc_time - timedelta(**date_timedelta)
+
+        return custom_date.isoformat()
+

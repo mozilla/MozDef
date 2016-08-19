@@ -59,13 +59,6 @@ def QueryStringMatch(query_str):
     return Q('query_string', query=query_str)
 
 
-# Need to fix this
-def ExactMatch(key, value):
-    if pyes_enabled.pyes_on is True:
-        return pyes.QueryFilter(pyes.MatchQuery(key, value, 'boolean'))
-    return Q('match', **{key: value})
-
-
 class SearchQuery():
     def __init__(self, *args, **kwargs):
         self.date_timedelta = dict(kwargs)
@@ -93,14 +86,12 @@ class SearchQuery():
     def add_should(self, input_obj):
         self.append_to_array(self.should, input_obj)
 
-    def execute(self, elasticsearch_client):
+    def execute(self, elasticsearch_client, indices=['events', 'events-previous']):
+        search_query = None
         if pyes_enabled.pyes_on is True:
-            search_filter = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-            search_filter.filters.append(BooleanMatch(must=self.must, should=self.should, must_not=self.must_not))
-            esresults = elasticsearch_client.search(search_filter, size=1000, index='events')
-            results = esresults._search_raw()['hits']['hits']
+            search_query = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
+            search_query.filters.append(BooleanMatch(must=self.must, should=self.should, must_not=self.must_not))
         else:
-            main_query = BooleanMatch(must=self.must, must_not=self.must_not, should=self.should)
-            ser = Search(using=elasticsearch_client, index="events").query(main_query)
-            results = ser.execute().hits.hits
+            search_query = BooleanMatch(must=self.must, must_not=self.must_not, should=self.should)
+        results = elasticsearch_client.search(search_query, indices)
         return results

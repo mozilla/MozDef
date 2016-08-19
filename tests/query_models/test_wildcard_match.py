@@ -1,7 +1,10 @@
 from positive_test_suite import PositiveTestSuite
 from negative_test_suite import NegativeTestSuite
 
-from models import WildcardMatch
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+from query_models import WildcardMatch
 
 
 class TestWildcardMatchPositiveTestSuite(PositiveTestSuite):

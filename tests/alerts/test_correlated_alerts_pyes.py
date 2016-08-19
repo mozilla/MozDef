@@ -2,10 +2,10 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts"))
 
-from parent_test_alert import ParentTestAlert
+from alert_test_suite import AlertTestSuite
 from correlated_alerts_pyes import AlertCorrelatedIntelNotice
 
-class ParentCorrelatedIntelNoticeTest(ParentTestAlert):
+class ParentCorrelatedIntelNoticeTest(AlertTestSuite):
     def alert_class(self):
         return AlertCorrelatedIntelNotice
 
@@ -112,7 +112,7 @@ class TestCorrelatedIntelNoticeOldTimestampDoesntExist(ParentCorrelatedIntelNoti
 
     def events(self):
         default_event = self.generate_default_event()
-        custom_timestamp = self.helper.subtract_from_timestamp(self.helper.current_timestamp(), dict(minutes=16))
+        custom_timestamp = self.subtract_from_timestamp(self.current_timestamp(), dict(minutes=16))
         default_event['receivedtimestamp'] = custom_timestamp
         default_event['utctimestamp'] = custom_timestamp
         default_event['timestamp'] = custom_timestamp

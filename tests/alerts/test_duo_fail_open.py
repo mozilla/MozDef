@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts"))
 
-from parent_test_alert import ParentTestAlert
+from alert_test_suite import AlertTestSuite
 
 from duo_fail_open import AlertDuoFailOpen
 
@@ -11,17 +11,17 @@ from duo_fail_open import AlertDuoFailOpen
 THRESHOLD_NUMBER = 1
 SAMPLESLIMIT_NUMBER = 10
 
-class ParentDuoFailOpenTest(ParentTestAlert):
+class DuoFailOpenTest(AlertTestSuite):
     def alert_class(self):
         return AlertDuoFailOpen
 
     def generate_default_event(self):
-        event = super(ParentDuoFailOpenTest, self).generate_default_event()
+        event = super(DuoFailOpenTest, self).generate_default_event()
         event['summary'] = "Failsafe Duo login summary"
         return event
 
 
-class TestDuoFailOpenWithSamplesLimit(ParentDuoFailOpenTest):
+class TestDuoFailOpenWithSamplesLimit(DuoFailOpenTest):
     expected_to_throw = True
 
     def events(self):
@@ -195,7 +195,7 @@ class TestDuoFailOpenWithSamplesLimit(ParentDuoFailOpenTest):
  u'found': True}
 
 
-class TestDuoFailOpenPositiveWithThreshold(ParentDuoFailOpenTest):
+class TestDuoFailOpenPositiveWithThreshold(DuoFailOpenTest):
     expected_to_throw = True
 
     def events(self):
@@ -234,7 +234,7 @@ class TestDuoFailOpenPositiveWithThreshold(ParentDuoFailOpenTest):
  u'found': True}
 
 
-class TestDuoFailOpenMissingHostname(ParentDuoFailOpenTest):
+class TestDuoFailOpenMissingHostname(DuoFailOpenTest):
     expected_to_throw = False
 
     def events(self):
@@ -247,7 +247,7 @@ class TestDuoFailOpenMissingHostname(ParentDuoFailOpenTest):
         return events
 
 
-class TestDuoFailOpenIncorrectSummary(ParentDuoFailOpenTest):
+class TestDuoFailOpenIncorrectSummary(DuoFailOpenTest):
     expected_to_throw = False
 
     def events(self):
@@ -260,14 +260,14 @@ class TestDuoFailOpenIncorrectSummary(ParentDuoFailOpenTest):
         return events
 
 
-class TestDuoFailOpenOldTimestampDoesntExist(ParentDuoFailOpenTest):
+class TestDuoFailOpenOldTimestampDoesntExist(DuoFailOpenTest):
     expected_to_throw = False
 
     def events(self):
         events = []
         for a in range(THRESHOLD_NUMBER):
             event = self.generate_default_event()
-            custom_timestamp = self.helper.subtract_from_timestamp(self.helper.current_timestamp(), dict(minutes=16))
+            custom_timestamp = self.subtract_from_timestamp(self.current_timestamp(), dict(minutes=16))
             event['receivedtimestamp'] = custom_timestamp
             event['utctimestamp'] = custom_timestamp
             event['timestamp'] = custom_timestamp
@@ -277,7 +277,7 @@ class TestDuoFailOpenOldTimestampDoesntExist(ParentDuoFailOpenTest):
         return events
 
 
-class TestDuoFailOpenNotEnoughEvents(ParentDuoFailOpenTest):
+class TestDuoFailOpenNotEnoughEvents(DuoFailOpenTest):
     expected_to_throw = False
 
     def events(self):

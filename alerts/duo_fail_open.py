@@ -13,15 +13,14 @@
 # this case a VPN certificate)
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery, QueryFilter, MatchQuery
+from query_models import SearchQuery, PhraseMatch
 
 
 class AlertDuoFailOpen(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=15)
 
-        search_query.add_must(QueryFilter(MatchQuery(
-            'summary', 'Failsafe Duo login', 'phrase')))
+        search_query.add_must(PhraseMatch('summary', 'Failsafe Duo login'))
 
         self.filtersManual(search_query)
 
