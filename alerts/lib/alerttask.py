@@ -261,7 +261,7 @@ class AlertTask(Task):
                 else:
                     # _exists_:field
                     if filt['query'].startswith('_exists_:'):
-                        esfilt = ExistsFilter(value.split('.')[-1])
+                        esfilt = ExistsMatch(value.split('.')[-1])
                         # self.log.info('exists %s' % value.split('.')[-1])
                     # _missing_:field
                     elif filt['query'].startswith('_missing_:'):

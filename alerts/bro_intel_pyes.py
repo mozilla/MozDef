@@ -9,7 +9,7 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsFilter
+from query_models import SearchQuery, TermMatch, ExistsMatch
 
 
 class AlertBroIntel(AlertTask):
@@ -19,7 +19,7 @@ class AlertBroIntel(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'event'),
             TermMatch('category', 'brointel'),
-            ExistsFilter('seenindicator')
+            ExistsMatch('seenindicator')
         ])
 
         self.filtersManual(search_query)

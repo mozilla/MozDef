@@ -11,7 +11,7 @@
 # Michal Purzynski <mpurzynski@mozilla.com>
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
 
 
 class AlertMultipleIntelHits(AlertTask):
@@ -22,7 +22,7 @@ class AlertMultipleIntelHits(AlertTask):
             TermMatch('_type', 'bro'),
             TermMatch('eventsource', 'nsm'),
             TermMatch('category', 'brointel'),
-            ExistsFilter('seenindicator'),
+            ExistsMatch('seenindicator'),
             QueryFilter(MatchQuery('hostname', 'sensor1 sensor2 sensor3', 'boolean'))
         ])
 

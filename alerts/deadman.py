@@ -68,7 +68,7 @@ class broNSM(AlertTask):
         event['_source']['hostname'] = hostname
         event['_source']['summary'] = summary
         # serialize the filter to avoid datetime objects causing json problems.
-        event['_source']['details'] = dict(filter= '{0}'.format(self.filter.serialize()))
+        event['_source']['details'] = dict(filter='{0}'.format(self.filter.serialize()))
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, [event], severity=severity, url=url)

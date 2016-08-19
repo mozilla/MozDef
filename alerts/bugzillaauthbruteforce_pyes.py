@@ -9,7 +9,7 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
 
 
 class AlertBugzillaPBruteforce(AlertTask):
@@ -20,7 +20,7 @@ class AlertBugzillaPBruteforce(AlertTask):
             TermMatch('_type', 'bro'),
             TermMatch('eventsource', 'nsm'),
             TermMatch('category', 'bronotice'),
-            ExistsFilter('details.sourceipaddress'),
+            ExistsMatch('details.sourceipaddress'),
             QueryFilter(MatchQuery('details.note','BugzBruteforcing::HTTP_BugzBruteforcing_Attacker','phrase')),
         ])
 

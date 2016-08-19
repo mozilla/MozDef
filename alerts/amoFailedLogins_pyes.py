@@ -9,7 +9,7 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
 
 
 class AlertFailedAMOLogin(AlertTask):
@@ -19,9 +19,9 @@ class AlertFailedAMOLogin(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'addons'),
             TermMatch('signatureid', 'authfail'),
-            ExistsFilter('details.sourceipaddress'),
+            ExistsMatch('details.sourceipaddress'),
             QueryFilter(MatchQuery("msg","The password was incorrect","phrase")),
-            ExistsFilter('suser')
+            ExistsMatch('suser')
         ])
 
         self.filtersManual(search_query)
