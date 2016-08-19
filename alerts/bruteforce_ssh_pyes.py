@@ -10,8 +10,8 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-
 from query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
+
 
 class AlertBruteforceSshES(AlertTask):
     def main(self):
