@@ -9,7 +9,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, QueryFilter, MatchQuery, WildcardQuery
+from query_models import SearchQuery, TermMatch, QueryFilter, MatchQuery, WildcardQuery
 
 
 class AlertAccountCreations(AlertTask):
@@ -17,8 +17,8 @@ class AlertAccountCreations(AlertTask):
         search_query = SearchQuery(minutes=10)
 
         search_query.add_must([
-            TermFilter('_type', 'event'),
-            TermFilter('tags', 'firefoxaccounts'),
+            TermMatch('_type', 'event'),
+            TermMatch('tags', 'firefoxaccounts'),
             QueryFilter(MatchQuery('details.path','/v1/account/create','phrase'))
 
         ])
@@ -26,7 +26,7 @@ class AlertAccountCreations(AlertTask):
         #ignore test accounts and attempts to create accounts that already exist.
         search_query.add_must_not([
             QueryFilter(WildcardQuery(field='details.email',value='*restmail.net')),
-            TermFilter('details.code','429')
+            TermMatch('details.code','429')
         ])
 
         self.filtersManual(search_query)

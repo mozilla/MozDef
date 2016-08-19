@@ -13,7 +13,7 @@
 # Alicia Smith <asmith@mozilla.com>
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, QueryFilter, MatchQuery
 
 
 class AlertSFTPEvent(AlertTask):
@@ -21,10 +21,10 @@ class AlertSFTPEvent(AlertTask):
         search_query = SearchQuery(minutes=5)
 
         search_query.add_must([
-            TermFilter('_type', 'auditd'),
-            TermFilter('category', 'execve'),
-            TermFilter('processname', 'audisp-json'),
-            TermFilter('details.processname', 'ssh'),
+            TermMatch('_type', 'auditd'),
+            TermMatch('category', 'execve'),
+            TermMatch('processname', 'audisp-json'),
+            TermMatch('details.processname', 'ssh'),
             QueryFilter(MatchQuery('details.parentprocess', 'sftp', 'phrase')),
         ])
 

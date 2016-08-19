@@ -9,7 +9,7 @@
 # Jonathan Claudius jclaudius@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, QueryFilter, QueryStringQuery
+from query_models import SearchQuery, TermMatch, QueryFilter, QueryStringQuery
 
 
 class AlertConfluenceShellUsage(AlertTask):
@@ -18,12 +18,12 @@ class AlertConfluenceShellUsage(AlertTask):
         search_query = SearchQuery(minutes=5)
 
         search_query.add_must([
-            TermFilter('_type', 'auditd'),
-            TermFilter('details.user', 'confluence'),
+            TermMatch('_type', 'auditd'),
+            TermMatch('details.user', 'confluence'),
             QueryFilter(QueryStringQuery('hostname: /.*(mana|confluence).*/')),
         ])
 
-        search_query.add_must_not(TermFilter('details.originaluser', 'root'))
+        search_query.add_must_not(TermMatch('details.originaluser', 'root'))
 
         self.filtersManual(search_query)
 

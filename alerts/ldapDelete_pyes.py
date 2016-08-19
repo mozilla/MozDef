@@ -9,7 +9,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter
+from query_models import SearchQuery, TermMatch
 
 
 class ldapDelete(AlertTask):
@@ -17,8 +17,8 @@ class ldapDelete(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermFilter('category', 'ldapChange'),
-            TermFilter('changetype', 'delete')
+            TermMatch('category', 'ldapChange'),
+            TermMatch('changetype', 'delete')
         ])
 
         self.filtersManual(search_query)

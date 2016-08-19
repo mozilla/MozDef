@@ -9,7 +9,7 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsFilter, QueryFilter, MatchQuery
 
 
 class AlertBugzillaPBruteforce(AlertTask):
@@ -17,9 +17,9 @@ class AlertBugzillaPBruteforce(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermFilter('_type', 'bro'),
-            TermFilter('eventsource', 'nsm'),
-            TermFilter('category', 'bronotice'),
+            TermMatch('_type', 'bro'),
+            TermMatch('eventsource', 'nsm'),
+            TermMatch('category', 'bronotice'),
             ExistsFilter('details.sourceipaddress'),
             QueryFilter(MatchQuery('details.note','BugzBruteforcing::HTTP_BugzBruteforcing_Attacker','phrase')),
         ])

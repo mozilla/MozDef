@@ -257,7 +257,7 @@ class AlertTask(Task):
                         value = value.split('\"')[1]
                         esfilt = QueryFilter(MatchQuery(fieldname, value, 'phrase'))
                     else:
-                        esfilt = TermFilter(fieldname, value)
+                        esfilt = TermMatch(fieldname, value)
                 else:
                     # _exists_:field
                     if filt['query'].startswith('_exists_:'):
@@ -279,7 +279,7 @@ class AlertTask(Task):
                         esfilt = QueryFilter(MatchQuery(fieldname, value, "boolean"))
                     # field:value
                     else:
-                        esfilt = TermFilter(fieldname, value)
+                        esfilt = TermMatch(fieldname, value)
                         # self.log.info("terms %s %s" % (fieldname, value))
 
                 if filt['mandate'] == 'must':

@@ -9,7 +9,7 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, ExistsFilter
+from query_models import SearchQuery, TermMatch, ExistsFilter
 
 
 class AlertSSLBlacklistHit(AlertTask):
@@ -17,10 +17,10 @@ class AlertSSLBlacklistHit(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermFilter('_type', 'bro'),
-            TermFilter('eventsource', 'nsm'),
-            TermFilter('category', 'brointel'),
-            TermFilter('details.sources', 'abuse.ch SSLBL'),
+            TermMatch('_type', 'bro'),
+            TermMatch('eventsource', 'nsm'),
+            TermMatch('category', 'brointel'),
+            TermMatch('details.sources', 'abuse.ch SSLBL'),
             ExistsFilter('details.sourceipaddress')
         ])
 

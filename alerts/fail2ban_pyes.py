@@ -9,7 +9,7 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, QueryFilter, MatchQuery
 
 
 class AlertFail2ban(AlertTask):
@@ -17,8 +17,8 @@ class AlertFail2ban(AlertTask):
         search_query = SearchQuery(minutes=10)
 
         search_query.add_must([
-            TermFilter('_type', 'event'),
-            TermFilter('program', 'fail2ban'),
+            TermMatch('_type', 'event'),
+            TermMatch('program', 'fail2ban'),
             QueryFilter(MatchQuery("summary","banned for","phrase"))
         ])
 

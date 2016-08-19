@@ -12,7 +12,7 @@
 
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, ExistsFilter
+from query_models import SearchQuery, TermMatch, ExistsFilter
 
 
 class AlertProxyDrop(AlertTask):
@@ -20,7 +20,7 @@ class AlertProxyDrop(AlertTask):
         search_query = SearchQuery(minutes=5)
 
         search_query.add_must([
-            TermFilter('category', 'squid'),
+            TermMatch('category', 'squid'),
             ExistsFilter('details.proxyaction'),
         ])
 

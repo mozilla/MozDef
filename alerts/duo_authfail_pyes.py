@@ -8,7 +8,7 @@
 # Alicia Smith <asmith@mozilla.com>
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsFilter, QueryFilter, MatchQuery
 
 
 class AlertDuoAuthFail(AlertTask):
@@ -16,8 +16,8 @@ class AlertDuoAuthFail(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
-            TermFilter('_type', 'event'),
-            TermFilter('category', 'event'),
+            TermMatch('_type', 'event'),
+            TermMatch('category', 'event'),
             ExistsFilter('details.ip'),
             ExistsFilter('details.username'),
             QueryFilter(MatchQuery('details.result', 'FRAUD', 'phrase')),

@@ -9,7 +9,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter
+from query_models import SearchQuery, TermMatch
 
 
 class ldapAdd(AlertTask):
@@ -17,8 +17,8 @@ class ldapAdd(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermFilter('category', 'ldapChange'),
-            TermFilter('changetype', 'add')
+            TermMatch('category', 'ldapChange'),
+            TermMatch('changetype', 'add')
         ])
 
         self.filtersManual(search_query)

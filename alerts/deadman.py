@@ -12,7 +12,7 @@
 # to alert on a dead input source.
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, QueryFilter, TermFilter, MatchQuery
+from query_models import SearchQuery, QueryFilter, TermMatch, MatchQuery
 
 def fakeEvent():
     # make a fake event
@@ -38,8 +38,8 @@ class broNSM(AlertTask):
                 search_query.add_must([
                     QueryFilter(MatchQuery("details.note","MozillaAlive::Bro_Is_Watching_You","phrase")),
                     QueryFilter(MatchQuery("details.peer_descr", host, "phrase")),
-                    TermFilter('category', 'bronotice'),
-                    TermFilter('_type', 'bro')
+                    TermMatch('category', 'bronotice'),
+                    TermMatch('_type', 'bro')
                 ])
 
                 self.filtersManual(search_query)

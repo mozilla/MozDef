@@ -40,7 +40,7 @@
 #  ]
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, QueryFilter, MatchQuery
 
 
 class AlertHTTPErrors(AlertTask):
@@ -48,10 +48,10 @@ class AlertHTTPErrors(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermFilter('tags', 'nubis_events_non_prod'),
-            TermFilter('tags', 'nubis_events_prod'),
-            TermFilter('category', 'syslog'),
-            TermFilter('details.__tag', 'ec2.forward.squid.access'),
+            TermMatch('tags', 'nubis_events_non_prod'),
+            TermMatch('tags', 'nubis_events_prod'),
+            TermMatch('category', 'syslog'),
+            TermMatch('details.__tag', 'ec2.forward.squid.access'),
             QueryFilter(MatchQuery('details.summary','is DENIED, because it matched','phrase')),
         ])
 

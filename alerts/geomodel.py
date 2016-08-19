@@ -9,7 +9,7 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermFilter
+from query_models import SearchQuery, TermMatch
 
 
 class AlertGeomodel(AlertTask):
@@ -20,8 +20,8 @@ class AlertGeomodel(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
-            TermFilter('_type', 'event'),
-            TermFilter('category', 'geomodelnotice'),
+            TermMatch('_type', 'event'),
+            TermMatch('category', 'geomodelnotice'),
         ])
 
         self.filtersManual(search_query)
