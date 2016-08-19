@@ -91,7 +91,7 @@ class AlertTask(Task):
 
     def __init__(self):
         self.alert_name = self.__class__.__name__
-        self.filter = None
+        self.main_query = None
         self.begindateUTC = None
         self.enddateUTC = None
         # List of events
