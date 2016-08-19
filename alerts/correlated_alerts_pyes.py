@@ -9,7 +9,7 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_classes import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertCorrelatedIntelNotice(AlertTask):
