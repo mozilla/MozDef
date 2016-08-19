@@ -9,7 +9,7 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertHTTPBruteforce(AlertTask):
@@ -21,7 +21,7 @@ class AlertHTTPBruteforce(AlertTask):
             TermMatch('eventsource', 'nsm'),
             TermMatch('category', 'bronotice'),
             ExistsMatch('details.sourceipaddress'),
-            QueryFilter(MatchQuery('details.note','AuthBruteforcing::HTTP_AuthBruteforcing_Attacker','phrase')),
+            PhraseMatch('details.note', 'AuthBruteforcing::HTTP_AuthBruteforcing_Attacker'),
         ])
 
         self.filtersManual(search_query)

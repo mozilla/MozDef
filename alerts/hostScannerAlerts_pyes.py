@@ -10,7 +10,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertHostScannerFinding(AlertTask):
@@ -20,7 +20,7 @@ class AlertHostScannerFinding(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'cef'),
             ExistsMatch('details.dhost'),
-            QueryFilter(MatchQuery("signatureid","sensitivefiles","phrase"))
+            PhraseMatch("signatureid", "sensitivefiles")
         ])
 
         self.filtersManual(search_query)

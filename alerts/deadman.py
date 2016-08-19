@@ -12,7 +12,8 @@
 # to alert on a dead input source.
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, QueryFilter, TermMatch, MatchQuery
+from query_models import SearchQuery, TermMatch, PhraseMatch
+
 
 def fakeEvent():
     # make a fake event
@@ -26,6 +27,7 @@ def fakeEvent():
     event['_id'] = ''
     return event
 
+
 class broNSM(AlertTask):
     def main(self, *args, **kwargs):
         # call with hostlist=['host1','host2','host3']
@@ -36,8 +38,8 @@ class broNSM(AlertTask):
                 search_query = SearchQuery(minutes=20)
 
                 search_query.add_must([
-                    QueryFilter(MatchQuery("details.note","MozillaAlive::Bro_Is_Watching_You","phrase")),
-                    QueryFilter(MatchQuery("details.peer_descr", host, "phrase")),
+                    PhraseMatch("details.note", "MozillaAlive::Bro_Is_Watching_You"),
+                    PhraseMatch("details.peer_descr", host),
                     TermMatch('category', 'bronotice'),
                     TermMatch('_type', 'bro')
                 ])

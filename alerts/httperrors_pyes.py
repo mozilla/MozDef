@@ -9,7 +9,7 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertHTTPErrors(AlertTask):
@@ -21,7 +21,7 @@ class AlertHTTPErrors(AlertTask):
             TermMatch('eventsource', 'nsm'),
             TermMatch('category', 'bronotice'),
             ExistsMatch('details.sourceipaddress'),
-            QueryFilter(MatchQuery('details.note','MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker','phrase')),
+            PhraseMatch('details.note', 'MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker'),
         ])
 
         self.filtersManual(search_query)
@@ -43,4 +43,3 @@ class AlertHTTPErrors(AlertTask):
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, [event], severity=severity, url=url)
-

@@ -9,7 +9,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch
 
 
 class ldapGroupModify(AlertTask):
@@ -19,7 +19,7 @@ class ldapGroupModify(AlertTask):
         search_query.add_must([
             TermMatch('category', 'ldapChange'),
             TermMatch('changetype', 'modify'),
-            QueryFilter(MatchQuery("summary","groups"))
+            TermMatch("summary", "groups")
         ])
 
         self.filtersManual(search_query)

@@ -9,7 +9,7 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertFailedAMOLogin(AlertTask):
@@ -20,7 +20,7 @@ class AlertFailedAMOLogin(AlertTask):
             TermMatch('_type', 'addons'),
             TermMatch('signatureid', 'authfail'),
             ExistsMatch('details.sourceipaddress'),
-            QueryFilter(MatchQuery("msg","The password was incorrect","phrase")),
+            PhraseMatch("msg", "The password was incorrect"),
             ExistsMatch('suser')
         ])
 

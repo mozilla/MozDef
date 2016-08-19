@@ -9,7 +9,7 @@
 # Michal Purzynski michal@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertSSHManyConns(AlertTask):
@@ -21,7 +21,7 @@ class AlertSSHManyConns(AlertTask):
             TermMatch('eventsource', 'nsm'),
             TermMatch('category', 'bronotice'),
             ExistsMatch('details.sourceipaddress'),
-            QueryFilter(MatchQuery('details.note','SSH::Password_Guessing','phrase')),
+            PhraseMatch('details.note', 'SSH::Password_Guessing'),
         ])
 
         self.filtersManual(search_query)

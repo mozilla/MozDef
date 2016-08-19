@@ -9,7 +9,7 @@
 # Jonathan Claudius jclaudius@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryFilter, QueryStringQuery
+from query_models import SearchQuery, TermMatch, QueryStringMatch
 
 
 class AlertConfluenceShellUsage(AlertTask):
@@ -20,7 +20,7 @@ class AlertConfluenceShellUsage(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'auditd'),
             TermMatch('details.user', 'confluence'),
-            QueryFilter(QueryStringQuery('hostname: /.*(mana|confluence).*/')),
+            QueryStringMatch('hostname: /.*(mana|confluence).*/'),
         ])
 
         search_query.add_must_not(TermMatch('details.originaluser', 'root'))

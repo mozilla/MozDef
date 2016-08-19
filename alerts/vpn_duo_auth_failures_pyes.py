@@ -21,8 +21,8 @@ class AlertManyVPNDuoAuthFailures(AlertTask):
             TermMatch('_type', 'event'),
             TermMatch('category', 'event'),
             TermMatch('tags', 'duosecurity'),
-            PhraseMatch('details.integration','global and external openvpn','phrase'),
-            PhraseMatch('details.result','FAILURE','phrase'),
+            PhraseMatch('details.integration', 'global and external openvpn'),
+            PhraseMatch('details.result', 'FAILURE'),
         ])
 
         self.filtersManual(search_query)
@@ -42,7 +42,7 @@ class AlertManyVPNDuoAuthFailures(AlertTask):
         severity = 'NOTICE'
 
         summary = ('{0} openvpn authentication attempts by {1}'.format(aggreg['count'], aggreg['value']))
-        sourceip = self.mostCommon(aggreg['allevents'],'_source.details.ip')
+        sourceip = self.mostCommon(aggreg['allevents'], '_source.details.ip')
         for i in sourceip[:5]:
             summary += ' {0} ({1} hits)'.format(i[0], i[1])
 

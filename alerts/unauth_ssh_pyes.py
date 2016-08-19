@@ -9,8 +9,7 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryFilter, QueryStringQuery, MatchQuery
-import json
+from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 import re
 from configlib import getConfig, OptionParser
 
@@ -22,6 +21,7 @@ from configlib import getConfig, OptionParser
 # hostfilter <ES compatible regexp>
 # user username
 # skiphosts 1.2.3.4 2.3.4.5
+
 
 class AlertUnauthSSH(AlertTask):
     def main(self):
@@ -35,12 +35,12 @@ class AlertUnauthSSH(AlertTask):
             TermMatch('_type', 'event'),
             TermMatch('category', 'syslog'),
             TermMatch('details.program', 'sshd'),
-            QueryFilter(QueryStringQuery('details.hostname: /{}/'.format(self.config.hostfilter))),
-            QueryFilter(MatchQuery('summary', 'Accepted publickey {}'.format(self.config.user), operator='and'))
+            QueryStringMatch('details.hostname: /{}/'.format(self.config.hostfilter)),
+            PhraseMatch('summary', 'Accepted publickey {}'.format(self.config.user))
         ])
 
         for x in self.config.skiphosts:
-            search_query.add_must_not(QueryFilter(MatchQuery('summary', x)))
+            search_query.add_must_not(PhraseMatch('summary', x))
 
         self.filtersManual(search_query)
         self.searchEventsSimple()

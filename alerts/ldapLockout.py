@@ -9,7 +9,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class ldapLockout(AlertTask):
@@ -19,7 +19,7 @@ class ldapLockout(AlertTask):
         search_query.add_must([
             TermMatch('category', 'ldapChange'),
             TermMatch("actor", "cn=admin,dc=mozilla"),
-            QueryFilter(MatchQuery('changepairs', 'replace:pwdAccountLockedTime','phrase'))
+            PhraseMatch('changepairs', 'replace:pwdAccountLockedTime')
         ])
         self.filtersManual(search_query)
 

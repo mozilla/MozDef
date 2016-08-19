@@ -13,7 +13,7 @@
 # Alicia Smith <asmith@mozilla.com>
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertUnauthPortScan(AlertTask):
@@ -25,7 +25,7 @@ class AlertUnauthPortScan(AlertTask):
             TermMatch('category', 'bronotice'),
             TermMatch('eventsource', 'nsm'),
             ExistsMatch('details.sourceipaddress'),
-            QueryFilter(MatchQuery('details.note', 'Scan::Port_Scan', 'phrase')),
+            PhraseMatch('details.note', 'Scan::Port_Scan'),
         ])
 
         self.filtersManual(search_query)

@@ -20,6 +20,11 @@ class TestPhraseMatchPositiveTestSuite(PositiveTestSuite):
                 {'summary': 'we are test here source'},
                 {'summary': 'this is test'},
             ],
+            PhraseMatch('summary', '/test/abc'): [
+                {'summary': '/test/abc'},
+                {'summary': '/test/abc/def'},
+                {'summary': 'path /test/abc'},
+            ],
         }
         return tests
 

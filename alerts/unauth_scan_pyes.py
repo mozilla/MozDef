@@ -13,7 +13,7 @@
 # Alicia Smith <asmith@mozilla.com>
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertUnauthInternalScan(AlertTask):
@@ -26,7 +26,7 @@ class AlertUnauthInternalScan(AlertTask):
             TermMatch('eventsource', 'nsm'),
             TermMatch('hostname', 'nsmserver1'),
             ExistsMatch('details.sourceipaddress'),
-            QueryFilter(MatchQuery('details.note', 'Scan::Address_Scan', 'phrase')),
+            PhraseMatch('details.note', 'Scan::Address_Scan'),
         ])
 
         self.filtersManual(search_query)

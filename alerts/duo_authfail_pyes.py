@@ -8,7 +8,7 @@
 # Alicia Smith <asmith@mozilla.com>
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertDuoAuthFail(AlertTask):
@@ -20,7 +20,7 @@ class AlertDuoAuthFail(AlertTask):
             TermMatch('category', 'event'),
             ExistsMatch('details.ip'),
             ExistsMatch('details.username'),
-            QueryFilter(MatchQuery('details.result', 'FRAUD', 'phrase')),
+            PhraseMatch('details.result', 'FRAUD'),
         ])
 
         self.filtersManual(search_query)
