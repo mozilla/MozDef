@@ -9,7 +9,7 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, TermsFilter
+from query_models import SearchQuery, TermMatch, TermsMatch
 
 
 class AlertCloudtrail(AlertTask):
@@ -18,7 +18,7 @@ class AlertCloudtrail(AlertTask):
 
         search_query.add_must([
             TermMatch('_type', 'cloudtrail'),
-            TermsFilter('eventName', ['runinstances',
+            TermsMatch('eventName', ['runinstances',
                                       'stopinstances',
                                       'startinstances'])
         ])
