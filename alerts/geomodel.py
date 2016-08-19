@@ -9,7 +9,7 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery, TermFilter
+from query_models import SearchQuery, TermFilter
 
 
 class AlertGeomodel(AlertTask):

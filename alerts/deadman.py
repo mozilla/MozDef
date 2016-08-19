@@ -12,7 +12,7 @@
 # to alert on a dead input source.
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery, QueryFilter, TermFilter, MatchQuery
+from query_models import SearchQuery, QueryFilter, TermFilter, MatchQuery
 
 def fakeEvent():
     # make a fake event

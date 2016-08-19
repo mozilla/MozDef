@@ -9,7 +9,7 @@
 # Anthony Verez averez@mozilla.com
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery
+from query_models import SearchQuery
 
 
 class AlertBroIntel(AlertTask):

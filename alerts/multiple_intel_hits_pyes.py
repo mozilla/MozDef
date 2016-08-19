@@ -11,7 +11,7 @@
 # Michal Purzynski <mpurzynski@mozilla.com>
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermFilter, ExistsFilter, QueryFilter, MatchQuery
 
 
 class AlertMultipleIntelHits(AlertTask):

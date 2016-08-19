@@ -9,7 +9,7 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery, TermFilter, QueryFilter, QueryStringQuery, MatchQuery
+from query_models import SearchQuery, TermFilter, QueryFilter, QueryStringQuery, MatchQuery
 import json
 import re
 from configlib import getConfig, OptionParser

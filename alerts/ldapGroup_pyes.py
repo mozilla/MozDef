@@ -9,7 +9,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from lib.query_classes import SearchQuery, TermFilter, QueryFilter, MatchQuery
+from query_models import SearchQuery, TermFilter, QueryFilter, MatchQuery
 
 
 class ldapGroupModify(AlertTask):
