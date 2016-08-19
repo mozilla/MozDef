@@ -27,7 +27,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 
 from elasticsearch_client import ElasticsearchClient
-from query_models import ExistsMatch, RangeMatch
+from query_models import ExistsMatch, RangeMatch, PhraseMatch, TermMatch, TermsMatch, MissingMatch
 
 
 def toUTC(suspectedDate, localTimeZone=None):
@@ -255,7 +255,7 @@ class AlertTask(Task):
                     value = filt['query']
                     if '\"' in value:
                         value = value.split('\"')[1]
-                        esfilt = QueryFilter(MatchQuery(fieldname, value, 'phrase'))
+                        esfilt = PhraseMatch(fieldname, value)
                     else:
                         esfilt = TermMatch(fieldname, value)
                 else:
@@ -265,18 +265,18 @@ class AlertTask(Task):
                         # self.log.info('exists %s' % value.split('.')[-1])
                     # _missing_:field
                     elif filt['query'].startswith('_missing_:'):
-                        esfilt = MissingFilter(value.split('.')[-1])
+                        esfilt = MissingMatch(value.split('.')[-1])
                         # self.log.info('missing %s' % value.split('.')[-1])
                     # field:"value"
                     elif '\"' in value:
                         value = value.split('\"')[1]
-                        esfilt = QueryFilter(MatchQuery(fieldname, value, 'phrase'))
+                        esfilt = PhraseMatch(fieldname, value)
                         # self.log.info("phrase %s %s" % (fieldname, value))
                     # field:(value1 value2 value3)
                     elif '(' in value and ')' in value:
                         value = value.split('(')[1]
                         value = value.split('(')[0]
-                        esfilt = QueryFilter(MatchQuery(fieldname, value, "boolean"))
+                        esfilt = TermsMatch(fieldname, value)
                     # field:value
                     else:
                         esfilt = TermMatch(fieldname, value)
