@@ -31,6 +31,10 @@ from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+from elasticsearch_client import ElasticsearchClient
+from query_models import SearchQuery, TermMatch, RangeMatch
+
 options = None
 pluginList = list()   # tuple of module,registration dict,priority
 
@@ -577,21 +581,23 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
 def kibanaDashboards():
     try:
         resultsList = []
-        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-        r = es.search(pyes.Search(pyes.MatchAllQuery(), size=100),
-            'kibana-int', 'dashboard')
-        if r:
-            for dashboard in r:
-                dashboardJson = json.loads(dashboard.dashboard)
-                resultsList.append({
-                    'name': dashboardJson['title'],
-                    'url': "%s/%s/%s" % (options.kibanaurl,
-                        "index.html#/dashboard/elasticsearch",
-                        dashboardJson['title'])
-                })
-            return json.dumps(resultsList)
-        else:
+        es_client = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('_type', 'dashboard'))
+        results = search_query.execute(es_client, indices=['kibana-int'])
+
+        for dashboard in results:
+            resultsList.append({
+                'name': dashboard['_source']['title'],
+                'url': "%s/%s/%s" % (options.kibanaurl,
+                    "index.html#/dashboard/elasticsearch",
+                    dashboard['_source']['title'])
+            })
+
+        if results == []:
             sys.stderr.write('No Kibana dashboard found\n')
+
+        return json.dumps(resultsList)
     except pyes.exceptions.NoServerAvailable:
         sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
 

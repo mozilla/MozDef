@@ -6,6 +6,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient
 
 from datetime import datetime
+from datetime import timedelta
+from dateutil.parser import parse
+import pytz
 
 
 class ElasticsearchException(Exception):
@@ -30,12 +33,24 @@ class UnitTestSuite(object):
 
     def setup_elasticsearch(self):
         self.es_client.create_index(self.index_name)
+        self.es_client.create_index('alerts')
         self.es_client.create_alias('events', self.index_name)
         self.es_client.create_alias('events-previous', self.index_name)
 
     def reset_elasticsearch(self):
         self.es_client.delete_index(self.index_name, True)
+        self.es_client.delete_index('alerts', True)
         self.es_client.delete_index('events', True)
         self.es_client.delete_index('events-previous', True)
-        self.es_client.delete_index('alerts', True)
+        # Delete templates
+        # self.es_client.delete_template('eventstemplate')
+        # self.es_client.delete_template('alertstemplate')
 
+    def current_timestamp(self):
+        return pytz.UTC.normalize(pytz.timezone("UTC").localize(datetime.now())).isoformat()
+
+    def subtract_from_timestamp(self, timestamp, date_timedelta):
+        utc_time = parse(timestamp)
+        custom_date = utc_time - timedelta(**date_timedelta)
+
+        return custom_date.isoformat()

@@ -7,11 +7,6 @@ from lib.config import LOGGING, ES
 
 from unit_test_suite import UnitTestSuite
 
-
-from datetime import datetime
-from datetime import timedelta
-from dateutil.parser import parse
-import pytz
 import random
 
 
@@ -97,17 +92,11 @@ class AlertTestSuite(UnitTestSuite):
         assert len(self.alert_task.alert_ids) == 0
 
     def get_alert_by_id(self, alert_id):
-        return self.es_client.get_alert(alert_id)
+        self.es_client.flush('alerts')
+        return self.es_client.get_alert_by_id(alert_id)
 
     def random_ip(self):
         return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
 
-    def current_timestamp(self):
-        return pytz.UTC.normalize(pytz.timezone("UTC").localize(datetime.now())).isoformat()
 
-    def subtract_from_timestamp(self, timestamp, date_timedelta):
-        utc_time = parse(timestamp)
-        custom_date = utc_time - timedelta(**date_timedelta)
-
-        return custom_date.isoformat()
 

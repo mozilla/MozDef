@@ -11,6 +11,7 @@ from duo_fail_open import AlertDuoFailOpen
 THRESHOLD_NUMBER = 1
 SAMPLESLIMIT_NUMBER = 10
 
+
 class DuoFailOpenTest(AlertTestSuite):
     def alert_class(self):
         return AlertDuoFailOpen

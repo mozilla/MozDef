@@ -1,16 +1,18 @@
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
+from query_models import SearchQuery, TermMatch, BooleanMatch
+
+import json
+
 # Remove this code when pyes is gone!
-import pyes
-import pyes_enabled
-from config import ESv134
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../alerts/lib"))
+import pyes
+import pyes_enabled
+from config import ESv134
 # Remove this code when pyes is gone!
-
-from query_models import TermMatch, SearchQuery, BooleanMatch
 
 
 class ElasticsearchClient():
@@ -67,11 +69,11 @@ class ElasticsearchClient():
 
     def update_event(self, index, doc_type, event_id, event):
         if pyes_enabled.pyes_on is True:
-            self.pyes_client.update(index, doc_type,event_id, document=event)
+            self.pyes_client.update(index, doc_type, event_id, document=event)
         else:
             self.es.index(index=index, doc_type=doc_type, id=event_id, body=event)
 
-    def search(self, search_query, indices=['events']):
+    def search(self, search_query, indices):
         results = []
         if pyes_enabled.pyes_on is True:
             esresults = self.pyes_client.search(search_query, size=1000, indices=','.join(map(str, indices)))
@@ -88,18 +90,32 @@ class ElasticsearchClient():
         else:
             return self.es.index(index='alerts', doc_type='alert', body=alert)
 
-    def get_alert(self, alert_id):
-        # todo Improve this
-        if pyes_enabled.pyes_on is True:
-            tmatch = TermMatch('_id', alert_id)
-            search_query = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-            search_query.filters.append(BooleanMatch(must=[tmatch], should=[], must_not=[]))
-            import time
-            time.sleep(1)
-            return self.search(search_query, ['alerts'])[0]
+    def get_alert_by_id(self, alert_id):
+        id_match = TermMatch('_id', alert_id)
+        search_query = SearchQuery()
+        search_query.add_must(id_match)
+        results = search_query.execute(self, indices=['alerts'])
+        if len(results) == 0:
+            return None
         else:
-            tmatch = BooleanMatch(must=[TermMatch('_id', alert_id)])
-            import time
-            time.sleep(1)
-            return self.search(tmatch, ['alerts'])[0]
+            return results[0]
+
+    def save_dashboard(self, dash_file, dash_name=None):
+        f = open(dash_file)
+        dashboardjson = json.load(f)
+        title = dashboardjson['title']
+        if dash_name:
+            title = dash_name
+        dashboarddata = {
+            "user": "guest",
+            "group": "guest",
+            "title": title,
+            "dashboard": json.dumps(dashboardjson)
+        }
+        f.close()
+
+        if pyes_enabled.pyes_on is True:
+            return self.pyes_client.index(index='kibana-int', doc_type='dashboard', doc=dashboarddata)
+        else:
+            return self.es.index(index='kibana-int', doc_type='dashboard', body=dashboarddata)
 
