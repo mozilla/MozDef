@@ -1,0 +1,17 @@
+[Unit]
+Description=MongoDB Database Service
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/mozdefdb/mozdefdb.pid
+ExecStart=/usr/bin/mongod --config /etc/mongod.conf
+ExecReload=/bin/kill -HUP $MAINPID
+#Restart=always
+User=mozdef
+Group=mozdef
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
