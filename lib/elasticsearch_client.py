@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
-from query_models import SearchQuery, TermMatch, BooleanMatch
+from query_models import SearchQuery, TermMatch, BooleanMatch, AggregatedResults, SimpleResults
 
 import json
 
@@ -77,12 +77,29 @@ class ElasticsearchClient():
         results = []
         if pyes_enabled.pyes_on is True:
             esresults = self.pyes_client.search(search_query, size=1000, indices=','.join(map(str, indices)))
-            results = esresults._search_raw()['hits']['hits']
+            results = esresults._search_raw()
         else:
-            esresults = Search(using=self.es, index=indices).query(search_query).execute()
-            results = esresults.hits.hits
+            results = Search(using=self.es, index=indices).query(search_query).execute()
 
-        return results
+        result_set = SimpleResults(results)
+        return result_set
+
+    def aggregated_search(self, search_query, indices, aggregations):
+        if pyes_enabled.pyes_on is True:
+                query = search_query.search()
+                for field_name in aggregations:
+                    query.facet.add_term_facet(field_name)
+
+                esresults = self.pyes_client.search(query, size=1000, indices=','.join(map(str, indices)))
+                results = esresults._search_raw()
+        else:
+                search_obj = Search(using=self.es, index=indices)
+                query_obj = search_obj.query(search_query)
+                for field_name in aggregations:
+                    query_obj.aggs.bucket(field_name.to_dict()['terms']['field'], field_name)
+                results = query_obj.execute()
+        result_set = AggregatedResults(results)
+        return result_set
 
     def save_alert(self, alert):
         if pyes_enabled.pyes_on is True:
@@ -103,6 +120,7 @@ class ElasticsearchClient():
     def save_dashboard(self, dash_file, dash_name=None):
         f = open(dash_file)
         dashboardjson = json.load(f)
+        f.close()
         title = dashboardjson['title']
         if dash_name:
             title = dash_name
@@ -112,7 +130,6 @@ class ElasticsearchClient():
             "title": title,
             "dashboard": json.dumps(dashboardjson)
         }
-        f.close()
 
         if pyes_enabled.pyes_on is True:
             return self.pyes_client.index(index='kibana-int', doc_type='dashboard', doc=dashboarddata)

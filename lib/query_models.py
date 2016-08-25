@@ -1,5 +1,5 @@
-from elasticsearch_dsl import Q, Search
-
+from elasticsearch_dsl import Q, Search, A
+from dotmap import DotMap
 
 import pyes
 import pyes_enabled
@@ -59,12 +59,114 @@ def QueryStringMatch(query_str):
     return Q('query_string', query=query_str)
 
 
+def Aggregation(field_name):
+    if pyes_enabled.pyes_on is True:
+        return field_name
+
+    return A('terms', field=field_name)
+
+
+def AggregatedResults(input_results):
+    if pyes_enabled.pyes_on is True:
+        converted_results = {
+            'meta': {
+                'timed_out': input_results.timed_out
+            },
+            'hits': [],
+            'aggregations': {}
+        }
+        for hit in input_results.hits.hits:
+            hit_dict = {
+                '_id': unicode(hit['_id']),
+                '_type': hit['_type'],
+                '_index': hit['_index'],
+                '_score': hit['_score'],
+                'data': hit['_source'],
+            }
+            converted_results['hits'].append(hit_dict)
+
+        for facet_name, facet_value in input_results.facets.iteritems():
+            aggregation_dict = {
+                'terms': []
+            }
+            for term in facet_value.terms:
+                aggregation_dict['terms'].append({'count': term.count, 'key': term.term})
+            converted_results['aggregations'][facet_name] = aggregation_dict
+    else:
+        converted_results = {
+            'meta': {
+                'timed_out': input_results.timed_out
+            },
+            'hits': [],
+            'aggregations': {}
+        }
+        for hit in input_results.hits:
+            hit_dict = {
+                '_id': hit.meta.id,
+                '_type': hit.meta.doc_type,
+                '_index': hit.meta.index,
+                '_score': hit.meta.score,
+                'data': hit.to_dict()
+            }
+            converted_results['hits'].append(hit_dict)
+
+        for agg_name, aggregation in input_results.aggregations.to_dict().iteritems():
+            aggregation_dict = {
+                'terms': []
+            }
+            for bucket in aggregation['buckets']:
+                aggregation_dict['terms'].append({'count': bucket['doc_count'], 'key': bucket['key']})
+
+            converted_results['aggregations'][agg_name] = aggregation_dict
+
+    return DotMap(converted_results)
+
+
+def SimpleResults(input_results):
+    if pyes_enabled.pyes_on is True:
+        converted_results = {
+            'meta': {
+                'timed_out': input_results.timed_out
+            },
+            'hits': []
+        }
+        for hit in input_results.hits.hits:
+            hit_dict = {
+                '_id': unicode(hit['_id']),
+                '_type': hit['_type'],
+                '_index': hit['_index'],
+                '_score': hit['_score'],
+                'data': hit['_source'],
+            }
+            converted_results['hits'].append(hit_dict)
+    else:
+        converted_results = {
+            'meta': {
+                'timed_out': input_results.timed_out,
+            },
+            'hits': []
+        }
+        for hit in input_results.hits:
+            hit_dict = {
+                '_id': hit.meta.id,
+                '_type': hit.meta.doc_type,
+                '_index': hit.meta.index,
+                '_score': hit.meta.score,
+                'data': hit.to_dict()
+            }
+
+            converted_results['hits'].append(hit_dict)
+
+    return DotMap(converted_results)
+
+
 class SearchQuery():
     def __init__(self, *args, **kwargs):
         self.date_timedelta = dict(kwargs)
         self.must = []
         self.must_not = []
         self.should = []
+        self.aggregation = []
 
     def append_to_array(self, in_array, in_obj):
         """
@@ -86,12 +188,30 @@ class SearchQuery():
     def add_should(self, input_obj):
         self.append_to_array(self.should, input_obj)
 
+    def add_aggregation(self, input_obj):
+        self.append_to_array(self.aggregation, input_obj)
+        # self.aggregatio
+        # self.aggregation[name] = input_obj
+
     def execute(self, elasticsearch_client, indices=['events', 'events-previous']):
         search_query = None
         if pyes_enabled.pyes_on is True:
             search_query = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-            search_query.filters.append(BooleanMatch(must=self.must, should=self.should, must_not=self.must_not))
+            search_query.filters.append(BooleanMatch(
+                must=self.must, should=self.should, must_not=self.must_not))
         else:
-            search_query = BooleanMatch(must=self.must, must_not=self.must_not, should=self.should)
-        results = elasticsearch_client.search(search_query, indices)
+            search_query = BooleanMatch(
+                must=self.must, must_not=self.must_not, should=self.should)
+
+        # Remove try catch statement when we remove pyes_on
+        # results = []
+        try:
+            if len(self.aggregation) == 0:
+                results = elasticsearch_client.search(search_query, indices)
+            else:
+                results = elasticsearch_client.aggregated_search(
+                    search_query, indices, self.aggregation)
+        except RuntimeError:
+            results = []
+
         return results
