@@ -1,8 +1,12 @@
 from elasticsearch_dsl import Q, Search, A
-from dotmap import DotMap
 
 import pyes
 import pyes_enabled
+
+from utilities.to_utc import toUTC
+
+from datetime import datetime
+from datetime import timedelta
 
 
 def ExistsMatch(field_name):
@@ -81,7 +85,7 @@ def AggregatedResults(input_results):
                 '_type': hit['_type'],
                 '_index': hit['_index'],
                 '_score': hit['_score'],
-                'data': hit['_source'],
+                '_source': hit['_source'],
             }
             converted_results['hits'].append(hit_dict)
 
@@ -106,7 +110,7 @@ def AggregatedResults(input_results):
                 '_type': hit.meta.doc_type,
                 '_index': hit.meta.index,
                 '_score': hit.meta.score,
-                'data': hit.to_dict()
+                '_source': hit.to_dict()
             }
             converted_results['hits'].append(hit_dict)
 
@@ -119,7 +123,7 @@ def AggregatedResults(input_results):
 
             converted_results['aggregations'][agg_name] = aggregation_dict
 
-    return DotMap(converted_results)
+    return converted_results
 
 
 def SimpleResults(input_results):
@@ -136,7 +140,7 @@ def SimpleResults(input_results):
                 '_type': hit['_type'],
                 '_index': hit['_index'],
                 '_score': hit['_score'],
-                'data': hit['_source'],
+                '_source': hit['_source'],
             }
             converted_results['hits'].append(hit_dict)
     else:
@@ -152,12 +156,12 @@ def SimpleResults(input_results):
                 '_type': hit.meta.doc_type,
                 '_index': hit.meta.index,
                 '_score': hit.meta.score,
-                'data': hit.to_dict()
+                '_source': hit.to_dict()
             }
 
             converted_results['hits'].append(hit_dict)
 
-    return DotMap(converted_results)
+    return converted_results
 
 
 class SearchQuery():
@@ -190,10 +194,17 @@ class SearchQuery():
 
     def add_aggregation(self, input_obj):
         self.append_to_array(self.aggregation, input_obj)
-        # self.aggregatio
-        # self.aggregation[name] = input_obj
 
     def execute(self, elasticsearch_client, indices=['events', 'events-previous']):
+        if self.must == [] and self.must_not == [] and self.should == []:
+            raise AttributeError('Must define a must, must_not, or should query')
+
+        if self.date_timedelta:
+            end_date = toUTC(datetime.now())
+            begin_date = toUTC(datetime.now() - timedelta(**self.date_timedelta))
+            range_query = RangeMatch('utctimestamp', begin_date, end_date)
+            self.add_must(range_query)
+
         search_query = None
         if pyes_enabled.pyes_on is True:
             search_query = pyes.ConstantScoreQuery(pyes.MatchAllQuery())

@@ -1,31 +1,143 @@
-# from positive_test_suite import PositiveTestSuite
-# from negative_test_suite import NegativeTestSuite
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from query_models import SearchQuery, Aggregation, ExistsMatch
+from query_models import SearchQuery, Aggregation, TermMatch
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
 
 
 class TestAggregation(UnitTestSuite):
-    def testing(self):
+    def test_simple_aggregation(self):
         events = [
             {"test": "value", "note": "abvc"},
             {"test": "value", "note": "abvc"},
             {"test": "value", "note": "think"},
+            {"test": "value", "summary": "think"},
         ]
         for event in events:
             self.populate_test_event(event)
         search_query = SearchQuery()
-        search_query.add_must(ExistsMatch('note'))
-        aggreg = Aggregation('note')
-        search_query.add_aggregation(aggreg)
+        search_query.add_must(TermMatch('test', 'value'))
+        search_query.add_aggregation(Aggregation('note'))
         results = search_query.execute(self.es_client)
-        assert True is True
-        # import pdb
-        # pdb.set_trace()
-        # print results
-        # results = normalize_results(unformatted_results)
-        # assert results['aggregations']['note_terms']['buckets'][0]['count'] == 2
-        # assert results['aggregations']['note_terms']['buckets'][1]['count'] == 2
+
+        assert results['aggregations'].keys() == ['note']
+
+        assert results['aggregations']['note'].keys() == ['terms']
+        assert len(results['aggregations']['note']['terms']) == 2
+        assert results['aggregations']['note']['terms'][0].keys() == ['count', 'key']
+
+        assert results['aggregations']['note']['terms'][0]['count'] == 2
+        assert results['aggregations']['note']['terms'][0]['key'] == 'abvc'
+
+        assert results['aggregations']['note']['terms'][1]['count'] == 1
+        assert results['aggregations']['note']['terms'][1]['key'] == 'think'
+
+    def test_multiple_aggregations(self):
+        events = [
+            {"test": "value", "note": "abvc"},
+            {"test": "value", "note": "abvc"},
+            {"test": "value", "note": "think"},
+            {"test": "value", "summary": "think"},
+        ]
+        for event in events:
+            self.populate_test_event(event)
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('test', 'value'))
+        search_query.add_aggregation(Aggregation('note'))
+        search_query.add_aggregation(Aggregation('test'))
+        results = search_query.execute(self.es_client)
+
+        assert results['aggregations'].keys() == ['note', 'test']
+
+        assert results['aggregations']['note'].keys() == ['terms']
+        assert len(results['aggregations']['note']['terms']) == 2
+        assert results['aggregations']['note']['terms'][0].keys() == ['count', 'key']
+
+        assert results['aggregations']['note']['terms'][0]['count'] == 2
+        assert results['aggregations']['note']['terms'][0]['key'] == 'abvc'
+
+        assert results['aggregations']['note']['terms'][1]['count'] == 1
+        assert results['aggregations']['note']['terms'][1]['key'] == 'think'
+
+        assert results['aggregations']['test'].keys() == ['terms']
+        assert len(results['aggregations']['test']['terms']) == 1
+        assert results['aggregations']['test']['terms'][0].keys() == ['count', 'key']
+
+        assert results['aggregations']['test']['terms'][0]['count'] == 4
+        assert results['aggregations']['test']['terms'][0]['key'] == 'value'
+
+    def test_aggregation_non_existing_term(self):
+        events = [
+            {"test": "value", "note": "abvc"},
+            {"test": "value", "note": "abvc"},
+            {"test": "value", "note": "think"},
+            {"test": "value", "summary": "think"},
+        ]
+        for event in events:
+            self.populate_test_event(event)
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('test', 'value'))
+        search_query.add_aggregation(Aggregation('example'))
+        results = search_query.execute(self.es_client)
+
+        assert results.keys() == ['hits', 'meta', 'aggregations']
+        assert len(results['hits']) == 4
+        assert results['aggregations'].keys() == ['example']
+
+        assert results['aggregations']['example'].keys() == ['terms']
+        assert results['aggregations']['example']['terms'] == []
+
+    def test_aggregation_multiple_layers(self):
+        events = [
+            {
+                "test": "value",
+                "details": {"ip": "127.0.0.1"},
+            },
+            {
+                "test": "value",
+                "details": {"ip": "127.0.0.1"},
+            },
+            {
+                "test": "value",
+                "details": {"ip": "192.168.1.1"},
+            },
+        ]
+
+        for event in events:
+            self.populate_test_event(event)
+
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('test', 'value'))
+        search_query.add_aggregation(Aggregation('details.ip'))
+        results = search_query.execute(self.es_client)
+
+        assert results['aggregations'].keys() == ['details.ip']
+        assert results['aggregations']['details.ip'].keys() == ['terms']
+        assert len(results['aggregations']['details.ip']['terms']) == 2
+
+        assert results['aggregations']['details.ip']['terms'][0]['count'] == 2
+        assert results['aggregations']['details.ip']['terms'][0]['key'] == "127.0.0.1"
+
+        assert results['aggregations']['details.ip']['terms'][1]['count'] == 1
+        assert results['aggregations']['details.ip']['terms'][1]['key'] == "192.168.1.1"
+
+    def test_aggregation_non_existing_layers_term(self):
+        events = [
+            {"test": "value", "note": "abvc"},
+            {"test": "value", "note": "abvc"},
+            {"test": "value", "note": "think"},
+            {"test": "value", "summary": "think"},
+        ]
+        for event in events:
+            self.populate_test_event(event)
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('test', 'value'))
+        search_query.add_aggregation(Aggregation('details.ipinformation'))
+        results = search_query.execute(self.es_client)
+
+        assert results['aggregations'].keys() == ['details.ipinformation']
+        assert results['aggregations']['details.ipinformation'].keys() == ['terms']
+        assert len(results['aggregations']['details.ipinformation']['terms']) == 0
+
+# q2.facet.add_term_facet('details.dn', size=20)

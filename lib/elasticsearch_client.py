@@ -98,6 +98,7 @@ class ElasticsearchClient():
                 for field_name in aggregations:
                     query_obj.aggs.bucket(field_name.to_dict()['terms']['field'], field_name)
                 results = query_obj.execute()
+
         result_set = AggregatedResults(results)
         return result_set
 
@@ -112,10 +113,10 @@ class ElasticsearchClient():
         search_query = SearchQuery()
         search_query.add_must(id_match)
         results = search_query.execute(self, indices=['alerts'])
-        if len(results) == 0:
+        if len(results['hits']) == 0:
             return None
         else:
-            return results[0]
+            return results['hits'][0]
 
     def save_dashboard(self, dash_file, dash_name=None):
         f = open(dash_file)

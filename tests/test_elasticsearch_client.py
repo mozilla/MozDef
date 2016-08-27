@@ -1,12 +1,9 @@
-import pytest
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 sys.path.append(os.path.join(os.path.dirname(__file__), "../alerts/lib"))
 
 from unit_test_suite import UnitTestSuite
-from elasticsearch_client import ElasticsearchClient
-from config import ES
 
 
 class ElasticsearchClientTest(UnitTestSuite):
@@ -51,7 +48,7 @@ class TestWriteWithRead(ElasticsearchClientTest):
     def test_saved_index(self):
         assert self.saved_alert['_index'] == 'alerts'
 
-    def test_alert_data(self):
+    def test_alert_source(self):
         self.fetched_alert = self.es_client.get_alert_by_id(self.saved_alert['_id'])
         assert self.fetched_alert['_source'] == self.alert
 

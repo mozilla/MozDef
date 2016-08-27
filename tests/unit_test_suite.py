@@ -11,10 +11,6 @@ from dateutil.parser import parse
 import pytz
 
 
-class ElasticsearchException(Exception):
-    pass
-
-
 class UnitTestSuite(object):
     def setup(self):
         self.index_name = datetime.now().strftime("events-%Y%m%d")

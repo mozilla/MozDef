@@ -92,8 +92,6 @@ class AlertTask(Task):
     def __init__(self):
         self.alert_name = self.__class__.__name__
         self.main_query = None
-        self.begindateUTC = None
-        self.enddateUTC = None
         # List of events
         self.events = None
         # List of aggregations
@@ -218,12 +216,6 @@ class AlertTask(Task):
         must, should and must_not are pyes filter objects lists
         see http://pyes.readthedocs.org/en/latest/references/pyes.filters.html
         """
-
-        self.begindateUTC = toUTC(datetime.now() - timedelta(**query.date_timedelta))
-        self.enddateUTC = toUTC(datetime.now())
-
-        range_query = RangeMatch('utctimestamp', self.begindateUTC, self.enddateUTC)
-        query.add_must(range_query)
 
         # Don't fire on already alerted events
         if ExistsMatch('alerttimestamp') not in query.must_not:

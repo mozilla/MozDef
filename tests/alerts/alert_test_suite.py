@@ -70,29 +70,24 @@ class AlertTestSuite(UnitTestSuite):
     def verify_alert(self, expected_alert):
         assert len(self.alert_task.alert_ids) != 0
 
+        self.es_client.flush('alerts')
         for alert_id in self.alert_task.alert_ids:
             alert = self.get_alert_by_id(alert_id)
 
             assert alert['_index'] == 'alerts'
             assert alert['_type'] == 'alert'
 
-            assert alert['_source']['category'] == expected_alert[
-                '_source']['category']
-            assert alert['_source']['severity'] == expected_alert[
-                '_source']['severity']
-            assert alert['_source']['summary'] == expected_alert[
-                '_source']['summary']
-            assert alert['_source'][
-                'tags'] == expected_alert['_source']['tags']
+            assert alert['_source']['category'] == expected_alert['_source']['category']
+            assert alert['_source']['severity'] == expected_alert['_source']['severity']
+            assert alert['_source']['summary'] == expected_alert['_source']['summary']
+            assert alert['_source']['tags'] == expected_alert['_source']['tags']
 
-            assert len(alert['_source']['events']) == len(
-                expected_alert['_source']['events'])
+            assert len(alert['_source']['events']) == len( expected_alert['_source']['events'])
 
     def verify_alert_not_fired(self):
         assert len(self.alert_task.alert_ids) == 0
 
     def get_alert_by_id(self, alert_id):
-        self.es_client.flush('alerts')
         return self.es_client.get_alert_by_id(alert_id)
 
     def random_ip(self):

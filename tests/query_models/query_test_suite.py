@@ -17,14 +17,16 @@ class QueryTestSuite(UnitTestSuite):
             # else:
             #     print "\t[ERROR]"
 
-            assert len(query_result) is 1
+            assert query_result['meta']['timed_out'] is False
+            assert len(query_result['hits']) is 1
         else:
             # if len(query_result) is 0:
             #     print "\t[SUCCESS]"
             # else:
             #     print "\t[ERROR]"
 
-            assert len(query_result) is 0
+            assert query_result['meta']['timed_out'] is False
+            assert len(query_result['hits']) is 0
 
     def test_query_class(self):
         # print ""
@@ -36,7 +38,7 @@ class QueryTestSuite(UnitTestSuite):
                 self.populate_test_event(event)
 
                 # Testing must
-                search_query = SearchQuery(minutes=1)
+                search_query = SearchQuery()
                 search_query.add_must(query)
                 query_result = search_query.execute(self.es_client)
                 # replace print statement with a specific py.test unit test, so that it shows up in total tests run
@@ -44,7 +46,7 @@ class QueryTestSuite(UnitTestSuite):
                 self.verify_test(query_result, self.positive_test)
 
                 # Testing must_not
-                search_query = SearchQuery(minutes=1)
+                search_query = SearchQuery()
                 search_query.add_must_not(query)
                 query_result = search_query.execute(self.es_client)
                 # replace print statement with a specific py.test unit test, so that it shows up in total tests run
