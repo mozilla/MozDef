@@ -288,7 +288,8 @@ class AlertTask(Task):
         Search events matching filters, store events in self.events
         """
         try:
-            self.events = self.main_query.execute(self.es, indices=self.event_indices)
+            results = self.main_query.execute(self.es, indices=self.event_indices)
+            self.events = results['hits']
             self.log.debug(self.events)
         except Exception as e:
             self.log.error('Error while searching events in ES: {0}'.format(e))
@@ -308,7 +309,8 @@ class AlertTask(Task):
         ex: details.sourceipaddress
         """
         try:
-            results = self.main_query.execute(self.es, indices=self.event_indices)
+            esresults = self.main_query.execute(self.es, indices=self.event_indices)
+            results = esresults['hits']
 
             # List of aggregation values that can be counted/summarized by Counter
             # Example: ['evil@evil.com','haxoor@noob.com', 'evil@evil.com'] for an email aggregField

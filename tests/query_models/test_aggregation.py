@@ -139,5 +139,3 @@ class TestAggregation(UnitTestSuite):
         assert results['aggregations'].keys() == ['details.ipinformation']
         assert results['aggregations']['details.ipinformation'].keys() == ['terms']
         assert len(results['aggregations']['details.ipinformation']['terms']) == 0
-
-# q2.facet.add_term_facet('details.dn', size=20)
