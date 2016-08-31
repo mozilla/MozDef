@@ -7,7 +7,7 @@
 #
 # Contributors:
 # Alicia Smith <asmith@mozilla.com>
-# Aaron Meihm <ameihm@mozilla.com>
+# A majority written by Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
 import pyes
@@ -28,7 +28,7 @@ class AlertAuthSignRelengSSH(AlertTask):
     def main(self):
         date_timedelta = dict(minutes=30)
 
-        self.config_file = './unauth_ssh_signreleng_pyes.conf'
+        self.config_file = './ssh_access_signreleng_pyes.conf'
         self.config = None
         self.initConfiguration()
 
