@@ -17,6 +17,40 @@ class TestTermMatchPositiveTestSuite(PositiveTestSuite):
                 {'summary': 'example test summary'},
                 {'summary': 'example summary test'},
             ],
+
+            # ES v 2.3
+            TermMatch('summary', 'ldap'): [
+                {'summary': 'LDAP'},
+                {'summary': 'lDaP'},
+                {'summary': 'ldap'},
+            ],
+
+            TermMatch('summary', 'LDAP'): [
+                {'summary': 'LDAP'},
+                {'summary': 'lDaP'},
+                {'summary': 'ldap'},
+            ],
+
+            TermMatch('summary', 'LDAP_INVALID_CREDENTIALS'): [
+                {'summary': 'LDaP_InVaLID_CREDeNTiALS'},
+            ],
+
+            TermMatch('details.results', 'LDAP_INVALID_CREDENTIALS'): [
+                {
+                    'details':
+                    {
+                        "results": "LDAP_INVALID_CREDENTIALS",
+                    }
+                }
+            ],
+            TermMatch('details.results', 'ldap'): [
+                {
+                    'details':
+                    {
+                        "results": "LDAP",
+                    }
+                }
+            ],
         }
         return tests
 
@@ -34,6 +68,6 @@ class TestTermMatchNegativeTestSuite(NegativeTestSuite):
                 {'summary': 'example summary'},
                 {'summary': 'summary test'},
                 {'summary': 'summary'},
-            ]
+            ],
         }
         return tests

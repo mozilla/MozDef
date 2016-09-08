@@ -1,6 +1,5 @@
 import os
 import sys
-# sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from query_models import SearchQuery
 
@@ -12,7 +11,7 @@ class QueryTestSuite(UnitTestSuite):
 
     def verify_test(self, query_result, positive_test):
         if positive_test:
-            # if len(query_result) is 1:
+            # if len(query_result['hits']) is 1:
             #     print "\t[SUCCESS]"
             # else:
             #     print "\t[ERROR]"
@@ -20,7 +19,7 @@ class QueryTestSuite(UnitTestSuite):
             assert query_result['meta']['timed_out'] is False
             assert len(query_result['hits']) is 1
         else:
-            # if len(query_result) is 0:
+            # if len(query_result['hits']) is 0:
             #     print "\t[SUCCESS]"
             # else:
             #     print "\t[ERROR]"

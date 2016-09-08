@@ -82,7 +82,7 @@ class AlertTestSuite(UnitTestSuite):
             assert alert['_source']['summary'] == expected_alert['_source']['summary']
             assert alert['_source']['tags'] == expected_alert['_source']['tags']
 
-            assert len(alert['_source']['events']) == len( expected_alert['_source']['events'])
+            assert len(alert['_source']['events']) == len(expected_alert['_source']['events'])
 
     def verify_alert_not_fired(self):
         assert len(self.alert_task.alert_ids) == 0

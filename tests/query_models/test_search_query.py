@@ -125,7 +125,6 @@ class TestExecute(SearchQueryUnitTest):
         assert results['hits'][0]['_type'] == 'event'
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
-        assert results['hits'][0]['_score'] == 1.0
 
         assert results['hits'][0]['_source'].keys() == ['note', 'details', 'summary']
         assert results['hits'][0]['_source']['note'] == 'Example note'
@@ -139,7 +138,6 @@ class TestExecute(SearchQueryUnitTest):
         assert results['hits'][1]['_type'] == 'event'
 
         assert results['hits'][1]['_index'] == datetime.now().strftime("events-%Y%m%d")
-        assert results['hits'][1]['_score'] == 1.0
 
         assert results['hits'][1]['_source'].keys() == ['note', 'details', 'summary']
         assert results['hits'][1]['_source']['note'] == 'Example note'
@@ -179,7 +177,6 @@ class TestExecute(SearchQueryUnitTest):
         assert results['hits'][0]['_type'] == 'event'
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
-        assert results['hits'][0]['_score'] == 1.0
 
         assert results['hits'][0]['_source'].keys() == ['note', 'details', 'summary']
         assert results['hits'][0]['_source']['note'] == 'Example note'

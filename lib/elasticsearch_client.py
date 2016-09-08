@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
-from query_models import SearchQuery, TermMatch, BooleanMatch, AggregatedResults, SimpleResults
+from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
 
 import json
 
@@ -79,7 +79,7 @@ class ElasticsearchClient():
             esresults = self.pyes_client.search(search_query, size=1000, indices=','.join(map(str, indices)))
             results = esresults._search_raw()
         else:
-            results = Search(using=self.es, index=indices).query(search_query).execute()
+            results = Search(using=self.es, index=indices).filter(search_query).execute()
 
         result_set = SimpleResults(results)
         return result_set
@@ -94,7 +94,7 @@ class ElasticsearchClient():
                 results = esresults._search_raw()
         else:
                 search_obj = Search(using=self.es, index=indices)
-                query_obj = search_obj.query(search_query)
+                query_obj = search_obj.filter(search_query)
                 for field_name in aggregations:
                     query_obj.aggs.bucket(field_name.to_dict()['terms']['field'], field_name)
                 results = query_obj.execute()

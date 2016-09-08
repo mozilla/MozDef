@@ -13,31 +13,28 @@ import json
 import netaddr
 import os
 import pyes
-import pytz
 import pynsive
 import random
 import re
 import requests
 import sys
 import socket
-from bottle import debug, route, run, response, request, default_app, post
+from bottle import route, run, response, request, default_app, post
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
-from elasticutils import S
-from dateutil.parser import parse
 from ipwhois import IPWhois
-from bson.son import SON
 from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient
-from query_models import SearchQuery, TermMatch, RangeMatch
+from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
+
+from utilities.to_utc import toUTC
 
 options = None
 pluginList = list()   # tuple of module,registration dict,priority
-
 
 
 def enable_cors(fn):
@@ -519,6 +516,7 @@ def isIPv4(ip):
     except:
         return False
 
+
 def esLdapResults(begindateUTC=None, enddateUTC=None):
     '''an ES query/facet to count success/failed logins'''
     resultsList = list()
@@ -528,46 +526,45 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
     if enddateUTC is None:
         enddateUTC = datetime.now()
         enddateUTC = toUTC(enddateUTC)
-    try:
-        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-            from_value=begindateUTC, to_value=enddateUTC))
-        q = pyes.MatchAllQuery()
-        q = pyes.FilteredQuery(q, qDate)
-        q = pyes.FilteredQuery(q, pyes.TermFilter('tags', 'ldap'))
-        q = pyes.FilteredQuery(q,
-            pyes.TermFilter('details.result', 'LDAP_INVALID_CREDENTIALS'))
-        q2 = q.search()
-        q2.facet.add_term_facet('details.result')
-        q2.facet.add_term_facet('details.dn', size=20)
-        results = es.search(q2, indices='events')
 
-        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com',
-            'mozillafoundation.org', 'org')
-        for t in results.facets['details.dn'].terms:
-            if t['term'] in stoplist:
+    try:
+        es_client = ElasticsearchClient(list('{0}'.format(s) for s in options.esservers))
+        search_query = SearchQuery()
+        range_match = RangeMatch('utctimestamp', begindateUTC, enddateUTC)
+
+        search_query.add_must(range_match)
+        search_query.add_must(TermMatch('tags', 'ldap'))
+
+        search_query.add_must(TermMatch('details.result', 'LDAP_INVALID_CREDENTIALS'))
+
+        search_query.add_aggregation(Aggregation('details.result'))
+        search_query.add_aggregation(Aggregation('details.dn'))
+
+        results = search_query.execute(es_client, indices=['events'])
+
+        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com', 'mozillafoundation.org', 'org', 'mozillafoundation')
+
+        for t in results['aggregations']['details.dn']['terms']:
+            if t['key'] in stoplist:
                 continue
-            #print(t['term'])
+            #print(t['key'])
             failures = 0
             success = 0
-            dn = t['term']
+            dn = t['key']
 
-            #re-query with the terms of the details.dn
-            qt = pyes.MatchAllQuery()
-            qt = pyes.FilteredQuery(qt, qDate)
-            qt = pyes.FilteredQuery(qt, pyes.TermFilter('tags', 'ldap'))
-            qt = pyes.FilteredQuery(qt,
-                pyes.TermFilter('details.dn', t['term']))
-            qt2 = qt.search()
-            qt2.facet.add_term_facet('details.result')
-            results = es.search(qt2)
-            #sys.stdout.write('{0}\n'.format(results.facets['details.result'].terms))
+            details_query = SearchQuery()
+            details_query.add_must(range_match)
+            details_query.add_must(TermMatch('tags', 'ldap'))
+            details_query.add_must(TermMatch('details.dn', dn))
+            details_query.add_aggregation(Aggregation('details.result'))
 
-            for t in results.facets['details.result'].terms:
-                #print(t['term'],t['count'])
-                if t['term'] == 'LDAP_SUCCESS':
+            results = details_query.execute(es_client)
+
+            for t in results['aggregations']['details.result']['terms']:
+                #print(t['key'],t['count'])
+                if t['key'].upper() == 'LDAP_SUCCESS':
                     success = t['count']
-                if t['term'] == 'LDAP_INVALID_CREDENTIALS':
+                if t['key'].upper() == 'LDAP_INVALID_CREDENTIALS':
                     failures = t['count']
             resultsList.append(dict(dn=dn, failures=failures,
                 success=success, begin=begindateUTC.isoformat(),
@@ -586,12 +583,12 @@ def kibanaDashboards():
         search_query.add_must(TermMatch('_type', 'dashboard'))
         results = search_query.execute(es_client, indices=['kibana-int'])
 
-        for dashboard in results:
+        for dashboard in results['hits']:
             resultsList.append({
                 'name': dashboard['_source']['title'],
                 'url': "%s/%s/%s" % (options.kibanaurl,
                     "index.html#/dashboard/elasticsearch",
-                    dashboard['_source']['title'])
+                dashboard['_source']['title'])
             })
 
         if results == []:
@@ -707,7 +704,7 @@ if __name__ == "__main__":
 else:
     parser = OptionParser()
     parser.add_option("-c", dest='configfile',
-        default=sys.argv[0].replace('.py', '.conf'),
+        default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
