@@ -3,8 +3,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/"))
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
-from lib.config import LOGGING, ES
-
 from unit_test_suite import UnitTestSuite
 
 import random
@@ -92,6 +90,5 @@ class AlertTestSuite(UnitTestSuite):
 
     def random_ip(self):
         return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
-
 
 

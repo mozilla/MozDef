@@ -12,7 +12,6 @@ import bottle
 import json
 import netaddr
 import os
-import pyes
 import pynsive
 import random
 import re
@@ -571,8 +570,8 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
                 end=enddateUTC.isoformat()))
 
         return(json.dumps(resultsList))
-    except pyes.exceptions.NoServerAvailable:
-        sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
+    except Exception as e:
+        sys.stderr.write('Error trying to get ldap results: {0}\n'.format(e))
 
 
 def kibanaDashboards():
@@ -595,8 +594,8 @@ def kibanaDashboards():
             sys.stderr.write('No Kibana dashboard found\n')
 
         return json.dumps(resultsList)
-    except pyes.exceptions.NoServerAvailable:
-        sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
+    except Exception as e:
+        sys.stderr.write('Kibana dashboard received error: {0}\n'.format(e))
 
 
 def getWhois(ipaddress):
