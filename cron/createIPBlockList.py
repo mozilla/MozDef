@@ -188,4 +188,4 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
-    s3_upload_file('/Users/aliciasmith/python/blocklist/static/qaipblocklist.txt', 'mozilla_infosec_blocklist','qaipblocklist')
+    s3_upload_file('/home/mozdef/envs/mozdef/static/qaipblocklist.txt', 'mozilla_infosec_blocklist','qaipblocklist')
