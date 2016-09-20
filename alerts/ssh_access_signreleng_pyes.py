@@ -7,7 +7,7 @@
 #
 # Contributors:
 # Alicia Smith <asmith@mozilla.com>
-# A majority written by Aaron Meihm <ameihm@mozilla.com>
+# Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
 import pyes
@@ -38,7 +38,7 @@ class AlertAuthSignRelengSSH(AlertTask):
             pyes.TermFilter('tags', 'releng'),
             pyes.TermFilter('details.program', 'sshd'),
             pyes.QueryFilter(pyes.QueryStringQuery('details.hostname: /{}/'.format(self.config.hostfilter))),
-            pyes.QueryFilter(pyes.MatchQuery('summary', 'Accepted publickey {}'))
+            pyes.QueryFilter(pyes.MatchQuery('summary', 'Accepted publickey for {}'))
         ]
         must_not = []
         for x in self.config.skiphosts:
@@ -75,5 +75,5 @@ class AlertAuthSignRelengSSH(AlertTask):
         if len(groups) > 0:
             targetuser = groups[0]
 
-        summary = 'SSH login on releng signing infra by {0} on {1} user {2}'.format(sourceipaddress, targethost, targetuser)
+        summary = 'SSH login on releng signing infra from {0} on {1} as user {2}'.format(sourceipaddress, targethost, targetuser)
         return self.createAlertDict(summary, category, tags, [event], severity)
