@@ -263,15 +263,14 @@ def initConfig():
                   options.configfile).split(','))
 
     # load any alert regexes from the config file
-    # expecting one line, tab delimited json:
+    # expecting a string representation of a json formatted array:
     # regexes={"type":"LDAP Group Update","expression":"ou=groups","severity":"INFO"}   {"type":"LDAP Delete","expression":"delete","severity":"INFO"}
     # adding a tag attribute will limit expression matching to items with that tag
     # regexes={"type":"LDAP Group Update","expression":"ou=groups","severity":"INFO","tag":"ldap"}
     regexes = getConfig('regexes', '', options.configfile)
     options.regexlist = []
     if len(regexes) > 0:
-        for r in regexes.split('\t'):
-            options.regexlist.append(json.loads(r))
+        options.regexlist = json.loads(regexes)
 
 if __name__ == '__main__':
     parser = OptionParser()
