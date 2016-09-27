@@ -173,6 +173,11 @@ class ElasticsearchClient():
         else:
             return self.es_connection.index(index='kibana-int', doc_type='dashboard', body=dashboarddata)
 
-    def flush_bulk(input):
-        print "NEED TO IMPLEMENT THIS!"
+    def flush_bulk(self):
+        if pyes_enabled.pyes_on is True:
+            self.es_connection.flush_bulk(True)
+        else:
+            # todo: need to update this so that it flushes bulk queue
+            print "NEED TO IMPLEMENT THIS!"
+            raise NotImplementedError
 

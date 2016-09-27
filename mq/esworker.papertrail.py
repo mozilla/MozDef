@@ -377,7 +377,7 @@ class taskConsumer(object):
            that bulk processing affords.
         '''
         # sys.stderr.write('mule {0} flushing bulk elastic search posts\n'.format(self.muleid))
-        self.esConnection.flush_bulk(True)
+        self.esConnection.flush_bulk()
         Timer(options.esbulktimeout, self.flush_es_bulk).start()
 
 
