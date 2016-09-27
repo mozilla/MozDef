@@ -12,7 +12,6 @@ import json
 import kombu
 import math
 import os
-import pyes
 import pytz
 import pynsive
 import re
@@ -25,6 +24,11 @@ from operator import itemgetter
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 from threading import Timer
+
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+
 
 # running under uwsgi?
 try:
@@ -223,9 +227,9 @@ def keyMapping(aDict):
 
     return returndict
 
-def esConnect(conn):
+def esConnect():
     '''open or re-open a connection to elastic search'''
-    return pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)), bulk_size=options.esbulksize)
+    return ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)), options.esbulksize)
 
 
 class taskConsumer(ConsumerMixin):
@@ -241,7 +245,7 @@ class taskConsumer(ConsumerMixin):
         else:
             self.muleid = 0
         if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the pyes bulker even if it's not full
+            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
             # to prevent events from sticking around an idle worker
             Timer(options.esbulktimeout, self.flush_es_bulk).start()
 
@@ -307,21 +311,23 @@ class taskConsumer(ConsumerMixin):
                             doctype = bodyDict['details']['deviceproduct']
 
                 try:
+                    bulk = False
                     if options.esbulksize != 0:
-                        res = self.esConnection.index(index='events', doc_type=doctype, doc=jbody, bulk=True)
-                    else:
-                        res = self.esConnection.index(index='events', doc_type=doctype, doc=jbody, bulk=False)
+                        bulk = True
 
-                except (pyes.exceptions.NoServerAvailable, pyes.exceptions.InvalidIndexNameException) as e:
+                    self.esConnection.save_event(body=jbody, doc_type=doctype, bulk=bulk)
+
+                except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                     # handle loss of server or race condition with index rotation/creation/aliasing
                     try:
-                        self.esConnection = esConnect(None)
+                        self.esConnection = esConnect()
                         message.requeue()
                         return
                     except kombu.exceptions.MessageStateError:
                         # state may be already set.
                         return
-                except pyes.exceptions.ElasticSearchException as e:
+                # todo: fix the exception
+                except ElasticsearchException as e:
                     # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
                     try:
                         sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
@@ -521,7 +527,7 @@ if __name__ == '__main__':
     initConfig()
 
     # open ES connection globally so we don't waste time opening it per message
-    es = esConnect(None)
+    es = esConnect()
 
     # force a check for plugins and establish the plugin list
     pluginList = list()

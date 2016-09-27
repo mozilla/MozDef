@@ -24,7 +24,7 @@ class UnitTestSuite(object):
         self.reset_elasticsearch()
 
     def populate_test_event(self, event, event_type='event'):
-        self.es_client.save_event(event, event_type)
+        self.es_client.save_event(body=event, doc_type=event_type)
         self.es_client.flush(self.index_name)
 
     def setup_elasticsearch(self):

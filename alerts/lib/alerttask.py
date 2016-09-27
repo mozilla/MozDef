@@ -200,7 +200,7 @@ class AlertTask(Task):
         Send alert to elasticsearch
         """
         try:
-            res = self.es.save_alert(alertDict)
+            res = self.es.save_alert(body=alertDict)
             self.log.debug('alert sent to ES')
             self.log.debug(res)
             return res
@@ -464,8 +464,7 @@ class AlertTask(Task):
                     'id': alertResultES['_id']})
                 event['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
 
-
-                self.es.update_event(event['_index'], event['_type'], event['_id'], event['_source'])
+                self.es.save_event(index=event['_index'], doc_type=event['_type'], body=event['_source'], doc_id=event['_id'])
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 

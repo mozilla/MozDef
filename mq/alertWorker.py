@@ -13,13 +13,16 @@ import dateutil.parser
 import json
 import kombu
 import logging
-import pyes
 import re
 import sys
 from configlib import getConfig, OptionParser
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 from logging.handlers import SysLogHandler
+
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex
 
 logger = logging.getLogger()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -60,13 +63,8 @@ def splitTime(inString):
     return(' '.join(outString), ' '.join(outTime))
 
 
-def esConnect(conn):
-    '''open or re-open a connection to elastic search'''
-    if isinstance(conn, pyes.es.ES):
-        return pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-    else:
-        return pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-
+def esConnect():
+    return ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
 
 class eventConsumer(ConsumerMixin):
 
@@ -127,15 +125,13 @@ class eventConsumer(ConsumerMixin):
                         msg, adate = splitTime(bodyDict['summary'])
                         bodyDict['summary'] = msg
                     try:
-                        self.esConnection.index(index='alerts',
-                                                doc_type='alert',
-                                                doc=bodyDict)
-                    except (pyes.exceptions.NoServerAvailable,
-                            pyes.exceptions.InvalidIndexNameException) as e:
+                        self.esConnection.save_alert(body=bodyDict)
+
+                    except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                         # handle loss of server or race condition with index
                         # rotation/creation/aliasing
                         try:
-                            self.esConnection = esConnect(None)
+                            self.esConnection = esConnect()
                             message.requeue()
                             return
                         except kombu.exceptions.MessageStateError:
@@ -280,5 +276,5 @@ if __name__ == '__main__':
                       help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    es = esConnect(None)
+    es = esConnect()
     main()

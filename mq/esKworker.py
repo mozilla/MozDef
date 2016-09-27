@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import time
-import pyes
 from datetime import datetime
 from dateutil.parser import parse
 import pytz
@@ -9,6 +8,10 @@ import json
 from configlib import getConfig,OptionParser
 from kombu import Connection,Queue
 from kombu.mixins import ConsumerMixin
+
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+from elasticsearch_client import ElasticsearchClient
 
 def toUTC(suspectedDate,localTimeZone=None):
     '''make a UTC date out of almost anything'''
@@ -20,7 +23,7 @@ def toUTC(suspectedDate,localTimeZone=None):
         objDate=parse(suspectedDate,fuzzy=True)
     elif type(suspectedDate)==datetime:
         objDate=suspectedDate
-    
+
     if objDate.tzinfo is None:
         objDate=pytz.timezone(localTimeZone).localize(objDate)
         objDate=utc.normalize(objDate)
@@ -28,7 +31,7 @@ def toUTC(suspectedDate,localTimeZone=None):
         objDate=utc.normalize(objDate)
     if objDate is not None:
         objDate=utc.normalize(objDate)
-        
+
     return objDate.isoformat()
 
 def removeDictAt(aDict):
@@ -51,7 +54,7 @@ def isCEF(aDict):
     #maybe it snuck in some other way
     #check some key CEF indicators (the header fields)
     if 'fields' in aDict.keys():
-    
+
         lowerKeys=[s.lower() for s in aDict['fields'].keys()]
         if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
             return True
@@ -67,19 +70,19 @@ def keyMapping(aDict):
     returndict=dict()
     #save the source event for chain of custody/forensics
     #returndict['original']=aDict
-    
+
     for k,v in aDict.iteritems():
-        
+
         if removeAt(k.lower()) in ('message','summary'):
             returndict[u'summary']=str(v)
-            
+
         if removeAt(k.lower()) in ('eventtime','timestamp'):
             returndict[u'utctimestamp']=toUTC(v)
             returndict[u'timestamp']=parse(v,fuzzy=True).isoformat()
-            
+
         if removeAt(k.lower()) in ('hostname','source_host','host'):
             returndict[u'hostname']=str(v)
-        
+
 
         if removeAt(k.lower()) in ('tags'):
             if len(v)>0:
@@ -88,17 +91,17 @@ def keyMapping(aDict):
         #nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
         if removeAt(k.lower()) in ('syslogseverity','severity','severityvalue','level'):
             returndict[u'severity']=str(v).upper()
-            
+
         if removeAt(k.lower()) in ('facility','syslogfacility'):
             returndict[u'facility']=str(v)
 
         if removeAt(k.lower()) in ('pid','processid'):
             returndict[u'processid']=str(v)
-        
+
         #nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
         if removeAt(k.lower()) in ('pname','processname','sourcename'):
             returndict[u'processname']=str(v)
-        
+
         #the file, or source
         if removeAt(k.lower()) in ('path','logger','file'):
             returndict[u'eventsource']=str(v)
@@ -110,28 +113,28 @@ def keyMapping(aDict):
         if removeAt(k.lower()) in ('fields','details'):
             if len(v)>0:
                 returndict[u'details']=v
-        
+
         #custom fields/details as a one off, not in an array fields.something=value or details.something=value
         if removeAt(k.lower()).startswith('fields.') or removeAt(k.lower()).startswith('details.'):
             #custom/parsed field
             returndict[unicode(k.lower().replace('fields','details'))]=str(v)
-    
+
     if 'utctimestamp' not in returndict.keys():
         #we didn't find a reasonable timestamp, so lets set it to now:
         returndict['utctimestamp']=toUTC(datetime.now())
-    
+
     #set the timestamp when we received it, i.e. now
     returndict['receivedtimestatmp']=toUTC(datetime.now())
-    
+
 
     return returndict
-        
+
 def normaliseJSON(jsonStringIn):
     try:
         j=json.loads(jsonStringIn)
         j=keyMapping(j)
         return j
-        
+
     except ValueError as ve:
         sys.stderr.write("Invalid json %r\n"%jsonStringIn)
         return None
@@ -142,15 +145,13 @@ def normaliseJSON(jsonStringIn):
 def callback(ch, method, properties, body):
     #print(" [*] Received %r" % (body))
     #declare elastic search connection
-    #es=pyes.ES(("http",options.esserver,options.esport))
-    #es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
     try:
         bodydict=json.loads(body)   #raw body we were sent
         jbody=normaliseJSON(body)   #normalized body with validated fields to be sent to elastic search
-        
+
         if jbody is not None:       #could be empty,or invalid
             jbody=json.JSONEncoder().encode(jbody)
-            
+
             #figure out what type of document we are indexing and post to the elastic search index.
             doctype='event'
             if isCEF(bodydict):
@@ -158,12 +159,12 @@ def callback(ch, method, properties, body):
                 doctype='cef'
                 if 'deviceproduct' in bodydict['fields'].keys():
                     doctype=bodydict['fields']['deviceproduct']
-            
-            res=es.index(index='events',doc_type=doctype,doc=jbody)
+
+            res = es.save_event(body=jbody, doc_type=doctype)
             #print(' [*] elasticsearch:{0}'.format(res))
             #publish on the events topic queue
-            ch.basic_publish(exchange='events',routing_key='mozdef.event',body=jbody)  
-    
+            ch.basic_publish(exchange='events',routing_key='mozdef.event',body=jbody)
+
         ch.basic_ack(delivery_tag = method.delivery_tag)
     except Exception as e:
         sys.stderr.write("esworker exception in events queue %r\n"%e)
@@ -191,10 +192,10 @@ class kConsumer(ConsumerMixin):
                 jbody=normaliseJSON(body)   #normalized body with validated fields to be sent to elastic search
             else:
                 sys.stderr.write("esworker exception: unknown body type received %r\n"%body)
-                
+
             if jbody is not None:       #could be empty,or invalid
                 jbody=json.JSONEncoder().encode(jbody)
-                
+
                 #figure out what type of document we are indexing and post to the elastic search index.
                 doctype='event'
                 if isCEF(bodydict):
@@ -202,25 +203,24 @@ class kConsumer(ConsumerMixin):
                     doctype='cef'
                     if 'deviceproduct' in bodydict['fields'].keys():
                         doctype=bodydict['fields']['deviceproduct']
-                
-                res=self.esconnection.index(index='events',doc_type=doctype,doc=jbody)
+
+                res = self.esconnection.save_event(body=jbody, doc_type=doctype)
                 #print(' [*] elasticsearch:{0}'.format(res))
                 #TODO publish on the events topic queue
-        
+
             message.ack()
         except OSError as e:
             sys.stderr.write("esworker exception in events queue %r\n"%e)
 
 
 def main():
-    
     #connect and declare the queues
     connString='amqp://guest:guest@{0}:5672//'.format(options.mqserver)
     mqConn=Connection(connString)
     eventTaskQueue=Queue(options.taskqueue)
     eventTaskQueue(mqConn).declare()
     kConsumer(mqConn,eventTaskQueue,es).run()
-    
+
 
 def initConfig():
     #change this to your default zone for when it's not specified
