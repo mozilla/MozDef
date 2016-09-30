@@ -60,6 +60,24 @@ class TestKibanaDashboardsRoute(GetMethodTestSuite):
             assert json_resp[0]['name'] == 'Example FTP Dashboard'
 
 
+class TestKibanaDashboardsRouteWithoutDashboards(GetMethodTestSuite):
+    routes = ['/kibanadashboards', '/kibanadashboards/']
+
+    status_code = 200
+
+    def setup(self):
+        super(TestKibanaDashboardsRouteWithoutDashboards, self).setup()
+        self.es_client.delete_index('kibana-int', True)
+
+    def test_route_endpoints(self):
+        for route in self.routes:
+            response = self.response_per_route(route)
+            json_resp = json.loads(response.body)
+
+            assert response.status_code == self.status_code
+            assert json_resp == []
+
+
 class TestLdapLoginsRoute(GetMethodTestSuite):
 
     routes = ['/ldapLogins', '/ldapLogins/']

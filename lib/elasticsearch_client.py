@@ -31,7 +31,7 @@ class ElasticsearchInvalidIndex(Exception):
         self.index_name = index_name
 
     def __str__(self):
-        return "Invalid index: " + self.index_name
+        return "Invalid index: " + str(self.index_name)
 
 
 class ElasticsearchClient():
@@ -84,8 +84,11 @@ class ElasticsearchClient():
         results = []
         if pyes_enabled.pyes_on is True:
             # todo: update the size amount
-            esresults = self.es_connection.search(search_query, size=1000, indices=','.join(map(str, indices)))
-            results = esresults._search_raw()
+            try:
+                esresults = self.es_connection.search(search_query, size=1000, indices=','.join(map(str, indices)))
+                results = esresults._search_raw()
+            except pyes.exceptions.IndexMissingException:
+                raise ElasticsearchInvalidIndex(indices)
         else:
             results = Search(using=self.es_connection, index=indices).filter(search_query).execute()
 

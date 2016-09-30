@@ -27,7 +27,7 @@ from pymongo import MongoClient
 from bson import json_util
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient
+from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
 
 from utilities.to_utc import toUTC
@@ -575,8 +575,8 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
 
 
 def kibanaDashboards():
+    resultsList = []
     try:
-        resultsList = []
         es_client = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         search_query = SearchQuery()
         search_query.add_must(TermMatch('_type', 'dashboard'))
@@ -590,12 +590,16 @@ def kibanaDashboards():
                 dashboard['_source']['title'])
             })
 
-        if results == []:
-            sys.stderr.write('No Kibana dashboard found\n')
+    except ElasticsearchInvalidIndex as e:
+        sys.stderr.write('Kibana dashboard index not found: {0}\n'.format(e))
 
-        return json.dumps(resultsList)
     except Exception as e:
         sys.stderr.write('Kibana dashboard received error: {0}\n'.format(e))
+
+    if resultsList == []:
+        sys.stderr.write('No Kibana dashboard found\n')
+
+    return json.dumps(resultsList)
 
 
 def getWhois(ipaddress):
