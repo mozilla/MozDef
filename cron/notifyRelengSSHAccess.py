@@ -65,7 +65,7 @@ def toUTC(suspectedDate, localTimeZone="UTC"):
 def esSearch(es, begindateUTC=None, enddateUTC=None):
     resultsList = list()
     if begindateUTC is None:
-        begindateUTC = toUTC(datetime.now() - timedelta(hours=48))
+        begindateUTC = toUTC(datetime.now() - timedelta(hours=24))
     if enddateUTC is None:
         enddateUTC = toUTC(datetime.now())
     try:
