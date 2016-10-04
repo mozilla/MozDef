@@ -1,26 +1,3 @@
-#!/usr/bin/env bash
-
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
-
-source  /home/mozdef/envs/mozdef/bin/activate
-/home/mozdef/envs/mozdef/cron/notifyRelengSSHAccess.py
-[root@mozdef1.private.scl3 cron]# cat notifyRelengSSHAccess.conf
-[options]
-esservers=http://mozdefes1.private.scl3.mozilla.com:9200,http://mozdefes2.private.scl3.mozilla.com:9200,http://mozdefes3.private.scl3.mozilla.com:9200,http://mozdefes4.private.scl3.mozilla.com:9200,http://mozdefes5.private.scl3.mozilla.com:9200
-smtpserver=smtp.mozilla.org
-sender=mozdef_donotreply@mozilla.com
-recipients=asmith@mozilla.com
-defaulttimezone=US/Pacific
-[root@mozdef1.private.scl3 cron]# cd ../alerts/
-[root@mozdef1.private.scl3 alerts]# vi ssh_access_signreleng_pyes.
-[root@mozdef1.private.scl3 alerts]# vi ssh_access_signreleng_pyes.py
-[root@mozdef1.private.scl3 alerts]# cat ssh_access_signreleng_pyes.py
 #!/usr/bin/env python
 
 # This Source Code Form is subject to the terms of the Mozilla Public
