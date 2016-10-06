@@ -25,7 +25,7 @@ from configlib import getConfig, OptionParser
 
 class AlertAuthSignRelengSSH(AlertTask):
     def main(self):
-        date_timedelta = dict(minutes=25)
+        date_timedelta = dict(minutes=15)
 
         self.config_file = './ssh_access_signreleng_pyes.conf'
         self.config = None
