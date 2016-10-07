@@ -29,7 +29,6 @@ logger = logging.getLogger(sys.argv[0])
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
 
-
 def initLogger():
     logger.level = logging.INFO
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -40,7 +39,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
 
 def toUTC(suspectedDate, localTimeZone="UTC"):
     '''make a UTC date out of almost anything'''
@@ -84,63 +82,37 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
         q = pyes.FilteredQuery(q,pyes.BoolFilter(must=[qDate,
                                                        qTag,
                                                        qType,
-                                                       qSev,
+                                                       qSev
                                                        ]))
 
         pyesresults = es.search(q, size=1000, indices='alerts')
         logger.debug(pyesresults.count())
-        print(q)
 
         # correlate any matches
-        # make a simple list of indicator values that can be counted/summarized by Counter
-        resultsTargets = list()
+        # make a simple list of summary values that can be counted/summarized by Counter
+        resultsTargets = []
 
         # bug in pyes..capture results as raw list or it mutates after first access:
-        # copy the hits.hits list as our resusts, which is the same as the official elastic search library returns.
+        # copy the hits.hits list as our results, which is the same as the official elastic search library returns.
         results = pyesresults._search_raw()['hits']['hits']
-        print(results)
         for r in results:
-            # get the hostname
-            resultsTargets.append(r['_source']['events'][0]['documentsource']['hostname'])
-            #resultsTargets.append(r['_source']['events']['hostname'])
+            # Build Up our Array
+            resultsTargets.append(
+                {"ts" : r['_source']['events'][0]['documentsource']['utctimestamp'],
+                 "summary" : r['_source']['summary']
+                }
+            )
 
-        # use the list of tuples ('hostname',count) to create a dictionary with:
-        # indicator,count,es records
-        # and add it to a list to return.
-        indicatorList = list()
-        for i in Counter(resultsTargets).most_common():
-            idict = dict(indicator=i[0], count=i[1], events=[])
-            for r in results:
-                #if r['_source']['events']['hostname'].encode('ascii', 'ignore') == i[0]:
-                if r['_source']['events'][0]['documentsource']['hostname'].encode('ascii', 'ignore') == i[0]:
-                    idict['events'].append(r)
-            indicatorList.append(idict)
-        return indicatorList
+        return resultsTargets
 
     except pyes.exceptions.NoServerAvailable:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
-def sendResults(indicatorCounts):
+def sendResults(summaryCounts):
     emailMessage = ''
 
-    for i in indicatorCounts:
-        emailMessage += ('Count: {0} Endpoint: {1:>20}\n'.format(i['count'], i['indicator']))
-
-        for event in i['events']:
-            emailMessage += ('{0:>10}:\n'.format('Detail'))
-            for k, v in event['_source'].iteritems():
-
-                #sys.stdout.write('\t\t{0}\n\n'.format(json.dumps(event['_source'], indent=4, sort_keys=True)))
-                if k in ['details', 'tags', 'hostname']:
-                    emailMessage += ('{0:>20}:'.format(k))
-                    emailMessage += ('{0:>30}'.format(
-                        json.dumps(v,
-                                   indent=20,
-                                   sort_keys=True)
-                        .replace('{', '')
-                        .replace('}', '')))
-                elif k not in ('utctimestamp', 'receivedtimestamp'):
-                    emailMessage += ('{0:>20}: {1}\n'.format(k, v))
+    for i in summaryCounts:
+        emailMessage += ('Timestamp: {0:4} Summary: {1:4}\n'.format(i['ts'], i['summary']))
         emailMessage += ('\n')
 
     for r in options.recipients:
@@ -159,9 +131,9 @@ def main():
     logger.debug(options)
     es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
     # see if we have matches.
-    indicatorCounts = esSearch(es)
-    if len(indicatorCounts) > 0:
-        sendResults(indicatorCounts)
+    summaryCounts = esSearch(es)
+    if len(summaryCounts) > 0:
+        sendResults(summaryCounts)
     logger.debug('finished')
 
 
