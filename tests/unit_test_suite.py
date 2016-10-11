@@ -15,6 +15,16 @@ class UnitTestSuite(object):
     def setup(self):
         self.index_name = datetime.now().strftime("events-%Y%m%d")
 
+        # todo: remove once we are able to run unit tests against
+        # a live server that won't delete all the data. Depends on when we
+        # can use a different index for searching in unit tests.
+        for server in ES['servers']:
+            if "private.scl3.mozilla.com" in server.lower():
+                print "THIS SHOULD NOT BE RUN AGAINST A LIVE TARGET ON MOZILLA NETWORK"
+                print '\tThis is because all of the data in ES is reset/deteled'
+                print '\twhen unit tests are executed.'
+                raise Exception('Using live system in config file for ES servers')
+
         self.es_client = ElasticsearchClient(ES['servers'])
 
         self.reset_elasticsearch()
