@@ -139,7 +139,7 @@ def main():
 
 def initConfig():
     # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
+    options.defaultTimeZone = getConfig('defaulttimezone', 'UTC', options.configfile)
     # logging settings
     options.output = getConfig('output', 'stdout', options.configfile)  # output our log to stdout or syslog
     options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)  # syslog hostname
