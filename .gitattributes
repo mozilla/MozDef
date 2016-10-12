@@ -1,5 +1,6 @@
 *.conf filter=git-crypt diff=git-crypt
 *.key filter=git-crypt diff=git-crypt
+*.ini !filter !diff
 rra2json.json filter=git-crypt diff=git-crypt
 mozdefGoogleCredentials.json filter=git-crypt diff=git-crypt
 .git* !filter !diff
