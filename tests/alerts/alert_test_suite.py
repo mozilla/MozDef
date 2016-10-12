@@ -1,25 +1,137 @@
+import os.path
 import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/"))
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from unit_test_suite import UnitTestSuite
 
 import random
+import copy
 
 
 class AlertTestSuite(UnitTestSuite):
-
-    def event_type(self):
-        # todo normalize all bro events and alerts so the _type is still
-        # 'event'
-        return 'event'
-
     def setup(self):
         super(AlertTestSuite, self).setup()
 
-        alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
+        alerts_dir = os.path.join(
+            os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)
+
+    # Some housekeeping stuff here to make sure the data we get is 'good'
+    def verify_starting_values(self, test_case):
+        # Verify the description for the test case is populated
+        assert test_case.description is not None or ""
+        assert test_case.description is not ""
+
+        # Verify alert_src is a legit file
+        # full_alert_file_path = "../../../alerts/" + self.alert_src + ".py"
+        full_alert_file_path = "./" + self.alert_src + ".py"
+        assert os.path.isfile(full_alert_file_path) is True
+
+        # Verify we're able to load in the alert_name
+        # This can probably be improved, but for the mean time, we're just
+        # gonna grep for class name
+        alert_source_str = open(full_alert_file_path, 'r').read()
+        class_search_str = "class " + self.alert_name + "("
+        assert class_search_str in alert_source_str
+
+        # Verify events is not empty
+        assert len(test_case.events) is not 0
+
+        # Verify that if we're a positive test case, we actually passed in an
+        # expected_alert
+        if test_case.expected_test_result is True:
+            assert test_case.expected_alert is not None
+        else:
+            # How can we expect an alert, when we're expecting the alert to
+            # never throw?
+            assert test_case.expected_alert is None
+
+    # todo: remote this out to utilities
+    def dict_merge(self, target, *args):
+        # Merge multiple dicts
+        if len(args) > 1:
+            for obj in args:
+                self.dict_merge(target, obj)
+            return target
+
+        # Recursively merge dicts and set non-dict values
+        obj = args[0]
+        if not isinstance(obj, dict):
+            return obj
+        for k, v in obj.iteritems():
+            if k in target and isinstance(target[k], dict):
+                self.dict_merge(target[k], v)
+            else:
+                target[k] = v
+        return target
+
+    def test_alert_test_case(self, test_case):
+        self.verify_starting_values(test_case)
+        for event in test_case.events:
+            temp_event = self.dict_merge(
+                self.generate_default_event(), self.default_event)
+
+            merged_event = self.dict_merge(temp_event, event)
+            test_case.full_events.append(merged_event)
+            self.populate_test_event(
+                merged_event['_source'], merged_event['_type'])
+
+        self.es_client.flush('events')
+
+        alert_task = test_case.run(
+            alert_src=self.alert_src, alert_name=self.alert_name)
+        self.verify_alert_task(alert_task, test_case)
+
+    def verify_expected_alert(self, found_alert, test_case):
+        # Verify index is set correctly
+        assert found_alert['_index'] == 'alerts'
+        # Verify alert type is correct
+        assert found_alert['_type'] == 'alert'
+
+        # Verify that the alert has the right "look to it"
+        assert found_alert.keys() == [
+            '_score', '_type', '_id', '_source', '_index']
+
+        # Verify the alert has an id field that is unicode
+        assert type(found_alert['_id']) == unicode
+
+        # Verify there is a utctimestamp field
+        assert 'utctimestamp' in found_alert['_source']
+
+        # Verify the events are added onto the alert
+        assert type(found_alert['_source']['events']) == list
+        assert len(found_alert['_source']['events']) is not 0
+        alert_events = found_alert['_source']['events']
+        sorted_alert_events = sorted(alert_events, key=lambda k: k[
+                                     'documentsource']['utctimestamp'])
+
+        created_events = test_case.full_events
+        sorted_created_events = sorted(created_events, key=lambda k: k[
+                                       '_source']['utctimestamp'])
+
+        event_index = 0
+        for event in sorted_alert_events:
+            assert event['documentsource'] == sorted_created_events[
+                event_index]['_source']
+            event_index += 1
+
+        # Verify that the alert properties are set correctly
+        for key, value in test_case.expected_alert.iteritems():
+            assert found_alert['_source'][key] == value
+
+    def verify_alert_task(self, alert_task, test_case):
+        if test_case.expected_test_result is True:
+            assert len(alert_task.alert_ids) is not 0
+            self.es_client.flush('alerts')
+            for alert_id in alert_task.alert_ids:
+                found_alert = self.es_client.get_alert_by_id(alert_id)
+                self.verify_expected_alert(found_alert, test_case)
+        else:
+            assert len(alert_task.alert_ids) is 0
+
+    def random_ip(self):
+        return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
 
     def generate_default_event(self):
         current_timestamp = self.current_timestamp()
@@ -27,68 +139,27 @@ class AlertTestSuite(UnitTestSuite):
         source_ip = self.random_ip()
 
         event = {
-            "category": "bronotice",
-            "receivedtimestamp": current_timestamp,
-            "utctimestamp": current_timestamp,
-            "timestamp": current_timestamp,
-            "hostname": "nsm",
-            "processid": "1337",
-            "processname": "syslog",
-            "severity": "NOTICE",
-            "source": "nsm_src",
-            "summary": "Example summary",
-            "tags": ['tag1', 'tag2'],
-            "details": {
-                "sourceipaddress": source_ip,
-                "hostname": "testhostname"
+            "_index": "events",
+            "_type": "event",
+            "_source": {
+                "category": "excategory",
+                "receivedtimestamp": current_timestamp,
+                "utctimestamp": current_timestamp,
+                "timestamp": current_timestamp,
+                "hostname": "exhostname",
+                "severity": "NOTICE",
+                "source": "exsource",
+                "summary": "Example summary",
+                "tags": ['tag1', 'tag2'],
+                "details": {
+                    "sourceipaddress": source_ip,
+                    "hostname": "exhostname"
+                }
             }
         }
 
         return event
 
-    def test_alert(self):
-        for event in self.events():
-            self.populate_test_event(event, self.event_type())
-
-        # THIS IS A HAX, todo: modify this to call celery with syncronous
-        # execution
-        import time
-        time.sleep(2)
-
-        alert_instance = self.alert_class()()
-        alert_instance.run()
-        self.alert_task = alert_instance
-
-        if self.expected_to_throw is True:
-            expected_alert = self.alert()
-            self.verify_alert(expected_alert)
-        else:
-            self.verify_alert_not_fired()
-
-    def verify_alert(self, expected_alert):
-        assert len(self.alert_task.alert_ids) != 0
-
-        self.es_client.flush('alerts')
-        for alert_id in self.alert_task.alert_ids:
-            alert = self.get_alert_by_id(alert_id)
-
-            assert alert['_index'] == 'alerts'
-            assert alert['_type'] == 'alert'
-
-            assert alert['_source']['category'] == expected_alert['_source']['category']
-            assert alert['_source']['severity'] == expected_alert['_source']['severity']
-            assert alert['_source']['summary'] == expected_alert['_source']['summary']
-            assert alert['_source']['tags'] == expected_alert['_source']['tags']
-
-            assert len(alert['_source']['events']) == len(expected_alert['_source']['events'])
-
-    def verify_alert_not_fired(self):
-        assert len(self.alert_task.alert_ids) == 0
-
-    def get_alert_by_id(self, alert_id):
-        return self.es_client.get_alert_by_id(alert_id)
-
-    def random_ip(self):
-        return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
-
-
+    @staticmethod
+    def copy(obj):
+        return copy.deepcopy(obj)

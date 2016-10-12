@@ -10,7 +10,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
+from query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class AlertBruteforceSshES(AlertTask):
@@ -19,9 +19,8 @@ class AlertBruteforceSshES(AlertTask):
 
         search_query.add_must([
             TermMatch('_type', 'event'),
-            PhraseMatch('summary', 'failed'),
+            PhraseMatch('summary', 'login invalid ldap_count_entries'),
             TermMatch('program', 'sshd'),
-            TermsMatch('summary', ['login', 'invalid', 'ldap_count_entries']),
         ])
 
         search_query.add_must_not([
