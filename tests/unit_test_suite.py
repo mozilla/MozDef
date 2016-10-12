@@ -13,6 +13,7 @@ import pytz
 
 class UnitTestSuite(object):
     def setup(self):
+        print "Setting up unit test suite"
         self.index_name = datetime.now().strftime("events-%Y%m%d")
 
         # todo: remove once we are able to run unit tests against
@@ -52,11 +53,14 @@ class UnitTestSuite(object):
         # self.es_client.delete_template('eventstemplate')
         # self.es_client.delete_template('alertstemplate')
 
-    def current_timestamp(self):
+    @staticmethod
+    def current_timestamp():
         return pytz.UTC.normalize(pytz.timezone("UTC").localize(datetime.now())).isoformat()
 
-    def subtract_from_timestamp(self, timestamp, date_timedelta):
+    @staticmethod
+    def subtract_from_timestamp(date_timedelta, timestamp=None):
+        if timestamp is None:
+            timestamp = UnitTestSuite.current_timestamp()
         utc_time = parse(timestamp)
         custom_date = utc_time - timedelta(**date_timedelta)
-
         return custom_date.isoformat()
