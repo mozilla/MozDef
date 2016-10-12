@@ -59,6 +59,45 @@ class TestAlertBruteforceSshES(AlertTestSuite):
 
     temp_events = AlertTestSuite.copy(default_events)
     custom_events = []
+    for temp_event in temp_events:
+        temp_event['_source']['summary'] = 'login failed'
+        custom_events.append(AlertTestSuite.copy(temp_event))
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with events with a summary of 'login failed'",
+            events=custom_events,
+            expected_alert=default_alert
+        )
+    )
+
+    temp_events = AlertTestSuite.copy(default_events)
+    custom_events = []
+    for temp_event in temp_events:
+        temp_event['_source']['summary'] = 'invalid failed'
+        custom_events.append(AlertTestSuite.copy(temp_event))
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with events with a summary of 'invalid failed'",
+            events=custom_events,
+            expected_alert=default_alert
+        )
+    )
+
+    temp_events = AlertTestSuite.copy(default_events)
+    custom_events = []
+    for temp_event in temp_events:
+        temp_event['_source']['summary'] = 'invalid failed'
+        custom_events.append(AlertTestSuite.copy(temp_event))
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with events with a summary of 'ldap_count_entries failed'",
+            events=custom_events,
+            expected_alert=default_alert
+        )
+    )
+
+    temp_events = AlertTestSuite.copy(default_events)
+    custom_events = []
     for event in temp_events[0:-2]:
         custom_events.append(AlertTestSuite.copy(event))
 
@@ -85,7 +124,47 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         custom_event['_source']['summary'] = 'login good ldap_count_entries'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with events with incorrect summary",
+            description="Negative test case with events with summary without 'failed'",
+            events=custom_events,
+        )
+    )
+
+    custom_events = AlertTestSuite.copy(default_events)
+    for custom_event in custom_events:
+        custom_event['_source']['summary'] = 'failed'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with summary with only 'failed'",
+            events=custom_events,
+        )
+    )
+
+    custom_events = AlertTestSuite.copy(default_events)
+    for custom_event in custom_events:
+        custom_event['_source']['summary'] = 'login'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with summary with only 'login'",
+            events=custom_events,
+        )
+    )
+
+    custom_events = AlertTestSuite.copy(default_events)
+    for custom_event in custom_events:
+        custom_event['_source']['summary'] = 'invalid'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with summary with only 'invalid'",
+            events=custom_events,
+        )
+    )
+
+    custom_events = AlertTestSuite.copy(default_events)
+    for custom_event in custom_events:
+        custom_event['_source']['summary'] = 'ldap_count_entries'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with summary with only 'ldap_count_entries'",
             events=custom_events,
         )
     )
