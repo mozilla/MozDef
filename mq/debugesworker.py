@@ -485,7 +485,7 @@ def main():
 
 def initConfig():
     # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'UTC', options.configfile)
+    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))

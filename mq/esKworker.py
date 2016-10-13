@@ -224,7 +224,7 @@ def main():
 
 def initConfig():
     #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','UTC',options.configfile)
+    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     
     options.mqserver=getConfig('mqserver','localhost',options.configfile)
     options.taskqueue=getConfig('taskqueue','eventtask',options.configfile)
