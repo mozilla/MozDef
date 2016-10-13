@@ -268,7 +268,7 @@ def initConfig():
     options.logfile = getConfig('logfile', 'auditd.mozdef.fifo', options.configfile)
 
     # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'UTC', options.configfile)
+    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
 
     # mq server/exchange options.
     # mqservers can be a comma delimited list of server,server2,server3 etc to load balance the posts.

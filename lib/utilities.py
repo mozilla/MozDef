@@ -2,7 +2,7 @@ from datetime import datetime
 from dateutil.parser import parse
 import pytz
 
-def toUTC(suspectedDate, localTimeZone='UTC'):
+def toUTC(suspectedDate, localTimeZone='US/Pacific'):
     '''make a UTC date out of almost anything'''
 
     utc=pytz.UTC
