@@ -50,7 +50,7 @@ class TestHelper():
     return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
 
   def current_timestamp(self):
-    return pytz.UTC.normalize(pytz.timezone("UTC").localize(datetime.now())).isoformat()
+    return pytz.UTC.normalize(pytz.timezone("US/Pacific").localize(datetime.now())).isoformat()
 
   def subtract_from_timestamp(self, timestamp, date_timedelta):
     utc_time = parse(timestamp)
