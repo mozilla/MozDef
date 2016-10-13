@@ -52,7 +52,7 @@ ES = {
 }
 
 OPTIONS = {
-    'defaulttimezone': 'UTC',
+    'defaulttimezone': 'US/Pacific',
 }
 
 LOGGING = {
