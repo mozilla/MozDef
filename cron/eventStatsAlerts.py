@@ -152,7 +152,7 @@ def initConfig():
 
     # change this to your default zone for when it's not specified
     options.defaulttimezone = getConfig('defaulttimezone',
-                                        'UTC',
+                                        'US/Pacific',
                                         options.configfile)
 
     # elastic search server settings

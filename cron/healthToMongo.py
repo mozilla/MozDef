@@ -43,7 +43,7 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone="UTC"):
+def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
@@ -172,7 +172,7 @@ def initConfig():
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
     # change this to your default zone for when it's not specified
     options.defaulttimezone = getConfig('defaulttimezone',
-                                        'UTC',
+                                        'US/Pacific',
                                         options.configfile)
 
 

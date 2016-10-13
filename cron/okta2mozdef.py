@@ -157,7 +157,7 @@ def initConfig():
     options.output=getConfig('output','stdout',options.configfile)                              #output our log to stdout or syslog
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
-    options.defaultTimeZone=getConfig('defaulttimezone','UTC',options.configfile)        #default timezone
+    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)        #default timezone
     options.apikey=getConfig('apikey','',options.configfile)                                    #okta api key to use
     options.oktadomain = getConfig('oktadomain', 'yourdomain.okta.com', options.configfile)     #okta domain: something.okta.com
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))

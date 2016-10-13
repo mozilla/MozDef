@@ -47,7 +47,7 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone="UTC"):
+def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None

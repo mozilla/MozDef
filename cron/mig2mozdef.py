@@ -135,7 +135,7 @@ def initConfig():
     options.output=getConfig('output','stdout',options.configfile)                      #output our log to stdout or syslog
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)   #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
-    options.defaultTimeZone=getConfig('defaulttimezone','UTC',options.configfile)
+    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     # Z = UTC, -07:00 = PDT
     options.mighost=getConfig('mighost','https://localhost',options.configfile)
     options.gpghome=getConfig('gpghome','/home/someuser/.gnupg',options.configfile)

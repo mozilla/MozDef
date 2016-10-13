@@ -109,7 +109,7 @@ def updateMongo(mozdefdb, esAlerts):
             mrecord['_id'] = genMeteorID()
             # capture the elastic search meta data (index/id/doctype)
             # set the date back to a datetime from unicode, so mongo/meteor can properly sort, select. 
-            mrecord['utctimestamp']=toUTC(mrecord['utctimestamp'],'UTC')
+            mrecord['utctimestamp']=toUTC(mrecord['utctimestamp'],'US/Pacific')
             # also set an epoch time field so minimongo can sort
             mrecord['utcepoch'] = calendar.timegm(mrecord['utctimestamp'].utctimetuple())
             mrecord['esmetadata'] = dict()
@@ -136,7 +136,7 @@ def main():
 
 def initConfig():
     #change this to your default timezone
-    options.defaulttimezone=getConfig('defaulttimezone','UTC',options.configfile)    
+    options.defaulttimezone=getConfig('defaulttimezone','US/Pacific',options.configfile)    
     # output our log to stdout or syslog
     options.output = getConfig('output', 'stdout', options.configfile)
     # syslog hostname

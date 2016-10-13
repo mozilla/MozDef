@@ -40,7 +40,7 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone="UTC"):
+def toUTC(suspectedDate, localTimeZone="US/Pacific"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
@@ -157,7 +157,7 @@ def main():
 
 def initConfig():
     # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'UTC', options.configfile)
+    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
     # logging settings
     options.output = getConfig('output', 'stdout', options.configfile)  # output our log to stdout or syslog
     options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)  # syslog hostname

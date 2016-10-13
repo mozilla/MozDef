@@ -222,7 +222,7 @@ def searchMongoAlerts(mozdefdb):
                     newAttacker['alertscount'] = len(newAttacker['alerts'])
                     newAttacker['eventscount'] = len(newAttacker['events'])
                     if newAttacker['eventscount'] > 0:
-                        newAttacker['lastseentimestamp'] = toUTC(newAttacker['events'][-1]['documentsource']['utctimestamp'], 'UTC')
+                        newAttacker['lastseentimestamp'] = toUTC(newAttacker['events'][-1]['documentsource']['utctimestamp'], 'US/Pacific')
                     attackers.insert(newAttacker)
                     #upate geoIP info
                     latestGeoIP = [a['events'] for a in alerts.find(
@@ -266,7 +266,7 @@ def searchMongoAlerts(mozdefdb):
                             updateAttackerGeoIP(mozdefdb, attacker['_id'], alert['events'][-1]['documentsource'])
 
                         # update last seen time
-                        attacker['lastseentimestamp'] = toUTC(attacker['events'][-1]['documentsource']['utctimestamp'], 'UTC')
+                        attacker['lastseentimestamp'] = toUTC(attacker['events'][-1]['documentsource']['utctimestamp'], 'US/Pacific')
                         # update counts
                         attacker['alertscount'] = len(attacker['alerts'])
                         attacker['eventscount'] = len(attacker['events'])
@@ -477,7 +477,7 @@ def main():
 
 def initConfig():
     #change this to your default timezone
-    options.defaulttimezone=getConfig('defaulttimezone','UTC',options.configfile)
+    options.defaulttimezone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     # output our log to stdout or syslog
     options.output = getConfig('output', 'stdout', options.configfile)
     # syslog hostname
