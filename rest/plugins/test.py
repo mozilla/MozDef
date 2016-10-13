@@ -54,7 +54,7 @@ class message(object):
         # fill self.options with plugin-specific options
         
         # example: set a default time zone for when it's not specified
-        self.options.defaultTimeZone = getConfig('defaulttimezone', 'UTC', self.configfile)
+        self.options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', self.configfile)
 
         #print(self.options)
         #print(self.options.defaultTimeZone)
