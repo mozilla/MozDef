@@ -189,7 +189,7 @@ class TestLdapLoginsRoute(GetMethodTestSuite):
             self.populate_test_event(event)
 
         for count in range(3):
-            timestamp = self.subtract_from_timestamp(self.current_timestamp(), {'hours': 2})
+            timestamp = GetMethodTestSuite.subtract_from_timestamp({'hours': 2})
             event = {
                 "receivedtimestamp": timestamp,
                 "utctimestamp": timestamp,

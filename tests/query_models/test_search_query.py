@@ -105,6 +105,103 @@ class TestExecute(SearchQueryUnitTest):
         }
         self.populate_test_event(event)
 
+    def test_complex_aggregation_query_execute(self):
+        self.setup()
+        query = SearchQuery()
+        assert query.date_timedelta == {}
+        query.add_must(ExistsMatch('ip'))
+        query.add_aggregation(Aggregation('ip'))
+        self.populate_test_event(
+            {
+                'summary': 'Test Summary',
+                'ip': '127.0.0.1',
+                'details': {
+                    'information': 'Example information'
+                }
+            }
+        )
+        self.populate_test_event(
+            {
+                'summary': 'Test Summary',
+                'ip': '1.2.3.4',
+                'details': {
+                    'information': 'Example information'
+                }
+            }
+        )
+        self.populate_test_event(
+            {
+                'summary': 'Test Summary',
+                'ip': '1.2.3.4',
+                'details': {
+                    'information': 'Example information'
+                }
+            }
+        )
+        results = query.execute(self.es_client)
+        assert results.keys() == ['hits', 'meta', 'aggregations']
+        assert results['meta'].keys() == ['timed_out']
+        assert results['meta']['timed_out'] is False
+
+        sorted_hits = sorted(results['hits'], key=lambda k: k['_source']['ip'])
+
+        assert len(sorted_hits) == 3
+
+        assert sorted_hits[0].keys() == ['_score', '_type',
+                                             '_id', '_source', '_index']
+        assert type(sorted_hits[0]['_id']) == unicode
+        assert sorted_hits[0]['_type'] == 'event'
+
+        assert sorted_hits[0]['_index'] == datetime.now().strftime("events-%Y%m%d")
+
+        assert sorted_hits[0]['_source'].keys() == ['ip', 'details', 'summary']
+        assert sorted_hits[0]['_source']['ip'] == '1.2.3.4'
+        assert sorted_hits[0]['_source']['summary'] == 'Test Summary'
+
+        assert sorted_hits[0]['_source']['details'].keys() == ['information']
+        assert sorted_hits[0]['_source']['details']['information'] == 'Example information'
+
+        assert sorted_hits[1].keys() == ['_score', '_type',
+                                             '_id', '_source', '_index']
+        assert type(sorted_hits[1]['_id']) == unicode
+        assert sorted_hits[1]['_type'] == 'event'
+
+        assert sorted_hits[1]['_index'] == datetime.now().strftime("events-%Y%m%d")
+
+        assert sorted_hits[1]['_source'].keys() == ['ip', 'details', 'summary']
+        assert sorted_hits[1]['_source']['ip'] == '1.2.3.4'
+        assert sorted_hits[1]['_source']['summary'] == 'Test Summary'
+
+        assert sorted_hits[1]['_source']['details'].keys() == ['information']
+        assert sorted_hits[1]['_source']['details']['information'] == 'Example information'
+
+        assert sorted_hits[2].keys() == ['_score', '_type', '_id', '_source', '_index']
+        assert type(sorted_hits[2]['_id']) == unicode
+        assert sorted_hits[2]['_type'] == 'event'
+
+        assert sorted_hits[2]['_index'] == datetime.now().strftime("events-%Y%m%d")
+
+        assert sorted_hits[2]['_source'].keys() == ['ip', 'details', 'summary']
+        assert sorted_hits[2]['_source']['ip'] == '127.0.0.1'
+        assert sorted_hits[2]['_source']['summary'] == 'Test Summary'
+
+        assert sorted_hits[2]['_source']['details'].keys() == ['information']
+        assert sorted_hits[2]['_source']['details']['information'] == 'Example information'
+
+        assert results['aggregations'].keys() == ['ip']
+
+        assert results['aggregations']['ip'].keys() == ['terms']
+
+        assert len(results['aggregations']['ip']['terms']) == 2
+
+        results['aggregations']['ip']['terms'].sort()
+        assert results['aggregations']['ip']['terms'][0]['count'] == 1
+        assert results['aggregations']['ip']['terms'][0]['key'] == '127.0.0.1'
+
+
+        assert results['aggregations']['ip']['terms'][1]['count'] == 2
+        assert results['aggregations']['ip']['terms'][1]['key'] == '1.2.3.4'
+
     def test_aggregation_query_execute(self):
         self.setup()
         query = SearchQuery()
@@ -196,7 +293,7 @@ class TestExecute(SearchQueryUnitTest):
         assert query.date_timedelta == {'seconds': 10}
 
         default_event = {
-            "utctimestamp": self.current_timestamp(),
+            "utctimestamp": UnitTestSuite.current_timestamp(),
             "summary": "Test summary",
             "details": {
                 "note": "Example note",
@@ -205,11 +302,11 @@ class TestExecute(SearchQueryUnitTest):
         self.populate_test_event(default_event)
 
         too_old_event = default_event
-        too_old_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'seconds': 11})
+        too_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 11})
         self.populate_test_event(too_old_event)
 
         not_old_event = default_event
-        not_old_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'seconds': 9})
+        not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
         self.populate_test_event(not_old_event)
 
         query.add_must(ExistsMatch('summary'))
@@ -222,7 +319,7 @@ class TestExecute(SearchQueryUnitTest):
         assert query.date_timedelta == {'minutes': 10}
 
         default_event = {
-            "utctimestamp": self.current_timestamp(),
+            "utctimestamp": UnitTestSuite.current_timestamp(),
             "summary": "Test summary",
             "details": {
                 "note": "Example note",
@@ -230,11 +327,11 @@ class TestExecute(SearchQueryUnitTest):
         }
 
         self.populate_test_event(default_event)
-        default_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'minutes': 11})
+        default_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'minutes': 11})
         self.populate_test_event(default_event)
 
         not_old_event = default_event
-        not_old_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'minutes': 9})
+        not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'minutes': 9})
         self.populate_test_event(not_old_event)
 
         query.add_must(ExistsMatch('summary'))
@@ -247,7 +344,7 @@ class TestExecute(SearchQueryUnitTest):
         assert query.date_timedelta == {'hours': 10}
 
         default_event = {
-            "utctimestamp": self.current_timestamp(),
+            "utctimestamp": UnitTestSuite.current_timestamp(),
             "summary": "Test summary",
             "details": {
                 "note": "Example note",
@@ -255,11 +352,11 @@ class TestExecute(SearchQueryUnitTest):
         }
 
         self.populate_test_event(default_event)
-        default_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'hours': 11})
+        default_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'hours': 11})
         self.populate_test_event(default_event)
 
         not_old_event = default_event
-        not_old_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'hours': 9})
+        not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'hours': 9})
         self.populate_test_event(not_old_event)
 
         query.add_must(ExistsMatch('summary'))
@@ -272,7 +369,7 @@ class TestExecute(SearchQueryUnitTest):
         assert query.date_timedelta == {'days': 10}
 
         default_event = {
-            "utctimestamp": self.current_timestamp(),
+            "utctimestamp": UnitTestSuite.current_timestamp(),
             "summary": "Test summary",
             "details": {
                 "note": "Example note",
@@ -280,11 +377,11 @@ class TestExecute(SearchQueryUnitTest):
         }
 
         self.populate_test_event(default_event)
-        default_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'days': 11})
+        default_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 11})
         self.populate_test_event(default_event)
 
         not_old_event = default_event
-        not_old_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'days': 9})
+        not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 9})
         self.populate_test_event(not_old_event)
 
         query.add_must(ExistsMatch('summary'))
@@ -297,7 +394,7 @@ class TestExecute(SearchQueryUnitTest):
         assert query.date_timedelta == {}
 
         default_event = {
-            "utctimestamp": self.current_timestamp(),
+            "utctimestamp": UnitTestSuite.current_timestamp(),
             "summary": "Test summary",
             "details": {
                 "note": "Example note",
@@ -305,11 +402,11 @@ class TestExecute(SearchQueryUnitTest):
         }
 
         self.populate_test_event(default_event)
-        default_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'days': 11})
+        default_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 11})
         self.populate_test_event(default_event)
 
         not_old_event = default_event
-        not_old_event['utctimestamp'] = self.subtract_from_timestamp(self.current_timestamp(), {'days': 9})
+        not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 9})
         self.populate_test_event(not_old_event)
 
         query.add_must(ExistsMatch('summary'))
@@ -322,7 +419,7 @@ class TestExecute(SearchQueryUnitTest):
         assert query.date_timedelta == {'days': 10}
 
         default_event = {
-            "timestamp": self.current_timestamp(),
+            "timestamp": UnitTestSuite.current_timestamp(),
             "summary": "Test summary",
             "details": {
                 "note": "Example note",
