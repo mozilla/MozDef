@@ -2,8 +2,6 @@
 chdir = /home/mozdef/envs/mozdef/mq/
 uid = mozdef
 mule = esworker.py
-mule = esworker.py
-mule = esworker.py
 pyargv = -c /home/mozdef/envs/mozdef/mq/esworker.aws.conf
 daemonize = /home/mozdef/envs/mozdef/logs/uwsgi.mqESmules.aws.log
 ;

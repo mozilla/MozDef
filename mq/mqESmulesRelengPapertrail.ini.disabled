@@ -2,8 +2,6 @@
 chdir = /home/mozdef/envs/mozdef/mq/
 uid = mozdef
 mule = esworker.papertrail.py
-mule = esworker.papertrail.py
-mule = esworker.papertrail.py
 pyargv = -c /home/mozdef/envs/mozdef/mq/esworker.relengpapertrail.conf
 daemonize = /home/mozdef/envs/mozdef/logs/uwsgi.mqESmules.relengpapertrail.log
 ;ignore normal operations that generate nothing but normal response
