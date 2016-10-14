@@ -34,7 +34,7 @@ ALERTS = {
     'proxy_drop_pyes.AlertProxyDrop': {'schedule': timedelta(minutes=1)},
     'duo_authfail_pyes.AlertDuoAuthFail': {'schedule': timedelta(seconds=60)},
     'vpn_duo_auth_failures_pyes.AlertManyVPNDuoAuthFailures': {'schedule': timedelta(minutes=20)},
-    'ssh_access_signreleng_pyes.AlertAuthSignRelengSSH': {'schedule':timedelta(minutes=20)},
+    'ssh_access_signreleng_pyes.AlertAuthSignRelengSSH': {'schedule':timedelta(minutes=10)},
 }
 
 
