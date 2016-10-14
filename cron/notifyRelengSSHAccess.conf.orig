@@ -1,6 +1,6 @@
 [options]
-esservers=http://mozdefes1.private.scl3.mozilla.com:9200,http://mozdefes2.private.scl3.mozilla.com:9200,http://mozdefes3.private.scl3.mozilla.com:9200,http://mozdefes4.private.scl3.mozilla.com:9200,http://mozdefes5.private.scl3.mozilla.com:9200
+esservers=http://mozdefqa1.private.scl3.mozilla.com:9200
 smtpserver=smtp.mozilla.org
 sender=mozdef_donotreply@mozilla.com
-recipients=release+mozdef@mozilla.com
-defaulttimezone=UTC
+recipients=asmith@mozilla.com
+defaulttimezone=US/Pacific
