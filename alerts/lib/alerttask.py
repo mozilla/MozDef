@@ -8,16 +8,12 @@
 # Contributors:
 # Anthony Verez averez@mozilla.com
 # Jeff Bryner jbryner@mozilla.com
-# Michal Purzynski mpurzynski@mozilla.com
 
 import collections
 import json
 import kombu
 import pytz
 import pyes
-import pynsive
-import os
-import sys
 
 from datetime import datetime
 from datetime import timedelta
@@ -26,10 +22,6 @@ from collections import Counter
 from celery import Task
 from celery.utils.log import get_task_logger
 from config import RABBITMQ, ES, OPTIONS
-from operator import itemgetter
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-import utilities
 
 def toUTC(suspectedDate, localTimeZone=None):
     '''make a UTC date out of almost anything'''
@@ -90,8 +82,6 @@ def getValueByPath(input_dict, path_string):
 
 class AlertTask(Task):
 
-    abstract = True
-
     def __init__(self):
         self.alert_name = self.__class__.__name__
         self.filter = None
@@ -102,8 +92,6 @@ class AlertTask(Task):
         # List of aggregations
         # e.g. when aggregField is email: [{value:'evil@evil.com',count:1337,events:[...]}, ...]
         self.aggregations = None
-        # Array to store all alert ids
-        self.alert_ids = []
 
         self.log.debug('starting {0}'.format(self.alert_name))
         self.log.debug(RABBITMQ)
@@ -111,8 +99,6 @@ class AlertTask(Task):
 
         self._configureKombu()
         self._configureES()
-
-        self.pluginsList = []
 
     @property
     def log(self):
@@ -215,23 +201,14 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Exception while pushing alert to ES: {0}'.format(e))
 
-    def saveAlertToSelf(self, saved_alert):
-        """
-        Save alert to self so we can analyze it later
-        """
-        self.alert_ids.append(saved_alert['_id'])
 
     def filtersManual(self, date_timedelta, must=[], should=[], must_not=[]):
         """
         Configure filters manually
-
         date_timedelta is a dict in timedelta format
         see https://docs.python.org/2/library/datetime.html#timedelta-objects
-
         must, should and must_not are pyes filter objects lists
         see http://pyes.readthedocs.org/en/latest/references/pyes.filters.html
-
-
         """
         self.begindateUTC = toUTC(datetime.now() - timedelta(**date_timedelta))
         self.enddateUTC = toUTC(datetime.now())
@@ -254,9 +231,7 @@ class AlertTask(Task):
     def filtersFromKibanaDash(self, fp, date_timedelta):
         """
         Import filters from a kibana dashboard
-
         fp is the file path of the json file
-
         date_timedelta is a dict in timedelta format
         see https://docs.python.org/2/library/datetime.html#timedelta-objects
         """
@@ -342,11 +317,9 @@ class AlertTask(Task):
           count: the hitcount of the text value
           events: the sampled list of events that matched
           allevents: the unsample, total list of matching events
-
         aggregationPath can be key.subkey.subkey to specify a path to a dictionary value
         relative to the _source that's returned from elastic search.
         ex: details.sourceipaddress
-
         """
         try:
             pyesresults = self.es.search(
@@ -387,59 +360,6 @@ class AlertTask(Task):
             self.log.error('Error while searching events in ES: {0}'.format(e))
 
 
-    def registerPlugins(self):
-        pluginList = list() # tuple of module,registration dict,priority
-        plugin_manager = pynsive.PluginManager()
-        if os.path.exists('plugins'):
-            plugin_manager.plug_into('.')
-            modules = pynsive.list_modules('plugins')
-            self.log.debug('modules loaded {0}'.format(modules))
-            for mname in modules:
-                module = pynsive.import_module(mname)
-                reload(module)
-                if not module:
-                    raise ImportError('Unable to load module {}'.format(mname))
-                else:
-                    if 'message' in dir(module):
-                        mclass = module.message()
-                        mreg = mclass.registration
-                        if 'priority' in dir(mclass):
-                            mpriority = mclass.priority
-                        else:
-                            mpriority = 100
-                        if isinstance(mreg, list):
-                            self.log.debug('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
-                            pluginList.append((mclass, mreg, mpriority))
-        return pluginList
-
-    def sendEventToPlugins(self, anevent, pluginList):
-        '''compare the event to the plugin registrations.
-           plugins register with a list of keys or values
-           or values they want to match on
-           this function compares that registration list
-           to the current event and sends the event to plugins
-           in order
-        '''
-        if not isinstance(anevent, dict):
-            raise TypeError('event is type {0}, should be a dict'.format(type(anevent)))
-
-        # expecting tuple of module,criteria,priority in pluginList
-        # sort the plugin list by priority
-        for plugin in sorted(pluginList, key=itemgetter(2), reverse=False):
-            # assume we don't run this event through the plugin
-            send = False
-            if isinstance(plugin[1], list):
-                try:
-                    if (set(plugin[1]).intersection([e for e in utilities.dict2List(anevent)])):
-                        send = True
-                except TypeError:
-                    self.log.debug('TypeError on set intersection for dict {0}'.format(anevent))
-                    return anevent
-            if send:
-                anevent = plugin[0].onMessage(anevent)
-
-        return anevent
-
     def walkEvents(self, **kwargs):
         """
         Walk through events, provide some methods to hook in alerts
@@ -448,13 +368,11 @@ class AlertTask(Task):
             for i in self.events:
                 alert = self.onEvent(i, **kwargs)
                 if alert:
-                    self.sendEventToPlugins(alert, self.pluginList)
                     self.log.debug(alert)
                     alertResultES = self.alertToES(alert)
                     self.tagEventsAlert([i], alertResultES)
                     self.alertToMessageQueue(alert)
                     self.hookAfterInsertion(alert)
-                    self.saveAlertToSelf(alertResultES)
         # did we not match anything?
         # can also be used as an alert trigger
         if len(self.events) == 0:
@@ -464,7 +382,6 @@ class AlertTask(Task):
                 alertResultES = self.alertToES(alert)
                 self.alertToMessageQueue(alert)
                 self.hookAfterInsertion(alert)
-                self.saveAlertToSelf(alertResultES)
 
 
     def walkAggregations(self, threshold):
@@ -483,7 +400,6 @@ class AlertTask(Task):
                         # on events we've already processed.
                         self.tagEventsAlert(aggregation['allevents'], alertResultES)
                         self.alertToMessageQueue(alert)
-                        self.saveAlertToSelf(alertResultES)
 
 
     def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None):
@@ -583,7 +499,6 @@ class AlertTask(Task):
         Main method launched by celery periodically
         """
         try:
-            self.pluginList = self.registerPlugins()
             self.main(*args, **kwargs)
             self.log.debug('finished')
         except Exception as e:
