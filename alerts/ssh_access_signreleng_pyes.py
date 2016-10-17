@@ -9,7 +9,7 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch
 import json
 import re
 from configlib import getConfig, OptionParser
@@ -25,22 +25,23 @@ from configlib import getConfig, OptionParser
 
 class AlertAuthSignRelengSSH(AlertTask):
     def main(self):
-        date_timedelta = dict(minutes=15)
+        search_query = SearchQuery(minutes=15)
 
         self.config_file = './ssh_access_signreleng_pyes.conf'
         self.config = None
         self.initConfiguration()
 
-        must = [
-            pyes.TermFilter('tags', 'releng'),
-            pyes.TermFilter('details.program', 'sshd'),
-            pyes.QueryFilter(pyes.QueryStringQuery('details.hostname: /{}/'.format(self.config.hostfilter))),
-            pyes.QueryFilter(pyes.MatchQuery('summary', 'Accepted publickey for {}'))
-        ]
-        must_not = []
+        search_query.add_must([
+            TermMatch('tags', 'releng'),
+            TermMatch('details.program', 'sshd'),
+            QueryStringMatch('details.hostname: /{}/'.format(self.config.hostfilter)),
+            PhraseMatch('summary', 'Accepted publickey for ')
+        ])
+
         for x in self.config.users:
-            must_not.append(pyes.QueryFilter(pyes.MatchQuery('summary', x)))
-        self.filtersManual(date_timedelta, must=must, must_not=must_not)
+            search_query.add_must_not(PhraseMatch('summary', x))
+
+        self.filtersManual(search_query)
         self.searchEventsSimple()
         self.walkEvents()
 
