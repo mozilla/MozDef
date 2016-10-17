@@ -19,6 +19,11 @@ from datetime import timedelta
 from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -35,26 +40,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def flattenDict(dictIn):
@@ -106,7 +91,7 @@ def esFailedAMOLogin():
     qalerted = pyes.ExistsFilter('alerttimestamp')
     q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
     q.filters.append(pyes.BoolFilter(
-        must=[qType, 
+        must=[qType,
               qDate,
               qEvents,
               pyes.QueryFilter(pyes.MatchQuery("msg","The password was incorrect","phrase")),
@@ -148,7 +133,7 @@ def esRunSearch(es, query, aggregateField, detailLimit=5):
         return indicatorList
 
     except pyes.exceptions.NoServerAvailable:
-        logger.error('Elastic Search server could not be reached, check network connectivity')        
+        logger.error('Elastic Search server could not be reached, check network connectivity')
 
 
 def createAlerts(es, indicatorCounts, threshold, description):
@@ -169,9 +154,9 @@ def createAlerts(es, indicatorCounts, threshold, description):
                         alert['events'].append(
                             dict(documentindex=e['_index'],
                                  documenttype=e['_type'],
-                                 documentsource=e['_source'], 
+                                 documentsource=e['_source'],
                                  documentid=e['_id']))
-                    alert['severity'] = 'NOTICE'                    
+                    alert['severity'] = 'NOTICE'
                     alert['summary'] = ('{0} {1}: {2}'.format(i['count'], description, i['indicator']))
                     # append first X source IPs
                     alert['summary'] += ' sample sourceips: '
@@ -182,14 +167,14 @@ def createAlerts(es, indicatorCounts, threshold, description):
                         # append the relevant events in text format to avoid errant ES issues.
                         # should be able to just set eventsource to i['events'] but different versions of ES 1.0 complain
                         alert['eventsource'].append(flattenDict(e))
-    
+
                     logger.debug(alert['summary'])
                     logger.debug(alert['events'])
                     logger.debug(alert)
-    
+
                     # save alert to alerts index, update events index with alert ID for cross reference
                     alertResult = alertToES(es, alert)
-    
+
                     ##logger.debug(alertResult)
                     # for each event in this list of indicatorCounts
                     # update with the alertid/index
@@ -199,9 +184,9 @@ def createAlerts(es, indicatorCounts, threshold, description):
                             e['_source']['alerts'] = []
                         e['_source']['alerts'].append(dict(index=alertResult['_index'], type=alertResult['_type'], id=alertResult['_id']))
                         e['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
-    
+
                         es.update(e['_index'], e['_type'], e['_id'], document=e['_source'])
-    
+
                     alertToMessageQueue(alert)
     except ValueError as e:
         logger.error("Exception %r when creating alerts " % e)
@@ -216,13 +201,11 @@ def main():
     # search for failed amo logins
     indicatorCounts=esRunSearch(es,esFailedAMOLogin(),'suser', 50)
     createAlerts(es,indicatorCounts, 5, 'amo failed logins')
-    
+
     logger.debug('finished')
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
     # msg queue settings
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)  # message queue server hostname
     options.alertqueue = getConfig('alertqueue', 'mozdef.alert', options.configfile)  # alert queue topic

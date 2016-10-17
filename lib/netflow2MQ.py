@@ -31,6 +31,9 @@ from Queue import Empty, Full
 import socket, struct, sys
 from socket import inet_ntoa
 
+from utilities.toUTC import toUTC
+
+
 SIZE_OF_HEADER = 24
 SIZE_OF_RECORD = 48
 
@@ -62,33 +65,6 @@ def isNumber(s):
         except ValueError:
             return False
     return True
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone
-    try:
-        if type(suspectedDate) == datetime:
-            objDate = suspectedDate
-        elif isNumber(suspectedDate):   # epoch?
-            objDate = datetime.fromtimestamp(float(suspectedDate))
-        elif type(suspectedDate) in (str, unicode):
-            objDate = parse(suspectedDate, fuzzy=True)
-
-        if objDate.tzinfo is None:
-            objDate = pytz.timezone(localTimeZone).localize(objDate)
-            objDate = utc.normalize(objDate)
-        else:
-            objDate = utc.normalize(objDate)
-        if objDate is not None:
-            objDate = utc.normalize(objDate)
-    except ValueError:
-        pass
-
-    return objDate
 
 
 def postLogs(logcache):
@@ -157,13 +133,13 @@ def main():
             buf, address = sock.recvfrom(1500)
             netflowsource=address[0]
             netflowsource=socket.getfqdn(netflowsource)
-            
+
             #is the sender in a whitelist of accepted senders?
             if len(options.senderwhitelist) > 0:
                 if netflowsource not in options.senderwhitelist.split(','):
                     logger.debug('ignoring: {0}'.format(netflowsource))
                     continue
-            
+
 
             header = {}
             # NetFlow export format version number
@@ -172,12 +148,12 @@ def main():
             if header['version'] != 5:
                 logger.error( "Not NetFlow v5!")
                 continue
-            
+
             # It's pretty unlikely you'll ever see more then 1000 records in a 1500 byte UDP packet
             if header['count'] <= 0 or header['count'] >= 1000:
                 logger.error("Invalid count %s" % header['count'])
                 continue
-            
+
             # Current time in milliseconds since the export device booted
             header['uptime'] = socket.ntohl(struct.unpack('I', buf[4:8])[0])
             # Current count of seconds since 0000 UTC 1970
@@ -193,14 +169,14 @@ def main():
             # First two bits hold the sampling mode; remaining 14 bits hold value of sampling interval
             header['samplinginterval'] = struct.unpack('!H', buf[22:24])[0] & 0b0011111111111111
 
-            
+
             for i in range(0, header['count']):
                 try:
                     base = SIZE_OF_HEADER+(i*SIZE_OF_RECORD)
-            
+
                     data = struct.unpack('!IIIIHH',buf[base+16:base+36])
                     data2 = struct.unpack('!BBBHHBB',buf[base+37:base+46])
-            
+
                     record = header
                     # Netflow source
                     record['hostname'] = netflowsource
@@ -236,10 +212,10 @@ def main():
                     record['sourcemask'] = data2[5]
                     # Destination addressess prefix mask bits
                     record['destinationmask'] = data2[6]
-            
+
                     #publish record
                     if str(record['sourceport']) not in options.sourceportignore.split(','):
-                    
+
                         nfevent = dict(utctimestamp=toUTC(datetime.now()).isoformat())
                         nfevent['tags'] = ['netflow', 'network']
                         nfevent['category'] = 'netflow'
@@ -267,9 +243,6 @@ def initConfig():
     options.syslogport = getConfig('syslogport', 514, options.configfile)
     options.logfile = getConfig('logfile', 'auditd.mozdef.fifo', options.configfile)
 
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
-
     # mq server/exchange options.
     # mqservers can be a comma delimited list of server,server2,server3 etc to load balance the posts.
     options.mqservers = getConfig('mqservers', 'localhost', options.configfile)
@@ -277,7 +250,7 @@ def initConfig():
     options.mquser = getConfig('mquser', 'guest', options.configfile)
     options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
     options.mqport = getConfig('mqport', 5672, options.configfile)
-    
+
     #netflow options
     options.netflowport = getConfig('netflowport', 2056, options.configfile)
     #comma separated list of ports to ignore/drop

@@ -20,6 +20,11 @@ from datetime import timedelta
 from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -36,26 +41,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def flattenDict(dictIn):
@@ -143,7 +128,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
                                    emails=hit['emails'],
                                    events=hit['events'],
                                    sourceipgeolocation=hit['sourceipgeolocation'])
-                    
+
                     alerts.append(alertDict)
         return alerts
 
@@ -160,7 +145,7 @@ def createAlerts(es, alerts):
             ['city', 'region_code', 'area_code', 'time_zone', 'dma_code', 'metro_code', 'country_code3', 'latitude', 'postal_code', 'longitude', 'country_code', 'country_name', 'continent']
         emails (list of email addresses)
         events (list of dictionaries of ['documentindex', 'documentid', 'documenttype','documentsource] )
-        
+
 
         1) create a summary alert with detail of the events
         2) update the events with an alert timestamp so they are not included in further alerts
@@ -215,8 +200,6 @@ def main():
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
     # msg queue settings
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)  # message queue server hostname
     options.alertqueue = getConfig('alertqueue', 'mozdef.alert', options.configfile)  # alert queue topic

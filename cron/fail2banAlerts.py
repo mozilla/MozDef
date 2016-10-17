@@ -20,6 +20,11 @@ from datetime import timedelta
 from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -36,26 +41,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def flattenDict(dictIn):
@@ -118,7 +103,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
         rawresults=results._search_raw()
         alerts=list()
         for r in rawresults['hits']['hits'][:]:
-            alertDict = dict(category='fail2ban', 
+            alertDict = dict(category='fail2ban',
                              summary='{0}: {1}'.format(r['_source']['details']['hostname'], r['_source']['summary'].strip()),
                              events=[r])
             alerts.append(alertDict)
@@ -144,8 +129,8 @@ def createAlerts(es, alerts):
                     alert['events'].append(
                         dict(documentindex=e['_index'],
                              documenttype=e['_type'],
-                             documentsource=e['_source'], 
-                             documentid=e['_id']))                 
+                             documentsource=e['_source'],
+                             documentid=e['_id']))
                 alert['summary'] = i['summary']
                 logger.debug(alert)
 
@@ -161,7 +146,7 @@ def createAlerts(es, alerts):
                     e['_source']['alerts'].append(dict(index=alertResult['_index'], type=alertResult['_type'], id=alertResult['_id']))
                     e['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
 
-                    es.update(e['_index'], e['_type'], e['_id'], document=e['_source'])   
+                    es.update(e['_index'], e['_type'], e['_id'], document=e['_source'])
 
                 alertToMessageQueue(alert)
     except ValueError as e:
@@ -179,8 +164,6 @@ def main():
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
     # msg queue settings
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)  # message queue server hostname
     options.alertqueue = getConfig('alertqueue', 'mozdef.alert', options.configfile)  # alert queue topic

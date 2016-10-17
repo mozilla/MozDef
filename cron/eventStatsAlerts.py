@@ -21,6 +21,11 @@ from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from dateutil.parser import parse
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 
@@ -43,28 +48,6 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def esSearch(es, begindateUTC=None, enddateUTC=None):
     resultsList = list()
     if begindateUTC is None:
@@ -72,16 +55,16 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
     if enddateUTC is None:
         enddateUTC = toUTC(datetime.now())
     try:
-        # search for aggregated event stats summaries within the date range 
+        # search for aggregated event stats summaries within the date range
         qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
         q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
         q = pyes.FilteredQuery(q,pyes.BoolFilter(must=[qDate,
                                                        pyes.TermFilter('_type', 'mozdefstats')]))
         results=es.search(query=q,size=100,indices=['events','events-previous'])
-        
+
         #avoid pyes iteration bug
         rawresults = results._search_raw()
-        
+
         #examine the results
         #for each details.counts, append the count
         #as a list to the stats dict
@@ -98,7 +81,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
         aggregationthresholds = dict(zip(options.aggregations,
                                          options.aggregationthresholds))
 
-        
+
         #for our running history of counts per category
         #do some simple stats math to see if we
         #should alert on anything
@@ -113,7 +96,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
             elif  stat > options.defaultthreshold:
                 alert = True
 
-            if alert: 
+            if alert:
                 print('{0} {1}%: \n\t\t{2} \n\t\t{3} \n\t\t{4}'.format(
                                                 s,
                                                 stat,
@@ -121,7 +104,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
                                                 smean,
                                                 sstd
                                                 )
-                      )        
+                      )
 
     except pyes.exceptions.NoServerAvailable:
         logger.error('Elastic Search server could not be reached, check network connectivity')
@@ -149,17 +132,11 @@ def initConfig():
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-
-    # change this to your default zone for when it's not specified
-    options.defaulttimezone = getConfig('defaulttimezone',
-                                        'US/Pacific',
-                                        options.configfile)
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
-    
+
     # field to use as the aggegation point (category, _type, etc)
     options.aggregationfield = getConfig('aggregationfield',
                                          'category',

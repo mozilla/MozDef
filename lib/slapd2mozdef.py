@@ -15,6 +15,9 @@ from dateutil.tz import tzlocal
 import json
 from requests_futures.sessions import FuturesSession
 
+from utilities.toUTC import toUTC
+
+
 '''
 Search for slapd transactions and parse out the interesting bits:
 
@@ -25,7 +28,7 @@ Jan  2 08:01:57 ldap1 slapd[24398]: slap_graduate_commit_csn: removing 0x7faaf3a
 Jan  2 08:01:57 ldap1 slapd[24398]: conn=15824148 op=0 RESULT tag=97 err=49 text=
 Jan  2 08:01:57 ldap1 slapd[24398]: conn=15824148 fd=28 closed (connection lost)
 
-syslog/udp so lines don't come in order, don't expect them to. 
+syslog/udp so lines don't come in order, don't expect them to.
 
 '''
 
@@ -160,7 +163,7 @@ class Pygtail(object):
 
     def _check_rotated_filename_candidates(self):
         """
-        Check for various rotated logfile filename patterns and return the 
+        Check for various rotated logfile filename patterns and return the
         matches we find.
         """
         candidates=[]
@@ -197,17 +200,17 @@ def searchforBindResult(line,bindDetails,linecache):
     '''match outstanding binds without results to any new RESULT lines'''
     cache=''.join(linecache)
     for bind in bindDetails:
-        if bindDetails[bind]['errCode'] is None:       
+        if bindDetails[bind]['errCode'] is None:
             #print('searching...{0} {1}'.format(bindDetails[bind]['conn'],bindDetails[bind]['op']))
             errCodere=re.compile(r'''conn={0} op={1} RESULT tag=\d+ err=(\d+) '''.format(bindDetails[bind]['conn'],bindDetails[bind]['op']))
-    
+
             for errCode in errCodere.findall(cache):
                 bindDetails[bind]['result']=errCodes[int(errCode)]
                 bindDetails[bind]['errCode']=int(errCode)
-        if bindDetails[bind]['ipAddress']=='0.0.0.0':       
+        if bindDetails[bind]['ipAddress']=='0.0.0.0':
             srcIPre=re.compile(r'''conn={0}.*?ACCEPT from IP=(.*?):\d+ '''.format(bindDetails[bind]['conn']))
             for srcIP in srcIPre.findall(cache):
-                bindDetails[bind]['ipAddress']=srcIP    
+                bindDetails[bind]['ipAddress']=srcIP
 
 def postBindResults(bindDetails,pt,linecache,eof=False):
     '''post our results via http using a keepalive session'''
@@ -219,7 +222,7 @@ def postBindResults(bindDetails,pt,linecache,eof=False):
         if (bindDetails[bind]['errCode'] is not None and bindDetails[bind]['ipAddress'] !='0.0.0.0') \
             or (bindDetails[bind]['conn'] not in cache) \
             or (eof):
-            try:            
+            try:
                 log=('{0} {1} srcIP={2}'.format(bindDetails[bind]['result'],bindDetails[bind]['dn'],bindDetails[bind]['ipAddress']))
                 #format a dictionary object to post in json
                 eventlog=dict(message=log,timestamp=bindDetails[bind]['eventtime'])
@@ -235,8 +238,8 @@ def postBindResults(bindDetails,pt,linecache,eof=False):
                 eventlog['details.source']=''
                 for line in linecache:
                     if bindDetails[bind]['conn'] in line:
-                        eventlog['details.source']+=line            
-             
+                        eventlog['details.source']+=line
+
                 r=httpsession.post(options.url,json.dumps(eventlog))
                 posts.append(r)
                 #print("%r"%r)
@@ -245,13 +248,13 @@ def postBindResults(bindDetails,pt,linecache,eof=False):
                 sys.stderr.write("slapd2mozdef.py exception posting to %s %r"%(options.url,e))
                 sys.exit(1)
     for p in posts:
-        try: 
+        try:
             if p.result().status_code!=200:
                 sys.stderr.write("slapd2mozdef.py exception posting to %s %r"%(options.url,p.result().status_code))
                 sys.exit(1)
         except Exception as e:
                 sys.stderr.write("slapd2mozdef.py exception posting to %s %r"%(options.url,e))
-                sys.exit(1)            
+                sys.exit(1)
     #update our position in the file
     pt.pretend=False
     pt._update_offset_file()
@@ -273,20 +276,20 @@ def main():
        parse out the interesting transactions and move on to the next
        sleeping in between to be nice to our cpu for really large files
     '''
-    
+
     for afile in glob2.iglob(options.filemask):
         #cache list of log lines to help deal with the multi-line slapd format
         linecache=[]
-        
+
         #defaults
         ipAddress='0.0.0.0'
         bindName='Unknown'
         errCode=None
         errName='Unknown'
-        
+
         #dictionary to store bits of bind transactions as we find them in the multi-line logs
         bindDetails={}
-        
+
         if exists(afile): #sometimes files can move/archive while we iterate the list
             #have pygtail feed us lines without incrementing the offset until we've posted any results we've found.
             pt = Pygtail(afile,pretend=True)
@@ -297,9 +300,9 @@ def main():
                     if len(linecache)>options.cachelength:
                         linecache.remove(linecache[0])
                     linecache.append(line)
-                    
+
                     searchforBind(line,bindDetails)
-    
+
                     if 'RESULT' in line:
                         #maybe it's the termination of an earlier bind attempt
                         searchforBindResult(line,bindDetails,linecache)
@@ -310,13 +313,11 @@ def main():
         postBindResults(bindDetails,pt,linecache,True)
 
 def initConfig():
-    #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)    
     options.filemask=getConfig('filemask','*.log',options.configfile)
     options.cachelength=getConfig('cachelength',100,options.configfile)
     options.url=getConfig('url','http://localhost:9200',options.configfile)
     options.bindignore=getConfig('bindignore','',options.configfile)  #space delimited list of words/usernames/items if found in BIND dn="something" to ignore
- 
+
 if __name__ == '__main__':
     parser=OptionParser()
     parser.add_option("-c", dest='configfile' , default='', help="configuration file to use")

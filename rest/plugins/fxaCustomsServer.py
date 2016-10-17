@@ -44,18 +44,18 @@ class message(object):
            (i.e. blockip matches /blockip)
            set the priority if you have a preference for order of plugins
            0 goes first, 100 is assumed/default if not sent
-           
+
            Plugins will register in Meteor with attributes:
            name: (as below)
            description: (as below)
            priority: (as below)
            file: "plugins.filename" where filename.py is the plugin code.
-           
+
            Plugin gets sent main rest options as:
            self.restoptions
            self.restoptions['configfile'] will be the .conf file
            used by the restapi's index.py file.
-           
+
         '''
 
         self.registration = ['blockip']
@@ -70,17 +70,15 @@ class message(object):
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
-        
+
 
     def initConfiguration(self):
         myparser = OptionParser()
         # setup self.options by sending empty list [] to parse_args
         (self.options, args) = myparser.parse_args([])
-        
+
         # fill self.options with plugin-specific options
-        # change this to your default zone for when it's not specified
-        self.options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', self.configfile)
-        
+
         # boto options
         self.options.region = getConfig('region',
                                         'us-west-2',
@@ -104,7 +102,7 @@ class message(object):
                 # '{"Message": {"ban": {"ip": "192.168.0.2"}}}'
                 # encoded like this:
                 # {"Message":"{\"ban\":{\"ip\":\"192.168.0.2\"}}"}
-                
+
                 conn = boto.sqs.connect_to_region(self.options.region,
                                                   aws_access_key_id=self.options.aws_access_key_id,
                                                   aws_secret_access_key=self.options.aws_secret_access_key)
@@ -115,7 +113,7 @@ class message(object):
                 m.set_body(json.dumps(banMessage))
                 queue.write(m)
                 sys.stdout.write('Sent {0} to customs server\n'.format(ipaddress))
-            
+
         except Exception as e:
             sys.stderr.write('Error while sending to customs server %s: %r\n' % (ipaddress, e))
 
@@ -124,8 +122,8 @@ class message(object):
         '''
         request: http://bottlepy.org/docs/dev/api.html#the-request-object
         response: http://bottlepy.org/docs/dev/api.html#the-response-object
-        
-        '''        
+
+        '''
         # format/validate request.json:
         ipaddress = None
         CIDR = None
@@ -134,10 +132,10 @@ class message(object):
         referenceID = None
         userid = None
         sendToCustomsServer = False
-        
+
         # loop through the fields of the form
         # and fill in our values
-        try: 
+        try:
             for i in request.json:
                 # were we checked?
                 if self.name in i.keys():
@@ -171,5 +169,5 @@ class message(object):
                         sys.stdout.write ('Sent {0}/{1} to customs server\n'.format(ipaddress, CIDR))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
-                
+
         return (request, response)

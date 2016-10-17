@@ -27,6 +27,11 @@ from dateutil.parser import parse
 from pymongo import MongoClient
 from pymongo import collection
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -49,27 +54,6 @@ def initLogger():
         sh.setFormatter(formatter)
         logger.addHandler(sh)
 
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone    
-    if type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 def aggregateIPs(attackers):
     iplist=[]
@@ -95,7 +79,7 @@ def aggregateIPs(attackers):
 
                 #strip any host bits 192.168.10/24 -> 192.168.0/24
                 ipcidrnet=str(ipcidr.cidr)
-                if ipcidrnet not in iplist and not whitelisted: 
+                if ipcidrnet not in iplist and not whitelisted:
                     iplist.append(ipcidrnet)
             else:
                 logger.debug('invalid:' + ip)
@@ -123,8 +107,6 @@ def main():
 
 
 def initConfig():
-    #change this to your default timezone
-    options.defaulttimezone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     # output our log to stdout or syslog
     options.output = getConfig('output', 'stdout', options.configfile)
     # syslog hostname
@@ -142,13 +124,13 @@ def initConfig():
     options.ipwhitelist = list()
     for i in list(getConfig('ipwhitelist', '127.0.0.1/32', options.configfile).split(',')):
         options.ipwhitelist.append(netaddr.IPNetwork(i))
-    
+
     # Output File Name
     options.outputfile = getConfig('outputfile', 'ipblocklist.txt', options.configfile)
-    
+
     # Category to choose
     options.category = getConfig('category', 'bruteforcer', options.configfile)
-    
+
     # Max IPs to emit
     options.iplimit = getConfig('iplimit', 1000, options.configfile)
 

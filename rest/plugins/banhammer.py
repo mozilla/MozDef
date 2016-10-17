@@ -43,18 +43,18 @@ class message(object):
            (i.e. blockip matches /blockip)
            set the priority if you have a preference for order of plugins
            0 goes first, 100 is assumed/default if not sent
-           
+
            Plugins will register in Meteor with attributes:
            name: (as below)
            description: (as below)
            priority: (as below)
            file: "plugins.filename" where filename.py is the plugin code.
-           
+
            Plugin gets sent main rest options as:
            self.restoptions
            self.restoptions['configfile'] will be the .conf file
            used by the restapi's index.py file.
-           
+
         '''
 
         self.registration = ['blockip']
@@ -69,17 +69,15 @@ class message(object):
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
-        
+
 
     def initConfiguration(self):
         myparser = OptionParser()
         # setup self.options by sending empty list [] to parse_args
         (self.options, args) = myparser.parse_args([])
-        
+
         # fill self.options with plugin-specific options
-        # change this to your default zone for when it's not specified
-        self.options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', self.configfile)
-        
+
         # options for your custom/internal ip blocking service
         # mozilla's is called banhammer
         # and uses an intermediary mysql DB
@@ -104,9 +102,9 @@ class message(object):
 
     def banhammer(self,
                   ipaddress = None,
-                  CIDR = None, 
-                  comment = None, 
-                  duration = None, 
+                  CIDR = None,
+                  comment = None,
+                  duration = None,
                   referenceID = None,
                   userID=None
                   ):
@@ -144,7 +142,7 @@ class message(object):
                 end_date = datetime.utcnow() + timedelta(days=7)
             elif duration == '30d':
                 end_date = datetime.utcnow() + timedelta(days=30)
-    
+
             if referenceID is not None:
                 # Insert in DB
                 dbcursor.execute("""
@@ -166,12 +164,12 @@ class message(object):
         '''
         request: http://bottlepy.org/docs/dev/api.html#the-request-object
         response: http://bottlepy.org/docs/dev/api.html#the-response-object
-        
+
         '''
         response.headers['X-PLUGIN'] = self.description
         # debug
         # print(request.json)
-        
+
         #format/validate request.json for banhammer:
         ipaddress = None
         CIDR = None
@@ -180,10 +178,10 @@ class message(object):
         referenceID = None
         userid = None
         banhammer = False
-        
+
         # loop through the fields of the form
         # and fill in our values
-        try: 
+        try:
             for i in request.json:
                 # were we checked?
                 if self.name in i.keys():
@@ -209,13 +207,13 @@ class message(object):
                         #split the ip vs cidr mask
                         ipaddress, CIDR =  str(ipcidr.cidr).split('/')
                         self.banhammer(ipaddress,
-                                       CIDR, 
-                                       comment, 
-                                       duration, 
+                                       CIDR,
+                                       comment,
+                                       duration,
                                        referenceID,
                                        userid)
                         sys.stdout.write ('Sent {0}/{1} to banhammer\n'.format(ipaddress, CIDR))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
-                
+
         return (request, response)

@@ -21,6 +21,11 @@ import pytz
 import pyes
 from collections import Counter
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -36,25 +41,6 @@ def initLogger():
         sh=logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-def toUTC(suspectedDate,localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc=pytz.UTC
-    objDate=None
-    if type(suspectedDate)==str:
-        objDate=parse(suspectedDate,fuzzy=True)
-    elif type(suspectedDate)==datetime:
-        objDate=suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate=pytz.timezone(localTimeZone).localize(objDate)
-        objDate=utc.normalize(objDate)
-    else:
-        objDate=utc.normalize(objDate)
-    if objDate is not None:
-        objDate=utc.normalize(objDate)
-
-    return objDate
 
 def flattenDict(dictIn):
     sout=''
@@ -237,8 +223,6 @@ def main():
     logger.debug('finished')
 
 def initConfig():
-    #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     #msg queue settings
     options.mqserver=getConfig('mqserver','localhost',options.configfile)               #message queue server hostname
     options.alertqueue=getConfig('alertqueue','mozdef.alert',options.configfile)        #alert queue topic

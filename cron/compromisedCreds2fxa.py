@@ -29,32 +29,15 @@ from boto.sqs.message import RawMessage
 from urllib2 import urlopen
 from urllib import urlencode
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
 
 logger = logging.getLogger(sys.argv[0])
 logger.level=logging.INFO
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
-
-def toUTC(suspectedDate,localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc=pytz.UTC
-    objDate=None
-    if localTimeZone is None:
-        localTimeZone=options.defaultTimeZone
-    if type(suspectedDate) in (str,unicode):
-        objDate=parse(suspectedDate,fuzzy=True)
-    elif type(suspectedDate)==datetime:
-        objDate=suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate=pytz.timezone(localTimeZone).localize(objDate)
-        objDate=utc.normalize(objDate)
-    else:
-        objDate=utc.normalize(objDate)
-    if objDate is not None:
-        objDate=utc.normalize(objDate)
-
-    return objDate
 
 def buildQuery(optionDict):
     '''
@@ -189,7 +172,6 @@ def initConfig():
     options.output=getConfig('output','stdout',options.configfile)                              #output our log to stdout or syslog
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)        #default timezone
     options.mozdefurl = getConfig('url', 'http://localhost:8080/events', options.configfile)                  #mozdef event input url to post to
     options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(hours=24)),options.configfile))
     options.recordlimit = getConfig('recordlimit', 1000, options.configfile)                    #max number of records to request

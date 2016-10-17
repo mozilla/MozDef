@@ -19,6 +19,12 @@ from datetime import timedelta
 from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -35,26 +41,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def flattenDict(dictIn):
@@ -148,8 +134,8 @@ def esRunSearch(es, query, aggregateField):
         return indicatorList
 
     except pyes.exceptions.NoServerAvailable:
-        logger.error('Elastic Search server could not be reached, check network connectivity')        
-    
+        logger.error('Elastic Search server could not be reached, check network connectivity')
+
 def esSearch(es, begindateUTC=None, enddateUTC=None):
     if begindateUTC is None:
         begindateUTC = toUTC(datetime.now() - timedelta(minutes=80))
@@ -188,7 +174,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
 
         # correlate any matches by the dhost field.
         # make a simple list of indicator values that can be counted/summarized by Counter
-        resultsIndicators = list()  
+        resultsIndicators = list()
 
         # bug in pyes..capture results as raw list or it mutates after first access:
         # copy the hits.hits list as our resusts, which is the same as the official elastic search library returns.
@@ -229,7 +215,7 @@ def createAlerts(es, indicatorCounts):
                     alert['events'].append(
                         dict(documentindex=e['_index'],
                              documenttype=e['_type'],
-                             documentsource=e['_source'], 
+                             documentsource=e['_source'],
                              documentid=e['_id']))
                 alert['severity'] = 'NOTICE'
                 if i['count']==1:
@@ -239,7 +225,7 @@ def createAlerts(es, indicatorCounts):
                 for e in i['events'][:3]:
                     alert['summary'] += ' {0}'.format(e['_source']['details']['fname'])
                     if 'dhost' in e['_source']['details'].keys():
-                        alert['summary'] += ' on {0}'.format(e['_source']['details']['dhost'])                    
+                        alert['summary'] += ' on {0}'.format(e['_source']['details']['dhost'])
                 for e in i['events']:
                     # append the relevant events in text format to avoid errant ES issues.
                     # should be able to just set eventsource to i['events'] but different versions of ES 1.0 complain
@@ -276,17 +262,15 @@ def main():
     # searches for suspicious file access
     # aggregating by a specific field (usually dhost or suser)
     # and alert if found
-    
+
     # signature: WRITE by a user, not by puppet
     indicatorCounts = esRunSearch(es,esUserWriteSearch(), 'suser')
     createAlerts(es, indicatorCounts)
-    
+
     logger.debug('finished')
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
     # msg queue settings
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)  # message queue server hostname
     options.alertqueue = getConfig('alertqueue', 'mozdef.alert', options.configfile)  # alert queue topic

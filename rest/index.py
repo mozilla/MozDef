@@ -30,7 +30,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
 
-from utilities.to_utc import toUTC
+from utilities.toUTC import toUTC
 
 options = None
 pluginList = list()   # tuple of module,registration dict,priority
@@ -673,10 +673,6 @@ def verisSummary(verisRegex=None):
             sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
 
 def initConfig():
-    #change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
-                                        options.configfile)
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))

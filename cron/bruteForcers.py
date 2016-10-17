@@ -20,6 +20,11 @@ from datetime import timedelta
 from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -36,26 +41,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def flattenDict(dictIn):
@@ -117,7 +102,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
                                                  'login ldap_count_entries',
                                                  'boolean'))],
             must_not=[
-                pyes.ExistsFilter('alerttimestamp'), 
+                pyes.ExistsFilter('alerttimestamp'),
                 pyes.QueryFilter(pyes.MatchQuery('summary','10.22.8.128','phrase')),
                 pyes.QueryFilter(pyes.MatchQuery('summary','10.8.75.35','phrase')),
                 pyes.QueryFilter(pyes.MatchQuery('summary','208.118.237.','phrase'))
@@ -127,7 +112,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
         rawresults=results._search_raw()
         alerts=list()
         ips=list()
-        
+
         # see if any of these failed attempts cross our threshold per source ip
         for r in rawresults['hits']['hits'][:]:
             if 'details' in r['_source'].keys() and 'sourceipaddress' in r['_source']['details']:
@@ -147,7 +132,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
                 # add source events
                 for r in rawresults['hits']['hits']:
                     if 'details' in r['_source'].keys() and 'sourceipaddress' in r['_source']['details'] and r['_source']['details']['sourceipaddress'].encode('ascii', 'ignore') == i[0]:
-                        alertDict['events'].append(r)  
+                        alertDict['events'].append(r)
                 alerts.append(alertDict)
         return alerts
 
@@ -172,8 +157,8 @@ def createAlerts(es, alerts):
                     alert['events'].append(
                         dict(documentindex=e['_index'],
                              documenttype=e['_type'],
-                             documentsource=e['_source'], 
-                             documentid=e['_id']))                
+                             documentsource=e['_source'],
+                             documentid=e['_id']))
                 alert['severity'] = 'NOTICE'
                 alert['summary'] = ('{0} ssh bruteforce attempts by {1}'.format(i['sourceiphits'], i['sourceipaddress']))
                 for e in i['events'][:3]:
@@ -194,7 +179,7 @@ def createAlerts(es, alerts):
                     e['_source']['alerts'].append(dict(index=alertResult['_index'], type=alertResult['_type'], id=alertResult['_id']))
                     e['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
 
-                    es.update(e['_index'], e['_type'], e['_id'], document=e['_source'])                
+                    es.update(e['_index'], e['_type'], e['_id'], document=e['_source'])
 
                 alertToMessageQueue(alert)
     except ValueError as e:
@@ -212,8 +197,6 @@ def main():
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
     # msg queue settings
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)  # message queue server hostname
     options.alertqueue = getConfig('alertqueue', 'mozdef.alert', options.configfile)  # alert queue topic

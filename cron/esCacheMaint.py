@@ -20,6 +20,12 @@ import time
 from configlib import getConfig, OptionParser
 from datetime import datetime, date, timedelta
 from dateutil.parser import parse
+
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 
@@ -59,33 +65,6 @@ def digits(n):
     return digits
 
 
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone
-
-    if type(suspectedDate) == datetime:
-        objDate = suspectedDate
-    elif isNumber(suspectedDate):
-        # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
-        epochDivisor = int(str(1) + '0'*(digits(suspectedDate) % 10))
-        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor))
-    elif type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def esConnect(conn):
     '''open or re-open a connection to elastic search'''
     return pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
@@ -99,7 +78,7 @@ def isJVMMemoryHigh():
     if r.status_code == 200:
         nodestats=r.json()
         #logger.debug(json.dumps(nodestats, indent=4, sort_keys=True))
-    
+
         for node in nodestats['nodes']:
             loadaverage=nodestats['nodes'][node]['os']['load_average']
             cpuusage=nodestats['nodes'][node]['os']['cpu']['usage']
@@ -142,7 +121,7 @@ def clearESCache():
                     logger.debug('{0}: <ignoring due to current search > field data {1}'.format(targetindex, indexstats['_all']['total']['fielddata']['memory_size_in_bytes']))
             else:
                 logger.error('{0} returned {1}'.format(url, r.status_code))
-    
+
 
 def main():
     if isJVMMemoryHigh():
@@ -151,15 +130,12 @@ def main():
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
-
     # elastic search options.
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
-    
+
     # memory watermark, set to 90 (percent) by default
     options.jvmlimit = getConfig('jvmlimit', 90, options.configfile)
-    
+
     # be conservative? if set only clears cache for the first index found with no searches and cached field data
     # if false, will continue to clear for any index not matching the date suffix.
     options.conservative = getConfig('conservative', True, options.configfile)

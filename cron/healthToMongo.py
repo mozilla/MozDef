@@ -20,6 +20,11 @@ from logging.handlers import SysLogHandler
 from dateutil.parser import parse
 from pymongo import MongoClient
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 
@@ -43,29 +48,9 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def getFrontendStats(es):
-    begindateUTC = toUTC(datetime.now() - timedelta(minutes=15), options.defaulttimezone)
-    enddateUTC = toUTC(datetime.now(), options.defaulttimezone)
+    begindateUTC = toUTC(datetime.now() - timedelta(minutes=15))
+    enddateUTC = toUTC(datetime.now())
     qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
         from_value=begindateUTC, to_value=enddateUTC))
     qType = pyes.TermFilter('_type', 'mozdefhealth')
@@ -170,10 +155,6 @@ def initConfig():
         options.configfile).split(','))
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
-    # change this to your default zone for when it's not specified
-    options.defaulttimezone = getConfig('defaulttimezone',
-                                        'US/Pacific',
-                                        options.configfile)
 
 
 if __name__ == '__main__':

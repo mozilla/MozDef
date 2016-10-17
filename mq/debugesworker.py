@@ -29,6 +29,8 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
+from utilities.toUTC import toUTC
+
 
 # running under uwsgi?
 try:
@@ -59,33 +61,6 @@ def digits(n):
     else:
         digits = int(math.log10(-n))+2
     return digits
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone
-
-    if type(suspectedDate) == datetime:
-        objDate = suspectedDate
-    elif isNumber(suspectedDate):
-        # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
-        epochDivisor = int(str(1) + '0'*(digits(suspectedDate) % 10))
-        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor))
-    elif type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate.isoformat()
 
 
 def removeDictAt(aDict):
@@ -490,9 +465,6 @@ def main():
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
-
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
     options.esbulksize = getConfig('esbulksize', 0, options.configfile)

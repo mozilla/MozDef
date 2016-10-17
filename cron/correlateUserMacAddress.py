@@ -22,6 +22,11 @@ from logging.handlers import SysLogHandler
 from dateutil.parser import parse
 from hashlib import md5
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 
@@ -42,28 +47,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def getDocID(usermacaddress):
@@ -111,7 +94,7 @@ def esSearch(es, macassignments=None, begindateUTC=None, enddateUTC=None):
         # search for events within the date range
         qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
         q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-        q.filters.append(pyes.BoolFilter(must=[ 
+        q.filters.append(pyes.BoolFilter(must=[
                                                qDate,
                                                pyes.TermFilter("program","AUTHORIZATION-SUCCESS")
                                                ],
@@ -136,7 +119,7 @@ def esSearch(es, macassignments=None, begindateUTC=None, enddateUTC=None):
                                                                                                              entity=entity,
                                                                                                              utctimestamp=r['_source']['utctimestamp'])
         return correlations
-        
+
     except pyes.exceptions.NoServerAvailable:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
@@ -159,7 +142,7 @@ def esStoreCorrelations(es, correlations):
                      doc=json.dumps(event),
                      bulk=False)
         except Exception as e:
-            logger.error("Exception %r when posting correlation " % e)        
+            logger.error("Exception %r when posting correlation " % e)
 
 
 def main():
@@ -172,14 +155,14 @@ def main():
 
     es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
     # create intelligence index if it's not already there
-    es.indices.create_index_if_missing('intelligence',dict(number_of_shards=2,number_of_replicas=1))    
-    
+    es.indices.create_index_if_missing('intelligence',dict(number_of_shards=2,number_of_replicas=1))
+
     # read in the OUI file for mac prefix to vendor dictionary
     macassignments = readOUIFile(options.ouifilename)
-    
+
     # search ES for events containing username and mac address
     correlations = esSearch(es, macassignments=macassignments)
-    
+
     # store the correlation in the intelligence index
     esStoreCorrelations(es, correlations)
 
@@ -197,25 +180,20 @@ def initConfig():
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
 
-    # change this to your default zone for when it's not specified
-    options.defaulttimezone = getConfig('defaulttimezone',
-                                        'US/Pacific',
-                                        options.configfile)
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
-    
+
 
     # default time period in minutes to look back in time for the aggregation
     options.correlationminutes = getConfig('correlationminutes',
                                          150,
                                          options.configfile)
-    
+
     # default location of the OUI file from IEEE for resolving mac prefixes
     # Expects the OUI file from IEEE:
-    # wget http://www.ieee.org/netstorage/standards/oui.txt    
+    # wget http://www.ieee.org/netstorage/standards/oui.txt
     options.ouifilename = getConfig('ouifilename',
                                 'oui.txt',
                                 options.configfile)

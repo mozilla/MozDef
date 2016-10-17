@@ -6,7 +6,7 @@ from dateutil.parser import parse
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
-from utilities.to_utc import toUTC
+from utilities.toUTC import toUTC
 
 
 class TestToUTC():

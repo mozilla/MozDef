@@ -28,6 +28,11 @@ from dateutil.parser import parse
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -102,28 +107,6 @@ def run_async(func):
         func_hl.start()
         return func_hl
     return async_func
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone    
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def getQuote():
@@ -383,13 +366,7 @@ def consumeAlerts(ircBot):
 def initConfig():
     # initialize config options
     # sets defaults or overrides from config file.
-    
-    # change this to your default zone for when it's not specified
-    # in time strings
-    options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
-                                        options.configfile)
-    
+
     # irc options
     options.host = getConfig('host', 'irc.somewhere.com', options.configfile)
     options.nick = getConfig('nick', 'mozdefnick', options.configfile)
@@ -448,7 +425,7 @@ if __name__ == "__main__":
     sh = logging.StreamHandler(sys.stderr)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
-    
+
     parser = OptionParser()
     parser.add_option(
         "-c", dest='configfile',

@@ -19,6 +19,11 @@ from datetime import timedelta
 from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 
@@ -36,26 +41,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def flattenDict(dictIn):
@@ -145,7 +130,7 @@ def esRPMSearch():
     qalerted = pyes.ExistsFilter('alerttimestamp')
     q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
     q.filters.append(pyes.BoolFilter(must=[qType, qDate,qEvents,
-                                           pyes.ExistsFilter('suser')], 
+                                           pyes.ExistsFilter('suser')],
         should=[
         pyes.QueryFilter(pyes.MatchQuery("command","-e","phrase")),
         pyes.QueryFilter(pyes.MatchQuery("command","--erase","phrase")),
@@ -157,8 +142,8 @@ def esRPMSearch():
         pyes.QueryFilter(pyes.MatchQuery("command","--eval","phrase")),
         pyes.QueryFilter(pyes.MatchQuery("command","--info","phrase")),
         pyes.QueryFilter(pyes.MatchQuery("dhost","deploy","phrase")),         # ignore rpm builds on deploy hosts
-        pyes.QueryFilter(pyes.MatchQuery("parentprocess","puppet","phrase")), # ignore rpm -e hp 
-        ]))    
+        pyes.QueryFilter(pyes.MatchQuery("parentprocess","puppet","phrase")), # ignore rpm -e hp
+        ]))
     return q
 
 def esYumSearch():
@@ -170,7 +155,7 @@ def esYumSearch():
     qalerted = pyes.ExistsFilter('alerttimestamp')
     q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
     q.filters.append(pyes.BoolFilter(must=[qType, qDate,qEvents,
-                                           pyes.ExistsFilter('suser')], 
+                                           pyes.ExistsFilter('suser')],
         should=[
         pyes.QueryFilter(pyes.MatchQuery("command","remove","phrase"))
         ],
@@ -194,7 +179,7 @@ def esGCCSearch():
                               qDate,
                               qEvents,
                               qCommand,
-                              pyes.ExistsFilter('suser')                              
+                              pyes.ExistsFilter('suser')
                             ],
     must_not=[
         qalerted,
@@ -223,15 +208,15 @@ def esHistoryModSearch():
     q.filters.append(
         pyes.BoolFilter(must=[
                             qType, qDate,qCommand,
-                            pyes.ExistsFilter('suser'), 
+                            pyes.ExistsFilter('suser'),
                             pyes.QueryFilter(pyes.MatchQuery("parentprocess","bash sh ksh","boolean")),
                             pyes.QueryFilter(pyes.MatchQuery("command","bash_history sh_history zsh_history .history secure messages history","boolean"))
                             ],
     should=[
-        
+
         pyes.QueryFilter(pyes.MatchQuery("command","rm vi vim nano emacs","boolean")),
         pyes.QueryFilter(pyes.MatchQuery("command","history -c","phrase"))
-        
+
     ],
     must_not=[
         qalerted
@@ -268,8 +253,8 @@ def esRunSearch(es, query, aggregateField, detailLimit=5):
         return indicatorList
 
     except pyes.exceptions.NoServerAvailable:
-        logger.error('Elastic Search server could not be reached, check network connectivity')        
-    
+        logger.error('Elastic Search server could not be reached, check network connectivity')
+
 def esSearch(es, begindateUTC=None, enddateUTC=None):
     if begindateUTC is None:
         begindateUTC = toUTC(datetime.now() - timedelta(minutes=80))
@@ -349,7 +334,7 @@ def createAlerts(es, indicatorCounts):
                     alert['events'].append(
                         dict(documentindex=e['_index'],
                              documenttype=e['_type'],
-                             documentsource=e['_source'], 
+                             documentsource=e['_source'],
                              documentid=e['_id']))
                 alert['severity'] = 'NOTICE'
                 if i['count']==1:
@@ -358,10 +343,10 @@ def createAlerts(es, indicatorCounts):
                     alert['summary'] = ('{0} suspicious commands: {1}'.format(i['count'], i['indicator']))
                 for e in i['events'][:3]:
                     if 'dhost' in e['_source']['details'].keys():
-                        alert['summary'] += ' on {0}'.format(e['_source']['details']['dhost']) 
+                        alert['summary'] += ' on {0}'.format(e['_source']['details']['dhost'])
                     # first 50 chars of a command, then ellipsis
                     alert['summary'] += ' {0}'.format(e['_source']['details']['command'][:50] + (e['_source']['details']['command'][:50] and '...'))
-                   
+
                 for e in i['events']:
                     # append the relevant events in text format to avoid errant ES issues.
                     # should be able to just set eventsource to i['events'] but different versions of ES 1.0 complain
@@ -398,7 +383,7 @@ def main():
     # run a series of searches for suspicious commands
     # aggregating by a specific field (usually dhost or suser)
     # and alert if found
-    
+
     # /etc/shadow manipulation by destination host
     indicatorCounts = esRunSearch(es,esShadowSearch(), 'suser')
     createAlerts(es, indicatorCounts)
@@ -406,25 +391,23 @@ def main():
     # search for rpm -i or -e type commands by suser:
     indicatorCounts=esRunSearch(es,esRPMSearch(),'suser')
     createAlerts(es,indicatorCounts)
-    
+
     # search for yum remove commands by suser:
     indicatorCounts=esRunSearch(es,esYumSearch(),'suser')
     createAlerts(es,indicatorCounts)
- 
+
     # search for gcc commands by suser:
     indicatorCounts=esRunSearch(es,esGCCSearch(),'suser')
     createAlerts(es,indicatorCounts)
 
     # search for history modification commands by suser:
     indicatorCounts=esRunSearch(es,esHistoryModSearch(),'suser')
-    createAlerts(es,indicatorCounts)  
-    
+    createAlerts(es,indicatorCounts)
+
     logger.debug('finished')
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
     # msg queue settings
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)  # message queue server hostname
     options.alertqueue = getConfig('alertqueue', 'mozdef.alert', options.configfile)  # alert queue topic

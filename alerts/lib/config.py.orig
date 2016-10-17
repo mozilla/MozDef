@@ -45,10 +45,6 @@ ES = {
 	'servers': ['http://mozdefqa1.private.scl3.mozilla.com:9200']
 }
 
-OPTIONS = {
-    'defaulttimezone': 'US/Pacific',
-}
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

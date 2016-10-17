@@ -20,6 +20,11 @@ from dateutil.parser import parse
 import pytz
 import pyes
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -29,31 +34,12 @@ def initLogger():
     logger.level=logging.INFO
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     formatter.formatTime = loggerTimeStamp
-    if options.output=='syslog':    
+    if options.output=='syslog':
         logger.addHandler(SysLogHandler(address=(options.sysloghostname,options.syslogport)))
     else:
         sh=logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-def toUTC(suspectedDate,localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc=pytz.UTC
-    objDate=None
-    if type(suspectedDate)==str:
-        objDate=parse(suspectedDate,fuzzy=True)
-    elif type(suspectedDate)==datetime:
-        objDate=suspectedDate
-    
-    if objDate.tzinfo is None:
-        objDate=pytz.timezone(localTimeZone).localize(objDate)
-        objDate=utc.normalize(objDate)
-    else:
-        objDate=utc.normalize(objDate)
-    if objDate is not None:
-        objDate=utc.normalize(objDate)
-        
-    return objDate
 
 def flattenDict(dictIn):
     sout=''
@@ -67,7 +53,7 @@ def alertToMessageQueue(alertDict):
         channel = connection.channel()
         #declare the exchanges
         channel.exchange_declare(exchange=options.alertexchange,type='topic', durable=True)
-        
+
         #cherry pick items from the alertDict to send to the alerts messageQueue
         mqAlert=dict(severity='INFO',category='')
         if 'severity' in alertDict.keys():
@@ -79,7 +65,7 @@ def alertToMessageQueue(alertDict):
         if 'eventtimestamp' in alertDict.keys():
             mqAlert['eventtimestamp']=alertDict['eventtimestamp']
         mqAlert['summary']=alertDict['summary']
-        channel.basic_publish(exchange=options.alertexchange,routing_key=options.alertqueue,body=json.dumps(mqAlert))    
+        channel.basic_publish(exchange=options.alertexchange,routing_key=options.alertqueue,body=json.dumps(mqAlert))
     except Exception as e:
         logger.error('Exception while sending alert to message queue: {0}'.format(e))
 
@@ -106,10 +92,10 @@ def esCloudTrailSearch(es,begindateUTC=None, enddateUTC=None):
         #uncomment for debugging to recreate alerts for events that already have an alerttimestamp
         #results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents])))
         return(results._search_raw()['hits']['hits'])
-        
+
     except pyes.exceptions.NoServerAvailable:
         logger.error('Elastic Search server could not be reached, check network connectivity')
-        
+
 def createAlerts(es,esResults):
     try:
         if len(esResults)>0:
@@ -118,7 +104,7 @@ def createAlerts(es,esResults):
                 alert['events'].append(
                     dict(documentindex=r['_index'],
                          documenttype=r['_type'],
-                         documentsource=r['_source'], 
+                         documentsource=r['_source'],
                          documentid=r['_id']))
                 alert['eventtimestamp']=r['_source']['eventTime']
                 alert['severity']='INFO'
@@ -135,10 +121,10 @@ def createAlerts(es,esResults):
                                 alert['summary'] += (' running {0} '.format(flattenDict(i)))
                 if r['_source']['eventName']=='StartInstances':
                     for i in r['_source']['requestParameters']['instancesSet']['items']:
-                        alert['summary'] += (' starting {0} '.format(i['instanceId']))                
+                        alert['summary'] += (' starting {0} '.format(i['instanceId']))
                 logger.debug(alert['summary'])
                 #logger.debug(alert['events'])
-                
+
                 #save alert to alerts index, update events index with alert ID for cross reference
                 alertResult=alertToES(es,alert)
                 logger.debug(alertResult)
@@ -150,7 +136,7 @@ def createAlerts(es,esResults):
                 alertToMessageQueue(alert)
     except EOFError as e:
         logger.error("Exception %r when creating alerts "%e)
-        
+
 def main():
     logger.debug('starting')
     logger.debug(options)
@@ -160,8 +146,6 @@ def main():
     logger.debug('finished')
 
 def initConfig():
-    #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     #msg queue settings
     options.mqserver=getConfig('mqserver','localhost',options.configfile)               #message queue server hostname
     options.alertqueue=getConfig('alertqueue','mozdef.alert',options.configfile)        #alert queue topic
@@ -172,7 +156,7 @@ def initConfig():
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
     #elastic search server settings
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
-    
+
 if __name__ == '__main__':
     parser=OptionParser()
     parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")

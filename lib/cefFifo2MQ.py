@@ -32,6 +32,8 @@ import kombu
 from kombu import Connection, Queue, Exchange
 from Queue import Empty, Full
 
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 # sample CEF record:
 # CEF:0|Unix|auditd|1|CHMOD|CHMOD failed|3|end=1391190619 fname="/var/log/nagios/rw/live" dhost=something.mozilla.com suser=someone suid=496 dproc=/usr/sbin/nagios msg=gid\\=496 euid\\=496 suid\\=496 fsuid\\=496 egid\\=496 sgid\\=496 fsgid\\=496 ses\\=20673 cwd\\="/" inode\\=00:00 dev\\=(null) mode\\=(null) ouid\\=(null) ogid\\=(null) rdev\\=(null) cn1Label=auid cn1=1579 cs1Label=Command cs1= cs2Label=Truncated cs2=No cs3Label=AuditKey cs3=(null) cs4Label=TTY cs4=(none) cs5Label=ParentProcess cs5=init cs6Label=MsgTruncated cs6=No
@@ -93,33 +95,6 @@ def isNumber(s):
         except ValueError:
             return False
     return True
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone
-    try:
-        if type(suspectedDate) == datetime:
-            objDate = suspectedDate
-        elif isNumber(suspectedDate):   # epoch?
-            objDate = datetime.fromtimestamp(float(suspectedDate))
-        elif type(suspectedDate) in (str, unicode):
-            objDate = parse(suspectedDate, fuzzy=True)
-
-        if objDate.tzinfo is None:
-            objDate = pytz.timezone(localTimeZone).localize(objDate)
-            objDate = utc.normalize(objDate)
-        else:
-            objDate = utc.normalize(objDate)
-        if objDate is not None:
-            objDate = utc.normalize(objDate)
-    except ValueError:
-        pass
-
-    return objDate
 
 
 def postLogs(logcache):
@@ -195,13 +170,13 @@ def parseCEF(acef):
         logger.error('Index error parsing CEF headers in {0}'.format(acef[:200]))
         return None
 
-    # get the non header fields including any pipes in target commands, etc. 
+    # get the non header fields including any pipes in target commands, etc.
     # mlist = '|'.join(acef.split('|')[7:]).decode('ascii','ignore')
     # since fields are delimited by field=value<space>field=value
-    # and we are reversing the text to find fields, 
+    # and we are reversing the text to find fields,
     # add a beginning space else we miss the first field.
     # then grab everything after the cef header as ascii
-    mlist = ' ' + '|'.join(acef.split('|')[7:]).decode('ascii','ignore')      
+    mlist = ' ' + '|'.join(acef.split('|')[7:]).decode('ascii','ignore')
     # unescape any escaped field\\=value fields
     mlist = mlist.replace('\\=', '=')
     # no empty messages
@@ -338,9 +313,6 @@ def initConfig():
     options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)
     options.syslogport = getConfig('syslogport', 514, options.configfile)
     options.logfile = getConfig('logfile', 'auditd.mozdef.fifo', options.configfile)
-
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
 
     # mq server/exchange options.
     # mqservers can be a comma delimited list of server,server2,server3 etc to load balance the posts.

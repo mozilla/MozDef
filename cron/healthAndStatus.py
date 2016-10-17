@@ -23,6 +23,11 @@ from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from dateutil.parser import parse
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 
@@ -43,26 +48,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone='US/Pacific'):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def getDocID(servername):
@@ -95,7 +80,7 @@ def main():
             mq = r.json()
             # setup a log entry for health/status.
             healthlog = dict(
-                utctimestamp=toUTC(datetime.now(), options.defaulttimezone).isoformat(),
+                utctimestamp=toUTC(datetime.now()).isoformat(),
                 hostname=server,
                 processid=os.getpid(),
                 processname=sys.argv[0],
@@ -125,10 +110,10 @@ def main():
                         munack = 0
                     queueinfo=dict(
                         queue=m['name'],
-                        vhost=m['vhost'], 
+                        vhost=m['vhost'],
                         messages_ready=mready,
                         messages_unacknowledged=munack)
-            
+
                     if 'deliver_details' in m['message_stats'].keys():
                         queueinfo['deliver_eps'] = round(m['message_stats']['deliver_details']['rate'], 2)
                         healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_details']['rate'], 2)
@@ -177,11 +162,6 @@ def initConfig():
     options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
     # port of the rabbitmq json management interface
     options.mqapiport = getConfig('mqapiport', 15672, options.configfile)
-
-    # change this to your default zone for when it's not specified
-    options.defaulttimezone = getConfig('defaulttimezone',
-                                        'US/Pacific',
-                                        options.configfile)
 
     # elastic search server settings
     options.esservers = list(getConfig('esservers',

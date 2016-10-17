@@ -23,6 +23,11 @@ from dateutil.parser import parse
 from pymongo import MongoClient
 from pymongo import collection
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
 logger = logging.getLogger(sys.argv[0])
 
 
@@ -43,28 +48,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone    
-    if type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def genMeteorID():
@@ -91,12 +74,12 @@ def ensureIndexes(mozdefdb):
     1) an index on the utcepoch field in descending order
        to make it easy on the alerts screen queries.
     2) an index on esmetadata.id for correlation to ES
-    
+
     '''
     alerts = mozdefdb['alerts']
     alerts.ensure_index([('utcepoch',-1)])
     alerts.ensure_index([('esmetadata.id',1)])
-    
+
 def updateMongo(mozdefdb, esAlerts):
     alerts = mozdefdb['alerts']
     for a in esAlerts['hits']['hits']:
@@ -108,8 +91,8 @@ def updateMongo(mozdefdb, esAlerts):
             # generate a meteor-compatible ID
             mrecord['_id'] = genMeteorID()
             # capture the elastic search meta data (index/id/doctype)
-            # set the date back to a datetime from unicode, so mongo/meteor can properly sort, select. 
-            mrecord['utctimestamp']=toUTC(mrecord['utctimestamp'],'US/Pacific')
+            # set the date back to a datetime from unicode, so mongo/meteor can properly sort, select.
+            mrecord['utctimestamp']=toUTC(mrecord['utctimestamp'])
             # also set an epoch time field so minimongo can sort
             mrecord['utcepoch'] = calendar.timegm(mrecord['utctimestamp'].utctimetuple())
             mrecord['esmetadata'] = dict()
@@ -135,8 +118,6 @@ def main():
 
 
 def initConfig():
-    #change this to your default timezone
-    options.defaulttimezone=getConfig('defaulttimezone','US/Pacific',options.configfile)    
     # output our log to stdout or syslog
     options.output = getConfig('output', 'stdout', options.configfile)
     # syslog hostname

@@ -3,7 +3,7 @@ from elasticsearch_dsl import Q, Search, A
 import pyes
 import pyes_enabled
 
-from utilities.to_utc import toUTC
+from utilities.toUTC import toUTC
 
 from datetime import datetime
 from datetime import timedelta

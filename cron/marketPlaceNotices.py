@@ -22,6 +22,12 @@ from dateutil.parser import parse
 from email.mime.text import MIMEText
 from logging.handlers import SysLogHandler
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -38,26 +44,6 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
-
-
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 
 def esSearch(es, begindateUTC=None, enddateUTC=None):
@@ -82,11 +68,11 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
         qSeverity = pyes.RangeFilter(
             qrange=pyes.ESRange('details.severity',
                                 from_value=6))
-        
+
         q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
         # q.filters.append(pyes.BoolFilter(must=[qType, qDate, qSeverity], must_not=[qDev]))
         q = pyes.FilteredQuery(q,pyes.BoolFilter(must=[qType, qDate, qSeverity, qProd], must_not=[qDev]))
-        
+
         pyesresults = es.search(q, size=1000, indices='events,events-previous')
         logger.debug(pyesresults.count())
 
@@ -117,14 +103,14 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
 
 def sendResults(indicatorCounts):
     emailMessage = ''
-    
+
     for i in indicatorCounts:
         emailMessage += ('Count: {0} Endpoint: {1:>20}\n'.format(i['count'], i['indicator']))
-        
+
         for event in i['events']:
             emailMessage += ('{0:>10}:\n'.format('event'))
             for k, v in event['_source'].iteritems():
-                
+
                 #sys.stdout.write('\t\t{0}\n\n'.format(json.dumps(event['_source'], indent=4, sort_keys=True)))
                 if k == 'details':
                     emailMessage += ('{0:>20}:'.format('details'))
@@ -137,14 +123,14 @@ def sendResults(indicatorCounts):
                 elif k not in ('utctimestamp', 'receivedtimestamp'):
                     emailMessage += ('{0:>20}: {1}\n'.format(k, v))
         emailMessage += ('\n')
-    
+
     for r in options.recipients:
         mimeMessage = MIMEText(emailMessage)
         mimeMessage['To'] = email.utils.formataddr((r, r))
         mimeMessage['From'] = email.utils.formataddr(('MozDef', options.sender))
         mimeMessage['Date'] = toUTC(datetime.now()).isoformat()
         mimeMessage['Subject'] = 'Marketplace Alert Summary'
-        
+
         smtpserver = smtplib.SMTP(host=options.smtpserver, port=25)
         smtpserver.sendmail(options.sender, [r], mimeMessage.as_string())
         smtpserver.quit()
@@ -161,8 +147,6 @@ def main():
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
     # logging settings
     options.output = getConfig('output', 'stdout', options.configfile)  # output our log to stdout or syslog
     options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)  # syslog hostname

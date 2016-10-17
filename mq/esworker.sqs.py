@@ -34,6 +34,10 @@ from boto.sqs.message import RawMessage
 import base64
 from threading import Timer
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
 
 # running under uwsgi?
 try:
@@ -64,33 +68,6 @@ def digits(n):
     else:
         digits = int(math.log10(-n))+2
     return digits
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone
-
-    if type(suspectedDate) == datetime:
-        objDate = suspectedDate
-    elif isNumber(suspectedDate):
-        # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
-        epochDivisor = int(str(1) + '0'*(digits(suspectedDate) % 10))
-        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor))
-    elif type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate.isoformat()
 
 
 def removeDictAt(aDict):
@@ -592,9 +569,6 @@ def main():
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
-
     #capture the hostname
     options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
 

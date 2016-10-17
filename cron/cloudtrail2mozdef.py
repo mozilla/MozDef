@@ -31,6 +31,13 @@ from dateutil.parser import parse
 from datetime import date
 import pytz
 
+
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
+
 # This hack is in place while we wait for https://bugzilla.mozilla.org/show_bug.cgi?id=1216784 to be resolved
 HACK=True
 
@@ -134,11 +141,11 @@ class State:
         except IOError:
             self.data = {}
         except ValueError:
-            logger.error("%s state file found but isn't a recognized json format" % 
+            logger.error("%s state file found but isn't a recognized json format" %
                          self.filename)
             raise
         except TypeError:
-            logger.error("%s state file found and parsed but it doesn't contain an iterable object" % 
+            logger.error("%s state file found and parsed but it doesn't contain an iterable object" %
                          self.filename)
             raise
 
@@ -181,14 +188,14 @@ def get_bucket_account(bucket_name, assumed_role):
         pass
     logger.error("Unable to determine what account the bucket %s resides in. "
         "Checked the AWS account containing the mozdef user, the AWS account "
-        "of the target CloudTrail, and the following bucket map : %s" % 
+        "of the target CloudTrail, and the following bucket map : %s" %
         options.bucket_account_map)
     return False
 
 def get_role_arn(account, default=None):
     '''Given an AWS account number, return the first associated assumed_role_arn
     in the config file, or None if none is found.'''
-    return next((x for x in options.assumed_role_arns 
+    return next((x for x in options.assumed_role_arns
                  if len(x.split(':')) == 6
                  and x.split(':')[4].lstrip('0') == account.lstrip('0')), default)
 
@@ -209,37 +216,15 @@ def process_file(s3file, es):
                 logger.error('Error handling log record {0} {1}'.format(r, e))
                 continue
     except Exception as e:
-        logger.error('Unable to process file %s due to %s' % (s3file.read, 
+        logger.error('Unable to process file %s due to %s' % (s3file.read,
                                                               e.message))
-
-
-def toUTC(suspectedDate,localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc=pytz.UTC
-    objDate=None
-    if localTimeZone is None:
-        localTimeZone=options.defaultTimeZone
-    if type(suspectedDate) in (str,unicode):
-        objDate=parse(suspectedDate,fuzzy=True)
-    elif type(suspectedDate)==datetime:
-        objDate=suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate=pytz.timezone(localTimeZone).localize(objDate)
-        objDate=utc.normalize(objDate)
-    else:
-        objDate=utc.normalize(objDate)
-    if objDate is not None:
-        objDate=utc.normalize(objDate)
-
-    return objDate
 
 def main():
     logging.getLogger('boto').setLevel(logging.CRITICAL) # disable all boto error logging
 
     logger.level=logging.ERROR
     formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
-    
+
     if options.output=='syslog':
         logger.addHandler(SysLogHandler(address=(options.sysloghostname,options.syslogport)))
     else:
@@ -271,7 +256,7 @@ def main():
 
                 try:
                     ct_credentials = role_manager.get_credentials(assumed_role_arn)
-                    ct = boto.cloudtrail.connect_to_region(region, 
+                    ct = boto.cloudtrail.connect_to_region(region,
                                                            **ct_credentials)
                     trails=ct.describe_trails()['trailList']
                 except boto.exception.NoAuthHandlerFound as e:
@@ -318,14 +303,14 @@ def main():
                              bucket_account_assumed_role_arn,
                              e.message))
                         continue
-                        
+
                     filelist=list()
                     for search_date in search_dates:
                         # TODO it's possible that if the AWS account id is 11 instead of 12 digits, CloudTrail
                         # will either 0 pad to 12 digits or remove the 0 padding when creating the s3 bucket
                         # directory. Depending on this behavior,
                         # we should either aws_account.lstrip('0') or aws_account.lstrip('0').zfill(12)
-                        prefix = ('AWSLogs/%(accountid)s/CloudTrail/%(region)s/%(year)s/%(month)s/%(day)s/' % 
+                        prefix = ('AWSLogs/%(accountid)s/CloudTrail/%(region)s/%(year)s/%(month)s/%(day)s/' %
                                      {'accountid': aws_account,
                                       'region': region,
                                       'year': date.strftime(search_date, '%Y'),
@@ -340,7 +325,7 @@ def main():
                                 (trail['S3BucketName'],
                                  prefix,
                                  e.message))
-                            continue                        
+                            continue
                     for afile in filelist:
                         try:
                             s3file=ctbucket.get_key(afile)
@@ -350,7 +335,7 @@ def main():
                                 (afile.name,
                                  trail['S3BucketName'],
                                  e.message))
-                            continue                        
+                            continue
                         logger.debug('{0} {1}'.format(afile,s3file.last_modified))
                         if 'lastrun' not in state.data[aws_account][region]:
                             if toUTC(s3file.last_modified) > toUTC(datetime.utcnow()-timedelta(seconds=3600)):
@@ -374,7 +359,6 @@ def initConfig():
     options.output=getConfig('output','stdout',options.configfile)                      #output our log to stdout or syslog
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)   #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
     options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to cloudtrail
     options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))

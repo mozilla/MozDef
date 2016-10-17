@@ -82,8 +82,6 @@ class message(object):
         (self.options, args) = myparser.parse_args([])
 
         # fill self.options with plugin-specific options
-        # change this to your default zone for when it's not specified
-        self.options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', self.configfile)
 
         # threat exchange options
         self.options.appid = getConfig('appid',

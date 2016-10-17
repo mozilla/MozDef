@@ -34,6 +34,9 @@ import glob
 from os import stat
 from collections import deque
 
+from utilities.toUTC import toUTC
+
+
 class Buffer(deque):
     def put(self, iterable):
         for i in iterable:
@@ -44,8 +47,8 @@ class Buffer(deque):
 
     def get(self, how_many):
         return ''.join([self.popleft() for _ in xrange(how_many)])
-    
-    
+
+
 logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
@@ -82,32 +85,6 @@ def isNumber(s):
             return False
     return True
 
-def toUTC(suspectedDate,localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc=pytz.UTC
-    objDate=None
-    if localTimeZone is None:
-        localTimeZone=options.defaultTimeZone    
-    try:
-        if type(suspectedDate)==datetime:
-            objDate=suspectedDate
-        elif isNumber(suspectedDate):   #epoch?
-            #objDate=parse(time.ctime(float(suspectedDate)),fuzzy=False)
-            objDate=datetime.fromtimestamp(float(suspectedDate))
-        elif type(suspectedDate)==str:
-            objDate=parse(suspectedDate,fuzzy=True)
-        
-        if objDate.tzinfo is None:
-            objDate=pytz.timezone(localTimeZone).localize(objDate)
-            objDate=utc.normalize(objDate)
-        else:
-            objDate=utc.normalize(objDate)
-        if objDate is not None:
-            objDate=utc.normalize(objDate)
-    except ValueError:
-        pass
-        
-    return objDate
 
 class Pygtail(object):
     """
@@ -227,7 +204,7 @@ class Pygtail(object):
 
     def _check_rotated_filename_candidates(self):
         """
-        Check for various rotated logfile filename patterns and return the 
+        Check for various rotated logfile filename patterns and return the
         matches we find.
         """
         candidates=[]
@@ -262,7 +239,7 @@ def postLogs(logcache):
     logger.info('started posting process')
     def backgroundcallback(session, response):
         #release the connection back to the pool
-        try: 
+        try:
             r=response.result()
             response.close()
         except Exception as e:
@@ -277,7 +254,7 @@ def postLogs(logcache):
                 #signalled from parent process that it's ok to stop.
                 logcache.task_done()
                 canQuit=True
-                
+
             elif len(postdata)>0:
                 url=random.choice(options.urls)
                 r=httpsession.post(url,data=postdata,stream=False)
@@ -299,7 +276,7 @@ def parseCEF(acef):
     cef['version']=0
     cef['details']={}
     fields=[]
-    
+
     headers=acef.split('|')
     cef['details']['version']=headers[0].replace('CEF:','')
     cef['details']['devicevendor']=headers[1]
@@ -309,14 +286,14 @@ def parseCEF(acef):
     cef['details']['name']=headers[5]
     cef['details']['severity']=headers[6]
     cef['summary']=headers[5]
-    
-    #get the non header fields including any pipes in target commands, etc. 
+
+    #get the non header fields including any pipes in target commands, etc.
     mlist = '|'.join(acef.split('|')[7:]).decode('ascii','ignore')
     #unescape any escaped field\\=value fields
     mlist=mlist.replace('\\=', '=')
-    #no empty messages 
+    #no empty messages
     mlist=mlist.replace('msg= ','').split('=')
-    
+
     i=0
     try:
         for i,x in enumerate(reversed(mlist)):
@@ -335,13 +312,13 @@ def parseCEF(acef):
         if 'label' in field.lower():
             #this is a label for another field..fix up our dict to have the label as key and data as value
             if field.lower().replace('label','') in rawcefdict.keys():
-                cef['details'][rawcefdict[field.lower()]]=rawcefdict[field.lower().replace('label','')].decode('ascii','ignore')    
+                cef['details'][rawcefdict[field.lower()]]=rawcefdict[field.lower().replace('label','')].decode('ascii','ignore')
                 rawcefdict.pop(field.lower().replace('label',''))
             rawcefdict.pop(field.lower(),'')
     #add whatever is left (non label field or value) to the cef dictionary
     for k,v in rawcefdict.iteritems():
         cef['details'][k]=v.decode('ascii','ignore')
-    #pick an eventtimestamp if one exists. 
+    #pick an eventtimestamp if one exists.
     if 'start' in cef['details'].keys():
         cef['timestamp']=toUTC(cef['details']['start']).isoformat()
     elif 'end' in cef['details'].keys():
@@ -349,7 +326,7 @@ def parseCEF(acef):
     elif 'rt' in cef['details'].keys():
         cef['timestamp']=toUTC(cef['details']['rt']).isoformat()
     else:
-        cef['timestamp']=toUTC(datetime.now()).isoformat()        
+        cef['timestamp']=toUTC(datetime.now()).isoformat()
     return cef
 
 def nonBlockRead(fd):
@@ -387,7 +364,7 @@ def readCEFFile(afile):
                             #logger.debug(json.dumps(cefDict))
                             #append json to the list for posting
                             if cefDict is not None:
-                                logcache.put(json.dumps(cefDict)) 
+                                logcache.put(json.dumps(cefDict))
                         else:
                             bufb.append(line)
                     bufa.clear()
@@ -402,7 +379,7 @@ def readCEFFile(afile):
             sys.exit(1)
         except ValueError as e:
             logger.fatal('Exception while handling CEF message: %r'%e)
-            sys.exit(1)    
+            sys.exit(1)
 def main():
     logger.info('started')
     notDone=True
@@ -412,7 +389,7 @@ def main():
             if not process.is_alive():
                 logger.info('{0}/{1} marked as done'.format(process,file))
                 readers.remove((process,file))
-        
+
         for afile in glob2.iglob(options.filemask):
             #logger.debug('noticed file {0}'.format(afile))
             #if we aren't reading a file
@@ -420,12 +397,12 @@ def main():
             activefiles=[]
             for process,filename in readers:
                 activefiles.append(filename)
-            if afile not in activefiles:            
+            if afile not in activefiles:
                 logger.info('starting a reader for {0}'.format(afile))
                 readingProcess=Process(target=readCEFFile,args=(afile,),name="cef2mozdefReadFile")
                 readers.append((readingProcess,afile))
                 readingProcess.start()
-                
+
         #if we are reading a file no longer in the list of active files (rotated, etc),
         #tell it's reader it's ok to stop.
         for process,filename in readers:
@@ -433,7 +410,7 @@ def main():
                 logger.info('{0} no longer valid, stopping file reader'.format(filename))
                 process.terminate()
                 process.join()
-            
+
         #change this if you want it to stop (cronjob, or debugging), else it will run forever (ala /etc/init service)
         #notDone=False
         time.sleep(2)
@@ -445,9 +422,7 @@ def initConfig():
     options.syslogport=getConfig('syslogport',514,options.configfile)                   #syslog port
     options.filemask=getConfig('filemask','*.log',options.configfile)
     options.urls=list(getConfig('urls','http://localhost:8080/cef/',options.configfile).split(','))
-     #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
-    
+
 if __name__ == '__main__':
     parser=OptionParser()
     parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
