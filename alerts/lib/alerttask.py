@@ -20,7 +20,7 @@ from dateutil.parser import parse
 from collections import Counter
 from celery import Task
 from celery.utils.log import get_task_logger
-from config import RABBITMQ, ES, OPTIONS
+from config import RABBITMQ, ES
 
 import os
 import sys
