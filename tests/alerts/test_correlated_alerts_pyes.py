@@ -39,13 +39,12 @@ class TestAlertCorrelatedIntelNotice(AlertTestSuite):
             expected_alert=default_alert
         ),
 
-
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
             events=[
                 {
                     "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp({'minutes': 14})
+                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 14})
                     }
                 }
             ],
@@ -114,7 +113,7 @@ class TestAlertCorrelatedIntelNotice(AlertTestSuite):
             events=[
                 {
                     "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp({'minutes': 16})
+                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 16})
                     }
                 }
             ],

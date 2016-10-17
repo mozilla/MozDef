@@ -29,7 +29,7 @@ class TestAlertDuoFailOpen(AlertTestSuite):
 
     default_events = list()
     for num in xrange(10):
-        default_events.append(default_event)
+        default_events.append(AlertTestSuite.copy(default_event))
 
     test_cases.append(
         PositiveAlertTestCase(
@@ -47,11 +47,9 @@ class TestAlertDuoFailOpen(AlertTestSuite):
         )
     )
 
-    temp_events = AlertTestSuite.copy(default_events)
-    custom_events = []
-    for temp_event in temp_events:
-        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp(date_timedelta={'minutes': 14})
-        custom_events.append(AlertTestSuite.copy(temp_event))
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 14})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events a minute earlier",
@@ -60,9 +58,9 @@ class TestAlertDuoFailOpen(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['summary'] = 'bad summary example'
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = 'bad summary example'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with incorrect summary",
@@ -70,9 +68,9 @@ class TestAlertDuoFailOpen(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp({'minutes': 16})
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 16})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",

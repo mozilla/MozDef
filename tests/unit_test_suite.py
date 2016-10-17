@@ -64,3 +64,11 @@ class UnitTestSuite(object):
         utc_time = parse(timestamp)
         custom_date = utc_time - timedelta(**date_timedelta)
         return custom_date.isoformat()
+
+    @staticmethod
+    def current_timestamp_lambda():
+        return lambda: (pytz.UTC.normalize(pytz.timezone("UTC").localize(datetime.now())).isoformat())
+
+    @staticmethod
+    def subtract_from_timestamp_lambda(date_timedelta, timestamp=None):
+        return lambda: UnitTestSuite.subtract_from_timestamp(date_timedelta, timestamp)

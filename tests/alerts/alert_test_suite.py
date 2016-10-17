@@ -68,19 +68,19 @@ class AlertTestSuite(UnitTestSuite):
 
     def test_alert_test_case(self, test_case):
         self.verify_starting_values(test_case)
-        for event in test_case.events:
-            temp_event = self.dict_merge(
-                self.generate_default_event(), self.default_event)
+        temp_events = test_case.events
+        for event in temp_events:
+            temp_event = self.dict_merge(self.generate_default_event(), self.default_event)
 
             merged_event = self.dict_merge(temp_event, event)
+            merged_event['_source']['utctimestamp'] = merged_event['_source']['utctimestamp']()
             test_case.full_events.append(merged_event)
             self.populate_test_event(
                 merged_event['_source'], merged_event['_type'])
 
         self.es_client.flush('events')
 
-        alert_task = test_case.run(
-            alert_src=self.alert_src, alert_name=self.alert_name)
+        alert_task = test_case.run(alert_src=self.alert_src, alert_name=self.alert_name)
         self.verify_alert_task(alert_task, test_case)
 
     def verify_expected_alert(self, found_alert, test_case):
@@ -134,7 +134,7 @@ class AlertTestSuite(UnitTestSuite):
         return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
 
     def generate_default_event(self):
-        current_timestamp = self.current_timestamp()
+        current_timestamp = UnitTestSuite.current_timestamp_lambda()
 
         source_ip = self.random_ip()
 
@@ -143,9 +143,7 @@ class AlertTestSuite(UnitTestSuite):
             "_type": "event",
             "_source": {
                 "category": "excategory",
-                "receivedtimestamp": current_timestamp,
                 "utctimestamp": current_timestamp,
-                "timestamp": current_timestamp,
                 "hostname": "exhostname",
                 "severity": "NOTICE",
                 "source": "exsource",
@@ -163,3 +161,4 @@ class AlertTestSuite(UnitTestSuite):
     @staticmethod
     def copy(obj):
         return copy.deepcopy(obj)
+

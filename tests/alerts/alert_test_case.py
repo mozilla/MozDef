@@ -2,11 +2,15 @@ import os.path
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts"))
 
+from alert_test_suite import AlertTestSuite
 
 class AlertTestCase(object):
     def __init__(self, description, events=[], events_type='event', expected_alert=None):
         self.description = description
-        self.events = events
+        # As a result of defining our test cases as class level variables
+        # we need to copy each event so that other tests dont
+        # mess with the same instance in memory
+        self.events = AlertTestSuite.copy(events)
         self.events_type = events_type
         self.expected_alert = expected_alert
         self.full_events = []

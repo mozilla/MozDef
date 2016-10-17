@@ -34,21 +34,21 @@ class TestAlertBruteforceSshES(AlertTestSuite):
 
     default_events = list()
     for num in xrange(10):
-        default_events.append(default_event)
+        default_events.append(AlertTestSuite.copy(default_event))
 
+
+    custom_events = default_events
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default event and default alert expected",
-            events=default_events,
+            events=custom_events,
             expected_alert=default_alert
         )
     )
 
-    temp_events = AlertTestSuite.copy(default_events)
-    custom_events = []
-    for temp_event in temp_events:
-        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp(date_timedelta={'minutes': 1})
-        custom_events.append(AlertTestSuite.copy(temp_event))
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events a minute earlier",
@@ -57,11 +57,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    temp_events = AlertTestSuite.copy(default_events)
-    custom_events = []
-    for temp_event in temp_events:
+    custom_events = default_events
+    for temp_event in custom_events:
         temp_event['_source']['summary'] = 'login failed'
-        custom_events.append(AlertTestSuite.copy(temp_event))
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events with a summary of 'login failed'",
@@ -70,11 +68,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    temp_events = AlertTestSuite.copy(default_events)
-    custom_events = []
-    for temp_event in temp_events:
+    custom_events = default_events
+    for temp_event in custom_events:
         temp_event['_source']['summary'] = 'invalid failed'
-        custom_events.append(AlertTestSuite.copy(temp_event))
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events with a summary of 'invalid failed'",
@@ -83,11 +79,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    temp_events = AlertTestSuite.copy(default_events)
-    custom_events = []
-    for temp_event in temp_events:
+    custom_events = default_events
+    for temp_event in custom_events:
         temp_event['_source']['summary'] = 'invalid failed'
-        custom_events.append(AlertTestSuite.copy(temp_event))
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events with a summary of 'ldap_count_entries failed'",
@@ -96,15 +90,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    temp_events = AlertTestSuite.copy(default_events)
-    custom_events = []
-    for event in temp_events[0:-2]:
-        custom_events.append(AlertTestSuite.copy(event))
-
-    temp_events[9]['_source']['details']['sourceipaddress'] = "127.0.0.1"
-    custom_events.append(temp_events[9])
-    temp_events[8]['_source']['details']['sourceipaddress'] = "127.0.0.1"
-    custom_events.append(temp_events[8])
+    custom_events = default_events
+    custom_events[8]['_source']['details']['sourceipaddress'] = "127.0.0.1"
+    custom_events[9]['_source']['details']['sourceipaddress'] = "127.0.0.1"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with 10 events however one has different sourceipaddress",
@@ -119,9 +107,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         ),
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['summary'] = 'login good ldap_count_entries'
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = 'login good ldap_count_entries'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with summary without 'failed'",
@@ -129,9 +117,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['summary'] = 'failed'
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = 'failed'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with summary with only 'failed'",
@@ -139,9 +127,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['summary'] = 'login'
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = 'login'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with summary with only 'login'",
@@ -149,9 +137,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['summary'] = 'invalid'
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = 'invalid'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with summary with only 'invalid'",
@@ -159,9 +147,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['summary'] = 'ldap_count_entries'
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = 'ldap_count_entries'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with summary with only 'ldap_count_entries'",
@@ -169,9 +157,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['program'] = 'badprogram'
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['program'] = 'badprogram'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with bad program",
@@ -179,9 +167,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp({'minutes': 3})
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
@@ -189,9 +177,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['summary'] = custom_event['_source']['summary'].replace('1.2.3.4', '10.22.75.203')
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = temp_event['_source']['summary'].replace('1.2.3.4', '10.22.75.203')
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with 10.22.75.203 as a whitelisted ip",
@@ -199,9 +187,9 @@ class TestAlertBruteforceSshES(AlertTestSuite):
         )
     )
 
-    custom_events = AlertTestSuite.copy(default_events)
-    for custom_event in custom_events:
-        custom_event['_source']['summary'] = custom_event['_source']['summary'].replace('1.2.3.4', '10.8.75.144')
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = temp_event['_source']['summary'].replace('1.2.3.4', '10.8.75.144')
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with 10.8.75.144 as a whitelisted ip",
