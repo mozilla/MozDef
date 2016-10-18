@@ -11,11 +11,8 @@ import requests
 import json
 import os
 import sys
-import pika
 from datetime import datetime
-from dateutil.parser import parse
 from configlib import getConfig, OptionParser
-import email.utils
 import sys
 import smtplib
 from email.mime.text import MIMEText
