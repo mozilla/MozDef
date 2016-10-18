@@ -35,6 +35,8 @@ ALERTS = {
     'duo_authfail_pyes.AlertDuoAuthFail': {'schedule': timedelta(seconds=60)},
     'vpn_duo_auth_failures_pyes.AlertManyVPNDuoAuthFailures': {'schedule': timedelta(minutes=20)},
     'ssh_access_signreleng_pyes.AlertAuthSignRelengSSH': {'schedule':timedelta(minutes=10)},
+    'cloudtrail_new_vpn.AlertCloudtrailNewVPN': {'schedule':timedelta(minutes=25)},
+    'cloudtrail_delete_bucket.AlertCloudtrailDeleteBucket': {'schedule':timedelta(minutes=25)},
 }
 
 
