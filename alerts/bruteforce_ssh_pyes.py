@@ -46,10 +46,8 @@ class AlertBruteforceSshES(AlertTask):
         tags = ['ssh']
         severity = 'NOTICE'
 
-        summary = ('{0} ssh bruteforce attempts by {1}'.format(
-            aggreg['count'], aggreg['value']))
-        hosts = self.mostCommon(
-            aggreg['allevents'], '_source.details.hostname')
+        summary = ('{0} ssh bruteforce attempts by {1}'.format(aggreg['count'], aggreg['value']))
+        hosts = self.mostCommon(aggreg['allevents'], '_source.details.hostname')
         for i in hosts[:5]:
             summary += ' {0} ({1} hits)'.format(i[0], i[1])
 

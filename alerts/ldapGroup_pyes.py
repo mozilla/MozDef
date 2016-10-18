@@ -9,7 +9,7 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch
+from query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class ldapGroupModify(AlertTask):
@@ -19,7 +19,7 @@ class ldapGroupModify(AlertTask):
         search_query.add_must([
             TermMatch('category', 'ldapChange'),
             TermMatch('changetype', 'modify'),
-            TermMatch("summary", "groups")
+            PhraseMatch("summary", "groups")
         ])
 
         self.filtersManual(search_query)
@@ -32,7 +32,7 @@ class ldapGroupModify(AlertTask):
         category = 'ldap'
         tags = ['ldap']
         severity = 'INFO'
-        summary='{0}'.format(event['_source']['summary'])
+        summary = '{0}'.format(event['_source']['summary'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, [event], severity)

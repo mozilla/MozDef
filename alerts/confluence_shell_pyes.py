@@ -43,8 +43,7 @@ class AlertConfluenceShellUsage(AlertTask):
         tags = ['confluence', 'mana']
         severity = 'CRITICAL'
 
-        summary = 'Confluence user is running shell commands on {0}'.format(aggreg[
-                                                                            'value'])
+        summary = 'Confluence user is running shell commands on {0}'.format(aggreg['value'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

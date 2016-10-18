@@ -18,9 +18,7 @@ class AlertCloudtrail(AlertTask):
 
         search_query.add_must([
             TermMatch('_type', 'cloudtrail'),
-            TermsMatch('eventName', ['runinstances',
-                                      'stopinstances',
-                                      'startinstances'])
+            TermsMatch('eventName', ['runinstances', 'stopinstances', 'startinstances'])
         ])
 
         self.filtersManual(search_query)
@@ -34,8 +32,11 @@ class AlertCloudtrail(AlertTask):
         tags = ['cloudtrail', 'aws']
         severity = 'INFO'
 
-        summary = ('{0} called {1} from {2}'.format(event['_source']['userIdentity'][
-                   'userName'], event['_source']['eventName'], event['_source']['sourceIPAddress']))
+        summary = ('{0} called {1} from {2}'.format(
+            event['_source']['userIdentity']['userName'],
+            event['_source']['eventName'],
+            event['_source']['sourceIPAddress'])
+        )
         if event['_source']['eventName'] == 'RunInstances':
             for i in event['_source']['responseElements']['instancesSet']['items']:
                 if 'privateDnsName' in i.keys():
@@ -43,7 +44,7 @@ class AlertCloudtrail(AlertTask):
                 elif 'instanceId' in i.keys():
                     summary += (' running {0} '.format(i['instanceId']))
                 else:
-                    summary += (' running {0} '.format(flattenDict(i)))
+                    summary += (' running {0} '.format(i))
         if event['_source']['eventName'] == 'StartInstances':
             for i in event['_source']['requestParameters']['instancesSet']['items']:
                 summary += (' starting {0} '.format(i['instanceId']))

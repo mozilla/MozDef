@@ -40,8 +40,7 @@ class AlertDuoFailOpen(AlertTask):
         tags = ['openvpn', 'duosecurity']
         severity = 'WARNING'
 
-        summary = 'DuoSecurity contact failed, fail open triggered on {0}'.format(aggreg[
-                                                                                  'value'])
+        summary = 'DuoSecurity contact failed, fail open triggered on {0}'.format(aggreg['value'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
