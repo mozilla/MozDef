@@ -12,6 +12,13 @@ from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, TermsMatch
 
 
+def flattenDict(dictIn):
+    sout = ''
+    for k, v in dictIn.iteritems():
+        sout += '{0}: {1} '.format(k, v)
+    return sout
+
+
 class AlertCloudtrail(AlertTask):
     def main(self):
         search_query = SearchQuery(hours=1)
@@ -44,7 +51,7 @@ class AlertCloudtrail(AlertTask):
                 elif 'instanceId' in i.keys():
                     summary += (' running {0} '.format(i['instanceId']))
                 else:
-                    summary += (' running {0} '.format(i))
+                    summary += (' running {0} '.format(flattenDict(i)))
         if event['_source']['eventName'] == 'StartInstances':
             for i in event['_source']['requestParameters']['instancesSet']['items']:
                 summary += (' starting {0} '.format(i['instanceId']))
