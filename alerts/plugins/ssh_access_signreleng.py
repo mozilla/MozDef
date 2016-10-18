@@ -53,7 +53,7 @@ class message(object):
     def onMessage(self, message):
         # here is where you do something with the incoming alert message
 
-        emailMessage = MIMEText(message['summary'] + ' on ' + message['utctimestamp'] + ' UTC')
+        emailMessage = MIMEText(message['utctimestamp'] + ' UTC: ' + message['summary'])
         emailMessage['Subject'] = 'MozDef Alert: Releng Signing Servers Successful SSH Access'
         emailMessage['From'] = self.options.sender
         emailMessage['To'] = self.options.recipients
