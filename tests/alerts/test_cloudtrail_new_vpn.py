@@ -4,9 +4,8 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestAlertCorrelatedIntelNotice(AlertTestSuite):
-    alert_src = "cloudtrail_new_vpn"
-    alert_name = "AlertCloudtrailNewVPN"
+class TestAlertCloudtrailNewVPN(AlertTestSuite):
+    alert_filename = "cloudtrail_new_vpn"
 
     # This event is the default positive event that will cause the
     # alert to trigger

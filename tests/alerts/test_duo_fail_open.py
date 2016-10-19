@@ -5,8 +5,7 @@ from alert_test_suite import AlertTestSuite
 
 
 class TestAlertDuoFailOpen(AlertTestSuite):
-    alert_src = "duo_fail_open"
-    alert_name = "AlertDuoFailOpen"
+    alert_filename = "duo_fail_open"
 
     # This event is the default positive event that will cause the
     # alert to trigger

@@ -4,9 +4,8 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestAlertCorrelatedIntelNotice(AlertTestSuite):
-    alert_src = "cloudtrail_delete_bucket"
-    alert_name = "AlertCloudtrailDeleteBucket"
+class TestAlertCloudtrailDeleteBucket(AlertTestSuite):
+    alert_filename = "cloudtrail_delete_bucket"
 
     # This event is the default positive event that will cause the
     # alert to trigger

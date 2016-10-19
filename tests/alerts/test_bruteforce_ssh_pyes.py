@@ -5,8 +5,7 @@ from alert_test_suite import AlertTestSuite
 
 
 class TestAlertBruteforceSshES(AlertTestSuite):
-    alert_src = "bruteforce_ssh_pyes"
-    alert_name = "AlertBruteforceSshES"
+    alert_filename = "bruteforce_ssh_pyes"
 
     # This event is the default positive event that will cause the
     # alert to trigger

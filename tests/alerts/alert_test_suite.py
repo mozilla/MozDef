@@ -13,12 +13,12 @@ class AlertTestSuite(UnitTestSuite):
     def setup(self):
         super(AlertTestSuite, self).setup()
 
-        alerts_dir = os.path.join(
-            os.path.dirname(__file__), "../../alerts/")
+        alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)
-        self.alert_name = (self.__class__.__name__[4:] if
-                           self.__class__.__name__.startswith('Test') else
-                           False)
+
+        self.alert_classname = (self.__class__.__name__[4:] if
+                                self.__class__.__name__.startswith('Test') else
+                                False)
 
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):
@@ -26,16 +26,16 @@ class AlertTestSuite(UnitTestSuite):
         assert test_case.description is not None or ""
         assert test_case.description is not ""
 
-        # Verify alert_src is a legit file
-        # full_alert_file_path = "../../../alerts/" + self.alert_src + ".py"
-        full_alert_file_path = "./" + self.alert_src + ".py"
+        # Verify alert_filename is a legit file
+        # full_alert_file_path = "../../../alerts/" + self.alert_filename + ".py"
+        full_alert_file_path = "./" + self.alert_filename + ".py"
         assert os.path.isfile(full_alert_file_path) is True
 
-        # Verify we're able to load in the alert_name
+        # Verify we're able to load in the alert_classname
         # This can probably be improved, but for the mean time, we're just
         # gonna grep for class name
         alert_source_str = open(full_alert_file_path, 'r').read()
-        class_search_str = "class " + self.alert_name + "("
+        class_search_str = "class " + self.alert_classname + "("
         assert class_search_str in alert_source_str
 
         # Verify events is not empty
@@ -83,7 +83,7 @@ class AlertTestSuite(UnitTestSuite):
 
         self.es_client.flush('events')
 
-        alert_task = test_case.run(alert_src=self.alert_src, alert_name=self.alert_name)
+        alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
         self.verify_alert_task(alert_task, test_case)
 
     def verify_expected_alert(self, found_alert, test_case):
