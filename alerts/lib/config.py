@@ -12,20 +12,8 @@ from celery.schedules import crontab, timedelta
 import time
 import logging
 
-#ALERTS = {
-    #'bro_intel.AlertBroIntel': crontab(minute='*/1'),
-    #'bro_notice.AlertBroNotice': crontab(minute='*/1'),
-    #'bruteforce_ssh.AlertBruteforceSsh': crontab(minute='*/1'),
-    #'cloudtrail.AlertCloudtrail': crontab(minute='*/1'),
-    #'fail2ban.AlertFail2ban': crontab(minute='*/1'),
-    #'duo_fail_open.AlertDuoFailOpen': crontab(minute='*/2'),
-    #'amoFailedLogins_pyes.AlertFailedAMOLogin': crontab(minute='*/2'),
-    #'hostScannerAlerts_pyes.AlertHostScannerFinding': crontab(minute='*/10'),
-    #'deadman.broNSM3': crontab(minute='*/5'),
-#}
 
 ALERTS = {
-    #'deadman.broNSM': {'schedule': timedelta(minutes=1),'kwargs':dict(hostlist=['nsm3', 'nsm5'])},
     'bruteforce_ssh_pyes.AlertBruteforceSsh': {'schedule': timedelta(minutes=1)},
     'unauth_ssh_pyes.AlertUnauthSSH': {'schedule': timedelta(minutes=1)},
     'confluence_shell_pyes.AlertConfluenceShellUsage': {'schedule': timedelta(minutes=1)},
@@ -34,11 +22,10 @@ ALERTS = {
     'proxy_drop_pyes.AlertProxyDrop': {'schedule': timedelta(minutes=1)},
     'duo_authfail_pyes.AlertDuoAuthFail': {'schedule': timedelta(seconds=60)},
     'vpn_duo_auth_failures_pyes.AlertManyVPNDuoAuthFailures': {'schedule': timedelta(minutes=20)},
-    'ssh_access_signreleng_pyes.AlertAuthSignRelengSSH': {'schedule':timedelta(minutes=10)},
-    'cloudtrail_new_vpn.AlertCloudtrailNewVPN': {'schedule':timedelta(minutes=25)},
-    'cloudtrail_delete_bucket.AlertCloudtrailDeleteBucket': {'schedule':timedelta(minutes=25)},
+    'ssh_access_signreleng_pyes.AlertAuthSignRelengSSH': {'schedule': timedelta(minutes=10)},
+    'cloudtrail_new_vpn.AlertCloudtrailNewVPN': {'schedule': timedelta(minutes=25)},
+    'cloudtrail_delete_bucket.AlertCloudtrailDeleteBucket': {'schedule': timedelta(minutes=25)},
 }
-
 
 RABBITMQ = {
     'mqserver': 'localhost',
