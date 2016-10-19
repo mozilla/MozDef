@@ -7,6 +7,7 @@ from unit_test_suite import UnitTestSuite
 
 import random
 import copy
+import re
 
 
 class AlertTestSuite(UnitTestSuite):
@@ -19,6 +20,17 @@ class AlertTestSuite(UnitTestSuite):
         self.alert_classname = (self.__class__.__name__[4:] if
                                 self.__class__.__name__.startswith('Test') else
                                 False)
+        # Convert "AlertFooBar" to "foo_bar" and "BazQux" to "baz_qux"
+        self.alert_filename = re.sub(
+            '([a-z0-9])([A-Z])',
+            r'\1_\2',
+            re.sub(
+                '(.)([A-Z][a-z]+)',
+                r'\1_\2',
+                self.alert_classname[5:] if
+                self.alert_classname.startswith('Alert') else
+                self.alert_classname)).lower()
+
 
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):
