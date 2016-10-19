@@ -16,6 +16,9 @@ class AlertTestSuite(UnitTestSuite):
         alerts_dir = os.path.join(
             os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)
+        self.alert_name = (self.__class__.__name__[4:] if
+                           self.__class__.__name__.startswith('Test') else
+                           False)
 
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):
