@@ -16,7 +16,7 @@ class AlertTestCase(object):
         self.full_events = []
 
     def run(self, alert_src, alert_name):
-        print('\n\tTesting {}'.format(self.description))
+        print '\n\tTesting {} '.format(self.description),
         alert_file_module = __import__(alert_src)
         alert_class = getattr(alert_file_module, alert_name)
 
