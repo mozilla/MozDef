@@ -10,7 +10,6 @@ from utilities.toUTC import toUTC
 from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
-import pytz
 
 
 class UnitTestSuite(object):

@@ -4,6 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts"))
 
 from alert_test_suite import AlertTestSuite
 
+
 class AlertTestCase(object):
     def __init__(self, description, events=[], events_type='event', expected_alert=None):
         self.description = description
@@ -20,12 +21,6 @@ class AlertTestCase(object):
         alert_file_module = __import__(alert_src)
         alert_class = getattr(alert_file_module, alert_name)
 
-        # THIS IS A HAX, todo: modify this to call celery with syncronous
-        # execution
-        import time
-        time.sleep(2)
-
         alert_task = alert_class()
         alert_task.run()
         return alert_task
-
