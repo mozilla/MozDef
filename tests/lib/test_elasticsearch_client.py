@@ -1,15 +1,16 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 
 from query_models import SearchQuery, TermMatch, Aggregation
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
 
 # Remove this code when pyes is gone!
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 import pyes_enabled
 # Remove this code when pyes is gone!
 

@@ -4,9 +4,10 @@ from datetime import datetime
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
 from query_models import SearchQuery, ExistsMatch, TermMatch, Aggregation
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
 
 
@@ -147,8 +148,7 @@ class TestExecute(SearchQueryUnitTest):
 
         assert len(sorted_hits) == 3
 
-        assert sorted_hits[0].keys() == ['_score', '_type',
-                                             '_id', '_source', '_index']
+        assert sorted_hits[0].keys() == ['_score', '_type', '_id', '_source', '_index']
         assert type(sorted_hits[0]['_id']) == unicode
         assert sorted_hits[0]['_type'] == 'event'
 
@@ -161,8 +161,7 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted_hits[0]['_source']['details'].keys() == ['information']
         assert sorted_hits[0]['_source']['details']['information'] == 'Example information'
 
-        assert sorted_hits[1].keys() == ['_score', '_type',
-                                             '_id', '_source', '_index']
+        assert sorted_hits[1].keys() == ['_score', '_type', '_id', '_source', '_index']
         assert type(sorted_hits[1]['_id']) == unicode
         assert sorted_hits[1]['_type'] == 'event'
 
@@ -197,7 +196,6 @@ class TestExecute(SearchQueryUnitTest):
         results['aggregations']['ip']['terms'].sort()
         assert results['aggregations']['ip']['terms'][0]['count'] == 1
         assert results['aggregations']['ip']['terms'][0]['key'] == '127.0.0.1'
-
 
         assert results['aggregations']['ip']['terms'][1]['count'] == 2
         assert results['aggregations']['ip']['terms'][1]['key'] == '1.2.3.4'

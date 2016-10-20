@@ -1,9 +1,9 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
 from query_models import SearchQuery
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
 
 
