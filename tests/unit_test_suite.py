@@ -5,6 +5,8 @@ from config import ES
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient
 
+from utilities.toUTC import toUTC
+
 from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
@@ -55,7 +57,7 @@ class UnitTestSuite(object):
 
     @staticmethod
     def current_timestamp():
-        return pytz.UTC.normalize(pytz.timezone("UTC").localize(datetime.now())).isoformat()
+        return toUTC(datetime.now()).isoformat()
 
     @staticmethod
     def subtract_from_timestamp(date_timedelta, timestamp=None):
@@ -67,7 +69,7 @@ class UnitTestSuite(object):
 
     @staticmethod
     def current_timestamp_lambda():
-        return lambda: (pytz.UTC.normalize(pytz.timezone("UTC").localize(datetime.now())).isoformat())
+        return lambda: UnitTestSuite.current_timestamp()
 
     @staticmethod
     def subtract_from_timestamp_lambda(date_timedelta, timestamp=None):
