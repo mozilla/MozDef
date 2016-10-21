@@ -9,4 +9,4 @@
 # Jeff Bryner jbryner@mozilla.com
 
 source  /home/mozdef/envs/mozdef/bin/activate
-/home/mozdef/envs/mozdef/cron/compromisedCreds2fxa.py
+/home/mozdef/envs/mozdef/cron/compromisedCreds2fxa.py -c /home/mozdef/envs/mozdef/cron/compromisedCreds2fxa.conf
