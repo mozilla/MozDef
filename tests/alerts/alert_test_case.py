@@ -16,11 +16,11 @@ class AlertTestCase(object):
         self.expected_alert = expected_alert
         self.full_events = []
 
-    def run(self, alert_src, alert_name):
+    def run(self, alert_filename, alert_classname):
         print '\n\tTesting {} '.format(self.description),
-        alert_file_module = __import__(alert_src)
-        alert_class = getattr(alert_file_module, alert_name)
+        alert_file_module = __import__(alert_filename)
+        alert_class_attr = getattr(alert_file_module, alert_classname)
 
-        alert_task = alert_class()
+        alert_task = alert_class_attr()
         alert_task.run()
         return alert_task

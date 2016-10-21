@@ -14,7 +14,6 @@ from dateutil.parser import parse
 
 class UnitTestSuite(object):
     def setup(self):
-        print "Setting up unit test suite"
         self.index_name = datetime.now().strftime("events-%Y%m%d")
 
         # todo: remove once we are able to run unit tests against
