@@ -18,8 +18,6 @@ After `installing docker`_, use this to build a new image::
 Running the container::
 
   sudo make run
-  (once inside as root)
-  /etc/init.d/supervisor start
 
 You're done! Now go to:
 
