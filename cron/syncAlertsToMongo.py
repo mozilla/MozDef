@@ -10,23 +10,19 @@
 
 import calendar
 import logging
-import pyes
-import pytz
 import random
-import netaddr
 import sys
 from datetime import datetime
-from datetime import timedelta
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
 from pymongo import MongoClient
-from pymongo import collection
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+from query_models import SearchQuery, TermMatch
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -55,17 +51,22 @@ def genMeteorID():
 
 
 def getESAlerts(es):
-    begindateUTC = toUTC(datetime.now() - timedelta(minutes=50))
-    enddateUTC = toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-                                                from_value=begindateUTC,
-                                                to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'alert')
-    q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    q.filters.append(pyes.BoolFilter(must=[qDate, qType]))
-    results = es.search(q, size=10000, indices='alerts')
-    # return raw search to avoid pyes iteration bug
-    return results._search_raw()
+    search_query = SearchQuery(minutes=50)
+    search_query.add_must(TermMatch('_type', 'alert'))
+    results = search_query.execute(es, indices=['alerts'])
+    return results
+
+    # begindateUTC = toUTC(datetime.now() - timedelta(minutes=50))
+    # enddateUTC = toUTC(datetime.now())
+    # qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
+    #                                             from_value=begindateUTC,
+    #                                             to_value=enddateUTC))
+    # qType = pyes.TermFilter('_type', 'alert')
+    # q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
+    # q.filters.append(pyes.BoolFilter(must=[qDate, qType]))
+    # results = es.search(q, size=10000, indices='alerts')
+    # # return raw search to avoid pyes iteration bug
+    # return results._search_raw()
 
 
 def ensureIndexes(mozdefdb):
@@ -82,7 +83,7 @@ def ensureIndexes(mozdefdb):
 
 def updateMongo(mozdefdb, esAlerts):
     alerts = mozdefdb['alerts']
-    for a in esAlerts['hits']['hits']:
+    for a in esAlerts['hits']:
         # insert alert into mongo if we don't already have it
         alertrecord = alerts.find_one({'esmetadata.id': a['_id']})
         if alertrecord is None:
@@ -106,7 +107,7 @@ def main():
     logger.debug('starting')
     logger.debug(options)
     try:
-        es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         client = MongoClient(options.mongohost, options.mongoport)
         mozdefdb = client.meteor
         ensureIndexes(mozdefdb)
