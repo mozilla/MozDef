@@ -7,6 +7,8 @@ from query_models import SearchQuery, TermMatch, Aggregation
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
 
+import time
+
 # Remove this code when pyes is gone!
 import os
 import sys
@@ -224,3 +226,17 @@ class TestWriteWithIDExists(ElasticsearchClientTest):
         self.es_client.flush('events')
         fetched_event = self.es_client.get_event_by_id(event_id)
         assert fetched_event['_source'] == event
+
+
+class TestGetIndices(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestGetIndices, self).teardown()
+        self.es_client.delete_index('test_index')
+
+    def test_get_indices(self):
+        self.es_client.create_index('test_index')
+        time.sleep(0.5)
+        indices = self.es_client.get_indices()
+        indices.sort()
+        assert indices == ['alerts', self.index_name, 'test_index']

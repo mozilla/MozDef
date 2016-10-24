@@ -58,6 +58,14 @@ class ElasticsearchClient():
 
             self.es_connection.indices.delete(index=index_name, ignore=ignore_codes)
 
+    def get_indices(self):
+        if pyes_enabled.pyes_on is True:
+            return self.es_connection.indices.stats()['indices'].keys()
+        else:
+            # todo: need to update this so that it flushes bulk queue
+            print "NEED TO IMPLEMENT THIS!"
+            raise NotImplementedError
+
     def create_index(self, index_name, ignore_fail=False):
         if pyes_enabled.pyes_on is True:
             self.es_connection.indices.create_index(index_name)
@@ -133,7 +141,6 @@ class ElasticsearchClient():
                 return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=body)
             else:
                 return self.es_connection.index(index=index, doc_type=doc_type, body=body)
-
 
     def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):
         return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
