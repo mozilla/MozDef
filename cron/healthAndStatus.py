@@ -12,8 +12,6 @@
 import json
 import logging
 import os
-import pyes
-import pytz
 import requests
 import sys
 from datetime import datetime
@@ -21,12 +19,13 @@ from hashlib import md5
 from requests.auth import HTTPBasicAuth
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -66,7 +65,7 @@ def main():
     '''
     logger.debug('starting')
     logger.debug(options)
-    es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
     try:
         auth = HTTPBasicAuth(options.mquser, options.mqpassword)
 
@@ -127,18 +126,11 @@ def main():
 
             # post to elastic search servers directly without going through
             # message queues in case there is an availability issue
-            es.index(index='events',
-                     doc_type='mozdefhealth',
-                     doc=json.dumps(healthlog),
-                     bulk=False)
+            es.save_event(doc_type='mozdefhealth', body=json.dumps(healthlog))
             # post another doc with a static docid and tag
             # for use when querying for the latest status
             healthlog['tags'] = ['mozdef', 'status', 'latest']
-            es.index(index='events',
-                     id=getDocID(server),
-                     doc_type='mozdefhealth',
-                     doc=json.dumps(healthlog),
-                     bulk=False)
+            es.save_event(doc_type='mozdefhealth', doc_id=getDocID(server), body=json.dumps(healthlog))
     except Exception as e:
         logger.error("Exception %r when gathering health and status " % e)
 
