@@ -10,22 +10,13 @@
 
 import boto
 import boto.s3
-import calendar
 import logging
-import pyes
-import pytz
-import random
 import netaddr
 import sys
-from boto.s3.key import Key
-from bson.son import SON
 from datetime import datetime
-from datetime import timedelta
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
 from pymongo import MongoClient
-from pymongo import collection
 
 import sys
 import os
@@ -136,7 +127,7 @@ def initConfig():
 
     # AWS creds
     options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to mozilla_infosec_blocklist
-   options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
+    options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
 
 def s3_upload_file(file_path, bucket_name, key_name):
     """
@@ -157,7 +148,7 @@ def s3_upload_file(file_path, bucket_name, key_name):
     key.set_acl('public-read')
     url = "https://s3.amazonaws.com/{}/{}".format(bucket.name, key.name)
     print( "URL: {}".format(url))
-    return urljk
+    return url
 
 if __name__ == '__main__':
     parser = OptionParser()
