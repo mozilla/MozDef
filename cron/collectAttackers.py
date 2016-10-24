@@ -8,30 +8,26 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-import calendar
 import collections
 import json
 import logging
-import pyes
-import pytz
 import random
 import netaddr
 import sys
 from bson.son import SON
 from datetime import datetime
-from datetime import timedelta
 from configlib import getConfig, OptionParser
-from kombu import Connection, Queue, Exchange
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
 from pymongo import MongoClient
-from pymongo import collection
 from collections import Counter
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+from query_models import SearchQuery, PhraseMatch
+
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -114,24 +110,19 @@ def mostCommon(listofdicts,dictkeypath):
 
 
 def searchESForBROAttackers(es, threshold):
-    begindateUTC = toUTC(datetime.now() - timedelta(hours=2))
-    enddateUTC = toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-    q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    qBro = pyes.QueryFilter(pyes.MatchQuery('category', 'bronotice', 'phrase'))
-    qErr = pyes.QueryFilter(pyes.MatchQuery('details.note', 'MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker', 'phrase'))
-    q = pyes.FilteredQuery(q, pyes.BoolFilter(must=[qBro, qErr]))
-
-    results = es.search(q, size=1000, indices='events,events-previous')
-    # grab results as native es results to avoid pyes iteration bug
-    # and get easier access to es metadata fields
-    rawresults = results._search_raw()['hits']['hits']
+    search_query = SearchQuery(hours=2)
+    search_query.add_must([
+        PhraseMatch('category', 'bronotice'),
+        PhraseMatch('details.note', 'MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker')
+    ])
+    full_results = search_query.execute(es)
+    results = full_results['hits']
 
     # Hit count is buried in the 'sub' field
     # as: 'sub': u'6 in 1.0 hr, eps: 0'
     # cull the records for hitcounts over the threshold before returning
     attackers = list()
-    for r in rawresults:
+    for r in results:
         hitcount = int(r['_source']['details']['sub'].split()[0])
         if hitcount > threshold:
             attackers.append(r)
@@ -446,7 +437,7 @@ def main():
     logger.debug('starting')
     logger.debug(options)
     try:
-        es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         client = MongoClient(options.mongohost, options.mongoport)
         # use meteor db
         mozdefdb = client.meteor
