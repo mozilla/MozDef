@@ -56,18 +56,6 @@ def getESAlerts(es):
     results = search_query.execute(es, indices=['alerts'])
     return results
 
-    # begindateUTC = toUTC(datetime.now() - timedelta(minutes=50))
-    # enddateUTC = toUTC(datetime.now())
-    # qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-    #                                             from_value=begindateUTC,
-    #                                             to_value=enddateUTC))
-    # qType = pyes.TermFilter('_type', 'alert')
-    # q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    # q.filters.append(pyes.BoolFilter(must=[qDate, qType]))
-    # results = es.search(q, size=10000, indices='alerts')
-    # # return raw search to avoid pyes iteration bug
-    # return results._search_raw()
-
 
 def ensureIndexes(mozdefdb):
     '''
@@ -80,6 +68,7 @@ def ensureIndexes(mozdefdb):
     alerts = mozdefdb['alerts']
     alerts.ensure_index([('utcepoch',-1)])
     alerts.ensure_index([('esmetadata.id',1)])
+
 
 def updateMongo(mozdefdb, esAlerts):
     alerts = mozdefdb['alerts']
