@@ -12,7 +12,7 @@
 import os
 import os.path
 import sys
-from configlib import getConfig,OptionParser
+from configlib import getConfig, OptionParser
 import logging
 from logging.handlers import SysLogHandler
 import boto
@@ -23,19 +23,15 @@ import boto.s3
 import gzip
 from StringIO import StringIO
 import json
-import time
-import pyes
 from datetime import datetime
 from datetime import timedelta
-from dateutil.parser import parse
 from datetime import date
-import pytz
-
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -207,7 +203,7 @@ def process_file(s3file, es):
             try:
                 r['utctimestamp']=toUTC(r['eventTime']).isoformat()
                 jbody=json.dumps(r)
-                res=es.index(index='events',doc_type='cloudtrail',doc=jbody)
+                res = es.save_event(body=jbody, doc_type='cloudtrail')
                 #logger.debug(res)
             except Exception as e:
                 logger.error('Error handling log record {0} {1}'.format(r, e))
@@ -233,7 +229,7 @@ def main():
     logger.debug('started')
     #logger.debug(options)
     try:
-        es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         role_manager = RoleManager(aws_access_key_id=options.aws_access_key_id,
                                    aws_secret_access_key=options.aws_secret_access_key)
         for aws_account in options.aws_accounts:
