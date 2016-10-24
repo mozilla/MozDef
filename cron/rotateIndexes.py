@@ -15,12 +15,17 @@
 # Create a starter .conf file with backupDiscover.py
 
 import sys
-import pyes
 import logging
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
+
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -38,14 +43,16 @@ def esRotateIndexes():
 
     logger.debug('started')
     try:
-        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-        indices = es.indices.stats()['indices'].keys()
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+
+        indices = es.get_indices()
+
         # calc dates for use in index names events-YYYYMMDD, alerts-YYYYMM, etc.
-        odate_day = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m%d')
-        odate_month = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m')
-        ndate_day = date.strftime(datetime.utcnow(),'%Y%m%d')
-        ndate_month = date.strftime(datetime.utcnow(),'%Y%m')
-        
+        odate_day = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m%d')
+        odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m')
+        ndate_day = date.strftime(toUTC(datetime.now()), '%Y%m%d')
+        ndate_month = date.strftime(toUTC(datetime.now()), '%Y%m')
+
         # examine each index in the .conf file
         # for rotation settings
         for (index, dobackup, rotation, pruning) in zip(options.indices,
@@ -66,14 +73,14 @@ def esRotateIndexes():
                             continue
                     if newindex not in indices:
                         logger.debug('Creating %s index' % newindex)
-                        es.indices.create_index(newindex)
+                        es.create_index(newindex)
                     # set aliases: events to events-YYYYMMDD
                     # and events-previous to events-YYYYMMDD-1 for example
                     logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
-                    es.indices.set_alias(index, newindex)
+                    es.create_alias(index, newindex)
                     if oldindex in indices:
                         logger.debug('Setting {0}-previous alias to index: {1}'.format(index, oldindex))
-                        es.indices.set_alias('%s-previous' % index, oldindex)
+                        es.create_alias('%s-previous' % index, oldindex)
                     else:
                         logger.debug('Old index %s is missing, do not change %s-previous alias' % (oldindex, index))
             except Exception as e:
