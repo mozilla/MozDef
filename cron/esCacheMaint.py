@@ -11,20 +11,17 @@
 import json
 import logging
 import math
-import pyes
-import pytz
 import random
 import requests
 import sys
-import time
 from configlib import getConfig, OptionParser
 from datetime import datetime, date, timedelta
-from dateutil.parser import parse
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -65,11 +62,6 @@ def digits(n):
     return digits
 
 
-def esConnect(conn):
-    '''open or re-open a connection to elastic search'''
-    return pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
-
-
 def isJVMMemoryHigh():
     url = "http://{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
     #r=requests.get(url="http://mozdefes5.private.scl3.mozilla.com:9200/_nodes/stats?pretty=true")
@@ -95,14 +87,14 @@ def isJVMMemoryHigh():
 
 
 def clearESCache():
-    es=esConnect(None)
-    indexes=es.indices.status()['indices']
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+    indices = es.get_indices()
     # assums index names  like events-YYYYMMDD etc.
     # used to avoid operating on current indexes
     dtNow = datetime.utcnow()
     indexSuffix = date.strftime(dtNow, '%Y%m%d')
     previousSuffix = date.strftime(dtNow - timedelta(days=1), '%Y%m%d')
-    for targetindex in sorted(indexes.keys()):
+    for targetindex in sorted(indices):
         if indexSuffix not in targetindex and previousSuffix not in targetindex:
             url = 'http://{0}/{1}/_stats'.format(random.choice(options.esservers), targetindex)
             r = requests.get(url)
