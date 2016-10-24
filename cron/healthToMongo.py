@@ -50,7 +50,6 @@ def getFrontendStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
         TermMatch('_type', 'mozdefhealth'),
-        # Is this an array or a string?
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'latest'),
     ])
