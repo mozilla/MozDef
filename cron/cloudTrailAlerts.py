@@ -11,19 +11,17 @@
 import pika
 import sys
 import json
-from configlib import getConfig,OptionParser
+from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 import logging
 from datetime import datetime
-from datetime import timedelta
-from dateutil.parser import parse
-import pytz
-import pyes
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from query_models import SearchQuery, TermMatch, TermsMatch, ExistsMatch
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -71,29 +69,23 @@ def alertToMessageQueue(alertDict):
 
 def alertToES(es,alertDict):
     try:
-        res=es.index(index='alerts',doc_type='alert',doc=alertDict)
+        res = es.save_alert(body=alertDict)
         return(res)
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
-def esCloudTrailSearch(es,begindateUTC=None, enddateUTC=None):
-    resultsList=list()
-    if begindateUTC is None:
-        begindateUTC=toUTC(datetime.now() - timedelta(hours=160))
-    if enddateUTC is None:
-        enddateUTC= toUTC(datetime.now())
+def esCloudTrailSearch(es):
+    search_query = SearchQuery(hours=160)
+    search_query.add_must([
+        TermMatch('_type', 'cloudtrail'),
+        TermsMatch('eventName', ['runinstances', 'stopinstances', 'startinstances']),
+    ])
+    search_query.add_must_not(ExistsMatch('alerttimestamp'))
     try:
-        #search for actions within the date range that haven't already been alerted (i.e. given an alerttimestamp)
-        qDate=pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',from_value=begindateUTC,to_value=enddateUTC))
-        qcloud=pyes.TermFilter('_type','cloudtrail')
-        qEvents=pyes.TermsFilter('eventName',['runinstances','stopinstances','startinstances'])
-        qalerted=pyes.ExistsFilter('alerttimestamp')
-        results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents],must_not=[qalerted])), indices='events')
-        #uncomment for debugging to recreate alerts for events that already have an alerttimestamp
-        #results=es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(must=[qcloud,qDate,qEvents])))
-        return(results._search_raw()['hits']['hits'])
+        full_results = search_query.execute(es)
+        return full_results['hits']
 
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
 def createAlerts(es,esResults):
@@ -132,7 +124,7 @@ def createAlerts(es,esResults):
                     r['_source']['alerts']=[]
                 r['_source']['alerts'].append(dict(index=alertResult['_index'],type=alertResult['_type'],id=alertResult['_id']))
                 r['_source']['alerttimestamp']=toUTC(datetime.now()).isoformat()
-                es.update(r['_index'],r['_type'],r['_id'],document=r['_source'])
+                es.save_object(index=r['_index'], doc_type=r['_type'], doc_id=r['_id'], body=r['_source'])
                 alertToMessageQueue(alert)
     except EOFError as e:
         logger.error("Exception %r when creating alerts "%e)
@@ -140,9 +132,9 @@ def createAlerts(es,esResults):
 def main():
     logger.debug('starting')
     logger.debug(options)
-    es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-    results=esCloudTrailSearch(es)
-    createAlerts(es,results)
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+    results = esCloudTrailSearch(es)
+    createAlerts(es, results)
     logger.debug('finished')
 
 def initConfig():
