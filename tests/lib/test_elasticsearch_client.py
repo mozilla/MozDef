@@ -240,3 +240,22 @@ class TestGetIndices(ElasticsearchClientTest):
         indices = self.es_client.get_indices()
         indices.sort()
         assert indices == ['alerts', self.index_name, 'test_index']
+
+
+class TestClusterHealth(ElasticsearchClientTest):
+
+    def test_cluster_health_results(self):
+        health_results = self.es_client.get_cluster_health()
+        health_keys = health_results.keys()
+        health_keys.sort()
+        assert health_keys == ['active_primary_shards', 'active_shards', 'cluster_name', 'initializing_shards', 'number_of_data_nodes', 'number_of_nodes', 'relocating_shards', 'status', 'timed_out', 'unassigned_shards']
+        assert type(health_results['active_primary_shards']) is int
+        assert type(health_results['active_shards']) is int
+        assert type(health_results['cluster_name']) is str
+        assert type(health_results['initializing_shards']) is int
+        assert type(health_results['number_of_data_nodes']) is int
+        assert type(health_results['number_of_nodes']) is int
+        assert type(health_results['relocating_shards']) is int
+        assert type(health_results['status']) is str
+        assert type(health_results['timed_out']) is bool
+        assert type(health_results['unassigned_shards']) is int

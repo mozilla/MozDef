@@ -191,3 +191,11 @@ class ElasticsearchClient():
             print "NEED TO IMPLEMENT THIS!"
             raise NotImplementedError
 
+    def get_cluster_health(self):
+        if pyes_enabled.pyes_on is True:
+            escluster = pyes.managers.Cluster(self.es_connection)
+            return escluster.health()
+        else:
+            # todo: need to update this so that it flushes bulk queue
+            print "NEED TO IMPLEMENT THIS!"
+            raise NotImplementedError
