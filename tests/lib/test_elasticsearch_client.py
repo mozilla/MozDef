@@ -27,6 +27,24 @@ class ElasticsearchClientTest(UnitTestSuite):
         return results['aggregations']['_type']['terms'][0]['count']
 
 
+class MockTransportClass:
+
+    def __init__(self):
+        self.request_counts = 0
+        self.original_function = None
+
+    def _send_request(self, method, path, body=None, params=None, headers=None, raw=False, return_response=False):
+        self.request_counts += 1
+        return self.original_function(method, path, body, params)
+
+    def backup_function(self, orig_function):
+        self.original_function = orig_function
+
+    def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):
+        self.request_counts += 1
+        return self.original_function(method, url, params=params, body=body)
+
+
 class TestWriteWithRead(ElasticsearchClientTest):
     def setup(self):
         super(TestWriteWithRead, self).setup()
@@ -72,22 +90,13 @@ class TestWriteWithRead(ElasticsearchClientTest):
         assert self.es_client.get_alert_by_id("123") is None
 
 
-class MockTransportClass:
+class TestNoResultsFound(ElasticsearchClientTest):
 
-    def __init__(self):
-        self.request_counts = 0
-        self.original_function = None
-
-    def _send_request(self, method, path, body=None, params=None, headers=None, raw=False, return_response=False):
-        self.request_counts += 1
-        return self.original_function(method, path, body, params)
-
-    def backup_function(self, orig_function):
-        self.original_function = orig_function
-
-    def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):
-        self.request_counts += 1
-        return self.original_function(method, url, params=params, body=body)
+    def test_search_no_results(self):
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('garbagefielddoesntexist', 'testingvalues'))
+        results = search_query.execute(self.es_client)
+        assert results['hits'] == []
 
 
 class TestSimpleWrites(ElasticsearchClientTest):
@@ -142,7 +151,7 @@ class TestBulkWrites(ElasticsearchClientTest):
         assert num_events == 10000
 
 
-class TestBulkWritesWithLessThanThreshold(ElasticsearchClientTest):
+class TestBulkWritesWithMoreThanThreshold(ElasticsearchClientTest):
 
     def test_bulk_writing(self):
         mock_class = MockTransportClass()
@@ -193,12 +202,6 @@ class TestBulkWritesWithLessThanThreshold(ElasticsearchClientTest):
         results = search_query.execute(self.es_client, indices=['events'])
         assert len(results['hits']) == 101
 
- # set bulk amount to 20 events
- # add 100 events and make sure requests sent is 5 and events is 100
- # add 90 events and make sure requests sent is 4 and events is 80
- # todo: add unit test for writing stuff to ES, then making sure it gets purged/flushed correctly
- # todo: add unit tests for verifying number of entries obtained via search is 1000
- # todo: verify that when you flush bulk, it writes all of the events in the queue
 
 class TestWriteWithID(ElasticsearchClientTest):
 
