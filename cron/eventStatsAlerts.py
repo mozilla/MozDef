@@ -8,23 +8,21 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-import json
 import logging
 import numpy
 import os
-import pyes
-import pytz
 import sys
 from datetime import datetime
-from datetime import timedelta
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from query_models import SearchQuery, TermMatch
+
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -48,28 +46,17 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def esSearch(es, begindateUTC=None, enddateUTC=None):
-    resultsList = list()
-    if begindateUTC is None:
-        begindateUTC = toUTC(datetime.now() - timedelta(minutes=options.aggregationminutes))
-    if enddateUTC is None:
-        enddateUTC = toUTC(datetime.now())
+def esSearch(es):
+    search_query = SearchQuery(minutes=options.aggregationminutes)
+    search_query.add_must(TermMatch('_type', 'mozdefstats'))
+
     try:
-        # search for aggregated event stats summaries within the date range
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-        q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-        q = pyes.FilteredQuery(q,pyes.BoolFilter(must=[qDate,
-                                                       pyes.TermFilter('_type', 'mozdefstats')]))
-        results=es.search(query=q,size=100,indices=['events','events-previous'])
-
-        #avoid pyes iteration bug
-        rawresults = results._search_raw()
-
+        full_results = search_query.execute(es)
         #examine the results
         #for each details.counts, append the count
         #as a list to the stats dict
         stats=dict()
-        for r in rawresults['hits']['hits']:
+        for r in full_results['hits']:
             for i in r['_source']['details']['counts']:
                 #print(i.values()[0])
                 if i.keys()[0] not in stats.keys():
@@ -80,7 +67,6 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
         # aggregation threshold percentages
         aggregationthresholds = dict(zip(options.aggregations,
                                          options.aggregationthresholds))
-
 
         #for our running history of counts per category
         #do some simple stats math to see if we
@@ -106,7 +92,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
                                                 )
                       )
 
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
 
@@ -117,7 +103,7 @@ def main():
     '''
     logger.debug('starting')
     logger.debug(options)
-    es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
     esSearch(es)
     logger.debug('finished')
 
