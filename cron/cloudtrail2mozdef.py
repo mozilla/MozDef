@@ -38,9 +38,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib
 from utilities.toUTC import toUTC
 
 
-# This hack is in place while we wait for https://bugzilla.mozilla.org/show_bug.cgi?id=1216784 to be resolved
-HACK=True
-
 logger = logging.getLogger(sys.argv[0])
 
 class RoleManager:
@@ -259,13 +256,6 @@ def main():
                     ct = boto.cloudtrail.connect_to_region(region,
                                                            **ct_credentials)
                     trails=ct.describe_trails()['trailList']
-                except boto.exception.NoAuthHandlerFound as e:
-                    # TODO Remove this hack once https://bugzilla.mozilla.org/show_bug.cgi?id=1216784 is complete
-                    if HACK:
-                        # logger.error("Working around missing permissions with a HACK")
-                        trails=[{'S3BucketName':'mozilla-cloudtrail-logs'}]
-                    else:
-                        continue
                 except Exception as e:
                     logger.error("Unable to connect to cloudtrail %s in order to "
                         "enumerate CloudTrails in region %s due to %s" %
