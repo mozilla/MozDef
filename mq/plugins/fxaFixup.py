@@ -49,6 +49,10 @@ class message(object):
                     if message['details']['code'] == 200:
                         #normal 200 returns for web content
                         return(None, metadata)
+                if 'op' in message['details']:
+                    if message['details']['op'] == 'mailer.send.1':
+                        # Due to status flag not being a string
+                        return(None, metadata)
 
         # tag the message
         if 'tags' in message.keys() and isinstance(message['tags'], list):
