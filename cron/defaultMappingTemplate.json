@@ -1,0 +1,63 @@
+{
+    "mappings": {
+        "_default_": {
+            "_all": {
+                "enabled": true
+            }, 
+            "properties": {
+                "receivedtimestamp": {
+                    "type": "date", 
+                    "format": "dateOptionalTime"
+                }, 
+                "details": {
+                    "properties": {
+                        "destinationipaddress": {
+                            "type": "ip"
+                        }, 
+                        "success": {
+                            "type": "boolean"
+                        }, 
+                        "sourceport": {
+                            "index": "not_analyzed", 
+                            "type": "long"
+                        }, 
+                        "destinationport": {
+                            "index": "not_analyzed", 
+                            "type": "long"
+                        }, 
+                        "srcip": {
+                            "type": "ip"
+                        }, 
+                        "sourceipaddress": {
+                            "type": "ip"
+                        }
+                    }
+                }, 
+                "utctimestamp": {
+                    "type": "date", 
+                    "format": "dateOptionalTime"
+                }, 
+                "summary": {
+                    "type": "string"
+                }
+            }, 
+            "dynamic_templates": [
+                {
+                    "string_fields": {
+                        "match_mapping_type": "*", 
+                        "mapping": {
+                            "index": "not_analyzed", 
+                            "type": "string", 
+                            "doc_values": true
+                        }, 
+                        "match": "*"
+                    }
+                }
+            ]
+        }
+    }, 
+    "aliases": {}, 
+    "order": 0, 
+    "template": "*", 
+    "settings": {}
+}
