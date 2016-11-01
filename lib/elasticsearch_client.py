@@ -88,12 +88,12 @@ class ElasticsearchClient():
         else:
             self.es_connection.indices.flush(index=index_name)
 
-    def search(self, search_query, indices):
+    def search(self, search_query, indices, size):
         results = []
         if pyes_enabled.pyes_on is True:
             # todo: update the size amount
             try:
-                esresults = self.es_connection.search(search_query, size=1000, indices=','.join(map(str, indices)))
+                esresults = self.es_connection.search(search_query, size=size, indices=','.join(map(str, indices)))
                 results = esresults._search_raw()
             except pyes.exceptions.IndexMissingException:
                 raise ElasticsearchInvalidIndex(indices)
@@ -103,14 +103,14 @@ class ElasticsearchClient():
         result_set = SimpleResults(results)
         return result_set
 
-    def aggregated_search(self, search_query, indices, aggregations):
+    def aggregated_search(self, search_query, indices, aggregations, size):
         if pyes_enabled.pyes_on is True:
             query = search_query.search()
             for field_name in aggregations:
                 query.facet.add_term_facet(field_name)
 
             # todo: change size here
-            esresults = self.es_connection.search(query, size=1000, indices=','.join(map(str, indices)))
+            esresults = self.es_connection.search(query, size=size, indices=','.join(map(str, indices)))
             results = esresults._search_raw()
         else:
             search_obj = Search(using=self.es_connection, index=indices)

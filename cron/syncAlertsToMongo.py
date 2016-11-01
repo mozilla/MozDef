@@ -53,7 +53,7 @@ def genMeteorID():
 def getESAlerts(es):
     search_query = SearchQuery(minutes=50)
     search_query.add_must(TermMatch('_type', 'alert'))
-    results = search_query.execute(es, indices=['alerts'])
+    results = search_query.execute(es, indices=['alerts'], size=10000)
     return results
 
 

@@ -51,7 +51,7 @@ def esSearch(es):
     search_query.add_must(TermMatch('_type', 'mozdefstats'))
 
     try:
-        full_results = search_query.execute(es)
+        full_results = search_query.execute(es, size=100)
         #examine the results
         #for each details.counts, append the count
         #as a list to the stats dict

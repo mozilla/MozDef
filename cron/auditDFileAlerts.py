@@ -20,7 +20,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
-from query_models import SearchQuery, TermMatch, PhraseMatch, ExistsMatch
+from query_models import SearchQuery, TermMatch, PhraseMatch, ExistsMatch, MultiMatch
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -83,16 +83,17 @@ def alertToES(es, alertDict):
 
 def esUserWriteSearch():
     search_query = SearchQuery(minutes=30)
+
     search_query.add_must([
         TermMatch('_type', 'auditd'),
         TermMatch('signatureid', 'write'),
         PhraseMatch('auditkey', 'user'),
         ExistsMatch('suser')
     ])
+
     search_query.add_must_not([
         ExistsMatch('alerttimestamp'),
-        PhraseMatch('parentprocess', 'puppet dhclient-script')
-
+        MultiMatch('parentprocess', ['puppet', 'dhclient-script'])
     ])
 
     return search_query
