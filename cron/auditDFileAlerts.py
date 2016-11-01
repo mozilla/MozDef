@@ -10,22 +10,21 @@ import sys
 import json
 import logging
 import pika
-import pytz
-import pyes
 from collections import Counter
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from datetime import timedelta
-from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from query_models import SearchQuery, TermMatch, PhraseMatch, ExistsMatch
 
 
 logger = logging.getLogger(sys.argv[0])
+
 
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
@@ -76,44 +75,38 @@ def alertToMessageQueue(alertDict):
 
 def alertToES(es, alertDict):
     try:
-        res = es.index(index='alerts', doc_type='alert', doc=alertDict)
+        res = es.save_alert(body=alertDict)
         return(res)
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
 
 def esUserWriteSearch():
-    begindateUTC= toUTC(datetime.now() - timedelta(minutes=30))
-    enddateUTC= toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'auditd')
-    qEvents = pyes.TermFilter("signatureid","write")
-    qalerted = pyes.ExistsFilter('alerttimestamp')
-    q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    q.filters.append(
-        pyes.BoolFilter(must=[
-                            qType, qDate,qEvents,
-                            pyes.QueryFilter(pyes.MatchQuery("auditkey","user","phrase")),
-                            pyes.ExistsFilter('suser')
-                            ],
-    must_not=[
-        qalerted,
-        pyes.QueryFilter(pyes.MatchQuery("parentprocess","puppet dhclient-script","boolean"))
-        ]))
-    return q
+    search_query = SearchQuery(minutes=30)
+    search_query.add_must([
+        TermMatch('_type', 'auditd'),
+        TermMatch('signatureid', 'write'),
+        PhraseMatch('auditkey', 'user'),
+        ExistsMatch('suser')
+    ])
+    search_query.add_must_not([
+        ExistsMatch('alerttimestamp'),
+        PhraseMatch('parentprocess', 'puppet dhclient-script')
+
+    ])
+
+    return search_query
+
 
 def esRunSearch(es, query, aggregateField):
     try:
-        pyesresults = es.search(query, size=1000, indices='events,events-previous')
-        # logger.debug(results.count())
+        full_results = query.execute(es)
 
         # correlate any matches by the aggregate field.
         # make a simple list of indicator values that can be counted/summarized by Counter
         resultsIndicators = list()
 
-        # bug in pyes..capture results as raw list or it mutates after first access:
-        # copy the hits.hits list as our results, which is the same as the official elastic search library returns.
-        results = pyesresults._search_raw()['hits']['hits']
+        results = full_results['hits']
         for r in results:
             if aggregateField in r['_source']['details']:
                 resultsIndicators.append(r['_source']['details'][aggregateField])
@@ -133,68 +126,7 @@ def esRunSearch(es, query, aggregateField):
             indicatorList.append(idict)
         return indicatorList
 
-    except pyes.exceptions.NoServerAvailable:
-        logger.error('Elastic Search server could not be reached, check network connectivity')
-
-def esSearch(es, begindateUTC=None, enddateUTC=None):
-    if begindateUTC is None:
-        begindateUTC = toUTC(datetime.now() - timedelta(minutes=80))
-    if enddateUTC is None:
-        enddateUTC = toUTC(datetime.now())
-    try:
-        # search for events within the date range that haven't already been alerted (i.e. given an alerttimestamp)
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-        qType = pyes.TermFilter('_type', 'auditd')
-        qEvents = pyes.TermFilter('command', 'shadow')
-        qalerted = pyes.ExistsFilter('alerttimestamp')
-        q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-        # query must match dates, should have keywords must not match whitelisted items
-        q.filters.append(pyes.BoolFilter(must=[qType, qDate ], should=[qEvents],must_not=[
-            qalerted,
-            pyes.QueryFilter(pyes.MatchQuery("cwd","/var/backups","phrase")),
-            pyes.QueryFilter(pyes.MatchQuery("dproc","/usr/bin/glimpse","phrase")),
-            pyes.QueryFilter(pyes.MatchQuery("dproc","/bin/chmod","phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'cmp -s shadow.bak /etc/shadow',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'cp -p /etc/shadow shadow.bak',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('suser', 'infrasec',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('parentprocess', 'mig-agent',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('parentprocess', 'passwd',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'no drop shadow',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'js::shadow',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'target.new',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', '/usr/share/man',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'shadow-invert.png',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'ruby-shadow',"phrase")),
-            pyes.QueryFilter(pyes.QueryStringQuery('command:gzip')),
-            pyes.QueryFilter(pyes.QueryStringQuery('command:http')),
-            pyes.QueryFilter(pyes.QueryStringQuery('command:html'))
-        ]))
-        pyesresults = es.search(q, size=1000, indices='events')
-        # logger.debug(results.count())
-
-        # correlate any matches by the dhost field.
-        # make a simple list of indicator values that can be counted/summarized by Counter
-        resultsIndicators = list()
-
-        # bug in pyes..capture results as raw list or it mutates after first access:
-        # copy the hits.hits list as our resusts, which is the same as the official elastic search library returns.
-        results = pyesresults._search_raw()['hits']['hits']
-        for r in results:
-            resultsIndicators.append(r['_source']['details']['dhost'])
-
-        # use the list of tuples ('indicator',count) to create a dictionary with:
-        # indicator,count,es records
-        # and add it to a list to return.
-        indicatorList = list()
-        for i in Counter(resultsIndicators).most_common():
-            idict = dict(indicator=i[0], count=i[1], events=[])
-            for r in results:
-                if r['_source']['details']['dhost'].encode('ascii', 'ignore') == i[0]:
-                    idict['events'].append(r)
-            indicatorList.append(idict)
-        return indicatorList
-
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
 
@@ -238,7 +170,7 @@ def createAlerts(es, indicatorCounts):
                 # save alert to alerts index, update events index with alert ID for cross reference
                 alertResult = alertToES(es, alert)
 
-                ##logger.debug(alertResult)
+                # logger.debug(alertResult)
                 # for each event in this list of indicatorCounts
                 # update with the alertid/index
                 # and update the alerttimestamp on the event itself so it's not re-alerted
@@ -258,13 +190,13 @@ def createAlerts(es, indicatorCounts):
 def main():
     logger.debug('starting')
     logger.debug(options)
-    es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
     # searches for suspicious file access
     # aggregating by a specific field (usually dhost or suser)
     # and alert if found
 
     # signature: WRITE by a user, not by puppet
-    indicatorCounts = esRunSearch(es,esUserWriteSearch(), 'suser')
+    indicatorCounts = esRunSearch(es, esUserWriteSearch(), 'suser')
     createAlerts(es, indicatorCounts)
 
     logger.debug('finished')
