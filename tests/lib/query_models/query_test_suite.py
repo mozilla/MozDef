@@ -35,9 +35,3 @@ class QueryTestSuite(UnitTestSuite):
                 search_query.add_must_not(query)
                 query_result = search_query.execute(self.es_client)
                 self.verify_test(query_result, self.positive_test is False)
-
-                # Testing should
-                # todo: figure out a way to automagically test 'should'
-
-
-

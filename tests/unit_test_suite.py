@@ -11,6 +11,8 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
 
+import random
+
 
 class UnitTestSuite(object):
     def setup(self):
@@ -52,6 +54,34 @@ class UnitTestSuite(object):
         # Delete templates
         # self.es_client.delete_template('eventstemplate')
         # self.es_client.delete_template('alertstemplate')
+
+    def random_ip(self):
+        return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
+
+    def generate_default_event(self):
+        current_timestamp = UnitTestSuite.current_timestamp_lambda()
+
+        source_ip = self.random_ip()
+
+        event = {
+            "_index": "events",
+            "_type": "event",
+            "_source": {
+                "category": "excategory",
+                "utctimestamp": current_timestamp,
+                "hostname": "exhostname",
+                "severity": "NOTICE",
+                "source": "exsource",
+                "summary": "Example summary",
+                "tags": ['tag1', 'tag2'],
+                "details": {
+                    "sourceipaddress": source_ip,
+                    "hostname": "exhostname"
+                }
+            }
+        }
+
+        return event
 
     @staticmethod
     def current_timestamp():

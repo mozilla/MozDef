@@ -9,6 +9,12 @@ from datetime import datetime
 from datetime import timedelta
 
 
+def MultiMatch(key, value):
+    if pyes_enabled.pyes_on is True:
+        return pyes.QueryFilter(pyes.MatchQuery(key, value, 'boolean'))
+    return Q('multi_match', query=key, fields=value)
+
+
 def ExistsMatch(field_name):
     if pyes_enabled.pyes_on is True:
         return pyes.ExistsFilter(field_name)
@@ -197,9 +203,9 @@ class SearchQuery():
     def add_aggregation(self, input_obj):
         self.append_to_array(self.aggregation, input_obj)
 
-    def execute(self, elasticsearch_client, indices=['events', 'events-previous']):
-        if self.must == [] and self.must_not == [] and self.should == []:
-            raise AttributeError('Must define a must, must_not, or should query')
+    def execute(self, elasticsearch_client, indices=['events', 'events-previous'], size=1000):
+        if self.must == [] and self.must_not == [] and self.should == [] and self.aggregation == []:
+            raise AttributeError('Must define a must, must_not, should query, or aggregation')
 
         if self.date_timedelta:
             end_date = toUTC(datetime.now())
@@ -210,21 +216,15 @@ class SearchQuery():
         search_query = None
         if pyes_enabled.pyes_on is True:
             search_query = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-            search_query.filters.append(BooleanMatch(
-                must=self.must, should=self.should, must_not=self.must_not))
+            search_query.filters.append(BooleanMatch(must=self.must, should=self.should, must_not=self.must_not))
         else:
             search_query = BooleanMatch(
                 must=self.must, must_not=self.must_not, should=self.should)
 
-        # Remove try catch statement when we remove pyes_on
-        # results = []
-        try:
-            if len(self.aggregation) == 0:
-                results = elasticsearch_client.search(search_query, indices)
-            else:
-                results = elasticsearch_client.aggregated_search(
-                    search_query, indices, self.aggregation)
-        except RuntimeError:
-            results = []
+        results = []
+        if len(self.aggregation) == 0:
+            results = elasticsearch_client.search(search_query, indices, size)
+        else:
+            results = elasticsearch_client.aggregated_search(search_query, indices, self.aggregation, size)
 
         return results

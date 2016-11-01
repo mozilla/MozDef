@@ -21,6 +21,16 @@ class SearchQueryUnitTest(UnitTestSuite):
         assert self.query.should == []
         assert self.query.aggregation == []
 
+    def populate_example_event(self):
+        event = {
+            'summary': 'Test Summary',
+            'note': 'Example note',
+            'details': {
+                'information': 'Example information'
+            }
+        }
+        self.populate_test_event(event)
+
 
 class TestMustInput(SearchQueryUnitTest):
 
@@ -96,18 +106,7 @@ class TestAggregationInput(SearchQueryUnitTest):
 
 class TestExecute(SearchQueryUnitTest):
 
-    def populate_example_event(self):
-        event = {
-            'summary': 'Test Summary',
-            'note': 'Example note',
-            'details': {
-                'information': 'Example information'
-            }
-        }
-        self.populate_test_event(event)
-
     def test_complex_aggregation_query_execute(self):
-        self.setup()
         query = SearchQuery()
         assert query.date_timedelta == {}
         query.add_must(ExistsMatch('ip'))
@@ -199,6 +198,16 @@ class TestExecute(SearchQueryUnitTest):
 
         assert results['aggregations']['ip']['terms'][1]['count'] == 2
         assert results['aggregations']['ip']['terms'][1]['key'] == '1.2.3.4'
+
+    def test_aggregation_without_must_fields(self):
+        event = self.generate_default_event()
+        event['_source']['utctimestamp'] = event['_source']['utctimestamp']()
+        self.populate_test_event(event)
+        search_query = SearchQuery(minutes=10)
+
+        search_query.add_aggregation(Aggregation('summary'))
+        results = search_query.execute(self.es_client)
+        assert results['aggregations']['summary']['terms'][0]['count'] == 1
 
     def test_aggregation_query_execute(self):
         self.setup()
@@ -440,3 +449,26 @@ class TestExecute(SearchQueryUnitTest):
         query = SearchQuery(minutes=10)
         with pytest.raises(AttributeError):
             query.execute(self.es_client)
+
+    def test_execute_with_size(self):
+        for num in range(0, 30):
+            self.populate_example_event()
+        query = SearchQuery()
+        query.add_must(ExistsMatch('summary'))
+        results = query.execute(self.es_client, size=12)
+        assert len(results['hits']) == 12
+
+    def test_execute_without_size(self):
+        for num in range(0, 1200):
+            self.populate_example_event()
+        query = SearchQuery()
+        query.add_must(ExistsMatch('summary'))
+        results = query.execute(self.es_client)
+        assert len(results['hits']) == 1000
+
+    def test_execute_with_should(self):
+        self.populate_example_event()
+        self.query.add_should(ExistsMatch('summary'))
+        self.query.add_should(ExistsMatch('nonexistentfield'))
+        results = self.query.execute(self.es_client)
+        assert len(results['hits']) == 1

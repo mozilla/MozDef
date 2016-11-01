@@ -5,7 +5,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from unit_test_suite import UnitTestSuite
 
-import random
 import copy
 import re
 
@@ -146,35 +145,6 @@ class AlertTestSuite(UnitTestSuite):
         else:
             assert len(alert_task.alert_ids) is 0
 
-    def random_ip(self):
-        return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
-
-    def generate_default_event(self):
-        current_timestamp = UnitTestSuite.current_timestamp_lambda()
-
-        source_ip = self.random_ip()
-
-        event = {
-            "_index": "events",
-            "_type": "event",
-            "_source": {
-                "category": "excategory",
-                "utctimestamp": current_timestamp,
-                "hostname": "exhostname",
-                "severity": "NOTICE",
-                "source": "exsource",
-                "summary": "Example summary",
-                "tags": ['tag1', 'tag2'],
-                "details": {
-                    "sourceipaddress": source_ip,
-                    "hostname": "exhostname"
-                }
-            }
-        }
-
-        return event
-
     @staticmethod
     def copy(obj):
         return copy.deepcopy(obj)
-
