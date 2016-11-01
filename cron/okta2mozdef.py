@@ -14,19 +14,18 @@ from configlib import getConfig,OptionParser
 import logging
 from logging.handlers import SysLogHandler
 import json
-import time
 import pyes
 from datetime import datetime
 from datetime import timedelta
-from dateutil.parser import parse
 from datetime import date
-import pytz
 import requests
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+
 
 logger = logging.getLogger(sys.argv[0])
 logger.level=logging.INFO
@@ -76,7 +75,7 @@ def main():
     logger.debug('started')
     #logger.debug(options)
     try:
-        es=pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         s = requests.Session()
         s.headers.update({'Accept': 'application/json'})
         s.headers.update({'Content-type': 'application/json'})
@@ -123,7 +122,7 @@ def main():
                                     if 'requestUri' in actor.keys():
                                         mozdefEvent['details']['source_uri'] = actor['requestUri']
                             jbody=json.dumps(mozdefEvent)
-                            res=es.index(index='events',doc_type='okta',doc=jbody)
+                            res = es.save_event(doc_type='okta',body=jbody)
                             logger.debug(res)
                         except Exception as e:
                             logger.error('Error handling log record {0} {1}'.format(r, e))
