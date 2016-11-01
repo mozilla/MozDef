@@ -14,7 +14,6 @@ from configlib import getConfig,OptionParser
 import logging
 from logging.handlers import SysLogHandler
 import json
-import pyes
 from datetime import datetime
 from datetime import timedelta
 from datetime import date
