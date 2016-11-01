@@ -10,19 +10,18 @@ import sys
 import json
 import logging
 import pika
-import pytz
-import pyes
 from collections import Counter
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from datetime import timedelta
-from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from query_models import SearchQuery, TermMatch, ExistsMatch, QueryStringMatch, PhraseMatch, MultiMatch
+
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -76,165 +75,153 @@ def alertToMessageQueue(alertDict):
 
 def alertToES(es, alertDict):
     try:
-        res = es.index(index='alerts', doc_type='alert', doc=alertDict)
+        res = es.save_alert(body=alertDict)
         return(res)
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
+
 
 def esShadowSearch():
     # find stuff like cat /etc/shadow
     #  search for events within the date range that haven't already been alerted (i.e. given an alerttimestamp)
-    begindateUTC = toUTC(datetime.now() - timedelta(minutes=30))
-    enddateUTC = toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'auditd')
-    qEvents = pyes.TermFilter('command', 'shadow')
-    qalerted = pyes.ExistsFilter('alerttimestamp')
-    q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    # query must match dates, should have keywords must not match whitelisted items
-    q.filters.append(
-        pyes.BoolFilter(
-            must=[qType,
-                  qDate,
-                  pyes.ExistsFilter('suser')],
-            should=[qEvents],
-            must_not=[
-                qalerted,
-                pyes.QueryFilter(pyes.MatchQuery("cwd","/var/backups","phrase")),
-                pyes.QueryFilter(pyes.MatchQuery("dproc","/usr/bin/glimpse","phrase")),
-                pyes.QueryFilter(pyes.MatchQuery("dproc","/bin/chmod","phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('command', 'cmp -s shadow.bak /etc/shadow',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('command', 'cp -p /etc/shadow shadow.bak',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('suser', 'infrasec',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('parentprocess', 'mig-agent',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('parentprocess', 'passwd',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('command', 'no drop shadow',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('command', 'js::shadow',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('command', 'target.new',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('command', '/usr/share/man',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('command', 'shadow-invert.png',"phrase")),
-                pyes.QueryFilter(pyes.MatchQuery('command', 'ruby-shadow',"phrase")),
-                pyes.QueryFilter(pyes.QueryStringQuery('command:gzip')),
-                pyes.QueryFilter(pyes.QueryStringQuery('command:http')),
-                pyes.QueryFilter(pyes.QueryStringQuery('command:html'))
-    ]))
-    return q
+    search_query = SearchQuery(minutes=30)
+
+    search_query.add_must([
+        TermMatch('_type', 'auditd'),
+        ExistsMatch('suser')
+    ])
+
+    search_query.add_should(PhraseMatch('command', 'shadow'))
+
+    search_query.add_must_not([
+        ExistsMatch('alerttimestamp'),
+        PhraseMatch("cwd", "/var/backups"),
+        PhraseMatch("dproc", "/usr/bin/glimpse"),
+        PhraseMatch("dproc", "/bin/chmod"),
+        PhraseMatch('command', 'cmp -s shadow.bak /etc/shadow'),
+        PhraseMatch('command', 'cp -p /etc/shadow shadow.bak'),
+        PhraseMatch('suser', 'infrasec'),
+        PhraseMatch('parentprocess', 'mig-agent'),
+        PhraseMatch('parentprocess', 'passwd'),
+        PhraseMatch('command', 'no drop shadow'),
+        PhraseMatch('command', 'js::shadow'),
+        PhraseMatch('command', 'target.new'),
+        PhraseMatch('command', '/usr/share/man'),
+        PhraseMatch('command', 'shadow-invert.png'),
+        PhraseMatch('command', 'ruby-shadow'),
+        QueryStringMatch('command:gzip'),
+        QueryStringMatch('command:http'),
+        QueryStringMatch('command:html')
+    ])
+
+    return search_query
 
 
 def esRPMSearch():
-    begindateUTC= toUTC(datetime.now() - timedelta(minutes=30))
-    enddateUTC= toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'auditd')
-    qEvents = pyes.TermFilter("dproc","rpm")
-    qalerted = pyes.ExistsFilter('alerttimestamp')
-    q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    q.filters.append(pyes.BoolFilter(must=[qType, qDate,qEvents,
-                                           pyes.ExistsFilter('suser')],
-        should=[
-        pyes.QueryFilter(pyes.MatchQuery("command","-e","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("command","--erase","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("command","-i","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("command","--install","phrase"))
-        ],
-        must_not=[
-        qalerted,
-        pyes.QueryFilter(pyes.MatchQuery("command","--eval","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("command","--info","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("dhost","deploy","phrase")),         # ignore rpm builds on deploy hosts
-        pyes.QueryFilter(pyes.MatchQuery("parentprocess","puppet","phrase")), # ignore rpm -e hp
-        ]))
-    return q
+    search_query = SearchQuery(minutes=30)
+
+    search_query.add_must([
+        TermMatch('_type', 'auditd'),
+        TermMatch('dproc', 'rpm'),
+        ExistsMatch('suser')
+    ])
+
+    search_query.add_should([
+        PhraseMatch("command", "-e"),
+        PhraseMatch("command", "--erase"),
+        PhraseMatch("command", "-i"),
+        PhraseMatch("command", "--install"),
+    ])
+
+    search_query.add_must_not([
+        ExistsMatch('alerttimestamp'),
+        PhraseMatch("command", "--eval"),
+        PhraseMatch("command", "--info"),
+        PhraseMatch("dhost", "deploy"),          # ignore rpm builds on deploy hosts
+        PhraseMatch("parentprocess", "puppet"),  # ignore rpm -e hp
+    ])
+
+    return search_query
+
 
 def esYumSearch():
-    begindateUTC= toUTC(datetime.now() - timedelta(minutes=30))
-    enddateUTC= toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'auditd')
-    qEvents = pyes.TermFilter("fname","yum")
-    qalerted = pyes.ExistsFilter('alerttimestamp')
-    q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    q.filters.append(pyes.BoolFilter(must=[qType, qDate,qEvents,
-                                           pyes.ExistsFilter('suser')],
-        should=[
-        pyes.QueryFilter(pyes.MatchQuery("command","remove","phrase"))
-        ],
-        must_not=[
-        qalerted,
-        pyes.QueryFilter(pyes.MatchQuery("fname","yum.conf","phrase"))
-        ]))
-    return q
+    search_query = SearchQuery(minutes=30)
+
+    search_query.add_must([
+        TermMatch('_type', 'auditd'),
+        TermMatch('fname', 'yum'),
+        ExistsMatch('suser')
+    ])
+
+    search_query.add_should(PhraseMatch('command', 'remove'))
+
+    search_query.add_must_not([
+        ExistsMatch('alerttimestamp'),
+        PhraseMatch('fname', 'yum.conf')
+    ])
+
+    return search_query
+
 
 def esGCCSearch():
-    begindateUTC= toUTC(datetime.now() - timedelta(minutes=30))
-    enddateUTC= toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'auditd')
-    qEvents = pyes.TermFilter("fname","gcc")
-    qCommand = pyes.ExistsFilter('command')
-    qalerted = pyes.ExistsFilter('alerttimestamp')
-    q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    q.filters.append(
-        pyes.BoolFilter(must=[qType,
-                              qDate,
-                              qEvents,
-                              qCommand,
-                              pyes.ExistsFilter('suser')
-                            ],
-    must_not=[
-        qalerted,
-        pyes.QueryFilter(pyes.MatchQuery("command","conftest.c dhave_config_h","boolean")),
-        pyes.QueryFilter(pyes.MatchQuery("command","gcc -v","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("command","gcc -e","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("command","gcc --version","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("command","gcc -qversion","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("command","gcc --help","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("parentprocess","gcc","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("parentprocess","g++ c++ make imake configure python python2 python2.6 python2.7","boolean")),
-        pyes.QueryFilter(pyes.MatchQuery("suser","root","phrase")),
-        pyes.QueryFilter(pyes.MatchQuery("dhost","jenkins1","boolean")),
-        pyes.QueryFilter(pyes.MatchQuery("command","gcc -Wl,-t -o /tmp","phrase"))
-        ]))
-    return q
+    search_query = SearchQuery(minutes=30)
+
+    search_query.add_must([
+        TermMatch('_type', 'auditd'),
+        TermMatch('fname', 'gcc'),
+        ExistsMatch('command'),
+        ExistsMatch('suser'),
+
+    ])
+
+    search_query.add_must_not([
+        ExistsMatch('alerttimestamp'),
+        MultiMatch("command", ['conftest.c', 'dhave_config_h']),
+        PhraseMatch("command", "gcc -v"),
+        PhraseMatch("command", "gcc -e"),
+        PhraseMatch("command", "gcc --version"),
+        PhraseMatch("command", "gcc -qversion"),
+        PhraseMatch("command", "gcc --help"),
+        PhraseMatch("parentprocess", "gcc"),
+        MultiMatch("parentprocess", ['g++', 'c++', 'make', 'imake', 'configure', 'python', 'python2', 'python2.6', 'python2.7']),
+        PhraseMatch("suser", "root"),
+        PhraseMatch("dhost", "jenkins1"),
+        PhraseMatch("command", "gcc -Wl,-t -o /tmp"),
+    ])
+
+    return search_query
+
 
 def esHistoryModSearch():
-    begindateUTC= toUTC(datetime.now() - timedelta(minutes=30))
-    enddateUTC= toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'auditd')
-    qCommand = pyes.ExistsFilter('command')
-    qalerted = pyes.ExistsFilter('alerttimestamp')
-    q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    q.filters.append(
-        pyes.BoolFilter(must=[
-                            qType, qDate,qCommand,
-                            pyes.ExistsFilter('suser'),
-                            pyes.QueryFilter(pyes.MatchQuery("parentprocess","bash sh ksh","boolean")),
-                            pyes.QueryFilter(pyes.MatchQuery("command","bash_history sh_history zsh_history .history secure messages history","boolean"))
-                            ],
-    should=[
+    search_query = SearchQuery(minutes=30)
 
-        pyes.QueryFilter(pyes.MatchQuery("command","rm vi vim nano emacs","boolean")),
-        pyes.QueryFilter(pyes.MatchQuery("command","history -c","phrase"))
+    search_query.add_must([
+        TermMatch('_type', 'auditd'),
+        ExistsMatch('command'),
+        ExistsMatch('suser'),
+        MultiMatch("parentprocess", ['bash', 'sh', 'ksh']),
+        MultiMatch("command", ['bash_history', 'sh_history', 'zsh_history', '.history', 'secure', 'messages', 'history'])
+    ])
 
-    ],
-    must_not=[
-        qalerted
-        ]))
-    return q
+    search_query.add_should([
+        MultiMatch("command", ['rm', 'vi', 'vim', 'nano', 'emacs']),
+        PhraseMatch("command", "history -c")
+    ])
+
+    search_query.add_must_not(ExistsMatch('alerttimestamp'))
+
+    return search_query
+
 
 def esRunSearch(es, query, aggregateField, detailLimit=5):
     try:
-        pyesresults = es.search(query, size=1000, indices='events,events-previous')
-        # logger.debug(results.count())
+        full_results = query.execute(es)
 
         # correlate any matches by the aggregate field.
         # make a simple list of indicator values that can be counted/summarized by Counter
         resultsIndicators = list()
 
-        # bug in pyes..capture results as raw list or it mutates after first access:
-        # copy the hits.hits list as our results, which is the same as the official elastic search library returns.
-        results = pyesresults._search_raw()['hits']['hits']
+        results = full_results['hits']
         for r in results:
             resultsIndicators.append(r['_source']['details'][aggregateField])
 
@@ -247,73 +234,12 @@ def esRunSearch(es, query, aggregateField, detailLimit=5):
             for r in results:
                 if r['_source']['details'][aggregateField].encode('ascii', 'ignore') == i[0]:
                     # copy events detail into this correlation up to our detail limit
-                    if len(idict['events'])<detailLimit:
+                    if len(idict['events']) < detailLimit:
                         idict['events'].append(r)
             indicatorList.append(idict)
         return indicatorList
 
-    except pyes.exceptions.NoServerAvailable:
-        logger.error('Elastic Search server could not be reached, check network connectivity')
-
-def esSearch(es, begindateUTC=None, enddateUTC=None):
-    if begindateUTC is None:
-        begindateUTC = toUTC(datetime.now() - timedelta(minutes=80))
-    if enddateUTC is None:
-        enddateUTC = toUTC(datetime.now())
-    try:
-        # search for events within the date range that haven't already been alerted (i.e. given an alerttimestamp)
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-        qType = pyes.TermFilter('_type', 'auditd')
-        qEvents = pyes.TermFilter('command', 'shadow')
-        qalerted = pyes.ExistsFilter('alerttimestamp')
-        q=pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-        # query must match dates, should have keywords must not match whitelisted items
-        q.filters.append(pyes.BoolFilter(must=[qType, qDate ], should=[qEvents],must_not=[
-            qalerted,
-            pyes.QueryFilter(pyes.MatchQuery("cwd","/var/backups","phrase")),
-            pyes.QueryFilter(pyes.MatchQuery("dproc","/usr/bin/glimpse","phrase")),
-            pyes.QueryFilter(pyes.MatchQuery("dproc","/bin/chmod","phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'cmp -s shadow.bak /etc/shadow',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'cp -p /etc/shadow shadow.bak',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('suser', 'infrasec',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('parentprocess', 'mig-agent',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('parentprocess', 'passwd',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'no drop shadow',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'js::shadow',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'target.new',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', '/usr/share/man',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'shadow-invert.png',"phrase")),
-            pyes.QueryFilter(pyes.MatchQuery('command', 'ruby-shadow',"phrase")),
-            pyes.QueryFilter(pyes.QueryStringQuery('command:gzip')),
-            pyes.QueryFilter(pyes.QueryStringQuery('command:http')),
-            pyes.QueryFilter(pyes.QueryStringQuery('command:html'))
-        ]))
-        pyesresults = es.search(q, size=1000, indices='events')
-        # logger.debug(results.count())
-
-        # correlate any matches by the dhost field.
-        # make a simple list of indicator values that can be counted/summarized by Counter
-        resultsIndicators = list()
-
-        # bug in pyes..capture results as raw list or it mutates after first access:
-        # copy the hits.hits list as our resusts, which is the same as the official elastic search library returns.
-        results = pyesresults._search_raw()['hits']['hits']
-        for r in results:
-            resultsIndicators.append(r['_source']['details']['dhost'])
-
-        # use the list of tuples ('indicator',count) to create a dictionary with:
-        # indicator,count,es records
-        # and add it to a list to return.
-        indicatorList = list()
-        for i in Counter(resultsIndicators).most_common():
-            idict = dict(indicator=i[0], count=i[1], events=[])
-            for r in results:
-                if r['_source']['details']['dhost'].encode('ascii', 'ignore') == i[0]:
-                    idict['events'].append(r)
-            indicatorList.append(idict)
-        return indicatorList
-
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
 
@@ -379,30 +305,30 @@ def createAlerts(es, indicatorCounts):
 def main():
     logger.debug('starting')
     logger.debug(options)
-    es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
     # run a series of searches for suspicious commands
     # aggregating by a specific field (usually dhost or suser)
     # and alert if found
 
     # /etc/shadow manipulation by destination host
-    indicatorCounts = esRunSearch(es,esShadowSearch(), 'suser')
+    indicatorCounts = esRunSearch(es, esShadowSearch(), 'suser')
     createAlerts(es, indicatorCounts)
 
     # search for rpm -i or -e type commands by suser:
-    indicatorCounts=esRunSearch(es,esRPMSearch(),'suser')
-    createAlerts(es,indicatorCounts)
+    indicatorCounts = esRunSearch(es, esRPMSearch(), 'suser')
+    createAlerts(es, indicatorCounts)
 
     # search for yum remove commands by suser:
-    indicatorCounts=esRunSearch(es,esYumSearch(),'suser')
-    createAlerts(es,indicatorCounts)
+    indicatorCounts = esRunSearch(es, esYumSearch(), 'suser')
+    createAlerts(es, indicatorCounts)
 
     # search for gcc commands by suser:
-    indicatorCounts=esRunSearch(es,esGCCSearch(),'suser')
-    createAlerts(es,indicatorCounts)
+    indicatorCounts = esRunSearch(es, esGCCSearch(), 'suser')
+    createAlerts(es, indicatorCounts)
 
     # search for history modification commands by suser:
-    indicatorCounts=esRunSearch(es,esHistoryModSearch(),'suser')
-    createAlerts(es,indicatorCounts)
+    indicatorCounts = esRunSearch(es, esHistoryModSearch(), 'suser')
+    createAlerts(es, indicatorCounts)
 
     logger.debug('finished')
 
