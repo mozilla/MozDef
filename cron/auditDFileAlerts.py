@@ -134,7 +134,7 @@ def createAlerts(es, indicatorCounts):
     '''given a list of dictionaries:
         count: X
         indicator: sometext
-        events: list of pyes results matching the indicator
+        events: list of ES results matching the indicator
 
         1) create a summary alert with detail of the events
         2) update the events with an alert timestamp so they are not included in further alerts

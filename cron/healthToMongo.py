@@ -76,7 +76,6 @@ def writeEsClusterStats(data, mongo):
 
 
 def getEsNodesStats():
-    # doesn't work with pyes
     r = requests.get(options.esservers[0] + '/_nodes/stats/os,jvm,fs')
     jsonobj = r.json()
     results = []
@@ -100,7 +99,6 @@ def writeEsNodesStats(data, mongo):
 
 
 def getEsHotThreads():
-    # doesn't work with pyes
     r = requests.get(options.esservers[0] + '/_nodes/hot_threads')
     results = []
     for line in r.text.split('\n'):
