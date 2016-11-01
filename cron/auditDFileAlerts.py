@@ -180,7 +180,7 @@ def createAlerts(es, indicatorCounts):
                     e['_source']['alerts'].append(dict(index=alertResult['_index'], type=alertResult['_type'], id=alertResult['_id']))
                     e['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
 
-                    es.update(e['_index'], e['_type'], e['_id'], document=e['_source'])
+                    es.save_object(index=e['_index'], doc_type=e['_type'], doc_id=e['_id'], body=e['_source'])
 
                 alertToMessageQueue(alert)
     except ValueError as e:
