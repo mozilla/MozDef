@@ -11,14 +11,9 @@ import sys
 import smtplib
 import json
 import logging
-import pika
-import pytz
-import pyes
 from collections import Counter
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from datetime import timedelta
-from dateutil.parser import parse
 from email.mime.text import MIMEText
 from logging.handlers import SysLogHandler
 
@@ -26,6 +21,8 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from query_models import SearchQuery, TermMatch, PhraseMatch, RangeMatch
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -46,43 +43,21 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def esSearch(es, begindateUTC=None, enddateUTC=None):
-    resultsList = list()
-    if begindateUTC is None:
-        begindateUTC = toUTC(datetime.now() - timedelta(minutes=60))
-    if enddateUTC is None:
-        enddateUTC = toUTC(datetime.now())
+def esSearch(es):
+    search_query = SearchQuery(minutes=60)
+    search_query.add_must([
+        TermMatch('deviceproduct', 'webpay'),
+        PhraseMatch('details.dhost', 'marketplace.firefox.com'),
+        RangeMatch('details.severity', from_value=6)
+    ])
+    search_query.add_must_not(PhraseMatch('details.dhost', 'marketplace-dev.allizom.org'))
+
     try:
-        # search for events within the date range
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-                                                    from_value=begindateUTC,
-                                                    to_value=enddateUTC))
-        qType = pyes.TermFilter('deviceproduct', 'webpay')
-        qDev = pyes.QueryFilter(pyes.MatchQuery('details.dhost',
-                                                'marketplace-dev.allizom.org',
-                                                'phrase'))
-        qProd = pyes.QueryFilter(
-            pyes.MatchQuery('details.dhost',
-                            'marketplace.firefox.com',
-                            'phrase'))
-        qSeverity = pyes.RangeFilter(
-            qrange=pyes.ESRange('details.severity',
-                                from_value=6))
-
-        q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-        # q.filters.append(pyes.BoolFilter(must=[qType, qDate, qSeverity], must_not=[qDev]))
-        q = pyes.FilteredQuery(q,pyes.BoolFilter(must=[qType, qDate, qSeverity, qProd], must_not=[qDev]))
-
-        pyesresults = es.search(q, size=1000, indices='events,events-previous')
-        logger.debug(pyesresults.count())
-
+        full_results = search_query.execute(es)
         # correlate any matches
         # make a simple list of indicator values that can be counted/summarized by Counter
         resultsIndicators = list()
-
-        # bug in pyes..capture results as raw list or it mutates after first access:
-        # copy the hits.hits list as our resusts, which is the same as the official elastic search library returns.
-        results = pyesresults._search_raw()['hits']['hits']
+        results = full_results['hits']
         for r in results:
             resultsIndicators.append(r['_source']['details']['request'])
 
@@ -98,7 +73,7 @@ def esSearch(es, begindateUTC=None, enddateUTC=None):
             indicatorList.append(idict)
         return indicatorList
 
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
 def sendResults(indicatorCounts):
@@ -138,7 +113,7 @@ def sendResults(indicatorCounts):
 def main():
     logger.debug('starting')
     logger.debug(options)
-    es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
     # see if we have matches.
     indicatorCounts = esSearch(es)
     if len(indicatorCounts) > 0:
