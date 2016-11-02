@@ -21,7 +21,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient
-from query_models import SearchQuery, TermMatch, MultiMatch
+from query_models import SearchQuery, TermMatch, QueryStringMatch
 
 import re
 userre = re.compile(r'''Accepted publickey for (.*?) from''', re.IGNORECASE)
@@ -58,7 +58,7 @@ def searchForSSHKeys(es):
     search_query.add_must([
         TermMatch('_type', 'event'),
         TermMatch('program', 'sshd'),
-        MultiMatch('summary', ['found', 'matching', 'key', 'accepted', 'publickey'])
+        QueryStringMatch('summary:found matching key accepted publickey')
     ])
     results = search_query.execute(es)
     return results

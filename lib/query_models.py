@@ -9,12 +9,6 @@ from datetime import datetime
 from datetime import timedelta
 
 
-def MultiMatch(key, value):
-    if pyes_enabled.pyes_on is True:
-        return pyes.QueryFilter(pyes.MatchQuery(key, value, 'boolean'))
-    return Q('multi_match', query=key, fields=value)
-
-
 def ExistsMatch(field_name):
     if pyes_enabled.pyes_on is True:
         return pyes.ExistsFilter(field_name)

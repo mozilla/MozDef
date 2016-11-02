@@ -20,7 +20,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
-from query_models import SearchQuery, TermMatch, ExistsMatch, QueryStringMatch, PhraseMatch, MultiMatch
+from query_models import SearchQuery, TermMatch, ExistsMatch, QueryStringMatch, PhraseMatch
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -176,14 +176,14 @@ def esGCCSearch():
 
     search_query.add_must_not([
         ExistsMatch('alerttimestamp'),
-        MultiMatch("command", ['conftest.c', 'dhave_config_h']),
+        QueryStringMatch("command:conftest.c dhave_config_h"),
         PhraseMatch("command", "gcc -v"),
         PhraseMatch("command", "gcc -e"),
         PhraseMatch("command", "gcc --version"),
         PhraseMatch("command", "gcc -qversion"),
         PhraseMatch("command", "gcc --help"),
         PhraseMatch("parentprocess", "gcc"),
-        MultiMatch("parentprocess", ['g++', 'c++', 'make', 'imake', 'configure', 'python', 'python2', 'python2.6', 'python2.7']),
+        QueryStringMatch("parentprocess:g++ c++ make imake configure python python2 python2.6 python2.7"),
         PhraseMatch("suser", "root"),
         PhraseMatch("dhost", "jenkins1"),
         PhraseMatch("command", "gcc -Wl,-t -o /tmp"),
@@ -199,12 +199,12 @@ def esHistoryModSearch():
         TermMatch('_type', 'auditd'),
         ExistsMatch('command'),
         ExistsMatch('suser'),
-        MultiMatch("parentprocess", ['bash', 'sh', 'ksh']),
-        MultiMatch("command", ['bash_history', 'sh_history', 'zsh_history', '.history', 'secure', 'messages', 'history'])
+        QueryStringMatch("parentprocess:bash sh ksh"),
+        QueryStringMatch("command:bash_history sh_history zsh_history .history secure messages history")
     ])
 
     search_query.add_should([
-        MultiMatch("command", ['rm', 'vi', 'vim', 'nano', 'emacs']),
+        QueryStringMatch("command:rm vi vim nano emacs"),
         PhraseMatch("command", "history -c")
     ])
 
