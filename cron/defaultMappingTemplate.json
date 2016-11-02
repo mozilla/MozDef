@@ -12,8 +12,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match" : "*",
-            "match_mapping_type" : "string"
+            "match_mapping_type" : "string",
+            "match" : "*"
           }
         }, {
           "float_fields" : {
@@ -22,8 +22,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match" : "*",
-            "match_mapping_type" : "float"
+            "match_mapping_type" : "float",
+            "match" : "*"
           }
         }, {
           "double_fields" : {
@@ -32,8 +32,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match" : "*",
-            "match_mapping_type" : "double"
+            "match_mapping_type" : "double",
+            "match" : "*"
           }
         }, {
           "byte_fields" : {
@@ -42,8 +42,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match" : "*",
-            "match_mapping_type" : "byte"
+            "match_mapping_type" : "byte",
+            "match" : "*"
           }
         }, {
           "short_fields" : {
@@ -52,8 +52,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match" : "*",
-            "match_mapping_type" : "short"
+            "match_mapping_type" : "short",
+            "match" : "*"
           }
         }, {
           "integer_fields" : {
@@ -62,8 +62,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match" : "*",
-            "match_mapping_type" : "integer"
+            "match_mapping_type" : "integer",
+            "match" : "*"
           }
         }, {
           "long_fields" : {
@@ -72,8 +72,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match" : "*",
-            "match_mapping_type" : "long"
+            "match_mapping_type" : "long",
+            "match" : "*"
           }
         } ],
         "properties" : {
@@ -88,6 +88,9 @@
               },
               "sourceipaddress" : {
                 "type" : "ip"
+              },
+              "sourceipv4address" : {
+                "type" : "string"
               },
               "srcip" : {
                 "type" : "ip"
@@ -119,5 +122,4 @@
       }
     },
     "aliases" : { }
-  }
-}
+  }'
