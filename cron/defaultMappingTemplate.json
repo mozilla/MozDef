@@ -8,55 +8,118 @@
           "string_fields" : {
             "mapping" : {
               "index" : "not_analyzed",
-              "type" : "string",
-              "doc_values" : true
+              "doc_values" : true,
+              "type" : "string"
             },
-            "match_mapping_type" : "*",
+            "match_mapping_type" : "string",
+            "match" : "*"
+          }
+        }, {
+          "float_fields" : {
+            "mapping" : {
+              "index" : "not_analyzed",
+              "doc_values" : true,
+              "type" : "string"
+            },
+            "match_mapping_type" : "float",
+            "match" : "*"
+          }
+        }, {
+          "double_fields" : {
+            "mapping" : {
+              "index" : "not_analyzed",
+              "doc_values" : true,
+              "type" : "string"
+            },
+            "match_mapping_type" : "double",
+            "match" : "*"
+          }
+        }, {
+          "byte_fields" : {
+            "mapping" : {
+              "index" : "not_analyzed",
+              "doc_values" : true,
+              "type" : "string"
+            },
+            "match_mapping_type" : "byte",
+            "match" : "*"
+          }
+        }, {
+          "short_fields" : {
+            "mapping" : {
+              "index" : "not_analyzed",
+              "doc_values" : true,
+              "type" : "string"
+            },
+            "match_mapping_type" : "short",
+            "match" : "*"
+          }
+        }, {
+          "integer_fields" : {
+            "mapping" : {
+              "index" : "not_analyzed",
+              "doc_values" : true,
+              "type" : "string"
+            },
+            "match_mapping_type" : "integer",
+            "match" : "*"
+          }
+        }, {
+          "long_fields" : {
+            "mapping" : {
+              "index" : "not_analyzed",
+              "doc_values" : true,
+              "type" : "string"
+            },
+            "match_mapping_type" : "long",
             "match" : "*"
           }
         } ],
-        "_all" : {
-          "enabled" : true
-        },
         "properties" : {
           "summary" : {
             "type" : "string"
           },
-          "utctimestamp" : {
-            "format" : "dateOptionalTime",
-            "type" : "date"
-          },
-          "receivedtimestamp" : {
-            "format" : "dateOptionalTime",
-            "type" : "date"
-          },
           "details" : {
             "properties" : {
-              "sourceport" : {
-                "index" : "not_analyzed",
-                "type" : "long"
-              },
               "destinationport" : {
                 "index" : "not_analyzed",
                 "type" : "long"
               },
+              "sourceipaddress" : {
+                "type" : "ip"
+              },
+              "sourceipv4address" : {
+                "type" : "string"
+              },
               "srcip" : {
                 "type" : "ip"
               },
-              "sourceipaddress" : {
+              "destinationipaddress" : {
                 "type" : "ip"
               },
               "success" : {
                 "type" : "boolean"
               },
-              "destinationipaddress" : {
-                "type" : "ip"
+              "sourceport" : {
+                "index" : "not_analyzed",
+                "type" : "long"
               }
             }
+          },
+          "receivedtimestamp" : {
+            "format" : "dateOptionalTime",
+            "type" : "date"
+          },
+          "utctimestamp" : {
+            "format" : "dateOptionalTime",
+            "type" : "date"
           }
+        },
+        "_all" : {
+          "enabled" : true
         }
       }
     },
     "aliases" : { }
-  }
 }
+
