@@ -14,15 +14,15 @@ import logging
 
 
 ALERTS = {
-    'bruteforce_ssh_pyes.AlertBruteforceSshES': {'schedule': timedelta(minutes=1)},
-    'unauth_ssh_pyes.AlertUnauthSSH': {'schedule': timedelta(minutes=1)},
-    'confluence_shell_pyes.AlertConfluenceShellUsage': {'schedule': timedelta(minutes=1)},
-    'unauth_scan_pyes.AlertUnauthInternalScan': {'schedule': timedelta(minutes=1)},
-    'auditd_sftp_pyes.AlertSFTPEvent': {'schedule': timedelta(minutes=1)},
-    'proxy_drop_pyes.AlertProxyDrop': {'schedule': timedelta(minutes=1)},
-    'duo_authfail_pyes.AlertDuoAuthFail': {'schedule': timedelta(seconds=60)},
-    'vpn_duo_auth_failures_pyes.AlertManyVPNDuoAuthFailures': {'schedule': timedelta(minutes=20)},
-    'ssh_access_signreleng_pyes.AlertAuthSignRelengSSH': {'schedule': timedelta(minutes=10)},
+    'bruteforce_ssh.AlertBruteforceSshES': {'schedule': timedelta(minutes=1)},
+    'unauth_ssh.AlertUnauthSSH': {'schedule': timedelta(minutes=1)},
+    'confluence_shell.AlertConfluenceShellUsage': {'schedule': timedelta(minutes=1)},
+    'unauth_scan.AlertUnauthInternalScan': {'schedule': timedelta(minutes=1)},
+    'auditd_sftp.AlertSFTPEvent': {'schedule': timedelta(minutes=1)},
+    'proxy_drop.AlertProxyDrop': {'schedule': timedelta(minutes=1)},
+    'duo_authfail.AlertDuoAuthFail': {'schedule': timedelta(seconds=60)},
+    'vpn_duo_auth_failures.AlertManyVPNDuoAuthFailures': {'schedule': timedelta(minutes=20)},
+    'ssh_access_signreleng.AlertAuthSignRelengSSH': {'schedule': timedelta(minutes=10)},
     'cloudtrail_new_vpn.AlertCloudtrailNewVPN': {'schedule': timedelta(minutes=25)},
     'cloudtrail_delete_bucket.AlertCloudtrailDeleteBucket': {'schedule': timedelta(minutes=25)},
 }
