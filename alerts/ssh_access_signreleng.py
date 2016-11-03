@@ -27,7 +27,7 @@ class AlertAuthSignRelengSSH(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=15)
 
-        self.config_file = './ssh_access_signreleng_pyes.conf'
+        self.config_file = './ssh_access_signreleng.conf'
         self.config = None
         self.initConfiguration()
 
