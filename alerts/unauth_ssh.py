@@ -13,7 +13,7 @@ from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 import re
 from configlib import getConfig, OptionParser
 
-# Note: this plugin requires a configuration file (unauth_ssh_pyes.conf)
+# Note: this plugin requires a configuration file (unauth_ssh.conf)
 # to exist in the same directory as the plugin.
 #
 # It should contain content such as:

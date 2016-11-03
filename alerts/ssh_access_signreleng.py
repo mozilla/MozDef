@@ -14,7 +14,7 @@ import json
 import re
 from configlib import getConfig, OptionParser
 
-# Note: this plugin requires a configuration file (unauth_ssh_pyes.conf)
+# Note: this plugin requires a configuration file (ssh_access_signreleng.conf)
 # to exist in the same directory as the plugin.
 #
 # It should contain content such as:
