@@ -4,8 +4,8 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestAlertBruteforceSshES(AlertTestSuite):
-    alert_filename = "bruteforce_ssh_pyes"
+class TestAlertBruteforceSsh(AlertTestSuite):
+    alert_filename = "bruteforce_ssh"
 
     # This event is the default positive event that will cause the
     # alert to trigger

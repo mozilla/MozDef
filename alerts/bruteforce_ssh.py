@@ -13,7 +13,7 @@ from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
 
 
-class AlertBruteforceSshES(AlertTask):
+class AlertBruteforceSsh(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=2)
 

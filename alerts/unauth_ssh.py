@@ -25,7 +25,7 @@ from configlib import getConfig, OptionParser
 
 class AlertUnauthSSH(AlertTask):
     def main(self):
-        self.config_file = './unauth_ssh_pyes.conf'
+        self.config_file = './unauth_ssh.conf'
         self.config = None
         self.initConfiguration()
 
