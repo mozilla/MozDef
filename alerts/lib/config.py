@@ -14,7 +14,7 @@ import logging
 
 
 ALERTS = {
-    'bruteforce_ssh_pyes.AlertBruteforceSsh': {'schedule': timedelta(minutes=1)},
+    'bruteforce_ssh_pyes.AlertBruteforceSshES': {'schedule': timedelta(minutes=1)},
     'unauth_ssh_pyes.AlertUnauthSSH': {'schedule': timedelta(minutes=1)},
     'confluence_shell_pyes.AlertConfluenceShellUsage': {'schedule': timedelta(minutes=1)},
     'unauth_scan_pyes.AlertUnauthInternalScan': {'schedule': timedelta(minutes=1)},

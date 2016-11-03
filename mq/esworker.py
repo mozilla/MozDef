@@ -132,7 +132,7 @@ def keyMapping(aDict):
     # returndict['original']=aDict
 
     # set the timestamp when we received it, i.e. now
-    returndict['receivedtimestamp'] = toUTC(datetime.now())
+    returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
     returndict['mozdefhostname'] = options.mozdefhostname
     try:
         for k, v in aDict.iteritems():
@@ -150,8 +150,8 @@ def keyMapping(aDict):
                 returndict[u'details']['payload'] = toUnicode(v)
 
             if k in ('eventtime', 'timestamp', 'utctimestamp'):
-                returndict[u'utctimestamp'] = toUTC(v)
-                returndict[u'timestamp'] = toUTC(v)
+                returndict[u'utctimestamp'] = toUTC(v).isoformat()
+                returndict[u'timestamp'] = toUTC(v).isoformat()
 
             if k in ('hostname', 'source_host', 'host'):
                 returndict[u'hostname'] = toUnicode(v)
@@ -220,7 +220,7 @@ def keyMapping(aDict):
 
         if 'utctimestamp' not in returndict.keys():
             # default in case we don't find a reasonable timestamp
-            returndict['utctimestamp'] = toUTC(datetime.now())
+            returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
     except Exception as e:
         sys.stderr.write('esworker exception normalizing the message %r\n' % e)
