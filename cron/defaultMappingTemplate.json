@@ -12,13 +12,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-<<<<<<< HEAD
             "match_mapping_type" : "string",
             "match" : "*"
-=======
-            "match" : "*",
-            "match_mapping_type" : "string"
->>>>>>> 50e9866cadf793771d6dde5f01d5d8926e62bb91
           }
         }, {
           "float_fields" : {
@@ -27,13 +22,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-<<<<<<< HEAD
-            "match_mapping_type" : "float",
-            "match" : "*"
-=======
             "match" : "*",
             "match_mapping_type" : "float"
->>>>>>> 50e9866cadf793771d6dde5f01d5d8926e62bb91
           }
         }, {
           "double_fields" : {
@@ -42,13 +32,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-<<<<<<< HEAD
             "match_mapping_type" : "double",
             "match" : "*"
-=======
-            "match" : "*",
-            "match_mapping_type" : "double"
->>>>>>> 50e9866cadf793771d6dde5f01d5d8926e62bb91
           }
         }, {
           "byte_fields" : {
@@ -57,13 +42,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-<<<<<<< HEAD
             "match_mapping_type" : "byte",
             "match" : "*"
-=======
-            "match" : "*",
-            "match_mapping_type" : "byte"
->>>>>>> 50e9866cadf793771d6dde5f01d5d8926e62bb91
           }
         }, {
           "short_fields" : {
@@ -72,13 +52,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-<<<<<<< HEAD
             "match_mapping_type" : "short",
             "match" : "*"
-=======
-            "match" : "*",
-            "match_mapping_type" : "short"
->>>>>>> 50e9866cadf793771d6dde5f01d5d8926e62bb91
           }
         }, {
           "integer_fields" : {
@@ -87,13 +62,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-<<<<<<< HEAD
             "match_mapping_type" : "integer",
             "match" : "*"
-=======
-            "match" : "*",
-            "match_mapping_type" : "integer"
->>>>>>> 50e9866cadf793771d6dde5f01d5d8926e62bb91
           }
         }, {
           "long_fields" : {
@@ -102,13 +72,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-<<<<<<< HEAD
             "match_mapping_type" : "long",
             "match" : "*"
-=======
-            "match" : "*",
-            "match_mapping_type" : "long"
->>>>>>> 50e9866cadf793771d6dde5f01d5d8926e62bb91
           }
         } ],
         "properties" : {
@@ -124,12 +89,9 @@
               "sourceipaddress" : {
                 "type" : "ip"
               },
-<<<<<<< HEAD
               "sourceipv4address" : {
                 "type" : "string"
               },
-=======
->>>>>>> 50e9866cadf793771d6dde5f01d5d8926e62bb91
               "srcip" : {
                 "type" : "ip"
               },
