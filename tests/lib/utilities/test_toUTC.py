@@ -3,7 +3,7 @@ from dateutil.parser import parse
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../lib'))
 from utilities.toUTC import toUTC
 
 
@@ -15,32 +15,22 @@ class TestToUTC():
     def test_normal_date_str_with_default_timezone(self):
         result = toUTC("2016-07-13 14:33:31.625443")
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 21:33:31.625443+00:00'
+        assert str(result) == '2016-07-13 14:33:31.625443+00:00'
+
+    def test_normal_date_str_with_utc_timezone(self):
+        result = toUTC("2016-07-13 22:33:31.625443+00:00")
+        self.result_is_datetime(result)
+        assert str(result) == '2016-07-13 22:33:31.625443+00:00'
 
     def test_normal_date_str_with_timezone(self):
-        result = toUTC("2016-07-13 14:33:31.625443", "US/Pacific")
+        result = toUTC("2016-07-13 14:33:31.625443-08:00")
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 21:33:31.625443+00:00'
+        assert str(result) == '2016-07-13 22:33:31.625443+00:00'
 
     def test_abnormal_date_str_without_timezone(self):
         result = toUTC("Jan  2 08:01:57")
         self.result_is_datetime(result)
-        assert str(result) == '2016-01-02 16:01:57+00:00'
-
-    def test_abnormal_date_str_with_us_east_timezone(self):
-        result = toUTC("Jan  2 08:01:57", "US/Eastern")
-        self.result_is_datetime(result)
-        assert str(result) == '2016-01-02 13:01:57+00:00'
-
-    def test_abnormal_date_str_with_utc_timezone(self):
-        result = toUTC("Jan  2 08:01:57", "UTC")
-        self.result_is_datetime(result)
         assert str(result) == '2016-01-02 08:01:57+00:00'
-
-    def test_abnormal_date_obj_without_timezone(self):
-        result = toUTC(parse("Jan  2 08:01:57"))
-        self.result_is_datetime(result)
-        assert str(result) == '2016-01-02 16:01:57+00:00'
 
     def test_abnormal_date_obj_with_timezone_in_date(self):
         result = toUTC(parse("2016-01-02 08:01:57+06:00"))
@@ -50,9 +40,9 @@ class TestToUTC():
     def test_long_epoch_without_timezone(self):
         result = toUTC(1468443523000000000)
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 22:58:43+00:00'
+        assert str(result) == '2016-07-13 15:58:43+00:00'
 
     def test_short_epoch_without_timezone(self):
         result = toUTC(1468443523)
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 22:58:43+00:00'
+        assert str(result) == '2016-07-13 15:58:43+00:00'
