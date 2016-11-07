@@ -11,8 +11,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match_mapping_type" : "string",
-            "match" : "*"
+            "match" : "*",
+            "match_mapping_type" : "string"
           }
         }, {
           "float_fields" : {
@@ -21,8 +21,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match_mapping_type" : "float",
-            "match" : "*"
+            "match" : "*",
+            "match_mapping_type" : "float"
           }
         }, {
           "double_fields" : {
@@ -31,8 +31,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match_mapping_type" : "double",
-            "match" : "*"
+            "match" : "*",
+            "match_mapping_type" : "double"
           }
         }, {
           "byte_fields" : {
@@ -41,8 +41,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match_mapping_type" : "byte",
-            "match" : "*"
+            "match" : "*",
+            "match_mapping_type" : "byte"
           }
         }, {
           "short_fields" : {
@@ -51,8 +51,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match_mapping_type" : "short",
-            "match" : "*"
+            "match" : "*",
+            "match_mapping_type" : "short"
           }
         }, {
           "integer_fields" : {
@@ -61,8 +61,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match_mapping_type" : "integer",
-            "match" : "*"
+            "match" : "*",
+            "match_mapping_type" : "integer"
           }
         }, {
           "long_fields" : {
@@ -71,8 +71,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match_mapping_type" : "long",
-            "match" : "*"
+            "match" : "*",
+            "match_mapping_type" : "long"
           }
         } ],
         "properties" : {
@@ -88,11 +88,13 @@
               "sourceipaddress" : {
                 "type" : "ip"
               },
-              "sourceipv4address" : {
-                "type" : "string"
-              },
               "srcip" : {
                 "type" : "ip"
+              },
+              "sourceipv4address" : {
+                "type" : "string",
+                "index" : "not_analyzed",
+                "doc_values" : true
               },
               "destinationipaddress" : {
                 "type" : "ip"
@@ -113,6 +115,11 @@
           "utctimestamp" : {
             "format" : "dateOptionalTime",
             "type" : "date"
+          },
+          "apiVersion" : {
+          "type" : "string",
+          "index" : "not_analyzed",
+          "doc_values" : true
           }
         },
         "_all" : {
@@ -122,4 +129,3 @@
     },
     "aliases" : { }
 }
-
