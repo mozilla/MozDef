@@ -63,11 +63,10 @@ def QueryStringMatch(query_str):
     return Q('query_string', query=query_str)
 
 
-def Aggregation(field_name):
+def Aggregation(field_name, aggregation_size=20):
     if pyes_enabled.pyes_on is True:
-        return field_name
-
-    return A('terms', field=field_name)
+        return field_name, aggregation_size
+    return A('terms', field=field_name, size=aggregation_size)
 
 
 def AggregatedResults(input_results):

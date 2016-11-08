@@ -1,8 +1,9 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from query_models import SearchQuery, Aggregation, TermMatch
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
+from query_models import SearchQuery, Aggregation, TermMatch, ExistsMatch
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
 
 
@@ -139,3 +140,23 @@ class TestAggregation(UnitTestSuite):
         assert results['aggregations'].keys() == ['details.ipinformation']
         assert results['aggregations']['details.ipinformation'].keys() == ['terms']
         assert len(results['aggregations']['details.ipinformation']['terms']) == 0
+
+    def test_aggregation_with_default_size(self):
+        for num in range(0, 100):
+            event = {'keyname': 'value' + str(num)}
+            self.populate_test_event(event)
+        search_query = SearchQuery()
+        search_query.add_must(ExistsMatch('keyname'))
+        search_query.add_aggregation(Aggregation('keyname'))
+        results = search_query.execute(self.es_client)
+        assert len(results['aggregations']['keyname']['terms']) == 20
+
+    def test_aggregation_with_aggregation_size(self):
+        for num in range(0, 100):
+            event = {'keyname': 'value' + str(num)}
+            self.populate_test_event(event)
+        search_query = SearchQuery()
+        search_query.add_must(ExistsMatch('keyname'))
+        search_query.add_aggregation(Aggregation('keyname', 2))
+        results = search_query.execute(self.es_client)
+        assert len(results['aggregations']['keyname']['terms']) == 2
