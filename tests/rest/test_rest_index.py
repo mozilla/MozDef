@@ -3,24 +3,24 @@ import json
 
 from dateutil.parser import parse
 
-from get_method_test_suite import GetMethodTestSuite
+from rest_test_suite import RestTestSuite
 
 
-class TestTestRoute(GetMethodTestSuite):
+class TestTestRoute(RestTestSuite):
     routes = ['/test', '/test/']
 
     status_code = 200
     body = ''
 
 
-class TestStatusRoute(GetMethodTestSuite):
+class TestStatusRoute(RestTestSuite):
     routes = ['/status', '/status/']
 
     status_code = 200
     body = '{"status": "ok"}'
 
 
-class TestKibanaDashboardsRoute(GetMethodTestSuite):
+class TestKibanaDashboardsRoute(RestTestSuite):
     routes = ['/kibanadashboards', '/kibanadashboards/']
 
     status_code = 200
@@ -60,7 +60,7 @@ class TestKibanaDashboardsRoute(GetMethodTestSuite):
             assert json_resp[0]['name'] == 'Example FTP Dashboard'
 
 
-class TestKibanaDashboardsRouteWithoutDashboards(GetMethodTestSuite):
+class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
     routes = ['/kibanadashboards', '/kibanadashboards/']
 
     status_code = 200
@@ -78,7 +78,7 @@ class TestKibanaDashboardsRouteWithoutDashboards(GetMethodTestSuite):
             assert json_resp == []
 
 
-class TestLdapLoginsRoute(GetMethodTestSuite):
+class TestLdapLoginsRoute(RestTestSuite):
 
     routes = ['/ldapLogins', '/ldapLogins/']
     status_code = 200
@@ -189,7 +189,7 @@ class TestLdapLoginsRoute(GetMethodTestSuite):
             self.populate_test_event(event)
 
         for count in range(3):
-            timestamp = GetMethodTestSuite.subtract_from_timestamp({'hours': 2})
+            timestamp = RestTestSuite.subtract_from_timestamp({'hours': 2})
             event = {
                 "receivedtimestamp": timestamp,
                 "utctimestamp": timestamp,

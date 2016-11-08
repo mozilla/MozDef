@@ -6,6 +6,7 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
+import os
 import sys
 import bottle
 from bottle import debug,route, run, template, response,request,post, default_app
@@ -141,7 +142,7 @@ if __name__ == "__main__":
 else:
     #get config info:
     parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
+    parser.add_option("-c", dest='configfile' , default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'), help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
 

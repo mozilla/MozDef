@@ -1,7 +1,13 @@
-from rest_test_suite import RestTestSuite
+from webtest import TestApp
+
+from unit_test_suite import UnitTestSuite
 
 
-class GetMethodTestSuite(RestTestSuite):
+class HTTPTestSuite(UnitTestSuite):
+
+    def setup(self):
+        self.app = TestApp(self.application)
+        super(HTTPTestSuite, self).setup()
 
     def response_per_route(self, route):
         return self.app.get(route)
