@@ -16,7 +16,8 @@ import random
 
 class UnitTestSuite(object):
     def setup(self):
-        self.index_name = datetime.now().strftime("events-%Y%m%d")
+        self.event_index_name = datetime.now().strftime("events-%Y%m%d")
+        self.alert_index_name = datetime.now().strftime("alert-%Y%m")
 
         # todo: remove once we are able to run unit tests against
         # a live server that won't delete all the data. Depends on when we
@@ -38,22 +39,21 @@ class UnitTestSuite(object):
 
     def populate_test_event(self, event, event_type='event'):
         self.es_client.save_event(body=event, doc_type=event_type)
-        self.es_client.flush(self.index_name)
+        self.es_client.flush(self.event_index_name)
 
     def setup_elasticsearch(self):
-        self.es_client.create_index(self.index_name)
-        self.es_client.create_index('alerts')
-        self.es_client.create_alias('events', self.index_name)
-        self.es_client.create_alias('events-previous', self.index_name)
+        self.es_client.create_index(self.event_index_name)
+        self.es_client.create_alias('events', self.event_index_name)
+        self.es_client.create_alias('events-previous', self.event_index_name)
+        self.es_client.create_index(self.alert_index_name)
+        self.es_client.create_alias('alerts', self.alert_index_name)
 
     def reset_elasticsearch(self):
-        self.es_client.delete_index(self.index_name, True)
-        self.es_client.delete_index('alerts', True)
+        self.es_client.delete_index(self.event_index_name, True)
         self.es_client.delete_index('events', True)
         self.es_client.delete_index('events-previous', True)
-        # Delete templates
-        # self.es_client.delete_template('eventstemplate')
-        # self.es_client.delete_template('alertstemplate')
+        self.es_client.delete_index(self.alert_index_name, True)
+        self.es_client.delete_index('alerts', True)
 
     def random_ip(self):
         return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))

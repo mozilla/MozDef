@@ -100,7 +100,7 @@ class AlertTestSuite(UnitTestSuite):
 
     def verify_expected_alert(self, found_alert, test_case):
         # Verify index is set correctly
-        assert found_alert['_index'] == 'alerts'
+        assert found_alert['_index'] == self.alert_index_name
         # Verify alert type is correct
         assert found_alert['_type'] == 'alert'
 
