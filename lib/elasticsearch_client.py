@@ -78,7 +78,7 @@ class ElasticsearchClient():
 
     def create_alias(self, alias_name, index_name):
         if pyes_enabled.pyes_on is True:
-            self.es_connection.indices.add_alias(alias_name, index_name)
+            self.es_connection.indices.set_alias(alias_name, index_name)
         else:
             self.es_connection.indices.put_alias(index=index_name, name=alias_name)
 
