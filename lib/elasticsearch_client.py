@@ -14,6 +14,7 @@ if pyes_enabled.pyes_on is True:
 else:
     from elasticsearch import Elasticsearch
     from elasticsearch_dsl import Search
+    from elasticsearch.exceptions import NotFoundError
 
 
 class ElasticsearchBadServer(Exception):
@@ -62,9 +63,7 @@ class ElasticsearchClient():
         if pyes_enabled.pyes_on is True:
             return self.es_connection.indices.stats()['indices'].keys()
         else:
-            # todo: need to update this so that it flushes bulk queue
-            print "NEED TO IMPLEMENT THIS!"
-            raise NotImplementedError
+            return self.es_connection.indices.stats()['indices'].keys()
 
     def create_index(self, index_name, ignore_fail=False):
         if pyes_enabled.pyes_on is True:
@@ -100,14 +99,16 @@ class ElasticsearchClient():
     def search(self, search_query, indices, size):
         results = []
         if pyes_enabled.pyes_on is True:
-            # todo: update the size amount
             try:
                 esresults = self.es_connection.search(search_query, size=size, indices=','.join(map(str, indices)))
                 results = esresults._search_raw()
             except pyes.exceptions.IndexMissingException:
                 raise ElasticsearchInvalidIndex(indices)
         else:
-            results = Search(using=self.es_connection, index=indices).filter(search_query).execute()
+            try:
+                results = Search(using=self.es_connection, index=indices).params(size=size).filter(search_query).execute()
+            except NotFoundError:
+                raise ElasticsearchInvalidIndex(indices)
 
         result_set = SimpleResults(results)
         return result_set
@@ -115,17 +116,16 @@ class ElasticsearchClient():
     def aggregated_search(self, search_query, indices, aggregations, size):
         if pyes_enabled.pyes_on is True:
             query = search_query.search()
-            for field_name in aggregations:
-                query.facet.add_term_facet(field_name)
+            for field_name, aggregation_size in aggregations:
+                query.facet.add_term_facet(field_name, size=aggregation_size)
 
-            # todo: change size here
             esresults = self.es_connection.search(query, size=size, indices=','.join(map(str, indices)))
             results = esresults._search_raw()
         else:
-            search_obj = Search(using=self.es_connection, index=indices)
+            search_obj = Search(using=self.es_connection, index=indices).params(size=size)
             query_obj = search_obj.filter(search_query)
-            for field_name in aggregations:
-                query_obj.aggs.bucket(field_name.to_dict()['terms']['field'], field_name)
+            for aggregation in aggregations:
+                query_obj.aggs.bucket(name=aggregation.to_dict()['terms']['field'], agg_type=aggregation)
             results = query_obj.execute()
 
         result_set = AggregatedResults(results)
@@ -143,13 +143,17 @@ class ElasticsearchClient():
                 raise ElasticsearchBadServer()
             except pyes.exceptions.InvalidIndexNameException:
                 raise ElasticsearchInvalidIndex(index)
-            except pyes.exceptions.ElasticSearchException:
-                raise ElasticsearchException()
+            except pyes.exceptions.ElasticSearchException as e:
+                raise ElasticsearchException(e.message)
         else:
+            doc_body = body
+            if '_source' in body:
+                doc_body = body['_source']
+
             if doc_id:
-                return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=body)
+                return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=doc_body)
             else:
-                return self.es_connection.index(index=index, doc_type=doc_type, body=body)
+                return self.es_connection.index(index=index, doc_type=doc_type, body=doc_body)
 
     def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):
         return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
@@ -205,6 +209,13 @@ class ElasticsearchClient():
             escluster = pyes.managers.Cluster(self.es_connection)
             return escluster.health()
         else:
-            # todo: need to update this so that it flushes bulk queue
-            print "NEED TO IMPLEMENT THIS!"
-            raise NotImplementedError
+            health_dict = self.es_connection.cluster.health()
+            # To line up with the health stats from ES1, we're
+            # removing certain keys
+            health_dict.pop('active_shards_percent_as_number', None)
+            health_dict.pop('delayed_unassigned_shards', None)
+            health_dict.pop('number_of_in_flight_fetch', None)
+            health_dict.pop('number_of_pending_tasks', None)
+            health_dict.pop('task_max_waiting_in_queue_millis', None)
+
+            return health_dict

@@ -9,6 +9,9 @@ from unit_test_suite import UnitTestSuite
 
 import time
 
+from elasticsearch_client import ElasticsearchInvalidIndex
+import pytest
+
 # Remove this code when pyes is gone!
 import os
 import sys
@@ -82,7 +85,7 @@ class TestWriteWithRead(ElasticsearchClientTest):
         assert self.saved_alert['_type'] == 'alert'
 
     def test_saved_index(self):
-        assert self.saved_alert['_index'] == 'alerts'
+        assert self.saved_alert['_index'] == self.alert_index_name
 
     def test_alert_source(self):
         self.fetched_alert = self.es_client.get_alert_by_id(self.saved_alert['_id'])
@@ -99,6 +102,15 @@ class TestNoResultsFound(ElasticsearchClientTest):
         search_query.add_must(TermMatch('garbagefielddoesntexist', 'testingvalues'))
         results = search_query.execute(self.es_client)
         assert results['hits'] == []
+
+
+class TestWithBadIndex(ElasticsearchClientTest):
+
+    def test_search_nonexisting_index(self):
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('key', 'value'))
+        with pytest.raises(ElasticsearchInvalidIndex):
+            search_query.execute(self.es_client, indices=['doesnotexist'])
 
 
 class TestSimpleWrites(ElasticsearchClientTest):
@@ -239,7 +251,7 @@ class TestGetIndices(ElasticsearchClientTest):
         time.sleep(0.5)
         indices = self.es_client.get_indices()
         indices.sort()
-        assert indices == ['alerts', self.index_name, 'test_index']
+        assert indices == [self.alert_index_name, self.event_index_name, 'test_index']
 
 
 class TestClusterHealth(ElasticsearchClientTest):
@@ -251,12 +263,18 @@ class TestClusterHealth(ElasticsearchClientTest):
         assert health_keys == ['active_primary_shards', 'active_shards', 'cluster_name', 'initializing_shards', 'number_of_data_nodes', 'number_of_nodes', 'relocating_shards', 'status', 'timed_out', 'unassigned_shards']
         assert type(health_results['active_primary_shards']) is int
         assert type(health_results['active_shards']) is int
-        assert type(health_results['cluster_name']) is str
+        if pyes_enabled.pyes_on is True:
+            assert type(health_results['cluster_name']) is str
+        else:
+            assert type(health_results['cluster_name']) is unicode
         assert type(health_results['initializing_shards']) is int
         assert type(health_results['number_of_data_nodes']) is int
         assert type(health_results['number_of_nodes']) is int
         assert type(health_results['relocating_shards']) is int
-        assert type(health_results['status']) is str
+        if pyes_enabled.pyes_on is True:
+            assert type(health_results['status']) is str
+        else:
+            assert type(health_results['status']) is unicode
         assert type(health_results['timed_out']) is bool
         assert type(health_results['unassigned_shards']) is int
 
@@ -278,13 +296,18 @@ class TestCreatingAlias(ElasticsearchClientTest):
     def test_simple_create_alias(self):
         self.es_client.create_index('index1')
         self.es_client.create_alias('alias1', 'index1')
-        indices = self.es_client.get_alias('alias1')
-        assert indices == ['index1']
+        alias_indices = self.es_client.get_alias('alias1')
+        assert alias_indices == ['index1']
+        indices = self.es_client.get_indices()
+        assert 'index1' in indices
 
     def test_alias_multiple_indices(self):
         self.es_client.create_index('index1')
         self.es_client.create_index('index2')
         self.es_client.create_alias('alias1', 'index1')
         self.es_client.create_alias('alias1', 'index2')
-        indices = self.es_client.get_alias('alias1')
-        assert indices == ['index2']
+        alias_indices = self.es_client.get_alias('alias1')
+        assert alias_indices == ['index2']
+        indices = self.es_client.get_indices()
+        assert 'index1' in indices
+        assert 'index2' in indices
