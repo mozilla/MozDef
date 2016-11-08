@@ -1,5 +1,6 @@
 import os
 import json
+import time
 
 from dateutil.parser import parse
 
@@ -67,6 +68,12 @@ class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
 
     def setup(self):
         super(TestKibanaDashboardsRouteWithoutDashboards, self).setup()
+        self.es_client.delete_index('kibana-int', True)
+        self.es_client.create_index('kibana-int')
+        time.sleep(0.2)
+
+    def teardown(self):
+        super(TestKibanaDashboardsRouteWithoutDashboards, self).teardown()
         self.es_client.delete_index('kibana-int', True)
 
     def test_route_endpoints(self):
