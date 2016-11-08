@@ -210,7 +210,6 @@ class TestExecute(SearchQueryUnitTest):
         assert results['aggregations']['summary']['terms'][0]['count'] == 1
 
     def test_aggregation_query_execute(self):
-        self.setup()
         query = SearchQuery()
         assert query.date_timedelta == {}
         query.add_must(ExistsMatch('note'))
@@ -264,7 +263,6 @@ class TestExecute(SearchQueryUnitTest):
         assert results['aggregations']['note']['terms'][1]['key'] == 'note'
 
     def test_simple_query_execute(self):
-        self.setup()
         query = SearchQuery()
         assert query.date_timedelta == {}
         query.add_must(ExistsMatch('note'))
