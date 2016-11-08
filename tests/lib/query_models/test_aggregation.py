@@ -49,7 +49,9 @@ class TestAggregation(UnitTestSuite):
         search_query.add_aggregation(Aggregation('test'))
         results = search_query.execute(self.es_client)
 
-        assert results['aggregations'].keys() == ['note', 'test']
+        aggregation_keys = results['aggregations'].keys()
+        aggregation_keys.sort()
+        assert aggregation_keys == ['note', 'test']
 
         assert results['aggregations']['note'].keys() == ['terms']
         assert len(results['aggregations']['note']['terms']) == 2
