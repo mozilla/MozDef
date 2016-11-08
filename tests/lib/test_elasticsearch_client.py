@@ -259,3 +259,32 @@ class TestClusterHealth(ElasticsearchClientTest):
         assert type(health_results['status']) is str
         assert type(health_results['timed_out']) is bool
         assert type(health_results['unassigned_shards']) is int
+
+
+class TestCreatingAlias(ElasticsearchClientTest):
+
+    def setup(self):
+        super(TestCreatingAlias, self).setup()
+        self.es_client.delete_index('index1', True)
+        self.es_client.delete_index('index2', True)
+        self.es_client.delete_index('alias1', True)
+
+    def teardown(self):
+        super(TestCreatingAlias, self).teardown()
+        self.es_client.delete_index('index1', True)
+        self.es_client.delete_index('index2', True)
+        self.es_client.delete_index('alias1', True)
+
+    def test_simple_create_alias(self):
+        self.es_client.create_index('index1')
+        self.es_client.create_alias('alias1', 'index1')
+        indices = self.es_client.get_alias('alias1')
+        assert indices == ['index1']
+
+    def test_alias_multiple_indices(self):
+        self.es_client.create_index('index1')
+        self.es_client.create_index('index2')
+        self.es_client.create_alias('alias1', 'index1')
+        self.es_client.create_alias('alias1', 'index2')
+        indices = self.es_client.get_alias('alias1')
+        assert indices == ['index2']

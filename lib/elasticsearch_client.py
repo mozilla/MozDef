@@ -80,7 +80,16 @@ class ElasticsearchClient():
         if pyes_enabled.pyes_on is True:
             self.es_connection.indices.set_alias(alias_name, index_name)
         else:
+            if self.es_connection.indices.exists_alias(index='*', name=alias_name):
+                self.es_connection.indices.delete_alias(index='*', name=alias_name)
+
             self.es_connection.indices.put_alias(index=index_name, name=alias_name)
+
+    def get_alias(self, alias_name):
+        if pyes_enabled.pyes_on is True:
+            return self.es_connection.indices.get_alias('alias1')
+        else:
+            return self.es_connection.indices.get_alias(index='*', name='alias1').keys()
 
     def flush(self, index_name):
         if pyes_enabled.pyes_on is True:
