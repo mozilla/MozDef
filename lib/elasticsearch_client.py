@@ -131,6 +131,12 @@ class ElasticsearchClient():
         result_set = AggregatedResults(results)
         return result_set
 
+    def save_documents(self, documents):
+        # todo finish this logic, mannnn
+        # this is garbage logic, and doesn't actually bulk import!!!!!!!!
+        for document in documents:
+            self.save_event(body=document)
+
     def save_object(self, index, doc_type, body, doc_id=None, bulk=False):
         if pyes_enabled.pyes_on is True:
             try:

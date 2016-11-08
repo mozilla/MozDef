@@ -193,6 +193,7 @@ class TestBulkWritesWithMoreThanThreshold(ElasticsearchClientTest):
 
 class TestBulkWritesWithLessThanThreshold(ElasticsearchClientTest):
 
+    # todo need to fix this for BulkQueue
     def test_bulk_writing(self):
         self.es_client.save_event(body={'key': 'value'}, bulk=True)
         id_match = TermMatch('_type', 'event')
