@@ -17,8 +17,6 @@ def ExistsMatch(field_name):
 
 def TermMatch(key, value):
     if pyes_enabled.pyes_on is True:
-        if key != '_id':
-            value = value.lower()
         return pyes.TermFilter(key, value)
     return Q('match', **{key: value})
 
