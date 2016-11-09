@@ -1,15 +1,18 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from query_models import SearchQuery, TermMatch, Aggregation
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
+from config import ES
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
 
 import time
 
-from elasticsearch_client import ElasticsearchInvalidIndex
+from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 import pytest
 
 # Remove this code when pyes is gone!
@@ -23,13 +26,18 @@ import pyes_enabled
 class ElasticsearchClientTest(UnitTestSuite):
     def setup(self):
         super(ElasticsearchClientTest, self).setup()
+        self.es_client = ElasticsearchClient(ES['servers'], bulk_refresh_time=3)
 
     def get_num_events(self):
+        self.es_client.flush('events')
         search_query = SearchQuery()
         search_query.add_must(TermMatch('_type', 'event'))
         search_query.add_aggregation(Aggregation('_type'))
         results = search_query.execute(self.es_client)
-        return results['aggregations']['_type']['terms'][0]['count']
+        if len(results['aggregations']['_type']['terms']) != 0:
+            return results['aggregations']['_type']['terms'][0]['count']
+        else:
+            return 0
 
 
 class MockTransportClass:
@@ -37,16 +45,26 @@ class MockTransportClass:
     def __init__(self):
         self.request_counts = 0
         self.original_function = None
+        # Exclude certain paths/urls so that we only
+        # count requests that were made to ADD events
+        self.exclude_paths = [
+            "/events,events-previous/_search",
+            "/events/_flush",
+            "/_all/_flush",
+            "/events%2Cevents-previous/_search"
+        ]
 
     def _send_request(self, method, path, body=None, params=None, headers=None, raw=False, return_response=False):
-        self.request_counts += 1
+        if path not in self.exclude_paths:
+            self.request_counts += 1
         return self.original_function(method, path, body, params)
 
     def backup_function(self, orig_function):
         self.original_function = orig_function
 
     def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):
-        self.request_counts += 1
+        if url not in self.exclude_paths:
+            self.request_counts += 1
         return self.original_function(method, url, params=params, body=body)
 
 
@@ -134,88 +152,80 @@ class TestSimpleWrites(ElasticsearchClientTest):
             self.es_client.save_event(body=event)
         self.es_client.flush('events')
 
-        assert mock_class.request_counts == 10001
+        assert mock_class.request_counts == 10000
         num_events = self.get_num_events()
         assert num_events == 10000
 
 
-class TestBulkWrites(ElasticsearchClientTest):
+class BulkTest(ElasticsearchClientTest):
 
-    def test_bulk_writing(self):
-        mock_class = MockTransportClass()
+    def setup(self):
+        super(BulkTest, self).setup()
+        self.mock_class = MockTransportClass()
 
         if pyes_enabled.pyes_on is True:
-            mock_class.backup_function(self.es_client.es_connection._send_request)
-            self.es_client.es_connection._send_request = mock_class._send_request
+            self.mock_class.backup_function(self.es_client.es_connection._send_request)
+            self.es_client.es_connection._send_request = self.mock_class._send_request
         else:
-            mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
-            self.es_client.es_connection.transport.perform_request = mock_class.perform_request
+            self.mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
+            self.es_client.es_connection.transport.perform_request = self.mock_class.perform_request
 
+    def teardown(self):
+        super(BulkTest, self).teardown()
+        self.es_client.finish_bulk()
+
+
+class TestBulkWrites(BulkTest):
+
+    def test_bulk_writing(self):
         event_length = 10000
         events = []
         for num in range(event_length):
             events.append({"key": "value" + str(num)})
 
         for event in events:
-            self.es_client.save_event(body=event, bulk=True)
+            self.es_client.bulk_save_object(index='events', doc_type='event', body=event)
         self.es_client.flush('events')
 
-        assert mock_class.request_counts == 101
+        assert self.mock_class.request_counts == 100
         num_events = self.get_num_events()
         assert num_events == 10000
 
 
-class TestBulkWritesWithMoreThanThreshold(ElasticsearchClientTest):
+class TestBulkWritesWithMoreThanThreshold(BulkTest):
 
     def test_bulk_writing(self):
-        mock_class = MockTransportClass()
-
-        if pyes_enabled.pyes_on is True:
-            mock_class.backup_function(self.es_client.es_connection._send_request)
-            self.es_client.es_connection._send_request = mock_class._send_request
-        else:
-            mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
-            self.es_client.es_connection.transport.perform_request = mock_class.perform_request
-
         event_length = 9995
         events = []
         for num in range(event_length):
             events.append({"key": "value" + str(num)})
 
         for event in events:
-            self.es_client.save_event(body=event, bulk=True)
+            self.es_client.bulk_save_object(index='events', doc_type='event', body=event)
         self.es_client.flush('events')
 
-        assert mock_class.request_counts == 101
-        num_events = self.get_num_events()
-        assert num_events == 9995
+        assert self.mock_class.request_counts == 99
+        assert self.get_num_events() == 9900
+        time.sleep(3)
+        self.es_client.flush('events')
+        assert self.mock_class.request_counts == 100
+        assert self.get_num_events() == 9995
 
 
-class TestBulkWritesWithLessThanThreshold(ElasticsearchClientTest):
+class TestBulkWritesWithLessThanThreshold(BulkTest):
 
-    # todo need to fix this for BulkQueue
     def test_bulk_writing(self):
-        self.es_client.save_event(body={'key': 'value'}, bulk=True)
-        id_match = TermMatch('_type', 'event')
-        search_query = SearchQuery()
-        search_query.add_must(id_match)
-        results = search_query.execute(self.es_client, indices=['events'])
-        assert len(results['hits']) == 0
+        self.es_client.bulk_save_object(index='events', doc_type='event', body={'key': 'value'})
+        assert self.get_num_events() == 0
+        assert self.mock_class.request_counts == 0
 
-        event_length = 100
-        events = []
+        event_length = 5
         for num in range(event_length):
-            events.append({"key": "value" + str(num)})
+            self.es_client.bulk_save_object(index='events', doc_type='event', body={"key": "value" + str(num)})
 
-        for event in events:
-            self.es_client.save_event(body=event, bulk=True)
-        self.es_client.flush('events')
-
-        id_match = TermMatch('_type', 'event')
-        search_query = SearchQuery()
-        search_query.add_must(id_match)
-        results = search_query.execute(self.es_client, indices=['events'])
-        assert len(results['hits']) == 101
+        assert self.get_num_events() == 0
+        time.sleep(3)
+        assert self.get_num_events() == 6
 
 
 class TestWriteWithID(ElasticsearchClientTest):

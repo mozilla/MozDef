@@ -15,6 +15,9 @@ else:
     from elasticsearch import Elasticsearch
     from elasticsearch_dsl import Search
     from elasticsearch.exceptions import NotFoundError
+    from elasticsearch.helpers import bulk
+
+from bulk_queue import BulkQueue
 
 
 class ElasticsearchBadServer(Exception):
@@ -37,7 +40,7 @@ class ElasticsearchInvalidIndex(Exception):
 
 class ElasticsearchClient():
 
-    def __init__(self, servers, bulk_amount=100):
+    def __init__(self, servers, bulk_amount=100, bulk_refresh_time=30):
         if pyes_enabled.pyes_on is True:
             # ES v1
             self.es_connection = pyes.ES(servers, bulk_size=bulk_amount)
@@ -45,6 +48,7 @@ class ElasticsearchClient():
             # ES v2 and up
             self.es_connection = Elasticsearch(servers)
             self.es_connection.ping()
+        self.bulk_queue = BulkQueue(self, threshold=bulk_amount, flush_time=bulk_refresh_time)
 
     def delete_index(self, index_name, ignore_fail=False):
         if pyes_enabled.pyes_on is True:
@@ -132,19 +136,35 @@ class ElasticsearchClient():
         return result_set
 
     def save_documents(self, documents):
-        # todo finish this logic, mannnn
-        # this is garbage logic, and doesn't actually bulk import!!!!!!!!
-        for document in documents:
-            self.save_event(body=document)
+        if pyes_enabled.pyes_on is True:
+            for document in documents:
+                try:
+                    self.es_connection.index(index=document['_index'], doc_type=document['_type'], doc=document, id=document['_id'], bulk=True)
+                except pyes.exceptions.NoServerAvailable:
+                    raise ElasticsearchBadServer()
+                except pyes.exceptions.InvalidIndexNameException:
+                    raise ElasticsearchInvalidIndex(document['_index'])
+                except pyes.exceptions.ElasticSearchException as e:
+                    raise ElasticsearchException(e.message)
+        else:
+            bulk(self.es_connection, documents)
 
-    def save_object(self, index, doc_type, body, doc_id=None, bulk=False):
+    def bulk_save_object(self, index, doc_type, body, doc_id=None):
+        if not self.bulk_queue.started():
+            self.bulk_queue.start_timer()
+
+        doc_body = body
+        if '_source' in body:
+            doc_body = body['_source']
+        self.bulk_queue.add(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id)
+
+    def finish_bulk(self):
+        self.bulk_queue.stop_timer()
+
+    def save_object(self, index, doc_type, body, doc_id=None):
         if pyes_enabled.pyes_on is True:
             try:
-                if doc_id:
-                    return self.es_connection.index(index=index, doc_type=doc_type, doc=body, id=doc_id, bulk=bulk)
-                else:
-                    return self.es_connection.index(index=index, doc_type=doc_type, doc=body, bulk=bulk)
-
+                return self.es_connection.index(index=index, doc_type=doc_type, doc=body, id=doc_id)
             except pyes.exceptions.NoServerAvailable:
                 raise ElasticsearchBadServer()
             except pyes.exceptions.InvalidIndexNameException:
@@ -155,17 +175,13 @@ class ElasticsearchClient():
             doc_body = body
             if '_source' in body:
                 doc_body = body['_source']
+            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=doc_body)
 
-            if doc_id:
-                return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=doc_body)
-            else:
-                return self.es_connection.index(index=index, doc_type=doc_type, body=doc_body)
+    def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None):
+        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
 
-    def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):
-        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
-
-    def save_event(self, body, index='events', doc_type='event', doc_id=None, bulk=False):
-        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
+    def save_event(self, body, index='events', doc_type='event', doc_id=None):
+        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)

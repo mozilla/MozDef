@@ -8,19 +8,36 @@ class BulkQueue():
         self.threshold = threshold
         self.list = list()
         self.flush_time = flush_time
-        self.time_thread = Timer(self.flush_time, self.flush)
+        self.time_thread = Timer(self.flush_time, self.timer_over)
+        self.running = False
+
+    def timer_over(self):
+        self.flush()
+        self.time_thread = Timer(self.flush_time, self.timer_over)
+        self.start_timer()
 
     def start_timer(self):
         """ Start timer thread that flushes queue every X seconds """
         self.time_thread.start()
+        self.running = True
 
     def stop_timer(self):
         """ Stop timer thread """
         self.time_thread.cancel()
+        self.running = False
 
-    def add(self, event):
+    def started(self):
+        return self.running
+
+    def add(self, index, doc_type, body, doc_id=None):
         """ Add event to queue, flushing if we hit the threshold """
-        self.list.append(event)
+        bulk_doc = {
+            "_index": index,
+            "_type": doc_type,
+            "_id": doc_id,
+            "_source": body
+        }
+        self.list.append(bulk_doc)
         if self.size() >= self.threshold:
             self.flush()
 
