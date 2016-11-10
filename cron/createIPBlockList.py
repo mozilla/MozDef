@@ -72,8 +72,8 @@ def aggregateIPs(attackers):
     iplist=[]
 
     # We don't want to block ips forever,
-    # so only care about the ips the past 7 days
-    threshold_days = 7
+    # so only care about the ips the past 3 months
+    threshold_days = 30 * 3
     timelimit = datetime.now() - timedelta(days=threshold_days)
 
     ips=attackers.aggregate([
