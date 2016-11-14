@@ -135,6 +135,3 @@ class TestTimer(BulkQueueTest):
         assert queue.size() == 0
         queue.stop_timer()
         assert self.num_objects_saved() == 200
-
-
-# todo: add tests for what if inserting events goes bad? bad data? can't connect to ES?
