@@ -183,8 +183,9 @@ class TestBulkWrites(BulkTest):
         for num in range(event_length):
             events.append({"key": "value" + str(num)})
 
+        assert self.mock_class.request_counts == 0
         for event in events:
-            self.es_client.bulk_save_object(index='events', doc_type='event', body=event)
+            self.es_client.save_event(body=event, bulk=True)
         self.es_client.flush('events')
 
         assert self.mock_class.request_counts == 100
@@ -201,7 +202,7 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
             events.append({"key": "value" + str(num)})
 
         for event in events:
-            self.es_client.bulk_save_object(index='events', doc_type='event', body=event)
+            self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
         self.es_client.flush('events')
 
         assert self.mock_class.request_counts == 99
@@ -215,13 +216,13 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
 class TestBulkWritesWithLessThanThreshold(BulkTest):
 
     def test_bulk_writing(self):
-        self.es_client.bulk_save_object(index='events', doc_type='event', body={'key': 'value'})
+        self.es_client.save_event(body={'key': 'value'}, bulk=True)
         assert self.get_num_events() == 0
         assert self.mock_class.request_counts == 0
 
         event_length = 5
         for num in range(event_length):
-            self.es_client.bulk_save_object(index='events', doc_type='event', body={"key": "value" + str(num)})
+            self.es_client.save_event(body={"key": "value" + str(num)}, bulk=True)
 
         assert self.get_num_events() == 0
         time.sleep(3)
@@ -322,3 +323,46 @@ class TestCreatingAlias(ElasticsearchClientTest):
         indices = self.es_client.get_indices()
         assert 'index1' in indices
         assert 'index2' in indices
+
+
+if pyes_enabled.pyes_on is not True:
+    # Instead of trying to figure out how to update mappings via pyes, I decided
+    # to just skip this unit test since we'll be ripping it out soon
+    class TestBulkInvalidFormatProblem(BulkTest):
+
+        def setup(self):
+            super(TestBulkInvalidFormatProblem, self).setup()
+
+            mapping = {
+                "mappings": {
+                    "event": {
+                        "properties": {
+                            "utcstamp": {
+                                "type": "date",
+                                "format": "dateOptionalTime"
+                            }
+                        }
+                    }
+                }
+            }
+
+            # Recreate the test indexes with a custom mapping to throw
+            # parsing errors
+            self.es_client.delete_index("events", True)
+            self.es_client.delete_index(self.event_index_name, True)
+            self.es_client.create_index(self.event_index_name, mapping=mapping)
+            self.es_client.create_alias('events', self.event_index_name)
+            self.es_client.create_alias('events-previous', self.event_index_name)
+
+        def test_bulk_problems(self):
+            event = {
+                "utcstamp": "2016-11-08T14:13:01.250631+00:00"
+            }
+            malformed_event = {
+                "utcstamp": "abc",
+            }
+
+            self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
+            self.es_client.save_object(index='events', doc_type='event', body=malformed_event, bulk=True)
+            time.sleep(5)
+            assert self.get_num_events() == 1

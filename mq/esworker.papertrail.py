@@ -15,6 +15,7 @@
 import json
 import math
 import os
+import kombu
 import pytz
 import pynsive
 import re
@@ -29,7 +30,6 @@ import calendar
 from operator import itemgetter
 import base64
 import requests
-from threading import Timer
 
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
@@ -299,8 +299,7 @@ class taskConsumer(object):
         if options.esbulksize != 0:
             # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
             # to prevent events from sticking around an idle worker
-            Timer(options.esbulktimeout, self.flush_es_bulk).start()
-
+            self.esConnection.start_bulk_timer()
 
     def run(self):
         while True:
@@ -342,19 +341,6 @@ class taskConsumer(object):
             except ValueError as e:
                 sys.stdout.write('Exception while handling message: %r'%e)
                 sys.exit(1)
-
-
-    def flush_es_bulk(self):
-        '''if we are bulk posting to elastic search force a bulk post even if we don't have
-           enough items to trigger a post normally.
-           This allows you to have lots of workers and not wait for events for too long if
-           there isn't a steady event stream while still retaining the throughput capacity
-           that bulk processing affords.
-        '''
-        # sys.stderr.write('mule {0} flushing bulk elastic search posts\n'.format(self.muleid))
-        self.esConnection.flush_bulk()
-        Timer(options.esbulktimeout, self.flush_es_bulk).start()
-
 
     def on_message(self, body, message):
         #print("RECEIVED MESSAGE: %r" % (body, ))

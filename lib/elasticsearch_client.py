@@ -1,6 +1,8 @@
 from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
 
 import json
+import logging
+
 
 # Remove this code when pyes is gone!
 import os
@@ -15,9 +17,13 @@ else:
     from elasticsearch import Elasticsearch
     from elasticsearch_dsl import Search
     from elasticsearch.exceptions import NotFoundError
-    from elasticsearch.helpers import bulk
+    from elasticsearch.helpers import bulk, BulkIndexError
 
 from bulk_queue import BulkQueue
+
+logger = logging.getLogger()
+logger.level = logging.DEBUG
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
 class ElasticsearchBadServer(Exception):
@@ -69,14 +75,15 @@ class ElasticsearchClient():
         else:
             return self.es_connection.indices.stats()['indices'].keys()
 
-    def create_index(self, index_name, ignore_fail=False):
+    def create_index(self, index_name, ignore_fail=False, mapping=None):
         if pyes_enabled.pyes_on is True:
             self.es_connection.indices.create_index(index_name)
         else:
-            mapping = '''
-            {
-              "mappings":{}
-            }'''
+            if not mapping:
+                mapping = '''
+                {
+                  "mappings":{}
+                }'''
             self.es_connection.indices.create(index=index_name, update_all_types='true', body=mapping)
 
     def create_alias(self, alias_name, index_name):
@@ -146,12 +153,19 @@ class ElasticsearchClient():
                     raise ElasticsearchInvalidIndex(document['_index'])
                 except pyes.exceptions.ElasticSearchException as e:
                     raise ElasticsearchException(e.message)
+            self.es_connection.flush_bulk(True)
         else:
-            bulk(self.es_connection, documents)
+            try:
+                bulk(self.es_connection, documents)
+            except BulkIndexError as e:
+                logger.error("Error bulk indexing: " + str(e))
 
-    def bulk_save_object(self, index, doc_type, body, doc_id=None):
+    def start_bulk_timer(self):
         if not self.bulk_queue.started():
             self.bulk_queue.start_timer()
+
+    def bulk_save_object(self, index, doc_type, body, doc_id=None):
+        self.start_bulk_timer()
 
         doc_body = body
         if '_source' in body:
@@ -161,27 +175,30 @@ class ElasticsearchClient():
     def finish_bulk(self):
         self.bulk_queue.stop_timer()
 
-    def save_object(self, index, doc_type, body, doc_id=None):
-        if pyes_enabled.pyes_on is True:
-            try:
-                return self.es_connection.index(index=index, doc_type=doc_type, doc=body, id=doc_id)
-            except pyes.exceptions.NoServerAvailable:
-                raise ElasticsearchBadServer()
-            except pyes.exceptions.InvalidIndexNameException:
-                raise ElasticsearchInvalidIndex(index)
-            except pyes.exceptions.ElasticSearchException as e:
-                raise ElasticsearchException(e.message)
+    def save_object(self, index, doc_type, body, doc_id=None, bulk=False):
+        if bulk:
+            self.bulk_save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
         else:
-            doc_body = body
-            if '_source' in body:
-                doc_body = body['_source']
-            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=doc_body)
+            if pyes_enabled.pyes_on is True:
+                try:
+                    return self.es_connection.index(index=index, doc_type=doc_type, doc=body, id=doc_id)
+                except pyes.exceptions.NoServerAvailable:
+                    raise ElasticsearchBadServer()
+                except pyes.exceptions.InvalidIndexNameException:
+                    raise ElasticsearchInvalidIndex(index)
+                except pyes.exceptions.ElasticSearchException as e:
+                    raise ElasticsearchException(e.message)
+            else:
+                doc_body = body
+                if '_source' in body:
+                    doc_body = body['_source']
+                return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=doc_body)
 
-    def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None):
-        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+    def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):
+        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
 
-    def save_event(self, body, index='events', doc_type='event', doc_id=None):
-        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+    def save_event(self, body, index='events', doc_type='event', doc_id=None, bulk=False):
+        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)
@@ -217,14 +234,6 @@ class ElasticsearchClient():
             return self.es_connection.index(index='kibana-int', doc_type='dashboard', doc=dashboarddata)
         else:
             return self.es_connection.index(index='kibana-int', doc_type='dashboard', body=dashboarddata)
-
-    def flush_bulk(self):
-        if pyes_enabled.pyes_on is True:
-            self.es_connection.flush_bulk(True)
-        else:
-            # todo: need to update this so that it flushes bulk queue
-            print "NEED TO IMPLEMENT THIS!"
-            raise NotImplementedError
 
     def get_cluster_health(self):
         if pyes_enabled.pyes_on is True:

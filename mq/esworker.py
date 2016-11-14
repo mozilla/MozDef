@@ -26,7 +26,6 @@ from dateutil.parser import parse
 from operator import itemgetter
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
-from threading import Timer
 
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
@@ -249,23 +248,12 @@ class taskConsumer(ConsumerMixin):
         if options.esbulksize != 0:
             # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
             # to prevent events from sticking around an idle worker
-            Timer(options.esbulktimeout, self.flush_es_bulk).start()
+            self.esConnection.start_bulk_timer()
 
     def get_consumers(self, Consumer, channel):
         consumer = Consumer(self.taskQueue, callbacks=[self.on_message], accept=['json', 'text/plain'], no_ack=(not options.mqack))
         consumer.qos(prefetch_count=options.prefetch)
         return [consumer]
-
-    def flush_es_bulk(self):
-        '''if we are bulk posting to elastic search force a bulk post even if we don't have
-           enough items to trigger a post normally.
-           This allows you to have lots of workers and not wait for events for too long if
-           there isn't a steady event stream while still retaining the throughput capacity
-           that bulk processing affords.
-        '''
-        # sys.stderr.write('mule {0} flushing bulk elastic search posts\n'.format(self.muleid))
-        self.esConnection.flush_bulk()
-        Timer(options.esbulktimeout, self.flush_es_bulk).start()
 
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
