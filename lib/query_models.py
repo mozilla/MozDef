@@ -1,7 +1,9 @@
-from elasticsearch_dsl import Q, Search, A
-
-import pyes
 import pyes_enabled
+
+if pyes_enabled.pyes_on is True:
+    import pyes
+else:
+    from elasticsearch_dsl import Q, Search, A
 
 from utilities.toUTC import toUTC
 
