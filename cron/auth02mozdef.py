@@ -268,7 +268,7 @@ def load_state(fpath):
     try:
         with open(fpath) as fd:
             state = int(fd.read().split('\n')[0])
-    except FileNotFoundError:
+    except IOError:
         pass
     return state
 
