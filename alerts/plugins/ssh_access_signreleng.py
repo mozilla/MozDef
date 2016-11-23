@@ -7,13 +7,10 @@
 # Alicia Smith <asmith@mozilla.com>
 # Michal Purzynski <mpurzynski@mozilla.com>
 
-import requests
-import json
 import os
 import sys
 from datetime import datetime
 from configlib import getConfig, OptionParser
-import sys
 import smtplib
 from email.mime.text import MIMEText
 
@@ -50,7 +47,7 @@ class message(object):
     def onMessage(self, message):
         # here is where you do something with the incoming alert message
 
-        emailMessage = MIMEText(message['utctimestamp'] + ' UTC: ' + message['summary'])
+        emailMessage = MIMEText(message['summary'] + ' on ' + message['events'][0]['documentsource']['utctimestamp'] + ' UTC')
         emailMessage['Subject'] = 'MozDef Alert: Releng Signing Servers Successful SSH Access'
         emailMessage['From'] = self.options.sender
         emailMessage['To'] = self.options.recipients
