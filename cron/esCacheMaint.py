@@ -17,7 +17,6 @@ import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, date, timedelta
 
-import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
@@ -73,7 +72,7 @@ def isJVMMemoryHigh():
 
         for node in nodestats['nodes']:
             loadaverage=nodestats['nodes'][node]['os']['load_average']
-            cpuusage=nodestats['nodes'][node]['os']['cpu']['usage']
+            cpuusage=nodestats['nodes'][node]['os']['cpu_percent']
             nodename=nodestats['nodes'][node]['name']
             jvmused=nodestats['nodes'][node]['jvm']['mem']['heap_used_percent']
             logger.debug('{0}: cpu {1}%  jvm {2}% load average: {3}'.format(nodename,cpuusage,jvmused,loadaverage))

@@ -16,7 +16,6 @@ from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
-import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
@@ -85,7 +84,7 @@ def getEsNodesStats():
             'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
             'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024),
             'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
-            'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu']['usage'],
+            'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu_percent'],
             'load': jsonobj['nodes'][nodeid]['os']['load_average']
         })
     return results

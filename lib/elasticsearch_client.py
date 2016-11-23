@@ -21,7 +21,7 @@ else:
 
 from bulk_queue import BulkQueue
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.level = logging.DEBUG
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
