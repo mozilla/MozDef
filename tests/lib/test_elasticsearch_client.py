@@ -15,13 +15,6 @@ import time
 from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 import pytest
 
-# Remove this code when pyes is gone!
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-import pyes_enabled
-# Remove this code when pyes is gone!
-
 
 class ElasticsearchClientTest(UnitTestSuite):
     def setup(self):
@@ -53,11 +46,6 @@ class MockTransportClass:
             "/_all/_flush",
             "/events%2Cevents-previous/_search"
         ]
-
-    def _send_request(self, method, path, body=None, params=None, headers=None, raw=False, return_response=False):
-        if path not in self.exclude_paths:
-            self.request_counts += 1
-        return self.original_function(method, path, body, params)
 
     def backup_function(self, orig_function):
         self.original_function = orig_function
@@ -135,13 +123,8 @@ class TestSimpleWrites(ElasticsearchClientTest):
 
     def test_simple_writing(self):
         mock_class = MockTransportClass()
-
-        if pyes_enabled.pyes_on is True:
-            mock_class.backup_function(self.es_client.es_connection._send_request)
-            self.es_client.es_connection._send_request = mock_class._send_request
-        else:
-            mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
-            self.es_client.es_connection.transport.perform_request = mock_class.perform_request
+        mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
+        self.es_client.es_connection.transport.perform_request = mock_class.perform_request
 
         event_length = 10000
         events = []
@@ -162,13 +145,8 @@ class BulkTest(ElasticsearchClientTest):
     def setup(self):
         super(BulkTest, self).setup()
         self.mock_class = MockTransportClass()
-
-        if pyes_enabled.pyes_on is True:
-            self.mock_class.backup_function(self.es_client.es_connection._send_request)
-            self.es_client.es_connection._send_request = self.mock_class._send_request
-        else:
-            self.mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
-            self.es_client.es_connection.transport.perform_request = self.mock_class.perform_request
+        self.mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
+        self.es_client.es_connection.transport.perform_request = self.mock_class.perform_request
 
     def teardown(self):
         super(BulkTest, self).teardown()
@@ -275,18 +253,12 @@ class TestClusterHealth(ElasticsearchClientTest):
         assert health_keys == ['active_primary_shards', 'active_shards', 'cluster_name', 'initializing_shards', 'number_of_data_nodes', 'number_of_nodes', 'relocating_shards', 'status', 'timed_out', 'unassigned_shards']
         assert type(health_results['active_primary_shards']) is int
         assert type(health_results['active_shards']) is int
-        if pyes_enabled.pyes_on is True:
-            assert type(health_results['cluster_name']) is str
-        else:
-            assert type(health_results['cluster_name']) is unicode
+        assert type(health_results['cluster_name']) is unicode
         assert type(health_results['initializing_shards']) is int
         assert type(health_results['number_of_data_nodes']) is int
         assert type(health_results['number_of_nodes']) is int
         assert type(health_results['relocating_shards']) is int
-        if pyes_enabled.pyes_on is True:
-            assert type(health_results['status']) is str
-        else:
-            assert type(health_results['status']) is unicode
+        assert type(health_results['status']) is unicode
         assert type(health_results['timed_out']) is bool
         assert type(health_results['unassigned_shards']) is int
 
@@ -325,44 +297,41 @@ class TestCreatingAlias(ElasticsearchClientTest):
         assert 'index2' in indices
 
 
-if pyes_enabled.pyes_on is not True:
-    # Instead of trying to figure out how to update mappings via pyes, I decided
-    # to just skip this unit test since we'll be ripping it out soon
-    class TestBulkInvalidFormatProblem(BulkTest):
+class TestBulkInvalidFormatProblem(BulkTest):
 
-        def setup(self):
-            super(TestBulkInvalidFormatProblem, self).setup()
+    def setup(self):
+        super(TestBulkInvalidFormatProblem, self).setup()
 
-            mapping = {
-                "mappings": {
-                    "event": {
-                        "properties": {
-                            "utcstamp": {
-                                "type": "date",
-                                "format": "dateOptionalTime"
-                            }
+        mapping = {
+            "mappings": {
+                "event": {
+                    "properties": {
+                        "utcstamp": {
+                            "type": "date",
+                            "format": "dateOptionalTime"
                         }
                     }
                 }
             }
+        }
 
-            # Recreate the test indexes with a custom mapping to throw
-            # parsing errors
-            self.es_client.delete_index("events", True)
-            self.es_client.delete_index(self.event_index_name, True)
-            self.es_client.create_index(self.event_index_name, mapping=mapping)
-            self.es_client.create_alias('events', self.event_index_name)
-            self.es_client.create_alias('events-previous', self.event_index_name)
+        # Recreate the test indexes with a custom mapping to throw
+        # parsing errors
+        self.es_client.delete_index("events", True)
+        self.es_client.delete_index(self.event_index_name, True)
+        self.es_client.create_index(self.event_index_name, mapping=mapping)
+        self.es_client.create_alias('events', self.event_index_name)
+        self.es_client.create_alias('events-previous', self.event_index_name)
 
-        def test_bulk_problems(self):
-            event = {
-                "utcstamp": "2016-11-08T14:13:01.250631+00:00"
-            }
-            malformed_event = {
-                "utcstamp": "abc",
-            }
+    def test_bulk_problems(self):
+        event = {
+            "utcstamp": "2016-11-08T14:13:01.250631+00:00"
+        }
+        malformed_event = {
+            "utcstamp": "abc",
+        }
 
-            self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
-            self.es_client.save_object(index='events', doc_type='event', body=malformed_event, bulk=True)
-            time.sleep(5)
-            assert self.get_num_events() == 1
+        self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
+        self.es_client.save_object(index='events', doc_type='event', body=malformed_event, bulk=True)
+        time.sleep(5)
+        assert self.get_num_events() == 1
