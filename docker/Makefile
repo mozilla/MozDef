@@ -26,7 +26,7 @@ build-no-cache:
 	docker build --no-cache -t $(NAME):$(VERSION) .
 
 run:
-	docker run -p 3000:3000 -p 9090:9090 -p 9200:9200 -p 8080:8080 -p 8081:8081 \
+	docker run -d -p 3000:3000 -p 9090:9090 -p 9200:9200 -p 8080:8080 -p 8081:8081 \
 		-h $(NAME) -t -i $(NAME):$(VERSION)
 
 debug:build

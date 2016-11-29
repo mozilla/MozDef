@@ -30,6 +30,7 @@ ENV LANGUAGE en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
+ENV HOME /root
 
 RUN apt-get install -q -y openjdk-7-jre
 
@@ -113,6 +114,7 @@ EXPOSE 8081
 # CLEAN
 RUN apt-get clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
-# Launch rabbit and sleep 10s for it to start
-#CMD /etc/init.d/rabbitmq-server start && sleep 10 && /usr/bin/supervisord
+# Launch 
+ENTRYPOINT exec service supervisor start
+
 
