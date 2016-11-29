@@ -7,7 +7,11 @@ Type=forking
 PIDFile=/var/run/mozdefdb/mozdefdb.pid
 ExecStart=/usr/bin/mongod --config /etc/mongod.conf
 ExecReload=/bin/kill -HUP $MAINPID
+<<<<<<< HEAD
 Restart=always
+=======
+#Restart=always
+>>>>>>> 8d519538b9afa92609f5afa587256e02a25a554e
 User=mozdef
 Group=mozdef
 StandardOutput=syslog
