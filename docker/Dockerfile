@@ -57,7 +57,7 @@ RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysq
 	&& mkdir -p /run/uwsgi/apps/ \
 	&& touch /run/uwsgi/apps/loginput.socket && chmod 666 /run/uwsgi/apps/loginput.socket \
 	&& touch /run/uwsgi/apps/rest.socket && chmod 666 /run/uwsgi/apps/rest.socket \
-        && mkdir -p /home/mozdef/envs/mozdef/bot/ && cd /home/mozdef/envs/mozdef/bot/ \
+        && mkdir -p /opt/mozdef/envs/mozdef/bot/ && cd /opt/mozdef/envs/mozdef/bot/ \
         && wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && gzip -d GeoLiteCity.dat.gz)
 ADD conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 ADD conf/settings.js /opt/MozDef/meteor/app/lib/settings.js
