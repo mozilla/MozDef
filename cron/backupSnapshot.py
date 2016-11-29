@@ -151,7 +151,7 @@ def initConfig():
         )
     options.indices = list(getConfig(
         'backup_indices',
-        'events,alerts,kibana-int',
+        'events,alerts,.kibana',
         options.configfile).split(',')
         )
     options.dobackup = list(getConfig(

@@ -55,7 +55,7 @@ is how you set the default timezone to something other than UTC
 ::
 
     [options]
-    backup_indices = intelligence,kibana-int,alerts,events,complianceitems,.jsp,.marvel-kibana,vulnerabilities
+    backup_indices = intelligence,.kibana,alerts,events,complianceitems,.jsp,.marvel-kibana,vulnerabilities
     backup_dobackup = 1,1,1,1,1,1,1,1
     backup_rotation = none,none,monthly,daily,none,none,none,none
     backup_pruning = 0,0,0,20,0,0,0,0

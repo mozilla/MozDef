@@ -233,7 +233,7 @@ class ElasticsearchClient():
         if pyes_enabled.pyes_on is True:
             return self.es_connection.index(index='kibana-int', doc_type='dashboard', doc=dashboarddata)
         else:
-            return self.es_connection.index(index='kibana-int', doc_type='dashboard', body=dashboarddata)
+            return self.es_connection.index(index='.kibana', doc_type='dashboard', body=dashboarddata)
 
     def get_cluster_health(self):
         if pyes_enabled.pyes_on is True:

@@ -28,17 +28,17 @@ class TestKibanaDashboardsRoute(RestTestSuite):
 
     def teardown(self):
         super(TestKibanaDashboardsRoute, self).teardown()
-        self.es_client.delete_index('kibana-int', True)
+        self.es_client.delete_index('.kibana', True)
 
     def setup(self):
         super(TestKibanaDashboardsRoute, self).setup()
 
-        self.es_client.delete_index('kibana-int', True)
-        self.es_client.create_index('kibana-int')
+        self.es_client.delete_index('.kibana', True)
+        self.es_client.create_index('.kibana')
         json_dashboard_location = os.path.join(os.path.dirname(__file__), "ssh_dashboard.json")
         self.es_client.save_dashboard(json_dashboard_location, "Example SSH Dashboard")
         self.es_client.save_dashboard(json_dashboard_location, "Example FTP Dashboard")
-        self.es_client.flush('kibana-int')
+        self.es_client.flush('.kibana')
 
     def test_route_endpoints(self):
         for route in self.routes:
@@ -68,13 +68,13 @@ class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
 
     def setup(self):
         super(TestKibanaDashboardsRouteWithoutDashboards, self).setup()
-        self.es_client.delete_index('kibana-int', True)
-        self.es_client.create_index('kibana-int')
+        self.es_client.delete_index('.kibana', True)
+        self.es_client.create_index('.kibana')
         time.sleep(0.2)
 
     def teardown(self):
         super(TestKibanaDashboardsRouteWithoutDashboards, self).teardown()
-        self.es_client.delete_index('kibana-int', True)
+        self.es_client.delete_index('.kibana', True)
 
     def test_route_endpoints(self):
         for route in self.routes:
