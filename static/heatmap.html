@@ -12,18 +12,18 @@
       fill: none;
       vector-effect: non-scaling-stroke;
     }
-    
+
     .vis:hover .pipedon:not(:hover) * {
       opacity: 0.6;
     }
-    
+
     .label {
       pointer-events: fill;
       text-anchor: middle;
       font-family: Impact;
     }
 
-</style>    
+</style>
     <!--
     load up the base libraries.
         --require.js
@@ -63,12 +63,12 @@
             {name: 'none',  color: '#4D4D4D'},
         ];
 
-        
-        // elastic search setup and query 
+
+        // elastic search setup and query
         var client = new elasticsearch.Client({
-            host: 'mozdefqa1.private.scl3.mozilla.com:9200',
+            host: 'mozdefqa2.private.scl3.mozilla.com:9200',
             log: 'error'
-        });   
+        });
 
         var searchParams = {
           index: 'rra',
@@ -89,13 +89,13 @@
             }
           }
         };
-        
+
         var searchParams = {
           index: 'rra',
           size: 200,
-          body: {            
-            query: { 
-                bool: { 
+          body: {
+            query: {
+                bool: {
                   must: [
                     { match: { category:   "rra_data"        }},
                     { range: { utctimestamp: { gte: "2016-01-01" }}}
@@ -104,17 +104,17 @@
               }
           }
         };
-        
+
         client.search(searchParams, function (err, res) {
           if (err) {
             // handle error
             throw err;
           }
-        
+
             esresults= res.hits.hits
             window.esresults=esresults;
             console.log('results received');
-            
+
             //utility function
             // given an object, recurse it and
             // return a list of its key/value pairs
@@ -128,7 +128,7 @@
               }
               return result
             }
-            
+
             svg = d3.select('svg');
             width = svg.node().getBoundingClientRect().width;
             height = svg.node().getBoundingClientRect().height;
@@ -138,17 +138,17 @@
                 transform: "translate(" + (zoom.translate()) + ")scale(" + (zoom.scale()) + ")"
               });
             });
-            
+
             svg.call(zoom);
             vis = zoomable_layer.append('g').attr({
               "class": 'vis',
               transform: "translate(" + (width / 2) + "," + (height / 3) + ")"
-            });        
-    
+            });
+
             isometric = function(_3d_p) {
               return [-Math.sqrt(3) / 2 * _3d_p[0] + Math.sqrt(3) / 2 * _3d_p[1], +0.5 * _3d_p[0] + 0.5 * _3d_p[1] - _3d_p[2]];
-            };        
-    
+            };
+
             parallelepipedon = function(d) {
               var fb, ft, mlb, mlt, mrb, mrt, nb, nt;
               if (!(d.x != null)) {
@@ -186,8 +186,8 @@
                 mrt: mrt
               };
               return d;
-            };        
-            
+            };
+
             iso_layout = function(data, shape, scale) {
                 if (!(scale != null)) {
                   scale = 1;
@@ -198,27 +198,27 @@
                 return data.sort(function(a, b) {
                   return b.dh - a.dh;
                 });
-           };       
-            
+           };
+
             path_generator = function(d) {
               return 'M' + d.map(function(p) {
                 return p.join(' ');
               }).join('L') + 'z';
-            };        
-    
+            };
+
             treemap = d3.layout.treemap().size([400, 400]).value(function(d) {
               return d.area;
             }).sort(function(a, b) {
               return a.dh - b.dh;
             }).ratio(2).round(false);
-          
+
             color = d3.scale.category20c();
-          
+
             correct_x = d3.scale.linear().domain([0, width]).range([0, width * 1.05]);
-          
+
             correct_y = d3.scale.linear().domain([0, height]).range([0, height * 3 / 4]);
-    
-            
+
+
             //data = d3.range(30).map(function() {
             //  return {
             //    word: 'something',
@@ -226,7 +226,7 @@
             //    dh: Math.random() * 150
             //  };
             //});
-    
+
             data = _.map(esresults,function(esrecord) {
                 //calc the risk value for this record
                 //by summarizing the risks into counts of LOW/MEDIUM/HIGH/MAXIMUM
@@ -240,7 +240,7 @@
                 })
                 var counts=_.countBy(riskvalues,function(r){
                   return r.value
-                })                
+                })
                 //calc the total risk score
                 var riskscore=0;
                 if  ( _.has(counts,"MAXIMUM")){
@@ -254,7 +254,7 @@
                 }
                 if (_.has(counts,"LOW")){
                   riskscore += counts.LOW * 5
-                }                
+                }
               return {
                 word: esrecord._source.details.metadata.service,
                 area: _.size(_.flatten(_.values(esrecord._source.details.data))), //flatten the array of data
@@ -263,35 +263,35 @@
                 record: esrecord,
                 score: riskscore,
                 counts:counts
-                
+
               };
-            }); 
-    
+            });
+
             data = treemap.nodes({
               children: data
             }).filter(function(n) {
               return n.depth === 1;
             });
-    
+
             iso_layout(data, parallelepipedon);
-          
+
             data.forEach(function(d, i) {
               return d.template_color = d3.hcl(color(i));
-            });        
-    
+            });
+
             pipedons = vis.selectAll('.pipedon').data(data);
-          
+
             enter_pipedons = pipedons.enter().append('g').attr({
               "class": 'pipedon'
             });
-          
+
             enter_pipedons.append('path').attr({
               "class": 'iso face bottom',
               d: function(d) {
                 return path_generator(d.iso.face_bottom);
               }
             });
-          
+
             enter_pipedons.append('path').attr({
               "class": 'iso face left',
               d: function(d) {
@@ -301,7 +301,7 @@
                 return d.template_color;
               }
             });
-          
+
             enter_pipedons.append('path').attr({
               "class": 'iso face right',
               d: function(d) {
@@ -311,7 +311,7 @@
                 return d3.hcl(d.template_color.h, d.template_color.c, d.template_color.l - 12);
               }
             });
-          
+
             enter_pipedons.append('path').attr({
               "class": 'iso face top',
               d: function(d) {
@@ -321,13 +321,13 @@
                 return d3.hcl(d.template_color.h, d.template_color.c, d.template_color.l + 12);
               }
             });
-          
+
             enter_labels_g = enter_pipedons.append('g');
-          
+
             enter_labels = enter_labels_g.append('svg').attr({
               "class": 'label'
             });
-          
+
             enter_labels.append('text').text(function(d) {
               return d.word.toUpperCase();
             }).attr({
@@ -358,8 +358,8 @@
                 return d3.select(this).attr('transform', 'rotate(90) translate(0,1)');
               }
             });
-          
-            //add a tooltip 
+
+            //add a tooltip
             enter_labels.append("svg:title")
             .text(function(d){
                 return d.word + ' ' + _.pairs(d.counts).toString() + ' total score: ' + d.score});
@@ -368,7 +368,7 @@
               d.iso_x = isometric([d.x + d.dx / 2, d.y + d.dy / 2, d.h + d.dh])[0] - d.dx / 2;
               return d.iso_y = isometric([d.x + d.dx / 2, d.y + d.dy / 2, d.h + d.dh])[1] - d.dy / 2;
             });
-          
+
             enter_labels.attr({
               x: function(d) {
                 return d.iso_x;
@@ -390,13 +390,13 @@
                 return d3.hcl(d.template_color.h, d.template_color.c, d.template_color.l - 12);
               }
             });
-          
+
             enter_labels_g.attr({
               transform: function(d) {
                 return "translate(" + (d.iso_x + d.dx / 2) + "," + (d.iso_y + d.dy / 2) + ") scale(1, " + (1 / Math.sqrt(3)) + ") rotate(-45) translate(" + (-(d.iso_x + d.dx / 2)) + "," + (-(d.iso_y + d.dy / 2)) + ")";
               }
             });
-          
+
             enter_pipedons.append('path').attr({
               "class": 'iso outline',
               d: function(d) {
@@ -407,7 +407,7 @@
 
 
         });
-        
+
         //publish objects to the console for debugging
         //window.roadmapData = roadmapData;
         window.data = data;

@@ -37,7 +37,7 @@ RABBITMQ = {
 }
 
 ES = {
-    'servers': ['http://mozdefqa1.private.scl3.mozilla.com:9200']
+    'servers': ['http://localhost:9200']
 }
 
 LOGGING = {
