@@ -146,7 +146,7 @@ Step by Step::
         sudo make run
         (once inside the container)
         #/etc/init.d/supervisor start
-        
+
         Browse to http://youripaddress:3000 for the MozDef UI
 
     Build notes:
@@ -215,7 +215,7 @@ Python
 
 Create a mozdef user::
 
-  adduser mozdef
+  adduser mozdef -d /opt/mozdef
 
 We need to install a python2.7 virtualenv.
 
@@ -233,14 +233,14 @@ Then::
   wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
   tar xvzf Python-2.7.6.tgz
   cd Python-2.7.6
-  ./configure --prefix=/home/mozdef/python2.7 --enable-shared
+  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared
   make
   make install
 
-  cd /home/mozdef
+  cd /opt/mozdef
 
   wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-  export LD_LIBRARY_PATH=/home/mozdef/python2.7/lib/
+  export LD_LIBRARY_PATH=/opt/mozdef/python2.7/lib/
   ./python2.7/bin/python get-pip.py
   ./python2.7/bin/pip install virtualenv
   mkdir ~/envs
@@ -251,7 +251,7 @@ Then::
 
 At this point when you launch python, It should tell you that you're using Python 2.7.6.
 
-Whenever you launch a python script from now on, you should have your mozdef virtualenv actived and your LD_LIBRARY_PATH env variable should include /home/mozdef/python2.7/lib/
+Whenever you launch a python script from now on, you should have your mozdef virtualenv actived and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/
 
 RabbitMQ
 ********
@@ -320,7 +320,7 @@ Make sure you have meteorite/mrt (run as root/admin)::
 
   npm install -g meteorite
 
-Then from the meteor subdirectory of this git repository (/home/mozdef/MozDef/meteor)  run::
+Then from the meteor subdirectory of this git repository (/opt/mozdef/MozDef/meteor)  run::
 
   mrt add iron-router
   mrt add accounts-persona
