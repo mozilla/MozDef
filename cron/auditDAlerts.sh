@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-source  /home/mozdef/envs/mozdef/bin/activate
-/home/mozdef/envs/mozdef/cron/auditDAlerts.py -c /home/mozdef/envs/mozdef/cron/auditDAlerts.conf
-/home/mozdef/envs/mozdef/cron/auditDFileAlerts.py -c /home/mozdef/envs/mozdef/cron/auditDAlerts.conf
+source  /opt/mozdef/envs/mozdef/bin/activate
+/opt/mozdef/envs/mozdef/cron/auditDAlerts.py -c /opt/mozdef/envs/mozdef/cron/auditDAlerts.conf
+/opt/mozdef/envs/mozdef/cron/auditDFileAlerts.py -c /opt/mozdef/envs/mozdef/cron/auditDAlerts.conf

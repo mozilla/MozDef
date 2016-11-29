@@ -8,6 +8,6 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-source  /home/mozdef/envs/mozdef/bin/activate
-/home/mozdef/envs/mozdef/cron/vidyo2MozDef.py -c /home/mozdef/envs/mozdef/cron/vidyo2MozDef.conf
+source  /opt/mozdef/envs/mozdef/bin/activate
+/opt/mozdef/envs/mozdef/cron/vidyo2MozDef.py -c /opt/mozdef/envs/mozdef/cron/vidyo2MozDef.conf
 

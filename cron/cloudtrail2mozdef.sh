@@ -8,6 +8,6 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-source  /home/mozdef/envs/mozdef/bin/activate
-/home/mozdef/envs/mozdef/cron/cloudtrail2mozdef.py -c /home/mozdef/envs/mozdef/cron/cloudtrail2mozdef.conf
+source  /opt/mozdef/envs/mozdef/bin/activate
+/opt/mozdef/envs/mozdef/cron/cloudtrail2mozdef.py -c /opt/mozdef/envs/mozdef/cron/cloudtrail2mozdef.conf
 
