@@ -30,8 +30,6 @@ class TestTermMatchNegativeTestSuite(NegativeTestSuite):
         tests = {
             RangeMatch('utctimestamp', begin_date, end_date): [
                 {'utctimestamp': '2016-08-12T21:07:11.316450+00:00'},
-                {'utctimestamp': '2016-08-12T21:07:12.316450+00:00'},
-                {'utctimestamp': '2016-08-13T21:07:12.316450+00:00'},
                 {'utctimestamp': '2016-08-13T21:07:13.316450+00:00'},
             ],
         }

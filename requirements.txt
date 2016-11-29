@@ -8,7 +8,7 @@ docutils==0.11
 elasticutils==0.8.2
 futures==2.1.6
 glob2==0.4.1
-kombu==3.0.26
+kombu==3.0.30
 pyelasticsearch==0.6.1
 pymongo==2.6.3
 python-dateutil==2.2
