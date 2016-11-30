@@ -10,6 +10,7 @@
 
 source  /opt/mozdef/envs/mozdef/bin/activate
 /opt/mozdef/envs/mozdef/cron/healthAndStatus.py -c /opt/mozdef/envs/mozdef/cron/healthAndStatus.conf
+/opt/mozdef/envs/mozdef/cron/healthAndStatus.py -c /opt/mozdef/envs/mozdef/cron/healthAndStatus.fxaprod.conf
 /opt/mozdef/envs/mozdef/cron/healthToMongo.py -c /opt/mozdef/envs/mozdef/cron/healthToMongo.conf
 /opt/mozdef/envs/mozdef/cron/esCacheMaint.py -c /opt/mozdef/envs/mozdef/cron/esCacheMaint.conf
 /opt/mozdef/envs/mozdef/cron/eventStats.py -c /opt/mozdef/envs/mozdef/cron/eventStats.conf
