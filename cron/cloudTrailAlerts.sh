@@ -9,5 +9,5 @@
 # Jeff Bryner jbryner@mozilla.com
 
 source  /opt/mozdef/envs/mozdef/bin/activate
-/opt/mozdef/envs/mozdef/cron/cloudTrailAlerts.py
+/opt/mozdef/envs/mozdef/cron/cloudTrailAlerts.py -c /opt/mozdef/envs/mozdef/cron/cloudTrailAlerts.conf
 
