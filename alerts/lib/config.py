@@ -60,11 +60,12 @@ RABBITMQ = {
 }
 
 ES = {
-	'servers': ['http://mozdefes1.private.scl3.mozilla.com:9200',
-                'http://mozdefes2.private.scl3.mozilla.com:9200',
-                'http://mozdefes3.private.scl3.mozilla.com:9200',
-                'http://mozdefes4.private.scl3.mozilla.com:9200',
-                'http://mozdefes5.private.scl3.mozilla.com:9200']
+	'servers': ['http://mozdefes6.private.scl3.mozilla.com:9200',
+                'http://mozdefes7.private.scl3.mozilla.com:9200',
+                'http://mozdefes8.private.scl3.mozilla.com:9200',
+                'http://mozdefes9.private.scl3.mozilla.com:9200',
+                'http://mozdefes10.private.scl3.mozilla.com:9200',
+                'http://mozdefes11.private.scl3.mozilla.com:9200']
 }
 
 LOGGING = {

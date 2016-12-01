@@ -3,7 +3,7 @@ chdir = /opt/mozdef/envs/mozdef/mq/
 uid = mozdef
 mule = esworker.sqs.py
 pyargv = -c /opt/mozdef/envs/mozdef/mq/esworker.infosecsqs.nonprod.conf
-daemonize = /opt/mozdef/envs/mozdef/logs/uwsgi.mqESmules.infosecsqs.log
+logto = /opt/mozdef/envs/mozdef/logs/uwsgi.mqESmules.infosecsqs.log
 ;ignore normal operations that generate nothing but normal response
 ;
 log-drain = generated 0 bytes
@@ -11,6 +11,8 @@ log-date = %%a %%b %%d %%H:%%M:%%S
 socket = /opt/mozdef/envs/mozdef/mq/mqESmulesInfosecSQSNonProd.socket
 virtualenv = /opt/mozdef/envs/mozdef/
 master-fifo = /opt/mozdef/envs/mozdef/mq/mqESmulesInfosecSQSNonProd.fifo
+procname-master = [m]
+procname-prefix = [mqwInfosecSQSNonProd]
 never-swap
 pidfile= /opt/mozdef/envs/mozdef/mq/mqESmulesInfosecSQSNonProd.pid
 vacuum = true

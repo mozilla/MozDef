@@ -3,15 +3,17 @@ chdir = /opt/mozdef/envs/mozdef/mq/
 uid = mozdef
 mule = esworker.py
 pyargv = -c /opt/mozdef/envs/mozdef/mq/esworker.autoland.conf
-daemonize = /opt/mozdef/envs/mozdef/logs/uwsgi.mqESmules.autoland.log
+logto = /opt/mozdef/envs/mozdef/logs/uwsgi.mqw.autoland.log
 ;ignore normal operations that generate nothing but normal response
 ;
 log-drain = generated 0 bytes
 log-date = %%a %%b %%d %%H:%%M:%%S
-socket = /opt/mozdef/envs/mozdef/mq/mqESmulesAutoland.socket
+socket = /opt/mozdef/envs/mozdef/mq/mqwAutoland.socket
 virtualenv = /opt/mozdef/envs/mozdef/
-master-fifo = /opt/mozdef/envs/mozdef/mq/mqESmulesAutoland.fifo
+procname-master = [m]
+procname-prefix = [mqwAutoland]
+master-fifo = /opt/mozdef/envs/mozdef/mq/mqwAutoland.fifo
 never-swap
-pidfile= /opt/mozdef/envs/mozdef/mq/mqESmulesAutoland.pid
+pidfile= /opt/mozdef/envs/mozdef/mq/mqwAutoland.pid
 vacuum = true
 enable-threads

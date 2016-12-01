@@ -3,15 +3,17 @@ chdir = /opt/mozdef/envs/mozdef/mq/
 uid = mozdef
 mule = esworker.py
 pyargv = -c /opt/mozdef/envs/mozdef/mq/esworker.fxastage.conf
-daemonize = /opt/mozdef/envs/mozdef/logs/uwsgi.mqESmules.fxastage.log
+logto = /opt/mozdef/envs/mozdef/logs/uwsgi.mqw.fxastage.log
 ;ignore normal operations that generate nothing but normal response
 ;
 log-drain = generated 0 bytes
 log-date = %%a %%b %%d %%H:%%M:%%S
-socket = /opt/mozdef/envs/mozdef/mq/mqESmulesFxaStage.socket
+socket = /opt/mozdef/envs/mozdef/mq/mqwFxaStage.socket
 virtualenv = /opt/mozdef/envs/mozdef/
-master-fifo = /opt/mozdef/envs/mozdef/mq/mqESmulesFxaStage.fifo
+master-fifo = /opt/mozdef/envs/mozdef/mq/mqwFxaStage.fifo
+procname-master = [m]
+procname-prefix = [mqwFxaStage]
 never-swap
-pidfile= /opt/mozdef/envs/mozdef/mq/mqESmulesFxaStage.pid
+pidfile= /opt/mozdef/envs/mozdef/mq/mqwFxaStage.pid
 vacuum = true
 enable-threads
