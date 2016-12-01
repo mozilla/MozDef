@@ -6,3 +6,4 @@ results
 *.log
 .coverage
 .cache
+*.pyc
