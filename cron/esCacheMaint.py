@@ -63,7 +63,6 @@ def digits(n):
 
 def isJVMMemoryHigh():
     url = "http://{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
-    #r=requests.get(url="http://mozdefes5.private.scl3.mozilla.com:9200/_nodes/stats?pretty=true")
     r = requests.get(url)
     logger.debug(r)
     if r.status_code == 200:
