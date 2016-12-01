@@ -1,8 +1,4 @@
-# mozdefqa-gen2-private-scl3
-Repo for MozDefQA Next Gen
+# mozdef-private
+Repo for MozDef Next Gen
 
-mozdefqa-gen2-private-scl3
-
-private repo for the scl3 QA deployment of mozdef
-
-This repo will be used to make updates to the QA MozDef system in SCL3. Primarily for testing new alerts and logging.
+Private repo for the deployment of mozdef.
