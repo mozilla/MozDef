@@ -24,6 +24,12 @@ if (Meteor.isClient) {
         Session.set('alertsrecordlimit',100);
         Session.set('attackerlimit','10');
         getAllPlugins();
+
+        //assumes connection to an nginx/apache front end
+        //serving up an site handling authentication set via
+        //server side header
+        Meteor.loginViaHeader();
+
         //see if we have a myo armband
         try{
             myMyo = Myo;
@@ -363,6 +369,15 @@ if (Meteor.isClient) {
         }
     });
 
-
+    //sample login function
+    Meteor.loginViaHeader = function(callback) {
+      //create a login request to pass to loginHandler
+      var loginRequest = {};
+      //send the login request
+      Accounts.callLoginMethod({
+        methodArguments: [loginRequest],
+        userCallback: callback
+      });
+    };
 
 };
