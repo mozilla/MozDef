@@ -10,9 +10,11 @@ Anthony Verez averez@mozilla.com
 */
 
 if (Meteor.isServer) {
+    
     Meteor.startup(function () {
         console.log("MozDef starting")
-        //important to set this for so persona can validate the source request
+        
+        //important to set this so persona can validate the source request
         //set to what the browser thinks you are coming from (i.e. localhost, or actual servername)
         Meteor.absoluteUrl.defaultOptions.rootUrl = mozdef.rootURL + ':' + mozdef.port
         
@@ -36,51 +38,58 @@ if (Meteor.isServer) {
         mozdefsettings.insert({ key:'enableClientAccountCreation', 
                                 value : mozdef.enableClientAccountCreation || false});         
 
-        Accounts.config({
-            forbidClientAccountCreation: ! mozdef.enableClientAccountCreation,
+
+        Accounts.registerLoginHandler("headerLogin",function(loginRequest) {
+            //there are multiple login handlers in meteor. 
+            //a login request go through all these handlers to find it's login hander
+            //so in our login handler, we only consider login requests which are via a header
+            var self=this;
+            var sessionData = self.connection || (self._session ? self._session.sessionData : self._sessionData);
+            var session = Meteor.server.sessions[self.connection.id];
+            //ideally we would use a header unique to the installation like HTTP_OIDC_CLAIM_ID_TOKEN_EMAIL
+            //however sockJS whitelists only certain headers
+            // https://github.com/sockjs/sockjs-node/blob/8b03b3b1e7be14ee5746847f517029cb3ce30ca7/src/transport.coffee#L132
+            // choose one that is passed on and set it in your http server config:
+            var headerName='via';
+            
+            console.log('connection headers',this.connection.httpHeaders);
+            console.log('target header:',this.connection.httpHeaders[headerName]);
+            //our authentication logic
+            //check for user email header
+            if(this.connection.httpHeaders[headerName] == undefined) {
+                console.log('refused login request due to missing http header')
+                return null;
+            }
+            console.log('handling login request',loginRequest);
+            
+            //grab the email from the header
+            var userEmail = this.connection.httpHeaders[headerName];
+
+            //we create a user if needed, and get the userId
+            var userId = null;
+            var user = Meteor.users.findOne({profile:{email:userEmail}});
+            if(!user) {
+                console.log('creating user:',userEmail)
+                userId = Meteor.users.insert({
+                    profile: { email: userEmail},
+                    username: userEmail,
+                    emails: [{address:userEmail , "verified": true}],
+                    createdAt: new Date()
+                });
+            } else {  
+                userId = user._id;
+            }
+            
+            //generate login tokens
+            var stampedToken = Accounts._generateStampedLoginToken();
+            var hashStampedToken = Accounts._hashStampedToken(stampedToken);
+            //console.log(stampedToken,hashStampedToken);
+            //send loggedin user's user id
+            return {
+                userId: userId
+            }
         });
 
-        Accounts.onCreateUser(function(options, user) {
-          console.log('creating user');
-          console.log(user);
-          //meteor doesn't store a readily accessible email address
-          //so lets create a common location for it
-          //as user.profile.email
-          user.profile = {};
-          if ( user.services.persona && user.services.persona.email ) {
-            //make an emails list so persona acts like every other service
-            user.emails=[{verified: true, address: user.services.persona.email}];
-            user.profile.email = user.services.persona.email;
-            console.log('User email is: ' + user.profile.email);
-          } else if (user.emails){
-            user.profile.email=user.emails[0].address;
-          }
-          //return the user object to be saved
-          //in Meteor.users
-          return user;
-        });
-        
-        Accounts.onLogin(function(loginSuccess){
-            //fixup the user record on successful login
-            //if needed
-            //loginSuccess object has:
-            //type: 'persona'
-            //allowed: true/false
-            //methodArguments
-            //user (the same user object in onCreateUser)
-            //connection (id/close/onclose/clientAddress/httpHeaders)
-            user=loginSuccess.user
-            if (user.services.persona && !user.emails){
-                //make an emails list so persona acts like every other service
-                user.emails=[{verified: true, address: user.services.persona.email}];
-                user.profile.email = user.services.persona.email;
-                Meteor.users.update(user._id,
-                                    {$set: {emails:user.emails}});
-                //console.log('User email set to : ' + user.profile.email);    
-            }
-            console.log('login success', user);
-        });
-        
         //update veris if missing:
         console.log("checking the veris framework reference enumeration");
         console.log('tags: ' + veris.find().count());
