@@ -14,11 +14,11 @@ import logging
 import netaddr
 import sys
 from datetime import datetime
+from datetime import timedelta
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
-import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
@@ -47,12 +47,19 @@ def initLogger():
 
 
 def aggregateIPs(attackers):
-    iplist=[]
-    ips=attackers.aggregate([
-        {"$sort": {"lastseentimestamp":-1}},
-        {"$match": {"category":options.category}},
-        {"$match": {"indicators.ipv4address":{"$exists": True}}},
-        {"$group": {"_id": {"ipv4address":"$indicators.ipv4address"}}},
+    iplist = []
+
+    # We don't want to block ips forever,
+    # so only care about the ips the past 3 months
+    threshold_days = 30 * 3
+    timelimit = datetime.now() - timedelta(days=threshold_days)
+
+    ips = attackers.aggregate([
+        {"$sort": {"lastseentimestamp": -1}},
+        {"$match": {"category": options.category}},
+        {"$match": {"lastseentimestamp": {"$gte": timelimit}}},
+        {"$match": {"indicators.ipv4address": {"$exists": True}}},
+        {"$group": {"_id": {"ipv4address": "$indicators.ipv4address"}}},
         {"$unwind": "$_id.ipv4address"},
         {"$limit": options.iplimit}
     ])
