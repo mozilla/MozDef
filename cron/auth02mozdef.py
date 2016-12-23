@@ -45,6 +45,14 @@ log_types=DotDict({
             "event": 'Success Login',
             "level": 1 # Info
             },
+        'slo': {
+            "event": 'Success Logout',
+            "level": 1 # Info
+            },
+        'flo': {
+            "event": 'Failed Logout',
+            "level": 3 # Error
+            },
         'seacft': {
             "event": 'Success Exchange',
             "level": 1 # Info
@@ -196,7 +204,15 @@ log_types=DotDict({
         'fdu': {
                 "event": 'Failed User Deletion',
                 "level": 3 # Error
-                }
+                },
+        'sd': {
+                "event": 'Success delegation',
+                "level": 3 # error
+         },
+        'fd': {
+                "event": 'Failed delegation',
+                "level": 3 # error
+         }
 })
 
 def process_msg(mozmsg, msg):
@@ -267,8 +283,8 @@ def load_state(fpath):
     state = 0
     try:
         with open(fpath) as fd:
-            state = int(fd.read().split('\n')[0])
-    except FileNotFoundError:
+            state = fd.read().split('\n')[0]
+    except IOError:
         pass
     return state
 
@@ -279,6 +295,54 @@ def save_state(fpath, state):
     """
     with open(fpath, mode='w') as fd:
         fd.write(str(state)+'\n')
+
+def fetch_auth0_logs(config, headers, fromid):
+    lastid = fromid
+
+    r = requests.get('{url}?take={reqnr}&sort=date:1&per_page={reqnr}&include_totals=true&from={fromid}'.format(
+        url=config.auth0.url,
+        reqnr=config.auth0.reqnr,
+        fromid=fromid),
+        headers=headers)
+
+    #If we fail here, auth0 is not responding to us the way we expected it
+    if (not r.ok):
+        raise Exception(r.url, r.reason, r.status_code, r.json())
+    ret = r.json()
+
+    #Sometimes API give us the requested totals.. sometimes not.
+    if (type(ret) is dict) and ('logs' in ret.keys()):
+        have_totals = True
+        all_msgs = ret['logs']
+    else:
+        have_totals = False
+        all_msgs = ret
+
+    #Process all new auth0 log msgs, normalize and send them to mozdef
+    for msg in all_msgs:
+        print(msg)
+        mozmsg = mozdef.MozDefEvent(config.mozdef.url)
+        if bool(config.DEBUG):
+            mozmsg.set_send_to_syslog(True, only_syslog=True)
+        mozmsg.source = config.auth0.url
+        mozmsg.tags = ['auth0']
+        msg = DotDict(msg)
+        lastid = msg._id
+
+        #Fill in mozdef msg fields from the auth0 msg
+        try:
+            mozmsg = process_msg(mozmsg, msg)
+        except KeyError as e:
+            #if this happens the msg was malformed in some way
+            mozmsg.details['error'] = 'true'
+            mozmsg.details['errormsg'] = '"'+str(e)+'"'
+            mozmsg.summary = 'Failed to parse auth0 message'
+        mozmsg.send()
+
+    if have_totals:
+        return (int(ret['total']), int(ret['start']), int(ret['length']), lastid)
+    else:
+        return (0, 0, 0, lastid)
 
 def main():
     #Configuration loading
@@ -293,37 +357,17 @@ def main():
             'Accept': 'application/json'}
 
     fromid = load_state(config.state_file)
+    # Auth0 will interpret a 0 state as an error on our hosted instance, but will accept an empty parameter "as if it was 0"
+    if (fromid == 0 or fromid == "0"):
+        fromid = ""
+    totals = 1
+    start = 0
+    length = 0
 
-    r = requests.get('{url}?take={reqnr}&sort=date:1&per_page={reqnr}&include_totals=true&from={fromid}'.format(
-        url=config.auth0.url,
-        reqnr=config.auth0.reqnr,
-        fromid=fromid),
-        headers=headers)
-
-    #If we fail here, auth0 is not responding to us the way we expected it
-    if (not r.ok):
-        raise Exception(r.url, r.reason, r.status_code, r.json())
-    ret = r.json()
-
-    #Process all new auth0 log msgs, normalize and send them to mozdef
-    for msg in ret:
-        mozmsg = mozdef.MozDefEvent(config.mozdef.url)
-        if config.DEBUG:
-            mozmsg.set_send_to_syslog(True, only_syslog=True)
-        mozmsg.source = config.auth0.url
-        mozmsg.tags = ['auth0']
-        msg = DotDict(msg)
-        lastid = msg._id
-
-        #Fill in mozdef msg fields from the auth0 msg
-        try:
-            mozmsg = process_msg(mozmsg, msg)
-        except KeyError as e:
-            #if this happens the msg was malformed in some way
-            mozmsg.details['error'] = 'true'
-            mozmsg.details['errormsg'] = e
-            mozmsg.summary = 'Failed to parse auth0 message'
-        mozmsg.send()
+    # Fetch until we've gotten all messages
+    while (totals > start+length):
+        (totals, start, length, lastid) = fetch_auth0_logs(config, headers, fromid)
+        fromid = lastid
 
     save_state(config.state_file, lastid)
 
