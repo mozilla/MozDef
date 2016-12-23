@@ -20,7 +20,7 @@ import logging
 
 ALERTS={
     # QA and Prod both
-    'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/2')}
+    'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/2')},
     'unauth_ssh.AlertUnauthSSH': {'schedule': timedelta(minutes=1)},
     'confluence_shell.AlertConfluenceShellUsage': {'schedule': timedelta(minutes=1)},
     'unauth_scan.AlertUnauthInternalScan': {'schedule': timedelta(minutes=1)},
