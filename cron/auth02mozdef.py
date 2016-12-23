@@ -320,9 +320,8 @@ def fetch_auth0_logs(config, headers, fromid):
 
     #Process all new auth0 log msgs, normalize and send them to mozdef
     for msg in all_msgs:
-        print(msg)
         mozmsg = mozdef.MozDefEvent(config.mozdef.url)
-        if bool(config.DEBUG):
+        if config.DEBUG == 'True':
             mozmsg.set_send_to_syslog(True, only_syslog=True)
         mozmsg.source = config.auth0.url
         mozmsg.tags = ['auth0']
