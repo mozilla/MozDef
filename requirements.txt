@@ -38,3 +38,4 @@ boto3==1.4.1
 elasticsearch_dsl==2.1.0
 pika==0.10.0
 mozdef_client
+hjson
