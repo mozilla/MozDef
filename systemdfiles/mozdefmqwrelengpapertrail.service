@@ -4,6 +4,9 @@ After=syslog.target
 
 [Service]
 # Requires systemd version 211 or newer
+PermissionsStartOnly=true
+ExecStartPre=-/usr/bin/mkdir /var/run/mozdefmqwRelengPapertrail
+ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdefmqwRelengPapertrail
 User=mozdef
 Group=mozdef
 ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/mq; source /opt/mozdef/envs/mozdef/bin/activate; uwsgi --ini mqwRelengPapertrail.ini'

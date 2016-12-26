@@ -14,6 +14,6 @@ master-fifo = /opt/mozdef/envs/mozdef/mq/mqwFxaStage.fifo
 procname-master = [m]
 procname-prefix = [mqwFxaStage]
 never-swap
-pidfile= /opt/mozdef/envs/mozdef/mq/mqwFxaStage.pid
+pidfile= /var/run/mozdefmq/mqwFxaStage.pid
 vacuum = true
 enable-threads

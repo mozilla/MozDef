@@ -8,12 +8,12 @@ logto = /opt/mozdef/envs/mozdef/logs/uwsgi.mqESmules.infosecsqs.log
 ;
 log-drain = generated 0 bytes
 log-date = %%a %%b %%d %%H:%%M:%%S
-socket = /opt/mozdef/envs/mozdef/mq/mqESmulesInfosecSQSNonProd.socket
+socket = /opt/mozdef/envs/mozdef/mq/mqwInfosecSQSNonProd.socket
 virtualenv = /opt/mozdef/envs/mozdef/
-master-fifo = /opt/mozdef/envs/mozdef/mq/mqESmulesInfosecSQSNonProd.fifo
+master-fifo = /opt/mozdef/envs/mozdef/mq/mqwInfosecSQSNonProd.fifo
 procname-master = [m]
 procname-prefix = [mqwInfosecSQSNonProd]
 never-swap
-pidfile= /opt/mozdef/envs/mozdef/mq/mqESmulesInfosecSQSNonProd.pid
+pidfile= /var/run/mozdefmqwInfosecSQSNonProd/mqwInfosecSQSNonProd.pid
 vacuum = true
 enable-threads

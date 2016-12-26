@@ -1,0 +1,19 @@
+[uwsgi]
+chdir = /opt/mozdef/envs/mozdef/mq/
+uid = mozdef
+mule = esworker.papertrail.py
+mule = esworker.papertrail.py
+pyargv = -c /opt/mozdef/envs/mozdef/mq/esworker.relengpapertrail.conf
+logto = /opt/mozdef/envs/mozdef/logs/uwsgi.mqESmules.relengpapertrail.log
+;ignore normal operations that generate nothing but normal response
+log-drain = generated 0 bytes
+log-date = %%a %%b %%d %%H:%%M:%%S
+socket = /opt/mozdef/envs/mozdef/mq/mqwRelengPapertrail.socket
+virtualenv = /opt/mozdef/envs/mozdef/
+procname-master = [m]
+procname-prefix = [mqwRelengPapertrail]
+master-fifo = /opt/mozdef/envs/mozdef/mq/mqwRelengPapertrail.fifo
+never-swap
+pidfile= /var/run/mozdefmqwRelengPapertrail/mqwRelengPapertrail.pid
+vacuum = true
+enable-threads

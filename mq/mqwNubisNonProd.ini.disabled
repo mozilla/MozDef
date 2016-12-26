@@ -13,6 +13,6 @@ master-fifo = /opt/mozdef/envs/mozdef/mq/mqwNubisNonProd.fifo
 procname-master = [m]
 procname-prefix = [mqwNubisNonProd]
 never-swap
-pidfile= /opt/mozdef/envs/mozdef/mq/mqwNubisNonProd.pid
+pidfile= /var/run/mozdefmqwNubisNonProd/mqwNubisNonProd.pid
 vacuum = true
 enable-threads
