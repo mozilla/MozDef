@@ -3,7 +3,7 @@ chdir = /opt/mozdef/envs/mozdef/mq/
 uid = mozdef
 mule = esworker.sqs.py
 pyargv = -c /opt/mozdef/envs/mozdef/mq/esworker.nubis.nonprod.conf
-logto = /opt/mozdef/envs/mozdef/logs/uwsgi.mqw.nubis.log
+logto = /opt/mozdef/envs/mozdef/logs/uwsgi.nubis.log
 ;ignore normal operations that generate nothing but normal response
 log-drain = generated 0 bytes
 log-date = %%a %%b %%d %%H:%%M:%%S
@@ -13,6 +13,6 @@ master-fifo = /opt/mozdef/envs/mozdef/mq/mqwNubisNonProd.fifo
 procname-master = [m]
 procname-prefix = [mqwNubisNonProd]
 never-swap
-pidfile= /var/run/mozdefmqwNubisNonProd/mqwNubisNonProd.pid
+pidfile = /var/run/mozdefmqwNubisNonProd/mqwNubisNonProd.pid
 vacuum = true
 enable-threads
