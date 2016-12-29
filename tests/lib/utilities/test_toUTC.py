@@ -5,7 +5,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../lib'))
 from utilities.toUTC import toUTC
-
+import pytest
 
 class TestToUTC():
 
@@ -46,3 +46,22 @@ class TestToUTC():
         result = toUTC(1468443523)
         self.result_is_datetime(result)
         assert str(result) == '2016-07-13 15:58:43+00:00'
+
+    def test_float_epoch(self):
+        result = toUTC(1468443523.0)
+        self.result_is_datetime(result)
+        assert str(result) == '2016-07-13 15:58:43+00:00'
+
+    def test_long_float_epoch(self):
+        result = toUTC(1.468443523e+18)
+        self.result_is_datetime(result)
+        assert str(result) == '2016-07-13 15:58:43+00:00'
+
+    def test_float_epoch_milliseconds(self):
+        result = toUTC(1.468443523e+11)
+        self.result_is_datetime(result)
+        assert str(result) == '2016-07-13 15:58:43+00:00'
+
+    def test_unparseable_suspectedDate(self):
+        with pytest.raises(ValueError):
+            toUTC("This is not a date")

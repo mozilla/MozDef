@@ -228,7 +228,8 @@ def keyMapping(aDict):
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
     except Exception as e:
-        sys.stderr.write('esworker exception normalizing the message %r\n' % e)
+        sys.stderr.write(
+            'esworker.sqs exception normalizing the message %r\n' % e)
         return None
 
     return returndict
@@ -277,13 +278,24 @@ class taskConsumer(object):
                             continue
 
                     event = dict()
-                    event['tags'] = [options.taskexchange]
-                    event['details'] = msgbody
-                    if event['details'].has_key('time'):
-                        event['utctimestamp'] = toUTC(event['details']['time'])
+                    event = msgbody
 
-                    if event['details'].has_key('message'):
-                        event['summary'] = event['details']['message']
+                    # Was this message sent by fluentd-sqs
+                    fluentd_sqs_specific_fields = {
+                        'az', 'instance_id', '__tag'}
+                    if fluentd_sqs_specific_fields.issubset(
+                            set(msgbody.keys())):
+                        # Until we can influence fluentd-sqs to set the
+                        # 'customendpoint' key before submitting to SQS, we'll
+                        # need to do it here
+                        # TODO : Change nubis fluentd output to include
+                        # 'customendpoint'
+                        event['customendpoint'] = True
+
+                    if 'tags' in event:
+                        event['tags'].extend([options.taskexchange])
+                    else:
+                        event['tags'] = [options.taskexchange]
 
                     #process message
                     self.on_message(event, msg)
@@ -315,11 +327,15 @@ class taskConsumer(object):
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
-                    sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                    sys.stderr.write(
+                        "esworker.sqs exception: unknown body type received "
+                        "%r\n" % body)
                     #message.ack()
                     return
             else:
-                sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                sys.stderr.write(
+                    "esworker.sqs exception: unknown body type received "
+                    "%r\n" % body)
                 #message.ack()
                 return
 
@@ -387,7 +403,8 @@ class taskConsumer(object):
 
             #message.ack()
         except ValueError as e:
-            sys.stderr.write("esworker exception in events queue %r\n" % e)
+            sys.stderr.write(
+                "esworker.sqs exception in events queue %r\n" % e)
 
 
 def registerPlugins():
@@ -550,7 +567,7 @@ def main():
                                       aws_access_key_id=options.accesskey,
                                       aws_secret_access_key=options.secretkey)
     # attach to the queue
-    eventTaskQueue = mqConn.create_queue(options.taskexchange)
+    eventTaskQueue = mqConn.get_queue(options.taskexchange)
 
     # consume our queue
     taskConsumer(mqConn, eventTaskQueue, es).run()
