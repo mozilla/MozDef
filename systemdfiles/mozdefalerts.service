@@ -4,6 +4,10 @@ After=syslog.target
 
 [Service]
 # Requires systemd version 211 or newer
+PermissionsStartOnly=true
+ExecStartPre=-/usr/bin/mkdir /var/run/mozdef-alerts
+ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdef-alerts
+PIDFile=/var/run/mozdef-alerts/supervisord.pid
 User=mozdef
 Group=mozdef
 ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/alerts; source /opt/mozdef/envs/mozdef/bin/activate; /opt/mozdef/envs/mozdef/bin/supervisord -c /opt/mozdef/envs/mozdef/alerts/supervisord.alerts.conf'
