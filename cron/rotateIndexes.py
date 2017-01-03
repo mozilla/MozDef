@@ -29,7 +29,7 @@ from elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.DEBUG
+logger.level=logging.WARNING
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
