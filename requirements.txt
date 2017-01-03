@@ -20,6 +20,7 @@ ipwhois==0.9.0
 jmespath==0.9.0
 kitnirc==0.2.6
 kombu==3.0.35
+meld3==1.0.2
 pip==8.1.2
 pyasn1==0.7.1
 pyasn1-modules==0.0.5
@@ -29,9 +30,14 @@ python-dateutil==2.2
 pytz==2013.9
 requests==2.5.3
 requests-futures==0.9.5
+rsa==3.1.4
 s3cmd==1.0.1
+setuptools==25.2.0
+setuptools-scm==1.11.1
 simplejson==3.3.3
 six==1.5.2
+supervisor==3.3.1
+uritemplate==0.6
 urllib3==1.16
 virtualenv==1.11.4
 wsgiref==0.1.2
