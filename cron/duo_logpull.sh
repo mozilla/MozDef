@@ -6,4 +6,4 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 source  /opt/mozdef/envs/mozdef/bin/activate
-/opt/mozdef/envs/mozdef/cron/duo_logpull.py -c /opt/mozdef/envs/mozdef/cron/okta2mozdef.conf
+/opt/mozdef/envs/mozdef/cron/duo_logpull.py -c /opt/mozdef/envs/mozdef/cron/duo_logpull.conf
