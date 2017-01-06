@@ -52,3 +52,5 @@ numpy==1.11.2
 pika==0.10.0
 mozdef_client
 hjson
+# only needed by duo_logpull
+duo_client
