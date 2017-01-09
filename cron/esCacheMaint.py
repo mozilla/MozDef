@@ -62,7 +62,7 @@ def digits(n):
 
 
 def isJVMMemoryHigh():
-    url = "http://{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
+    url = "{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
     r = requests.get(url)
     logger.debug(r)
     if r.status_code == 200:
@@ -102,7 +102,7 @@ def clearESCache():
                     fielddata = indexstats['_all']['total']['fielddata']['memory_size_in_bytes']
                     if fielddata > 0:
                         logger.info('target: {0}: field data {1}'.format(targetindex, indexstats['_all']['total']['fielddata']['memory_size_in_bytes']))
-                        clearurl = 'http://{0}/{1}/_cache/clear'.format(random.choice(options.esservers), targetindex)
+                        clearurl = '{0}/{1}/_cache/clear'.format(random.choice(options.esservers), targetindex)
                         clearRequest = requests.post(clearurl)
                         logger.info(clearRequest.text)
                         if options.conservative:
