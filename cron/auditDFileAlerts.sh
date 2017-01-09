@@ -9,4 +9,4 @@
 # Brandon Myers bmyers@mozilla.com
 
 source  /opt/mozdef/envs/mozdef/bin/activate
-/opt/mozdef/envs/mozdef/cron/eventStats.py -c /opt/mozdef/envs/mozdef/cron/eventStats.conf
+/opt/mozdef/envs/mozdef/cron/auditDFileAlerts.py -c /opt/mozdef/envs/mozdef/cron/auditDAlerts.conf
