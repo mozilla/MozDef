@@ -126,7 +126,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
         self.es_client.es_connection.transport.perform_request = mock_class.perform_request
 
-        event_length = 10000
+        event_length = 100
         events = []
         for num in range(event_length):
             events.append({"key": "value" + str(num)})
@@ -135,9 +135,9 @@ class TestSimpleWrites(ElasticsearchClientTest):
             self.es_client.save_event(body=event)
         self.es_client.flush('events')
 
-        assert mock_class.request_counts == 10000
+        assert mock_class.request_counts == 100
         num_events = self.get_num_events()
-        assert num_events == 10000
+        assert num_events == 100
 
 
 class BulkTest(ElasticsearchClientTest):

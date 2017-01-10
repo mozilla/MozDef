@@ -17,6 +17,7 @@ import random
 class UnitTestSuite(object):
     def setup(self):
         self.event_index_name = datetime.now().strftime("events-%Y%m%d")
+        self.previous_event_index_name = (datetime.now() - timedelta(days=1)).strftime("events-%Y%m%d")
         self.alert_index_name = datetime.now().strftime("alert-%Y%m")
 
         # todo: remove once we are able to run unit tests against
@@ -44,13 +45,15 @@ class UnitTestSuite(object):
     def setup_elasticsearch(self):
         self.es_client.create_index(self.event_index_name)
         self.es_client.create_alias('events', self.event_index_name)
-        self.es_client.create_alias('events-previous', self.event_index_name)
+        self.es_client.create_index(self.previous_event_index_name)
+        self.es_client.create_alias('events-previous', self.previous_event_index_name)
         self.es_client.create_index(self.alert_index_name)
         self.es_client.create_alias('alerts', self.alert_index_name)
 
     def reset_elasticsearch(self):
         self.es_client.delete_index(self.event_index_name, True)
         self.es_client.delete_index('events', True)
+        self.es_client.delete_index(self.previous_event_index_name, True)
         self.es_client.delete_index('events-previous', True)
         self.es_client.delete_index(self.alert_index_name, True)
         self.es_client.delete_index('alerts', True)
