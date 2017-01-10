@@ -112,6 +112,10 @@ class ElasticsearchClient():
         self.bulk_queue.stop_timer()
 
     def save_object(self, index, doc_type, body, doc_id=None, bulk=False):
+        # Try and parse it as json if it's a string
+        if type(body) is str:
+            body = json.loads(body)
+
         if bulk:
             self.bulk_save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
         else:
