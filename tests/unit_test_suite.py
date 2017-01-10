@@ -18,7 +18,7 @@ class UnitTestSuite(object):
     def setup(self):
         self.event_index_name = datetime.now().strftime("events-%Y%m%d")
         self.previous_event_index_name = (datetime.now() - timedelta(days=1)).strftime("events-%Y%m%d")
-        self.alert_index_name = datetime.now().strftime("alert-%Y%m")
+        self.alert_index_name = datetime.now().strftime("alerts-%Y%m")
 
         # todo: remove once we are able to run unit tests against
         # a live server that won't delete all the data. Depends on when we
