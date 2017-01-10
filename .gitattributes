@@ -5,3 +5,4 @@
 config/mongod.conf !filter !diff
 cron/mozdefGoogleCredentials.json filter=git-crypt diff=git-crypt
 cron/auth02mozdef.json filter=git-crypt diff=git-crypt
+alerts/lib/config.py filter=git-crypt diff=git-crypt
