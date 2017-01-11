@@ -116,6 +116,9 @@ class ElasticsearchClient():
         if type(body) is str:
             body = json.loads(body)
 
+        if '_type' in body:
+            doc_type = body['_type']
+
         if bulk:
             self.bulk_save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
         else:
