@@ -20,7 +20,7 @@ class AlertConfluenceShellUsage(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'auditd'),
             TermMatch('details.user', 'confluence'),
-            QueryStringMatch('hostname: /.*(mana|confluence).*/'),
+            QueryStringMatch('details.hostname: /.*(mana|confluence).*/'),
         ])
 
         search_query.add_must_not(TermMatch('details.originaluser', 'root'))
