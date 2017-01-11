@@ -54,3 +54,4 @@ mozdef_client
 hjson
 # only needed by duo_logpull
 duo_client
+pyopenssl
