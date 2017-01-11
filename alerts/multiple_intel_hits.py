@@ -22,7 +22,7 @@ class AlertMultipleIntelHits(AlertTask):
             TermMatch('_type', 'bro'),
             TermMatch('eventsource', 'nsm'),
             TermMatch('category', 'brointel'),
-            ExistsMatch('seenindicator'),
+            ExistsMatch('details.seenindicator'),
             TermsMatch('hostname', ['sensor1', 'sensor2', 'sensor3'])
         ])
 

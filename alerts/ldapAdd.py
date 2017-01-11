@@ -18,7 +18,7 @@ class ldapAdd(AlertTask):
 
         search_query.add_must([
             TermMatch('category', 'ldapChange'),
-            TermMatch('changetype', 'add')
+            TermMatch('details.changetype', 'add')
         ])
 
         self.filtersManual(search_query)

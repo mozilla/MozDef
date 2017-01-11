@@ -18,10 +18,10 @@ class AlertFailedAMOLogin(AlertTask):
 
         search_query.add_must([
             TermMatch('_type', 'addons'),
-            TermMatch('signatureid', 'authfail'),
+            TermMatch('details.signatureid', 'authfail'),
             ExistsMatch('details.sourceipaddress'),
-            PhraseMatch("msg", "The password was incorrect"),
-            ExistsMatch('suser')
+            PhraseMatch('details.msg', "The password was incorrect"),
+            ExistsMatch('details.suser')
         ])
 
         self.filtersManual(search_query)

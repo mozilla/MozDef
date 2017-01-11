@@ -18,7 +18,7 @@ class ldapGroupModify(AlertTask):
 
         search_query.add_must([
             TermMatch('category', 'ldapChange'),
-            TermMatch('changetype', 'modify'),
+            TermMatch('details.changetype', 'modify'),
             PhraseMatch("summary", "groups")
         ])
 

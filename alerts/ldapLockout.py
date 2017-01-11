@@ -18,7 +18,7 @@ class ldapLockout(AlertTask):
 
         search_query.add_must([
             TermMatch('category', 'ldapChange'),
-            TermMatch("actor", "cn=admin,dc=mozilla"),
+            TermMatch("details.actor", "cn=admin,dc=mozilla"),
             PhraseMatch('changepairs', 'replace:pwdAccountLockedTime')
         ])
         self.filtersManual(search_query)

@@ -18,7 +18,7 @@ class ldapDelete(AlertTask):
 
         search_query.add_must([
             TermMatch('category', 'ldapChange'),
-            TermMatch('changetype', 'delete')
+            TermMatch('details.changetype', 'delete')
         ])
 
         self.filtersManual(search_query)

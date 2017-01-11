@@ -20,7 +20,7 @@ class AlertHostScannerFinding(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'cef'),
             ExistsMatch('details.dhost'),
-            PhraseMatch("signatureid", "sensitivefiles")
+            PhraseMatch("details.signatureid", "sensitivefiles")
         ])
 
         self.filtersManual(search_query)
