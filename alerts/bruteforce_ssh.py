@@ -20,7 +20,7 @@ class AlertBruteforceSsh(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'event'),
             PhraseMatch('summary', 'failed'),
-            TermMatch('program', 'sshd'),
+            TermMatch('details.program', 'sshd'),
             TermsMatch('summary', ['login', 'invalid', 'ldap_count_entries'])
         ])
 

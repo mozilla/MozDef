@@ -57,7 +57,7 @@ def searchForSSHKeys(es):
     search_query = SearchQuery(minutes=5)
     search_query.add_must([
         TermMatch('_type', 'event'),
-        TermMatch('program', 'sshd'),
+        TermMatch('details.program', 'sshd'),
         QueryStringMatch('summary:found matching key accepted publickey')
     ])
     results = search_query.execute(es)

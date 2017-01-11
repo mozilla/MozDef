@@ -85,7 +85,7 @@ def esSearch(es, macassignments=None):
     correlations={} # list of dicts to populate hits we find
 
     search_query = SearchQuery(minutes=options.correlationminutes)
-    search_query.add_must(TermMatch('program', 'AUTHORIZATION-SUCCESS'))
+    search_query.add_must(TermMatch('details.program', 'AUTHORIZATION-SUCCESS'))
     search_query.add_must_not(PhraseMatch('summary', 'last-resort'))
 
     try:
