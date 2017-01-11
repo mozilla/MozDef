@@ -20,7 +20,7 @@ class AlertConfluenceShellUsage(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'auditd'),
             TermMatch('details.user', 'confluence'),
-            QueryStringMatch('details.hostname: /.*(mana|confluence).*/'),
+            QueryStringMatch('hostname: /.*(mana|confluence).*/'),
         ])
 
         search_query.add_must_not(TermMatch('details.originaluser', 'root'))
@@ -29,7 +29,7 @@ class AlertConfluenceShellUsage(AlertTask):
 
         # Search aggregations on field 'sourceipaddress', keep X samples of
         # events at most
-        self.searchEventsAggregated('details.hostname', samplesLimit=10)
+        self.searchEventsAggregated('hostname', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         # in this case, always
         self.walkAggregations(threshold=1)
