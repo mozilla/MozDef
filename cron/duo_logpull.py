@@ -71,8 +71,9 @@ def process_events(mozmsg, duo_events, etype, state):
 
 
 def main():
+    state_location = os.path.dirname(sys.argv[0]) + '/' + options.statepath
     try:
-        state = pickle.load(open(options.statepath, 'rb'))
+        state = pickle.load(open(state_location, 'rb'))
     except IOError:
         # Oh, you're new.
         state = {'administration': 0, 'authentication': 0, 'telephony': 0}
@@ -89,7 +90,7 @@ def main():
     state = process_events(mozmsg, duo.get_authentication_log(mintime=state['authentication']+1), 'authentication', state)
     state = process_events(mozmsg, duo.get_telephony_log(mintime=state['telephony']+1), 'telephony', state)
 
-    pickle.dump(state, open(options.statepath, 'wb'))
+    pickle.dump(state, open(state_location, 'wb'))
 
 
 def initConfig():
