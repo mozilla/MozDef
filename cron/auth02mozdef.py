@@ -357,8 +357,7 @@ def main():
     headers = {'Authorization': 'Bearer {}'.format(config.auth0.token),
             'Accept': 'application/json'}
 
-    state_location = os.path.dirname(sys.argv[0]) + '/' + config.state_file
-    fromid = load_state(state_location)
+    fromid = load_state(config.state_file)
     # Auth0 will interpret a 0 state as an error on our hosted instance, but will accept an empty parameter "as if it was 0"
     if (fromid == 0 or fromid == "0"):
         fromid = ""
@@ -371,7 +370,7 @@ def main():
         (totals, start, length, lastid) = fetch_auth0_logs(config, headers, fromid)
         fromid = lastid
 
-    save_state(state_location, lastid)
+    save_state(config.state_file, lastid)
 
 if __name__ == "__main__":
     main()
