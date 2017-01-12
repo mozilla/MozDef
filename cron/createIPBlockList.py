@@ -168,4 +168,4 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
-    s3_upload_file('/opt/mozdef/envs/mozdef/static/ipblocklist.txt', 'mozilla_infosec_blocklist','qaipblocklist')
+    s3_upload_file('/opt/mozdef/envs/mozdef/static/ipblocklist.txt', 'mozilla_infosec_blocklist','ipblocklist')
