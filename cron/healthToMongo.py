@@ -79,18 +79,19 @@ def getEsNodesStats():
     jsonobj = r.json()
     results = []
     for nodeid in jsonobj['nodes']:
-        try:
-            results.append({
-                'hostname': jsonobj['nodes'][nodeid]['host'],
-                'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
-                'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024),
-                'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
-                'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu_percent'],
-                'load': jsonobj['nodes'][nodeid]['os']['load_average']
-            })
-        except Exception as e:
-            #logger.error("exception %r appending ES node stats" %e)
+        # Skip non masters and data nodes since it won't have full stats
+        if (jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
+                jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
             continue
+
+        results.append({
+            'hostname': jsonobj['nodes'][nodeid]['host'],
+            'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
+            'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024),
+            'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
+            'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu_percent'],
+            'load': jsonobj['nodes'][nodeid]['os']['load_average']
+        })
     return results
 
 
