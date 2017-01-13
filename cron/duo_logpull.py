@@ -10,18 +10,13 @@
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+
 from utilities.toUTC import toUTC
-
-
-import sys
 from configlib import getConfig, OptionParser
 import json
-
-
 import duo_client
 import mozdef_client as mozdef
 import pickle
-
 
 def process_events(mozmsg, duo_events, etype, state):
     # There are some key fields that we use as MozDef fields, those are set to "noconsume"
@@ -68,8 +63,6 @@ def process_events(mozmsg, duo_events, etype, state):
         pass
     return state
 
-
-
 def main():
     try:
         state = pickle.load(open(options.statepath, 'rb'))
@@ -81,8 +74,6 @@ def main():
     mozmsg = mozdef.MozDefMsg(options.MOZDEF_URL, tags=['duosecurity', 'logs'])
     mozmsg.debug = options.DEBUG
 
-
-
     # This will process events for all 3 log types and send them to MozDef. the state stores the last position in the
     # log when this script was last called.
     state = process_events(mozmsg, duo.get_administrator_log(mintime=state['administration']+1), 'administration', state)
@@ -90,7 +81,6 @@ def main():
     state = process_events(mozmsg, duo.get_telephony_log(mintime=state['telephony']+1), 'telephony', state)
 
     pickle.dump(state, open(options.statepath, 'wb'))
-
 
 def initConfig():
     options.IKEY = getConfig('IKEY', '', options.configfile)
@@ -100,7 +90,6 @@ def initConfig():
     options.MOZDEF_URL = getConfig('MOZDEF_URL', '', options.configfile)
     options.DEBUG = getConfig('DEBUG', True, options.configfile)
     options.statepath = getConfig('statepath', '', options.configfile)
-
 
 if __name__ == '__main__':
     parser = OptionParser()
