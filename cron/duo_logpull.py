@@ -18,6 +18,22 @@ import duo_client
 import mozdef_client as mozdef
 import pickle
 
+def normalize(details):
+    # Normalizes fields to conform to http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
+    # This is mainly used for common field names to put inside the details structure
+    # There might be faster ways to do this
+    normalized = {}
+
+    for f in details:
+        if f in ("ip", "ip_address"):
+            normalized["sourceipaddress"] = details[f]
+            continue
+        if f == "result":
+            if details[f] != "SUCCESS":
+                normalized["error"] = True
+        normalized[f] = details[f]
+    return normalized
+
 def process_events(mozmsg, duo_events, etype, state):
     # There are some key fields that we use as MozDef fields, those are set to "noconsume"
     # After processing these fields, we just pour everything into the "details" fields of Mozdef, except for the
@@ -48,12 +64,15 @@ def process_events(mozmsg, duo_events, etype, state):
                 continue
 
             details[i] = e[i]
+        mozmsg.details = normalize(details)
         if etype == 'administration':
-          mozmsg.send(e['action'], details=details)
+            mozmsg.summary = e['action']
         elif etype == 'telephony':
-          mozmsg.send(e['context'], details=details)
+            mozmsg.summary = e['context']
         elif etype == 'authentication':
-          mozmsg.send(e['eventtype']+' '+e['result']+' for '+e['username'], details=details)
+            mozmsg.summary = e['eventtype']+' '+e['result']+' for '+e['username']
+
+        mozmsg.send()
 
     # last event timestamp record is stored and returned so that we can save our last position in the log.
     try:
@@ -71,8 +90,13 @@ def main():
         state = {'administration': 0, 'authentication': 0, 'telephony': 0}
 
     duo = duo_client.Admin(ikey=options.IKEY, skey=options.SKEY, host=options.URL)
-    mozmsg = mozdef.MozDefMsg(options.MOZDEF_URL, tags=['duosecurity', 'logs'])
-    mozmsg.debug = options.DEBUG
+    mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
+    mozmsg.tags=['duosecurity', 'logs']
+    mozmsg.category = 'Authentication'
+    mozmsg.source = 'DuoSecurity API'
+    if options.DEBUG:
+        mozmsg.debug = options.DEBUG
+        mozmsg.set_send_to_syslog(True, only_syslog=True)
 
     # This will process events for all 3 log types and send them to MozDef. the state stores the last position in the
     # log when this script was last called.
