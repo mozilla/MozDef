@@ -12,6 +12,8 @@ Anthony Verez averez@mozilla.com
 if (Meteor.isServer) {
 
     Meteor.startup(function () {
+        // Since we only connect to localhost or to ourselves, adding a hack to bypass cert validation
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED="0";
         console.log("MozDef starting")
 
         //important to set this so persona can validate the source request
