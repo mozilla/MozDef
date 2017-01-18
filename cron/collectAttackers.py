@@ -20,6 +20,7 @@ from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 from collections import Counter
+from kombu import Connection
 
 import sys
 import os
