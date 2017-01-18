@@ -38,7 +38,7 @@ class message(object):
 
     def onMessage(self, message, metadata):
         #drop non-relevant messages
-        if message['eventsource'] in ('FxaContentWebserver', 'FxaAuthWebserver', 'FxaAuth', 'fxa-auth-server'):
+        if message['eventsource'] in ('FxaContentWebserver', 'FxaAuthWebserver', 'FxaOauthWebserver', 'FxaAuth', 'fxa-auth-server'):
             if 'details' in message.keys():
                 if 'status' in message['details']:
                     if message['details']['status'] == 200:
