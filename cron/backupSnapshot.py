@@ -14,10 +14,10 @@
 # Each run creates a snapshot of indexname-epochtimestamp
 # .conf file will determine what indexes are operated on
 # Create a starter .conf file with backupDiscover.py
-# You must create the s3 bucket "mozdefesbackups" first paying attention to
+# You must create the s3 bucket "mozdefes2backups" first paying attention to
 # the region assigned to the bucket.
 # Snapshots will be placed in:
-# mozdefesbackups/elasticsearch/YYYY-MM/servername/indices/indexname
+# mozdefes2backups/elasticsearch/YYYY-MM/servername/indices/indexname
 
 import sys
 import os
@@ -64,7 +64,7 @@ def main():
         snapshot_config = {
             "type": "s3",
             "settings": {
-                "bucket": "mozdefesbackups",
+                "bucket": "mozdefes2backups",
                 "base_path": "elasticsearch/{0}/{1}".format(bucketdate, hostname),
                 "region": "{0}".format(options.aws_region)
             }
@@ -113,7 +113,7 @@ echo "DONE!"
                     """ % (esserver, index_to_snapshot, epoch))
 
                 # upload the restore script
-                bucket = s3.get_bucket('mozdefesbackups')
+                bucket = s3.get_bucket('mozdefes2backups')
                 key = bucket.new_key('elasticsearch/%s/%s/%s-%s-%s-restore.sh' % (
                     bucketdate, hostname, index, idate, epoch))
                 key.set_contents_from_filename(localpath)
@@ -182,7 +182,7 @@ def initConfig():
         )
     options.aws_region = getConfig(
         'aws_region',
-        'us-east',
+        'us-west-1',
         options.configfile
         )
 
