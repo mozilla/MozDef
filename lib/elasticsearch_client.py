@@ -102,11 +102,7 @@ class ElasticsearchClient():
 
     def bulk_save_object(self, index, doc_type, body, doc_id=None):
         self.start_bulk_timer()
-
-        doc_body = body
-        if '_source' in body:
-            doc_body = body['_source']
-        self.bulk_queue.add(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id)
+        self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
 
     def finish_bulk(self):
         self.bulk_queue.stop_timer()
@@ -119,12 +115,13 @@ class ElasticsearchClient():
         if '_type' in body:
             doc_type = body['_type']
 
+        doc_body = body
+        if '_source' in body:
+            doc_body = body['_source']
+
         if bulk:
-            self.bulk_save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+            self.bulk_save_object(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id)
         else:
-            doc_body = body
-            if '_source' in body:
-                doc_body = body['_source']
             return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=doc_body)
 
     def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):

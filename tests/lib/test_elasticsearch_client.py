@@ -2,7 +2,7 @@ import os
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from query_models import SearchQuery, TermMatch, Aggregation
+from query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
 from config import ES
@@ -138,6 +138,44 @@ class TestSimpleWrites(ElasticsearchClientTest):
         assert mock_class.request_counts == 100
         num_events = self.get_num_events()
         assert num_events == 100
+
+    def test_writing_with_type(self):
+        query = SearchQuery()
+        default_event = {
+            "_type": "example",
+            "_source": {
+                "receivedtimestamp": UnitTestSuite.current_timestamp(),
+                "summary": "Test summary",
+                "details": {
+                    "note": "Example note",
+                }
+            }
+        }
+        self.populate_test_event(default_event)
+
+        query.add_must(ExistsMatch('summary'))
+        results = query.execute(self.es_client)
+        assert len(results['hits']) == 1
+        assert results['hits'][0]['_type'] == 'example'
+        assert results['hits'][0]['_source'] == default_event['_source']
+
+    def test_writing_with_source(self):
+        query = SearchQuery()
+        default_event = {
+            "_source": {
+                "receivedtimestamp": UnitTestSuite.current_timestamp(),
+                "summary": "Test summary",
+                "details": {
+                    "note": "Example note",
+                }
+            }
+        }
+        self.populate_test_event(default_event)
+
+        query.add_must(ExistsMatch('summary'))
+        results = query.execute(self.es_client)
+        assert len(results['hits']) == 1
+        assert results['hits'][0]['_type'] == 'event'
 
 
 class BulkTest(ElasticsearchClientTest):
