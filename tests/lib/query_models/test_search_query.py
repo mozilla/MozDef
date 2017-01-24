@@ -470,3 +470,74 @@ class TestExecute(SearchQueryUnitTest):
         self.query.add_should(ExistsMatch('nonexistentfield'))
         results = self.query.execute(self.es_client)
         assert len(results['hits']) == 1
+
+    def test_beginning_time_seconds_received_timestamp(self):
+        query = SearchQuery(seconds=10)
+        assert query.date_timedelta == {'seconds': 10}
+
+        default_event = {
+            "receivedtimestamp": UnitTestSuite.current_timestamp(),
+            "summary": "Test summary",
+            "details": {
+                "note": "Example note",
+            }
+        }
+        self.populate_test_event(default_event)
+
+        too_old_event = default_event
+        too_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 11})
+        self.populate_test_event(too_old_event)
+
+        not_old_event = default_event
+        not_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
+        self.populate_test_event(not_old_event)
+
+        query.add_must(ExistsMatch('summary'))
+
+        results = query.execute(self.es_client)
+        assert len(results['hits']) == 2
+
+    def test_time_received_timestamp(self):
+        query = SearchQuery(seconds=10)
+        assert query.date_timedelta == {'seconds': 10}
+
+        received_timestamp_default_event = {
+            "receivedtimestamp": UnitTestSuite.current_timestamp(),
+            "summary": "Test summary",
+            "details": {
+                "note": "Example note",
+            }
+        }
+        self.populate_test_event(received_timestamp_default_event)
+
+        utctimestamp_default_event = {
+            "utctimestamp": UnitTestSuite.current_timestamp(),
+            "summary": "Test summary",
+            "details": {
+                "note": "Example note",
+            }
+        }
+        self.populate_test_event(utctimestamp_default_event)
+
+        default_event = {
+            "utctimestamp": UnitTestSuite.current_timestamp(),
+            "receivedtimestamp": UnitTestSuite.current_timestamp(),
+            "summary": "Test summary",
+            "details": {
+                "note": "Example note",
+            }
+        }
+        self.populate_test_event(default_event)
+
+        modified_received_timestamp_event = default_event
+        modified_received_timestamp_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 11})
+        self.populate_test_event(modified_received_timestamp_event)
+
+        modified_utc_timestamp_event = default_event
+        modified_utc_timestamp_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
+        self.populate_test_event(modified_utc_timestamp_event)
+
+        query.add_must(ExistsMatch('summary'))
+
+        results = query.execute(self.es_client)
+        assert len(results['hits']) == 5
