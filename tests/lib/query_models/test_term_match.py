@@ -18,7 +18,6 @@ class TestTermMatchPositiveTestSuite(PositiveTestSuite):
                 {'summary': 'example summary test'},
             ],
 
-            # ES v 2.3
             TermMatch('summary', 'ldap'): [
                 {'summary': 'LDAP'},
                 {'summary': 'lDaP'},

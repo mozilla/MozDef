@@ -7,6 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../
 from utilities.toUTC import toUTC
 import pytest
 
+
 class TestToUTC():
 
     def result_is_datetime(self, result):
