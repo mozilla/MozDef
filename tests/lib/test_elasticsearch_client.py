@@ -241,7 +241,7 @@ class TestGetIndices(ElasticsearchClientTest):
         time.sleep(0.5)
         indices = self.es_client.get_indices()
         indices.sort()
-        assert indices == [self.alert_index_name, self.event_index_name, 'test_index']
+        assert indices == [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
 
 
 class TestClusterHealth(ElasticsearchClientTest):
