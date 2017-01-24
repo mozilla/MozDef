@@ -135,7 +135,9 @@ class SearchQuery():
         if self.date_timedelta:
             end_date = toUTC(datetime.now())
             begin_date = toUTC(datetime.now() - timedelta(**self.date_timedelta))
-            range_query = RangeMatch('utctimestamp', begin_date, end_date)
+            utc_range_query = RangeMatch('utctimestamp', begin_date, end_date)
+            received_range_query = RangeMatch('receivedtimestamp', begin_date, end_date)
+            range_query = utc_range_query | received_range_query
             self.add_must(range_query)
 
         search_query = None
