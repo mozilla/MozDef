@@ -24,7 +24,7 @@ class AlertUnauthPortScan(AlertTask):
             TermMatch('_type', 'bro'),
             TermMatch('category', 'bronotice'),
             TermMatch('eventsource', 'nsm'),
-            ExistsMatch('details.sourceipaddress'),
+            ExistsMatch('details.indicators'),
             PhraseMatch('details.note', 'Scan::Port_Scan'),
         ])
 
@@ -40,16 +40,16 @@ class AlertUnauthPortScan(AlertTask):
         hostname = event['_source']['hostname']
         url = "https://mana.mozilla.org/wiki/display/SECURITY/NSM+IR+procedures"
 
-        sourceipaddress = 'unknown'
+        indicators = 'unknown'
         target = 'unknown'
         x = event['_source']
         if 'details' in x:
-            if 'sourceipaddress' in x['details']:
-                sourceipaddress = x['details']['sourceipaddress']
+            if 'indicators' in x['details']:
+                indicators = x['details']['indicators']
             if 'destinationipaddress' in x['details']:
                 target = x['details']['destinationipaddress']
 
-        summary = '{2}: Unauthorized Port Scan Event from {0} scanning ports on host {1}'.format(sourceipaddress, target, hostname)
+        summary = '{2}: Unauthorized Port Scan Event from {0} scanning ports on host {1}'.format(indicators, target, hostname)
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, [], [event], severity, url)
