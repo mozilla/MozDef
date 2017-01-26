@@ -1,0 +1,24 @@
+[Unit]
+Description=MozDef Web Interface (meteor)
+After=mongod.service
+
+[Service]
+# Requires systemd version 211 or newer
+User=mozdef
+Group=mozdef
+# Client Env Vars
+Environment=HOME="/opt/mozdef"
+Environment=MONGO_URL=mongodb://localhost:3002/meteor
+Environment=ROOT_URL=http://mozdef.private.scl3.mozilla.com
+Environment=PORT=3000
+Environment=NODE_TLS_REJECT_UNAUTHORIZED="0"
+ExecStart=/bin/bash -c '/usr/bin/node /opt/mozdef/envs/meteor/mozdef/bundle/main.js > /opt/mozdef/meteor/meteor.log 2>&1 &'
+Restart=always
+KillSignal=SIGQUIT
+Type=forking
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
+Alias=mozdefweb
