@@ -25,7 +25,7 @@ class AlertUnauthInternalScan(AlertTask):
             TermMatch('category', 'bronotice'),
             TermMatch('eventsource', 'nsm'),
             TermMatch('hostname', 'nsmserver1'),
-            ExistsMatch('details.sourceipaddress'),
+            ExistsMatch('details.indicators'),
             PhraseMatch('details.note', 'Scan::Address_Scan'),
         ])
 
