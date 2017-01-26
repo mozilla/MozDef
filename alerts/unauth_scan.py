@@ -41,16 +41,16 @@ class AlertUnauthInternalScan(AlertTask):
         hostname = event['_source']['hostname']
         url = "https://mana.mozilla.org/wiki/display/SECURITY/NSM+IR+procedures"
 
-        sourceipaddress = 'unknown'
+        indicators = 'unknown'
         port = 'unknown'
         x = event['_source']
         if 'details' in x:
-            if 'sourceipaddress' in x['details']:
-                sourceipaddress = x['details']['sourceipaddress']
+            if 'indicators' in x['details']:
+                indicators = x['details']['indicators']
             if 'p' in x['details']:
                 port = x['details']['p']
 
-        summary = '{2}: Unauthorized Internal Scan Event from {0} scanning ports {1}'.format(sourceipaddress, port, hostname)
+        summary = '{2}: Unauthorized Internal Scan Event from {0} scanning ports {1}'.format(indicators, port, hostname)
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, [], [event], severity, url)
