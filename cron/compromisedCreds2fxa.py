@@ -29,7 +29,6 @@ from boto.sqs.message import RawMessage
 from urllib2 import urlopen
 from urllib import urlencode
 
-
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
