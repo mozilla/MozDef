@@ -16,7 +16,7 @@ import requests
 import json
 import time
 import re
-from configlib import getConfig,OptionParser,setConfig
+from configlib import getConfig, OptionParser
 from datetime import datetime
 from datetime import timedelta
 from dateutil.parser import parse
