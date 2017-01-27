@@ -360,7 +360,8 @@ def initConfig():
 
 if __name__ == '__main__':
     parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default='{0}.conf'.format(sys.argv[0]), help="configuration file to use")
+    defaultconfigfile = sys.argv[0].replace('.py', '.conf')
+    parser.add_option("-c", dest='configfile' , default=defaultconfigfile, help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
     main()
