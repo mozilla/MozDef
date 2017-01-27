@@ -29,6 +29,7 @@ from boto.sqs.message import RawMessage
 from urllib2 import urlopen
 from urllib import urlencode
 
+
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
@@ -165,7 +166,7 @@ def main():
         lastrun=toUTC(datetime.now()).isoformat()
 
         queryDict = {}
-        queryDict['since'] = state.data['lastrun'].isoformat()
+        queryDict['since'] = parse(state.data['lastrun']).isoformat()
         queryDict['until'] = datetime.utcnow().isoformat()
 
         logger.debug('Querying {0}'.format(queryDict))
