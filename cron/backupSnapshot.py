@@ -26,7 +26,7 @@ from logging.handlers import SysLogHandler
 from datetime import datetime
 from datetime import timedelta
 from datetime import date
-from configlib import getConfig, OptionParser, setConfig
+from configlib import getConfig, OptionParser
 import calendar
 import socket
 import boto
