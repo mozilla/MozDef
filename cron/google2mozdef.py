@@ -11,15 +11,11 @@
 import os
 import sys
 import logging
-import pytz
 import requests
 import json
-import time
-from configlib import getConfig,OptionParser,setConfig
+from configlib import getConfig, OptionParser
 from datetime import datetime
 from datetime import timedelta
-from dateutil.parser import parse
-from datetime import date
 from logging.handlers import SysLogHandler
 from httplib2 import Http
 from oauth2client.client import SignedJwtAssertionCredentials
@@ -33,6 +29,32 @@ from utilities.toUTC import toUTC
 logger = logging.getLogger(sys.argv[0])
 logger.level=logging.INFO
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+
+
+class State:
+    def __init__(self, filename):
+        '''Set the filename and populate self.data by calling self.read_stat_file()'''
+        self.filename = filename
+        self.read_state_file()
+
+    def read_state_file(self):
+        '''Populate self.data by reading and parsing the state file'''
+        try:
+            with open(self.filename, 'r') as f:
+                self.data = json.load(f)
+        except IOError:
+            self.data = {}
+        except ValueError:
+            logger.error("%s state file found but isn't a recognized json format" % self.filename)
+            raise
+        except TypeError:
+            logger.error("%s state file found and parsed but it doesn't contain an iterable object" % self.filename)
+            raise
+
+    def write_state_file(self):
+        '''Write the self.data value into the state file'''
+        with open(self.filename, 'w') as f:
+            json.dump(self.data, f, sort_keys=True, indent=4, separators=(',', ': '))
 
 
 def flattenDict(inDict, pre=None, values=True):
@@ -85,7 +107,7 @@ def main():
         logger.addHandler(sh)
 
     logger.debug('started')
-
+    state = State(options.state_file_name)
     try:
         # capture the time we start running so next time we catch any events
         # created while we run.
@@ -118,7 +140,7 @@ def main():
         api = build('admin', 'reports_v1', http=http)
         response = api.activities().list(userKey='all',
                                          applicationName='login',
-                                         startTime=toUTC(options.lastrun).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
+                                         startTime=toUTC(state.data['lastrun']).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
                                          maxResults=options.recordlimit).execute()
 
         # fix up the event craziness to a flatter format
@@ -166,7 +188,8 @@ def main():
 
         # record the time we started as
         # the start time for next time.
-        setConfig('lastrun',lastrun,options.configfile)
+        state.data['lastrun'] = lastrun
+        state.write_state_file()
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
 
@@ -176,7 +199,7 @@ def initConfig():
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
     options.url = getConfig('url', 'http://localhost:8080/events', options.configfile)                  #mozdef event input url to post to
-    options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(hours=24)),options.configfile))
+    options.state_file_name = getConfig('state_file_name','{0}.state'.format(sys.argv[0]),options.configfile)
     options.recordlimit = getConfig('recordlimit', 1000, options.configfile)                    #max number of records to request
     #
     # See
