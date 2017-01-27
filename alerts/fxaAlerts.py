@@ -24,7 +24,7 @@ class AlertAccountCreations(AlertTask):
 
         # ignore test accounts and attempts to create accounts that already exist.
         search_query.add_must_not([
-            WildcardMatch(field='details.email', value='*restmail.net'),
+            WildcardMatch('details.email', '*restmail.net'),
             TermMatch('details.code', '429')
         ])
 
