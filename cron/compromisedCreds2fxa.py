@@ -39,6 +39,32 @@ logger.level=logging.INFO
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
+class State:
+    def __init__(self, filename):
+        '''Set the filename and populate self.data by calling self.read_stat_file()'''
+        self.filename = filename
+        self.read_state_file()
+
+    def read_state_file(self):
+        '''Populate self.data by reading and parsing the state file'''
+        try:
+            with open(self.filename, 'r') as f:
+                self.data = json.load(f)
+        except IOError:
+            self.data = {}
+        except ValueError:
+            logger.error("%s state file found but isn't a recognized json format" % self.filename)
+            raise
+        except TypeError:
+            logger.error("%s state file found and parsed but it doesn't contain an iterable object" % self.filename)
+            raise
+
+    def write_state_file(self):
+        '''Write the self.data value into the state file'''
+        with open(self.filename, 'w') as f:
+            json.dump(self.data, f, sort_keys=True, indent=4, separators=(',', ': '))
+
+
 def buildQuery(optionDict):
     '''
     Builds a query string based on the dict of options
@@ -132,14 +158,14 @@ def main():
                                       aws_access_key_id=options.aws_access_key_id,
                                       aws_secret_access_key=options.aws_secret_access_key)
     queue = conn.get_queue(options.aws_queue_name)
-
+    state = State(options.state_file_name)
     try:
         # capture the time we start running so next time we catch any events
         # created while we run.
         lastrun=toUTC(datetime.now()).isoformat()
 
         queryDict = {}
-        queryDict['since'] = options.lastrun.isoformat()
+        queryDict['since'] = state.data['lastrun'].isoformat()
         queryDict['until'] = datetime.utcnow().isoformat()
 
         logger.debug('Querying {0}'.format(queryDict))
@@ -161,7 +187,8 @@ def main():
         # record the time we started as
         # the start time for next time.
         if len(allResults) > 0:
-            setConfig('lastrun',lastrun,options.configfile)
+            state.data['lastrun'] = lastrun
+            state.write_state_file()
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
 
@@ -173,7 +200,7 @@ def initConfig():
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
     options.mozdefurl = getConfig('url', 'http://localhost:8080/events', options.configfile)                  #mozdef event input url to post to
-    options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(hours=24)),options.configfile))
+    options.state_file_name = getConfig('state_file_name','{0}.state'.format(sys.argv[0]),options.configfile)
     options.recordlimit = getConfig('recordlimit', 1000, options.configfile)                    #max number of records to request
 
     # threat exchange options
