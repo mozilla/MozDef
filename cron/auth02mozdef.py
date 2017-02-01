@@ -270,9 +270,13 @@ def process_msg(mozmsg, msg):
     except KeyError:
         auth0details = ""
 
-    if type(details['description']) == unicode:
+    if type(details.type) == unicode:
         details.type = details.type.encode('utf8')
+
+    if type(details.description) == unicode:
         details.description = details.description.encode('utf8')
+
+    if type(auth0details) == unicode:
         auth0details = auth0details.encode('utf8')
 
     mozmsg.summary = "{type} {desc} {auth0details}".format(
