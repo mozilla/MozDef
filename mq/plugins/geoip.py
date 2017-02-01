@@ -8,7 +8,7 @@
 
 import netaddr
 import pygeoip
-
+import os
 
 def isIP(ip):
     try:
@@ -27,7 +27,8 @@ class message(object):
         '''
         self.registration = ['sourceipaddress', 'destinationipaddress']
         self.priority = 20
-        self.geoip = pygeoip.GeoIP('/opt/mozdef/envs/mozdef/bot/GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
+        geoip_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../lib/GeoLiteCity.dat")
+        self.geoip = pygeoip.GeoIP(geoip_location, pygeoip.MEMORY_CACHE)
 
     def ipLocation(self, ip):
         location = dict()

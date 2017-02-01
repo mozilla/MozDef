@@ -126,7 +126,8 @@ def isIP(ip):
 def ipLocation(ip):
     location = ""
     try:
-        gi = pygeoip.GeoIP('GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
+        geoip_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../lib/GeoLiteCity.dat")
+        gi = pygeoip.GeoIP(geoip_location, pygeoip.MEMORY_CACHE)
         geoDict = gi.record_by_addr(str(netaddr.IPNetwork(ip)[0]))
         if geoDict is not None:
             location = geoDict['country_name']
