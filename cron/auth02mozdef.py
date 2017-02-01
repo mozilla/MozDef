@@ -270,8 +270,17 @@ def process_msg(mozmsg, msg):
     except KeyError:
         auth0details = ""
 
-    mozmsg.summary = "{type} {desc} {auth0details}".format(type=details.type, desc=details.description,
-            auth0details=auth0details)
+    if type(details['description']) == unicode:
+        details.type = details.type.encode('utf8')
+        details.description = details.description.encode('utf8')
+        auth0details = auth0details.encode('utf8')
+
+    mozmsg.summary = "{type} {desc} {auth0details}".format(
+        type=details.type,
+        desc=details.description,
+        auth0details=auth0details
+    )
+
     mozmsg.details = details
     #that's just too much data, IMO
     #mozmsg.details['auth0_raw'] = msg
