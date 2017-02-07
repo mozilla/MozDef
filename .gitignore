@@ -7,3 +7,4 @@ results
 .coverage
 .cache
 *.pyc
+cron/ipblocklist.txt
