@@ -82,7 +82,7 @@ def main():
 
         #capture the time we start running so next time we catch any events created while we run.
         state = State(options.state_file_name)
-        state.data['lastrun']=toUTC(datetime.now()).isoformat()
+        lastrun = toUTC(datetime.now()).isoformat()
         #in case we don't archive files..only look at today and yesterday's files.
         yesterday=date.strftime(datetime.utcnow()-timedelta(days=1),'%Y/%m/%d')
         today = date.strftime(datetime.utcnow(),'%Y/%m/%d')
@@ -97,7 +97,7 @@ def main():
             oktaevents = json.loads(r.text)
             for event in oktaevents:
                 if 'published' in event.keys():
-                    if toUTC(event['published']) > state.data['lastrun']:
+                    if toUTC(event['published']) > toUTC(state.data['lastrun']):
                         try:
                             mozdefEvent = dict()
                             mozdefEvent['utctimestamp']=toUTC(event['published']).isoformat()
@@ -128,6 +128,7 @@ def main():
                             continue
                 else:
                     logger.error('Okta event does not contain published date: {0}'.format(event))
+            state.data['lastrun'] = lastrun
             state.write_state_file()
         else:
             logger.error('Could not get Okta events HTTP error code {} reason {}'.format(r.status_code, r.reason))
