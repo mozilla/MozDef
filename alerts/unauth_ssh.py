@@ -36,7 +36,7 @@ class AlertUnauthSSH(AlertTask):
             TermMatch('category', 'syslog'),
             TermMatch('details.program', 'sshd'),
             QueryStringMatch('details.hostname: /{}/'.format(self.config.hostfilter)),
-            PhraseMatch('summary', 'Accepted publickey {}'.format(self.config.user))
+            PhraseMatch('summary', 'Accepted publickey for {}'.format(self.config.user))
         ])
 
         for x in self.config.skiphosts:
