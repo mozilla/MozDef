@@ -135,6 +135,9 @@ def initConfig():
     # AWS creds
     options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to mozilla_infosec_blocklist
     options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
+    options.aws_bucket_name=getConfig('aws_bucket_name','',options.configfile)
+    options.aws_document_key_name=getConfig('aws_document_key_name','',options.configfile)
+
 
 def s3_upload_file(file_path, bucket_name, key_name):
     """
@@ -168,4 +171,4 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
-    s3_upload_file('/opt/mozdef/envs/mozdef/static/ipblocklist.txt', 'mozilla_infosec_blocklist','ipblocklist')
+    s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
