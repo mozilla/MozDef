@@ -36,9 +36,9 @@ For new features, show how the feature would be used.
 
 <!--- You can also paste gist.github.com links for larger files -->
 
-##### EXPECTED RESULTS
+#### EXPECTED RESULTS
 <!--- What did you expect to happen when running the steps above? -->
 
-##### ACTUAL RESULTS
+#### ACTUAL RESULTS
 <!--- What actually happened?  -->
 
