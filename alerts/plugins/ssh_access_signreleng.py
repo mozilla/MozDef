@@ -47,15 +47,14 @@ class message(object):
     def onMessage(self, message):
         # here is where you do something with the incoming alert message
 
-        emailMessage = MIMEText(message['summary'] + ' on ' + message['events'][0]['documentsource']['utctimestamp'] + ' UTC')
-        emailMessage['Subject'] = 'MozDef Alert: Releng Signing Servers Successful SSH Access'
+        emailMessage = MIMEText(message['summary'] + ' on ' + message['events'][0]['documentsource']['utctimestamp'])
+        emailMessage['Subject'] = 'MozDef Alert: Releng Restricted Servers Successful SSH Access'
         emailMessage['From'] = self.options.sender
         emailMessage['To'] = self.options.recipients
         emailMessage['Date'] = datetime.utcnow().isoformat()
         smtpObj = smtplib.SMTP(self.options.smtpserver, 25)
         try:
             smtpObj.sendmail(self.options.sender, self.options.recipients, emailMessage.as_string())
-            sys.stderr.write('Successfully sent email\n')
             smtpObj.quit()
         except smtplib.SMTPException as e:
             sys.stderr.write('Error: failed to send email {0}\n'.format(e))
