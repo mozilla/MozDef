@@ -259,9 +259,11 @@ def process_msg(mozmsg, msg):
         details['action'] = msg.details.response.body.name
     except KeyError:
         try:
-            details['errormsg'] = msg.details.error.message
             details['error'] = 'true'
+            details['errormsg'] = msg.details.error.message
         except KeyError:
+            pass
+        except AttributeError:
             pass
         details['username'] = msg.user_name
 
