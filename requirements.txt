@@ -56,7 +56,7 @@ rsa==3.1.4
 s3cmd==1.0.1
 setuptools-scm==1.11.1
 simplejson==3.3.3
-six==1.5.2
+six==1.10.0
 supervisor==3.3.1
 uritemplate==0.6
 urllib3==1.16
