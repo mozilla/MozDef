@@ -9,9 +9,20 @@
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-
-from utilities.toUTC import toUTC
+from datetime import datetime, timedelta, tzinfo
+try:
+    from datetime import timezone
+    utc = timezone.utc
+except ImportError:
+    #Hi there python2 user
+    class UTC(tzinfo):
+        def utcoffset(self, dt):
+            return timedelta(0)
+        def tzname(self, dt):
+            return "UTC"
+        def dst(self, dt):
+            return timedelta(0)
+    utc = UTC()
 from configlib import getConfig, OptionParser
 import json
 import duo_client
@@ -50,7 +61,10 @@ def process_events(mozmsg, duo_events, etype, state):
 
     for e in duo_events:
         details = {}
-        mozmsg.log['timestamp'] = toUTC(e['timestamp']).isoformat()
+        # Timestamp format: http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
+        # Duo logs come as a UTC timestamp
+        dt = datetime.utcfromtimestamp(e['timestamp'])
+        mozmsg.timestamp = dt.replace(tzinfo=utc).isoformat()
         mozmsg.log['hostname'] = e['host']
         for i in e:
             if i in noconsume:
