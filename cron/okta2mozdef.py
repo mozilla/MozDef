@@ -81,7 +81,7 @@ def main():
         s.headers.update({'Authorization':'SSWS {0}'.format(options.apikey)})
 
         #capture the time we start running so next time we catch any events created while we run.
-        state = State(options.state_file_name)
+        state = State(options.state_file)
         lastrun = toUTC(datetime.now()).isoformat()
         #in case we don't archive files..only look at today and yesterday's files.
         yesterday=date.strftime(datetime.utcnow()-timedelta(days=1),'%Y/%m/%d')
@@ -143,7 +143,7 @@ def initConfig():
     options.apikey=getConfig('apikey','',options.configfile)                                    #okta api key to use
     options.oktadomain = getConfig('oktadomain', 'yourdomain.okta.com', options.configfile)     #okta domain: something.okta.com
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
-    options.state_file_name=getConfig('state_file_name','{0}.json'.format(sys.argv[0]),options.configfile)
+    options.state_file=getConfig('state_file','{0}.json'.format(sys.argv[0]),options.configfile)
     options.recordlimit = getConfig('recordlimit', 10000, options.configfile)                    #max number of records to request
 
 
