@@ -120,6 +120,12 @@ def main():
                                         mozdefEvent['details']['username'] = actor['login']
                                     if 'requestUri' in actor.keys():
                                         mozdefEvent['details']['source_uri'] = actor['requestUri']
+
+                            # We are renaming action to activity because there are
+                            # currently mapping problems with the details.action field
+                            mozdefEvent['details']['activity'] = mozdefEvent['details']['action']
+                            mozdefEvent['details'].pop('action')
+
                             jbody=json.dumps(mozdefEvent)
                             res = es.save_event(doc_type='okta',body=jbody)
                             logger.debug(res)
