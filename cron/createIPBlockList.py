@@ -68,7 +68,8 @@ def aggregateIPs(attackers):
         for i in ips['result']:
             whitelisted = False
             logger.debug('working {0}'.format(i))
-            ipcidr=netaddr.IPNetwork(i['_id']['ipv4address'])
+            ip = i['_id']['ipv4address']
+            ipcidr=netaddr.IPNetwork(ip)
             if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
                 for whitelist_range in options.ipwhitelist:
                     whitelist_network = netaddr.IPNetwork(whitelist_range)
