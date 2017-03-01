@@ -212,11 +212,12 @@ class message(object):
                        and not ipcidr.ip.is_private() \
                        and not ipcidr.ip.is_reserved():
 
+                        whitelisted = False
                         for whitelist_range in self.options.ipwhitelist:
                             whitelist_network = netaddr.IPNetwork(whitelist_range)
                             if ipcidr in whitelist_network:
-                                sys.stdout.write(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
                                 whitelisted = True
+                                sys.stdout.write('{0} is whitelisted as part of {1}\n'.format(ipcidr, whitelist_network))
 
                         if not whitelisted:
                             # split the ip vs cidr mask
