@@ -11,8 +11,8 @@ import sys
 from configlib import getConfig, OptionParser
 import MySQLdb
 from datetime import datetime, timedelta
-import json
 import netaddr
+
 
 def isIPv4(ip):
     try:
@@ -70,6 +70,11 @@ class message(object):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
 
+    def parse_network_list(self, network_list_location):
+        networks = []
+        with open(network_list_location, "r") as text_file:
+            networks = text_file.read().rstrip().split("\n")
+        return networks
 
     def initConfiguration(self):
         myparser = OptionParser()
@@ -99,6 +104,9 @@ class message(object):
             'banhammer',
             self.configfile)
 
+        # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
+        self.options.network_list_file = getConfig('network_list_file', '', self.options.configfile)
+        self.options.ipwhitelist = self.parse_network_list(self.options.network_list_file)
 
     def banhammer(self,
                   ipaddress = None,
@@ -159,7 +167,6 @@ class message(object):
         except Exception as e:
             sys.stderr.write('Error while banhammering %s/%d: %s\n' % (ipaddress, int(CIDR), e))
 
-
     def onMessage(self, request, response):
         '''
         request: http://bottlepy.org/docs/dev/api.html#the-request-object
@@ -198,21 +205,29 @@ class message(object):
                     userid = i.values()[0]
 
             if banhammer and ipaddress is not None:
-                #figure out the CIDR mask
+                # figure out the CIDR mask
                 if isIPv4(ipaddress) or isIPv6(ipaddress):
-                    ipcidr=netaddr.IPNetwork(ipaddress)
+                    ipcidr = netaddr.IPNetwork(ipaddress)
                     if not ipcidr.ip.is_loopback() \
                        and not ipcidr.ip.is_private() \
                        and not ipcidr.ip.is_reserved():
-                        #split the ip vs cidr mask
-                        ipaddress, CIDR =  str(ipcidr.cidr).split('/')
-                        self.banhammer(ipaddress,
-                                       CIDR,
-                                       comment,
-                                       duration,
-                                       referenceID,
-                                       userid)
-                        sys.stdout.write ('Sent {0}/{1} to banhammer\n'.format(ipaddress, CIDR))
+
+                        for whitelist_range in self.options.ipwhitelist:
+                            whitelist_network = netaddr.IPNetwork(whitelist_range)
+                            if ipcidr in whitelist_network:
+                                sys.stdout.write(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
+                                whitelisted = True
+
+                        if not whitelisted:
+                            # split the ip vs cidr mask
+                            ipaddress, CIDR = str(ipcidr.cidr).split('/')
+                            self.banhammer(ipaddress,
+                                           CIDR,
+                                           comment,
+                                           duration,
+                                           referenceID,
+                                           userid)
+                            sys.stdout.write('Sent {0}/{1} to banhammer\n'.format(ipaddress, CIDR))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
