@@ -33,7 +33,7 @@ def save_ip_list(save_path, ip_list_contents):
         logger.debug("Overwriting ip list file in " + str(save_path))
     else:
         logger.debug("Creating new ip list file at " + str(save_path))
-    with open(save_path, "w") as text_file:
+    with open(save_path, "w+") as text_file:
         text_file.write(ip_list_contents)
 
 def main():
