@@ -368,13 +368,14 @@ class AlertTask(Task):
                 self.hookAfterInsertion(alert)
 
 
-    def walkAggregations(self, threshold):
+    def walkAggregations(self, threshold, config=None):
         """
         Walk through aggregations, provide some methods to hook in alerts
         """
         if len(self.aggregations) > 0:
             for aggregation in self.aggregations:
                 if aggregation['count'] >= threshold:
+                    aggregation['config']=config
                     alert = self.onAggregation(aggregation)
                     self.log.debug(alert)
                     if alert:

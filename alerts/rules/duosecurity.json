@@ -1,0 +1,21 @@
+{
+	/* This is a demo rule that will currently match on ANY bypass in DuoSecurity */
+
+	// This is your Kibana search query string basically
+	"search_string": "bypass",
+	// These are a list of your Kibana search filters
+	"filters": [
+		["tags", "duosecurity"]
+	],
+	// Threshold to match and actually create an alert
+	// In this case, if at least 1 (count) match is found over a period of 5 (timerange_min) minutes
+	// then the alert will be created
+	"threshold": {
+		"timerange_min": "5",
+		"count": 1
+	},
+	/* This is used to generate the alert itself */
+	"tags": ["duosecurity"],
+	"likelihood_indicator": "MEDIUM",
+	"summary": "Bypass codes used for DuoSecurity MFA"
+}
