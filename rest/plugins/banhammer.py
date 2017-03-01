@@ -106,7 +106,6 @@ class message(object):
 
         # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
         self.options.network_list_file = getConfig('network_list_file', '', self.configfile)
-        self.options.ipwhitelist = self.parse_network_list(self.options.network_list_file)
 
     def banhammer(self,
                   ipaddress = None,
@@ -174,6 +173,10 @@ class message(object):
 
         '''
         response.headers['X-PLUGIN'] = self.description
+
+        # Refresh the ip network list each time we get a message
+        self.options.ipwhitelist = self.parse_network_list(self.options.network_list_file)
+
         # debug
         # print(request.json)
 
