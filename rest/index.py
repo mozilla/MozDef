@@ -173,29 +173,6 @@ def ipintel():
     return response
 
 
-@post('/ipcifquery', methods=['POST'])
-@post('/ipcifquery/', methods=['POST'])
-@enable_cors
-def index():
-    '''return a json version of cif query for an ip address'''
-    if request.body:
-        arequest = request.body.read()
-        request.body.close()
-    # valid json?
-    try:
-        requestDict = json.loads(arequest)
-    except ValueError as e:
-        response.status = 500
-
-    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
-        response.content_type = "application/json"
-        response.body = getIPCIF(requestDict['ipaddress'])
-    else:
-        response.status = 500
-
-    sendMessgeToPlugins(request, response, 'ipcifquery')
-    return response
-
 @post('/ipdshieldquery', methods=['POST'])
 @post('/ipdshieldquery/', methods=['POST'])
 @enable_cors
@@ -615,31 +592,6 @@ def getWhois(ipaddress):
         sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
 
 
-def getIPCIF(ipaddress):
-    ''' query a CIF service for information on this IP address per:
-        https://code.google.com/p/collective-intelligence-framework/wiki/API_HTTP_v1
-    '''
-    try:
-        resultsList = []
-        url='{0}api?apikey={1}&limit=20&confidence=65&q={2}'.format(options.cifhosturl,
-                                             options.cifapikey,
-                                             ipaddress)
-        headers = {'Accept': 'application/json'}
-        r=requests.get(url=url,verify=False,headers=headers)
-        if r.status_code == 200:
-            # we get a \n delimited list of json entries
-            cifjsons=r.text.split('\n')
-            for c in cifjsons:
-                # test for valid json
-                try:
-                    resultsList.append(json.loads(c))
-                except ValueError:
-                    pass
-            return json.dumps(resultsList)
-
-    except Exception as e:
-        sys.stderr.write('Error looking up CIF results for {0}: {1}\n'.format(ipaddress, e))
-
 def verisSummary(verisRegex=None):
     try:
         # aggregate the veris tags from the incidents collection and return as json
@@ -680,11 +632,6 @@ def initConfig():
                                   'http://localhost:9090',
                                   options.configfile)
 
-    # options for your CIF service
-    options.cifapikey = getConfig('cifapikey', '', options.configfile)
-    options.cifhosturl = getConfig('cifhosturl',
-                                   'http://localhost/',
-                                   options.configfile)
     # mongo connectivity options
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)

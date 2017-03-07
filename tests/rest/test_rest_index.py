@@ -262,8 +262,6 @@ class TestLdapLoginsRoute(RestTestSuite):
 # @post('/ipwhois/', methods=['POST'])
 # @post('/ipintel', methods=['POST'])
 # @post('/ipintel/', methods=['POST'])
-# @post('/ipcifquery', methods=['POST'])
-# @post('/ipcifquery/', methods=['POST'])
 # @post('/ipdshieldquery', methods=['POST'])
 # @post('/ipdshieldquery/', methods=['POST'])
 # @route('/plugins', methods=['GET'])
