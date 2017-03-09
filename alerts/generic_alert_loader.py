@@ -16,6 +16,9 @@ import json
 import sys
 import traceback
 import glob
+import os
+from configlib import getConfig, OptionParser
+
 
 class DotDict(dict):
     '''dict.item notation for dict()'s'''
@@ -29,14 +32,17 @@ class DotDict(dict):
                 value = DotDict(value)
             self[key] = value
 
+
 def debug(msg):
-    sys.stderr.write(msg+"\n")
+    sys.stderr.write(msg + "\n")
+
 
 class AlertGenericLoader(AlertTask):
     def load_configs(self):
         '''Load all configured rules'''
         self.configs = []
-        files = glob.glob("rules/*.json")
+        rules_location = os.path.join(self.config.alert_data_location, "rules")
+        files = glob.glob(rules_location + "/*.json")
         for f in files:
             with open(f) as fd:
                 # XXX Make a nicer try thing
@@ -48,11 +54,16 @@ class AlertGenericLoader(AlertTask):
                     traceback.print_exc(file=sys.stdout)
                     debug("Loading rule file {} failed".format(f))
 
+    def initConfiguration(self):
+        myparser = OptionParser()
+        (self.config, args) = myparser.parse_args([])
+        self.config.alert_data_location = getConfig('alert_data_location', '', self.config_file)
+
     def process_alert(self, config):
         search_query = SearchQuery(minutes=int(config.threshold.timerange_min))
         terms = []
         for i in config.filters:
-               terms.append(TermMatch(i[0], i[1]))
+            terms.append(TermMatch(i[0], i[1]))
         terms.append(QueryStringMatch(str(config.search_string)))
         search_query.add_must(terms)
         self.filtersManual(search_query)
@@ -60,10 +71,13 @@ class AlertGenericLoader(AlertTask):
         self.walkAggregations(threshold=int(config.threshold.count), config=config)
 
     def main(self):
+        self.config_file = './generic_alert_loader.conf'
+        self.initConfiguration()
+
         self.load_configs()
         for cfg in self.configs:
             try:
-                 self.process_alert(cfg)
+                self.process_alert(cfg)
             except:
                 traceback.print_exc(file=sys.stdout)
                 debug("Processing rule file {} failed".format(cfg.__str__()))

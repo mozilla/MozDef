@@ -8,3 +8,4 @@ results
 .cache
 *.pyc
 cron/ipblocklist.txt
+alerts/generic_alerts
