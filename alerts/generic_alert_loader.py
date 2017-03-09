@@ -61,11 +61,12 @@ class AlertGenericLoader(AlertTask):
 
     def main(self):
         self.load_configs()
-        try:
-            for cfg in self.configs:
+        for cfg in self.configs:
+            try:
                  self.process_alert(cfg)
-        except:
-            traceback.print_exc(file=sys.stdout)
+            except:
+                traceback.print_exc(file=sys.stdout)
+                debug("Processing rule file {} failed".format(cfg.__str__()))
 
     def onAggregation(self, aggreg):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
