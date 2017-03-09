@@ -30,7 +30,7 @@ class DotDict(dict):
             self[key] = value
 
 def debug(msg):
-	sys.stderr.write(msg+"\n")
+    sys.stderr.write(msg+"\n")
 
 class AlertGenericLoader(AlertTask):
     def load_configs(self):
@@ -50,10 +50,10 @@ class AlertGenericLoader(AlertTask):
 
     def process_alert(self, config):
         search_query = SearchQuery(minutes=int(config.threshold.timerange_min))
-	terms = []
+        terms = []
         for i in config.filters:
                terms.append(TermMatch(i[0], i[1]))
-	terms.append(QueryStringMatch(str(config.search_string)))
+        terms.append(QueryStringMatch(str(config.search_string)))
         search_query.add_must(terms)
         self.filtersManual(search_query)
         self.searchEventsAggregated('hostname', samplesLimit=int(config.threshold.count))
