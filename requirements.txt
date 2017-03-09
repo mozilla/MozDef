@@ -20,6 +20,7 @@ elasticsearch-dsl==2.1.0
 elasticutils==0.8.2
 enum34==1.1.6
 futures==2.1.6
+GitPython==2.1.3
 glob2==0.4.1
 google-api-python-client==1.4.0
 hjson==2.0.2
