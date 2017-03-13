@@ -18,20 +18,23 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib
 from utilities.logger import logger, initLogger
 
 
-def download_generic_alerts(repo_url, save_location):
-    if not os.path.isdir(save_location):
-        logger.debug("Cloning " + str(repo_url) + " into " + str(save_location))
-        Repo.clone_from(repo_url, save_location)
-    else:
-        logger.debug("Updating " + str(save_location))
-        git_repo = cmd.Git(save_location)
-        git_repo.pull()
+def download_generic_alerts(repo_url, save_location, deploy_key):
+    git_obj = cmd.Git(save_location)
+    git_ssh_cmd = 'ssh -i %s' % deploy_key
+
+    with git_obj.custom_environment(GIT_SSH_COMMAND=git_ssh_cmd):
+        if not os.path.isdir(save_location):
+            logger.debug("Cloning " + str(repo_url) + " into " + str(save_location))
+            Repo.clone_from(url=repo_url, to_path=save_location, branch='master')
+        else:
+            logger.debug("Updating " + str(save_location))
+            git_obj.pull()
 
 
 def main():
     logger.debug('Starting')
     logger.debug(options)
-    download_generic_alerts(options.alert_repo_url, options.alert_data_location)
+    download_generic_alerts(options.alert_repo_url, options.alert_data_location, options.deploy_key_location)
 
 
 def initConfig():
@@ -42,6 +45,8 @@ def initConfig():
 
     options.alert_repo_url = getConfig('alert_repo_url', '', options.configfile)
     options.alert_data_location = getConfig('alert_data_location', '', options.configfile)
+
+    options.deploy_key_location = getConfig('deployment_key_location', '', options.configfile)
 
 
 if __name__ == '__main__':
