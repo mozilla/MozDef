@@ -14,7 +14,7 @@ class TestSessionOpenedCrit(AlertTestSuite):
             "category": "syslog",
             "summary": "pam_unix(sshd:session): session opened for user mpurzynski by (uid=0)",
             "details": {
-                "hostname": "nsmserver1.private.scl3.mozilla.com",
+                "hostname": "interesting1.hostname.domain.com",
             }
         }
     }
@@ -23,7 +23,7 @@ class TestSessionOpenedCrit(AlertTestSuite):
     default_alert = {
         "category": "session",
         "severity": "CRITICAL",
-        "summary": "Session opened on nsmserver1.private.scl3.mozilla.com",
+        "summary": "Session opened on interesting1.hostname.domain.com",
         "tags": ['pam', 'syslog'],
     }
 
@@ -83,7 +83,7 @@ class TestSessionOpenedCrit(AlertTestSuite):
                 {
                     "_source": {
                         "details": {
-                            "hostname": "mozdefes7.private.scl3.mozilla.com",
+                            "hostname": "interesting9.hostname.domain.com",
                         }
                     }
                 }

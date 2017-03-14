@@ -31,7 +31,7 @@ class SessionOpenedCrit(AlertTask):
                         superquery |= PhraseMatch('details.hostname', host)
                     run += 1
             except ValueError:
-                sys.stderr.write("dupa\n")
+                sys.stderr.write("FAILED to open the configuration file\n")
 
         search_query = SearchQuery(minutes=2)
 
