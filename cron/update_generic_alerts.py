@@ -22,13 +22,14 @@ def download_generic_alerts(repo_url, save_location, deploy_key):
     git_obj = cmd.Git(save_location)
     git_ssh_cmd = 'ssh -i %s' % deploy_key
 
-    with git_obj.custom_environment(GIT_SSH_COMMAND=git_ssh_cmd):
-        if not os.path.isdir(save_location):
-            logger.debug("Cloning " + str(repo_url) + " into " + str(save_location))
-            Repo.clone_from(url=repo_url, to_path=save_location, branch='master')
-        else:
-            logger.debug("Updating " + str(save_location))
-            git_obj.pull()
+    git_obj.update_environment(GIT_SSH_COMMAND=git_ssh_cmd)
+
+    if not os.path.isdir(save_location):
+        logger.debug("Cloning " + str(repo_url) + " into " + str(save_location))
+        Repo.clone_from(repo_url, save_location, env={'GIT_SSH_COMMAND': git_ssh_cmd})
+    else:
+        logger.debug("Updating " + str(save_location))
+        git_obj.pull()
 
 
 def main():
