@@ -16,9 +16,10 @@ class AlertTestSuite(UnitTestSuite):
         alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)
 
-        self.alert_classname = (self.__class__.__name__[4:] if
-                                self.__class__.__name__.startswith('Test') else
-                                False)
+        if not self.alert_classname:
+            self.alert_classname = (self.__class__.__name__[4:] if
+                                    self.__class__.__name__.startswith('Test') else
+                                    False)
 
         if not self.alert_filename:
             # Convert "AlertFooBar" to "foo_bar" and "BazQux" to "baz_qux"
