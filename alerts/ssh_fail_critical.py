@@ -11,7 +11,7 @@
 # This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from query_models import SearchQuery, TermMatch, PhraseMatch
 import json
 import sys
 
