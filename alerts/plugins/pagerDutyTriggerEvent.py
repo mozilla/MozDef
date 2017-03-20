@@ -21,8 +21,8 @@ class message(object):
         the pager duty event api
         '''
 
-        self.registration = ['promisc','duosecurity']
-        self.priority = 1
+#        self.registration = ['promisc','duosecurity']
+#        self.priority = 1
 
         # set my own conf file
         # relative path to the rest index.py file
@@ -31,6 +31,9 @@ class message(object):
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
+
+        self.registration = self.options.keywords.split(" ")
+        self.priority = 1
 
     def initConfiguration(self):
         myparser = OptionParser()
@@ -41,6 +44,8 @@ class message(object):
         # change this to your default zone for when it's not specified
         self.options.serviceKey = getConfig('serviceKey', 'APIKEYHERE', self.configfile)
         self.options.docs = json.loads(getConfig('docs', 'NOTHING', self.configfile))
+        self.options.keywords = getConfig('keywords', 'KEYWORDS', self.configfile)
+        self.options.clienturl = getConfig('clienturl', 'CLIENTURL', self.configfile)
 
     def onMessage(self, message):
         # here is where you do something with the incoming alert message
@@ -54,7 +59,7 @@ class message(object):
               "event_type": "trigger",
               "description": "{0}".format(message['summary']),
               "client": "mozdef",
-              "client_url": "https://mozdef.private.scl3.mozilla.com/alert/{0}".format(message['events'][0]['documentsource']['alerts'][0]['id']),
+              "client_url": self.options.clienturl + "/{0}".format(message['events'][0]['documentsource']['alerts'][0]['id']),
               "details": message['events'],
               "contexts": [
                     {
