@@ -12,8 +12,6 @@
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
-import json
-import sys
 
 
 class PromiscKernel(AlertTask):
