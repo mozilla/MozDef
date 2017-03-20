@@ -29,7 +29,7 @@ class AlertDuoAuthFail(AlertTask):
 
     # Set alert properties
     def onEvent(self, event):
-        category = 'event'
+        category = 'duosecurity'
         severity = 'WARNING'
         url = "https://mana.mozilla.org/wiki/display/SECURITY/IR+Procedure%3A+DuoSecurity"
 
