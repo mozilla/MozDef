@@ -21,9 +21,6 @@ class message(object):
         the pager duty event api
         '''
 
-#        self.registration = ['promisc','duosecurity']
-#        self.priority = 1
-
         # set my own conf file
         # relative path to the rest index.py file
         self.configfile = './plugins/pagerDutyTriggerEvent.conf'
