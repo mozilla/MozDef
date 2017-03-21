@@ -12,7 +12,7 @@
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, QueryStringMatch
-import json
+import hjson
 import sys
 import traceback
 import glob
@@ -48,7 +48,7 @@ class AlertGenericLoader(AlertTask):
                 # XXX Make a nicer try thing
                 try:
                     # XXX template the json to get defaults
-                    cfg = DotDict(json.load(fd))
+                    cfg = DotDict(hjson.load(fd))
                     self.configs.append(cfg)
                 except:
                     traceback.print_exc(file=sys.stdout)
