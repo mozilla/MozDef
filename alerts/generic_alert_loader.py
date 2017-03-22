@@ -67,7 +67,7 @@ class AlertGenericLoader(AlertTask):
         terms.append(QueryStringMatch(str(config.search_string)))
         search_query.add_must(terms)
         self.filtersManual(search_query)
-        self.searchEventsAggregated('hostname', samplesLimit=int(config.threshold.count))
+        self.searchEventsAggregated(config.aggregation_key, samplesLimit=int(config.threshold.count))
         self.walkAggregations(threshold=int(config.threshold.count), config=config)
 
     def main(self):
@@ -88,7 +88,7 @@ class AlertGenericLoader(AlertTask):
         # aggreg['events']: list of events in the aggregation
         category = 'generic_alerts'
         tags = aggreg['config']['tags']
-        severity = aggreg['config']['likelihood_indicator']
+        severity = aggreg['config']['alert_severity']
 
         summary = '{} ({}): {}'.format(aggreg['config']['summary'], aggreg['count'], aggreg['value'])
 
