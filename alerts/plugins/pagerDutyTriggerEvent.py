@@ -52,16 +52,15 @@ class message(object):
             }
             payload = json.dumps({
               "service_key": "{0}".format(self.options.serviceKey),
-              "incident_key": "Possible Intrusion",
               "event_type": "trigger",
               "description": "{0}".format(message['summary']),
-              "client": "mozdef",
-              "client_url": self.options.clienturl + "/{0}".format(message['events'][0]['documentsource']['alerts'][0]['id']),
-              "details": message['events'],
+              "client": "MozDef",
+              "client_url": "https://" + self.options.clienturl + "/{0}".format(message['events'][0]['documentsource']['alerts'][0]['id']),
+#              "details": message['events'],
               "contexts": [
                     {
                         "type": "link",
-                        "href": "{0}".format(self.options.docs[message['category']]),
+                        "href": "https://" + "{0}".format(self.options.docs[message['category']]),
                         "text": "View runbook on mana"
                     }
                 ]
@@ -71,8 +70,6 @@ class message(object):
                             headers=headers,
                             data=payload,
             )
-            print r.status_code
-            print r.text        
         # you can modify the message if needed
         # plugins registered with lower (>2) priority
         # will receive the message and can also act on it
