@@ -16,12 +16,12 @@ class AlertTestSuite(UnitTestSuite):
         alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)
 
-        if not self.alert_classname:
+        if not hasattr(self, 'alert_classname'):
             self.alert_classname = (self.__class__.__name__[4:] if
                                     self.__class__.__name__.startswith('Test') else
                                     False)
 
-        if not self.alert_filename:
+        if not hasattr(self, 'alert_filename'):
             # Convert "AlertFooBar" to "foo_bar" and "BazQux" to "baz_qux"
             self.alert_filename = re.sub(
                 '([a-z0-9])([A-Z])',
@@ -91,8 +91,7 @@ class AlertTestSuite(UnitTestSuite):
             merged_event = self.dict_merge(temp_event, event)
             merged_event['_source']['utctimestamp'] = merged_event['_source']['utctimestamp']()
             test_case.full_events.append(merged_event)
-            self.populate_test_event(
-                merged_event['_source'], merged_event['_type'])
+            self.populate_test_event(merged_event['_source'], merged_event['_type'])
 
         self.es_client.flush('events')
 
@@ -106,8 +105,7 @@ class AlertTestSuite(UnitTestSuite):
         assert found_alert['_type'] == 'alert'
 
         # Verify that the alert has the right "look to it"
-        assert found_alert.keys() == [
-            '_score', '_type', '_id', '_source', '_index']
+        assert found_alert.keys() == ['_score', '_type', '_id', '_source', '_index']
 
         # Verify the alert has an id field that is unicode
         assert type(found_alert['_id']) == unicode
@@ -117,19 +115,15 @@ class AlertTestSuite(UnitTestSuite):
 
         # Verify the events are added onto the alert
         assert type(found_alert['_source']['events']) == list
-        assert len(found_alert['_source']['events']) is not 0
         alert_events = found_alert['_source']['events']
-        sorted_alert_events = sorted(alert_events, key=lambda k: k[
-                                     'documentsource']['utctimestamp'])
+        sorted_alert_events = sorted(alert_events, key=lambda k: k['documentsource']['utctimestamp'])
 
         created_events = test_case.full_events
-        sorted_created_events = sorted(created_events, key=lambda k: k[
-                                       '_source']['utctimestamp'])
+        sorted_created_events = sorted(created_events, key=lambda k: k['_source']['utctimestamp'])
 
         event_index = 0
         for event in sorted_alert_events:
-            assert event['documentsource'] == sorted_created_events[
-                event_index]['_source']
+            assert event['documentsource'] == sorted_created_events[event_index]['_source']
             event_index += 1
 
         # Verify that the alert properties are set correctly
