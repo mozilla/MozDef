@@ -37,37 +37,15 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
             expected_alert=default_alert
         ),
 
-        # PositiveAlertTestCase(
-        #     description="Positive test case with an event with somewhat old timestamp",
-        #     events=[
-        #         {
-        #             "_source": {
-        #                 "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 29})
-        #             }
-        #         }
-        #     ],
-        #     expected_alert=default_alert
-        # ),
-
-        # NegativeAlertTestCase(
-        #     description="Negative test case with bad event type",
-        #     events=[
-        #         {
-        #             "_type": "event",
-        #         }
-        #     ],
-        # ),
-
-        # NegativeAlertTestCase(
-        #     description="Negative test case with bad eventName",
-        #     events=[
-        #         {
-        #             "_source": {
-        #                 "eventName": "Badeventname",
-        #             }
-        #         }
-        #     ],
-        # ),
+        PositiveAlertTestCase(
+            description="Postive test case with bad event type",
+            events=[
+                {
+                    "_type": "event",
+                }
+            ],
+            expected_alert=default_alert
+        ),
 
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
