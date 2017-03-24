@@ -57,7 +57,7 @@ class broNSM(AlertTask):
         tags = ['bro']
         severity = 'ERROR'
 
-        summary = ('no {0} bro healthcheck events found since {1}'.format(hostname, self.begindateUTC.isoformat()))
+        summary = ('No {0} bro healthcheck events found the past 20 minutes'.format(hostname))
         url = "https://mana.mozilla.org/wiki/display/SECURITY/NSM+IR+procedures"
 
         # make an event to attach to the alert
