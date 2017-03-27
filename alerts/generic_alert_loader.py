@@ -38,6 +38,55 @@ def debug(msg):
 
 
 class AlertGenericLoader(AlertTask):
+    # Minimum data needed for an alert (this is the alert schema)
+    # If a field is missing it will be filled in by these defaults
+    self.default_alert = DotDict({
+            # Lucene search string
+            'search_string': '',
+            # ES Filters as such: [['field', 'value'], ['field', 'value']]
+            'filters': [],
+            # What to aggregate on if we get multiple matches?
+            'aggregation_key': 'summary',
+            # How long to search and aggregate for? The longer the slower.
+            # These defaults work well for alerts that basically don't *need*
+            # much aggregation
+            'threshold': {
+                'timerange_min': 5,
+                'count': 1
+                },
+            # This is the category that will show up in mozdef, and the severity
+            'alert_category': 'generic_alerts',
+            'alert_severity': 'INFO',
+            # This will show up as the alert text when it trigger
+            'summary': '',
+            # This helps sorting out alerts, so it's nice if you fill this in
+            'tags': ['generic'],
+            # This is the alert documentation
+            'url': ''
+            })
+    # The above default alert also require these to be set
+    # by the alert json file. If it's not set, fail.
+    self.default_alert_required_fields = DotDict({
+        'search_string': '',
+        'summary': '',
+        'url': ''
+        })
+
+    def validate_alert(self, alert):
+        '''Validate the alert has required fields and fills in defaults where possible'''
+        new_alert = self.default_alert.copy()
+        for k in self.default_alert:
+            # If we have this field set, add it, else we keep the default
+            # Granted that its not a required field
+            if k in alert:
+                new_alert[k] = alert[k]
+            else:
+                # Take default, or fail if it was a required field
+                if k in self.default_alert_required_fields:
+                    debug('Your alert does not have the required field {}'.format(k))
+                    raise KeyError
+        return new_alert
+
     def load_configs(self):
         '''Load all configured rules'''
         self.configs = []
@@ -47,8 +96,8 @@ class AlertGenericLoader(AlertTask):
             with open(f) as fd:
                 # XXX Make a nicer try thing
                 try:
-                    # XXX template the json to get defaults
                     cfg = DotDict(hjson.load(fd))
+                    cfg = validate_alert(cfg)
                     self.configs.append(cfg)
                 except:
                     traceback.print_exc(file=sys.stdout)
@@ -86,7 +135,7 @@ class AlertGenericLoader(AlertTask):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
-        category = 'generic_alerts'
+        category = aggreg['config']['alert_category']
         tags = aggreg['config']['tags']
         severity = aggreg['config']['alert_severity']
         url = aggreg['config']['url']
