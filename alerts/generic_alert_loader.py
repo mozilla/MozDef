@@ -89,7 +89,8 @@ class AlertGenericLoader(AlertTask):
         category = 'generic_alerts'
         tags = aggreg['config']['tags']
         severity = aggreg['config']['alert_severity']
+        url = aggreg['config']['url']
 
         summary = '{} ({}): {}'.format(aggreg['config']['summary'], aggreg['count'], aggreg['value'])
 
-        return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+        return self.createAlertDict(summary, category, tags, aggreg['events'], severity, url)
