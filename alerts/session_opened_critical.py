@@ -48,7 +48,7 @@ class SessionOpenedCrit(AlertTask):
 
     def onEvent(self, event):
         category = 'session'
-        severity = 'CRITICAL'
+        severity = 'WARNING'
         tags = ['pam', 'syslog']
 
         summary = 'Session opened on {0}'.format(event['_source']['details']['hostname'])

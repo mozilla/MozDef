@@ -36,7 +36,7 @@ class PromiscKernel(AlertTask):
 
     def onEvent(self, event):
         category = 'promisc'
-        severity = 'CRITICAL'
+        severity = 'WARNING'
         tags = ['promisc', 'kernel']
 
         summary = 'Promiscuous mode enabled on {0}'.format(event['_source']['hostname'])

@@ -49,7 +49,7 @@ class SSHFailCrit(AlertTask):
 
     def onEvent(self, event):
         category = 'session'
-        severity = 'CRITICAL'
+        severity = 'WARNING'
         tags = ['pam', 'syslog']
 
         summary = 'Failed to open session on {0}'.format(event['_source']['details']['hostname'])
