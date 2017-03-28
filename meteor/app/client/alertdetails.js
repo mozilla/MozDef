@@ -18,7 +18,7 @@ if (Meteor.isClient) {
         },
     
         kibanaurl: function () {
-            url=getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + Session.get('alertID');
+            url=getSetting('kibanaURL') + '/doc/alerts-*/alerts-201703/alert?id=' + Session.get('alertID');
             return url;
         }
     });

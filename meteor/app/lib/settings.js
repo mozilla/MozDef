@@ -15,7 +15,7 @@ mozdef = {
   rootURL: "mozdef.private.scl3.mozilla.com",
   port: "443",
   rootAPI: "https://mozdef.private.scl3.mozilla.com:8444",
-  kibanaURL: "https://mozdef.private.scl3.mozilla.com:9443",
+  kibanaURL: "https://mozdef.private.scl3.mozilla.com:9443/app/kibana#",
   enableBlockIP: true,
   enableClientAccountCreation: false
 }
