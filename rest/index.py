@@ -563,7 +563,7 @@ def kibanaDashboards():
             resultsList.append({
                 'name': dashboard['_source']['title'],
                 'url': "%s/%s/%s" % (options.kibanaurl,
-                    "index.html#/dashboard/elasticsearch",
+                "dashboard",
                 dashboard['_source']['title'])
             })
 
