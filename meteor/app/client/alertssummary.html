@@ -104,7 +104,7 @@ Anthony Verez averez@mozilla.com
     <tr class="alert-row">
         <td>{{utctimestamp}}</td>
         <td><a href="/alert/{{esmetadata.id}}">mozdef</a><br>
-            <a href="{{mozdef.kibanaURL}}/doc/alerts-*/alerts-201703/alert?id={{esmetadata.id}}" target="_blank">kibana</a>
+            <a href="{{mozdef.kibanaURL}}/doc/alerts-*/{{esmetadata.index}}/alert?id={{esmetadata.id}}" target="_blank">kibana</a>
             {{#if url}}
                 <br><a href="{{url}}" target ="_blank">docs</a>
             {{/if}}
