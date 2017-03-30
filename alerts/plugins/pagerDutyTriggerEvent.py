@@ -43,7 +43,7 @@ class message(object):
         self.options.keywords = getConfig('keywords', 'KEYWORDS', self.configfile)
         self.options.clienturl = getConfig('clienturl', 'CLIENTURL', self.configfile)
         try:
-            self.options.docs = json.loads(getConfig('docs', 'NOTHING', self.configfile))
+            self.options.docs = json.loads(getConfig('docs', {}, self.configfile))
         except:
             self.options.docs = {}
 
