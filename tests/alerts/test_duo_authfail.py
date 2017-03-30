@@ -27,7 +27,7 @@ class TestAlertDuoAuthFail(AlertTestSuite):
         "category": "duosecurity",
         "tags": ['duosecurity'],
         "severity": "WARNING",
-        "url": "https://mana.mozilla.org/wiki/display/SECURITY/IR+Procedure%3A+DuoSecurity",
+        "url": "https://your.super.cool.documentation",
         "summary": "Duo Authentication Failure: user you@somewhere.com rejected and marked a Duo Authentication attempt from 1.2.3.4 as fraud",
     }
 
