@@ -155,11 +155,13 @@ class AlertGenericLoader(AlertTask):
             elif 'hostname' in event_source:
                 hostnames.append(event_source['hostname'])
 
-        summary = '{} ({}): {} [{}]'.format(
+        summary = '{} ({}): {}'.format(
             aggreg['config']['summary'],
             aggreg['count'],
             aggreg['value'],
-            ','.join(hostnames)
         )
+
+        if hostnames:
+            summary += ' [{}]'.format(','.join(hostnames))
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity, url)
