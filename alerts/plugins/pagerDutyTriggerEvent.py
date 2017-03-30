@@ -40,12 +40,18 @@ class message(object):
         # fill self.options with plugin-specific options
         # change this to your default zone for when it's not specified
         self.options.serviceKey = getConfig('serviceKey', 'APIKEYHERE', self.configfile)
-        self.options.docs = json.loads(getConfig('docs', 'NOTHING', self.configfile))
         self.options.keywords = getConfig('keywords', 'KEYWORDS', self.configfile)
         self.options.clienturl = getConfig('clienturl', 'CLIENTURL', self.configfile)
+        try:
+            self.options.docs = json.loads(getConfig('docs', 'NOTHING', self.configfile))
+        except:
+            self.options.docs = {}
 
     def onMessage(self, message):
         # here is where you do something with the incoming alert message
+        doclink = 'unknown'
+        if message['category'] in self.options.docs.keys():
+            doclink = self.options.docs[message['category']]
         if 'summary' in message.keys() :
             headers = {
                 'Content-type': 'application/json',
@@ -60,7 +66,7 @@ class message(object):
               "contexts": [
                     {
                         "type": "link",
-                        "href": "https://" + "{0}".format(self.options.docs[message['category']]),
+                        "href": "https://" + "{0}".format(doclink),
                         "text": "View runbook on mana"
                     }
                 ]
