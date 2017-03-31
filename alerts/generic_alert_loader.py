@@ -112,16 +112,16 @@ class AlertGenericLoader(AlertTask):
         (self.config, args) = myparser.parse_args([])
         self.config.alert_data_location = getConfig('alert_data_location', '', self.config_file)
 
-    def process_alert(self, config):
-        search_query = SearchQuery(minutes=int(config.threshold.timerange_min))
+    def process_alert(self, alert_config):
+        search_query = SearchQuery(minutes=int(alert_config.time_window))
         terms = []
-        for i in config.filters:
+        for i in alert_config.filters:
             terms.append(TermMatch(i[0], i[1]))
-        terms.append(QueryStringMatch(str(config.search_string)))
+        terms.append(QueryStringMatch(str(alert_config.search_string)))
         search_query.add_must(terms)
         self.filtersManual(search_query)
-        self.searchEventsAggregated(config.aggregation_key, samplesLimit=int(config.threshold.count))
-        self.walkAggregations(threshold=int(config.threshold.count), config=config)
+        self.searchEventsAggregated(alert_config.aggregation_key, samplesLimit=int(alert_config.num_samples))
+        self.walkAggregations(threshold=int(alert_config.num_aggregations), alert_config=alert_config)
 
     def main(self):
         self.config_file = './generic_alert_loader.conf'
@@ -140,9 +140,9 @@ class AlertGenericLoader(AlertTask):
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
         category = aggreg['config']['alert_category']
-        tags = aggreg['config']['tags']
+        tags = aggreg['config']['alert_tags']
         severity = aggreg['config']['alert_severity']
-        url = aggreg['config']['url']
+        url = aggreg['config']['alert_url']
 
         # Find all affected hosts
         # Normally, the hostname data is in e.details.hostname so try that first,
@@ -156,7 +156,7 @@ class AlertGenericLoader(AlertTask):
                 hostnames.append(event_source['hostname'])
 
         summary = '{} ({}): {}'.format(
-            aggreg['config']['summary'],
+            aggreg['alert_config']['alert_summary'],
             aggreg['count'],
             aggreg['value'],
         )
