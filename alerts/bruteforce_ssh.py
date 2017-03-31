@@ -27,6 +27,8 @@ class AlertBruteforceSsh(AlertTask):
         search_query.add_must_not([
             PhraseMatch('summary', '10.22.75.203'),
             PhraseMatch('summary', '10.8.75.144'),
+            # bug 1350650
+            PhraseMatch('summary', '10.22.75.37'),
         ])
 
         self.filtersManual(search_query)
