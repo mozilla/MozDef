@@ -78,13 +78,15 @@ class AlertGenericLoader(AlertTask):
     required_fields = [
         "search_string",
         "filters",
-        "threshold",
         "aggregation_key",
+        "time_window",
+        "num_samples",
+        "num_aggregations",
         "alert_category",
-        "tags",
+        "alert_tags",
         "alert_severity",
-        "summary",
-        "url",
+        "alert_summary",
+        "alert_url",
     ]
 
     def validate_alert(self, alert):
@@ -121,7 +123,7 @@ class AlertGenericLoader(AlertTask):
         search_query.add_must(terms)
         self.filtersManual(search_query)
         self.searchEventsAggregated(alert_config.aggregation_key, samplesLimit=int(alert_config.num_samples))
-        self.walkAggregations(threshold=int(alert_config.num_aggregations), alert_config=alert_config)
+        self.walkAggregations(threshold=int(alert_config.num_aggregations), config=alert_config)
 
     def main(self):
         self.config_file = './generic_alert_loader.conf'
@@ -156,7 +158,7 @@ class AlertGenericLoader(AlertTask):
                 hostnames.append(event_source['hostname'])
 
         summary = '{} ({}): {}'.format(
-            aggreg['alert_config']['alert_summary'],
+            aggreg['config']['alert_summary'],
             aggreg['count'],
             aggreg['value'],
         )
