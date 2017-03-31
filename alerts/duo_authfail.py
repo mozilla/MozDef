@@ -13,7 +13,7 @@ from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 class AlertDuoAuthFail(AlertTask):
     def main(self):
-        search_query = SearchQuery(minutes=2)
+        search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
             TermMatch('_type', 'event'),
