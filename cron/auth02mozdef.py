@@ -351,7 +351,7 @@ def fetch_auth0_logs(config, headers, fromid):
         mozmsg = mozdef.MozDefEvent(config.mozdef.url)
         if config.DEBUG == 'True':
             mozmsg.set_send_to_syslog(True, only_syslog=True)
-        mozmsg.source = config.auth0.url
+        mozmsg.hostname = config.auth0.url
         mozmsg.tags = ['auth0']
         msg = byteify(msg)
         msg = DotDict(msg)
