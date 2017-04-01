@@ -282,29 +282,14 @@ def process_msg(mozmsg, msg):
             pass
         details['username'] = msg.user_name
 
-    try:
-        auth0details = msg.details.details
-    except KeyError:
-        auth0details = ""
-
-    if type(details.type) == unicode:
-        details.type = details.type.encode('utf8')
-
-    if type(details.description) == unicode:
-        details.description = details.description.encode('utf8')
-
-    if type(auth0details) == unicode:
-        auth0details = auth0details.encode('utf8')
-
-    mozmsg.summary = "{type} {desc} {auth0details}".format(
+    mozmsg.summary = "{type} {desc}".format(
         type=details.type,
-        desc=details.description,
-        auth0details=auth0details
+        desc=details.description
     )
 
     mozmsg.details = details
-    #that's just too much data, IMO
-    #mozmsg.details['auth0_raw'] = msg
+    mozmsg.details['auth0_raw'] = msg
+
     return mozmsg
 
 def load_state(fpath):
@@ -326,6 +311,18 @@ def save_state(fpath, state):
     """
     with open(fpath, mode='w') as fd:
         fd.write(str(state)+'\n')
+
+def byteify(input):
+    """Convert input to ascii"""
+    if isinstance(input, dict):
+        return {byteify(key): byteify(value)
+                for key, value in input.iteritems()}
+    elif isinstance(input, list):
+        return [byteify(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
 
 def fetch_auth0_logs(config, headers, fromid):
     lastid = fromid
@@ -356,6 +353,7 @@ def fetch_auth0_logs(config, headers, fromid):
             mozmsg.set_send_to_syslog(True, only_syslog=True)
         mozmsg.source = config.auth0.url
         mozmsg.tags = ['auth0']
+        msg = byteify(msg)
         msg = DotDict(msg)
         lastid = msg._id
 
