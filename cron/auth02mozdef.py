@@ -241,7 +241,13 @@ def process_msg(mozmsg, msg):
     except KeyError:
         pass
 
-    details['type'] = log_types[msg.type].event
+    try:
+        details['type'] = log_types[msg.type].event
+    except KeyError:
+        #New message type, check https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Logs/get_logs for ex.
+        debug('New auth0 message type, please add support: {}'.format(msg.type))
+        details['type'] = msg.type
+
     if log_types[msg.type].level == 3:
         mozmsg.set_severity(mozdef.MozDefEvent.SEVERITY_ERROR)
     elif log_types[msg.type].level > 3:
