@@ -267,6 +267,11 @@ def process_msg(mozmsg, msg):
     except KeyError:
         pass
 
+    try:
+        details['connection'] = msg.connection
+    except KeyError:
+        pass
+
     details['auth0_client_id'] = msg.client_id
 
     try:
