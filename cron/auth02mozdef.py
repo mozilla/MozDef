@@ -19,6 +19,7 @@ except ImportError:
     #Well hello there python2 user!
     import urllib
     quote_url = urllib.quote
+import traceback
 
 class DotDict(dict):
     '''dict.item notation for dict()'s'''
@@ -213,7 +214,15 @@ log_types=DotDict({
         'fd': {
                 "event": 'Failed delegation',
                 "level": 3 # error
-         }
+         },
+        'seccft': {
+                "event": "Success Exchange (Client Credentials for Access Token)",
+                "level": 1
+        },
+        'feccft': {
+                "event": "Failed Exchange (Client Credentials for Access Token)",
+                "level": 1
+        }
 })
 
 def process_msg(mozmsg, msg):
@@ -352,6 +361,8 @@ def fetch_auth0_logs(config, headers, fromid):
             mozmsg.details['error'] = 'true'
             mozmsg.details['errormsg'] = '"'+str(e)+'"'
             mozmsg.summary = 'Failed to parse auth0 message'
+            if config.DEBUG == 'True':
+                traceback.print_exc()
         mozmsg.send()
 
     if have_totals:
