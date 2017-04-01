@@ -272,7 +272,10 @@ def process_msg(mozmsg, msg):
     except KeyError:
         pass
 
-    details['auth0_client_id'] = msg.client_id
+    try:
+        details['auth0_client_id'] = msg.client_id
+    except KeyError:
+        pass
 
     try:
         details['username'] = msg.details.request.auth.user.name
@@ -285,10 +288,13 @@ def process_msg(mozmsg, msg):
             pass
         except AttributeError:
             pass
-        details['username'] = msg.user_name
+        try:
+            details['username'] = msg.user_name
+        except KeyError:
+            pass
 
-    mozmsg.summary = "{type} {desc}".format(
-        type=details.type,
+    mozmsg.summary = "{mtype} {desc}".format(
+        mtype=details.type,
         desc=details.description
     )
 
