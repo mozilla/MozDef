@@ -270,7 +270,7 @@ def process_msg(mozmsg, msg):
     details['auth0_client_id'] = msg.client_id
 
     try:
-        details['username'] = msg.details.request.auth.user
+        details['username'] = msg.details.request.auth.user.name
         details['action'] = msg.details.response.body.name
     except KeyError:
         try:
