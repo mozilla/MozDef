@@ -9,3 +9,4 @@ results
 *.pyc
 cron/ipblocklist.txt
 alerts/generic_alerts
+/.project
