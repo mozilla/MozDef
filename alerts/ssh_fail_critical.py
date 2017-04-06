@@ -30,7 +30,11 @@ class SSHFailCrit(AlertTask):
             TermMatch('_type', 'event'),
             TermMatch('category', 'syslog'),
             TermMatch('details.program', 'sshd'),
+##            ExistsMatch('details.hostname')
+        ])
+        search_query.add_should([
             PhraseMatch('summary', 'Failed'),
+            PhraseMatch('summary', 'invalid')
         ])
         search_query.add_must(superquery)
 

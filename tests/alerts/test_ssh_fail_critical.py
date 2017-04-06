@@ -13,9 +13,9 @@ class TestSSHFailCrit(AlertTestSuite):
         "_type": "event",
         "_source": {
             "category": "syslog",
-            "summary": "Failed publickey for root from 10.22.252.22 port 48882 ssh2",
+            "summary": "Failed publickey for root from 1.2.3.4 port 48882 ssh2",
             "details": {
-                "hostname": "example1.hostname.domain.com",
+                "hostname": "random.server.com",
                 "program": "sshd",
             }
         }
@@ -43,6 +43,28 @@ class TestSSHFailCrit(AlertTestSuite):
     event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
     test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with an event with invalid user and IP",
+            events=[
+                {
+                    "_source": {
+                        "summary": "Invalid user batman from 1.2.3.4"
+                    }
+                }
+            ],
+            expected_alert=default_alert
+        ),
+        PositiveAlertTestCase(
+            description="Positive test case with an event with just invalid user",
+            events=[
+                {
+                    "_source": {
+                        "summary": "input_userauth_request: invalid user robin"
+                    }
+                }
+            ],
+            expected_alert=default_alert
+        ),
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
             events=[event],
