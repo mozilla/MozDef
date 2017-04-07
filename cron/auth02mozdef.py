@@ -19,6 +19,7 @@ except ImportError:
     #Well hello there python2 user!
     import urllib
     quote_url = urllib.quote
+import traceback
 
 class DotDict(dict):
     '''dict.item notation for dict()'s'''
@@ -213,7 +214,15 @@ log_types=DotDict({
         'fd': {
                 "event": 'Failed delegation',
                 "level": 3 # error
-         }
+         },
+        'seccft': {
+                "event": "Success Exchange (Client Credentials for Access Token)",
+                "level": 1
+        },
+        'feccft': {
+                "event": "Failed Exchange (Client Credentials for Access Token)",
+                "level": 1
+        }
 })
 
 def process_msg(mozmsg, msg):
@@ -232,7 +241,13 @@ def process_msg(mozmsg, msg):
     except KeyError:
         pass
 
-    details['type'] = log_types[msg.type].event
+    try:
+        details['type'] = log_types[msg.type].event
+    except KeyError:
+        #New message type, check https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Logs/get_logs for ex.
+        debug('New auth0 message type, please add support: {}'.format(msg.type))
+        details['type'] = msg.type
+
     if log_types[msg.type].level == 3:
         mozmsg.set_severity(mozdef.MozDefEvent.SEVERITY_ERROR)
     elif log_types[msg.type].level > 3:
@@ -252,10 +267,18 @@ def process_msg(mozmsg, msg):
     except KeyError:
         pass
 
-    details['auth0_client_id'] = msg.client_id
+    try:
+        details['connection'] = msg.connection
+    except KeyError:
+        pass
 
     try:
-        details['username'] = msg.details.request.auth.user
+        details['auth0_client_id'] = msg.client_id
+    except KeyError:
+        pass
+
+    try:
+        details['username'] = msg.details.request.auth.user.name
         details['action'] = msg.details.response.body.name
     except KeyError:
         try:
@@ -265,31 +288,19 @@ def process_msg(mozmsg, msg):
             pass
         except AttributeError:
             pass
-        details['username'] = msg.user_name
+        try:
+            details['username'] = msg.user_name
+        except KeyError:
+            pass
 
-    try:
-        auth0details = msg.details.details
-    except KeyError:
-        auth0details = ""
-
-    if type(details.type) == unicode:
-        details.type = details.type.encode('utf8')
-
-    if type(details.description) == unicode:
-        details.description = details.description.encode('utf8')
-
-    if type(auth0details) == unicode:
-        auth0details = auth0details.encode('utf8')
-
-    mozmsg.summary = "{type} {desc} {auth0details}".format(
-        type=details.type,
-        desc=details.description,
-        auth0details=auth0details
+    mozmsg.summary = "{mtype} {desc}".format(
+        mtype=details.type,
+        desc=details.description
     )
 
     mozmsg.details = details
-    #that's just too much data, IMO
-    #mozmsg.details['auth0_raw'] = msg
+    mozmsg.details['auth0_raw'] = msg
+
     return mozmsg
 
 def load_state(fpath):
@@ -311,6 +322,18 @@ def save_state(fpath, state):
     """
     with open(fpath, mode='w') as fd:
         fd.write(str(state)+'\n')
+
+def byteify(input):
+    """Convert input to ascii"""
+    if isinstance(input, dict):
+        return {byteify(key): byteify(value)
+                for key, value in input.iteritems()}
+    elif isinstance(input, list):
+        return [byteify(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
 
 def fetch_auth0_logs(config, headers, fromid):
     lastid = fromid
@@ -339,8 +362,9 @@ def fetch_auth0_logs(config, headers, fromid):
         mozmsg = mozdef.MozDefEvent(config.mozdef.url)
         if config.DEBUG == 'True':
             mozmsg.set_send_to_syslog(True, only_syslog=True)
-        mozmsg.source = config.auth0.url
+        mozmsg.hostname = config.auth0.url
         mozmsg.tags = ['auth0']
+        msg = byteify(msg)
         msg = DotDict(msg)
         lastid = msg._id
 
@@ -352,6 +376,8 @@ def fetch_auth0_logs(config, headers, fromid):
             mozmsg.details['error'] = 'true'
             mozmsg.details['errormsg'] = '"'+str(e)+'"'
             mozmsg.summary = 'Failed to parse auth0 message'
+            if config.DEBUG == 'True':
+                traceback.print_exc()
         mozmsg.send()
 
     if have_totals:

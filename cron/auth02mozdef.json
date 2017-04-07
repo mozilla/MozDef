@@ -2,7 +2,7 @@
   "mozdef": {
     "url": "http://localhost:8080/events"
   },
-  //Generate on https://auth0.com/docs/api/management/v2 (top left TOKEN GENERATOR)
+  //Generate on https://manage{-dev}.{mozilla.}auth0.com/#/apis (Management API)
   "auth0": {
     "reqnr": 100,
     "token": "<add_token>",
