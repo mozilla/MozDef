@@ -34,14 +34,14 @@ class SessionOpenedCrit(AlertTask):
         search_query.add_must(superquery)
 
         self.filtersManual(search_query)
-        self.searchEventsSimple()
-        self.walkEvents()
+        self.searchEventsAggregated('details.hostname', samplesLimit=10)
+        self.walkAggregations(threshold=1)
 
-    def onEvent(self, event):
+    def onAggregation(self, aggreg):
         category = 'session'
         severity = 'WARNING'
         tags = ['pam', 'syslog']
 
-        summary = 'Session opened on {0}'.format(event['_source']['details']['hostname'])
+        summary = 'Session opened on {1} [{0}]'.format(aggreg['count'], aggreg['value'])
 
         return self.createAlertDict(summary, category, tags, [event], severity)
