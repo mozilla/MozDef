@@ -11,19 +11,12 @@
 import os
 import sys
 import logging
-import pytz
-import requests
 import json
-import time
 import re
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from datetime import timedelta
 from dateutil.parser import parse
-from datetime import date
 from logging.handlers import SysLogHandler
-from pytx import init
-from pytx import ThreatIndicator
 import boto.sqs
 from boto.sqs.message import RawMessage
 from urllib2 import urlopen
@@ -35,7 +28,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib
 from utilities.toUTC import toUTC
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.INFO
+logger.level = logging.INFO
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -72,26 +65,24 @@ def buildQuery(optionDict):
     if optionDict['since'] is None or optionDict['until'] is None:
         logger.error('"since" and "until" are both required')
         raise Exception('You must specify both "since" and "until" values')
-
     fields = ({
-        'access_token' : options.appid + '|' + options.appsecret,
+        'access_token': options.appid + '|' + options.appsecret,
         'threat_type': 'COMPROMISED_CREDENTIAL',
-        'type' : 'EMAIL_ADDRESS',
-        'fields' : 'indicator,passwords',
-        'since' : optionDict['since'],
-        'until' : optionDict['until'],
+        'type': 'EMAIL_ADDRESS',
+        'since': optionDict['since'],
+        'until': optionDict['until'],
     })
-
     return options.txserver + 'threat_indicators?' + urlencode(fields)
 
+
 def executeQuery(url):
-    queryResults=[]
+    queryResults = []
 
     try:
         response = urlopen(url).read()
     except TypeError as e:
-        logger.error('Type error %r'%e)
-        return queryResults,None
+        logger.error('Type error %r' % e)
+        return queryResults, None
     except Exception as e:
         lines = str(e.info()).split('\r\n')
         msg = str(e)
@@ -100,26 +91,26 @@ def executeQuery(url):
             result = re.search('^WWW-Authenticate: .*\) (.*)\"$', line)
             if result:
                 msg = result.groups()[0]
-        logger.error ('ERROR: %s\nReceived' % (msg))
-        return queryResults,None
+        logger.error('ERROR: %s\nReceived' % (msg))
+        return queryResults, None
 
     try:
         data = json.loads(response)
 
         if 'data' in data.keys():
-            for d in data['data']:
-                queryResults.append(dict(email=d['indicator'],md5=d['passwords']))
+            for record in data['data']:
+                queryResults.append(record['indicator'])
 
         if 'paging' in data:
-            nextURL=data['paging']['next']
+            nextURL = data['paging']['next']
         else:
-            nextURL=None
+            nextURL = None
 
-        return queryResults,nextURL
+        return queryResults, nextURL
 
     except Exception as e:
         logger.error('ERROR: %r' % (e))
-        return queryResults,None
+        return queryResults, None
 
 
 def sendToCustomsServer(queue, emailAddress=None):
@@ -140,19 +131,16 @@ def sendToCustomsServer(queue, emailAddress=None):
         logger.error('Error while sending to customs server %s: %r' % (emailAddress, e))
 
 
-
 def main():
-    if options.output=='syslog':
-        logger.addHandler(SysLogHandler(address=(options.sysloghostname,options.syslogport)))
+    if options.output == 'syslog':
+        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
     else:
-        sh=logging.StreamHandler(sys.stderr)
+        sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
 
     logger.debug('started')
 
-    # set up the threat exchange secret
-    init(options.appid, options.appsecret)
     # set up SQS
     conn = boto.sqs.connect_to_region(options.region,
                                       aws_access_key_id=options.aws_access_key_id,
@@ -162,7 +150,7 @@ def main():
     try:
         # capture the time we start running so next time we catch any events
         # created while we run.
-        lastrun=toUTC(datetime.now()).isoformat()
+        lastrun = toUTC(datetime.now()).isoformat()
 
         queryDict = {}
         queryDict['since'] = parse(state.data['lastrun']).isoformat()
@@ -173,66 +161,52 @@ def main():
         # we get results in pages
         # so iterate through the pages
         # and append to a list
-        nextURL=buildQuery(queryDict)
-        allResults=[]
+        nextURL = buildQuery(queryDict)
+        email_indicators = []
         while nextURL is not None:
-            results,nextURL=executeQuery(nextURL)
-            for r in results:
-                allResults.append(r)
+            results, nextURL = executeQuery(nextURL)
+            for indicator in results:
+                email_indicators.append(indicator)
 
-        # send the results to SQS
-        for r in allResults:
-            sendToCustomsServer(queue, r['email'])
+        # # send the results to SQS
+        for indicator in email_indicators:
+            sendToCustomsServer(queue, indicator)
 
         # record the time we started as
         # the start time for next time.
-        if len(allResults) > 0:
+        if len(email_indicators) > 0:
             state.data['lastrun'] = lastrun
             state.write_state_file()
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
 
     logger.debug('finished')
 
 
 def initConfig():
-    options.output=getConfig('output','stdout',options.configfile)                              #output our log to stdout or syslog
-    options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
-    options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
-    options.mozdefurl = getConfig('url', 'http://localhost:8080/events', options.configfile)                  #mozdef event input url to post to
-    options.state_file_name = getConfig('state_file_name','{0}.state'.format(sys.argv[0]),options.configfile)
-    options.recordlimit = getConfig('recordlimit', 1000, options.configfile)                    #max number of records to request
+    options.output = getConfig('output', 'stdout', options.configfile)
+    options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)
+    options.syslogport = getConfig('syslogport', 514, options.configfile)
+    options.mozdefurl = getConfig('url', 'http://localhost:8080/events', options.configfile)
+    options.state_file_name = getConfig('state_file_name', '{0}.state'.format(sys.argv[0]), options.configfile)
+    options.recordlimit = getConfig('recordlimit', 1000, options.configfile)
 
     # threat exchange options
-    options.appid = getConfig('appid',
-                              '',
-                              options.configfile)
-    options.appsecret=getConfig('appsecret',
-                                '',
-                                options.configfile)
+    options.appid = getConfig('appid', '', options.configfile)
+    options.appsecret = getConfig('appsecret', '', options.configfile)
 
-    options.txserver = getConfig('txserver',
-                                 'https://graph.facebook.com/',
-                                 options.configfile)
+    options.txserver = getConfig('txserver', 'https://graph.facebook.com/v2.8/', options.configfile)
 
     # boto options
-    options.region = getConfig('region',
-                                'us-west-2',
-                                options.configfile)
-    options.aws_access_key_id=getConfig('aws_access_key_id',
-                                        '',
-                                        options.configfile)
-    options.aws_secret_access_key=getConfig('aws_secret_access_key',
-                                            '',
-                                            options.configfile)
-    options.aws_queue_name=getConfig('aws_queue_name',
-                                    '',
-                                    options.configfile)
+    options.region = getConfig('region', 'us-west-2', options.configfile)
+    options.aws_access_key_id = getConfig('aws_access_key_id', '', options.configfile)
+    options.aws_secret_access_key = getConfig('aws_secret_access_key', '', options.configfile)
+    options.aws_queue_name = getConfig('aws_queue_name', '', options.configfile)
 
 
 if __name__ == '__main__':
-    parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
-    (options,args) = parser.parse_args()
+    parser = OptionParser()
+    parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
+    (options, args) = parser.parse_args()
     initConfig()
     main()
