@@ -31,15 +31,15 @@ class PromiscKernel(AlertTask):
         ])
 
         self.filtersManual(search_query)
-        self.searchEventsSimple()
-        self.walkEvents()
+        self.searchEventsAggregated('details.hostname', samplesLimit=10)
+        self.walkAggregations(threshold=1)
 
-    def onEvent(self, event):
+    def onAggregation(self, aggreg):
         category = 'promisc'
         severity = 'WARNING'
         tags = ['promisc', 'kernel']
 
-        summary = 'Promiscuous mode enabled on {0}'.format(event['_source']['hostname'])
+        summary = 'Promiscuous mode enabled on {1} [{0}]'.format(aggreg['count'], aggreg['value'])
 
-        return self.createAlertDict(summary, category, tags, [event], severity)
+        return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
 

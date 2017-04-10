@@ -14,15 +14,18 @@ class TestPromiscKernel(AlertTestSuite):
         "_source": {
             "category": "syslog",
             "summary": "device eth0 entered promiscuous mode",
-            "hostname": "test1.host.domain.com",
+            "hostname": "logging.server.com",
+            "details": {
+                "hostname": "random.hacked.server.yours",
+            }
         }
     }
 
     # This alert is the expected result from running this task
     default_alert = {
         "category": "promisc",
-        "severity": "CRITICAL",
-        "summary": "Promiscuous mode enabled on test1.host.domain.com",
+        "severity": "WARNING",
+        "summary": "Promiscuous mode enabled on random.hacked.server.yours [10]",
         "tags": ['promisc', 'kernel'],
     }
 
