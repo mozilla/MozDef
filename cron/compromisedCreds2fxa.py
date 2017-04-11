@@ -115,7 +115,6 @@ def main():
             indicator_str = result.get(td.INDICATOR)
             indicators = indicator_str.split(':')
             email_address = indicators[0]
-            print email_address
             email_indicators.append(email_address)
 
         # send the results to SQS
