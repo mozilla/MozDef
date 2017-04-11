@@ -28,6 +28,10 @@ class TestSSHFailCrit(AlertTestSuite):
         "summary": "Failed to open session on example1.hostname.domain.com",
         "tags": ['pam', 'syslog'],
     }
+    alt_alert = copy.deepcopy(default_alert)
+    alt_alert['summary'] = 'Failed to open session on random55.server.com [10]'
+
+    test_cases = []
 
     test_cases = []
 
@@ -44,27 +48,40 @@ class TestSSHFailCrit(AlertTestSuite):
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
     test_cases.append(
         PositiveAlertTestCase(
-            description="Positive test case with an event with invalid user and IP",
-            events=[
-                {
-                    "_source": {
-                        "summary": "Invalid user batman from 1.2.3.4"
-                    }
-                }
-            ],
-            expected_alert=default_alert
-        ),
+            description="Positive test case with an event with another hostname from the list",
+            events=custom_events,
+            expected_alert=alt_alert
+        )
+    )
+
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
+        # can do that or have subsequent events use alt_alert{}
+        temp_event['_source']['details']['hostname'] = 'random.server.com'
+    test_cases.append(
         PositiveAlertTestCase(
-            description="Positive test case with an event with just invalid user",
-            events=[
-                {
-                    "_source": {
-                        "summary": "input_userauth_request: invalid user robin"
-                    }
-                }
-            ],
+            description="Positive test case with an event with somewhat old timestamp",
+            events=custom_events,
             expected_alert=default_alert
-        ),
+        )
+    )
+
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = 'Invalid user batman from 1.2.3.4'
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with an event with invalid user and IP",
+            events=custom_events,
+            expected_alert=default_alert
+        )
+    )
+
+    custom_events = default_events
+    for temp_event in custom_events:
+        temp_event['_source']['summary'] = 'input_userauth_request: invalid user robin'
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
             events=[event],
