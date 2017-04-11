@@ -12,15 +12,15 @@ import os
 import sys
 import logging
 import json
-import re
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from dateutil.parser import parse
 from logging.handlers import SysLogHandler
 import boto.sqs
 from boto.sqs.message import RawMessage
-from urllib2 import urlopen
-from urllib import urlencode
+from pytx.access_token import access_token
+from pytx import ThreatIndicator
+from pytx.vocabulary import ThreatIndicator as td
 
 import sys
 import os
@@ -58,61 +58,6 @@ class State:
             json.dump(self.data, f, sort_keys=True, indent=4, separators=(',', ': '))
 
 
-def buildQuery(optionDict):
-    '''
-    Builds a query string based on the dict of options
-    '''
-    if optionDict['since'] is None or optionDict['until'] is None:
-        logger.error('"since" and "until" are both required')
-        raise Exception('You must specify both "since" and "until" values')
-    fields = ({
-        'access_token': options.appid + '|' + options.appsecret,
-        'threat_type': 'COMPROMISED_CREDENTIAL',
-        'type': 'EMAIL_ADDRESS',
-        'since': optionDict['since'],
-        'until': optionDict['until'],
-    })
-    return options.txserver + 'threat_indicators?' + urlencode(fields)
-
-
-def executeQuery(url):
-    queryResults = []
-
-    try:
-        response = urlopen(url).read()
-    except TypeError as e:
-        logger.error('Type error %r' % e)
-        return queryResults, None
-    except Exception as e:
-        lines = str(e.info()).split('\r\n')
-        msg = str(e)
-        for line in lines:
-            # get the exact error from the server
-            result = re.search('^WWW-Authenticate: .*\) (.*)\"$', line)
-            if result:
-                msg = result.groups()[0]
-        logger.error('ERROR: %s\nReceived' % (msg))
-        return queryResults, None
-
-    try:
-        data = json.loads(response)
-
-        if 'data' in data.keys():
-            for record in data['data']:
-                queryResults.append(record['indicator'])
-
-        if 'paging' in data:
-            nextURL = data['paging']['next']
-        else:
-            nextURL = None
-
-        return queryResults, nextURL
-
-    except Exception as e:
-        logger.error('ERROR: %r' % (e))
-        return queryResults, None
-
-
 def sendToCustomsServer(queue, emailAddress=None):
     try:
         if emailAddress is not None:
@@ -146,37 +91,41 @@ def main():
                                       aws_access_key_id=options.aws_access_key_id,
                                       aws_secret_access_key=options.aws_secret_access_key)
     queue = conn.get_queue(options.aws_queue_name)
+
     state = State(options.state_file_name)
     try:
+        access_token(options.appid, options.appsecret)
         # capture the time we start running so next time we catch any events
         # created while we run.
         lastrun = toUTC(datetime.now()).isoformat()
 
         queryDict = {}
         queryDict['since'] = parse(state.data['lastrun']).isoformat()
-        queryDict['until'] = datetime.utcnow().isoformat()
+        queryDict['until'] = lastrun
 
         logger.debug('Querying {0}'.format(queryDict))
 
-        # we get results in pages
-        # so iterate through the pages
-        # and append to a list
-        nextURL = buildQuery(queryDict)
+        results = ThreatIndicator.objects(
+            type_='COMPROMISED_CREDENTIAL',
+            since=queryDict['since'],
+            until=queryDict['until']
+        )
         email_indicators = []
-        while nextURL is not None:
-            results, nextURL = executeQuery(nextURL)
-            for indicator in results:
-                email_indicators.append(indicator)
+        for result in results:
+            indicator_str = result.get(td.INDICATOR)
+            indicators = indicator_str.split(':')
+            email_address = indicators[0]
+            print email_address
+            email_indicators.append(email_address)
 
-        # # send the results to SQS
+        # send the results to SQS
         for indicator in email_indicators:
             sendToCustomsServer(queue, indicator)
 
         # record the time we started as
         # the start time for next time.
-        if len(email_indicators) > 0:
-            state.data['lastrun'] = lastrun
-            state.write_state_file()
+        state.data['lastrun'] = lastrun
+        state.write_state_file()
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r" % e)
 
@@ -194,8 +143,6 @@ def initConfig():
     # threat exchange options
     options.appid = getConfig('appid', '', options.configfile)
     options.appsecret = getConfig('appsecret', '', options.configfile)
-
-    options.txserver = getConfig('txserver', 'https://graph.facebook.com/v2.8/', options.configfile)
 
     # boto options
     options.region = getConfig('region', 'us-west-2', options.configfile)
