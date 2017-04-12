@@ -61,6 +61,9 @@ class TestTermMatchNegativeTestSuite(NegativeTestSuite):
                 {'summary': 'example summary'},
                 {'summary': 'example summary tes'},
                 {'summary': 'testing'},
+                {'summary': 'test.mozilla.domain'},
+                {'summary': 'mozilla.test.domain'},
+                {'summary': 'mozilla.test'},
             ],
             TermMatch('summary', 'sum'): [
                 {'summary': 'example test summary'},
