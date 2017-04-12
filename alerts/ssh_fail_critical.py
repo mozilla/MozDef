@@ -37,6 +37,10 @@ class SSHFailCrit(AlertTask):
             PhraseMatch('summary', 'invalid')
         ])
         search_query.add_must(superquery)
+        search_query.add_must_not([
+            PhraseMatch('summary', 'reverse mapping checking getaddrinfo for'),
+            PhraseMatch('summary', 'subsystem request for netconf by user'),
+        ])
 
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.hostname', samplesLimit=10)

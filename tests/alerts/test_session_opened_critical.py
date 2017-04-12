@@ -27,6 +27,9 @@ class TestSessionOpenedCrit(AlertTestSuite):
         "summary": "Session opened on interesting1.hostname.domain.com",
         "tags": ['pam', 'syslog'],
     }
+    alt_alert = copy.deepcopy(default_alert)
+    alt_alert['summary'] = 'Session opened on random55.server.com [10]'
+
 
     test_cases = []
 
