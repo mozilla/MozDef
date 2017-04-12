@@ -50,6 +50,10 @@ class TestTermMatchPositiveTestSuite(PositiveTestSuite):
                     }
                 }
             ],
+
+            TermMatch('hostname', 'hostname.domain.com'): [
+                {'hostname': 'hostname.domain.com'},
+            ],
         }
         return tests
 
@@ -70,6 +74,11 @@ class TestTermMatchNegativeTestSuite(NegativeTestSuite):
                 {'summary': 'example summary'},
                 {'summary': 'summary test'},
                 {'summary': 'summary'},
+            ],
+            TermMatch('hostname', 'hostname.domain.com'): [
+                {'hostname': 'sub.hostname.domain.com'},
+                {'hostname': 'hostnames.domain.com'},
+                {'hostname': 'domain.com'},
             ],
         }
         return tests
