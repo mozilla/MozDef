@@ -79,6 +79,7 @@ class TestTermMatchNegativeTestSuite(NegativeTestSuite):
                 {'hostname': 'sub.hostname.domain.com'},
                 {'hostname': 'hostnames.domain.com'},
                 {'hostname': 'domain.com'},
+                {'hostname': 'com'},
             ],
         }
         return tests
