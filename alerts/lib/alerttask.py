@@ -486,3 +486,18 @@ class AlertTask(Task):
             self.log.debug('finished')
         except Exception as e:
             self.log.error('Exception in main() method: {0}'.format(e))
+
+    def parse_json_alert_config(self, config_file):
+        """
+        Helper function to parse an alert config file
+        """
+        alert_dir = os.path.join(os.path.dirname(__file__), '..')
+        config_file_path = os.path.join(alert_dir, config_file)
+        json_obj = {}
+        with open(config_file_path, "r") as fd:
+            try:
+                json_obj = json.load(fd)
+            except ValueError:
+                sys.stderr.write("FAILED to open the configuration file\n")
+
+        return json_obj

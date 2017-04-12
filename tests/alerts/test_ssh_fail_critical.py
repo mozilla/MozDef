@@ -3,6 +3,7 @@ from negative_alert_test_case import NegativeAlertTestCase
 
 from alert_test_suite import AlertTestSuite
 
+
 class TestSSHFailCrit(AlertTestSuite):
     alert_filename = "ssh_fail_critical"
 
@@ -23,30 +24,35 @@ class TestSSHFailCrit(AlertTestSuite):
     # This alert is the expected result from running this task
     default_alert = {
         "category": "session",
-        "severity": "CRITICAL",
-        "summary": "Failed to open session on nsmserver1.private.scl3.mozilla.com",
+        "severity": "WARNING",
+        "summary": "Failed to open session on example1.hostname.domain.com",
         "tags": ['pam', 'syslog'],
     }
 
-    test_cases = [
+    test_cases = []
+
+    event = AlertTestSuite.create_event(default_event)
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
-            events=[default_event],
+            events=[event],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
-                    }
-                }
-            ],
+            events=[event],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_type'] = "audit"
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad event type",
             events=[
@@ -54,51 +60,41 @@ class TestSSHFailCrit(AlertTestSuite):
                     "_type": "audit",
                 }
             ],
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['category'] = "badcategory"
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad eventName",
-            events=[
-                {
-                    "_source": {
-                        "category": "badcategory",
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['summary'] = "Accepted publickey for root from 10.22.252.22 port 48882 ssh2"
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad summary",
-            events=[
-                {
-                    "_source": {
-                        "summary": "Accepted publickey for root from 10.22.252.22 port 48882 ssh2",
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['hostname'] = "example2.hostname.domain.com"
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad details.hostname",
-            events=[
-                {
-                    "_source": {
-                        "details": {
-                            "hostname": "example2.hostname.domain.com",
-                        }
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
-                    }
-                }
-            ],
-        ),
-    ]
+            events=[event],
+        )
+    )

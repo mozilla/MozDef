@@ -30,55 +30,51 @@ class TestAlertOpenPortViolation(AlertTestSuite):
 
     test_cases = []
 
-    default_events = list()
-    for num in xrange(10):
-        default_events.append(AlertTestSuite.copy(default_event))
-
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
-            events=default_events,
+            events=AlertTestSuite.create_events(default_event, 10),
             expected_alert=default_alert
         )
     )
 
-    custom_events = default_events
-    for temp_event in custom_events:
-        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 239})
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 239})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events a minute earlier",
-            events=custom_events,
+            events=events,
             expected_alert=default_alert
         )
     )
 
-    custom_events = default_events
-    for temp_event in custom_events:
-        temp_event['_type'] = 'bad'
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_type'] = 'bad'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with incorrect _type",
-            events=custom_events,
+            events=events,
         )
     )
 
-    custom_events = default_events
-    for temp_event in custom_events:
-        temp_event['_source']['tags'] = 'bad tag example'
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['tags'] = 'bad tag example'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with incorrect tags",
-            events=custom_events,
+            events=events,
         )
     )
 
-    custom_events = default_events
-    for temp_event in custom_events:
-        temp_event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 241})
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 241})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
-            events=custom_events,
+            events=events,
         )
     )

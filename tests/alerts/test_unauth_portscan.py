@@ -17,15 +17,15 @@ class TestAlertUnauthPortScan(AlertTestSuite):
             "eventsource": "nsm",
             "hostname": "nsmhost",
             "details": {
-              "uid": "",
-              "actions": "Notice::ACTION_LOG",
-              "note": "Scan::Port_Scan",
-              "sourceipv4address": "0.0.0.0",
-              "indicators": [
-                "1.2.3.4"
-              ],
-              "msg": "1.2.3.4 scanned at least 12 unique ports of host 5.6.7.8 in 0m3s",
-              "destinationipaddress": "5.6.7.8",
+                "uid": "",
+                "actions": "Notice::ACTION_LOG",
+                "note": "Scan::Port_Scan",
+                "sourceipv4address": "0.0.0.0",
+                "indicators": [
+                    "1.2.3.4"
+                ],
+                "msg": "1.2.3.4 scanned at least 12 unique ports of host 5.6.7.8 in 0m3s",
+                "destinationipaddress": "5.6.7.8",
             },
         }
     }
@@ -39,90 +39,76 @@ class TestAlertUnauthPortScan(AlertTestSuite):
         'url': 'https://mana.mozilla.org/wiki/display/SECURITY/NSM+IR+procedures',
     }
 
-    test_cases = [
+    test_cases = []
+
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
-            events=[default_event],
+            events=[AlertTestSuite.create_event(default_event)],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 29})
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 29})
-                    }
-                }
-            ],
+            events=[event],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_type'] = 'event'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad event type",
-            events=[
-                {
-                    "_type": "event",
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['category'] = 'Badcategory'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad category",
-            events=[
-                {
-                    "_source": {
-                        "category": "Badcategory",
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['eventsource'] = 'Badeventsource'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad eventsource",
-            events=[
-                {
-                    "_source": {
-                        "eventsource": "Badeventsource",
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['indicators'] = None
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with non existent details.indicators",
-            events=[
-                {
-                    "_source": {
-                        "details": {
-                            "indicators": None,
-                        }
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['note'] = 'Badnote'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad details.note",
-            events=[
-                {
-                    "_source": {
-                        "details": {
-                            "note": "Badnote",
-                        }
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
-                    }
-                }
-            ],
-        ),
-    ]
+            events=[event],
+        )
+    )

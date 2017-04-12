@@ -143,3 +143,14 @@ class AlertTestSuite(UnitTestSuite):
     @staticmethod
     def copy(obj):
         return copy.deepcopy(obj)
+
+    @staticmethod
+    def create_events(default_event, num_events):
+        events = []
+        for num in xrange(num_events):
+            events.append(AlertTestSuite.create_event(default_event))
+        return events
+
+    @staticmethod
+    def create_event(default_event):
+        return copy.deepcopy(default_event)

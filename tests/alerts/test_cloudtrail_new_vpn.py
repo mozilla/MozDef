@@ -24,53 +24,50 @@ class TestAlertCloudtrailNewVPN(AlertTestSuite):
         "tags": ['cloudtrail', 'aws'],
     }
 
-    test_cases = [
+    test_cases = []
+
+    event = AlertTestSuite.create_event(default_event)
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
-            events=[default_event],
+            events=[event],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 29})
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 29})
-                    }
-                }
-            ],
+            events=[event],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_type'] = 'event'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad event type",
-            events=[
-                {
-                    "_type": "event",
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['eventName'] = "Badeventname"
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad eventName",
-            events=[
-                {
-                    "_source": {
-                        "eventName": "Badeventname",
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
-                    }
-                }
-            ],
-        ),
-    ]
+            events=[event],
+        )
+    )

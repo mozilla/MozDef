@@ -3,6 +3,7 @@ from negative_alert_test_case import NegativeAlertTestCase
 
 from alert_test_suite import AlertTestSuite
 
+
 class TestSessionOpenedCrit(AlertTestSuite):
     alert_filename = "session_opened_critical"
 
@@ -22,82 +23,72 @@ class TestSessionOpenedCrit(AlertTestSuite):
     # This alert is the expected result from running this task
     default_alert = {
         "category": "session",
-        "severity": "CRITICAL",
+        "severity": "WARNING",
         "summary": "Session opened on interesting1.hostname.domain.com",
         "tags": ['pam', 'syslog'],
     }
 
-    test_cases = [
+    test_cases = []
+
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
-            events=[default_event],
+            events=[AlertTestSuite.create_event(default_event)],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
-                    }
-                }
-            ],
+            events=[event],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_type'] = 'audit'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad event type",
-            events=[
-                {
-                    "_type": "audit",
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['category'] = 'badcategory'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad eventName",
-            events=[
-                {
-                    "_source": {
-                        "category": "badcategory",
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['summary'] = 'session closed'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad summary",
-            events=[
-                {
-                    "_source": {
-                        "summary": "session closed",
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['hostname'] = 'interesting9.hostname.domain.com'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad details.hostname",
-            events=[
-                {
-                    "_source": {
-                        "details": {
-                            "hostname": "interesting9.hostname.domain.com",
-                        }
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
-                    }
-                }
-            ],
-        ),
-    ]
+            events=[event],
+        )
+    )

@@ -11,27 +11,18 @@
 # This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
-import json
-import sys
+from query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class SessionOpenedCrit(AlertTask):
     def main(self):
-
+        hosts_json = self.parse_json_alert_config("critical_hosts.json")
         superquery = None
-        with open("critical_hosts.json", "r") as fd:
-            try:
-                hosts_json = json.load(fd)
-                run = 0
-                for host in hosts_json['hosts']:
-                    if run == 0:
-                        superquery = PhraseMatch('details.hostname', host)
-                    else:
-                        superquery |= PhraseMatch('details.hostname', host)
-                    run += 1
-            except ValueError:
-                sys.stderr.write("FAILED to open the configuration file\n")
+        for host in hosts_json['hosts']:
+            if superquery is None:
+                superquery = PhraseMatch('details.hostname', host)
+            else:
+                superquery |= PhraseMatch('details.hostname', host)
 
         search_query = SearchQuery(minutes=2)
 
@@ -54,4 +45,3 @@ class SessionOpenedCrit(AlertTask):
         summary = 'Session opened on {0}'.format(event['_source']['details']['hostname'])
 
         return self.createAlertDict(summary, category, tags, [event], severity)
-

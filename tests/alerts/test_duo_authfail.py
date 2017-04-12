@@ -31,92 +31,77 @@ class TestAlertDuoAuthFail(AlertTestSuite):
         "summary": "Duo Authentication Failure: user you@somewhere.com rejected and marked a Duo Authentication attempt from 1.2.3.4 as fraud",
     }
 
-    test_cases = [
+    test_cases = []
+
+    event = AlertTestSuite.create_event(default_event)
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
-            events=[default_event],
+            events=[event],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
+    test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
-                    }
-                }
-            ],
+            events=[event],
             expected_alert=default_alert
-        ),
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_type'] = 'wrongtype'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad event type",
-            events=[
-                {
-                    "_type": "wrongtype",
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['category'] = 'badcategory'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad category",
-            events=[
-                {
-                    "_source": {
-                        "category": "badcategory",
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['result'] = 'SUCCESS'
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad result",
-            events=[
-                {
-                    "_source": {
-                        "details": {
-                            "result": "SUCCESS",
-                        }
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['sourceipaddress'] = None
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case without the details.sourceipaddress",
-            events=[
-                {
-                    "_source": {
-                        "details": {
-                            "sourceipaddress": None,
-                        }
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['username'] = None
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case without the details.username",
-            events=[
-                {
-                    "_source": {
-                        "details": {
-                            "username": None,
-                        }
-                    }
-                }
-            ],
-        ),
+            events=[event],
+        )
+    )
 
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
+    test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with a wrong timestamp",
-            events=[
-                {
-                    "_source": {
-                        "utctimestamp": AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
-                    }
-                }
-            ],
-        ),
-    ]
+            events=[event],
+        )
+    )
