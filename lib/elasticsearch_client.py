@@ -64,6 +64,12 @@ class ElasticsearchClient():
 
         self.es_connection.indices.put_alias(index=index_name, name=alias_name)
 
+    def create_alias_multiple_indices(self, alias_name, indices):
+        if self.es_connection.indices.exists_alias(index='*', name=alias_name):
+            self.es_connection.indices.delete_alias(index='*', name=alias_name)
+        for index in indices:
+            self.es_connection.indices.put_alias(index=index, name=alias_name)
+
     def get_alias(self, alias_name):
         return self.es_connection.indices.get_alias(index='*', name=alias_name).keys()
 

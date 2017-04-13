@@ -334,6 +334,18 @@ class TestCreatingAlias(ElasticsearchClientTest):
         assert 'index1' in indices
         assert 'index2' in indices
 
+    def test_create_alias_multiple_indices(self):
+        self.es_client.create_index('index1')
+        self.es_client.create_index('index2')
+        self.es_client.create_alias_multiple_indices('alias1', ['index1', 'index2'])
+        alias_indices = self.es_client.get_alias('alias1')
+        assert len(alias_indices) == 2
+        assert 'index1' in alias_indices
+        assert 'index2' in alias_indices
+        indices = self.es_client.get_indices()
+        assert 'index1' in indices
+        assert 'index2' in indices
+
 
 class TestBulkInvalidFormatProblem(BulkTest):
 

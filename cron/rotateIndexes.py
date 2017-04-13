@@ -16,6 +16,7 @@
 
 import sys
 import logging
+from logging.handlers import SysLogHandler
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
@@ -29,7 +30,7 @@ from elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.WARNING
+logger.level = logging.WARNING
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -52,6 +53,7 @@ def esRotateIndexes():
         odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m')
         ndate_day = date.strftime(toUTC(datetime.now()), '%Y%m%d')
         ndate_month = date.strftime(toUTC(datetime.now()), '%Y%m')
+        week_ago_day = date.strftime(toUTC(datetime.now()) - timedelta(weeks=1), '%Y%m%d')
 
         # examine each index in the .conf file
         # for rotation settings
@@ -86,8 +88,26 @@ def esRotateIndexes():
             except Exception as e:
                 logger.error("Unhandled exception while rotating %s, terminating: %r" % (index, e))
 
+        indices = es.get_indices()
+        # Create weekly aliases for certain indices
+        for index in options.weekly_rotation_indices:
+            logger.debug('Realiasing events-weekly to indices since %s' % week_ago_day)
+            existing_weekly_indices = []
+            for day in range(int(week_ago_day), (int(ndate_day)) + 1):
+                day_index = index + '-' + str(day)
+                if day_index in indices:
+                    existing_weekly_indices.append(day_index)
+                else:
+                    logger.debug('%s not found, so cant assign weekly alias' % day_index)
+            if existing_weekly_indices:
+                weekly_index_alias = '%s-weekly' % index
+                logger.debug('Creating {0} alias for {1}'.format(weekly_index_alias, existing_weekly_indices))
+                es.create_alias_multiple_indices(weekly_index_alias, existing_weekly_indices)
+            else:
+                logger.warning('No indices within the past week to assign events-weekly to')
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
+
 
 def initConfig():
     # output our log to stdout or syslog
@@ -130,6 +150,12 @@ def initConfig():
     options.pruning = list(getConfig(
         'backup_pruning',
         '20,0,0',
+        options.configfile).split(',')
+        )
+
+    options.weekly_rotation_indices = list(getConfig(
+        'weekly_rotation_indices',
+        'events',
         options.configfile).split(',')
         )
 
