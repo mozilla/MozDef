@@ -13,8 +13,8 @@ class TestAlertBruteforceSsh(AlertTestSuite):
         "_type": "event",
         "_source": {
             "summary": 'login invalid ldap_count_entries failed by 1.2.3.4',
-            "program": "sshd",
             "details": {
+                "program": "sshd",
                 "hostname": "exhostname",
                 "sourceipaddress": "1.2.3.4",
             }
@@ -152,7 +152,7 @@ class TestAlertBruteforceSsh(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['program'] = 'badprogram'
+        event['_source']['details']['program'] = 'badprogram'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with bad program",

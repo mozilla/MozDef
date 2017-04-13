@@ -15,7 +15,7 @@ class TestSessionOpenedCrit(AlertTestSuite):
             "category": "syslog",
             "summary": "pam_unix(sshd:session): session opened for user mpurzynski by (uid=0)",
             "details": {
-                "hostname": "random.server.com",
+                "hostname": "interesting2.hostname.domain.com",
             }
         }
     }

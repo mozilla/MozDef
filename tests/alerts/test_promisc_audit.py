@@ -24,7 +24,7 @@ class TestPromiscAudit(AlertTestSuite):
     # This alert is the expected result from running this task
     default_alert = {
         "category": "promisc",
-        "severity": "CRITICAL",
+        "severity": "WARNING",
         "summary": "Promiscuous mode enabled on example1.hostname.domain.com",
         "tags": ['promisc', 'audit'],
     }

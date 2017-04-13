@@ -16,7 +16,6 @@ from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 
 class PromiscAudit(AlertTask):
     def main(self):
-
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
@@ -42,4 +41,3 @@ class PromiscAudit(AlertTask):
         summary = 'Promiscuous mode enabled on {0}'.format(event['_source']['hostname'])
 
         return self.createAlertDict(summary, category, tags, [event], severity)
-

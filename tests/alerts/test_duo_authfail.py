@@ -25,9 +25,9 @@ class TestAlertDuoAuthFail(AlertTestSuite):
     # This alert is the expected result from running this task
     default_alert = {
         "category": "duosecurity",
-        "tags": ['duosecurity'],
+        "tags": ['duosecurity', 'duosecuritypagerduty'],
         "severity": "WARNING",
-        "url": "https://your.super.cool.documentation",
+        "url": "https://mana.mozilla.org/wiki/display/SECURITY/IR+Procedure%3A+DuoSecurity",
         "summary": "Duo Authentication Failure: user you@somewhere.com rejected and marked a Duo Authentication attempt from 1.2.3.4 as fraud",
     }
 
@@ -98,7 +98,7 @@ class TestAlertDuoAuthFail(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 16})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with a wrong timestamp",

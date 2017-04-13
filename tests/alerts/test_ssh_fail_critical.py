@@ -15,7 +15,7 @@ class TestSSHFailCrit(AlertTestSuite):
             "category": "syslog",
             "summary": "Failed publickey for root from 1.2.3.4 port 48882 ssh2",
             "details": {
-                "hostname": "random.server.com",
+                "hostname": "superhost5.hostname.domain.com",
                 "program": "sshd",
             }
         }
