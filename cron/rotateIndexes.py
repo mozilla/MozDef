@@ -34,6 +34,11 @@ logger.level = logging.WARNING
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
+def daterange(start_date, end_date):
+    for n in range((end_date - start_date).days + 1):
+        yield start_date + timedelta(n)
+
+
 def esRotateIndexes():
     if options.output == 'syslog':
         logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
@@ -53,7 +58,6 @@ def esRotateIndexes():
         odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m')
         ndate_day = date.strftime(toUTC(datetime.now()), '%Y%m%d')
         ndate_month = date.strftime(toUTC(datetime.now()), '%Y%m')
-        week_ago_day = date.strftime(toUTC(datetime.now()) - timedelta(weeks=1), '%Y%m%d')
 
         # examine each index in the .conf file
         # for rotation settings
@@ -90,17 +94,21 @@ def esRotateIndexes():
 
         indices = es.get_indices()
         # Create weekly aliases for certain indices
+        week_ago_date = toUTC(datetime.now()) - timedelta(weeks=1)
+        week_ago_str = week_ago_date.strftime('%Y%m%d')
+        current_date = toUTC(datetime.now())
         for index in options.weekly_rotation_indices:
-            logger.debug('Realiasing events-weekly to indices since %s' % week_ago_day)
+            weekly_index_alias = '%s-weekly' % index
+            logger.debug('Trying to realias {0} to indices since {1}'.format(weekly_index_alias, week_ago_str))
             existing_weekly_indices = []
-            for day in range(int(week_ago_day), (int(ndate_day)) + 1):
-                day_index = index + '-' + str(day)
+            for day_obj in daterange(week_ago_date, current_date):
+                day_str = day_obj.strftime('%Y%m%d')
+                day_index = index + '-' + str(day_str)
                 if day_index in indices:
                     existing_weekly_indices.append(day_index)
                 else:
                     logger.debug('%s not found, so cant assign weekly alias' % day_index)
             if existing_weekly_indices:
-                weekly_index_alias = '%s-weekly' % index
                 logger.debug('Creating {0} alias for {1}'.format(weekly_index_alias, existing_weekly_indices))
                 es.create_alias_multiple_indices(weekly_index_alias, existing_weekly_indices)
             else:
