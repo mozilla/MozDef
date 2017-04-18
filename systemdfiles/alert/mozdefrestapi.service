@@ -1,6 +1,5 @@
 [Unit]
 Description=uWSGI mozdef restapi
-After=rabbitmq-server.service
 
 [Service]
 # Requires systemd version 211 or newer
