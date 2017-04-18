@@ -1,6 +1,6 @@
 Unit]
 Description=uWSGI mozdef mqwSyslog
-After=rabbitmq-server.service
+After=mongod.service
 
 [Service]
 # Requires systemd version 211 or newer
