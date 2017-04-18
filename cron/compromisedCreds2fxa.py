@@ -137,7 +137,6 @@ def initConfig():
     options.syslogport = getConfig('syslogport', 514, options.configfile)
     options.mozdefurl = getConfig('url', 'http://localhost:8080/events', options.configfile)
     options.state_file_name = getConfig('state_file_name', '{0}.state'.format(sys.argv[0]), options.configfile)
-    options.recordlimit = getConfig('recordlimit', 1000, options.configfile)
 
     # threat exchange options
     options.appid = getConfig('appid', '', options.configfile)
