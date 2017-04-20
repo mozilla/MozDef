@@ -32,7 +32,7 @@ class AlertGeomodel(AlertTask):
     def onEvent(self, event):
         category = 'geomodel'
         tags = ['geomodel']
-        severity = 'WARNING'
+        severity = 'NOTICE'
 
         ev = event['_source']
 
@@ -42,6 +42,11 @@ class AlertGeomodel(AlertTask):
             return None
         if ev['details']['severity'] < self.MINSEVERITY:
             return None
+
+        # By default we assign a MozDef severity of NOTICE, but up this if the
+        # geomodel alert is sev 3
+        if ev['details']['severity'] == 3:
+            severity = 'WARNING'
 
         summary = ev['summary']
         return self.createAlertDict(summary, category, tags, [event], severity)
