@@ -20,7 +20,6 @@ import boto.sqs
 from boto.sqs.message import RawMessage
 from pytx.access_token import access_token
 from pytx import ThreatIndicator
-from pytx.vocabulary import ThreatIndicator as td
 
 import sys
 import os
@@ -108,14 +107,13 @@ def main():
         results = ThreatIndicator.objects(
             type_='COMPROMISED_CREDENTIAL',
             since=queryDict['since'],
-            until=queryDict['until']
+            until=queryDict['until'],
+            dict_generator=True
         )
         email_indicators = []
         for result in results:
-            indicator_str = result.get(td.INDICATOR)
-            indicators = indicator_str.split(':')
-            email_address = indicators[0]
-            email_indicators.append(email_address)
+            indicators = result['indicator'].split(':')
+            email_indicators.append(str(indicators[0]))
 
         # send the results to SQS
         for indicator in email_indicators:
