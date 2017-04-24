@@ -410,22 +410,10 @@ def updateMongoWithESEvents(mozdefdb, results):
                         attackers.insert(newAttacker)
                         updateAttackerGeoIP(mozdefdb, newAttacker['_id'], esrecord['documentsource'])
                     else:
-                        # if event not present in this attackers events
-                        # append this to the list of events
-                        # todo: trim the list at X (i.e. last 100 events)
-                        matchingevent = attackers.find_one(
-                            {'_id': attacker['_id'],
-                             'events.documentid': r['_id'],
-                             'events.documenttype': r['_type'],
-                             'events.documentindex': r['_index']
-                             })
-                        # if matchingevent is None:
-                            # attacker['events'].append(esrecord)
-                            attacker['eventscount'] += 1
-                            # attacker['eventscount'] = len(attacker['events'])
-                            logger.debug('new event found for matching attacker')
-                            attacker['lastseentimestamp'] = attacker['events'][-1]['documentsource']['utctimestamp']
-                            attackers.save(attacker)
+                        attacker['eventscount'] += 1
+                        logger.debug('new event found for matching attacker')
+                        attacker['lastseentimestamp'] = esrecord['documentsource']['utctimestamp']
+                        attackers.save(attacker)
                         # geo ip could have changed, update it
                         updateAttackerGeoIP(mozdefdb, attacker['_id'], esrecord['documentsource'])
 
