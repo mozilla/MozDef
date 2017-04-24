@@ -182,6 +182,7 @@ def searchMongoAlerts(mozdefdb):
                          })
                     if matchingalerts is not None:
                         # update list of alerts this attacker matched.
+                        total_events = 0
                         for alert in matchingalerts:
                             newAttacker['alerts'].append(
                                 dict(alertid=alert['_id'])
@@ -190,16 +191,13 @@ def searchMongoAlerts(mozdefdb):
                             alert['attackerid'] = newAttacker['_id']
                             alerts.save(alert)
 
-                            #add the events from this alert:
-                            #add the events from this alert:
-                            for e in alert['events']:
-                                newAttacker['events'].append(e)
+                            total_events += len(alert['events'])
+                            if len(alert['events']) > 0:
+                                newAttacker['lastseentimestamp'] = toUTC(alert['events'][-1]['documentsource']['utctimestamp'])
                     newAttacker['alertscount'] = len(newAttacker['alerts'])
-                    newAttacker['eventscount'] = len(newAttacker['events'])
-                    if newAttacker['eventscount'] > 0:
-                        newAttacker['lastseentimestamp'] = toUTC(newAttacker['events'][-1]['documentsource']['utctimestamp'])
+                    newAttacker['eventscount'] = total_events
                     attackers.insert(newAttacker)
-                    #upate geoIP info
+                    # update geoIP info
                     latestGeoIP = [a['events'] for a in alerts.find(
                         {"events.documentsource.details.sourceipaddress":
                          str(ipcidr.ip),
@@ -232,19 +230,17 @@ def searchMongoAlerts(mozdefdb):
                             # update alert with attackerID
                             alert['attackerid'] = attacker['_id']
                             alerts.save(alert)
-                            #add the events from this alert:
-                            for e in alert['events']:
-                                attacker['events'].append(e)
+
+                            attacker['eventscount'] += len(alert['events'])
 
                             # geo ip could have changed, update it
                             # to the latest
                             updateAttackerGeoIP(mozdefdb, attacker['_id'], alert['events'][-1]['documentsource'])
+                            # update last seen time
+                            attacker['lastseentimestamp'] = toUTC(alert['events'][-1]['documentsource']['utctimestamp'])
 
-                        # update last seen time
-                        attacker['lastseentimestamp'] = toUTC(attacker['events'][-1]['documentsource']['utctimestamp'])
                         # update counts
                         attacker['alertscount'] = len(attacker['alerts'])
-                        attacker['eventscount'] = len(attacker['events'])
                         attackers.save(attacker)
 
                     # should we autocategorize the attacker
@@ -320,7 +316,6 @@ def genNewAttacker():
     newAttacker['_id'] = genMeteorID()
     newAttacker['lastseentimestamp'] = toUTC(datetime.now())
     newAttacker['firstseentimestamp'] = toUTC(datetime.now())
-    newAttacker['events'] = list()
     newAttacker['eventscount'] = 0
     newAttacker['alerts'] = list()
     newAttacker['alertscount'] = 0
@@ -409,7 +404,7 @@ def updateMongoWithESEvents(mozdefdb, results):
                         sourceIP.prefixlen = 24
                         # str sourceIP to get the ip/cidr rather than netblock cidr.
                         newAttacker['indicators'].append(dict(ipv4address=str(sourceIP)))
-                        newAttacker['events'].append(esrecord)
+                        # newAttacker['events'].append(esrecord)
                         newAttacker['eventscount'] = len(newAttacker['events'])
 
                         attackers.insert(newAttacker)
@@ -424,9 +419,10 @@ def updateMongoWithESEvents(mozdefdb, results):
                              'events.documenttype': r['_type'],
                              'events.documentindex': r['_index']
                              })
-                        if matchingevent is None:
-                            attacker['events'].append(esrecord)
-                            attacker['eventscount'] = len(attacker['events'])
+                        # if matchingevent is None:
+                            # attacker['events'].append(esrecord)
+                            attacker['eventscount'] += 1
+                            # attacker['eventscount'] = len(attacker['events'])
                             logger.debug('new event found for matching attacker')
                             attacker['lastseentimestamp'] = attacker['events'][-1]['documentsource']['utctimestamp']
                             attackers.save(attacker)
