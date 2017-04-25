@@ -39,8 +39,7 @@ def loggerTimeStamp(self, record, datefmt=None):
 
 
 def initLogger():
-#    logger.level = logging.INFO
-    logger.level = logging.DEBUG
+    logger.level = logging.INFO
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     formatter.formatTime = loggerTimeStamp
