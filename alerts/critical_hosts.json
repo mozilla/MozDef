@@ -1,9 +1,0 @@
-{
-  "hosts": [
-    "interesting1.hostname.domain.com",
-    "interesting2.hostname.domain.com",
-    "interesting3.hostname.domain.com",
-    "somethingelse50.hostname.domain.com",
-    "superhost5.hostname.domain.com"
-  ]
-}
