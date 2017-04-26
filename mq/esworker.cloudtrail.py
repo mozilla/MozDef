@@ -124,7 +124,11 @@ class RoleManager:
 
 def esConnect():
     '''open or re-open a connection to elastic search'''
-    return ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)), options.esbulksize)
+    return ElasticsearchClient(
+        (list('{0}'.format(s) for s in options.esservers)),
+        bulk_amount=options.esbulksize,
+        bulk_refresh_time=options.esbulktimeout
+    )
 
 
 class taskConsumer(object):
@@ -201,7 +205,7 @@ class taskConsumer(object):
             message['eventSource']
         )
         message['summary'] = summary_str
-        es.save_event(body=message, doc_type='cloudtrail')
+        es.save_event(body=message, doc_type='cloudtrail', bulk=True)
 
 
 def registerPlugins():
