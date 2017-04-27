@@ -24,6 +24,8 @@ import boto.s3
 from boto.sqs.message import RawMessage
 import gzip
 from StringIO import StringIO
+from threading import Timer
+
 
 import sys
 import os
@@ -67,11 +69,12 @@ class RoleManager:
                 logger.error("Unable to get session token due to exception %s" % e.message)
                 raise
             try:
-                self.session_conn_sts = boto.sts.connect_to_region('us-east-1',
-                                **self.get_credential_arguments(self.session_credentials))
+                self.session_conn_sts = boto.sts.connect_to_region(
+                    'us-east-1',
+                    **self.get_credential_arguments(self.session_credentials)
+                )
             except Exception, e:
-                logger.error("Unable to connect to STS with session token due to exception %s" %
-                              e.message)
+                logger.error("Unable to connect to STS with session token due to exception %s" % e.message)
                 raise
             self.conn_sts = self.session_conn_sts
         else:
@@ -133,16 +136,35 @@ def esConnect():
 
 class taskConsumer(object):
 
-    def __init__(self, mqConnection, taskQueue, esConnection, s3_connection):
+    def __init__(self, mqConnection, taskQueue, esConnection):
         self.connection = mqConnection
         self.esConnection = esConnection
         self.taskQueue = taskQueue
-        self.s3_connection = s3_connection
+        self.s3_connection = None
+        # This value controls how long we sleep
+        # between reauthenticating and getting a new set of creds
+        self.flush_wait_time = 1800
 
         if options.esbulksize != 0:
             # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
             # to prevent events from sticking around an idle worker
             self.esConnection.start_bulk_timer()
+
+        self.authenticate()
+        # This cycles the role manager creds every 30 minutes
+        # or else we would be getting errors after a while
+        Timer(self.flush_wait_time, self.flush_s3_creds).start()
+
+    def authenticate(self):
+        role_manager = RoleManager(options.accesskey, options.secretkey)
+        role_manager.assume_role(options.cloudtrail_arn)
+        role_creds = role_manager.get_credentials(options.cloudtrail_arn)
+        self.s3_connection = boto.connect_s3(**role_creds)
+
+    def flush_s3_creds(self):
+        logger.debug('Recycling credentials and reassuming role')
+        self.authenticate()
+        Timer(self.flush_wait_time, self.flush_s3_creds).start()
 
     def process_file(self, s3file):
         logger.debug("Fetching %s" % s3file.name)
@@ -189,6 +211,7 @@ class taskConsumer(object):
                 sys.exit(1)
             except Exception as e:
                 logger.error('Exception received: %r' % e)
+                time.sleep(3)
 
             time.sleep(.1)
 
@@ -212,7 +235,6 @@ class taskConsumer(object):
 
 def registerPlugins():
     pluginList = list()   # tuple of module,registration dict,priority
-    plugin_manager = pynsive.PluginManager()
     if os.path.exists('plugins'):
         modules = pynsive.list_modules('plugins')
         for mname in modules:
@@ -333,13 +355,8 @@ def main():
     # attach to the queue
     eventTaskQueue = sqs_conn.get_queue(options.taskexchange)
 
-    role_manager = RoleManager(options.accesskey, options.secretkey)
-    role_manager.assume_role(options.cloudtrail_arn)
-    role_creds = role_manager.get_credentials(options.cloudtrail_arn)
-    s3_conn = boto.connect_s3(**role_creds)
-
     # consume our queue
-    taskConsumer(sqs_conn, eventTaskQueue, es, s3_conn).run()
+    taskConsumer(sqs_conn, eventTaskQueue, es).run()
 
 
 def initConfig():
