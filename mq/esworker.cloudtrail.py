@@ -161,7 +161,6 @@ class taskConsumer(object):
                 records = self.taskQueue.get_messages(1)
                 for msg in records:
                     body_message = msg.get_body()
-                    self.taskQueue.delete_message(msg)
                     event = json.loads(body_message)
 
                     if not event['Message']:
@@ -183,12 +182,17 @@ class taskConsumer(object):
                         for event in events:
                             self.on_message(event)
 
-                time.sleep(.1)
+                    self.taskQueue.delete_message(msg)
+
             except KeyboardInterrupt:
                 sys.exit(1)
             except ValueError as e:
                 logger.error('Exception while handling message: %r' % e)
                 sys.exit(1)
+            except Exception as e:
+                logger.error('Exception received: %r' % e)
+
+            time.sleep(.1)
 
     def on_message(self, message):
         message['category'] = 'cloudtrail'
