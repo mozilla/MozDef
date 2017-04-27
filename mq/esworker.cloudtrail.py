@@ -156,9 +156,7 @@ class taskConsumer(object):
         self.taskQueue.set_message_class(RawMessage)
         while True:
             try:
-                # We only want to get one record, since this contains a gzip file
-                # containing all of the events
-                records = self.taskQueue.get_messages(1)
+                records = self.taskQueue.get_messages(options.prefetch)
                 for msg in records:
                     body_message = msg.get_body()
                     event = json.loads(body_message)
