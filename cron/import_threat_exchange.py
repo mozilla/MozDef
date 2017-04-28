@@ -57,7 +57,7 @@ def main():
     # A master dict of all the different types of
     # data we want to pull from threat exchange
     params = {
-        'malware_hashes': {
+        'malware_hash': {
             'threat_class': Malware,
             'query_params': {},
         },
