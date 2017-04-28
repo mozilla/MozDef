@@ -15,7 +15,7 @@ from datetime import datetime
 from datetime import timedelta
 
 from pytx.access_token import access_token
-from pytx import ThreatIndicator
+from pytx import ThreatDescriptor
 from pytx import Malware
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
@@ -26,49 +26,24 @@ from elasticsearch_client import ElasticsearchClient
 from state import State
 
 
-def pull_malware_hashes(since_date, until_date):
-    query_params = {
-        'since': str(since_date),
-        'until': str(until_date),
-        'dict_generator': True,
-    }
-    logger.info('Querying threat exchange with params {}'.format(query_params))
-    results = Malware.objects(**query_params)
-    malware_data = []
+def pull_threat_exchange_data(type_str, params):
+    logger.debug('Querying threat exchange for {}'.format(type_str))
+    results = params['threat_class'].objects(**params['query_params'])
+    docs = []
     for result in results:
         created_date = toUTC(datetime.now()).isoformat()
         es_doc = {
             'created_on': created_date,
             'details': result
         }
-        malware_data.append(es_doc)
-    return malware_data
-
-
-def pull_ip_addresses(since_date, until_date):
-    query_params = {
-        'type_': 'IP_ADDRESS',
-        'since': str(since_date),
-        'until': str(until_date),
-        'dict_generator': True,
-    }
-    logger.info('Querying threat exchange with params {}'.format(query_params))
-    results = ThreatIndicator.objects(**query_params)
-    ip_address_data = []
-    for result in results:
-        created_date = toUTC(datetime.now()).isoformat()
-        es_doc = {
-            'created_on': created_date,
-            'details': result
-        }
-        ip_address_data.append(es_doc)
-    return ip_address_data
+        docs.append(es_doc)
+    return docs
 
 
 def main():
-    logger.info('Connecting to Elasticsearch')
+    logger.debug('Connecting to Elasticsearch')
     client = ElasticsearchClient(options.esservers)
-    logger.info('Connecting to threat exchange')
+    logger.debug('Connecting to threat exchange')
     access_token(options.appid, options.appsecret)
     state = State(options.state_file_name)
     current_timestamp = toUTC(datetime.now()).isoformat()
@@ -79,15 +54,65 @@ def main():
     if 'lastrun' in state.data.keys():
         since_date = state.data['lastrun']
 
-    malware_hashes_docs = pull_malware_hashes(since_date=since_date, until_date=current_timestamp)
-    logger.info('Saving {} hashes to ES'.format(len(malware_hashes_docs)))
-    for malware_hash_doc in malware_hashes_docs:
-        client.save_object(index='threat-exchange', doc_type='malware_hashes', body=malware_hash_doc)
-
-    ip_addresses_docs = pull_ip_addresses(since_date=since_date, until_date=current_timestamp)
-    logger.info('Saving {} ip addresses to ES'.format(len(ip_addresses_docs)))
-    for ip_addresses_doc in ip_addresses_docs:
-        client.save_object(index='threat-exchange', doc_type='ip_address', body=ip_addresses_doc)
+    # A master dict of all the different types of
+    # data we want to pull from threat exchange
+    params = {
+        'malware_hashes': {
+            'threat_class': Malware,
+            'query_params': {},
+        },
+        'ip_address': {
+            'threat_class': ThreatDescriptor,
+            'query_params': {
+                'type_': 'IP_ADDRESS',
+            }
+        },
+        'domain': {
+            'threat_class': ThreatDescriptor,
+            'query_params': {
+                'type_': 'DOMAIN',
+            }
+        },
+        'uri': {
+            'threat_class': ThreatDescriptor,
+            'query_params': {
+                'type_': 'URI',
+            }
+        },
+        'debug_string': {
+            'threat_class': ThreatDescriptor,
+            'query_params': {
+                'type_': 'DEBUG_STRING',
+            }
+        },
+        'banner': {
+            'threat_class': ThreatDescriptor,
+            'query_params': {
+                'type_': 'BANNER',
+            }
+        },
+        'email_address': {
+            'threat_class': ThreatDescriptor,
+            'query_params': {
+                'type_': 'EMAIL_ADDRESS',
+            }
+        },
+        'file_created': {
+            'threat_class': ThreatDescriptor,
+            'query_params': {
+                'type_': 'FILE_CREATED',
+            }
+        },
+    }
+    docs = {}
+    for param_key, param in params.iteritems():
+        param['query_params']['since'] = str(since_date)
+        param['query_params']['until'] = str(current_timestamp)
+        param['query_params']['dict_generator'] = True
+        docs = pull_threat_exchange_data(param_key, param)
+        logger.debug('Saving {0} {1} to ES'.format(len(docs), param_key))
+        for doc in docs:
+            client.save_object(index='threat-exchange', doc_type=param_key, body=doc)
 
     state.data['lastrun'] = current_timestamp
     state.save()
