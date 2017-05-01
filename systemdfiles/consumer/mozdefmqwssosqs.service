@@ -5,8 +5,8 @@ After=rabbitmq-server.service
 [Service]
 # Requires systemd version 211 or newer
 PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/mkdir /var/run/mqwSSOSQS
-ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mqwSSOSQS
+ExecStartPre=-/usr/bin/mkdir /var/run/mozdefmqwSSOSQS
+ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdefmqwSSOSQS
 User=mozdef
 Group=mozdef
 ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/mq; source /opt/mozdef/envs/mozdef/bin/activate; uwsgi --ini mqwSSOSQS.ini'
