@@ -9,4 +9,4 @@
 # Brandon Myers bmyers@mozilla.com
 
 source  /opt/mozdef/envs/mozdef/bin/activate
-/opt/mozdef/envs/mozdef/cron/import_threat_exchange.sh -c /opt/mozdef/envs/mozdef/cron/import_threat_exchange.conf
+/opt/mozdef/envs/mozdef/cron/import_threat_exchange.py -c /opt/mozdef/envs/mozdef/cron/import_threat_exchange.conf
