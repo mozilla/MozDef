@@ -164,6 +164,6 @@ class AlertGenericLoader(AlertTask):
         )
 
         if hostnames:
-            summary += ' [{}]'.format(','.join(hostnames))
+            summary += ' [{}]'.format(', '.join(hostnames))
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity, url)
