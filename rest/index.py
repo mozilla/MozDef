@@ -481,7 +481,7 @@ def sendMessgeToPlugins(request, response, endpoint):
             (request, response) = plugin[5].onMessage(request, response)
 
 
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
+def toUTC(suspectedDate, localTimeZone="UTC"):
     '''make a UTC date out of almost anything'''
     utc = pytz.UTC
     objDate = None
@@ -669,7 +669,7 @@ def verisSummary(verisRegex=None):
 def initConfig():
     #change this to your default zone for when it's not specified
     options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
+                                        'UTC',
                                         options.configfile)
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',

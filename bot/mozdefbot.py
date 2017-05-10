@@ -386,7 +386,7 @@ def initConfig():
     # change this to your default zone for when it's not specified
     # in time strings
     options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
+                                        'UTC',
                                         options.configfile)
     
     # irc options

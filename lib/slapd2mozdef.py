@@ -311,7 +311,7 @@ def main():
 
 def initConfig():
     #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)    
+    options.defaultTimeZone=getConfig('defaulttimezone','UTC',options.configfile)    
     options.filemask=getConfig('filemask','*.log',options.configfile)
     options.cachelength=getConfig('cachelength',100,options.configfile)
     options.url=getConfig('url','http://localhost:9200',options.configfile)
