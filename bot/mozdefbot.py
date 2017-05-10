@@ -332,8 +332,8 @@ class alertConsumer(ConsumerMixin):
             if 'severity' in bodyDict.keys():
                 if not ((bodyDict['severity'] == 'NOTICE') or (bodyDict['severity'] == 'INFO')):
                     self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
-           	#if the alert does not have a severity for some reason, go ahead and publish it
-           	else:
+            #if the alert does not have a severity for some reason, go ahead and publish it
+            else:
                 self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
 
             message.ack()
