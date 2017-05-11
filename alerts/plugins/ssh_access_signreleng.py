@@ -56,6 +56,8 @@ class message(object):
         emailMessage['From'] = self.options.sender
         emailMessage['To'] = ','.join(self.options.recipients)
         nowtuple = mktime(datetime.utcnow().timetuple())
+        # The Date field needs to be in a specific format, and we must
+        # define it or gmail struggles to parse it.
         emailMessage['Date'] = formatdate(nowtuple)
         smtpObj = smtplib.SMTP(self.options.smtpserver, 25)
         try:
