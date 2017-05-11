@@ -15,7 +15,7 @@ from configlib import getConfig, OptionParser
 import smtplib
 from email.mime.text import MIMEText
 from email.Utils import formatdate
-import time
+from time import mktime
 
 
 class message(object):
@@ -55,7 +55,7 @@ class message(object):
         emailMessage['Subject'] = 'MozDef Alert: Releng Restricted Servers Successful SSH Access'
         emailMessage['From'] = self.options.sender
         emailMessage['To'] = ','.join(self.options.recipients)
-        nowtuple = time.mktime(datetime.utcnow().timetuple())
+        nowtuple = mktime(datetime.utcnow().timetuple())
         emailMessage['Date'] = formatdate(nowtuple)
         smtpObj = smtplib.SMTP(self.options.smtpserver, 25)
         try:
