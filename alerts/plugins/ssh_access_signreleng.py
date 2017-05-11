@@ -6,6 +6,7 @@
 # Contributors:
 # Alicia Smith <asmith@mozilla.com>
 # Michal Purzynski <mpurzynski@mozilla.com>
+# Brandon Myers <bmyers@mozilla.com>
 
 import os
 import sys
@@ -42,7 +43,8 @@ class message(object):
         # email settings
         self.options.smtpserver = getConfig('smtpserver', 'localhost', self.configfile)
         self.options.sender = getConfig('sender', 'donotreply@localhost.com', self.configfile)
-        self.options.recipients = getConfig('recipients', 'noone@localhost.com', self.configfile)
+        recipients_str = getConfig('recipients', 'noone@localhost.com', self.configfile)
+        self.options.recipients = recipients_str.split(',')
 
     def onMessage(self, message):
         # here is where you do something with the incoming alert message
