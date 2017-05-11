@@ -1,7 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Alicia Smith <asmith@mozilla.com>
@@ -14,6 +14,8 @@ from datetime import datetime
 from configlib import getConfig, OptionParser
 import smtplib
 from email.mime.text import MIMEText
+from email.Utils import formatdate
+import time
 
 
 class message(object):
@@ -52,8 +54,9 @@ class message(object):
         emailMessage = MIMEText(message['summary'] + ' on ' + message['events'][0]['documentsource']['utctimestamp'])
         emailMessage['Subject'] = 'MozDef Alert: Releng Restricted Servers Successful SSH Access'
         emailMessage['From'] = self.options.sender
-        emailMessage['To'] = self.options.recipients
-        emailMessage['Date'] = datetime.utcnow().isoformat()
+        emailMessage['To'] = ','.join(self.options.recipients)
+        nowtuple = time.mktime(datetime.utcnow().timetuple())
+        emailMessage['Date'] = formatdate(nowtuple)
         smtpObj = smtplib.SMTP(self.options.smtpserver, 25)
         try:
             smtpObj.sendmail(self.options.sender, self.options.recipients, emailMessage.as_string())
