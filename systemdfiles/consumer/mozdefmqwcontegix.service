@@ -1,4 +1,4 @@
-Unit]
+[Unit]
 Description=uWSGI mozdef mqwContegix
 After=rabbitmq-server.service
 
