@@ -100,45 +100,40 @@ class AlertTestSuite(UnitTestSuite):
 
     def verify_expected_alert(self, found_alert, test_case):
         # Verify index is set correctly
-        assert found_alert['_index'] == self.alert_index_name
+        assert found_alert['_index'] == self.alert_index_name, 'Alert index not propertly set, got: {}'.format(found_alert['_index'])
         # Verify alert type is correct
-        assert found_alert['_type'] == 'alert'
+        assert found_alert['_type'] == 'alert', 'Alert _type is not alert'
 
         # Verify that the alert has the right "look to it"
-        assert found_alert.keys() == ['_score', '_type', '_id', '_source', '_index']
+        assert found_alert.keys() == ['_score', '_type', '_id', '_source', '_index'], 'Alert format is malformed'
 
         # Verify the alert has an id field that is unicode
-        assert type(found_alert['_id']) == unicode
+        assert type(found_alert['_id']) == unicode, 'Alert _id is not an integer'
 
         # Verify there is a utctimestamp field
-        assert 'utctimestamp' in found_alert['_source']
+        assert 'utctimestamp' in found_alert['_source'], 'Alert does not have utctimestamp specified'
 
         # Verify the events are added onto the alert
-        assert type(found_alert['_source']['events']) == list
+        assert type(found_alert['_source']['events']) == list, 'Alert events field is not a list'
         alert_events = found_alert['_source']['events']
         sorted_alert_events = sorted(alert_events, key=lambda k: k['documentsource']['utctimestamp'])
 
         created_events = test_case.full_events
         sorted_created_events = sorted(created_events, key=lambda k: k['_source']['utctimestamp'])
 
-        event_index = 0
-        for event in sorted_alert_events:
-            assert event['documentsource'] == sorted_created_events[event_index]['_source']
-            event_index += 1
-
         # Verify that the alert properties are set correctly
         for key, value in test_case.expected_alert.iteritems():
-            assert found_alert['_source'][key] == value
+            assert found_alert['_source'][key] == value, '{0} does not match, got: {1}'.format(key, found_alert['_source'][key])
 
     def verify_alert_task(self, alert_task, test_case):
         if test_case.expected_test_result is True:
-            assert len(alert_task.alert_ids) is not 0
+            assert len(alert_task.alert_ids) is not 0, 'Alert did not fire as expected'
             self.es_client.flush('alerts')
             for alert_id in alert_task.alert_ids:
                 found_alert = self.es_client.get_alert_by_id(alert_id)
                 self.verify_expected_alert(found_alert, test_case)
         else:
-            assert len(alert_task.alert_ids) is 0
+            assert len(alert_task.alert_ids) is 0, 'Alert fired when it was expected not to'
 
     @staticmethod
     def copy(obj):
