@@ -1,11 +1,11 @@
 /var/log/mozdef/nginx/*.log {
-        daily
+        weekly
         missingok
-        rotate 52
+        rotate 17
         compress
         delaycompress
         notifempty
-        create 640 nginx adm
+        create 644 mozdef mozdef
         sharedscripts
         postrotate
                 if [ -f /var/run/nginx.pid ]; then
