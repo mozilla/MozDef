@@ -1,4 +1,4 @@
-Unit]
+[Unit]
 Description=uWSGI mozdef mqwSyslog
 After=rabbitmq-server.service
 
