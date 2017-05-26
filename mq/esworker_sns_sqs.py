@@ -131,8 +131,6 @@ class taskConsumer(object):
         (event, metadata) = sendEventToPlugins(event, metadata, self.pluginList)
         self.save_event(event, metadata)
 
-        return event
-
     def save_event(self, event, metadata):
         try:
             # drop the message if a plug in set it to None
