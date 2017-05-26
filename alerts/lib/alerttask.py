@@ -3,20 +3,20 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 import collections
 import json
 import kombu
 import pytz
 
+from configlib import getConfig, OptionParser
 from datetime import datetime
-from datetime import timedelta
-from dateutil.parser import parse
 from collections import Counter
 from celery import Task
 from celery.utils.log import get_task_logger
@@ -27,7 +27,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 
 from elasticsearch_client import ElasticsearchClient
-from query_models import ExistsMatch, RangeMatch, PhraseMatch, TermMatch, TermsMatch, MissingMatch
+from query_models import ExistsMatch
 
 
 def toUTC(suspectedDate, localTimeZone=None):
@@ -109,6 +109,14 @@ class AlertTask(Task):
     def log(self):
         return get_task_logger('%s.%s' % (__name__, self.alert_name))
 
+    def parse_config(self, config_filename, config_keys):
+        myparser = OptionParser()
+        self.config = None
+        (self.config, args) = myparser.parse_args([])
+        for config_key in config_keys:
+            temp_value = getConfig(config_key, '', config_filename)
+            setattr(self.config, config_key, temp_value)
+
     def _configureKombu(self):
         """
         Configure kombu for rabbitmq
@@ -126,14 +134,12 @@ class AlertTask(Task):
                 type='topic',
                 durable=True)
             self.alertExchange(self.mqConn).declare()
-            alertQueue = kombu.Queue(RABBITMQ['alertqueue'],
-                exchange=self.alertExchange)
+            alertQueue = kombu.Queue(RABBITMQ['alertqueue'], exchange=self.alertExchange)
             alertQueue(self.mqConn).declare()
             self.mqproducer = self.mqConn.Producer(serializer='json')
             self.log.debug('Kombu configured')
         except Exception as e:
             self.log.error('Exception while configuring kombu for alerts: {0}'.format(e))
-
 
     def _configureES(self):
         """
@@ -146,8 +152,7 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Exception while configuring ES for alerts: {0}'.format(e))
 
-
-    def mostCommon(self, listofdicts,dictkeypath):
+    def mostCommon(self, listofdicts, dictkeypath):
         """
             Given a list containing dictionaries,
             return the most common entries

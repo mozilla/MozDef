@@ -3,7 +3,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
@@ -11,6 +11,7 @@
 # Aaron Meihm ameihm@mozilla.com
 # Michal Purzynski <mpurzynski@mozilla.com>
 # Alicia Smith <asmith@mozilla.com>
+# Brandon Myers bmyers@mozilla.com
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
@@ -18,17 +19,18 @@ from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 class AlertUnauthInternalScan(AlertTask):
     def main(self):
+        self.parse_config('unauth_scan.conf', ['nsm_host', 'url'])
+
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
             TermMatch('_type', 'bro'),
             TermMatch('category', 'bronotice'),
             TermMatch('eventsource', 'nsm'),
-            TermMatch('hostname', 'nsmserver1'),
+            TermMatch('hostname', self.config.nsm_host),
             ExistsMatch('details.indicators'),
             PhraseMatch('details.note', 'Scan::Address_Scan'),
         ])
-
         self.filtersManual(search_query)
 
         self.searchEventsSimple()
@@ -39,7 +41,7 @@ class AlertUnauthInternalScan(AlertTask):
         category = 'scan'
         severity = 'NOTICE'
         hostname = event['_source']['hostname']
-        url = "https://mana.mozilla.org/wiki/display/SECURITY/NSM+IR+procedures"
+        url = self.config.url
 
         indicators = 'unknown'
         port = 'unknown'

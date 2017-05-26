@@ -1,14 +1,16 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Arzhel Younsi arzhel@mozilla.com
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
-dc_code_list = ['phx1', 'scl3', 'pao1', 'sjc2', 'pek1']
-offices_code_list = ['par1', 'lon1', 'ber1', 'tpe1', 'pek2', 'tpe1', 'akl1', 'sfo1', 'mtv2', 'yvr1', 'tor1', 'pdx1']        
+import os
+from configlib import getConfig, OptionParser
+
 
 class message(object):
     def __init__(self):
@@ -21,17 +23,22 @@ class message(object):
         self.registration = ['network', 'netflow']
         self.priority = 5
 
+        config_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mozillaLocation.conf")
+        parser = OptionParser()
+        (self.options, args) = parser.parse_args()
+        self.options.dc_code_list = getConfig('dc_code_list', '', config_location).split(',')
+        self.options.offices_code_list = getConfig('offices_code_list', '', config_location).split(',')
 
     def onMessage(self, message, metadata):
         if 'details' in message.keys() and 'hostname' in message['details'].keys():
-            hostnamesplit= str.lower(message['details']['hostname'].encode('ascii', 'ignore')).split('.')
+            hostnamesplit = str.lower(message['details']['hostname'].encode('ascii', 'ignore')).split('.')
             if len(hostnamesplit) == 5:
                 if 'mozilla' == hostnamesplit[-2]:
-                    message['details']['site']=hostnamesplit[-3]
-                    if message['details']['site'] in dc_code_list:
-                        message['details']['sitetype']='datacenter'
-                    elif message['details']['site'] in offices_code_list:
-                        message['details']['sitetype']='office'
+                    message['details']['site'] = hostnamesplit[-3]
+                    if message['details']['site'] in self.options.dc_code_list:
+                        message['details']['sitetype'] = 'datacenter'
+                    elif message['details']['site'] in self.options.offices_code_list:
+                        message['details']['sitetype'] = 'office'
                     else:
-                        message['details']['sitetype']='unknown'
+                        message['details']['sitetype'] = 'unknown'
         return (message, metadata)

@@ -3,11 +3,12 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
@@ -15,6 +16,8 @@ from query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
 
 class AlertBruteforceSsh(AlertTask):
     def main(self):
+        self.parse_config('bruteforce_ssh.conf', ['skiphosts'])
+
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
@@ -24,12 +27,8 @@ class AlertBruteforceSsh(AlertTask):
             TermsMatch('summary', ['login', 'invalid', 'ldap_count_entries'])
         ])
 
-        search_query.add_must_not([
-            PhraseMatch('summary', '10.22.75.203'),
-            PhraseMatch('summary', '10.8.75.144'),
-            # bug 1350650
-            PhraseMatch('summary', '10.22.75.37'),
-        ])
+        for ip_address in self.config.skiphosts.split():
+            search_query.add_must_not(PhraseMatch('summary', ip_address))
 
         self.filtersManual(search_query)
 

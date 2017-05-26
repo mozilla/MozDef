@@ -1,3 +1,11 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2017 Mozilla Corporation
+#
+# Contributors:
+# Brandon Myers bmyers@mozilla.com
+
 from positive_alert_test_case import PositiveAlertTestCase
 from negative_alert_test_case import NegativeAlertTestCase
 
@@ -14,7 +22,7 @@ class TestAlertOpenPortViolation(AlertTestSuite):
         "_source": {
             "tags": ["open_port_policy_violation"],
             "details": {
-                "destinationipaddress": "220.231.44.213",
+                "destinationipaddress": "1.2.3.4",
                 "destinationport": 25,
             }
         }
@@ -25,7 +33,7 @@ class TestAlertOpenPortViolation(AlertTestSuite):
         "category": "open_port_policy_violation",
         "tags": ['open_port_policy_violation'],
         "severity": "CRITICAL",
-        "summary": '10 unauthorized open port(s) on 220.231.44.213 (25 25 25 25 25 )',
+        "summary": '10 unauthorized open port(s) on 1.2.3.4 (25 25 25 25 25 )',
     }
 
     test_cases = []

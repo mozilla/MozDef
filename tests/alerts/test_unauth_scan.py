@@ -1,10 +1,12 @@
+#!/usr/bin/env python
+
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
-# Brandon Myers bmyers@mozilla.com
+# bmyers@mozilla.com
 
 from positive_alert_test_case import PositiveAlertTestCase
 from negative_alert_test_case import NegativeAlertTestCase
@@ -12,8 +14,9 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestAlertUnauthPortScan(AlertTestSuite):
-    alert_filename = "unauth_portscan"
+class TestAlertUnauthScan(AlertTestSuite):
+    alert_filename = "unauth_scan"
+    alert_classname = "AlertUnauthInternalScan"
 
     # This event is the default positive event that will cause the
     # alert to trigger
@@ -23,15 +26,16 @@ class TestAlertUnauthPortScan(AlertTestSuite):
             "category": "bronotice",
             "summary": "Scan::Port_Scan 1.2.3.4 scanned at least 12 unique ports of host 5.6.7.8 in 0m3s local",
             "eventsource": "nsm",
-            "hostname": "nsmhost",
+            "hostname": "nsmservername",
             "details": {
                 "uid": "",
                 "actions": "Notice::ACTION_LOG",
-                "note": "Scan::Port_Scan",
+                "note": "Scan::Address_Scan",
                 "sourceipv4address": "0.0.0.0",
                 "indicators": [
                     "1.2.3.4"
                 ],
+                "p": '22',
                 "msg": "1.2.3.4 scanned at least 12 unique ports of host 5.6.7.8 in 0m3s",
                 "destinationipaddress": "5.6.7.8",
             },
@@ -42,7 +46,7 @@ class TestAlertUnauthPortScan(AlertTestSuite):
     default_alert = {
         'category': 'scan',
         'severity': 'NOTICE',
-        'summary': "nsmhost: Unauthorized Port Scan Event from [u'1.2.3.4'] scanning ports on host 5.6.7.8",
+        'summary': "nsmservername: Unauthorized Internal Scan Event from [u'1.2.3.4'] scanning ports 22",
         'tags': [],
         'url': 'https://www.mozilla.org',
     }
@@ -58,7 +62,7 @@ class TestAlertUnauthPortScan(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 29})
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",

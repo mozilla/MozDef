@@ -1,3 +1,11 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2017 Mozilla Corporation
+#
+# Contributors:
+# Brandon Myers bmyers@mozilla.com
+
 from positive_alert_test_case import PositiveAlertTestCase
 from negative_alert_test_case import NegativeAlertTestCase
 
@@ -172,20 +180,20 @@ class TestAlertBruteforceSsh(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['summary'] = event['_source']['summary'].replace('1.2.3.4', '10.22.75.203')
+        event['_source']['summary'] = event['_source']['summary'].replace('1.2.3.4', '11.22.33.44')
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with 10.22.75.203 as a whitelisted ip",
+            description="Negative test case with 11.22.33.44 as a whitelisted ip",
             events=events,
         )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['summary'] = event['_source']['summary'].replace('1.2.3.4', '10.8.75.144')
+        event['_source']['summary'] = event['_source']['summary'].replace('1.2.3.4', '55.66.77.88')
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with 10.8.75.144 as a whitelisted ip",
+            description="Negative test case with 55.66.77.88 as a whitelisted ip",
             events=events,
         )
     )

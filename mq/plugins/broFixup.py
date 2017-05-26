@@ -1,10 +1,11 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 import netaddr
 
@@ -37,13 +38,13 @@ class message(object):
         takes an incoming bro message
         and sets the doc_type
         '''
-    
+
         self.registration = ['bro', 'nsm']
         self.priority = 5
- 
+
     def onMessage(self, message, metadata):
         # set the doc type to bro
-        # to avoid data type conflicts with other doc types 
+        # to avoid data type conflicts with other doc types
         # (int v string, etc)
         metadata['doc_type']= 'bro'
 
@@ -64,10 +65,10 @@ class message(object):
             if 'actions' in message['details'].keys():
                 if message['details']['actions'] == "Notice::ACTION_LOG":
                     # retrieve indicator ip addresses from the sub field
-                    # "sub": "Indicator: 183.136.216.6, Indicator: 23.94.17.82"
+                    # "sub": "Indicator: 1.2.3.4, Indicator: 5.6.7.8"
                     message['details']['indicators'] = [ip for ip
                                                         in findIPv4(message['details']['sub'])]
-                    
+
                     # remove the details.src field and add it to indicators
                     # as it may not be the actual source.
                     if 'src' in message['details'].keys():
@@ -75,4 +76,4 @@ class message(object):
                             message['details']['indicators'].append(message['details']['src'])
                             del message['details']['src']
 
-        return (message, metadata) 
+        return (message, metadata)

@@ -8,7 +8,6 @@
 # Contributors:
 # Brandon Myers bmyers@mozilla.com
 
-
 import os
 import sys
 
@@ -93,7 +92,7 @@ class TestWriteWithRead(ElasticsearchClientTest):
                  'severity': 'NOTICE',
                  'summary': 'nsm CrowdStrike::Correlated_Alerts Host 1.2.3.4 caused an alert to throw',
                  'tags': ['nsm,bro,correlated'],
-                 'url': 'https://mana.mozilla.org/wiki/display/SECURITY/NSM+IR+procedures',
+                 'url': 'https://mozilla.org',
                  'utctimestamp': '2016-08-19T16:40:57.851092+00:00'}
         self.saved_alert = self.es_client.save_alert(body=self.alert)
         self.es_client.flush('alerts')

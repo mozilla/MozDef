@@ -1,10 +1,11 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 import netaddr
 
@@ -88,7 +89,7 @@ class message(object):
                         message['details']['sourceipaddress'] = sourceIP
 
                 # handle the case of an escaped list:
-                # "remoteAddressChain": "[\"52.25.186.142\",\"172.31.8.233\",\"127.0.0.1\"]"
+                # "remoteAddressChain": "[\"1.2.3.4\",\"5.6.7.8\",\"127.0.0.1\"]"
                 if ( isinstance(message['details']['remoteAddressChain'], unicode) and
                      message['details']['remoteAddressChain'][0]=='[' and
                      message['details']['remoteAddressChain'][-1]==']' ):

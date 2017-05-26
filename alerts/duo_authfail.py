@@ -1,4 +1,7 @@
-# Copyright (c) 2014 Mozilla Corporation
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
@@ -6,6 +9,7 @@
 # Aaron Meihm ameihm@mozilla.com
 # Michal Purzynski <mpurzynski@mozilla.com>
 # Alicia Smith <asmith@mozilla.com>
+# Brandon Myers bmyers@mozilla.com
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
@@ -13,6 +17,7 @@ from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 class AlertDuoAuthFail(AlertTask):
     def main(self):
+        self.parse_config('duo_authfail.conf', ['url'])
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
@@ -32,7 +37,7 @@ class AlertDuoAuthFail(AlertTask):
         category = 'duosecurity'
         tags = ['duosecurity', 'duosecuritypagerduty']
         severity = 'WARNING'
-        url = "https://mana.mozilla.org/wiki/display/SECURITY/IR+Procedure%3A+DuoSecurity"
+        url = self.config.url
 
         sourceipaddress = 'unknown'
         user = 'unknown'

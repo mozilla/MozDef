@@ -19,7 +19,6 @@ import sys
 import traceback
 import glob
 import os
-from configlib import getConfig, OptionParser
 
 # Minimum data needed for an alert (this is an example alert json)
 '''
@@ -109,11 +108,6 @@ class AlertGenericLoader(AlertTask):
                 except Exception:
                     logger.error("Loading rule file {} failed".format(f))
 
-    def initConfiguration(self):
-        myparser = OptionParser()
-        (self.config, args) = myparser.parse_args([])
-        self.config.alert_data_location = getConfig('alert_data_location', '', self.config_file)
-
     def process_alert(self, alert_config):
         search_query = SearchQuery(minutes=int(alert_config.time_window))
         terms = []
@@ -126,8 +120,7 @@ class AlertGenericLoader(AlertTask):
         self.walkAggregations(threshold=int(alert_config.num_aggregations), config=alert_config)
 
     def main(self):
-        self.config_file = './generic_alert_loader.conf'
-        self.initConfiguration()
+        self.parse_config('generic_alert_loader.conf', ['alert_data_location'])
 
         self.load_configs()
         for cfg in self.configs:
