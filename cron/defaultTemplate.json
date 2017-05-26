@@ -1,5 +1,4 @@
 {
-  "defaulttemplate" : {
     "order" : 0,
     "template" : "*",
     "settings" : { },
@@ -22,8 +21,8 @@
               "doc_values" : true,
               "type" : "string"
             },
-            "match" : "*",
-            "match_mapping_type" : "float"
+            "match_mapping_type" : "float",
+            "match" : "*"
           }
         }, {
           "double_fields" : {
@@ -77,6 +76,11 @@
           }
         } ],
         "properties" : {
+          "apiVersion" : {
+            "index" : "not_analyzed",
+            "doc_values" : true,
+            "type" : "string"
+          },
           "summary" : {
             "type" : "string"
           },
@@ -90,6 +94,8 @@
                 "type" : "ip"
               },
               "sourceipv4address" : {
+                "index" : "not_analyzed",
+                "doc_values" : true,
                 "type" : "string"
               },
               "srcip" : {
