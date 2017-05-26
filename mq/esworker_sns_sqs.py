@@ -110,7 +110,10 @@ class taskConsumer(object):
                     message_json = json.loads(message_value)
                     for inside_message_key, inside_message_value in message_json.iteritems():
                         if inside_message_key in ('processid'):
-                            event['processid'] = inside_message_value
+                            processid = inside_message_value
+                            processid = processid.replace('[', '')
+                            processid = processid.replace(']', '')
+                            event['processid'] = processid
                         elif inside_message_key in ('pname', 'pid'):
                             event['processname'] = inside_message_value
                         elif inside_message_key in ('hostname'):
