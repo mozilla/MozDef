@@ -104,17 +104,22 @@ class taskConsumer(object):
 
         event['severity'] = 'INFO'
 
+        # Set defaults
+        event['processid'] = ''
+        event['processname'] = ''
+        event['category'] = 'syslog'
+
         for message_key, message_value in message.iteritems():
             if 'Message' == message_key:
                 try:
                     message_json = json.loads(message_value)
                     for inside_message_key, inside_message_value in message_json.iteritems():
-                        if inside_message_key in ('processid'):
+                        if inside_message_key in ('processid', 'pid'):
                             processid = inside_message_value
                             processid = processid.replace('[', '')
                             processid = processid.replace(']', '')
                             event['processid'] = processid
-                        elif inside_message_key in ('pname', 'pid'):
+                        elif inside_message_key in ('pname'):
                             event['processname'] = inside_message_value
                         elif inside_message_key in ('hostname'):
                             event['hostname'] = inside_message_value
