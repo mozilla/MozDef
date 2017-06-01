@@ -13,7 +13,6 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../mq"))
 from esworker_sns_sqs import taskConsumer
-from lib.plugins import checkPlugins
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from utilities.dot_dict import DotDict

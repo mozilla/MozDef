@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2017 Mozilla Corporation
+#
+# Contributors:
+# Brandon Myers bmyers@mozilla.com
+
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
@@ -5,6 +15,8 @@ from query_models import SearchQuery
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
+
+import pytest
 
 
 class QueryTestSuite(UnitTestSuite):
@@ -19,8 +31,9 @@ class QueryTestSuite(UnitTestSuite):
     def test_query_class(self):
         for query, events in self.query_tests().iteritems():
             for event in events:
-                self.reset_elasticsearch()
-                self.setup_elasticsearch()
+                if pytest.config.option.delete_indexes:
+                    self.reset_elasticsearch()
+                    self.setup_elasticsearch()
 
                 self.populate_test_event(event)
 
