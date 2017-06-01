@@ -57,7 +57,6 @@ def pytest_report_header(config):
     if config.option.verbose > 0:
         return ["reporting verbose test output"]
 
-@pytest.fixture()
 def pytest_addoption(parser):
     parser.addoption(
         "--delete_indexes",
