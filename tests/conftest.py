@@ -9,7 +9,7 @@ def getConfig(optionname,thedefault,section,configfile):
        send 'thedefault' as the data class you want to get a string back
        i.e. 'True' will return a string
        True will return a bool
-       1 will return an int       
+       1 will return an int
     """
     #getConfig('something','adefaultvalue')
     retvalue=thedefault
@@ -34,15 +34,14 @@ def options():
     configFile='setup.cfg'
     if pytest.config.inifile:
         configFile=str(pytest.config.inifile)
-        
+
     options["esserver"]=getConfig('esserver','localhost:9200','mozdef',configFile)
     options["loginput"]=getConfig('loginput','localhost:8080','mozdef',configFile)
-    options["webuiurl"]=getConfig('webuiurl','http://localhost/','mozdef',configFile)    
-    options["kibanaurl"]=getConfig('kibanaurl','http://localhost:9090/','mozdef',configFile)    
+    options["webuiurl"]=getConfig('webuiurl','http://localhost/','mozdef',configFile)
+    options["kibanaurl"]=getConfig('kibanaurl','http://localhost:9090/','mozdef',configFile)
     if pytest.config.option.verbose > 0:
         options["verbose"]=True
         print('Using options: \n\t%r' % options)
-        
     else:
         options["verbose"]=False
 
@@ -58,14 +57,11 @@ def pytest_report_header(config):
     if config.option.verbose > 0:
         return ["reporting verbose test output"]
 
-
-#def pytest_addoption(parser):
-    #parser.addoption("--esserver", 
-        #action="store", 
-        #default="localhost:9200",
-        #help="elastic search servers to use for testing")
-
-    #parser.addoption("--mozdefserver", 
-        #action="store", 
-        #default="localhost:8080",
-        #help="mozdef server to use for testing")
+@pytest.fixture()
+def pytest_addoption(parser):
+    parser.addoption(
+        "--delete_indexes",
+        action='store_true',
+        default=False,
+        help="A flag to indicate if we should delete all indexes in ES before each test. This could result in inconsistent tests if not specified."
+    )

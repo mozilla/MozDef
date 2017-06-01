@@ -23,31 +23,37 @@ from datetime import timedelta
 from dateutil.parser import parse
 
 import random
+import pytest
+
+import time
+
+if not pytest.config.option.delete_indexes:
+    warning_text = "\n\n** WARNING - Some unit tests will not pass unless the --delete_indexes is specified."
+    warning_text += "\nThis is due to the fact that some tests need a 'clean' ES environment **\n"
+    warning_text += "\n** DISCLAIMER - If you enable this flag, all indexes that MozDef uses will be deleted upon test execution **\n\n"
+    print warning_text
+else:
+    warning_text = "\n\n** WARNING - The --delete_indexes flag has been set. We will be deleting important indexes from ES before test execution**\n"
+    warning_text += "Continuing the unit test execution in 10 seconds...CANCEL ME IF YOU DO NOT WANT PREVIOUS INDEXES DELETED!!! **\n"
+    print warning_text
+    time.sleep(10)
 
 
 class UnitTestSuite(object):
+
     def setup(self):
         self.event_index_name = datetime.now().strftime("events-%Y%m%d")
         self.previous_event_index_name = (datetime.now() - timedelta(days=1)).strftime("events-%Y%m%d")
         self.alert_index_name = datetime.now().strftime("alerts-%Y%m")
-
-        # todo: remove once we are able to run unit tests against
-        # a live server that won't delete all the data. Depends on when we
-        # can use a different index for searching in unit tests.
-        for server in ES['servers']:
-            if "private.scl3.mozilla.com" in server.lower():
-                print "THIS SHOULD NOT BE RUN AGAINST A LIVE TARGET ON MOZILLA NETWORK"
-                print '\tThis is because all of the data in ES is reset/deteled'
-                print '\twhen unit tests are executed.'
-                raise Exception('Using live system in config file for ES servers')
-
         self.es_client = ElasticsearchClient(ES['servers'])
 
-        self.reset_elasticsearch()
-        self.setup_elasticsearch()
+        if pytest.config.option.delete_indexes:
+            self.reset_elasticsearch()
+            self.setup_elasticsearch()
 
     def teardown(self):
-        self.reset_elasticsearch()
+        if pytest.config.option.delete_indexes:
+            self.reset_elasticsearch()
 
     def populate_test_event(self, event, event_type='event'):
         self.es_client.save_event(body=event, doc_type=event_type)
