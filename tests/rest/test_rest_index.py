@@ -1,7 +1,19 @@
+#!/usr/bin/env python
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2017 Mozilla Corporation
+#
+# Contributors:
+# Brandon Myers bmyers@mozilla.com
+
+
 import os
 import json
 import time
 
+import pytest
 from dateutil.parser import parse
 
 from rest_test_suite import RestTestSuite
@@ -28,13 +40,15 @@ class TestKibanaDashboardsRoute(RestTestSuite):
 
     def teardown(self):
         super(TestKibanaDashboardsRoute, self).teardown()
-        self.es_client.delete_index('.kibana', True)
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('.kibana', True)
 
     def setup(self):
         super(TestKibanaDashboardsRoute, self).setup()
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('.kibana', True)
+            self.es_client.create_index('.kibana')
 
-        self.es_client.delete_index('.kibana', True)
-        self.es_client.create_index('.kibana')
         json_dashboard_location = os.path.join(os.path.dirname(__file__), "ssh_dashboard.json")
         self.es_client.save_dashboard(json_dashboard_location, "Example SSH Dashboard")
         self.es_client.save_dashboard(json_dashboard_location, "Example FTP Dashboard")
@@ -52,12 +66,10 @@ class TestKibanaDashboardsRoute(RestTestSuite):
 
             json_resp.sort()
 
-            assert json_resp[1]['url'].endswith(
-                ":9090/index.html#/dashboard/elasticsearch/Example SSH Dashboard") is True
+            assert json_resp[1]['url'].endswith(":9090/index.html#/dashboard/elasticsearch/Example SSH Dashboard") is True
             assert json_resp[1]['name'] == 'Example SSH Dashboard'
 
-            assert json_resp[0]['url'].endswith(
-                ":9090/index.html#/dashboard/elasticsearch/Example FTP Dashboard") is True
+            assert json_resp[0]['url'].endswith(":9090/index.html#/dashboard/elasticsearch/Example FTP Dashboard") is True
             assert json_resp[0]['name'] == 'Example FTP Dashboard'
 
 
@@ -68,13 +80,15 @@ class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
 
     def setup(self):
         super(TestKibanaDashboardsRouteWithoutDashboards, self).setup()
-        self.es_client.delete_index('.kibana', True)
-        self.es_client.create_index('.kibana')
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('.kibana', True)
+            self.es_client.create_index('.kibana')
         time.sleep(0.2)
 
     def teardown(self):
         super(TestKibanaDashboardsRouteWithoutDashboards, self).teardown()
-        self.es_client.delete_index('.kibana', True)
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('.kibana', True)
 
     def test_route_endpoints(self):
         for route in self.routes:

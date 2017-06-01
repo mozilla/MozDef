@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2017 Mozilla Corporation
+#
+# Contributors:
+# Brandon Myers bmyers@mozilla.com
+
+
 import os
 import sys
 
@@ -272,10 +283,12 @@ class TestGetIndices(ElasticsearchClientTest):
 
     def teardown(self):
         super(TestGetIndices, self).teardown()
-        self.es_client.delete_index('test_index')
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('test_index')
 
     def test_get_indices(self):
-        self.es_client.create_index('test_index')
+        if pytest.config.option.delete_indexes:
+            self.es_client.create_index('test_index')
         time.sleep(0.5)
         indices = self.es_client.get_indices()
         indices.sort()
@@ -305,29 +318,33 @@ class TestCreatingAlias(ElasticsearchClientTest):
 
     def setup(self):
         super(TestCreatingAlias, self).setup()
-        self.es_client.delete_index('index1', True)
-        self.es_client.delete_index('index2', True)
-        self.es_client.delete_index('alias1', True)
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('index1', True)
+            self.es_client.delete_index('index2', True)
+            self.es_client.delete_index('alias1', True)
 
     def teardown(self):
         super(TestCreatingAlias, self).teardown()
-        self.es_client.delete_index('index1', True)
-        self.es_client.delete_index('index2', True)
-        self.es_client.delete_index('alias1', True)
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('index1', True)
+            self.es_client.delete_index('index2', True)
+            self.es_client.delete_index('alias1', True)
 
     def test_simple_create_alias(self):
-        self.es_client.create_index('index1')
-        self.es_client.create_alias('alias1', 'index1')
+        if pytest.config.option.delete_indexes:
+            self.es_client.create_index('index1')
+            self.es_client.create_alias('alias1', 'index1')
         alias_indices = self.es_client.get_alias('alias1')
         assert alias_indices == ['index1']
         indices = self.es_client.get_indices()
         assert 'index1' in indices
 
     def test_alias_multiple_indices(self):
-        self.es_client.create_index('index1')
-        self.es_client.create_index('index2')
-        self.es_client.create_alias('alias1', 'index1')
-        self.es_client.create_alias('alias1', 'index2')
+        if pytest.config.option.delete_indexes:
+            self.es_client.create_index('index1')
+            self.es_client.create_index('index2')
+            self.es_client.create_alias('alias1', 'index1')
+            self.es_client.create_alias('alias1', 'index2')
         alias_indices = self.es_client.get_alias('alias1')
         assert alias_indices == ['index2']
         indices = self.es_client.get_indices()
@@ -367,11 +384,12 @@ class TestBulkInvalidFormatProblem(BulkTest):
 
         # Recreate the test indexes with a custom mapping to throw
         # parsing errors
-        self.es_client.delete_index("events", True)
-        self.es_client.delete_index(self.event_index_name, True)
-        self.es_client.create_index(self.event_index_name, mapping=mapping)
-        self.es_client.create_alias('events', self.event_index_name)
-        self.es_client.create_alias('events-previous', self.event_index_name)
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index("events", True)
+            self.es_client.delete_index(self.event_index_name, True)
+            self.es_client.create_index(self.event_index_name, mapping=mapping)
+            self.es_client.create_alias('events', self.event_index_name)
+            self.es_client.create_alias('events-previous', self.event_index_name)
 
     def test_bulk_problems(self):
         event = {
