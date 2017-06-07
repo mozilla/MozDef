@@ -36,7 +36,7 @@ class AlertOpenPortViolation(AlertTask):
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
         category = 'open_port_policy_violation'
-        tags = ['open_port_policy_violation']
+        tags = ['open_port_policy_violation', 'openportpagerduty']
         severity = 'CRITICAL'
 
         summary = ('{0} unauthorized open port(s) on {1} ('.format(aggreg['count'], aggreg['value']))
