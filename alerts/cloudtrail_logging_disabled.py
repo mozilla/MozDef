@@ -29,7 +29,7 @@ class AlertCloudtrailLoggingDisabled(AlertTask):
 
     def onEvent(self, event):
         category = 'AWSCloudtrail'
-        tags = ['cloudtrail', 'aws']
+        tags = ['cloudtrail', 'aws', 'cloudtrailpagerduty']
         severity = 'CRITICAL'
 
         summary = 'Cloudtrail Logging Disabled: ' + event['_source']['requestParameters']['name']
