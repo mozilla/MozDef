@@ -35,7 +35,7 @@ class AlertHTTPBruteforce(AlertTask):
     def onEvent(self, event):
         category = 'httperrors'
         tags = ['http']
-        severity = 'NOTICE'
+        severity = 'WARNING'
         hostname = event['_source']['hostname']
         url = self.config.url
 
