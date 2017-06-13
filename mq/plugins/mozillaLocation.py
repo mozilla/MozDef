@@ -9,7 +9,7 @@
 # Brandon Myers bmyers@mozilla.com
 
 import os
-from configlib import getConfig, OptionParser
+from configlib import getConfig
 
 
 class message(object):
@@ -24,10 +24,8 @@ class message(object):
         self.priority = 5
 
         config_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mozillaLocation.conf")
-        parser = OptionParser()
-        (self.options, args) = parser.parse_args()
-        self.options.dc_code_list = getConfig('dc_code_list', '', config_location).split(',')
-        self.options.offices_code_list = getConfig('offices_code_list', '', config_location).split(',')
+        self.dc_code_list = getConfig('dc_code_list', '', config_location).split(',')
+        self.offices_code_list = getConfig('offices_code_list', '', config_location).split(',')
 
     def onMessage(self, message, metadata):
         if 'details' in message.keys() and 'hostname' in message['details'].keys():
@@ -35,9 +33,9 @@ class message(object):
             if len(hostnamesplit) == 5:
                 if 'mozilla' == hostnamesplit[-2]:
                     message['details']['site'] = hostnamesplit[-3]
-                    if message['details']['site'] in self.options.dc_code_list:
+                    if message['details']['site'] in self.dc_code_list:
                         message['details']['sitetype'] = 'datacenter'
-                    elif message['details']['site'] in self.options.offices_code_list:
+                    elif message['details']['site'] in self.offices_code_list:
                         message['details']['sitetype'] = 'office'
                     else:
                         message['details']['sitetype'] = 'unknown'
