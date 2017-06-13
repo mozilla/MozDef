@@ -187,7 +187,12 @@ class taskConsumer(object):
                         logger.error('Invalid message format for cloudtrail SQS messages')
                         continue
 
+                    if event['Message'] == 'CloudTrail validation message.':
+                        # We don't care about these messages
+                        continue
+
                     message_json = json.loads(event['Message'])
+
                     if 's3ObjectKey' not in message_json.keys():
                         logger.error('Invalid message format, expecting an s3ObjectKey in Message')
                         continue
@@ -208,7 +213,6 @@ class taskConsumer(object):
                 sys.exit(1)
             except ValueError as e:
                 logger.error('Exception while handling message: %r' % e)
-                sys.exit(1)
             except Exception as e:
                 logger.error('Exception received: %r' % e)
                 time.sleep(3)
