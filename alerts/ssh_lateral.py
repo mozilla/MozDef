@@ -104,9 +104,7 @@ class SshLateral(AlertTask):
 
     def onAggregation(self, aggreg):
         category = 'session'
-        # XXX Set to notice for now, since this requires a policy to be
-        # created
-        severity = 'NOTICE'
+        severity = 'WARNING'
         tags = ['sshd', 'syslog']
 
         # Determine if this source host is in scope, first match against
