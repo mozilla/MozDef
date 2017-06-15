@@ -458,26 +458,6 @@ def sendMessgeToPlugins(request, response, endpoint):
             (request, response) = plugin[5].onMessage(request, response)
 
 
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def isIPv4(ip):
     try:
         # netaddr on it's own considers 1 and 0 to be valid_ipv4

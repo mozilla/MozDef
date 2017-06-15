@@ -34,62 +34,68 @@ class TestPromiscKernel(AlertTestSuite):
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
-            events=[AlertTestSuite.create_event(default_event)],
+            events=AlertTestSuite.create_events(default_event, 10),
             expected_alert=default_alert
         )
     )
 
-    event = AlertTestSuite.create_event(default_event)
-    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 1})
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
-            events=[event],
+            events=events,
             expected_alert=default_alert
         )
     )
 
-    event = AlertTestSuite.create_event(default_event)
-    event['_type'] = 'audit'
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_type'] = "audit"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad event type",
-            events=[event],
+            events=events,
         )
     )
 
-    event = AlertTestSuite.create_event(default_event)
-    event['_source']['category'] = 'badcategory'
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['category'] = "badcategory"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad eventName",
-            events=[event],
+            events=events,
         )
     )
 
-    event = AlertTestSuite.create_event(default_event)
-    event['_source']['summary'] = 'Promisc: Interface eth0 set promiscuous off'
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['summary'] = "Promisc: Interface eth0 set promiscuous off"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad summary",
-            events=[event],
+            events=events,
         )
     )
 
-    event = AlertTestSuite.create_event(default_event)
-    event['_source']['summary'] = 'device vethc0c001e entered promiscuous mode'
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['summary'] = "device vethc0c001e entered promiscuous mode"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with a bad interface",
-            events=[event],
+            events=events,
         )
     )
 
-    event = AlertTestSuite.create_event(default_event)
-    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
-            events=[event],
+            events=events,
         )
     )
