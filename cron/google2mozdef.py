@@ -193,7 +193,7 @@ def initConfig():
     options.output=getConfig('output','stdout',options.configfile)                              #output our log to stdout or syslog
     options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
     options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)        #default timezone
+    options.defaultTimeZone=getConfig('defaulttimezone','UTC',options.configfile)        #default timezone
     options.url = getConfig('url', 'http://localhost:8080/events', options.configfile)                  #mozdef event input url to post to
     options.lastrun=toUTC(getConfig('lastrun',toUTC(datetime.now()-timedelta(hours=24)),options.configfile))
     options.recordlimit = getConfig('recordlimit', 1000, options.configfile)                    #max number of records to request

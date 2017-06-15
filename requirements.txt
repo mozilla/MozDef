@@ -1,7 +1,6 @@
 amqp==1.4.6
 anyjson==0.3.3
 boto==2.38.0
-boto3==1.4.1
 bottle==0.12.4
 configlib==1.0.0
 configparser==3.5.0b2

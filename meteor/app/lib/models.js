@@ -146,7 +146,7 @@ models={
             'events':[],
             'eventscount':0,
             'alerts':[],
-            'alertscount':0,
+            'aletscount':0,
             'category':'unknown',
             'score':0,
             'geocoordinates':{'countrycode':'','longitude':0,'lattitude':0},

@@ -273,6 +273,7 @@ class mozdefBot():
                     pass
 
         except Exception as e:
+            sys.stdout.write('stdout - bot error, quitting {0}'.format(e))
             self.client.root_logger.error('bot error..quitting {0}'.format(e))
             self.client.disconnect()
             if self.mqConsumer:
@@ -386,7 +387,7 @@ def initConfig():
     # change this to your default zone for when it's not specified
     # in time strings
     options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
+                                        'UTC',
                                         options.configfile)
     
     # irc options

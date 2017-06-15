@@ -11,4 +11,6 @@
 source  /home/mozdef/envs/mozdef/bin/activate
 /home/mozdef/envs/mozdef/cron/healthAndStatus.py -c /home/mozdef/envs/mozdef/cron/healthAndStatus.conf
 /home/mozdef/envs/mozdef/cron/healthToMongo.py -c /home/mozdef/envs/mozdef/cron/healthToMongo.conf
+/home/mozdef/envs/mozdef/cron/esCacheMaint.py -c /home/mozdef/envs/mozdef/cron/esCacheMaint.conf
 /home/mozdef/envs/mozdef/cron/eventStats.py -c /home/mozdef/envs/mozdef/cron/eventStats.conf
+/home/mozdef/envs/mozdef/cron/eventStatsAlerts.py -c /home/mozdef/envs/mozdef/cron/eventStatsAlerts.conf

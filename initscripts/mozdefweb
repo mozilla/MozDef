@@ -1,0 +1,91 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides:          mozdefweb
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts mozdef meteor web interface.
+# Description: mozdef web interface provided by meteor
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+APP_NAME=mozdefweb
+
+# Pull in sysconfig settings
+[ -f /etc/sysconfig/${APP_NAME} ] && . /etc/sysconfig/${APP_NAME}
+
+PID_FILE=${PIDFILE:-/var/run/${APP_NAME}.pid}
+LOCK_FILE=${LOCKFILE:-/var/lock/subsys/${APP_NAME}}
+#METEOR_WAREHOUSE_DIR="/home/jbryner/.meteor"
+
+
+#we start a script that eventually runs node aka:
+#/home/jbryner/envs/meteor/bin/node /home/jbryner/envs/meteor/mozdef/.meteor/local/build/main.js
+APP_USER='jbryner'
+APP_DIR="/home/jbryner/envs/meteor/mozdef/"
+DAEMON_RUN="/home/jbryner/envs/meteor/bin/node"
+DAEMON_TARGET="/home/jbryner/envs/meteor/mozdef/.meteor/local/build/main.js"
+LOG_FILE="/home/jbryner/envs/meteor/meteor.log"
+
+export HOME="/home/jbryner"
+export MONGO_URL=mongodb://localhost:3002/meteor
+export ROOT_URL=http://mozdefqa1.private.scl3.mozilla.com/
+export PORT=3000
+
+start() {
+    echo -n $"Starting ${APP_NAME}: "
+    echo $"Starting process and waiting for PID"
+
+    cd ${APP_DIR}
+    #nohup runuser  -l ${APP_USER} -m -c '${DAEMON_RUN} ${DAEMON_TARGET} >${LOG_FILE} 2>&1 &'
+    #echo $"runuser -l ${APP_USER} -c '${DAEMON_RUN} ${DAEMON_TARGET} >${LOG_FILE} 2>&1 '"
+    nohup ${DAEMON_RUN} ${DAEMON_TARGET} >${LOG_FILE} 2>&1 &
+    RETVAL=$?
+    sleep 5
+    PID=`pgrep -f ${DAEMON_RUN} | head -n1` || PID=0
+    [ $PID -gt 0 ] && echo $"PID: $PID started"
+    [ $PID -gt 0 ] && echo $PID > ${PID_FILE}
+
+    [ $RETVAL -eq 0 ] && touch $LOCK_FILE
+    [ -x /sbin/restorecon ] && /sbin/restorecon $LOCK_FILE
+    echo $"$APP_NAME started"
+    return $RETVAL    
+}
+
+stop() {
+    echo -n $"Stopping ${APP_NAME}: "
+    #killproc -p ${PID_FILE} -d 10 $DAEMON
+    #many processes started that must be individually killed.
+    pgrep -f ${DAEMON_RUN}| while read i;do kill $i;done
+    RETVAL=$?
+    echo
+    [ $RETVAL = 0 ] && rm -f ${LOCK_FILE} ${PID_FILE} ; echo "Stopped"
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status -p ${PID_FILE} ${APP_NAME}
+        RETVAL=$?
+        ;;
+    restart|force-reload)
+        stop
+        start
+        ;;
+    *)
+        N=/etc/init.d/${APP_NAME}
+        echo "Usage: $N {start|stop|status|restart|force-reload}" >&2
+        RETVAL=2
+        ;;
+esac
+
+exit $RETVAL

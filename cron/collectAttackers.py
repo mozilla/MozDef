@@ -417,8 +417,7 @@ def updateMongoWithESEvents(mozdefdb, results):
                     esrecord = dict(documentid=r['_id'],
                          documenttype=r['_type'],
                          documentindex=r['_index'],
-                         documentsource=r['_source'],
-                         read=False)
+                         documentsource=r['_source'])
 
                     logger.debug('searching for ' + str(sourceIP))
                     #attacker = attackers.find_one({'events.details.sourceipaddress': str(sourceIP.ip)})

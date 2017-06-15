@@ -33,7 +33,7 @@ if __name__ == '__main__':
                       help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    es = es_module.Elasticsearch(options.esservers[0])
+    es = es_module.ElasticsearchClient(options.esservers[0])
     es.deleteIndex('events')
     es.deleteIndex('events-previous')
     es.deleteIndex('alerts')

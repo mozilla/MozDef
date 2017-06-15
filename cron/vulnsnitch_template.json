@@ -1,0 +1,118 @@
+{
+  "template": "vulnsnitch*",
+  "mappings": {
+    "history": {
+      "_ttl": {
+        "enabled": true
+      },
+      "properties": {
+        "advisory_id": {
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "cve": {
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "host": {
+          "properties": {
+            "hostname": {
+              "type": "multi_field",
+              "fields": {
+                "hostname": {
+                  "type": "string"
+                },
+                "raw": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                }
+              }
+            }
+          }
+        },
+        "packages": {
+          "properties": {
+            "arch": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "name": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "totals": {
+          "properties": {
+            "advisories": {
+              "type": "integer"
+            },
+            "cve": {
+              "type": "integer"
+            },
+            "packages": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "last_known_state": {
+      "_ttl": {
+        "enabled": true
+      },
+      "properties": {
+        "cve": {
+          "index": "not_analyzed",
+          "type": "string"
+        },
+        "host": {
+          "properties": {
+            "hostname": {
+              "type": "multi_field",
+              "fields": {
+                "hostname": {
+                  "type": "string"
+                },
+                "raw": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                }
+              }
+            }
+          }
+        },
+        "packages": {
+          "properties": {
+            "arch": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "name": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "totals": {
+          "properties": {
+            "advisories": {
+              "type": "integer"
+            },
+            "cve": {
+              "type": "integer"
+            },
+            "packages": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "_default_": {
+      "_ttl": {
+        "enabled": true
+      }
+    }
+  }
+}

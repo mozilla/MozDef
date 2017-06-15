@@ -239,7 +239,7 @@ Then::
 
   cd /home/mozdef
 
-  wget https://bootstrap.pypa.io/get-pip.py
+  wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
   export LD_LIBRARY_PATH=/home/mozdef/python2.7/lib/
   ./python2.7/bin/python get-pip.py
   ./python2.7/bin/pip install virtualenv
@@ -568,54 +568,29 @@ Manual Installation
     $ source $PATH_TO_VENV/bin/activate
     (.mozdef_env)$ cd $MOZDEF_PATH/examples/es-docs && python inject.py
 
-10. Installing Supervisord to enable Alerting on events.
-     
-    $ sudo -i -u mozdef -g mozdef
-    $ cd /home/mozdef/envs/mozdef
-    $ source bin/activate
-    $ cd bin
-    $ pip install supervisor
-
-
 Start Services
 ***************
 
-To start the following services you can place the init scripts under /etc/init.d/ and set them to executable. You can find the init scripts in the MozDef/initscripts directory. Or you can start them manually.
+Start the following services ::
 
-    The initscripts included will match the following startup commands:
+    $ invoke-rc.d rabbitmq-server start
 
-    1. /etc/init.d/rabbitmq-server start or systemctl start rabbitmq-server
+    $ service elasticsearch start
 
-       $ invoke-rc.d rabbitmq-server start
+    $ service nginx start
 
-    2. /etc/init.d/elasticsearch start or systemctl start elasticsearch
+    $ uwsgi --socket /run/uwsgi/apps/loginput.socket --wsgi-file $MOZDEF_PATH/loginput/index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/loginput --chmod-socket --logto /var/log/mozdef/uwsgi.loginput.log -H $PATH_TO_VENV
 
-       $ service elasticsearch start
+    $ uwsgi --socket /run/uwsgi/apps/rest.socket --wsgi-file $MOZDEF_PATH/rest/index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/rest --chmod-socket --logto /var/log/mozdef/uwsgi.rest.log -H $PATH_TO_VENV
 
-    3. /etc/init.d/nginx start or systemctl start nginx
+    $ cd $MOZDEF_PATH/mq && uwsgi --socket /run/uwsgi/apps/esworker.socket --mule=esworker.py --mule=esworker.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/mq --stats 127.0.0.1:9192  --logto /var/log/mozdef/uwsgi.esworker.log --master-fifo /run/uwsgi/apps/esworker.fifo -H $PATH_TO_VENV
 
-       $ service nginx start
+    $ cd $MOZDEF_PATH/meteor && meteor run
 
-    4. /etc/init.d/mozdefloginput start
+    # Activate the virtualenv to run background jobs
+    $ source $PATH_TO_VENV/bin/activate
 
-       $ cd $MOZDEF_PATH/loginput && uwsgi --ini uwsgi.ini
-
-    5. /etc/init.d/mozdefrestapi start
-
-       $ cd $MOZDEF_PATH/rest && uwsgi --ini uwsgi.ini
-
-    6. /etc/init.d/mozdefmq start
-
-       $ cd $MOZDEF_PATH/mq && uwsgi --ini uwsgi.ini
-
-    7. /etc/init.d/mozdefalerts start
-
-       $ cd $MOZDEF_PATH/bin && supervisord -c /home/mozdef/envs/mozdef/alerts/supervisord.alerts.conf
-
-    8. /etc/init.d/mozdefalertsplugin start
-       
-       $ cd $MOZDEF_PATH/alerts && uwsgi --ini uwsgi-alertsplugin.ini
-
-    9. /etc/init.d/mozdefweb start
-    
-       $ cd $MOZDEF_PATH/meteor && meteor run
+    (.mozdef_env)$ cd $MOZDEF_PATH/alerts && celery -A celeryconfig worker --loglevel=info --beat
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./healthjobs.sh
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./sampleevents.sh
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./syncalerts.sh

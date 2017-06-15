@@ -8,24 +8,26 @@
 # Contributors:
 # Anthony Verez averez@mozilla.com
 
-import pyes
+from elasticsearch import Elasticsearch
+
 import json
 import requests
 from datetime import datetime
 
-class Elasticsearch(object):
+class ElasticsearchClient(object):
     def __init__(self, esserver):
         """
         Class used for ES features not supported by pyes
         and for shortcuts when using pyes
         """
         self.esserver = esserver
-        self.conn = pyes.ES(esserver)
+        self.conn = Elasticsearch(esserver)
+        self.conn.ping()
 
     def deleteIndex(self, index):
         print('Deleting %s index...' % index)
         try:
-            self.conn.indices.delete_index(index)
+            self.conn.indices.delete(index)
         except:
             pass
 
@@ -43,7 +45,7 @@ class Elasticsearch(object):
     def createIndex(self, index):
         print('Creating %s index...' % index)
         try:
-            self.conn.indices.create_index(index)
+            self.conn.indices.create(index)
         except:
             pass
 
@@ -55,7 +57,7 @@ class Elasticsearch(object):
             if update_date:
                 # update date to right now
                 l['utctimestamp'] = datetime.utcnow().isoformat()+'+00:00'
-            self.conn.index(l, index, docs_type)
+            self.conn.index(index=index, doc_type=docs_type, body=l)
         f.close()
 
     def loadDashboard(self, dash_name, dash_file):

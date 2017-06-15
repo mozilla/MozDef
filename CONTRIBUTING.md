@@ -7,7 +7,7 @@ We would also love to hear how you are using MozDef and to receive contributions
 Bug reports
 -----------
 
-If you think you have found a bug in MozDef, first make sure that you are testing against the [master branch](https://github.com/mozilla/MozDef) - your issue may already have been fixed. If not, search our [issues list](https://github.com/mozilla/MozDef/issues) on GitHub in case a similar issue has already been opened.
+If you think you have found a bug in MozDef, first make sure that you are testing against the [master branch](https://github.com/jeffbryner/MozDef) - your issue may already have been fixed. If not, search our [issues list](https://github.com/jeffbryner/MozDef/issues) on GitHub in case a similar issue has already been opened.
 
 It is very helpful if you can prepare a reproduction of the bug. In other words, provide a small test case which we can run to confirm your bug. It makes it easier to find the problem and to fix it.
 
@@ -17,7 +17,7 @@ Feature requests
 ----------------
 
 If you are looking for a feature that doesn't exist currently in MozDef, you are probably not alone.
-Open an issue on our [issues list](https://github.com/mozilla/MozDef/issues) on GitHub which describes the feature you would like to see, why you need it, and how it should work.
+Open an issue on our [issues list](https://github.com/jeffbryner/MozDef/issues) on GitHub which describes the feature you would like to see, why you need it, and how it should work.
 If you attach diagrams or mockups, it would be super nice ;-).
 
 Contributing code and documentation changes
@@ -31,7 +31,7 @@ The process is described below.
 
 ### Fork and clone the repository
 
-You will need to fork the main [MozDef repository](https://github.com/mozilla/MozDef) and clone it to your local machine. See
+You will need to fork the main [MozDef repository](https://github.com/jeffbryner/MozDef) and clone it to your local machine. See
 [github help page](https://help.github.com/articles/fork-a-repo) for help.
 
 Push your local changes to your forked copy of the repository and [submit a pull request](https://help.github.com/articles/using-pull-requests). In the pull request, describe what your changes do and mention the number of the issue where discussion has taken place, eg "Closes #123".

@@ -1,0 +1,103 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 372 (0x174)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=US, ST=California, L=Mountain View, O=Mozilla Corporation, OU=Mozilla Corporation Root Certificate Services, CN=Mozilla Root CA/emailAddress=hostmaster@mozilla.com
+        Validity
+            Not Before: Mar  1 23:12:36 2014 GMT
+            Not After : Feb 28 23:12:36 2019 GMT
+        Subject: C=US, ST=California, L=Mountain View, O=Mozilla Corporation, OU=Security, CN=mozdefqa1.private.scl3.mozilla.com/emailAddress=hostmaster@mozilla.com
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:d8:8f:16:1f:64:a5:7d:d9:34:e7:e6:c9:d4:ff:
+                    ec:50:91:1f:4d:0a:f2:50:41:00:27:ae:50:07:67:
+                    ea:3b:8d:92:dd:0a:cd:71:50:65:93:37:d3:62:50:
+                    a3:39:c6:2d:4f:e8:fc:e7:70:e8:5e:02:88:34:79:
+                    7f:c0:f8:32:31:ae:36:d7:a6:12:b5:df:3e:92:95:
+                    0c:9e:e2:da:39:5c:f9:a5:86:97:39:f5:23:be:ee:
+                    b5:10:44:b5:7e:cd:00:d3:b8:53:a2:aa:42:7d:a8:
+                    c8:6c:f3:b0:5a:77:a4:c8:4a:49:94:c8:f8:d9:bb:
+                    27:a9:9d:33:f7:ff:e4:6a:7f:0c:d4:dd:33:18:75:
+                    ca:28:84:93:f3:03:e3:ec:27:45:eb:bb:63:3c:33:
+                    94:64:47:24:ad:39:53:b3:a8:30:4f:7e:f8:3f:9e:
+                    ea:3c:64:31:82:84:ab:29:ee:88:87:08:5e:3e:1b:
+                    a1:66:1a:5a:89:68:99:1f:4b:ca:b7:cb:8c:7e:b7:
+                    63:35:e0:34:29:10:e2:1a:67:11:fe:15:a2:a3:ca:
+                    58:c3:51:65:a0:b4:01:15:41:41:9e:77:94:f3:8a:
+                    4a:49:95:35:73:59:5d:6d:53:3e:ec:f3:79:89:ef:
+                    07:45:d6:49:80:a4:03:e1:df:d9:05:5e:33:46:c7:
+                    b0:f1
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Authority Key Identifier: 
+                keyid:B9:D5:73:EC:8F:19:E2:B3:19:3A:E4:6E:A1:86:50:35:8B:66:C2:E9
+
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication, TLS Web Client Authentication, Microsoft Server Gated Crypto, Netscape Server Gated Crypto
+            X509v3 Basic Constraints: critical
+                CA:FALSE
+    Signature Algorithm: sha1WithRSAEncryption
+        1b:63:ef:eb:c8:cb:24:64:22:2e:f5:42:1d:1e:19:05:5a:f6:
+        0f:44:a0:d0:1a:ad:60:f7:24:2f:7a:4b:68:cb:8e:e9:03:2a:
+        2c:46:1e:ee:df:3a:22:cc:3d:ba:28:01:f2:25:ec:bf:86:e2:
+        c5:a0:af:f8:b4:95:8e:13:e9:5f:ea:a2:98:ec:bc:03:7a:96:
+        66:16:59:80:9f:08:7b:58:a6:7d:7c:55:61:85:84:f8:4a:6b:
+        07:2b:b9:f7:b9:29:aa:90:18:05:7a:d7:c2:d6:30:ae:5e:94:
+        bc:d4:60:a8:34:9e:0b:f4:99:e7:8a:89:16:e5:17:82:40:97:
+        1d:56:ac:17:e7:b0:94:8b:fc:1c:d5:46:df:e9:df:d8:5a:2a:
+        6e:7e:1d:db:f9:7f:e7:40:44:32:9d:ae:75:25:b5:40:05:45:
+        d9:22:ca:38:25:2f:4c:0c:e0:1b:69:d2:8e:25:32:7e:c7:a0:
+        72:64:ae:f3:39:a1:ae:b6:50:27:81:39:60:fa:78:66:f6:d1:
+        bb:7a:e5:94:bc:eb:02:07:35:33:00:42:5f:9e:0b:11:a2:3c:
+        e5:0c:a2:e5:10:e9:06:7a:76:bb:1d:a4:0c:f2:5e:eb:e2:11:
+        dc:40:37:b7:d9:68:55:2e:5e:31:f5:fc:9c:d9:a4:41:6b:d6:
+        7f:9f:7d:03:30:3b:e6:84:b9:c0:19:8c:0a:25:63:5e:3f:c4:
+        f5:e4:5d:d4:bb:fe:ac:44:7d:cf:c5:2d:7f:ec:77:a9:72:4e:
+        f9:d4:d9:34:4e:18:cb:2b:e2:ed:77:ae:94:dc:3a:f9:12:e1:
+        70:c4:68:00:a3:c7:f4:ff:3e:17:25:6c:37:e7:c3:ba:07:ae:
+        35:71:aa:59:e4:d1:dc:19:b9:cd:43:e5:ea:0d:eb:58:55:46:
+        5c:bc:53:a6:43:07:ac:ba:61:99:72:9d:94:4d:3a:14:ab:b1:
+        41:41:93:0a:0d:8d:6b:a8:df:50:99:39:9d:70:bb:fc:bc:4f:
+        9f:8f:81:6d:6a:4e:f9:ac:4e:94:23:98:44:11:1a:c0:7e:4b:
+        73:f2:88:40:6e:bc:fc:15:70:2d:f6:e8:72:6a:65:3c:ce:32:
+        3d:ef:14:a8:c7:48:25:d3:fb:c1:9c:0b:58:34:7f:d3:20:12:
+        39:26:e6:9e:9a:fd:54:17:88:41:b8:3a:90:eb:fa:70:77:58:
+        6f:9f:74:f4:39:2f:66:c0:f1:fb:80:91:50:b1:21:3d:cd:58:
+        85:2f:c8:5e:84:ff:2a:25:ea:bf:69:03:84:16:05:47:00:1c:
+        bf:49:4c:b0:6a:0d:d1:24:9e:51:fb:83:2b:6e:ab:a0:d5:2b:
+        3c:20:3d:d4:6d:8a:81:2e
+-----BEGIN CERTIFICATE-----
+MIIFdTCCA12gAwIBAgICAXQwDQYJKoZIhvcNAQEFBQAwgdExCzAJBgNVBAYTAlVT
+MRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRww
+GgYDVQQKExNNb3ppbGxhIENvcnBvcmF0aW9uMTYwNAYDVQQLEy1Nb3ppbGxhIENv
+cnBvcmF0aW9uIFJvb3QgQ2VydGlmaWNhdGUgU2VydmljZXMxGDAWBgNVBAMTD01v
+emlsbGEgUm9vdCBDQTElMCMGCSqGSIb3DQEJARYWaG9zdG1hc3RlckBtb3ppbGxh
+LmNvbTAeFw0xNDAzMDEyMzEyMzZaFw0xOTAyMjgyMzEyMzZaMIG/MQswCQYDVQQG
+EwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmll
+dzEcMBoGA1UEChMTTW96aWxsYSBDb3Jwb3JhdGlvbjERMA8GA1UECxMIU2VjdXJp
+dHkxKzApBgNVBAMTIm1vemRlZnFhMS5wcml2YXRlLnNjbDMubW96aWxsYS5jb20x
+JTAjBgkqhkiG9w0BCQEWFmhvc3RtYXN0ZXJAbW96aWxsYS5jb20wggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDYjxYfZKV92TTn5snU/+xQkR9NCvJQQQAn
+rlAHZ+o7jZLdCs1xUGWTN9NiUKM5xi1P6PzncOheAog0eX/A+DIxrjbXphK13z6S
+lQye4to5XPmlhpc59SO+7rUQRLV+zQDTuFOiqkJ9qMhs87Bad6TISkmUyPjZuyep
+nTP3/+RqfwzU3TMYdcoohJPzA+PsJ0Xru2M8M5RkRyStOVOzqDBPfvg/nuo8ZDGC
+hKsp7oiHCF4+G6FmGlqJaJkfS8q3y4x+t2M14DQpEOIaZxH+FaKjyljDUWWgtAEV
+QUGed5TzikpJlTVzWV1tUz7s83mJ7wdF1kmApAPh39kFXjNGx7DxAgMBAAGjZzBl
+MB8GA1UdIwQYMBaAFLnVc+yPGeKzGTrkbqGGUDWLZsLpMDQGA1UdJQQtMCsGCCsG
+AQUFBwMBBggrBgEFBQcDAgYKKwYBBAGCNwoDAwYJYIZIAYb4QgQBMAwGA1UdEwEB
+/wQCMAAwDQYJKoZIhvcNAQEFBQADggIBABtj7+vIyyRkIi71Qh0eGQVa9g9EoNAa
+rWD3JC96S2jLjukDKixGHu7fOiLMPbooAfIl7L+G4sWgr/i0lY4T6V/qopjsvAN6
+lmYWWYCfCHtYpn18VWGFhPhKawcrufe5KaqQGAV618LWMK5elLzUYKg0ngv0meeK
+iRblF4JAlx1WrBfnsJSL/BzVRt/p39haKm5+Hdv5f+dARDKdrnUltUAFRdkiyjgl
+L0wM4Btp0o4lMn7HoHJkrvM5oa62UCeBOWD6eGb20bt65ZS86wIHNTMAQl+eCxGi
+POUMouUQ6QZ6drsdpAzyXuviEdxAN7fZaFUuXjH1/JzZpEFr1n+ffQMwO+aEucAZ
+jAolY14/xPXkXdS7/qxEfc/FLX/sd6lyTvnU2TROGMsr4u13rpTcOvkS4XDEaACj
+x/T/PhclbDfnw7oHrjVxqlnk0dwZuc1D5eoN61hVRly8U6ZDB6y6YZlynZRNOhSr
+sUFBkwoNjWuo31CZOZ1wu/y8T5+PgW1qTvmsTpQjmEQRGsB+S3PyiEBuvPwVcC32
+6HJqZTzOMj3vFKjHSCXT+8GcC1g0f9MgEjkm5p6a/VQXiEG4OpDr+nB3WG+fdPQ5
+L2bA8fuAkVCxIT3NWIUvyF6E/yol6r9pA4QWBUcAHL9JTLBqDdEknlH7gytuq6DV
+KzwgPdRtioEu
+-----END CERTIFICATE-----

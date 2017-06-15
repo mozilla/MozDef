@@ -1,0 +1,23 @@
+{
+    "template" : "*",
+    "mappings" : {
+      "_default_" : {
+        "dynamic_templates" : [
+            {
+                "string_fields" : {
+                    "mapping" : {
+                      "index" : "not_analyzed",
+                      "type" : "string",
+                      "doc_values": true
+                    },
+                    "match_mapping_type" : "string",
+                    "match" : "*"
+                }
+            }
+        ],
+        "_all" : {
+          "enabled" : true
+        }
+      }
+    }
+}

@@ -21,7 +21,7 @@ class message(object):
         the pager duty event api
         '''
     
-        self.registration = ['bro']
+        self.registration = ['sftp-server']
         self.priority = 2
 
         # set my own conf file
@@ -52,7 +52,7 @@ class message(object):
             }
             payload = json.dumps({
               "service_key": "{0}".format(self.options.serviceKey),
-              "incident_key": "bro",
+              "incident_key": "Possible Intrusion",
               "event_type": "trigger",
               "description": "{0}".format(message['summary']),
               "client": "mozdef",
