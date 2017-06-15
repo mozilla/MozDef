@@ -9,20 +9,19 @@
 # Jeff Bryner jbryner@mozilla.com
 
 from lib.alerttask import AlertTask
-import pyes
+from query_models import SearchQuery, TermMatch, PhraseMatch
+
 
 class ldapLockout(AlertTask):
     def main(self):
-        # look for events in last x 
-        date_timedelta = dict(minutes=15)
-        # Configure filters
-        # looking for pwdAccountLockedTime setting by admin
-        must = [
-            pyes.TermFilter('category', 'ldapChange'),
-            pyes.TermFilter("actor", "cn=admin,dc=mozilla"),
-            pyes.QueryFilter(pyes.MatchQuery('changepairs', 'replace:pwdAccountLockedTime','phrase'))
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=15)
+
+        search_query.add_must([
+            TermMatch('category', 'ldapChange'),
+            TermMatch("details.actor", "cn=admin,dc=mozilla"),
+            PhraseMatch('details.changepairs', 'replace:pwdAccountLockedTime')
+        ])
+        self.filtersManual(search_query)
 
         # Search events
         self.searchEventsSimple()

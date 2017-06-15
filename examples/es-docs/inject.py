@@ -37,7 +37,7 @@ if __name__ == '__main__':
     es.deleteIndex('events')
     es.deleteIndex('events-previous')
     es.deleteIndex('alerts')
-    es.deleteIndex('kibana-int')
+    es.deleteIndex('.kibana')
     es.setupIndexTemplate('eventstemplate', 'events_template.json')
     es.setupIndexTemplate('alertstemplate', 'alerts_template.json')
     es.createIndex('alerts')

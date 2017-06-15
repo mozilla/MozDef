@@ -18,7 +18,8 @@ if (Meteor.isClient) {
         },
     
         kibanaurl: function () {
-            url=getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + Session.get('alertID');
+            var esmetadata = alerts.findOne({'esmetadata.id': Session.get('alertID')}).esmetadata;
+            url=getSetting('kibanaURL') + '/doc/alerts-*/' + esmetadata.index + '/alert?id=' + esmetadata.id;
             return url;
         }
     });

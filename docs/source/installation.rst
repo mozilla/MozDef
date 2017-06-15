@@ -146,7 +146,7 @@ Step by Step::
         sudo make run
         (once inside the container)
         #/etc/init.d/supervisor start
-        
+
         Browse to http://youripaddress:3000 for the MozDef UI
 
     Build notes:
@@ -215,7 +215,7 @@ Python
 
 Create a mozdef user::
 
-  adduser mozdef
+  adduser mozdef -d /opt/mozdef
 
 We need to install a python2.7 virtualenv.
 
@@ -233,14 +233,14 @@ Then::
   wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
   tar xvzf Python-2.7.6.tgz
   cd Python-2.7.6
-  ./configure --prefix=/home/mozdef/python2.7 --enable-shared
+  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared
   make
   make install
 
-  cd /home/mozdef
+  cd /opt/mozdef
 
-  wget https://bootstrap.pypa.io/get-pip.py
-  export LD_LIBRARY_PATH=/home/mozdef/python2.7/lib/
+  wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+  export LD_LIBRARY_PATH=/opt/mozdef/python2.7/lib/
   ./python2.7/bin/python get-pip.py
   ./python2.7/bin/pip install virtualenv
   mkdir ~/envs
@@ -251,7 +251,7 @@ Then::
 
 At this point when you launch python, It should tell you that you're using Python 2.7.6.
 
-Whenever you launch a python script from now on, you should have your mozdef virtualenv actived and your LD_LIBRARY_PATH env variable should include /home/mozdef/python2.7/lib/
+Whenever you launch a python script from now on, you should have your mozdef virtualenv actived and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/
 
 RabbitMQ
 ********
@@ -320,7 +320,7 @@ Make sure you have meteorite/mrt (run as root/admin)::
 
   npm install -g meteorite
 
-Then from the meteor subdirectory of this git repository (/home/mozdef/MozDef/meteor)  run::
+Then from the meteor subdirectory of this git repository (/opt/mozdef/MozDef/meteor)  run::
 
   mrt add iron-router
   mrt add accounts-persona
@@ -568,54 +568,29 @@ Manual Installation
     $ source $PATH_TO_VENV/bin/activate
     (.mozdef_env)$ cd $MOZDEF_PATH/examples/es-docs && python inject.py
 
-10. Installing Supervisord to enable Alerting on events.
-     
-    $ sudo -i -u mozdef -g mozdef
-    $ cd /home/mozdef/envs/mozdef
-    $ source bin/activate
-    $ cd bin
-    $ pip install supervisor
-
-
 Start Services
 ***************
 
-To start the following services you can place the init scripts under /etc/init.d/ and set them to executable. You can find the init scripts in the MozDef/initscripts directory. Or you can start them manually.
+Start the following services ::
 
-    The initscripts included will match the following startup commands:
+    $ invoke-rc.d rabbitmq-server start
 
-    1. /etc/init.d/rabbitmq-server start or systemctl start rabbitmq-server
+    $ service elasticsearch start
 
-       $ invoke-rc.d rabbitmq-server start
+    $ service nginx start
 
-    2. /etc/init.d/elasticsearch start or systemctl start elasticsearch
+    $ uwsgi --socket /run/uwsgi/apps/loginput.socket --wsgi-file $MOZDEF_PATH/loginput/index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/loginput --chmod-socket --logto /var/log/mozdef/uwsgi.loginput.log -H $PATH_TO_VENV
 
-       $ service elasticsearch start
+    $ uwsgi --socket /run/uwsgi/apps/rest.socket --wsgi-file $MOZDEF_PATH/rest/index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/rest --chmod-socket --logto /var/log/mozdef/uwsgi.rest.log -H $PATH_TO_VENV
 
-    3. /etc/init.d/nginx start or systemctl start nginx
+    $ cd $MOZDEF_PATH/mq && uwsgi --socket /run/uwsgi/apps/esworker.socket --mule=esworker.py --mule=esworker.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/mq --stats 127.0.0.1:9192  --logto /var/log/mozdef/uwsgi.esworker.log --master-fifo /run/uwsgi/apps/esworker.fifo -H $PATH_TO_VENV
 
-       $ service nginx start
+    $ cd $MOZDEF_PATH/meteor && meteor run
 
-    4. /etc/init.d/mozdefloginput start
+    # Activate the virtualenv to run background jobs
+    $ source $PATH_TO_VENV/bin/activate
 
-       $ cd $MOZDEF_PATH/loginput && uwsgi --ini uwsgi.ini
-
-    5. /etc/init.d/mozdefrestapi start
-
-       $ cd $MOZDEF_PATH/rest && uwsgi --ini uwsgi.ini
-
-    6. /etc/init.d/mozdefmq start
-
-       $ cd $MOZDEF_PATH/mq && uwsgi --ini uwsgi.ini
-
-    7. /etc/init.d/mozdefalerts start
-
-       $ cd $MOZDEF_PATH/bin && supervisord -c /home/mozdef/envs/mozdef/alerts/supervisord.alerts.conf
-
-    8. /etc/init.d/mozdefalertsplugin start
-       
-       $ cd $MOZDEF_PATH/alerts && uwsgi --ini uwsgi-alertsplugin.ini
-
-    9. /etc/init.d/mozdefweb start
-    
-       $ cd $MOZDEF_PATH/meteor && meteor run
+    (.mozdef_env)$ cd $MOZDEF_PATH/alerts && celery -A celeryconfig worker --loglevel=info --beat
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./healthjobs.sh
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./sampleevents.sh
+    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./syncalerts.sh

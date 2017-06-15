@@ -1,0 +1,13 @@
+/var/log/mozdef/*.log
+{
+ rotate 17
+ weekly
+ missingok
+ notifempty
+ compress
+ delaycompress
+ sharedscripts
+ postrotate
+  service rsyslog reload-or-restart > /dev/null
+ endscript
+}

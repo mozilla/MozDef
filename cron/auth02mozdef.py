@@ -9,6 +9,7 @@
 
 import hjson
 import sys
+import os
 import requests
 import mozdef_client as mozdef
 try:
@@ -18,6 +19,7 @@ except ImportError:
     #Well hello there python2 user!
     import urllib
     quote_url = urllib.quote
+import traceback
 
 class DotDict(dict):
     '''dict.item notation for dict()'s'''
@@ -44,6 +46,14 @@ log_types=DotDict({
         's': {
             "event": 'Success Login',
             "level": 1 # Info
+            },
+        'slo': {
+            "event": 'Success Logout',
+            "level": 1 # Info
+            },
+        'flo': {
+            "event": 'Failed Logout',
+            "level": 3 # Error
             },
         'seacft': {
             "event": 'Success Exchange',
@@ -196,7 +206,23 @@ log_types=DotDict({
         'fdu': {
                 "event": 'Failed User Deletion',
                 "level": 3 # Error
-                }
+                },
+        'sd': {
+                "event": 'Success delegation',
+                "level": 3 # error
+         },
+        'fd': {
+                "event": 'Failed delegation',
+                "level": 3 # error
+         },
+        'seccft': {
+                "event": "Success Exchange (Client Credentials for Access Token)",
+                "level": 1
+        },
+        'feccft': {
+                "event": "Failed Exchange (Client Credentials for Access Token)",
+                "level": 1
+        }
 })
 
 def process_msg(mozmsg, msg):
@@ -215,7 +241,13 @@ def process_msg(mozmsg, msg):
     except KeyError:
         pass
 
-    details['type'] = log_types[msg.type].event
+    try:
+        details['type'] = log_types[msg.type].event
+    except KeyError:
+        #New message type, check https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Logs/get_logs for ex.
+        debug('New auth0 message type, please add support: {}'.format(msg.type))
+        details['type'] = msg.type
+
     if log_types[msg.type].level == 3:
         mozmsg.set_severity(mozdef.MozDefEvent.SEVERITY_ERROR)
     elif log_types[msg.type].level > 3:
@@ -235,29 +267,40 @@ def process_msg(mozmsg, msg):
     except KeyError:
         pass
 
-    details['auth0_client_id'] = msg.client_id
+    try:
+        details['connection'] = msg.connection
+    except KeyError:
+        pass
 
     try:
-        details['username'] = msg.details.request.auth.user
+        details['auth0_client_id'] = msg.client_id
+    except KeyError:
+        pass
+
+    try:
+        details['username'] = msg.details.request.auth.user.name
         details['action'] = msg.details.response.body.name
     except KeyError:
         try:
-            details['errormsg'] = msg.details.error.message
             details['error'] = 'true'
+            details['errormsg'] = msg.details.error.message
         except KeyError:
             pass
-        details['username'] = msg.user_name
+        except AttributeError:
+            pass
+        try:
+            details['username'] = msg.user_name
+        except KeyError:
+            pass
 
-    try:
-        auth0details = msg.details.details
-    except KeyError:
-        auth0details = ""
+    mozmsg.summary = "{mtype} {desc}".format(
+        mtype=details.type,
+        desc=details.description
+    )
 
-    mozmsg.summary = "{type} {desc} {auth0details}".format(type=details.type, desc=details.description,
-            auth0details=auth0details)
     mozmsg.details = details
-    #that's just too much data, IMO
-    #mozmsg.details['auth0_raw'] = msg
+    mozmsg.details['auth0_raw'] = msg
+
     return mozmsg
 
 def load_state(fpath):
@@ -267,8 +310,8 @@ def load_state(fpath):
     state = 0
     try:
         with open(fpath) as fd:
-            state = int(fd.read().split('\n')[0])
-    except FileNotFoundError:
+            state = fd.read().split('\n')[0]
+    except IOError:
         pass
     return state
 
@@ -280,19 +323,20 @@ def save_state(fpath, state):
     with open(fpath, mode='w') as fd:
         fd.write(str(state)+'\n')
 
-def main():
-    #Configuration loading
-    with open('auth02mozdef.json') as fd:
-        config = DotDict(hjson.load(fd))
+def byteify(input):
+    """Convert input to ascii"""
+    if isinstance(input, dict):
+        return {byteify(key): byteify(value)
+                for key, value in input.iteritems()}
+    elif isinstance(input, list):
+        return [byteify(element) for element in input]
+    elif isinstance(input, unicode):
+        return input.encode('utf-8')
+    else:
+        return input
 
-    if config == None:
-        print("No configuration file 'auth02mozdef.json' found.")
-        sys.exit(1)
-
-    headers = {'Authorization': 'Bearer {}'.format(config.auth0.token),
-            'Accept': 'application/json'}
-
-    fromid = load_state(config.state_file)
+def fetch_auth0_logs(config, headers, fromid):
+    lastid = fromid
 
     r = requests.get('{url}?take={reqnr}&sort=date:1&per_page={reqnr}&include_totals=true&from={fromid}'.format(
         url=config.auth0.url,
@@ -305,13 +349,22 @@ def main():
         raise Exception(r.url, r.reason, r.status_code, r.json())
     ret = r.json()
 
+    #Sometimes API give us the requested totals.. sometimes not.
+    if (type(ret) is dict) and ('logs' in ret.keys()):
+        have_totals = True
+        all_msgs = ret['logs']
+    else:
+        have_totals = False
+        all_msgs = ret
+
     #Process all new auth0 log msgs, normalize and send them to mozdef
-    for msg in ret:
+    for msg in all_msgs:
         mozmsg = mozdef.MozDefEvent(config.mozdef.url)
-        if config.DEBUG:
+        if config.DEBUG == 'True':
             mozmsg.set_send_to_syslog(True, only_syslog=True)
-        mozmsg.source = config.auth0.url
+        mozmsg.hostname = config.auth0.url
         mozmsg.tags = ['auth0']
+        msg = byteify(msg)
         msg = DotDict(msg)
         lastid = msg._id
 
@@ -321,9 +374,42 @@ def main():
         except KeyError as e:
             #if this happens the msg was malformed in some way
             mozmsg.details['error'] = 'true'
-            mozmsg.details['errormsg'] = e
+            mozmsg.details['errormsg'] = '"'+str(e)+'"'
             mozmsg.summary = 'Failed to parse auth0 message'
+            if config.DEBUG == 'True':
+                traceback.print_exc()
         mozmsg.send()
+
+    if have_totals:
+        return (int(ret['total']), int(ret['start']), int(ret['length']), lastid)
+    else:
+        return (0, 0, 0, lastid)
+
+def main():
+    #Configuration loading
+    config_location = os.path.dirname(sys.argv[0]) + '/' + 'auth02mozdef.json'
+    with open(config_location) as fd:
+        config = DotDict(hjson.load(fd))
+
+    if config == None:
+        print("No configuration file 'auth02mozdef.json' found.")
+        sys.exit(1)
+
+    headers = {'Authorization': 'Bearer {}'.format(config.auth0.token),
+            'Accept': 'application/json'}
+
+    fromid = load_state(config.state_file)
+    # Auth0 will interpret a 0 state as an error on our hosted instance, but will accept an empty parameter "as if it was 0"
+    if (fromid == 0 or fromid == "0"):
+        fromid = ""
+    totals = 1
+    start = 0
+    length = 0
+
+    # Fetch until we've gotten all messages
+    while (totals > start+length):
+        (totals, start, length, lastid) = fetch_auth0_logs(config, headers, fromid)
+        fromid = lastid
 
     save_state(config.state_file, lastid)
 

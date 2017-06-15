@@ -129,7 +129,8 @@ return the request, response object once done:
 Plugin Registration
 +++++++++++++++++++
 
-Simply place the .py file in the alerts/plugins directory, restart the esworker.py process located in the alerts directory and it will recognize the plugin and pass it events as it sees them.  
+Simply place the .py file in the rest/plugins directory, restart the REST API process
+and it will recognize the plugin and pass it events as it sees them. 
 
 
 

@@ -10,14 +10,16 @@ Anthony Verez averez@mozilla.com
 */
 
 if (Meteor.isServer) {
-    
+
     Meteor.startup(function () {
+        // Since we only connect to localhost or to ourselves, adding a hack to bypass cert validation
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED="0";
         console.log("MozDef starting")
-        
+
         //important to set this so persona can validate the source request
         //set to what the browser thinks you are coming from (i.e. localhost, or actual servername)
         Meteor.absoluteUrl.defaultOptions.rootUrl = mozdef.rootURL + ':' + mozdef.port
-        
+
         //instead of the Meteor.settings we use put deployment
         //settings in settings.js to make it easier to deploy
         //and to allow clients to get access to deployment-specific settings.
@@ -25,22 +27,22 @@ if (Meteor.isServer) {
         //Pull in settings.js entries into a collection
         //so the client gets dynamic content
         mozdefsettings.remove({});
-        mozdefsettings.insert({ key:'rootURL', 
+        mozdefsettings.insert({ key:'rootURL',
                                 value : mozdef.rootURL + ':' + mozdef.port });
-        mozdefsettings.insert({ key:'rootAPI', 
+        mozdefsettings.insert({ key:'rootAPI',
                                 value : mozdef.rootAPI });
         mozdefsettings.insert({ key:'kibanaURL',
                                 value : mozdef.kibanaURL });
-        mozdefsettings.insert({ key:'enableBlockIP', 
+        mozdefsettings.insert({ key:'enableBlockIP',
                                 value : mozdef.enableBlockIP });
         //allow local account creation?
         //http://docs.meteor.com/#/full/accounts_config
-        mozdefsettings.insert({ key:'enableClientAccountCreation', 
-                                value : mozdef.enableClientAccountCreation || false});         
+        mozdefsettings.insert({ key:'enableClientAccountCreation',
+                                value : mozdef.enableClientAccountCreation || false});
 
 
         Accounts.registerLoginHandler("headerLogin",function(loginRequest) {
-            //there are multiple login handlers in meteor. 
+            //there are multiple login handlers in meteor.
             //a login request go through all these handlers to find it's login hander
             //so in our login handler, we only consider login requests which are via a header
             var self=this;
@@ -51,7 +53,7 @@ if (Meteor.isServer) {
             // https://github.com/sockjs/sockjs-node/blob/8b03b3b1e7be14ee5746847f517029cb3ce30ca7/src/transport.coffee#L132
             // choose one that is passed on and set it in your http server config:
             var headerName='via';
-            
+
             console.log('connection headers',this.connection.httpHeaders);
             console.log('target header:',this.connection.httpHeaders[headerName]);
             //our authentication logic
@@ -61,7 +63,7 @@ if (Meteor.isServer) {
                 return null;
             }
             console.log('handling login request',loginRequest);
-            
+
             //grab the email from the header
             var userEmail = this.connection.httpHeaders[headerName];
 
@@ -76,10 +78,10 @@ if (Meteor.isServer) {
                     emails: [{address:userEmail , "verified": true}],
                     createdAt: new Date()
                 });
-            } else {  
+            } else {
                 userId = user._id;
             }
-            
+
             //generate login tokens
             var stampedToken = Accounts._generateStampedLoginToken();
             var hashStampedToken = Accounts._hashStampedToken(stampedToken);

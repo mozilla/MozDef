@@ -20,9 +20,6 @@ class message(object):
         and uses it to trigger an event using
         the pager duty event api
         '''
-    
-        self.registration = ['bro']
-        self.priority = 2
 
         # set my own conf file
         # relative path to the rest index.py file
@@ -31,41 +28,54 @@ class message(object):
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
-                
+
+        self.registration = self.options.keywords.split(" ")
+        self.priority = 1
+
     def initConfiguration(self):
         myparser = OptionParser()
         # setup self.options by sending empty list [] to parse_args
         (self.options, args) = myparser.parse_args([])
-        
+
         # fill self.options with plugin-specific options
         # change this to your default zone for when it's not specified
         self.options.serviceKey = getConfig('serviceKey', 'APIKEYHERE', self.configfile)
-        
+        self.options.keywords = getConfig('keywords', 'KEYWORDS', self.configfile)
+        self.options.clienturl = getConfig('clienturl', 'CLIENTURL', self.configfile)
+        try:
+            self.options.docs = json.loads(getConfig('docs', {}, self.configfile))
+        except:
+            self.options.docs = {}
 
     def onMessage(self, message):
         # here is where you do something with the incoming alert message
+        doclink = 'unknown'
+        if message['category'] in self.options.docs.keys():
+            doclink = self.options.docs[message['category']]
         if 'summary' in message.keys() :
-            print message['summary']
-
             headers = {
                 'Content-type': 'application/json',
             }
             payload = json.dumps({
               "service_key": "{0}".format(self.options.serviceKey),
-              "incident_key": "bro",
               "event_type": "trigger",
               "description": "{0}".format(message['summary']),
-              "client": "mozdef",
-              "client_url": "http://mozdef.rocks",
-              "details": message['events']
+              "client": "MozDef",
+              "client_url": "https://" + self.options.clienturl + "/{0}".format(message['events'][0]['documentsource']['alerts'][0]['id']),
+#              "details": message['events'],
+              "contexts": [
+                    {
+                        "type": "link",
+                        "href": "https://" + "{0}".format(doclink),
+                        "text": "View runbook on mana"
+                    }
+                ]
             })
             r = requests.post(
                             'https://events.pagerduty.com/generic/2010-04-15/create_event.json',
                             headers=headers,
                             data=payload,
             )
-            print r.status_code
-            print r.text        
         # you can modify the message if needed
         # plugins registered with lower (>2) priority
         # will receive the message and can also act on it

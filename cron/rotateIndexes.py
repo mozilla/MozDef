@@ -15,17 +15,28 @@
 # Create a starter .conf file with backupDiscover.py
 
 import sys
-import pyes
 import logging
+from logging.handlers import SysLogHandler
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.DEBUG
+logger.level = logging.WARNING
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+
+
+def daterange(start_date, end_date):
+    for n in range((end_date - start_date).days + 1):
+        yield start_date + timedelta(n)
 
 
 def esRotateIndexes():
@@ -38,14 +49,16 @@ def esRotateIndexes():
 
     logger.debug('started')
     try:
-        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-        indices = es.indices.stats()['indices'].keys()
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+
+        indices = es.get_indices()
+
         # calc dates for use in index names events-YYYYMMDD, alerts-YYYYMM, etc.
-        odate_day = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m%d')
-        odate_month = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m')
-        ndate_day = date.strftime(datetime.utcnow(),'%Y%m%d')
-        ndate_month = date.strftime(datetime.utcnow(),'%Y%m')
-        
+        odate_day = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m%d')
+        odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m')
+        ndate_day = date.strftime(toUTC(datetime.now()), '%Y%m%d')
+        ndate_month = date.strftime(toUTC(datetime.now()), '%Y%m')
+
         # examine each index in the .conf file
         # for rotation settings
         for (index, dobackup, rotation, pruning) in zip(options.indices,
@@ -66,21 +79,43 @@ def esRotateIndexes():
                             continue
                     if newindex not in indices:
                         logger.debug('Creating %s index' % newindex)
-                        es.indices.create_index(newindex)
+                        es.create_index(newindex)
                     # set aliases: events to events-YYYYMMDD
                     # and events-previous to events-YYYYMMDD-1 for example
                     logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
-                    es.indices.set_alias(index, newindex)
+                    es.create_alias(index, newindex)
                     if oldindex in indices:
                         logger.debug('Setting {0}-previous alias to index: {1}'.format(index, oldindex))
-                        es.indices.set_alias('%s-previous' % index, oldindex)
+                        es.create_alias('%s-previous' % index, oldindex)
                     else:
                         logger.debug('Old index %s is missing, do not change %s-previous alias' % (oldindex, index))
             except Exception as e:
                 logger.error("Unhandled exception while rotating %s, terminating: %r" % (index, e))
 
+        indices = es.get_indices()
+        # Create weekly aliases for certain indices
+        week_ago_date = toUTC(datetime.now()) - timedelta(weeks=1)
+        week_ago_str = week_ago_date.strftime('%Y%m%d')
+        current_date = toUTC(datetime.now())
+        for index in options.weekly_rotation_indices:
+            weekly_index_alias = '%s-weekly' % index
+            logger.debug('Trying to realias {0} to indices since {1}'.format(weekly_index_alias, week_ago_str))
+            existing_weekly_indices = []
+            for day_obj in daterange(week_ago_date, current_date):
+                day_str = day_obj.strftime('%Y%m%d')
+                day_index = index + '-' + str(day_str)
+                if day_index in indices:
+                    existing_weekly_indices.append(day_index)
+                else:
+                    logger.debug('%s not found, so cant assign weekly alias' % day_index)
+            if existing_weekly_indices:
+                logger.debug('Creating {0} alias for {1}'.format(weekly_index_alias, existing_weekly_indices))
+                es.create_alias_multiple_indices(weekly_index_alias, existing_weekly_indices)
+            else:
+                logger.warning('No indices within the past week to assign events-weekly to')
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
+
 
 def initConfig():
     # output our log to stdout or syslog
@@ -107,7 +142,7 @@ def initConfig():
         )
     options.indices = list(getConfig(
         'backup_indices',
-        'events,alerts,kibana-int',
+        'events,alerts,.kibana',
         options.configfile).split(',')
         )
     options.dobackup = list(getConfig(
@@ -123,6 +158,12 @@ def initConfig():
     options.pruning = list(getConfig(
         'backup_pruning',
         '20,0,0',
+        options.configfile).split(',')
+        )
+
+    options.weekly_rotation_indices = list(getConfig(
+        'weekly_rotation_indices',
+        'events',
         options.configfile).split(',')
         )
 

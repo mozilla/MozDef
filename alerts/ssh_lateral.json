@@ -1,0 +1,27 @@
+{
+    "hostmustmatch": [
+        ".*\\.enterprise\\.mozilla.com"
+    ],
+    "hostmustnotmatch": [
+        "ten-forward\\.enterprise\\.mozilla\\.com"
+    ],
+    "alertifsource": [
+        "10.0.0.0/8"
+    ],
+    "notalertifsource": [
+        "10.0.22.0/24",
+        "10.0.23.0/24"
+    ],
+    "ignoreusers": [
+        ".*@\\S+.*"
+    ],
+    "exceptions": [
+        ["kirk",".*","10.1.1.1/32"],
+        ["kirk",".*","10.1.1.2/32"],
+        ["kirk",".*","10.1.1.3/32"],
+        ["spock","sciencestation.enterprise.mozilla.com","10.0.50.0/24"],
+        ["spock","sciencestation.enterprise.mozilla.com","10.0.51.0/24"],
+        ["spock","sciencestation.enterprise.mozilla.com","10.0.52.0/24"],
+        ["spock","sciencestation.enterprise.mozilla.com","10.0.53.0/24"]
+    ]
+}

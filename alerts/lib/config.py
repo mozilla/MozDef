@@ -7,35 +7,28 @@
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
+# Jeff Bryner jbryner@mozilla.com
 
 from celery.schedules import crontab, timedelta
 import time
 import logging
 
-ALERTS = {
-    'bro_intel.AlertBroIntel': {'schedule': crontab(minute='*/1')},
-    'bro_notice.AlertBroNotice': {'schedule': crontab(minute='*/1')},
-    'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
-    'cloudtrail.AlertCloudtrail': {'schedule': crontab(minute='*/1')},
-    'fail2ban.AlertFail2ban': {'schedule': crontab(minute='*/1')},
+ALERTS={
+# 'pythonfile.pythonclass':{'schedule': crontab(minute='*/10')},
+# 'pythonfile.pythonclass':{'schedule': timedelta(minutes=10),'kwargs':dict(hostlist=['nsm3', 'nsm5'])},
 }
 
-
 RABBITMQ = {
-	'mqserver': 'localhost',
-	'mquser': 'guest',
-	'mqpassword': 'guest',
-	'mqport': 5672,
-	'alertexchange': 'alerts',
-	'alertqueue': 'mozdef.alert'
+    'mqserver': 'localhost',
+    'mquser': 'mozdef',
+    'mqpassword': 'mozdef',
+    'mqport': 5672,
+    'alertexchange': 'alerts',
+    'alertqueue': 'mozdef.alert'
 }
 
 ES = {
-	'servers': ['http://localhost:9200']
-}
-
-OPTIONS = {
-    'defaulttimezone': 'UTC',
+    'servers': ['http://localhost:9200']
 }
 
 LOGGING = {
@@ -67,7 +60,7 @@ LOGGING = {
     'loggers': {
         'celery': {
             'handlers': ['celery', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     }
 }
