@@ -49,7 +49,7 @@ ADD conf/nginx.conf /etc/nginx/
 #Mozdef
 RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysqlclient-dev\
         && pip install -U pip \
-        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
+        && curl -L https://github.com/mozilla/MozDef/archive/master.tar.gz |tar -C /opt -xz \
         && /bin/ln -s /opt/MozDef-master /opt/MozDef \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
 	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi celery \
@@ -78,8 +78,8 @@ ADD conf/elasticsearch.yml /opt/elasticsearch-1.3.2/config/
 RUN (curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz |tar -C /opt -xz \
        && /bin/ln -s /opt/kibana-3.1.0 /opt/kibana)
 #can't add from the local relative dir, so add from github
-ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
-ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
+ADD https://raw.githubusercontent.com/mozilla/MozDef/master/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
+ADD https://raw.githubusercontent.com/mozilla/MozDef/master/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
 
 # Meteor
 RUN (curl -L https://install.meteor.com/ | /bin/sh \

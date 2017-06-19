@@ -103,7 +103,7 @@ Step by Step::
     from your home directory (/home/ubuntu if using the AMI instance from above)
         sudo apt-get update
         sudo apt-get install git
-        git clone https://github.com/jeffbryner/MozDef.git
+        git clone https://github.com/mozilla/MozDef.git
 
     change the settings.js file to match your install:
     vim /home/ubuntu/MozDef/docker/conf/settings.js
@@ -172,7 +172,7 @@ Step by Step::
 MozDef manual installation process
 ----------------------------------
 This section explains the manual installation process for the MozDef system.
-  git clone https://github.com/jeffbryner/MozDef.git
+  git clone https://github.com/mozilla/MozDef.git
 
 
 
@@ -490,7 +490,7 @@ Manual Installation
 1. Cloning repository ::
 
     $ export MOZDEF_PATH=/opt/MozDef
-    $ git clone https://github.com/jeffbryner/MozDef.git $MOZDEF_PATH
+    $ git clone https://github.com/mozilla/MozDef.git $MOZDEF_PATH
 
 2. Installing dependencies ::
 

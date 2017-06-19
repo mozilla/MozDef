@@ -50,7 +50,7 @@ We have `some configuration snippets`_
 .. _logstash: http://logstash.net/
 .. _native python code: https://github.com/gdestuynder/mozdef_lib
 .. _AWS cloudtrail: https://aws.amazon.com/cloudtrail/
-.. _some configuration snippets: https://github.com/jeffbryner/MozDef/tree/master/examples
+.. _some configuration snippets: https://github.com/mozilla/MozDef/tree/master/examples
 
 What should I log?
 ******************
@@ -280,5 +280,5 @@ If you have a ``AlertBruteforceSsh`` class in a ``alerts/bruteforce_ssh.py`` fil
 		'bruteforce_ssh.AlertBruteforceSsh': crontab(minute='*/1'),
 	}
 
-.. _alerts: https://github.com/jeffbryner/MozDef/tree/master/alerts
+.. _alerts: https://github.com/mozilla/MozDef/tree/master/alerts
 .. _pyes: http://pyes.readthedocs.org/
