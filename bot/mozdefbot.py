@@ -308,6 +308,12 @@ class alertConsumer(ConsumerMixin):
                 logger.exception(
                     "alertworker exception: unknown body type received %r" % body)
                 return
+
+            if bodyDict['notify_mozdefbot'] is False:
+                # If the alert tells us to not notify, then don't post to IRC
+                message.ack()
+                return
+
             # process valid message
             # see where we send this alert
             ircchannel = options.alertircchannel
@@ -327,14 +333,8 @@ class alertConsumer(ConsumerMixin):
             if len(bodyDict['summary']) > 450:
                 sys.stdout.write('alert is more than 450 bytes, truncating\n')
                 bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
-            
-            #if the alert has a 'severity', only publish the alert if the severity is not NOTICE or INFO
-            if 'severity' in bodyDict.keys():
-                if not ((bodyDict['severity'] == 'NOTICE') or (bodyDict['severity'] == 'INFO')):
-                    self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
-            #if the alert does not have a severity for some reason, go ahead and publish it
-            else:
-                self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
+
+            self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
 
             message.ack()
         except ValueError as e:

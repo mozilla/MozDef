@@ -196,6 +196,15 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Exception while pushing alert to ES: {0}'.format(e))
 
+    def tagBotNotify(self, alert):
+        """
+            Tag alert to be excluded based on severity
+        """
+        alert['notify_mozdefbot'] = True
+        if alert['severity'] == 'NOTICE' or alert['severity'] == 'INFO':
+            alert['notify_mozdefbot'] = False
+    return alert
+
     def saveAlertID(self, saved_alert):
         """
         Save alert to self so we can analyze it later
@@ -285,6 +294,7 @@ class AlertTask(Task):
             for i in self.events:
                 alert = self.onEvent(i, **kwargs)
                 if alert:
+                    alert = self.tagBotNotify(alert)
                     self.log.debug(alert)
                     alertResultES = self.alertToES(alert)
                     self.tagEventsAlert([i], alertResultES)
@@ -296,6 +306,7 @@ class AlertTask(Task):
         if len(self.events) == 0:
             alert = self.onNoEvent(**kwargs)
             if alert:
+                alert = self.tagBotNotify(alert)
                 self.log.debug(alert)
                 alertResultES = self.alertToES(alert)
                 self.alertToMessageQueue(alert)
@@ -312,8 +323,9 @@ class AlertTask(Task):
                 if aggregation['count'] >= threshold:
                     aggregation['config']=config
                     alert = self.onAggregation(aggregation)
-                    self.log.debug(alert)
                     if alert:
+                        alert = self.tagBotNotify(alert)
+                        self.log.debug(alert)
                         alertResultES = self.alertToES(alert)
                         # even though we only sample events in the alert
                         # tag all events as alerted to avoid re-alerting
