@@ -34,7 +34,7 @@ import pytz
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
 from utilities.toUTC import toUTC
 
 #use futures to run in the background
