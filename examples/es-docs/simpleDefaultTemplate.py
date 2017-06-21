@@ -1,16 +1,13 @@
 import requests
-from pyes import ES
 import json
 
-es=ES(("http", "servername", 9200))
-
-#create a default template
-defaultTemplate=r'''
+# create a default template
+defaultTemplate = r'''
 {
     "template" : "*",
     "mappings" : {
       "_default_" : {
-        "dynamic_templates" : [ 
+        "dynamic_templates" : [
             {
                 "string_fields" : {
                     "mapping" : {
@@ -21,7 +18,7 @@ defaultTemplate=r'''
                     "match_mapping_type" : "string",
                     "match" : "*"
                 }
-            } 
+            }
         ],
 
         "properties" : {
@@ -35,7 +32,7 @@ defaultTemplate=r'''
             },
             "summary":{
               "type":"string"
-            },        
+            },
             "details":{
               "properties":{
                 "destinationipaddress":{
@@ -61,7 +58,7 @@ defaultTemplate=r'''
               }
             }
         },
-        
+
         "_all" : {
           "enabled" : true
         }
@@ -70,10 +67,9 @@ defaultTemplate=r'''
 }
 '''
 
-#valid json? 
-templateJson=json.loads(defaultTemplate)
+#valid json?
+templateJson = json.loads(defaultTemplate)
 
-#post it: 
-r=requests.put(url="http://servername:9200/_template/defaulttemplate",data=defaultTemplate)
+#post it:
+r = requests.put(url="http://servername:9200/_template/defaulttemplate", data=defaultTemplate)
 print(r)
-
