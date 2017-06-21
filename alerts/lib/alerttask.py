@@ -323,7 +323,7 @@ class AlertTask(Task):
                         self.saveAlertID(alertResultES)
 
 
-    def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None):
+    def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None, ircchannel=None):
         """
         Create an alert dict
         """
@@ -333,7 +333,8 @@ class AlertTask(Task):
             'summary': summary,
             'category': category,
             'tags': tags,
-            'events': []
+            'events': [],
+            'ircchannel': ircchannel,
         }
         if url:
             alert['url'] = url
