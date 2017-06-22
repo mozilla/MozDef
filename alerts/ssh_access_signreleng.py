@@ -18,7 +18,10 @@ class AlertAuthSignRelengSSH(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=15)
 
-        self.parse_config('ssh_access_signreleng.conf', ['hostfilter', 'users'])
+        self.parse_config('ssh_access_signreleng.conf', ['hostfilter', 'users', 'ircchannel'])
+
+        if self.config.ircchannel == '':
+            self.config.ircchannel = None
 
         search_query.add_must([
             TermMatch('tags', 'releng'),
@@ -57,4 +60,4 @@ class AlertAuthSignRelengSSH(AlertTask):
             targetuser = groups[0]
 
         summary = 'SSH login on releng sensitive infrastructure from {0} on {1} as user {2}'.format(sourceipaddress, targethost, targetuser)
-        return self.createAlertDict(summary, category, tags, [event], severity)
+        return self.createAlertDict(summary, category, tags, [event], severity, ircchannel=self.config.ircchannel)
