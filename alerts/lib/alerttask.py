@@ -208,7 +208,7 @@ class AlertTask(Task):
         # If an alert sets specific ircchannel, then we should probably always notify in mozdefbot
         if 'ircchannel' in alert:
             alert['notify_mozdefbot'] = True
-    return alert
+        return alert
 
     def saveAlertID(self, saved_alert):
         """
