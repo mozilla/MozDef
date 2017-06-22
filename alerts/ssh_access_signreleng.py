@@ -59,5 +59,5 @@ class AlertAuthSignRelengSSH(AlertTask):
         if len(groups) > 0:
             targetuser = groups[0]
 
-        summary = 'SSH login on releng sensitive infrastructure from {0} on {1} as user {2}'.format(sourceipaddress, targethost, targetuser)
+        summary = 'SSH login from {0} on {1} as user {2}'.format(sourceipaddress, targethost, targetuser)
         return self.createAlertDict(summary, category, tags, [event], severity, ircchannel=self.config.ircchannel)
