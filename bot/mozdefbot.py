@@ -309,7 +309,7 @@ class alertConsumer(ConsumerMixin):
                     "alertworker exception: unknown body type received %r" % body)
                 return
 
-            if bodyDict['notify_mozdefbot'] is False:
+            if 'notify_mozdefbot' not in bodyDict or bodyDict['notify_mozdefbot'] is False:
                 # If the alert tells us to not notify, then don't post to IRC
                 message.ack()
                 return
