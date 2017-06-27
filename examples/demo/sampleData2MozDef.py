@@ -32,6 +32,11 @@ from dateutil.parser import parse
 from datetime import date
 import pytz
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
+from utilities.toUTC import toUTC
+
 #use futures to run in the background
 #httpsession = FuturesSession(max_workers=5)
 httpsession = requests.session()
@@ -48,28 +53,6 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 #create a list of logs we can append json to and call for a post when we want.
 logcache=Queue()
-
-
-def toUTC(suspectedDate,localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc=pytz.UTC
-    objDate=None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone
-    if type(suspectedDate) in (str,unicode):
-        objDate=parse(suspectedDate,fuzzy=True)
-    elif type(suspectedDate)==datetime:
-        objDate=suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate=pytz.timezone(localTimeZone).localize(objDate)
-        objDate=utc.normalize(objDate)
-    else:
-        objDate=utc.normalize(objDate)
-    if objDate is not None:
-        objDate=utc.normalize(objDate)
-
-    return objDate
 
 
 def postLogs(logcache):
@@ -106,7 +89,7 @@ def postLogs(logcache):
 def genRandomIPv4():
     #random, IPs
     return '.'.join("%d" % (random.randint(0,254)) for x in range(4))
-    
+
 def genAttackerIPv4():
     #random, but not too random as to allow for alerting about attacks from
     #the same IP.
@@ -114,12 +97,12 @@ def genAttackerIPv4():
              '222.73.115.',
              '116.10.191.',
              '144.0.0.']
-    #change this to non zero according to taste for semi-random-ness 
+    #change this to non zero according to taste for semi-random-ness
     if random.randint(0,10)>= 0:
         return '{0}{1}'.format(random.choice(coreIPs), random.randint(1,2))
     else:
         return '.'.join("%d" % (random.randint(0,254)) for x in range(4))
-    
+
 
 def makeEvents():
     try:
@@ -138,13 +121,13 @@ def makeEvents():
                     del event['utctimestamp']
                 if 'receivedtimestamp' in event.keys():
                     del event['receivedtimestamp']
-                
+
                 #add demo to the tags so it's clear it's not real data.
                 if 'tags' not in event.keys():
                     event['tags'] = list()
-                
+
                 event['tags'].append('demodata')
-                
+
                 #replace potential <randomipaddress> with a random ip address
                 if 'summary' in event.keys() and '<randomipaddress>' in event['summary']:
                     randomIP = genRandomIPv4()
@@ -152,7 +135,7 @@ def makeEvents():
                     if 'details' not in event.keys():
                         event['details'] = dict()
                     event['details']['sourceipaddress'] = randomIP
-                    event['details']['sourceipv4address'] = randomIP                        
+                    event['details']['sourceipv4address'] = randomIP
 
                 #print(event['timestamp'], event['tags'], event['summary'])
 
@@ -171,7 +154,7 @@ def makeEvents():
 
 
     except KeyboardInterrupt as e:
-        sys.exit(1)    
+        sys.exit(1)
 
 def makeAlerts():
     '''
@@ -183,7 +166,7 @@ def makeAlerts():
         if timetoRun > toUTC(datetime.now()):
             #print(timetoRun)
             return
-        
+
         #print(timetoRun, options.lastalert)
         eventfiles = glob.glob(options.alertsglob)
         #pick a random number of events to send
@@ -202,14 +185,14 @@ def makeAlerts():
                     del event['utctimestamp']
                 if 'receivedtimestamp' in event.keys():
                     del event['receivedtimestamp']
-                
+
                 #add demo to the tags so it's clear it's not real data.
                 if 'tags' not in event.keys():
                     event['tags'] = list()
-                
+
                 event['tags'].append('demodata')
                 event['tags'].append('demoalert')
-                
+
                 #replace potential <randomipaddress> with a random ip address
                 if 'summary' in event.keys() and '<randomipaddress>' in event['summary']:
                     randomIP = genRandomIPv4()
@@ -241,8 +224,8 @@ def makeAlerts():
 
 
     except KeyboardInterrupt as e:
-        sys.exit(1)   
-            
+        sys.exit(1)
+
 def makeAttackers():
     '''
     send events that will be correlated into attackers using pre-defined IPs
@@ -253,7 +236,7 @@ def makeAttackers():
         if timetoRun > toUTC(datetime.now()):
             #print(timetoRun)
             return
-        
+
         #print(timetoRun, options.lastalert)
         eventfiles = glob.glob(options.alertsglob)
         #pick a random number of events to send
@@ -272,14 +255,14 @@ def makeAttackers():
                     del event['utctimestamp']
                 if 'receivedtimestamp' in event.keys():
                     del event['receivedtimestamp']
-                
+
                 #add demo to the tags so it's clear it's not real data.
                 if 'tags' not in event.keys():
                     event['tags'] = list()
-                
+
                 event['tags'].append('demodata')
                 event['tags'].append('demoalert')
-                
+
                 #replace potential <randomipaddress> with a random ip address
                 if 'summary' in event.keys() and '<randomipaddress>' in event['summary']:
                     randomIP = genAttackerIPv4()
@@ -311,25 +294,24 @@ def makeAttackers():
 
 
     except KeyboardInterrupt as e:
-        sys.exit(1)   
+        sys.exit(1)
 
 
 
 def initConfig():
-    options.defaulttimezone=getConfig('defaulttimezone','UTC',options.configfile)
     options.url = getConfig('url', 'http://localhost:8080/events/', options.configfile)
     options.eventsglob = getConfig('eventsglob', './sampleevents/events*json', options.configfile)
     options.alertsglob = getConfig('alertsglob', './sampleevents/alert*json', options.configfile)
     options.attackersglob = getConfig('attackersglob', './sampleevents/attacker*json', options.configfile)
     #how many alerts to create
     options.alertscount = getConfig('alertscount', 2, options.configfile)
-    #how many minutes to wait between creating ^ alerts 
+    #how many minutes to wait between creating ^ alerts
     options.alertsminutesinterval = getConfig('alertsminutesinterval', 5, options.configfile)
     options.lastalert = getConfig('lastalert', datetime.now() - timedelta(hours=1), options.configfile)
-    
+
     #how many attackers to create
     options.attackerscount = getConfig('attackers', 1, options.configfile)
-    #how many minutes to wait between creating ^ attackers 
+    #how many minutes to wait between creating ^ attackers
     options.attackersminutesinterval = getConfig('attackersminutesinterval', 5, options.configfile)
     options.lastattacker = getConfig('lastattacker', datetime.now() - timedelta(hours=1), options.configfile)
 
@@ -341,16 +323,16 @@ if __name__ == '__main__':
                       default=sys.argv[0].replace('.py', '.conf'),
                       help="configuration file to use")
     (options, args) = parser.parse_args()
-    initConfig()    
-    
+    initConfig()
+
     sh=logging.StreamHandler(sys.stdout)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
-    
+
     makeEvents()
     makeAlerts()
     makeAttackers()
-    
+
 
     while not logcache.empty():
         try:

@@ -7,6 +7,7 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 #
 # Alert Worker to listen for alerts and call python plugins
 # for user-controlled reaction to alerts.
@@ -24,6 +25,7 @@ from logging.handlers import SysLogHandler
 from operator import itemgetter
 
 logger = logging.getLogger()
+logger.level = logging.INFO
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
@@ -83,7 +85,7 @@ def dict2List(inObj):
                     yield l
             elif isinstance(v, dict):
                 for l in dict2List(v):
-                    yield l                    
+                    yield l
             else:
                 yield v
     else:
@@ -114,6 +116,8 @@ def sendEventToPlugins(anevent, pluginList):
                 sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
                 return anevent
         if send:
+            message_log_str = '{0} received message: ({1}) {2}'.format(plugin[0].__module__, anevent['utctimestamp'], anevent['summary'])
+            logger.info(message_log_str)
             anevent = plugin[0].onMessage(anevent)
 
     return anevent
@@ -231,7 +235,7 @@ def initConfig():
     options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
     options.mqport = getConfig('mqport', 5672, options.configfile)
     # mqack=True sets persistant delivery, False sets transient delivery
-    options.mqack = getConfig('mqack', True, options.configfile)    
+    options.mqack = getConfig('mqack', True, options.configfile)
 
 
 if __name__ == '__main__':

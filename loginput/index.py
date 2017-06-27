@@ -6,6 +6,7 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
+import os
 import sys
 import bottle
 from bottle import debug,route, run, template, response,request,post, default_app
@@ -36,7 +37,7 @@ def bulkindex():
             eventlist=[]
             for i in bulkpost.splitlines():
                 eventlist.append(i)
-                
+
             for i in eventlist:
                 try:
                     #valid json?
@@ -92,7 +93,7 @@ def cefindex():
             return
         #let the message queue worker who gets this know where it was posted
         cefDict['endpoint']='cef'
-        
+
         #post to eventtask exchange
         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
         ensurePublish(cefDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
@@ -120,7 +121,7 @@ def customindex(application):
         #let the message queue worker who gets this know where it was posted
         customDict['endpoint']= application
         customDict['customendpoint'] = True
-        
+
         #post to eventtask exchange
         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
         ensurePublish(customDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
@@ -128,9 +129,6 @@ def customindex(application):
 
 
 def initConfig():
-    #change this to your default zone for when it's not specified
-    options.defaultTimeZone=getConfig('defaulttimezone','US/Pacific',options.configfile)
-    
     options.mqserver=getConfig('mqserver','localhost',options.configfile)
     options.taskexchange=getConfig('taskexchange','eventtask',options.configfile)
     #options.esserver=getConfig('esserver','localhost',options.configfile)
@@ -144,10 +142,10 @@ if __name__ == "__main__":
 else:
     #get config info:
     parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py','.conf'), help="configuration file to use")
+    parser.add_option("-c", dest='configfile' , default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'), help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
-    
+
     #connect and declare the message queue/kombu objects.
     connString='amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,options.mqpassword,options.mqserver,options.mqport)
     mqConn=Connection(connString)
@@ -157,6 +155,6 @@ else:
     eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange)
     eventTaskQueue(mqConn).declare()
     mqproducer = mqConn.Producer(serializer='json')
-    
+
     application = default_app()
 

@@ -16,7 +16,6 @@ if (Meteor.isServer) {
         'loadKibanaDashboards': loadKibanaDashboards,
         'blockip': blockIP,
         'ipwhois': ipwhois,
-        'ipcif': ipcif,
         'ipdshield': ipdshield,
         'ipintel': ipintel,
         'verisstats': verisstats,
@@ -86,19 +85,6 @@ if (Meteor.isServer) {
         }
     }
 
-    function ipcif(ipaddress){
-        //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipcifquery/');
-        var ipcifResponse = HTTP.post(mozdef.rootAPI + '/ipcifquery/',{data: {'ipaddress':ipaddress}});
-
-        if ( typeof ipcifResponse == 'undefined') {
-            console.log("ipcif: no response from server")
-            return "";
-        } else {
-            //console.log(ipdshieldResponse);
-            return ipcifResponse;
-        }
-    }
-
     function ipintel(ipaddress){
         //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipintel/');
         var ipintelResponse = HTTP.post(mozdef.rootAPI + '/ipintel/',{data: {'ipaddress':ipaddress}});
@@ -142,7 +128,7 @@ if (Meteor.isServer) {
         //console.log('Looking up  plugins registered for ' + endpoint + ' from ' + mozdef.rootAPI + '/plugins/' + endpoint);
         if ( typeof endpoint == 'undefined') {
             var response = HTTP.get(mozdef.rootAPI + '/plugins/');
-            
+
         } else {
             var response = HTTP.get(mozdef.rootAPI + '/plugins/' + endpoint);
         }

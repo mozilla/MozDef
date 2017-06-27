@@ -35,9 +35,7 @@ License
 Contact
 =======
 
-* infosec+mozdef INSERTAT mozilla.com
-* Jeff Bryner, @0x7eff
-* Brandon Myers, @pwnbus
-* Alicia Smith, @phrozyn
-* Michal` Purzynski, @MichalPurzynski
+* opsec+mozdef INSERTAT mozilla.com
+* Jeff Bryner, jbryner INSERTAT mozilla.com @0x7eff
 * Anthony Verez, @netantho
+* https://lists.mozilla.org/listinfo/dev-mozdef

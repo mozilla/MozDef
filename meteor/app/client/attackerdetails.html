@@ -6,6 +6,7 @@ Copyright (c) 2014 Mozilla Corporation
 
 Contributors:
 Jeff Bryner jbryner@mozilla.com
+Brandon Myers bmyers@mozilla.com
 -->
 
 <template name="attackerdetails">
@@ -57,18 +58,6 @@ Jeff Bryner jbryner@mozilla.com
             </tbody>
         </table>
     </div>
-    <div class="row center">
-    <caption><h5>Events</h5></caption>
-    <table class="table table-reactive table-hover table-condensed" id="attacker-events-table">
-        <tbody class="table-striped">
-            {{#each this.events}}
-                {{>attacker_event}}
-            {{/each}}
-        </tbody>
-    </table>
-    </div>
-    
-   
 </div>
 
 </template>
@@ -76,7 +65,7 @@ Jeff Bryner jbryner@mozilla.com
 
 <!--each individual alert -->
 <template name="attacker_alert">
-    
+
         <tr>
             <td><a href="{{getAlertURL _id}}" target="_blank">MozDef</a></td>
             <td>{{utctimestamp}}</td>
@@ -86,18 +75,4 @@ Jeff Bryner jbryner@mozilla.com
         </tr>
 
 </template>
-
-<!--each individual event -->
-<template name="attacker_event">
-
-        <tr>
-            <td>{{documentindex}}</td>
-            <td>{{documentid}}</td>
-            <td>{{documenttype}}</td>
-            <td>{{documentsource.summary}}</td>
-            <td>{{>eventdetails}}</td>
-        </tr>
-
-</template>
-
 

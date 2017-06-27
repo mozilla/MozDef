@@ -12,28 +12,28 @@ import bottle
 import json
 import netaddr
 import os
-import pyes
-import pytz
 import pynsive
 import random
 import re
 import requests
 import sys
 import socket
-from bottle import debug, route, run, response, request, default_app, post
+from bottle import route, run, response, request, default_app, post
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
-from elasticutils import S
-from dateutil.parser import parse
 from ipwhois import IPWhois
-from bson.son import SON
 from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
+from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
+
+from utilities.toUTC import toUTC
+
 options = None
 pluginList = list()   # tuple of module,registration dict,priority
-
 
 
 def enable_cors(fn):
@@ -172,29 +172,6 @@ def ipintel():
     sendMessgeToPlugins(request, response, 'ipintel')
     return response
 
-
-@post('/ipcifquery', methods=['POST'])
-@post('/ipcifquery/', methods=['POST'])
-@enable_cors
-def index():
-    '''return a json version of cif query for an ip address'''
-    if request.body:
-        arequest = request.body.read()
-        request.body.close()
-    # valid json?
-    try:
-        requestDict = json.loads(arequest)
-    except ValueError as e:
-        response.status = 500
-
-    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
-        response.content_type = "application/json"
-        response.body = getIPCIF(requestDict['ipaddress'])
-    else:
-        response.status = 500
-
-    sendMessgeToPlugins(request, response, 'ipcifquery')
-    return response
 
 @post('/ipdshieldquery', methods=['POST'])
 @post('/ipdshieldquery/', methods=['POST'])
@@ -481,26 +458,6 @@ def sendMessgeToPlugins(request, response, endpoint):
             (request, response) = plugin[5].onMessage(request, response)
 
 
-def toUTC(suspectedDate, localTimeZone="US/Pacific"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def isIPv4(ip):
     try:
         # netaddr on it's own considers 1 and 0 to be valid_ipv4
@@ -515,6 +472,7 @@ def isIPv4(ip):
     except:
         return False
 
+
 def esLdapResults(begindateUTC=None, enddateUTC=None):
     '''an ES query/facet to count success/failed logins'''
     resultsList = list()
@@ -524,76 +482,81 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
     if enddateUTC is None:
         enddateUTC = datetime.now()
         enddateUTC = toUTC(enddateUTC)
-    try:
-        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-            from_value=begindateUTC, to_value=enddateUTC))
-        q = pyes.MatchAllQuery()
-        q = pyes.FilteredQuery(q, qDate)
-        q = pyes.FilteredQuery(q, pyes.TermFilter('tags', 'ldap'))
-        q = pyes.FilteredQuery(q,
-            pyes.TermFilter('details.result', 'LDAP_INVALID_CREDENTIALS'))
-        q2 = q.search()
-        q2.facet.add_term_facet('details.result')
-        q2.facet.add_term_facet('details.dn', size=20)
-        results = es.search(q2, indices='events')
 
-        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com',
-            'mozillafoundation.org', 'org')
-        for t in results.facets['details.dn'].terms:
-            if t['term'] in stoplist:
+    try:
+        es_client = ElasticsearchClient(list('{0}'.format(s) for s in options.esservers))
+        search_query = SearchQuery()
+        range_match = RangeMatch('utctimestamp', begindateUTC, enddateUTC)
+
+        search_query.add_must(range_match)
+        search_query.add_must(TermMatch('tags', 'ldap'))
+
+        search_query.add_must(TermMatch('details.result', 'LDAP_INVALID_CREDENTIALS'))
+
+        search_query.add_aggregation(Aggregation('details.result'))
+        search_query.add_aggregation(Aggregation('details.dn'))
+
+        results = search_query.execute(es_client, indices=['events'])
+
+        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com', 'mozillafoundation.org', 'org', 'mozillafoundation')
+
+        for t in results['aggregations']['details.dn']['terms']:
+            if t['key'] in stoplist:
                 continue
-            #print(t['term'])
+            #print(t['key'])
             failures = 0
             success = 0
-            dn = t['term']
+            dn = t['key']
 
-            #re-query with the terms of the details.dn
-            qt = pyes.MatchAllQuery()
-            qt = pyes.FilteredQuery(qt, qDate)
-            qt = pyes.FilteredQuery(qt, pyes.TermFilter('tags', 'ldap'))
-            qt = pyes.FilteredQuery(qt,
-                pyes.TermFilter('details.dn', t['term']))
-            qt2 = qt.search()
-            qt2.facet.add_term_facet('details.result')
-            results = es.search(qt2)
-            #sys.stdout.write('{0}\n'.format(results.facets['details.result'].terms))
+            details_query = SearchQuery()
+            details_query.add_must(range_match)
+            details_query.add_must(TermMatch('tags', 'ldap'))
+            details_query.add_must(TermMatch('details.dn', dn))
+            details_query.add_aggregation(Aggregation('details.result'))
 
-            for t in results.facets['details.result'].terms:
-                #print(t['term'],t['count'])
-                if t['term'] == 'LDAP_SUCCESS':
+            results = details_query.execute(es_client)
+
+            for t in results['aggregations']['details.result']['terms']:
+                #print(t['key'],t['count'])
+                if t['key'].upper() == 'LDAP_SUCCESS':
                     success = t['count']
-                if t['term'] == 'LDAP_INVALID_CREDENTIALS':
+                if t['key'].upper() == 'LDAP_INVALID_CREDENTIALS':
                     failures = t['count']
             resultsList.append(dict(dn=dn, failures=failures,
                 success=success, begin=begindateUTC.isoformat(),
                 end=enddateUTC.isoformat()))
 
         return(json.dumps(resultsList))
-    except pyes.exceptions.NoServerAvailable:
-        sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
+    except Exception as e:
+        sys.stderr.write('Error trying to get ldap results: {0}\n'.format(e))
 
 
 def kibanaDashboards():
+    resultsList = []
     try:
-        resultsList = []
-        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-        r = es.search(pyes.Search(pyes.MatchAllQuery(), size=100),
-            'kibana-int', 'dashboard')
-        if r:
-            for dashboard in r:
-                dashboardJson = json.loads(dashboard.dashboard)
-                resultsList.append({
-                    'name': dashboardJson['title'],
-                    'url': "%s/%s/%s" % (options.kibanaurl,
-                        "index.html#/dashboard/elasticsearch",
-                        dashboardJson['title'])
-                })
-            return json.dumps(resultsList)
-        else:
-            sys.stderr.write('No Kibana dashboard found\n')
-    except pyes.exceptions.NoServerAvailable:
-        sys.stderr.write('Elastic Search server could not be reached, check network connectivity\n')
+        es_client = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('_type', 'dashboard'))
+        results = search_query.execute(es_client, indices=['.kibana'])
+
+        for dashboard in results['hits']:
+            resultsList.append({
+                'name': dashboard['_source']['title'],
+                'url': "%s/%s/%s" % (options.kibanaurl,
+                "dashboard",
+                dashboard['_source']['title'])
+            })
+
+    except ElasticsearchInvalidIndex as e:
+        sys.stderr.write('Kibana dashboard index not found: {0}\n'.format(e))
+
+    except Exception as e:
+        sys.stderr.write('Kibana dashboard received error: {0}\n'.format(e))
+
+    if resultsList == []:
+        sys.stderr.write('No Kibana dashboard found\n')
+
+    return json.dumps(resultsList)
 
 
 def getWhois(ipaddress):
@@ -608,31 +571,6 @@ def getWhois(ipaddress):
     except Exception as e:
         sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
 
-
-def getIPCIF(ipaddress):
-    ''' query a CIF service for information on this IP address per:
-        https://code.google.com/p/collective-intelligence-framework/wiki/API_HTTP_v1
-    '''
-    try:
-        resultsList = []
-        url='{0}api?apikey={1}&limit=20&confidence=65&q={2}'.format(options.cifhosturl,
-                                             options.cifapikey,
-                                             ipaddress)
-        headers = {'Accept': 'application/json'}
-        r=requests.get(url=url,verify=False,headers=headers)
-        if r.status_code == 200:
-            # we get a \n delimited list of json entries
-            cifjsons=r.text.split('\n')
-            for c in cifjsons:
-                # test for valid json
-                try:
-                    resultsList.append(json.loads(c))
-                except ValueError:
-                    pass
-            return json.dumps(resultsList)
-
-    except Exception as e:
-        sys.stderr.write('Error looking up CIF results for {0}: {1}\n'.format(ipaddress, e))
 
 def verisSummary(verisRegex=None):
     try:
@@ -667,10 +605,6 @@ def verisSummary(verisRegex=None):
             sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
 
 def initConfig():
-    #change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
-                                        options.configfile)
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
@@ -678,11 +612,6 @@ def initConfig():
                                   'http://localhost:9090',
                                   options.configfile)
 
-    # options for your CIF service
-    options.cifapikey = getConfig('cifapikey', '', options.configfile)
-    options.cifhosturl = getConfig('cifhosturl',
-                                   'http://localhost/',
-                                   options.configfile)
     # mongo connectivity options
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
@@ -701,7 +630,7 @@ if __name__ == "__main__":
 else:
     parser = OptionParser()
     parser.add_option("-c", dest='configfile',
-        default=sys.argv[0].replace('.py', '.conf'),
+        default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()

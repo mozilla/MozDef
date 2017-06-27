@@ -17,7 +17,6 @@
 import json
 import math
 import os
-import pyes
 import pytz
 import pynsive
 import re
@@ -33,8 +32,13 @@ from boto.sqs.connection import SQSConnection
 import boto.sqs
 from boto.sqs.message import RawMessage
 import base64
-from threading import Timer
+import kombu
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 # running under uwsgi?
 try:
@@ -65,33 +69,6 @@ def digits(n):
     else:
         digits = int(math.log10(-n))+2
     return digits
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone
-
-    if type(suspectedDate) == datetime:
-        objDate = suspectedDate
-    elif isNumber(suspectedDate):
-        # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
-        epochDivisor = int(str(1) + '0'*(digits(suspectedDate) % 10))
-        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor))
-    elif type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate.isoformat()
 
 
 def removeDictAt(aDict):
@@ -160,7 +137,7 @@ def keyMapping(aDict):
     # returndict['original']=aDict
 
     # set the timestamp when we received it, i.e. now
-    returndict['receivedtimestamp'] = toUTC(datetime.now())
+    returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
     returndict['mozdefhostname'] = options.mozdefhostname
     try:
         for k, v in aDict.iteritems():
@@ -178,8 +155,8 @@ def keyMapping(aDict):
                 returndict[u'details']['payload'] = toUnicode(v)
 
             if k in ('eventtime', 'timestamp', 'utctimestamp'):
-                returndict[u'utctimestamp'] = toUTC(v)
-                returndict[u'timestamp'] = toUTC(v)
+                returndict[u'utctimestamp'] = toUTC(v).isoformat()
+                returndict[u'timestamp'] = toUTC(v).isoformat()
 
             if k in ('hostname', 'source_host', 'host'):
                 returndict[u'hostname'] = toUnicode(v)
@@ -248,18 +225,19 @@ def keyMapping(aDict):
 
         if 'utctimestamp' not in returndict.keys():
             # default in case we don't find a reasonable timestamp
-            returndict['utctimestamp'] = toUTC(datetime.now())
+            returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
     except Exception as e:
-        sys.stderr.write('esworker exception normalizing the message %r\n' % e)
+        sys.stderr.write(
+            'esworker.sqs exception normalizing the message %r\n' % e)
         return None
 
     return returndict
 
 
-def esConnect(conn):
+def esConnect():
     '''open or re-open a connection to elastic search'''
-    return pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)), bulk_size=options.esbulksize)
+    return ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)), options.esbulksize)
 
 
 class taskConsumer(object):
@@ -270,9 +248,9 @@ class taskConsumer(object):
         self.taskQueue = taskQueue
 
         if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the pyes bulker even if it's not full
+            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
             # to prevent events from sticking around an idle worker
-            Timer(options.esbulktimeout, self.flush_es_bulk).start()
+            self.esConnection.start_bulk_timer()
 
     def run(self):
         # Boto expects base64 encoded messages - but if the writer is not boto it's not necessarily base64 encoded
@@ -300,13 +278,24 @@ class taskConsumer(object):
                             continue
 
                     event = dict()
-                    event['tags'] = [options.taskexchange]
-                    event['details'] = msgbody
-                    if event['details'].has_key('time'):
-                        event['utctimestamp'] = toUTC(event['details']['time'])
+                    event = msgbody
 
-                    if event['details'].has_key('message'):
-                        event['summary'] = event['details']['message']
+                    # Was this message sent by fluentd-sqs
+                    fluentd_sqs_specific_fields = {
+                        'az', 'instance_id', '__tag'}
+                    if fluentd_sqs_specific_fields.issubset(
+                            set(msgbody.keys())):
+                        # Until we can influence fluentd-sqs to set the
+                        # 'customendpoint' key before submitting to SQS, we'll
+                        # need to do it here
+                        # TODO : Change nubis fluentd output to include
+                        # 'customendpoint'
+                        event['customendpoint'] = True
+
+                    if 'tags' in event:
+                        event['tags'].extend([options.taskexchange])
+                    else:
+                        event['tags'] = [options.taskexchange]
 
                     #process message
                     self.on_message(event, msg)
@@ -320,18 +309,6 @@ class taskConsumer(object):
             except ValueError as e:
                 sys.stdout.write('Exception while handling message: %r'%e)
                 sys.exit(1)
-
-
-    def flush_es_bulk(self):
-        '''if we are bulk posting to elastic search force a bulk post even if we don't have
-           enough items to trigger a post normally.
-           This allows you to have lots of workers and not wait for events for too long if
-           there isn't a steady event stream while still retaining the throughput capacity
-           that bulk processing affords.
-        '''
-        # sys.stderr.write('mule {0} flushing bulk elastic search posts\n'.format(self.muleid))
-        self.esConnection.flush_bulk(True)
-        Timer(options.esbulktimeout, self.flush_es_bulk).start()
 
     def on_message(self, body, message):
         #print("RECEIVED MESSAGE: %r" % (body, ))
@@ -350,11 +327,15 @@ class taskConsumer(object):
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
-                    sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                    sys.stderr.write(
+                        "esworker.sqs exception: unknown body type received "
+                        "%r\n" % body)
                     #message.ack()
                     return
             else:
-                sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                sys.stderr.write(
+                    "esworker.sqs exception: unknown body type received "
+                    "%r\n" % body)
                 #message.ack()
                 return
 
@@ -389,33 +370,28 @@ class taskConsumer(object):
                         metadata['doc_type'] = normalizedDict['details']['deviceproduct']
 
             try:
+                bulk = False
                 if options.esbulksize != 0:
-                    res = self.esConnection.index(
-                        index=metadata['index'],
-                        id=metadata['id'],
-                        doc_type=metadata['doc_type'],
-                        doc=jbody,
-                        bulk=True
-                    )
-                else:
-                    res = self.esConnection.index(
-                        index=metadata['index'],
-                        id=metadata['id'],
-                        doc_type=metadata['doc_type'],
-                        doc=jbody,
-                        bulk=False
-                    )
+                    bulk = True
 
-            except (pyes.exceptions.NoServerAvailable, pyes.exceptions.InvalidIndexNameException) as e:
+                res = self.esConnection.save_object(
+                    index=metadata['index'],
+                    doc_id=metadata['id'],
+                    doc_type=metadata['doc_type'],
+                    body=jbody,
+                    bulk=bulk
+                )
+
+            except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
                 try:
-                    self.esConnection = esConnect(None)
+                    self.esConnection = esConnect()
                     #message.requeue()
                     return
                 except kombu.exceptions.MessageStateError:
                     # state may be already set.
                     return
-            except pyes.exceptions.ElasticSearchException as e:
+            except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
                 try:
                     sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
@@ -427,7 +403,8 @@ class taskConsumer(object):
 
             #message.ack()
         except ValueError as e:
-            sys.stderr.write("esworker exception in events queue %r\n" % e)
+            sys.stderr.write(
+                "esworker.sqs exception in events queue %r\n" % e)
 
 
 def registerPlugins():
@@ -590,7 +567,7 @@ def main():
                                       aws_access_key_id=options.accesskey,
                                       aws_secret_access_key=options.secretkey)
     # attach to the queue
-    eventTaskQueue = mqConn.create_queue(options.taskexchange)
+    eventTaskQueue = mqConn.get_queue(options.taskexchange)
 
     # consume our queue
     taskConsumer(mqConn, eventTaskQueue, es).run()
@@ -598,9 +575,6 @@ def main():
 
 
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
-
     #capture the hostname
     options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
 
@@ -651,7 +625,7 @@ if __name__ == '__main__':
     initConfig()
 
     # open ES connection globally so we don't waste time opening it per message
-    es = esConnect(None)
+    es = esConnect()
 
     # force a check for plugins and establish the plugin list
     pluginList = list()

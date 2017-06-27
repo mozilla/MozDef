@@ -1,14 +1,14 @@
 {
-	"mozdef": {
-		"url": "http://localhost:8080/events"
-	},
-	//Generate on https://auth0.com/docs/api/management/v2 (top left TOKEN GENERATOR)
-	"auth0": {
-		"reqnr": 100,
-		"token": "",
-		"url": "https://<YOU>.auth0.com/api/v2/logs"
-	},
-	"state_file": "auth02mozdef.state",
-	//Sends msgs to syslog instead of MozDef mainly
-	"DEBUG": False
+  "mozdef": {
+    "url": "http://localhost:8080/events"
+  },
+  //Generate on https://manage{-dev}.{mozilla.}auth0.com/#/apis (Management API)
+  "auth0": {
+    "reqnr": 100,
+    "token": "<add_token>",
+    "url": "<add_url>"
+  },
+  "state_file": "/opt/mozdef/envs/mozdef/cron/auth02mozdef.state",
+  //Sends msgs to syslog instead of MozDef mainly
+  "DEBUG": False
 }

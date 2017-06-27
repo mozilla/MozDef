@@ -1,0 +1,11 @@
+/var/log/mozdef/supervisord/*.log
+{
+ copytruncate
+ dateext
+ rotate 17
+ weekly
+ missingok
+ notifempty
+ compress
+ delaycompress
+}

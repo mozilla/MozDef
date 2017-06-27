@@ -14,17 +14,16 @@ Anthony Verez averez@mozilla.com
     <link href="/css/bootstrap.css" rel="stylesheet" >
     <link href="/css/mozdef.css" rel="stylesheet" media="screen,projection,tv">
     <link href="/css/dropdowns.css" rel="stylesheet" media="screen,projection,tv">
-
 <title>mozdef::mozilla defense platform</title>
 </head>
 <body>
-  
-</body> 
+
+</body>
 <!--begin layout templates-->
 <!--the main, simple layout for the router to target-->
 <template name="layout">
     {{> menu}}
-      
+
         {{#if loggingIn}}
                 <div class="row center">
                     <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
@@ -32,7 +31,7 @@ Anthony Verez averez@mozilla.com
                        <strong>loading</strong>
                    </div>
                 </div>
-        {{else}}  
+        {{else}}
             {{#if currentUser}}
                 {{>yield}}
             {{else}}
@@ -45,7 +44,7 @@ Anthony Verez averez@mozilla.com
             {{/if}}
         {{/if}}
 
-       
+
 
 </template>
 

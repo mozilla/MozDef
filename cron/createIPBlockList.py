@@ -8,21 +8,20 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-import calendar
+import boto
+import boto.s3
 import logging
-import pyes
-import pytz
-import random
 import netaddr
 import sys
-from bson.son import SON
 from datetime import datetime
 from datetime import timedelta
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
 from pymongo import MongoClient
-from pymongo import collection
+
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -47,34 +46,20 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone    
-    if type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
 def aggregateIPs(attackers):
-    iplist=[]
-    ips=attackers.aggregate([
-        {"$sort": {"lastseentimestamp":-1}},
-        {"$match": {"category":options.category}},
-        {"$match": {"indicators.ipv4address":{"$exists": True}}},
-        {"$group": {"_id": {"ipv4address":"$indicators.ipv4address"}}},
+    iplist = []
+
+    # We don't want to block ips forever,
+    # so only care about the ips the past 3 months
+    threshold_days = 30 * 3
+    timelimit = datetime.now() - timedelta(days=threshold_days)
+
+    ips = attackers.aggregate([
+        {"$sort": {"lastseentimestamp": -1}},
+        {"$match": {"category": options.category}},
+        {"$match": {"lastseentimestamp": {"$gte": timelimit}}},
+        {"$match": {"indicators.ipv4address": {"$exists": True}}},
+        {"$group": {"_id": {"ipv4address": "$indicators.ipv4address"}}},
         {"$unwind": "$_id.ipv4address"},
         {"$limit": options.iplimit}
     ])
@@ -83,20 +68,29 @@ def aggregateIPs(attackers):
         for i in ips['result']:
             whitelisted = False
             logger.debug('working {0}'.format(i))
-            ipcidr=netaddr.IPNetwork(i['_id']['ipv4address'])
+            ip = i['_id']['ipv4address']
+            ipcidr=netaddr.IPNetwork(ip)
             if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
-                for i in options.ipwhitelist:
-                    if ipcidr in i:
-                        logger.debug('whitelisted' + str(ipcidr))
+                for whitelist_range in options.ipwhitelist:
+                    whitelist_network = netaddr.IPNetwork(whitelist_range)
+                    if ipcidr in whitelist_network:
+                        logger.debug(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
                         whitelisted = True
 
                 #strip any host bits 192.168.10/24 -> 192.168.0/24
                 ipcidrnet=str(ipcidr.cidr)
-                if ipcidrnet not in iplist and not whitelisted: 
+                if ipcidrnet not in iplist and not whitelisted:
                     iplist.append(ipcidrnet)
             else:
                 logger.debug('invalid:' + ip)
     return iplist
+
+
+def parse_network_list(network_list_location):
+    networks = []
+    with open(network_list_location, "r") as text_file:
+        networks = text_file.read().rstrip().split("\n")
+    return networks
 
 
 def main():
@@ -120,8 +114,6 @@ def main():
 
 
 def initConfig():
-    #change this to your default timezone
-    options.defaulttimezone=getConfig('defaulttimezone','UTC',options.configfile)
     # output our log to stdout or syslog
     options.output = getConfig('output', 'stdout', options.configfile)
     # syslog hostname
@@ -136,19 +128,45 @@ def initConfig():
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
     # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
-    options.ipwhitelist = list()
-    for i in list(getConfig('ipwhitelist', '127.0.0.1/32', options.configfile).split(',')):
-        options.ipwhitelist.append(netaddr.IPNetwork(i))
-    
+    options.network_list_file = getConfig('network_list_file', '', options.configfile)
+    options.ipwhitelist = parse_network_list(options.network_list_file)
+
     # Output File Name
     options.outputfile = getConfig('outputfile', 'ipblocklist.txt', options.configfile)
-    
+
     # Category to choose
     options.category = getConfig('category', 'bruteforcer', options.configfile)
-    
+
     # Max IPs to emit
     options.iplimit = getConfig('iplimit', 1000, options.configfile)
 
+    # AWS creds
+    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to mozilla_infosec_blocklist
+    options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
+    options.aws_bucket_name=getConfig('aws_bucket_name','',options.configfile)
+    options.aws_document_key_name=getConfig('aws_document_key_name','',options.configfile)
+
+
+def s3_upload_file(file_path, bucket_name, key_name):
+    """
+    Upload a file to the given s3 bucket and return a template url.
+    """
+    conn = boto.connect_s3(aws_access_key_id=options.aws_access_key_id,aws_secret_access_key=options.aws_secret_access_key)
+    try:
+        bucket = conn.get_bucket(bucket_name, validate=False)
+    except boto.exception.S3ResponseError as e:
+        conn.create_bucket(bucket_name)
+        bucket = conn.get_bucket(bucket_name, validate=False)
+
+
+    key = boto.s3.key.Key(bucket)
+    key.key = key_name
+    key.set_contents_from_filename(file_path)
+
+    key.set_acl('public-read')
+    url = "https://s3.amazonaws.com/{}/{}".format(bucket.name, key.name)
+    print( "URL: {}".format(url))
+    return url
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -161,3 +179,4 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
+    s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)

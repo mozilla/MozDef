@@ -7,7 +7,7 @@ Web Interface
 
 MozDef uses the `Meteor framework`_ for the web interface and bottle.py for the REST API.
 For authentication, MozDef ships with native support for `Persona`_.
-Meteor (the underlying UI framework) also supports `many authentication options`_ including google, github, twitter, facebook, oath, native accounts, etc.
+Meteor (the underlying UI framework) supports `many authentication options`_ including google, github, twitter, facebook, oath, native accounts, etc.
 
 .. _Meteor framework: https://www.meteor.com/
 .. _Persona: https://login.persona.org/about
@@ -50,7 +50,7 @@ We have `some configuration snippets`_
 .. _logstash: http://logstash.net/
 .. _native python code: https://github.com/gdestuynder/mozdef_lib
 .. _AWS cloudtrail: https://aws.amazon.com/cloudtrail/
-.. _some configuration snippets: https://github.com/jeffbryner/MozDef/tree/master/examples
+.. _some configuration snippets: https://github.com/mozilla/MozDef/tree/master/examples
 
 What should I log?
 ******************
@@ -180,6 +180,9 @@ Mandatory Fields
 |            | WARNING, ERROR, CRITICAL, ALERT,    |                                   |
 |            | EMERGENCY                           |                                   |
 +------------+-------------------------------------+-----------------------------------+
+| source     | Source of the event (file name,     | /var/log/syslog/2014.01.02.log    |
+|            | system name, component name)        |                                   |
++------------+-------------------------------------+-----------------------------------+
 | summary    | Short human-readable version of the | john login attempts over          |
 |            | event suitable for IRC, SMS, etc.   | threshold, account locked         |
 +------------+-------------------------------------+-----------------------------------+
@@ -266,8 +269,6 @@ There are two types of alerts:
 * simple alerts that consider events on at a time. For example you may want to get an alert everytime a single LDAP modification is detected.
 * aggregation alerts allow you to aggregate events on the field of your choice. For example you may want to alert when more than 3 login attempts failed for the same username.
 
-To narrow the events your alert sees, you need to specify filters. You can either use `pyes`_ to do that or load them from a Kibana dashboard.
-
 You'll find documented examples in the `alerts`_ folder.
 
 Once you've written your alert, you need to configure it in celery to be launched periodically.
@@ -277,5 +278,5 @@ If you have a ``AlertBruteforceSsh`` class in a ``alerts/bruteforce_ssh.py`` fil
 		'bruteforce_ssh.AlertBruteforceSsh': crontab(minute='*/1'),
 	}
 
-.. _alerts: https://github.com/jeffbryner/MozDef/tree/master/alerts
-.. _pyes: http://pyes.readthedocs.org/
+.. _alerts: https://github.com/mozilla/MozDef/tree/master/alerts
+.. _query_models: https://github.com/mozilla/MozDef/tree/master/lib/query_models

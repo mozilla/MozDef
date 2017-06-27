@@ -3,46 +3,30 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 import collections
 import json
 import kombu
-import pytz
-import pyes
+import os
+import sys
 
+from configlib import getConfig, OptionParser
 from datetime import datetime
-from datetime import timedelta
-from dateutil.parser import parse
 from collections import Counter
 from celery import Task
 from celery.utils.log import get_task_logger
-from config import RABBITMQ, ES, OPTIONS
+from config import RABBITMQ, ES
 
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone= OPTIONS['defaulttimezone']
-    if type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+from query_models import ExistsMatch
 
 
 # utility functions used by AlertTask.mostCommon
@@ -82,11 +66,15 @@ def getValueByPath(input_dict, path_string):
 
 class AlertTask(Task):
 
+    abstract = True
+
     def __init__(self):
         self.alert_name = self.__class__.__name__
-        self.filter = None
-        self.begindateUTC = None
-        self.enddateUTC = None
+        self.main_query = None
+
+        # Used to store any alerts that were thrown
+        self.alert_ids = []
+
         # List of events
         self.events = None
         # List of aggregations
@@ -100,9 +88,19 @@ class AlertTask(Task):
         self._configureKombu()
         self._configureES()
 
+        self.event_indices = ['events', 'events-previous']
+
     @property
     def log(self):
         return get_task_logger('%s.%s' % (__name__, self.alert_name))
+
+    def parse_config(self, config_filename, config_keys):
+        myparser = OptionParser()
+        self.config = None
+        (self.config, args) = myparser.parse_args([])
+        for config_key in config_keys:
+            temp_value = getConfig(config_key, '', config_filename)
+            setattr(self.config, config_key, temp_value)
 
     def _configureKombu(self):
         """
@@ -121,27 +119,24 @@ class AlertTask(Task):
                 type='topic',
                 durable=True)
             self.alertExchange(self.mqConn).declare()
-            alertQueue = kombu.Queue(RABBITMQ['alertqueue'],
-                exchange=self.alertExchange)
+            alertQueue = kombu.Queue(RABBITMQ['alertqueue'], exchange=self.alertExchange)
             alertQueue(self.mqConn).declare()
             self.mqproducer = self.mqConn.Producer(serializer='json')
             self.log.debug('Kombu configured')
         except Exception as e:
             self.log.error('Exception while configuring kombu for alerts: {0}'.format(e))
 
-
     def _configureES(self):
         """
-        Configure pyes for elasticsearch
+        Configure elasticsearch client
         """
         try:
-            self.es = pyes.ES(ES['servers'])
+            self.es = ElasticsearchClient(ES['servers'])
             self.log.debug('ES configured')
         except Exception as e:
             self.log.error('Exception while configuring ES for alerts: {0}'.format(e))
 
-
-    def mostCommon(self, listofdicts,dictkeypath):
+    def mostCommon(self, listofdicts, dictkeypath):
         """
             Given a list containing dictionaries,
             return the most common entries
@@ -194,121 +189,54 @@ class AlertTask(Task):
         Send alert to elasticsearch
         """
         try:
-            res = self.es.index(index='alerts', doc_type='alert', doc=alertDict)
+            res = self.es.save_alert(body=alertDict)
             self.log.debug('alert sent to ES')
             self.log.debug(res)
             return res
         except Exception as e:
             self.log.error('Exception while pushing alert to ES: {0}'.format(e))
 
+    def tagBotNotify(self, alert):
+        """
+            Tag alert to be excluded based on severity
+            If 'ircchannel' is set in an alert, we automatically notify mozdefbot
+        """
+        alert['notify_mozdefbot'] = True
+        if alert['severity'] == 'NOTICE' or alert['severity'] == 'INFO':
+            alert['notify_mozdefbot'] = False
 
-    def filtersManual(self, date_timedelta, must=[], should=[], must_not=[]):
+        # If an alert sets specific ircchannel, then we should probably always notify in mozdefbot
+        if 'ircchannel' in alert:
+            alert['notify_mozdefbot'] = True
+        return alert
+
+    def saveAlertID(self, saved_alert):
+        """
+        Save alert to self so we can analyze it later
+        """
+        self.alert_ids.append(saved_alert['_id'])
+
+    def filtersManual(self, query):
         """
         Configure filters manually
 
-        date_timedelta is a dict in timedelta format
-        see https://docs.python.org/2/library/datetime.html#timedelta-objects
-
-        must, should and must_not are pyes filter objects lists
-        see http://pyes.readthedocs.org/en/latest/references/pyes.filters.html
-
+        query is a search query object with date_timedelta populated
 
         """
-        self.begindateUTC = toUTC(datetime.now() - timedelta(**date_timedelta))
-        self.enddateUTC = toUTC(datetime.now())
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-            from_value=self.begindateUTC, to_value=self.enddateUTC))
-        q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
 
-        #Don't fire on already alerted events
-        if pyes.ExistsFilter('alerttimestamp') not in must_not:
-            must_not.append(pyes.ExistsFilter('alerttimestamp'))
+        # Don't fire on already alerted events
+        if ExistsMatch('alerttimestamp') not in query.must_not:
+            query.add_must_not(ExistsMatch('alerttimestamp'))
 
-        must.append(qDate)
-        q.filters.append(pyes.BoolFilter(
-            must=must,
-            should=should,
-            must_not=must_not))
-        self.filter = q
-
-
-    def filtersFromKibanaDash(self, fp, date_timedelta):
-        """
-        Import filters from a kibana dashboard
-
-        fp is the file path of the json file
-
-        date_timedelta is a dict in timedelta format
-        see https://docs.python.org/2/library/datetime.html#timedelta-objects
-        """
-        f = open(fp)
-        data = json.load(f)
-        must = []
-        should = []
-        must_not = []
-        for filtid in data['services']['filter']['list'].keys():
-            filt = data['services']['filter']['list'][filtid]
-            if filt['active'] and 'query' in filt.keys():
-                value = filt['query'].split(':')[-1]
-                fieldname = filt['query'].split(':')[0].split('.')[-1]
-                # self.log.info(fieldname)
-                # self.log.info(value)
-
-                # field: fieldname
-                # query: value
-                if 'field' in filt.keys():
-                    fieldname = filt['field']
-                    value = filt['query']
-                    if '\"' in value:
-                        value = value.split('\"')[1]
-                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, 'phrase'))
-                    else:
-                        pyesfilt = pyes.TermFilter(fieldname, value)
-                else:
-                    # _exists_:field
-                    if filt['query'].startswith('_exists_:'):
-                        pyesfilt = pyes.ExistsFilter(value.split('.')[-1])
-                        # self.log.info('exists %s' % value.split('.')[-1])
-                    # _missing_:field
-                    elif filt['query'].startswith('_missing_:'):
-                        pyesfilt = pyes.filters.MissingFilter(value.split('.')[-1])
-                        # self.log.info('missing %s' % value.split('.')[-1])
-                    # field:"value"
-                    elif '\"' in value:
-                        value = value.split('\"')[1]
-                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, 'phrase'))
-                        # self.log.info("phrase %s %s" % (fieldname, value))
-                    # field:(value1 value2 value3)
-                    elif '(' in value and ')' in value:
-                        value = value.split('(')[1]
-                        value = value.split('(')[0]
-                        pyesfilt = pyes.QueryFilter(pyes.MatchQuery(fieldname, value, "boolean"))
-                    # field:value
-                    else:
-                        pyesfilt = pyes.TermFilter(fieldname, value)
-                        # self.log.info("terms %s %s" % (fieldname, value))
-
-                if filt['mandate'] == 'must':
-                    must.append(pyesfilt)
-                elif filt['mandate'] == 'either':
-                    should.append(pyesfilt)
-                elif filt['mandate'] == 'mustNot':
-                    must_not.append(pyesfilt)
-        # self.log.info(must)
-        f.close()
-        self.filtersManual(date_timedelta, must=must, should=should, must_not=must_not)
-
+        self.main_query = query
 
     def searchEventsSimple(self):
         """
         Search events matching filters, store events in self.events
         """
         try:
-            pyesresults = self.es.search(
-                self.filter,
-                size=1000,
-                indices='events,events-previous')
-            self.events = pyesresults._search_raw()['hits']['hits']
+            results = self.main_query.execute(self.es, indices=self.event_indices)
+            self.events = results['hits']
             self.log.debug(self.events)
         except Exception as e:
             self.log.error('Error while searching events in ES: {0}'.format(e))
@@ -323,18 +251,13 @@ class AlertTask(Task):
           count: the hitcount of the text value
           events: the sampled list of events that matched
           allevents: the unsample, total list of matching events
-
         aggregationPath can be key.subkey.subkey to specify a path to a dictionary value
         relative to the _source that's returned from elastic search.
         ex: details.sourceipaddress
-
         """
         try:
-            pyesresults = self.es.search(
-                self.filter,
-                size=1000,
-                indices='events,events-previous')
-            results = pyesresults._search_raw()['hits']['hits']
+            esresults = self.main_query.execute(self.es, indices=self.event_indices)
+            results = esresults['hits']
 
             # List of aggregation values that can be counted/summarized by Counter
             # Example: ['evil@evil.com','haxoor@noob.com', 'evil@evil.com'] for an email aggregField
@@ -376,41 +299,48 @@ class AlertTask(Task):
             for i in self.events:
                 alert = self.onEvent(i, **kwargs)
                 if alert:
+                    alert = self.tagBotNotify(alert)
                     self.log.debug(alert)
                     alertResultES = self.alertToES(alert)
                     self.tagEventsAlert([i], alertResultES)
                     self.alertToMessageQueue(alert)
                     self.hookAfterInsertion(alert)
+                    self.saveAlertID(alertResultES)
         # did we not match anything?
         # can also be used as an alert trigger
         if len(self.events) == 0:
             alert = self.onNoEvent(**kwargs)
             if alert:
+                alert = self.tagBotNotify(alert)
                 self.log.debug(alert)
                 alertResultES = self.alertToES(alert)
                 self.alertToMessageQueue(alert)
                 self.hookAfterInsertion(alert)
+                self.saveAlertID(alertResultES)
 
 
-    def walkAggregations(self, threshold):
+    def walkAggregations(self, threshold, config=None):
         """
         Walk through aggregations, provide some methods to hook in alerts
         """
         if len(self.aggregations) > 0:
             for aggregation in self.aggregations:
                 if aggregation['count'] >= threshold:
+                    aggregation['config']=config
                     alert = self.onAggregation(aggregation)
-                    self.log.debug(alert)
                     if alert:
+                        alert = self.tagBotNotify(alert)
+                        self.log.debug(alert)
                         alertResultES = self.alertToES(alert)
                         # even though we only sample events in the alert
                         # tag all events as alerted to avoid re-alerting
                         # on events we've already processed.
                         self.tagEventsAlert(aggregation['allevents'], alertResultES)
                         self.alertToMessageQueue(alert)
+                        self.saveAlertID(alertResultES)
 
 
-    def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None):
+    def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None, ircchannel=None):
         """
         Create an alert dict
         """
@@ -420,7 +350,8 @@ class AlertTask(Task):
             'summary': summary,
             'category': category,
             'tags': tags,
-            'events': []
+            'events': [],
+            'ircchannel': ircchannel,
         }
         if url:
             alert['url'] = url
@@ -488,9 +419,7 @@ class AlertTask(Task):
                     'id': alertResultES['_id']})
                 event['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
 
-
-                self.es.update(event['_index'], event['_type'],
-                    event['_id'], document=event['_source'])
+                self.es.save_event(index=event['_index'], doc_type=event['_type'], body=event['_source'], doc_id=event['_id'])
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 
@@ -511,3 +440,18 @@ class AlertTask(Task):
             self.log.debug('finished')
         except Exception as e:
             self.log.error('Exception in main() method: {0}'.format(e))
+
+    def parse_json_alert_config(self, config_file):
+        """
+        Helper function to parse an alert config file
+        """
+        alert_dir = os.path.join(os.path.dirname(__file__), '..')
+        config_file_path = os.path.join(alert_dir, config_file)
+        json_obj = {}
+        with open(config_file_path, "r") as fd:
+            try:
+                json_obj = json.load(fd)
+            except ValueError:
+                sys.stderr.write("FAILED to open the configuration file\n")
+
+        return json_obj

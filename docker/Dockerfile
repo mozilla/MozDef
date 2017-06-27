@@ -30,7 +30,6 @@ ENV LANGUAGE en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
-ENV HOME /root
 
 RUN apt-get install -q -y openjdk-7-jre
 
@@ -50,7 +49,7 @@ ADD conf/nginx.conf /etc/nginx/
 #Mozdef
 RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysqlclient-dev\
         && pip install -U pip \
-        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
+        && curl -L https://github.com/mozilla/MozDef/archive/master.tar.gz |tar -C /opt -xz \
         && /bin/ln -s /opt/MozDef-master /opt/MozDef \
 	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
 	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi celery \
@@ -58,7 +57,7 @@ RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysq
 	&& mkdir -p /run/uwsgi/apps/ \
 	&& touch /run/uwsgi/apps/loginput.socket && chmod 666 /run/uwsgi/apps/loginput.socket \
 	&& touch /run/uwsgi/apps/rest.socket && chmod 666 /run/uwsgi/apps/rest.socket \
-        && mkdir -p /home/mozdef/envs/mozdef/bot/ && cd /home/mozdef/envs/mozdef/bot/ \
+        && mkdir -p /opt/mozdef/envs/mozdef/bot/ && cd /opt/mozdef/envs/mozdef/bot/ \
         && wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && gzip -d GeoLiteCity.dat.gz)
 ADD conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 ADD conf/settings.js /opt/MozDef/meteor/app/lib/settings.js
@@ -79,8 +78,8 @@ ADD conf/elasticsearch.yml /opt/elasticsearch-1.3.2/config/
 RUN (curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz |tar -C /opt -xz \
        && /bin/ln -s /opt/kibana-3.1.0 /opt/kibana)
 #can't add from the local relative dir, so add from github
-ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
-ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
+ADD https://raw.githubusercontent.com/mozilla/MozDef/master/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
+ADD https://raw.githubusercontent.com/mozilla/MozDef/master/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
 
 # Meteor
 RUN (curl -L https://install.meteor.com/ | /bin/sh \
@@ -114,7 +113,6 @@ EXPOSE 8081
 # CLEAN
 RUN apt-get clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
 
-# Launch 
-ENTRYPOINT exec service supervisor start
-
+# Launch rabbit and sleep 10s for it to start
+#CMD /etc/init.d/rabbitmq-server start && sleep 10 && /usr/bin/supervisord
 

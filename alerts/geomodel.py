@@ -9,20 +9,22 @@
 # Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from query_models import SearchQuery, TermMatch
+
 
 class AlertGeomodel(AlertTask):
     # The minimum event severity we will create an alert for
     MINSEVERITY = 2
 
     def main(self):
-        date_timedelta = dict(minutes=30)
+        search_query = SearchQuery(minutes=30)
 
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('category', 'geomodelnotice'),
-        ]
-        self.filtersManual(date_timedelta, must=must, must_not=[])
+        search_query.add_must([
+            TermMatch('_type', 'event'),
+            TermMatch('category', 'geomodelnotice'),
+        ])
+
+        self.filtersManual(search_query)
         self.searchEventsSimple()
         self.walkEvents()
 
@@ -30,7 +32,7 @@ class AlertGeomodel(AlertTask):
     def onEvent(self, event):
         category = 'geomodel'
         tags = ['geomodel']
-        severity = 'WARNING'
+        severity = 'NOTICE'
 
         ev = event['_source']
 
@@ -40,6 +42,11 @@ class AlertGeomodel(AlertTask):
             return None
         if ev['details']['severity'] < self.MINSEVERITY:
             return None
+
+        # By default we assign a MozDef severity of NOTICE, but up this if the
+        # geomodel alert is sev 3
+        if ev['details']['severity'] == 3:
+            severity = 'WARNING'
 
         summary = ev['summary']
         return self.createAlertDict(summary, category, tags, [event], severity)

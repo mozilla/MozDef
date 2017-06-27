@@ -9,10 +9,8 @@
 import os
 import sys
 from configlib import getConfig, OptionParser
-from datetime import datetime, timedelta
-import json
 import netaddr
-from pytx import init
+from pytx.access_token import access_token
 from pytx import ThreatIndicator
 
 
@@ -21,7 +19,7 @@ def isIPv4(ip):
         # netaddr on it's own considers 1 and 0 to be valid_ipv4
         # so a little sanity check prior to netaddr.
         # Use IPNetwork instead of valid_ipv4 to allow CIDR
-        if '.' in ip and len(ip.split('.'))==4:
+        if '.' in ip and len(ip.split('.')) == 4:
             # some ips are quoted
             netaddr.IPNetwork(ip.strip("'").strip('"'))
             return True
@@ -73,8 +71,7 @@ class message(object):
             self.initConfiguration()
 
             # set up the threat exchange secret
-            init(self.options.appid, self.options.appsecret)
-
+            access_token(self.options.appid, self.options.appsecret)
 
     def initConfiguration(self):
         myparser = OptionParser()
@@ -82,39 +79,29 @@ class message(object):
         (self.options, args) = myparser.parse_args([])
 
         # fill self.options with plugin-specific options
-        # change this to your default zone for when it's not specified
-        self.options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', self.configfile)
 
         # threat exchange options
-        self.options.appid = getConfig('appid',
-                                        '',
-                                        self.configfile)
-        self.options.appsecret=getConfig('appsecret',
-                                         '',
-                                         self.configfile)
+        self.options.appid = getConfig('appid', '', self.configfile)
+        self.options.appsecret = getConfig('appsecret', '', self.configfile)
 
-
-    def sendToThreatExchange(self,
-                            ipaddress=None,
-                            comment='malicious IP'):
+    def sendToThreatExchange(self, ipaddress=None, comment='malicious IP'):
         try:
             if ipaddress is not None and self.options is not None:
 
-                maliciousActor=ThreatIndicator()
-                maliciousActor.indicator= ipaddress
-                maliciousActor.threat_type="MALICIOUS_IP"
-                maliciousActor.type="IP_ADDRESS"
-                maliciousActor.share_level="GREEN"
-                maliciousActor.status="MALICIOUS"
-                maliciousActor.privacy_type="VISIBLE"
-                maliciousActor.description= comment
+                maliciousActor = ThreatIndicator()
+                maliciousActor.indicator = ipaddress
+                maliciousActor.threat_type = "MALICIOUS_IP"
+                maliciousActor.type = "IP_ADDRESS"
+                maliciousActor.share_level = "GREEN"
+                maliciousActor.status = "MALICIOUS"
+                maliciousActor.privacy_type = "VISIBLE"
+                maliciousActor.description = comment
                 maliciousActor.save()
 
                 sys.stdout.write('Sent {0} to threat exchange server\n'.format(ipaddress))
 
         except Exception as e:
             sys.stderr.write('Error while sending to threatexchange %s: %r\n' % (ipaddress, e))
-
 
     def onMessage(self, request, response):
         '''
@@ -155,19 +142,19 @@ class message(object):
                 sendToThreatExchange = False
 
             if sendToThreatExchange and ipaddress is not None:
-                #figure out the CIDR mask
+                # figure out the CIDR mask
                 if isIPv4(ipaddress) or isIPv6(ipaddress):
-                    ipcidr=netaddr.IPNetwork(ipaddress)
+                    ipcidr = netaddr.IPNetwork(ipaddress)
                     if not ipcidr.ip.is_loopback() \
                        and not ipcidr.ip.is_private() \
                        and not ipcidr.ip.is_reserved():
                         # split the ip vs cidr mask
                         # threat exchange can't accept CIDR addresses
                         # so send the most significant bit
-                        ipaddress, CIDR =  str(ipcidr).split('/')
+                        ipaddress, CIDR = str(ipcidr).split('/')
                         self.sendToThreatExchange(ipaddress, comment)
-                        sys.stdout.write ('Sent {0} to threat exchange\n'.format(ipaddress))
+                        sys.stdout.write('Sent {0} to threat exchange\n'.format(ipaddress))
         except Exception as e:
-            sys.stderr.write('Error handling request.json %r \n'% (e))
+            sys.stderr.write('Error handling request.json %r \n' % (e))
 
         return (request, response)

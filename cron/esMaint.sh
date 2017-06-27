@@ -8,6 +8,6 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-source  /home/mozdef/envs/mozdef/bin/activate
-/home/mozdef/envs/mozdef/cron/rotateIndexes.py -c /home/mozdef/envs/mozdef/cron/backup.conf
+source  /opt/mozdef/envs/mozdef/bin/activate
+/opt/mozdef/envs/mozdef/cron/rotateIndexes.py -c /opt/mozdef/envs/mozdef/cron/backup.conf
 

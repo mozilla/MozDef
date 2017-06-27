@@ -11,14 +11,17 @@
 import json
 import logging
 import os
-import pyes
-import pytz
 import sys
 from datetime import datetime
-from datetime import timedelta
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
+
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from query_models import SearchQuery, Aggregation
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -42,58 +45,25 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
+def esSearch(es):
+    search_query = SearchQuery(minutes=options.aggregationminutes)
+    search_query.add_aggregation(Aggregation('category'))
 
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
-def esSearch(es, begindateUTC=None, enddateUTC=None):
-    resultsList = list()
-    if begindateUTC is None:
-        begindateUTC = toUTC(datetime.now() - timedelta(minutes=options.aggregationminutes))
-    if enddateUTC is None:
-        enddateUTC = toUTC(datetime.now())
     try:
-        # search for events within the date range that haven't already been alerted (i.e. given an alerttimestamp)
-        qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp', from_value=begindateUTC, to_value=enddateUTC))
-        q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-        q = pyes.FilteredQuery(q,pyes.BoolFilter(must=[qDate]))
-        
-        q=q.search()
-        
-        qagg = pyes.aggs.TermsAgg(name='category', field='category')
-        q.agg.add(qagg)
-        results=es.search(query=q,indices=['events'])
-        
+        results = search_query.execute(es)
+
         mozdefstats=dict(utctimestamp=toUTC(datetime.now()).isoformat())
         mozdefstats['summary']='Aggregated category counts'
         mozdefstats['processid']=os.getpid()
         mozdefstats['processname']=sys.argv[0]
         mozdefstats['details']=dict(counts=list())
-        for bucket in results.aggs['category']['buckets']:
+        for bucket in results['aggregations']['category']['terms']:
             entry=dict()
-            entry[bucket['key']]=bucket['doc_count']
+            entry[bucket['key']]=bucket['count']
             mozdefstats['details']['counts'].append(entry)
         return mozdefstats
 
-    except pyes.exceptions.NoServerAvailable:
+    except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
 
@@ -104,16 +74,13 @@ def main():
     '''
     logger.debug('starting')
     logger.debug(options)
-    es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
     stats = esSearch(es)
     logger.debug(json.dumps(stats))
     try:
         # post to elastic search servers directly without going through
         # message queues in case there is an availability issue
-        es.index(index='events',
-                 doc_type='mozdefstats',
-                 doc=json.dumps(stats),
-                 bulk=False)
+        es.save_event(body=json.dumps(stats), doc_type='mozdefstats')
 
     except Exception as e:
         logger.error("Exception %r when gathering statistics " % e)
@@ -132,16 +99,11 @@ def initConfig():
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
 
-    # change this to your default zone for when it's not specified
-    options.defaulttimezone = getConfig('defaulttimezone',
-                                        'UTC',
-                                        options.configfile)
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
-    
+
     # field to use as the aggegation point (category, _type, etc)
     options.aggregationfield = getConfig('aggregationfield',
                                          'category',

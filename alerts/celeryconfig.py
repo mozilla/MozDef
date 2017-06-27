@@ -2,17 +2,13 @@ from celery import Celery
 from lib.config import ALERTS, LOGGING, RABBITMQ
 from logging.config import dictConfig
 
-print ALERTS
-
 # Alert files to include
 alerts_include = []
 for alert in ALERTS.keys():
     alerts_include.append('.'.join((alert).split('.')[:-1]))
 alerts_include = list(set(alerts_include))
 
-print alerts_include
-
-BROKER_URL =  'amqp://{0}:{1}@{2}:{3}//'.format(
+BROKER_URL = 'amqp://{0}:{1}@{2}:{3}//'.format(
                 RABBITMQ['mquser'],
                 RABBITMQ['mqpassword'],
                 RABBITMQ['mqserver'],
