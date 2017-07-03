@@ -20,11 +20,12 @@ ENV LC_CTYPE en_US.UTF-8
 
 # Locales
 RUN (apt-get clean \
-        && apt-key update \
         && apt-get -q -y update --fix-missing \
         && apt-get -q -y update \
+        && apt-get install -q -y gnupg \
         && apt-get install -q -y apt-utils \
-        && apt-get install -q -y locales)
+        && apt-get install -q -y locales \
+        && apt-key update)
 
 RUN echo "en_US.UTF-8 UTF-8\nen_US ISO-8859-1" > /etc/locale.gen
 RUN (locale-gen \
@@ -53,7 +54,7 @@ RUN (apt-get install -q -y curl \
 RUN rabbitmq-plugins enable rabbitmq_management
 
 RUN (pip install -U pip \
-        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
+        && curl -L https://github.com/mozilla/MozDef/archive/master.tar.gz |tar -C /opt -xz \
         && /bin/ln -s /opt/MozDef-master /opt/MozDef \
         && cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
         && /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi celery \
