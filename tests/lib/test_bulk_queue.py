@@ -16,7 +16,7 @@ class BulkQueueTest(UnitTestSuite):
         super(BulkQueueTest, self).setup()
 
     def num_objects_saved(self):
-        self.es_client.flush('events')
+        self.flush(self.event_index_name)
         search_query = SearchQuery()
         search_query.add_must(ExistsMatch('keyname'))
         results = search_query.execute(self.es_client)
@@ -113,13 +113,13 @@ class TestTimer(BulkQueueTest):
             queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 200
         assert queue.size() == 1
-        time.sleep(5)
+        time.sleep(3)
         assert self.num_objects_saved() == 201
         assert queue.size() == 0
         for num in range(0, 201):
             queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 401
-        time.sleep(5)
+        time.sleep(3)
         assert self.num_objects_saved() == 402
         queue.stop_timer()
 

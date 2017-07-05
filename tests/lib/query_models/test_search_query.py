@@ -138,6 +138,9 @@ class TestExecute(SearchQueryUnitTest):
                 }
             }
         )
+
+        self.flush(self.event_index_name)
+
         results = query.execute(self.es_client)
         assert results.keys() == ['hits', 'meta', 'aggregations']
         assert results['meta'].keys() == ['timed_out']
@@ -203,6 +206,8 @@ class TestExecute(SearchQueryUnitTest):
         event = self.generate_default_event()
         event['_source']['utctimestamp'] = event['_source']['utctimestamp']()
         self.populate_test_event(event)
+        self.flush(self.event_index_name)
+
         search_query = SearchQuery(minutes=10)
 
         search_query.add_aggregation(Aggregation('summary'))
@@ -211,11 +216,14 @@ class TestExecute(SearchQueryUnitTest):
 
     def test_aggregation_query_execute(self):
         query = SearchQuery()
-        assert query.date_timedelta == {}
         query.add_must(ExistsMatch('note'))
         query.add_aggregation(Aggregation('note'))
+        assert query.date_timedelta == {}
+
         self.populate_example_event()
         self.populate_example_event()
+        self.flush(self.event_index_name)
+
         results = query.execute(self.es_client)
         assert results.keys() == ['hits', 'meta', 'aggregations']
         assert results['meta'].keys() == ['timed_out']
@@ -264,9 +272,12 @@ class TestExecute(SearchQueryUnitTest):
 
     def test_simple_query_execute(self):
         query = SearchQuery()
-        assert query.date_timedelta == {}
         query.add_must(ExistsMatch('note'))
+        assert query.date_timedelta == {}
+
         self.populate_example_event()
+        self.flush(self.event_index_name)
+
         results = query.execute(self.es_client)
 
         assert results.keys() == ['hits', 'meta']
@@ -295,6 +306,7 @@ class TestExecute(SearchQueryUnitTest):
 
     def test_beginning_time_seconds(self):
         query = SearchQuery(seconds=10)
+        query.add_must(ExistsMatch('summary'))
         assert query.date_timedelta == {'seconds': 10}
 
         default_event = {
@@ -314,13 +326,14 @@ class TestExecute(SearchQueryUnitTest):
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
         self.populate_test_event(not_old_event)
 
-        query.add_must(ExistsMatch('summary'))
+        self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
         assert len(results['hits']) == 2
 
     def test_beginning_time_minutes(self):
         query = SearchQuery(minutes=10)
+        query.add_must(ExistsMatch('summary'))
         assert query.date_timedelta == {'minutes': 10}
 
         default_event = {
@@ -339,13 +352,14 @@ class TestExecute(SearchQueryUnitTest):
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'minutes': 9})
         self.populate_test_event(not_old_event)
 
-        query.add_must(ExistsMatch('summary'))
+        self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
         assert len(results['hits']) == 2
 
     def test_beginning_time_hours(self):
         query = SearchQuery(hours=10)
+        query.add_must(ExistsMatch('summary'))
         assert query.date_timedelta == {'hours': 10}
 
         default_event = {
@@ -364,13 +378,14 @@ class TestExecute(SearchQueryUnitTest):
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'hours': 9})
         self.populate_test_event(not_old_event)
 
-        query.add_must(ExistsMatch('summary'))
+        self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
         assert len(results['hits']) == 2
 
     def test_beginning_time_days(self):
         query = SearchQuery(days=10)
+        query.add_must(ExistsMatch('summary'))
         assert query.date_timedelta == {'days': 10}
 
         default_event = {
@@ -389,13 +404,14 @@ class TestExecute(SearchQueryUnitTest):
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 9})
         self.populate_test_event(not_old_event)
 
-        query.add_must(ExistsMatch('summary'))
+        self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
         assert len(results['hits']) == 2
 
     def test_without_time_defined(self):
         query = SearchQuery()
+        query.add_must(ExistsMatch('summary'))
         assert query.date_timedelta == {}
 
         default_event = {
@@ -414,13 +430,14 @@ class TestExecute(SearchQueryUnitTest):
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 9})
         self.populate_test_event(not_old_event)
 
-        query.add_must(ExistsMatch('summary'))
+        self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
         assert len(results['hits']) == 3
 
     def test_without_utctimestamp(self):
         query = SearchQuery(days=10)
+        query.add_must(ExistsMatch('summary'))
         assert query.date_timedelta == {'days': 10}
 
         default_event = {
@@ -432,8 +449,7 @@ class TestExecute(SearchQueryUnitTest):
         }
 
         self.populate_test_event(default_event)
-
-        query.add_must(ExistsMatch('summary'))
+        self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
         assert len(results['hits']) == 0
@@ -451,6 +467,7 @@ class TestExecute(SearchQueryUnitTest):
     def test_execute_with_size(self):
         for num in range(0, 30):
             self.populate_example_event()
+        self.flush(self.event_index_name)
         query = SearchQuery()
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client, size=12)
@@ -459,6 +476,7 @@ class TestExecute(SearchQueryUnitTest):
     def test_execute_without_size(self):
         for num in range(0, 1200):
             self.populate_example_event()
+        self.flush(self.event_index_name)
         query = SearchQuery()
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
@@ -466,6 +484,7 @@ class TestExecute(SearchQueryUnitTest):
 
     def test_execute_with_should(self):
         self.populate_example_event()
+        self.flush(self.event_index_name)
         self.query.add_should(ExistsMatch('summary'))
         self.query.add_should(ExistsMatch('nonexistentfield'))
         results = self.query.execute(self.es_client)
@@ -473,6 +492,7 @@ class TestExecute(SearchQueryUnitTest):
 
     def test_beginning_time_seconds_received_timestamp(self):
         query = SearchQuery(seconds=10)
+        query.add_must(ExistsMatch('summary'))
         assert query.date_timedelta == {'seconds': 10}
 
         default_event = {
@@ -492,13 +512,14 @@ class TestExecute(SearchQueryUnitTest):
         not_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
         self.populate_test_event(not_old_event)
 
-        query.add_must(ExistsMatch('summary'))
+        self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
         assert len(results['hits']) == 2
 
     def test_time_received_timestamp(self):
         query = SearchQuery(seconds=10)
+        query.add_must(ExistsMatch('summary'))
         assert query.date_timedelta == {'seconds': 10}
 
         received_timestamp_default_event = {
@@ -537,7 +558,7 @@ class TestExecute(SearchQueryUnitTest):
         modified_utc_timestamp_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
         self.populate_test_event(modified_utc_timestamp_event)
 
-        query.add_must(ExistsMatch('summary'))
+        self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
         assert len(results['hits']) == 5

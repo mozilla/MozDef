@@ -1,11 +1,10 @@
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.parser import parse
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../lib'))
 from utilities.toUTC import toUTC
-import pytest
 
 
 class TestToUTC():
@@ -31,7 +30,7 @@ class TestToUTC():
     def test_abnormal_date_str_without_timezone(self):
         result = toUTC("Jan  2 08:01:57")
         self.result_is_datetime(result)
-        assert str(result) == '2016-01-02 08:01:57+00:00'
+        assert str(result) == str(date.today().year) + '-01-02 08:01:57+00:00'
 
     def test_abnormal_date_obj_with_timezone_in_date(self):
         result = toUTC(parse("2016-01-02 08:01:57+06:00"))
@@ -41,28 +40,24 @@ class TestToUTC():
     def test_long_epoch_without_timezone(self):
         result = toUTC(1468443523000000000)
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 15:58:43+00:00'
+        assert str(result) == '2016-07-13 20:58:43+00:00'
 
     def test_short_epoch_without_timezone(self):
         result = toUTC(1468443523)
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 15:58:43+00:00'
+        assert str(result) == '2016-07-13 20:58:43+00:00'
 
     def test_float_epoch(self):
         result = toUTC(1468443523.0)
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 15:58:43+00:00'
+        assert str(result) == '2016-07-13 20:58:43+00:00'
 
     def test_long_float_epoch(self):
         result = toUTC(1.468443523e+18)
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 15:58:43+00:00'
+        assert str(result) == '2016-07-13 20:58:43+00:00'
 
     def test_float_epoch_milliseconds(self):
         result = toUTC(1.468443523e+11)
         self.result_is_datetime(result)
-        assert str(result) == '2016-07-13 15:58:43+00:00'
-
-    def test_unparseable_suspectedDate(self):
-        with pytest.raises(ValueError):
-            toUTC("This is not a date")
+        assert str(result) == '2016-07-13 20:58:43+00:00'

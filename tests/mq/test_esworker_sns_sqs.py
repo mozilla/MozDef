@@ -12,7 +12,7 @@
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../mq"))
-from esworker_sns_sqs import taskConsumer
+from mq.esworker_sns_sqs import taskConsumer
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from utilities.dot_dict import DotDict
@@ -39,7 +39,7 @@ class TestEsworkerSNSSQS(UnitTestSuite):
         self.consumer = taskConsumer(mq_conn, task_queue, es_connection, options)
 
     def search_and_verify_event(self, expected_event):
-        self.es_client.flush('events')
+        self.flush('events')
         search_query = SearchQuery(minutes=5)
         search_query.add_must(ExistsMatch('tags'))
         results = search_query.execute(self.es_client)

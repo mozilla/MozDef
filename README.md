@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/pwnbus/MozDef.svg?branch=master)](https://travis-ci.org/pwnbus/MozDef)
 
 MozDef: The Mozilla Defense Platform
 =====================================

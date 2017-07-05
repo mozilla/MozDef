@@ -52,7 +52,7 @@ class TestKibanaDashboardsRoute(RestTestSuite):
         json_dashboard_location = os.path.join(os.path.dirname(__file__), "ssh_dashboard.json")
         self.es_client.save_dashboard(json_dashboard_location, "Example SSH Dashboard")
         self.es_client.save_dashboard(json_dashboard_location, "Example FTP Dashboard")
-        self.es_client.flush('.kibana')
+        self.flush('.kibana')
 
     def test_route_endpoints(self):
         for route in self.routes:
@@ -226,7 +226,7 @@ class TestLdapLoginsRoute(RestTestSuite):
             }
             self.populate_test_event(event)
 
-        self.es_client.flush('events')
+        self.flush('events')
 
     def test_route_endpoints(self):
         for route in self.routes:
