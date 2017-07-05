@@ -36,6 +36,7 @@ class QueryTestSuite(UnitTestSuite):
                     self.setup_elasticsearch()
 
                 self.populate_test_event(event)
+                self.flush(self.event_index_name)
 
                 # Testing must
                 search_query = SearchQuery()

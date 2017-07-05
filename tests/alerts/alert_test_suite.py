@@ -103,7 +103,7 @@ class AlertTestSuite(UnitTestSuite):
             test_case.full_events.append(merged_event)
             self.populate_test_event(merged_event['_source'], merged_event['_type'])
 
-        self.es_client.flush('events')
+        self.flush('events')
 
         alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
         self.verify_alert_task(alert_task, test_case)
@@ -138,7 +138,7 @@ class AlertTestSuite(UnitTestSuite):
     def verify_alert_task(self, alert_task, test_case):
         if test_case.expected_test_result is True:
             assert len(alert_task.alert_ids) is not 0, 'Alert did not fire as expected'
-            self.es_client.flush('alerts')
+            self.flush('alerts')
             for alert_id in alert_task.alert_ids:
                 found_alert = self.es_client.get_alert_by_id(alert_id)
                 self.verify_expected_alert(found_alert, test_case)

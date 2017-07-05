@@ -1,0 +1,16 @@
+language: python
+python:
+  - '2.7.11'
+before_install:
+  - ES_VERSION=2.4.4; curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
+  - sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
+services:
+  - rabbitmq
+install:
+  - "pip install -r requirements.txt"
+  - "pip install -r requirements_tests.txt"
+before_script:
+  - sleep 5
+script:
+  - py.test --delete_indexes tests

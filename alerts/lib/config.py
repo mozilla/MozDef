@@ -20,8 +20,8 @@ ALERTS={
 
 RABBITMQ = {
     'mqserver': 'localhost',
-    'mquser': 'mozdef',
-    'mqpassword': 'mozdef',
+    'mquser': 'guest',
+    'mqpassword': 'guest',
     'mqport': 5672,
     'alertexchange': 'alerts',
     'alertqueue': 'mozdef.alert'

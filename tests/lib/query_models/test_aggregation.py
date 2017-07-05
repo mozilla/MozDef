@@ -28,6 +28,8 @@ class TestAggregation(UnitTestSuite):
         ]
         for event in events:
             self.populate_test_event(event)
+        self.flush(self.event_index_name)
+
         search_query = SearchQuery()
         search_query.add_must(TermMatch('test', 'value'))
         search_query.add_aggregation(Aggregation('note'))
@@ -60,6 +62,9 @@ class TestAggregation(UnitTestSuite):
         ]
         for event in events:
             self.populate_test_event(event)
+
+        self.flush(self.event_index_name)
+
         search_query = SearchQuery()
         search_query.add_must(TermMatch('test', 'value'))
         search_query.add_aggregation(Aggregation('note'))
@@ -96,6 +101,9 @@ class TestAggregation(UnitTestSuite):
         ]
         for event in events:
             self.populate_test_event(event)
+
+        self.flush(self.event_index_name)
+
         search_query = SearchQuery()
         search_query.add_must(TermMatch('test', 'value'))
         search_query.add_aggregation(Aggregation('example'))
@@ -127,6 +135,8 @@ class TestAggregation(UnitTestSuite):
         for event in events:
             self.populate_test_event(event)
 
+        self.flush(self.event_index_name)
+
         search_query = SearchQuery()
         search_query.add_must(TermMatch('test', 'value'))
         search_query.add_aggregation(Aggregation('details.ip'))
@@ -151,6 +161,9 @@ class TestAggregation(UnitTestSuite):
         ]
         for event in events:
             self.populate_test_event(event)
+
+        self.flush(self.event_index_name)
+
         search_query = SearchQuery()
         search_query.add_must(TermMatch('test', 'value'))
         search_query.add_aggregation(Aggregation('details.ipinformation'))
@@ -164,6 +177,9 @@ class TestAggregation(UnitTestSuite):
         for num in range(0, 100):
             event = {'keyname': 'value' + str(num)}
             self.populate_test_event(event)
+
+        self.flush(self.event_index_name)
+
         search_query = SearchQuery()
         search_query.add_must(ExistsMatch('keyname'))
         search_query.add_aggregation(Aggregation('keyname'))
@@ -174,6 +190,9 @@ class TestAggregation(UnitTestSuite):
         for num in range(0, 100):
             event = {'keyname': 'value' + str(num)}
             self.populate_test_event(event)
+
+        self.flush(self.event_index_name)
+
         search_query = SearchQuery()
         search_query.add_must(ExistsMatch('keyname'))
         search_query.add_aggregation(Aggregation('keyname', 2))

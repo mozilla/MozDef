@@ -31,7 +31,7 @@ class TestAlertOpenPortViolation(AlertTestSuite):
     # This alert is the expected result from running this task
     default_alert = {
         "category": "open_port_policy_violation",
-        "tags": ['open_port_policy_violation'],
+        "tags": ['open_port_policy_violation', 'openportpagerduty'],
         "severity": "CRITICAL",
         "summary": '10 unauthorized open port(s) on 1.2.3.4 (25 25 25 25 25 )',
     }
