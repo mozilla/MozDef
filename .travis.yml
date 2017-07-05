@@ -13,4 +13,4 @@ install:
 before_script:
   - sleep 5
 script:
-  - py.test --delete_indexes --ignore tests/loginput --ignore tests/rest tests
+  - py.test --delete_indexes tests
