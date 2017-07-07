@@ -16,3 +16,4 @@ before_script:
   - sleep 5
 script:
   - py.test --delete_indexes tests
+  - pycodestyle --show-source --ignore=E501,E402 ./
