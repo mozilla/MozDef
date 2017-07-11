@@ -45,6 +45,8 @@ RUN \
   && mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch \
   && rpm --import https://www.rabbitmq.com/rabbitmq-release-signing-key.asc \
   && yum install -y rabbitmq-server-$RABBITMQ_VERSION \
+  && yum install -y nginx \
+  && mkdir /var/log/mozdef/
   && curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x64.tar.gz | tar -C /opt/mozdef/ -xz \
   && mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x64 /opt/mozdef/envs/kibana \
   && yum install -y mongodb-org \
@@ -101,11 +103,6 @@ RUN \
   virtualenv /opt/mozdef/envs/python \
   && source /opt/mozdef/envs/python/bin/activate \
   && pip install -r /opt/mozdef/envs/mozdef/src/requirements.txt
-
-# Nginx
-USER root
-RUN yum install -y nginx
-RUN mkdir /var/log/mozdef/
 
 COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
 COPY docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
