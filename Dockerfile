@@ -102,16 +102,17 @@ RUN \
   && source /opt/mozdef/envs/python/bin/activate \
   && pip install -r /opt/mozdef/envs/mozdef/src/requirements.txt
 
-# # Nginx
-# RUN yum install -y nginx
-# RUN mkdir /var/log/mozdef/
+# Nginx
+USER root
+RUN yum install -y nginx
+RUN mkdir /var/log/mozdef/
 
 COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
 COPY docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 COPY docker/conf/mongod.conf /etc/mongod.conf
 COPY docker/conf/rabbitmq.config /etc/rabbitmq/
 COPY docker/conf/enabled_plugins /etc/rabbitmq/
-# COPY docker/conf/nginx.conf /etc/nginx/nginx.conf
+COPY docker/conf/nginx.conf /etc/nginx/nginx.conf
 
 COPY static /opt/mozdef/envs/mozdef/src/static
 COPY rest /opt/mozdef/envs/mozdef/src/rest
@@ -125,14 +126,14 @@ COPY mq /opt/mozdef/envs/mozdef/src/mq
 USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/src
 
+# 80 = MozDef Web UI (meteor)
 # 9200 = Elasticsearch
 # 5672 = RabbitMQ endpoint
 # 15672 = RabbitMQ Management endpoint (private by default)
 # 5601 = Kibana Web UI
 # 3002 = Mongodb (private by default)
-# 3000 = Meteor web UI
 # 8080 = Loginput
 # 8081 = RestAPI
-EXPOSE 9200 5672 5601 8080 8081 3000
+EXPOSE 80 9200 5672 5601 8080 8081
 
 CMD supervisord -n -c /etc/supervisor/conf.d/supervisor.conf
