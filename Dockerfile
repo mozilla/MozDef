@@ -29,7 +29,7 @@ ENV PORT=3000
 
 COPY docker/conf/mongodb.repo /etc/yum.repos.d/mongodb.repo
 
-# Install ES, RabbitMQ, nginx, Kibana, python
+# Install ES, RabbitMQ, nginx, Kibana, python, Node, Meteor
 RUN \
   yum clean all && \
   yum install -y epel-release && \
@@ -64,11 +64,8 @@ RUN \
                     python-devel \
                     python-pip && \
   chown -R mozdef:mozdef /opt/mozdef/ && \
-  pip install virtualenv
-
-# Node + Meteor
-USER root
-RUN \
+  pip install virtualenv && \
+  cd / && \
   curl -sL -o /opt/mozdef/nodesource.rpm https://rpm.nodesource.com/pub_4.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm && \
   rpm -i --nosignature --force /opt/mozdef/nodesource.rpm && \
   yum install -y nodejs-$NODE_VERSION && \
@@ -83,7 +80,7 @@ RUN \
   tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
   mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
   rm -r /opt/mozdef/meteor && \
-  cp "/opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor" /usr/bin/meteor
+  cp /opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
 COPY meteor /opt/mozdef/envs/mozdef/src/meteor
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/src/meteor
