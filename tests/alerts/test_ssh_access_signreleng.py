@@ -53,6 +53,30 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
+    event['_source']['summary'] = 'Accepted publickey for someuser from 1.2.3.4 port 39190 ssh2'
+    alert = AlertTestSuite.create_alert(default_alert)
+    alert['summary'] = 'SSH login from 1.2.3.4 on host1 as user someuser'
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with good event with excluded user but not ip",
+            events=[event],
+            expected_alert=alert
+        )
+    )
+
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['sourceipaddress'] = '4.5.6.7'
+    alert = AlertTestSuite.create_alert(default_alert)
+    alert['summary'] = 'SSH login from 4.5.6.7 on host1 as user ttesterson'
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with good event with excluded ip but not user",
+            events=[event],
+            expected_alert=alert
+        )
+    )
+
+    event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 16})
     test_cases.append(
         NegativeAlertTestCase(
@@ -98,10 +122,21 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['summary'] = 'Accepted publickey for someuser from 1.2.3.4 port 39190 ssh2'
+    event['_source']['summary'] = 'Accepted publickey for someuser from 4.5.6.7 port 39190 ssh2'
+    event['_source']['details']['sourceipaddress'] = '4.5.6.7'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with good event with excluded user",
+            description="Negative test case with good event with excluded user and ip",
+            events=[event],
+        )
+    )
+
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['summary'] = 'Accepted publickey for anotheruser from 8.9.10.11 port 39190 ssh2'
+    event['_source']['details']['sourceipaddress'] = '8.9.10.11'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with good event with excluded user and ip from second index",
             events=[event],
         )
     )
