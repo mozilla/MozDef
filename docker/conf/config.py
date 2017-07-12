@@ -20,18 +20,17 @@ ALERTS = {
     'fail2ban.AlertFail2ban': {'schedule': crontab(minute='*/1')},
 }
 
-
 RABBITMQ = {
-	'mqserver': 'localhost',
-	'mquser': 'guest',
-	'mqpassword': 'guest',
-	'mqport': 5672,
-	'alertexchange': 'alerts',
-	'alertqueue': 'mozdef.alert'
+    'mqserver': 'localhost',
+    'mquser': 'guest',
+    'mqpassword': 'guest',
+    'mqport': 5672,
+    'alertexchange': 'alerts',
+    'alertqueue': 'mozdef.alert'
 }
 
 ES = {
-	'servers': ['http://localhost:9200']
+    'servers': ['http://localhost:9200']
 }
 
 OPTIONS = {

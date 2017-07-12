@@ -14,7 +14,9 @@ FROM centos:7
 
 MAINTAINER mozdef@mozilla.com
 
+ENV NODE_VERSION 4.7.0
 ENV METEOR_VERSION 1.4.0.1
+ENV METEOR_FILE_VERSION 1.4.0-1
 ENV PYTHON_VERSION 2.7.11
 ENV KIBANA_VERSION 4.5.4
 ENV ES_VERSION 2.4.2
@@ -27,10 +29,11 @@ ENV PORT=3000
 
 COPY docker/conf/mongodb.repo /etc/yum.repos.d/mongodb.repo
 
+# Install ES, RabbitMQ, nginx, Kibana, python
 RUN \
-  yum clean all \
-  && yum install -y epel-release \
-  && yum install -y \
+  yum clean all && \
+  yum install -y epel-release && \
+  yum install -y \
                     wget \
                     java-$ES_JAVA_VERSION \
                     glibc-devel \
@@ -38,71 +41,68 @@ RUN \
                     libstdc++ \
                     supervisor \
                     libffi-devel \
-                    zlib-devel \
-  && useradd -ms /bin/bash -d /opt/mozdef -m mozdef \
-  && mkdir /opt/mozdef/envs \
-  && curl -s -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz \
-  && mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch \
-  && rpm --import https://www.rabbitmq.com/rabbitmq-release-signing-key.asc \
-  && yum install -y rabbitmq-server-$RABBITMQ_VERSION \
-  && yum install -y nginx \
-  && mkdir /var/log/mozdef/ \
-  && curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x64.tar.gz | tar -C /opt/mozdef/ -xz \
-  && mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x64 /opt/mozdef/envs/kibana \
-  && yum install -y mongodb-org \
-  && curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz \
-  && cd /opt/mozdef/Python-$PYTHON_VERSION \
-  && ./configure \
-  && make \
-  && make install \
-  && rm -r /opt/mozdef/Python-$PYTHON_VERSION \
-  && cd /opt/mozdef \
-  && yum install -y mysql-devel \
+                    zlib-devel && \
+  useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
+  mkdir /opt/mozdef/envs && \
+  curl -s -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
+  mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch && \
+  rpm --import https://www.rabbitmq.com/rabbitmq-release-signing-key.asc && \
+  yum install -y rabbitmq-server-$RABBITMQ_VERSION && \
+  yum install -y nginx && \
+  mkdir /var/log/mozdef/ && \
+  curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x64.tar.gz | tar -C /opt/mozdef/ -xz && \
+  mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x64 /opt/mozdef/envs/kibana && \
+  yum install -y mongodb-org && \
+  curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz && \
+  cd /opt/mozdef/Python-$PYTHON_VERSION && \
+  ./configure && \
+  make && \
+  make install && \
+  rm -r /opt/mozdef/Python-$PYTHON_VERSION && \
+  cd /opt/mozdef && \
+  yum install -y mysql-devel \
                     python-devel \
-                    python-pip \
-  && chown -R mozdef:mozdef /opt/mozdef/ \
-  && pip install virtualenv
+                    python-pip && \
+  chown -R mozdef:mozdef /opt/mozdef/ && \
+  pip install virtualenv
 
-# Node
+# Node + Meteor
 USER root
-COPY docker/conf/nodesource.sh /opt/mozdef/nodesource.sh
 RUN \
-  chmod u+x /opt/mozdef/nodesource.sh \
-  && /opt/mozdef/nodesource.sh \
-  && yum install -y nodejs-4.7.0 \
-  && npm install source-map-support@0.4.2 \
+  curl -sL -o /opt/mozdef/nodesource.rpm https://rpm.nodesource.com/pub_4.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm && \
+  rpm -i --nosignature --force /opt/mozdef/nodesource.rpm && \
+  yum install -y nodejs-$NODE_VERSION && \
+  npm install source-map-support@0.4.2 \
                  semver@5.3.0 \
                  fibers@1.0.13 \
                  amdefine@1.0.0 \
                  underscore@1.8.3 \
-                 bcrypt
-
-## Meteor
-USER root
-COPY docker/conf/meteor.sh /opt/mozdef/meteor.sh
-RUN chmod a+x /opt/mozdef/meteor.sh
-USER mozdef
-RUN /opt/mozdef/meteor.sh
-USER root
-RUN cp "/opt/mozdef/.meteor/packages/meteor-tool/1.4.0-1/mt-os.linux.x86_64/scripts/admin/launch-meteor" /usr/bin/meteor
+                 bcrypt && \
+  mkdir /opt/mozdef/meteor && \
+  curl -sL -o /opt/mozdef/meteor.tar.gz https://meteorinstall-4168.kxcdn.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
+  tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
+  mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
+  rm -r /opt/mozdef/meteor && \
+  cp "/opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor" /usr/bin/meteor
 
 COPY meteor /opt/mozdef/envs/mozdef/src/meteor
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/src/meteor
 USER mozdef
 RUN \
-  cd /opt/mozdef/envs/mozdef/src/meteor \
-  && meteor npm install --save babel-runtime \
-  && meteor add accounts-password \
-  && meteor add npm-bcrypt \
-  && mkdir -p /opt/mozdef/envs/meteor/mozdef \
-  && meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/ --allow-incompatible-update
+  cd /opt/mozdef/envs/mozdef/src/meteor && \
+  meteor npm install --save babel-runtime && \
+  meteor add accounts-password && \
+  meteor add npm-bcrypt && \
+  mkdir -p /opt/mozdef/envs/meteor/mozdef && \
+  meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/ --allow-incompatible-update
 
+# Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/src/requirements.txt
 USER mozdef
 RUN \
-  virtualenv /opt/mozdef/envs/python \
-  && source /opt/mozdef/envs/python/bin/activate \
-  && pip install -r /opt/mozdef/envs/mozdef/src/requirements.txt
+  virtualenv /opt/mozdef/envs/python && \
+  source /opt/mozdef/envs/python/bin/activate && \
+  pip install -r /opt/mozdef/envs/mozdef/src/requirements.txt
 
 COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
 COPY docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
