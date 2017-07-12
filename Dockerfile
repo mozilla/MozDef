@@ -120,6 +120,14 @@ COPY mq /opt/mozdef/envs/mozdef/src/mq
 USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/src
 
+# VOLUMES
+#  Elasticsearch
+VOLUME ['/var/lib/elasticsearch','/var/log/elasticsearch']
+#  Mongodb
+VOLUME ['/var/lib/mongodb','/var/log/mongodb']
+#  Nginx
+VOLUME ['/var/log/nginx','/var/log/mozdef']
+
 # 80 = MozDef Web UI (meteor)
 # 9200 = Elasticsearch
 # 5672 = RabbitMQ endpoint
