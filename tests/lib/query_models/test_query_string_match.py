@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from query_models import QueryStringMatch
 
 
-hostname_test_regex = 'hostname: /(.*\.)*(sub|bus)+(\..*)*\.abc(\..*)*\.company\.com/'
+hostname_test_regex = 'hostname: /(.*\.)*(groupa|groupb)\.(.*\.)*subdomain\.(.*\.)*.*/'
 
 
 class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
@@ -24,11 +24,18 @@ class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
             ],
 
             QueryStringMatch(hostname_test_regex): [
-                {'hostname': 'host1.sub.abc.company.com'},
-                {'hostname': 'host1.sub.test.abc.company.com'},
-                {'hostname': 'host1.sub.test.abc.domain.company.com'},
-                {'hostname': 'host1.sub.abc.domain.company.com'},
-                {'hostname': 'host2.bus.abc.domain.company.com'},
+                {'hostname': 'host.groupa.test.def.subdomain.company.com'},
+                {'hostname': 'host.groupa.test.def.subdomain.company.com'},
+                {'hostname': 'host.groupa.subdomain.domain.company.com'},
+                {'hostname': 'host.groupa.subdomain.domain1.company.com'},
+                {'hostname': 'host.groupa.subdomain.company.com'},
+                {'hostname': 'host1.groupa.subdomain.company.com'},
+                {'hostname': 'host1.groupa.test.subdomain.company.com'},
+                {'hostname': 'host-1.groupa.test.subdomain.domain.company.com'},
+                {'hostname': 'host-v2-test6.groupa.test.subdomain.domain.company.com'},
+                {'hostname': 'host1.groupa.subdomain.domain.company.com'},
+                {'hostname': 'someotherhost1.hgi.groupa.subdomain.domain1.company.com'},
+                {'hostname': 'host2.groupb.subdomain.domain.company.com'},
             ],
         }
         return tests
@@ -51,12 +58,17 @@ class TestQueryStringMatchNegativeTestSuite(NegativeTestSuite):
             ],
 
             QueryStringMatch(hostname_test_regex): [
-                {'hostname': 'host1.sub.abcd.company.com'},
-                {'hostname': 'host1.sub.dabc.company.com'},
-                {'hostname': 'host1.suba.abc.company.com'},
-                {'hostname': 'host1.asub.abc.company.com'},
-                {'hostname': 'host1.sub.dabc.domain.companyabc.com'},
-                {'hostname': 'host2.bus.abc.domain.abcompany.com'},
+                {'hostname': ''},
+                {'hostname': 'host.subdomain.company.com'},
+                {'hostname': 'host.subdomain.domain1.company.com'},
+                {'hostname': 'groupa.abc.company.com'},
+                {'hostname': 'asub.subdomain.company.com'},
+                {'hostname': 'example.com'},
+                {'hostname': 'abc.company.com'},
+                {'hostname': 'host1.groupa.asubdomain.company.com'},
+                {'hostname': 'host1.groupa.subdomaina.company.com'},
+                {'hostname': 'host1.groupaa.subdomain.company.com'},
+                {'hostname': 'host1.agroupb.subdomain.company.com'},
             ],
         }
         return tests
