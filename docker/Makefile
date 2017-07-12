@@ -20,13 +20,20 @@ VERSION=0.1
 
 
 build:
-	docker build -t $(NAME):$(VERSION) .
+	docker build -t $(NAME):$(VERSION) ..
 
 build-no-cache:
-	docker build --no-cache -t $(NAME):$(VERSION) .
+	docker build --no-cache -t $(NAME):$(VERSION) ..
 
 run:
-	docker run -p 3000:3000 -p 9090:9090 -p 9200:9200 -p 8080:8080 -p 8081:8081 \
+	docker run \
+		-e TZ=UTC \
+		-p 80:80 \
+		-p 5672:5672 \
+		-p 9090:9090 \
+		-p 9200:9200 \
+		-p 8080:8080 \
+		-p 8081:8081 \
 		-h $(NAME) -d $(NAME):$(VERSION)
 
 debug:build
