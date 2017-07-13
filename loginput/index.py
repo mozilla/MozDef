@@ -131,8 +131,6 @@ def customindex(application):
 def initConfig():
     options.mqserver=getConfig('mqserver','localhost',options.configfile)
     options.taskexchange=getConfig('taskexchange','eventtask',options.configfile)
-    #options.esserver=getConfig('esserver','localhost',options.configfile)
-    options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     options.mquser=getConfig('mquser','guest',options.configfile)
     options.mqpassword=getConfig('mqpassword','guest',options.configfile)
     options.mqport=getConfig('mqport',5672,options.configfile)
