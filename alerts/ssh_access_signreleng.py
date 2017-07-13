@@ -12,16 +12,19 @@
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch
 import re
+import json
 
 
 class AlertAuthSignRelengSSH(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=15)
 
-        self.parse_config('ssh_access_signreleng.conf', ['hostfilter', 'users', 'ircchannel'])
+        self.parse_config('ssh_access_signreleng.conf', ['hostfilter', 'ircchannel', 'exclusions'])
 
         if self.config.ircchannel == '':
             self.config.ircchannel = None
+
+        exclusions = json.loads(self.config.exclusions)
 
         search_query.add_must([
             TermMatch('tags', 'releng'),
@@ -30,8 +33,16 @@ class AlertAuthSignRelengSSH(AlertTask):
             PhraseMatch('summary', 'Accepted publickey for ')
         ])
 
-        for x in self.config.users.split():
-            search_query.add_must_not(PhraseMatch('summary', x))
+        for exclusion in exclusions:
+            exclusion_query = None
+            for key, value in exclusion.iteritems():
+                phrase_exclusion = PhraseMatch(key, value)
+                if exclusion_query is None:
+                    exclusion_query = phrase_exclusion
+                else:
+                    exclusion_query = exclusion_query + phrase_exclusion
+
+            search_query.add_must_not(exclusion_query)
 
         self.filtersManual(search_query)
         self.searchEventsSimple()
