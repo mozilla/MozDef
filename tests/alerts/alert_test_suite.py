@@ -159,3 +159,7 @@ class AlertTestSuite(UnitTestSuite):
     @staticmethod
     def create_event(default_event):
         return copy.deepcopy(default_event)
+
+    @staticmethod
+    def create_alert(default_alert):
+        return AlertTestSuite.create_event(default_alert)
