@@ -9,7 +9,7 @@ services:
   - rabbitmq
 install:
   - "pip install -r requirements.txt"
-  - "pip install -r requirements_tests.txt"
+  - "pip install -r tests/requirements_tests.txt"
 before_script:
   - sleep 5
 script:
