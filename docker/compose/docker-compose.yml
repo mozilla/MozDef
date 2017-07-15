@@ -1,0 +1,93 @@
+---
+version: '2'
+services:
+  nginx:
+    build: nginx/
+    restart: always
+    command: /usr/sbin/nginx
+    depends_on:
+      - kibana
+      - elasticsearch
+    ports:
+      - 80:80
+      - 9090:9090
+    networks:
+      - default
+  mongodb:
+    build: mongodb/
+    restart: always
+    command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
+    volumes:
+      - mongodb:/var/lib/mongo
+    # ports:
+      # - 3002:3002
+    networks:
+      - default
+  kibana:
+    build: kibana/
+    restart: always
+    command: bin/kibana --elasticsearch=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    # ports:
+    #   - 5601:5601
+    networks:
+      - default
+  elasticsearch:
+    build: elasticsearch/
+    restart: always
+    command: bin/elasticsearch -Des.insecure.allow.root=true -Dnetwork.host=0.0.0.0
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    # ports:
+    #   - 9200:9200
+    networks:
+      - default
+  rabbitmq:
+    build: rabbitmq/
+    restart: always
+    command: rabbitmq-server
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    # ports:
+    #   - 5672:5672
+    #   - 15672:15672
+    networks:
+      - default
+
+  # MozDef Specific Containers
+  base:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_base/Dockerfile
+    command: init 0
+    networks:
+      - default
+  loginput:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_loginput/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python loginput/index.py -c loginput/index.conf'
+    depends_on:
+      - base
+    networks:
+      - default
+  rest:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_rest/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python rest/index.py -c rest/index.conf'
+    depends_on:
+      - base
+    networks:
+      - default
+
+volumes:
+  elasticsearch:
+  rabbitmq:
+  mongodb:
+
+networks:
+  default:
