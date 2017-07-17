@@ -20,7 +20,7 @@ class AlertAccountCreations(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'event'),
             TermMatch('tags', 'firefoxaccounts'),
-            PhraseMatch('details.path', 'accountCreate')
+            PhraseMatch('details.action', 'accountCreate')
         ])
 
         # ignore test accounts and attempts to create accounts that already exist.
