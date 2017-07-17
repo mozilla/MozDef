@@ -34,7 +34,7 @@ class message(object):
                              'fxabrowseridwebserver',
                              'fxaprofilewebserver',
                              'fxa-auth-server',
-                             'Fxa-customsMozSvc'
+                             'fxa-customsmozsvc'
                              ]
         self.priority = 10
 
