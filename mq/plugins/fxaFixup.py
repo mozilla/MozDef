@@ -33,13 +33,14 @@ class message(object):
                              'fxaoauthwebserver',
                              'fxabrowseridwebserver',
                              'fxaprofilewebserver',
-                             'fxa-auth-server'
+                             'fxa-auth-server',
+                             'Fxa-customsMozSvc'
                              ]
         self.priority = 10
 
     def onMessage(self, message, metadata):
         #drop non-relevant messages
-        if message['eventsource'] in ('FxaContentWebserver', 'FxaAuthWebserver', 'FxaOauthWebserver', 'FxaAuth', 'fxa-auth-server'):
+        if message['eventsource'] in ('Fxa-customsMozSvc', 'FxaContentWebserver', 'FxaAuthWebserver', 'FxaOauthWebserver', 'FxaAuth', 'fxa-auth-server'):
             if 'details' in message.keys():
                 if 'status' in message['details']:
                     if message['details']['status'] == 200:
