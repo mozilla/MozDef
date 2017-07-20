@@ -26,6 +26,9 @@ if (Meteor.isClient) {
         Session.set('attackerlimit','10');
         getAllPlugins();
 
+        // Sends us to register our login handler
+        // and then to the login function of choice
+        // based on how enableClientAccountCreation was set at deployment.
         Meteor.login();
 
         //see if we have a myo armband

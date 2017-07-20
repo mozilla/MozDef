@@ -19,7 +19,7 @@ mozdef = {
   rootAPI: "https://localhost:8444",
   kibanaURL: "https://localhost:9443/app/kibana#",
   enableBlockIP: true,
-  enableClientAccountCreation: false,
+  enableClientAccountCreation: true,
   authenticationType: "meteor-password"
 }
 
