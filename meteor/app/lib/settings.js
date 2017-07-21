@@ -8,6 +8,7 @@ Contributors:
 Jeff Bryner jbryner@mozilla.com
 Anthony Verez averez@mozilla.com
 Brandon Myers bmyers@mozilla.com
+Alicia Smith asmith@mozilla.com
 */
 
 //configuration settings
@@ -18,6 +19,7 @@ mozdef = {
   rootAPI: "https://localhost:8444",
   kibanaURL: "https://localhost:9443/app/kibana#",
   enableBlockIP: true,
-  enableClientAccountCreation: false
+  enableClientAccountCreation: true,
+  authenticationType: "meteor-password"
 }
 
