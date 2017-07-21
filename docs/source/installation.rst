@@ -258,12 +258,14 @@ RabbitMQ
 
 `RabbitMQ`_ is used on workers to have queues of events waiting to be inserted into the Elasticsearch cluster (storage).
 
-RabbitMQ does provide a zero-dependency RPM that you can find for RedHat/CentOS here:
+RabbitMQ does provide a zero-dependency RPM that you can find for RedHat/CentOS here::
 https://github.com/rabbitmq/erlang-rpm
 
 For Debian/Ubuntu based distros you would need to install erlang separately.
 
 To install it, first make sure you enabled `EPEL repos`_. Then you need to install an Erlang environment.
+
+If you prefer to install all the dependencies on a Red Hat based system you can do the following::
 On Yum-based systems::
 
   sudo yum install erlang
@@ -339,6 +341,18 @@ mozdef = {
   enableBlockIP: true,
   enableClientAccountCreation: true,
   authenticationType: "meteor-password"
+}
+
+or for an OIDC implementation that passes a header to the nginx reverse proxy (for example using OpenResty with Lua and Auth0)::
+
+mozdef = {
+  rootURL: "localhost",
+  port: "443",
+  rootAPI: "https://localhost:8444",
+  kibanaURL: "https://localhost:9443/app/kibana#",
+  enableBlockIP: true,
+  enableClientAccountCreation: false,
+  authenticationType: "OIDC"
 }
 
 Then start meteor with::
