@@ -65,4 +65,4 @@ multiple-build:
 multiple-stop:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
 
-multiple-full: multiple-build multiple-stop multiple-run
+multiple-rebuild: multiple-build multiple-stop multiple-run

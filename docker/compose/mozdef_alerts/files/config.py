@@ -18,7 +18,7 @@ ALERTS = {
 }
 
 RABBITMQ = {
-    'mqserver': 'localhost',
+    'mqserver': 'rabbitmq',
     'mquser': 'guest',
     'mqpassword': 'guest',
     'mqport': 5672,
@@ -27,7 +27,7 @@ RABBITMQ = {
 }
 
 ES = {
-    'servers': ['http://localhost:9200']
+    'servers': ['http://elasticsearch:9200']
 }
 
 OPTIONS = {

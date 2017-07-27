@@ -7,7 +7,7 @@ services:
     command: /usr/sbin/nginx
     depends_on:
       - kibana
-      - elasticsearch
+      # - meteor
     ports:
       - 80:80
       - 9090:9090
@@ -39,8 +39,8 @@ services:
     command: bin/elasticsearch -Des.insecure.allow.root=true -Dnetwork.host=0.0.0.0
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
-    # ports:
-    #   - 9200:9200
+    ports:
+      - 9200:9200
     networks:
       - default
   rabbitmq:
@@ -63,6 +63,41 @@ services:
     command: init 0
     networks:
       - default
+  alerts:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_alerts/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
+    depends_on:
+      - base
+      - elasticsearch
+      - rabbitmq
+    networks:
+      - default
+  # bot:
+  #   build:
+  #     context: ../../
+  #     dockerfile: docker/compose/mozdef_bot/Dockerfile
+  #   restart: always
+  #   command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python bot/mozdefbot.py -c bot/mozdefbot.conf'
+  #   depends_on:
+  #     - base
+  #     - rabbitmq
+  #   networks:
+  #     - default
+  meteor:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_meteor/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && node bundle/main.js'
+    depends_on:
+      - base
+    # ports:
+    #   - 3000
+    networks:
+      - default
   loginput:
     build:
       context: ../../
@@ -71,6 +106,10 @@ services:
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python loginput/index.py -c loginput/index.conf'
     depends_on:
       - base
+      - elasticsearch
+      - rabbitmq
+    ports:
+      - 8080
     networks:
       - default
   rest:
@@ -81,6 +120,10 @@ services:
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python rest/index.py -c rest/index.conf'
     depends_on:
       - base
+      - elasticsearch
+      - mongodb
+    ports:
+      - 8081
     networks:
       - default
 

@@ -3,6 +3,7 @@ FROM centos:7
 MAINTAINER mozdef@mozilla.com
 
 ENV PYTHON_VERSION 2.7.11
+ENV TZ UTC
 
 RUN \
   yum install -y epel-release && \
@@ -27,7 +28,8 @@ RUN \
                     python-pip && \
   chown -R mozdef:mozdef /opt/mozdef/ && \
   pip install virtualenv && \
-  mkdir /opt/mozdef/envs/mozdef
+  mkdir /opt/mozdef/envs/mozdef && \
+  yum clean all
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
