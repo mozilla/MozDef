@@ -140,9 +140,9 @@ services:
   mq_syslog:
     build:
       context: ../../
-      dockerfile: docker/compose/mozdef_mq_syslog/Dockerfile
+      dockerfile: docker/compose/mozdef_mq_worker/Dockerfile
     restart: always
-    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python mq/esworker.py -c mq/syslog_worker.conf'
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python esworker.py -c syslog_worker.conf'
     scale: 1
     depends_on:
       - base
