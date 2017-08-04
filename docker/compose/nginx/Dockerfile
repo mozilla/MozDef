@@ -5,7 +5,8 @@ MAINTAINER mozdef@mozilla.com
 RUN \
   mkdir /var/log/mozdef && \
   yum install -y epel-release && \
-  yum install -y nginx
+  yum install -y nginx && \
+  yum clean all
 
 
 COPY files/nginx.conf /etc/nginx/nginx.conf

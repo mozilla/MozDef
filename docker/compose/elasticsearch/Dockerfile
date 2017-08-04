@@ -7,7 +7,8 @@ ENV ES_JAVA_VERSION 1.8.0
 
 RUN \
   yum install -y java-$ES_JAVA_VERSION && \
-  curl -s -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C / -xz
+  curl -s -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C / -xz && \
+  yum clean all
 
 WORKDIR /elasticsearch-$ES_VERSION
 
