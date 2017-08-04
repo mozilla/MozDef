@@ -59,11 +59,16 @@ class UnitTestSuite(object):
         self.es_client.save_event(body=event, doc_type=event_type)
 
     def setup_elasticsearch(self):
-        self.es_client.create_index(self.event_index_name)
+        default_mapping_file = os.path.join(os.path.dirname(__file__), "../config/defaultMappingTemplate.json")
+        mapping_str = ''
+        with open(default_mapping_file) as data_file:
+            mapping_str = data_file.read()
+
+        self.es_client.create_index(self.event_index_name, mapping=mapping_str)
         self.es_client.create_alias('events', self.event_index_name)
-        self.es_client.create_index(self.previous_event_index_name)
+        self.es_client.create_index(self.previous_event_index_name, mapping=mapping_str)
         self.es_client.create_alias('events-previous', self.previous_event_index_name)
-        self.es_client.create_index(self.alert_index_name)
+        self.es_client.create_index(self.alert_index_name, mapping=mapping_str)
         self.es_client.create_alias('alerts', self.alert_index_name)
 
     def reset_elasticsearch(self):
