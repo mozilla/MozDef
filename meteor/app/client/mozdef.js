@@ -9,6 +9,7 @@ Jeff Bryner jbryner@mozilla.com
 Anthony Verez averez@mozilla.com
 Yash Mehrotra yashmehrotra95@gmail.com
 Avijit Gupta 526avijit@gmail.com
+Alicia Smith asmith@mozilla.com
 */
 
 if (Meteor.isClient) {
@@ -25,10 +26,10 @@ if (Meteor.isClient) {
         Session.set('attackerlimit','10');
         getAllPlugins();
 
-        //assumes connection to an nginx/apache front end
-        //serving up an site handling authentication set via
-        //server side header
-        Meteor.loginViaHeader();
+        // Sends us to register our login handler
+        // and then to the login function of choice
+        // based on how enableClientAccountCreation was set at deployment.
+        Meteor.login();
 
         //see if we have a myo armband
         try{
@@ -369,7 +370,27 @@ if (Meteor.isClient) {
         }
     });
 
-    //sample login function
+    // login abstraction
+    Meteor.login = function(callback) {
+        var authenticationType = mozdef.authenticationType;
+        switch(authenticationType){
+            case 'meteor-password':
+                Meteor.loginViaPassword(callback);
+                break;
+            case 'oidc':
+                Meteor.loginViaHeader(callback);
+                break;
+            default:
+                // non-breaking default of header
+                // todo: evaluate defaulting to meteor-password
+                Meteor.loginViaHeader(callback);
+                break;
+        }
+    }
+
+    //assumes connection to an nginx/apache front end
+    //serving up an site handling authentication set via
+    //server side header
     Meteor.loginViaHeader = function(callback) {
       //create a login request to pass to loginHandler
       var loginRequest = {};
@@ -378,6 +399,10 @@ if (Meteor.isClient) {
         methodArguments: [loginRequest],
         userCallback: callback
       });
+    };
+
+    Meteor.loginViaPassword = function(callback) {
+        // noop - allow meteor to pass through
     };
 
 };

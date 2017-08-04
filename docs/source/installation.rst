@@ -192,16 +192,18 @@ Marvel plugin
 
 `Marvel`_ is a monitoring plugin developed by Elasticsearch (the company).
 
-WARNING: this plugin is NOT open source. At the time of writing, Marvel is free for development but you have to get a license for production.
+WARNING: this plugin is NOT open source. At the time of writing, Marvel is free for 30 days. 
+After which you can apply for a free basic license to continue using it for it's key monitoring features.
 
 To install Marvel, on each of your elasticsearch node, from the Elasticsearch home directory::
 
-  sudo bin/plugin -i elasticsearch/marvel/latest
+  sudo bin/plugin install license
+  sudo bin/plugin install marvel-agent
   sudo service elasticsearch restart
 
 You should now be able to access to Marvel at http://any-server-in-cluster:9200/_plugin/marvel
 
-.. _Marvel: http://www.elasticsearch.org/overview/marvel/
+.. _Marvel: https://www.elastic.co/guide/en/marvel/current/introduction.html
 
 Web and Workers nodes
 ---------------------
@@ -228,9 +230,9 @@ On APT-based systems::
 Then::
 
   su - mozdef
-  wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
-  tar xvzf Python-2.7.6.tgz
-  cd Python-2.7.6
+  wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
+  tar xvzf Python-2.7.11.tgz
+  cd Python-2.7.11
   ./configure --prefix=/opt/mozdef/python2.7 --enable-shared
   make
   make install
@@ -247,7 +249,7 @@ Then::
   source mozdef/bin/activate
   pip install -r MozDef/requirements.txt
 
-At this point when you launch python, It should tell you that you're using Python 2.7.6.
+At this point when you launch python, It should tell you that you're using Python 2.7.11.
 
 Whenever you launch a python script from now on, you should have your mozdef virtualenv actived and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/
 
@@ -256,14 +258,21 @@ RabbitMQ
 
 `RabbitMQ`_ is used on workers to have queues of events waiting to be inserted into the Elasticsearch cluster (storage).
 
+RabbitMQ does provide a zero-dependency RPM that you can find for RedHat/CentOS here::
+https://github.com/rabbitmq/erlang-rpm
+
+For Debian/Ubuntu based distros you would need to install erlang separately.
+
 To install it, first make sure you enabled `EPEL repos`_. Then you need to install an Erlang environment.
+
+If you prefer to install all the dependencies on a Red Hat based system you can do the following::
 On Yum-based systems::
 
   sudo yum install erlang
 
 You can then install the rabbitmq server::
 
-  sudo rpm --import http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
+  sudo rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
   sudo yum install rabbitmq-server
 
 To start rabbitmq at startup::
@@ -307,33 +316,51 @@ For meteor, in a terminal::
 
   curl https://install.meteor.com/ | sh
 
-  wget http://nodejs.org/dist/v0.10.26/node-v0.10.26.tar.gz
-  tar xvzf node-v0.10.26.tar.gz
-  cd node-v0.10.26
+  wget https://nodejs.org/dist/v4.7.0/node-v4.7.0.tar.gz
+  tar xvzf node-v4.7.0.tar.gz
+  cd node-v4.7.0
   ./configure
   make
   sudo make install
 
-Make sure you have meteorite/mrt (run as root/admin)::
-
-  npm install -g meteorite
-
 Then from the meteor subdirectory of this git repository (/opt/mozdef/MozDef/meteor)  run::
 
-  mrt add iron-router
-  mrt add accounts-persona
+  meteor add iron-router
 
-You may want to edit the app/lib/settings.js file to properly point to your elastic search server::
+If you wish to use meteor as the authentication handler you'll also need to install the Accounts-Password pkg::
+  meteor add accounts-password
 
-  elasticsearch={
-    address:"http://servername:9200/",
-    healthurl:"_cluster/health",
-    docstatsurl:"_stats/docs"
-  }
+You may want to edit the app/lib/settings.js file to properly configure the URLs and Authentication
+The default setting will use Meteor Accounts, but you can just as easily install an external provider like Github, Google, Facebook or your own OIDC::
+
+mozdef = {
+  rootURL: "localhost",
+  port: "443",
+  rootAPI: "https://localhost:8444",
+  kibanaURL: "https://localhost:9443/app/kibana#",
+  enableBlockIP: true,
+  enableClientAccountCreation: true,
+  authenticationType: "meteor-password"
+}
+
+or for an OIDC implementation that passes a header to the nginx reverse proxy (for example using OpenResty with Lua and Auth0)::
+
+mozdef = {
+  rootURL: "localhost",
+  port: "443",
+  rootAPI: "https://localhost:8444",
+  kibanaURL: "https://localhost:9443/app/kibana#",
+  enableBlockIP: true,
+  enableClientAccountCreation: false,
+  authenticationType: "OIDC"
+}
 
 Then start meteor with::
 
   meteor
+
+.. _meteor: https://guide.meteor.com/
+.. _meteor-accounts: https://guide.meteor.com/accounts.html
 
 
 Node
@@ -344,9 +371,9 @@ Alternatively you can run the meteor UI in 'deployment' mode using a native node
 First install node::
 
     yum install bzip2 gcc gcc-c++ sqlite sqlite-devel
-    wget http://nodejs.org/dist/v0.10.25/node-v0.10.25.tar.gz
-    tar xvfz node-v0.10.25.tar.gz
-    cd node-v0.10.25
+    wget https://nodejs.org/dist/v4.7.0/node-v4.7.0.tar.gz
+    tar xvfz node-v4.7.0.tar.gz
+    cd node-v4.7.0
     python configure
     make
     make install
@@ -363,7 +390,7 @@ You can then deploy the meteor UI for mozdef as necessary::
 
 This will create a 'bundle' directory with the entire UI code below that directory.
 
-You will need to update the settings.js file to match your servername/port::
+If you didn't update the settings.js before bundling the meteor installation, you will need to update the settings.js file to match your servername/port::
 
   vim bundle/programs/server/app/app/lib/settings.js
 
@@ -374,7 +401,8 @@ the fibers node module::
   rm -rf fibers
   sudo npm install fibers@1.0.1
 
-Then run the mozdef UI via node::
+There are systemd unit files available in the systemd directory of the public repo you can use to start meteor using node. 
+If you aren't using systemd, then run the mozdef UI via node manually::
 
   export MONGO_URL=mongodb://mongoservername:3002/meteor
   export ROOT_URL=http://meteorUIservername/
@@ -400,11 +428,11 @@ On apt-get based system::
 
 If you don't have this package in your repos, before installing create `/etc/yum.repos.d/nginx.repo` with the following content::
 
-  [nginx]
-  name=nginx repo
-  baseurl=http://nginx.org/packages/centos/6/$basearch/
-  gpgcheck=0
-  enabled=1
+ [nginx]
+ name=nginx repo
+ baseurl=http://nginx.org/packages/OS/OSRELEASE/$basearch/
+ gpgcheck=0
+ enabled=1
 
 .. _nginx: http://nginx.org/
 
@@ -413,9 +441,9 @@ UWSGI
 
 We use `uwsgi`_ to interface python and nginx::
 
-  wget http://projects.unbit.it/downloads/uwsgi-2.0.2.tar.gz
-  tar zxvf uwsgi-2.0.2.tar.gz
-  cd uwsgi-2.0.2
+  wget https://projects.unbit.it/downloads/uwsgi-2.0.12.tar.gz
+  tar zxvf uwsgi-2.0.12.tar.gz
+  cd uwsgi-2.0.12
   ~/python2.7/bin/python uwsgiconfig.py --build
   ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/mozdef/bin/
@@ -442,16 +470,16 @@ We use `uwsgi`_ to interface python and nginx::
   sudo vim /etc/nginx/nginx.conf
   sudo service nginx restart
 
-.. _uwsgi: http://projects.unbit.it/uwsgi/
+.. _uwsgi: https://uwsgi-docs.readthedocs.io/en/latest/
 
 Kibana
 ******
 
 `Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data::
 
-  wget https://download.elasticsearch.org/kibana/kibana/kibana-3.0.0milestone5.tar.gz
-  tar xvzf kibana-3.0.0milestone5.tar.gz
-  mv kibana-3.0.0milestone5 kibana
+  wget https://download.elastic.co/kibana/kibana/kibana-4.6.2-linux-x86_64.tar.gz
+  tar xvzf kibana-4.6.2-linux-x86_64.tar.gz
+  ln -s kibana-4.6.2 kibana
   # configure /etc/nginx/nginx.conf to target this folder
   sudo service nginx reload
 
@@ -460,10 +488,12 @@ To initialize elasticsearch indices and load some sample data::
   cd examples/es-docs/
   python inject.py
 
-.. _Kibana: http://www.elasticsearch.org/overview/kibana
+.. _Kibana: https://www.elastic.co/products/kibana
 
 Start Services
 **************
+
+TO DO: Add in services like supervisord, and refer to systemd files.
 
 Start the following services
 
@@ -541,21 +571,22 @@ Manual Installation
 6. Installing Kibana ::
 
     $ cd /tmp/
-    $ curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz | tar -C /opt -xz
-    $ /bin/ln -s /opt/kibana-3.1.0 /opt/kibana
+    $ curl -L https://download.elastic.co/kibana/kibana/kibana-4.6.2-linux-x86_64.tar.gz | tar -C /opt -xz
+    $ /bin/ln -s /opt/kibana-4.6.2 /opt/kibana
     $ cp $MOZDEF_PATH/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
     $ cp $MOZDEF_PATH/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
 
 7. Installing Elasticsearch ::
 
-    $ wget https://gist.githubusercontent.com/yashmehrotra/3209a7e2c696c2ac5110/raw/9161ffb32ee79d48f4bce224f8710ac8c7e85922/ElasticSearch.sh
-    # You can download any version of ELasticSearch
-    $ ./ElasticSearch.sh 1.6.0
+    For Red Hat based:
+    $ wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/rpm/elasticsearch/2.4.5/elasticsearch-2.4.5.rpm
+    For Debian based:
+    $ wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.5/elasticsearch-2.4.5.deb
+    # You can download and install any version of ELasticSearch > 2.x and < 5.x
 
 8. Setting up Meteor ::
 
     $ curl -L https://install.meteor.com/ | /bin/sh
-    $ npm install -g meteorite
     $ cd $MOZDEF_PATH/meteor
     $ meteor
 

@@ -3,10 +3,11 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, PhraseMatch, WildcardMatch
@@ -19,19 +20,18 @@ class AlertAccountCreations(AlertTask):
         search_query.add_must([
             TermMatch('_type', 'event'),
             TermMatch('tags', 'firefoxaccounts'),
-            PhraseMatch('details.path', '/v1/account/create')
+            PhraseMatch('details.action', 'accountCreate')
         ])
 
         # ignore test accounts and attempts to create accounts that already exist.
         search_query.add_must_not([
             WildcardMatch('details.email', '*restmail.net'),
-            TermMatch('details.code', '429')
         ])
 
         self.filtersManual(search_query)
 
-        # Search aggregations on field 'sourceipv4address', keep X samples of events at most
-        self.searchEventsAggregated('details.sourceipv4address', samplesLimit=10)
+        # Search aggregations on field 'ip', keep X samples of events at most
+        self.searchEventsAggregated('details.ip', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         self.walkAggregations(threshold=10)
 
