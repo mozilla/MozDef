@@ -7,6 +7,7 @@
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 from celery.schedules import crontab, timedelta
 import time
