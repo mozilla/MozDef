@@ -18,8 +18,7 @@ from elasticsearch_client import ElasticsearchClient
 
 from utilities.toUTC import toUTC
 
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from dateutil.parser import parse
 
 import random
@@ -42,9 +41,10 @@ else:
 class UnitTestSuite(object):
 
     def setup(self):
-        self.event_index_name = datetime.now().strftime("events-%Y%m%d")
-        self.previous_event_index_name = (datetime.now() - timedelta(days=1)).strftime("events-%Y%m%d")
-        self.alert_index_name = datetime.now().strftime("alerts-%Y%m")
+        current_date = datetime.now()
+        self.event_index_name = current_date.strftime("events-%Y%m%d")
+        self.previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
+        self.alert_index_name = current_date.strftime("alerts-%Y%m")
         self.es_client = ElasticsearchClient(ES['servers'])
 
         if pytest.config.option.delete_indexes:

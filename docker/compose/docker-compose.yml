@@ -1,5 +1,5 @@
 ---
-version: '2'
+version: '2.2'
 services:
   nginx:
     build: nginx/
@@ -7,7 +7,7 @@ services:
     command: /usr/sbin/nginx
     depends_on:
       - kibana
-      # - meteor
+      - meteor
     ports:
       - 80:80
       - 9090:9090
@@ -19,8 +19,6 @@ services:
     command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
     volumes:
       - mongodb:/var/lib/mongo
-    # ports:
-      # - 3002:3002
     networks:
       - default
   kibana:
@@ -29,8 +27,6 @@ services:
     command: bin/kibana --elasticsearch=http://elasticsearch:9200
     depends_on:
       - elasticsearch
-    # ports:
-    #   - 5601:5601
     networks:
       - default
   elasticsearch:
@@ -49,9 +45,6 @@ services:
     command: rabbitmq-server
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-    # ports:
-    #   - 5672:5672
-    #   - 15672:15672
     networks:
       - default
 
@@ -60,7 +53,29 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_base/Dockerfile
-    command: init 0
+  bootstrap:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
+    command: /initial_setup.sh
+    depends_on:
+      - base
+      - elasticsearch
+      - rabbitmq
+    networks:
+      - default
+  alertplugins:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_alertplugins/Dockerfile
+    restart: always
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python alertWorker.py -c alertWorker.conf'
+    depends_on:
+      - base
+      - elasticsearch
+      - rabbitmq
+      - alerts
+      - bootstrap
     networks:
       - default
   alerts:
@@ -68,11 +83,12 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_alerts/Dockerfile
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
     depends_on:
       - base
       - elasticsearch
       - rabbitmq
+      - bootstrap
     networks:
       - default
   # bot:
@@ -80,12 +96,60 @@ services:
   #     context: ../../
   #     dockerfile: docker/compose/mozdef_bot/Dockerfile
   #   restart: always
-  #   command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python bot/mozdefbot.py -c bot/mozdefbot.conf'
+  #   command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python bot/mozdefbot.py -c bot/mozdefbot.conf'
   #   depends_on:
   #     - base
   #     - rabbitmq
+  #     - alerts
+  #     - bootstrap
   #   networks:
   #     - default
+  cron:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_cron/Dockerfile
+    restart: always
+    command: crond -n
+    volumes:
+      - cron:/opt/mozdef/envs/mozdef/cron
+    depends_on:
+      - base
+      - rabbitmq
+      - elasticsearch
+      - mongodb
+      - bootstrap
+    networks:
+      - default
+  loginput:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_loginput/Dockerfile
+    restart: always
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python loginput/index.py -c loginput/index.conf'
+    depends_on:
+      - base
+      - elasticsearch
+      - rabbitmq
+      - bootstrap
+    ports:
+      - 8080:8080
+    networks:
+      - default
+  mq_syslog:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_mq_syslog/Dockerfile
+    restart: always
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python mq/esworker.py -c mq/syslog_worker.conf'
+    scale: 2
+    depends_on:
+      - base
+      - rabbitmq
+      - elasticsearch
+      - loginput
+      - bootstrap
+    networks:
+      - default
   meteor:
     build:
       context: ../../
@@ -94,22 +158,7 @@ services:
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && node bundle/main.js'
     depends_on:
       - base
-    # ports:
-    #   - 3000
-    networks:
-      - default
-  loginput:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_loginput/Dockerfile
-    restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python loginput/index.py -c loginput/index.conf'
-    depends_on:
-      - base
-      - elasticsearch
-      - rabbitmq
-    ports:
-      - 8080
+      - bootstrap
     networks:
       - default
   rest:
@@ -122,8 +171,9 @@ services:
       - base
       - elasticsearch
       - mongodb
+      - bootstrap
     ports:
-      - 8081
+      - 8081:8081
     networks:
       - default
 
@@ -131,6 +181,7 @@ volumes:
   elasticsearch:
   rabbitmq:
   mongodb:
+  cron:
 
 networks:
   default:

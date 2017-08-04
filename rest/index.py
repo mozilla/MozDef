@@ -7,6 +7,7 @@
 # Jeff Bryner jbryner@mozilla.com
 # Anthony Verez averez@mozilla.com
 # Yash Mehrotra yashmehrotra95@gmail.com
+# Brandon Myers bmyers@mozilla.com
 
 import bottle
 import json
@@ -617,23 +618,15 @@ def initConfig():
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
 
+parser = OptionParser()
+parser.add_option("-c", dest='configfile',
+    default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
+    help="configuration file to use")
+(options, args) = parser.parse_args()
+initConfig()
+registerPlugins()
+
 if __name__ == "__main__":
-    parser = OptionParser()
-    parser.add_option("-c", dest='configfile',
-        default=sys.argv[0].replace('.py', '.conf'),
-        help="configuration file to use")
-    (options, args) = parser.parse_args()
-    initConfig()
-    registerPlugins()
-
-    run(host="localhost", port=8081)
+    run(host="0.0.0.0", port=8081)
 else:
-    parser = OptionParser()
-    parser.add_option("-c", dest='configfile',
-        default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
-        help="configuration file to use")
-    (options, args) = parser.parse_args()
-    initConfig()
-    registerPlugins()
-
     application = default_app()

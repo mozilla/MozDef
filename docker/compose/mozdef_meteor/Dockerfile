@@ -29,6 +29,7 @@ RUN \
   cp /opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
 COPY meteor /opt/mozdef/envs/mozdef/meteor
+COPY docker/compose/mozdef_meteor/files/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 RUN chown -R mozdef:mozdef /opt/mozdef/
 

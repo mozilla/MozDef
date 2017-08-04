@@ -1,4 +1,9 @@
 FROM mozdef_base:latest
 
-COPY docker/conf/initial_setup.sh /initial_setup.sh
-RUN chmod u+x /initial_setup.sh
+COPY docker/compose/mozdef_bootstrap/files/initial_setup.py /opt/mozdef/envs/mozdef/initial_setup.py
+
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/
+
+USER mozdef
+
+WORKDIR /opt/mozdef/envs/mozdef

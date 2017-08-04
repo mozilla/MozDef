@@ -1,10 +1,11 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2014 Mozilla Corporation
+# Copyright (c) 2017 Mozilla Corporation
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 import os
 import sys
@@ -15,6 +16,19 @@ import kombu
 from kombu import Connection,Queue,Exchange
 import json
 from configlib import getConfig,OptionParser
+
+
+@route('/status')
+@route('/status/')
+def status():
+    '''endpoint for a status/health check'''
+    if request.body:
+        request.body.read()
+        request.body.close()
+    response.status = 200
+    response.content_type = "application/json"
+    response.body = json.dumps(dict(status='ok'))
+    return response
 
 @route('/test')
 @route('/test/')
@@ -135,24 +149,24 @@ def initConfig():
     options.mqpassword=getConfig('mqpassword','guest',options.configfile)
     options.mqport=getConfig('mqport',5672,options.configfile)
 
+
+#get config info:
+parser=OptionParser()
+parser.add_option("-c", dest='configfile' , default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'), help="configuration file to use")
+(options,args) = parser.parse_args()
+initConfig()
+
+#connect and declare the message queue/kombu objects.
+connString='amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,options.mqpassword,options.mqserver,options.mqport)
+mqConn=Connection(connString)
+
+eventTaskExchange=Exchange(name=options.taskexchange,type='direct',durable=True)
+eventTaskExchange(mqConn).declare()
+eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange)
+eventTaskQueue(mqConn).declare()
+mqproducer = mqConn.Producer(serializer='json')
+
 if __name__ == "__main__":
-    run(host="localhost", port=8080)
+    run(host="0.0.0.0", port=8080)
 else:
-    #get config info:
-    parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'), help="configuration file to use")
-    (options,args) = parser.parse_args()
-    initConfig()
-
-    #connect and declare the message queue/kombu objects.
-    connString='amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,options.mqpassword,options.mqserver,options.mqport)
-    mqConn=Connection(connString)
-
-    eventTaskExchange=Exchange(name=options.taskexchange,type='direct',durable=True)
-    eventTaskExchange(mqConn).declare()
-    eventTaskQueue=Queue(options.taskexchange,exchange=eventTaskExchange)
-    eventTaskQueue(mqConn).declare()
-    mqproducer = mqConn.Producer(serializer='json')
-
     application = default_app()
-
