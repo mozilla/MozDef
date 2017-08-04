@@ -57,11 +57,10 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
-    command: /initial_setup.sh
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python initial_setup.py http://elasticsearch:9200'
     depends_on:
       - base
       - elasticsearch
-      - rabbitmq
     networks:
       - default
   alertplugins:
