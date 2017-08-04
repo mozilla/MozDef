@@ -49,12 +49,12 @@ if event_index_name not in all_indices:
     client.create_index(event_index_name, mapping=mapping_str)
 client.create_alias('events', event_index_name)
 
-if event_index_name not in previous_event_index_name:
+if previous_event_index_name not in all_indices:
     print "Creating " + previous_event_index_name
     client.create_index(previous_event_index_name, mapping=mapping_str)
 client.create_alias('events-previous', previous_event_index_name)
 
-if event_index_name not in alert_index_name:
+if alert_index_name not in all_indices:
     print "Creating " + alert_index_name
     client.create_index(alert_index_name)
 client.create_alias('alerts', alert_index_name)
