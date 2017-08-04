@@ -20,6 +20,7 @@ from elasticsearch_client import ElasticsearchClient
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
 parser.add_argument('esserver', help='Elasticsearch server (ex: http://elasticsearch:9200)')
+parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: defaultTemplateMapping.json)')
 args = parser.parse_args()
 
 
@@ -37,17 +38,20 @@ event_index_name = current_date.strftime("events-%Y%m%d")
 previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
 alert_index_name = current_date.strftime("alerts-%Y%m")
 
+mapping_str = ''
+with open(args.default_mapping_file) as data_file:
+    mapping_str = data_file.read()
 
 all_indices = client.get_indices()
 
 if event_index_name not in all_indices:
     print "Creating " + event_index_name
-    client.create_index(event_index_name)
+    client.create_index(event_index_name, mapping=mapping_str)
 client.create_alias('events', event_index_name)
 
 if event_index_name not in previous_event_index_name:
     print "Creating " + previous_event_index_name
-    client.create_index(previous_event_index_name)
+    client.create_index(previous_event_index_name, mapping=mapping_str)
 client.create_alias('events-previous', previous_event_index_name)
 
 if event_index_name not in alert_index_name:
