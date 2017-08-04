@@ -45,6 +45,8 @@ services:
     command: rabbitmq-server
     volumes:
       - rabbitmq:/var/lib/rabbitmq
+    # ports:
+    #   - 5672:15672
     networks:
       - default
 
@@ -140,7 +142,7 @@ services:
       dockerfile: docker/compose/mozdef_mq_syslog/Dockerfile
     restart: always
     command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python mq/esworker.py -c mq/syslog_worker.conf'
-    scale: 2
+    scale: 1
     depends_on:
       - base
       - rabbitmq

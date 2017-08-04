@@ -15,7 +15,7 @@ Brandon Myers bmyers@mozilla.com
 mozdef = {
   rootURL: "localhost",
   port: "80",
-  rootAPI: "http://restapi:8081",
+  rootAPI: "http://localhost:8081",
   kibanaURL: "http://localhost:9090/app/kibana#",
   enableBlockIP: false,
   enableClientAccountCreation: true
