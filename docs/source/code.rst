@@ -1,13 +1,13 @@
 Code
-====
+****
 
 Plugins
--------
+=======
 
 Plugins are supported in several places: Event Processing and the REST api.
 
 Event Processing
-================
+----------------
 The front-end event processing portion of MozDef supports python `plugins`_ to allow customization of the input chain.
 Plugins are simple python modules than can register for events with a priority, so they only see events with certain
 dictionary items/values and will get them in a predefined order.
@@ -28,7 +28,7 @@ To create a plugin, make a python class that presents a registration dictionary 
 
 
 Message Processing
-++++++++++++++++++
+^^^^^^^^^^^^^^^^^^
 
 To process a message, define an onMessage function within your class as follows:
 
@@ -47,14 +47,14 @@ to assign custom document types, set static document _id values, etc.
 
 
 Plugin Registration
-+++++++++++++++++++
+-------------------
 
 Simply place the .py file in the plugins directory where the esworker.py is located, restart the esworker.py process
 and it will recognize the plugin and pass it events as it sees them.
 
 
 REST Plugins
-============
+------------
 
 The REST API for MozDef also supports `python plugins`_ which allow you to customize your handling of API calls to suit your environment.
 Plugins are simple python modules than can register for REST endpoints with a priority, so they only see calls for that endpoint
@@ -101,7 +101,7 @@ at run time.
 
 
 Message Processing
-++++++++++++++++++
+^^^^^^^^^^^^^^^^^^
 
 To process a message, define an onMessage function within your class as follows:
 
@@ -127,7 +127,7 @@ return the request, response object once done:
 
 
 Plugin Registration
-+++++++++++++++++++
+^^^^^^^^^^^^^^^^^^^
 
 Simply place the .py file in the rest/plugins directory, restart the REST API process
 and it will recognize the plugin and pass it events as it sees them.
