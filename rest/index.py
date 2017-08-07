@@ -32,6 +32,8 @@ from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
 
 from utilities.toUTC import toUTC
+from utilities.logger import logger, initLogger
+
 
 options = None
 pluginList = list()   # tuple of module,registration dict,priority
@@ -443,7 +445,7 @@ def registerPlugins():
                         mdescription = mfile
 
                     if isinstance(mreg, list):
-                        print('[*] plugin {0} registered to receive messages from /{1}'.format(mfile, mreg))
+                        logger.info('[*] plugin {0} registered to receive messages from /{1}'.format(mfile, mreg))
                         pluginList.append((mfile, mname, mdescription, mreg, mpriority, mclass))
 
 
@@ -601,6 +603,10 @@ def verisSummary(verisRegex=None):
             sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
 
 def initConfig():
+    # output our log to stdout or syslog
+    options.output = getConfig('output', 'stdout', options.configfile)
+    options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)
+    options.syslogport = getConfig('syslogport', 514, options.configfile)
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
@@ -619,6 +625,7 @@ parser.add_option("-c", dest='configfile',
     help="configuration file to use")
 (options, args) = parser.parse_args()
 initConfig()
+initLogger(options)
 registerPlugins()
 
 if __name__ == "__main__":
