@@ -18,7 +18,42 @@ from unit_test_suite import UnitTestSuite
 
 
 class TestAggregation(UnitTestSuite):
-    def test_simple_aggregation(self):
+    def test_simple_aggregation_summary_field(self):
+        events = [
+            {"test": "value", "summary": "abvc"},
+            {"test": "value", "summary": "abvc"},
+            {"test": "value", "summary": "think"},
+            {"test": "value", "note": "think"},
+            {"test": "value", "summary": "abvc space line"},
+        ]
+        for event in events:
+            self.populate_test_event(event)
+        self.flush(self.event_index_name)
+
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('test', 'value'))
+        search_query.add_aggregation(Aggregation('summary'))
+        results = search_query.execute(self.es_client)
+
+        assert results['aggregations'].keys() == ['summary']
+
+        assert results['aggregations']['summary'].keys() == ['terms']
+        assert len(results['aggregations']['summary']['terms']) == 4
+        assert results['aggregations']['summary']['terms'][0].keys() == ['count', 'key']
+
+        assert results['aggregations']['summary']['terms'][0]['count'] == 3
+        assert results['aggregations']['summary']['terms'][0]['key'] == 'abvc'
+
+        assert results['aggregations']['summary']['terms'][1]['count'] == 1
+        assert results['aggregations']['summary']['terms'][1]['key'] == 'line'
+
+        assert results['aggregations']['summary']['terms'][2]['count'] == 1
+        assert results['aggregations']['summary']['terms'][2]['key'] == 'space'
+
+        assert results['aggregations']['summary']['terms'][3]['count'] == 1
+        assert results['aggregations']['summary']['terms'][3]['key'] == 'think'
+
+    def test_simple_aggregation_note_field(self):
         events = [
             {"test": "value", "note": "abvc"},
             {"test": "value", "note": "abvc"},
@@ -38,20 +73,17 @@ class TestAggregation(UnitTestSuite):
         assert results['aggregations'].keys() == ['note']
 
         assert results['aggregations']['note'].keys() == ['terms']
-        assert len(results['aggregations']['note']['terms']) == 4
+        assert len(results['aggregations']['note']['terms']) == 3
         assert results['aggregations']['note']['terms'][0].keys() == ['count', 'key']
 
-        assert results['aggregations']['note']['terms'][0]['count'] == 3
+        assert results['aggregations']['note']['terms'][0]['count'] == 2
         assert results['aggregations']['note']['terms'][0]['key'] == 'abvc'
 
         assert results['aggregations']['note']['terms'][1]['count'] == 1
-        assert results['aggregations']['note']['terms'][1]['key'] == 'line'
+        assert results['aggregations']['note']['terms'][1]['key'] == 'abvc space line'
 
         assert results['aggregations']['note']['terms'][2]['count'] == 1
-        assert results['aggregations']['note']['terms'][2]['key'] == 'space'
-
-        assert results['aggregations']['note']['terms'][3]['count'] == 1
-        assert results['aggregations']['note']['terms'][3]['key'] == 'think'
+        assert results['aggregations']['note']['terms'][2]['key'] == 'think'
 
     def test_multiple_aggregations(self):
         events = [
