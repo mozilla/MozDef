@@ -11,6 +11,9 @@
 import argparse
 
 from datetime import datetime, timedelta
+from time import sleep
+
+from elasticsearch.exceptions import ConnectionError
 
 import sys
 import os
@@ -42,7 +45,19 @@ mapping_str = ''
 with open(args.default_mapping_file) as data_file:
     mapping_str = data_file.read()
 
-all_indices = client.get_indices()
+
+all_indices = []
+for attempt in range(5):
+    try:
+        all_indices = client.get_indices()
+    except ConnectionError:
+        print 'Unable to connect to Elasticsearch...retrying'
+        sleep(2)
+    else:
+        break
+else:
+    print 'Cannot connect to Elasticsearch after 5 tries, exiting script.'
+    exit(1)
 
 if event_index_name not in all_indices:
     print "Creating " + event_index_name
