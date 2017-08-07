@@ -504,7 +504,6 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         for t in results['aggregations']['details.dn']['terms']:
             if t['key'] in stoplist:
                 continue
-            #print(t['key'])
             failures = 0
             success = 0
             dn = t['key']
@@ -518,7 +517,6 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
             results = details_query.execute(es_client)
 
             for t in results['aggregations']['details.result']['terms']:
-                #print(t['key'],t['count'])
                 if t['key'].upper() == 'LDAP_SUCCESS':
                     success = t['count']
                 if t['key'].upper() == 'LDAP_INVALID_CREDENTIALS':
@@ -553,9 +551,6 @@ def kibanaDashboards():
 
     except Exception as e:
         sys.stderr.write('Kibana dashboard received error: {0}\n'.format(e))
-
-    if resultsList == []:
-        sys.stderr.write('No Kibana dashboard found\n')
 
     return json.dumps(resultsList)
 
