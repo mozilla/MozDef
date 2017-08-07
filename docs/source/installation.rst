@@ -167,8 +167,12 @@ Step by Step::
 .. _installing docker: https://docs.docker.com/installation/#installation
 .. _instructions: http://mozdef.readthedocs.org/en/latest/installation.html#dockerfile
 
-MozDef manual installation process
-----------------------------------
+
+MozDef manual installation process on RedHat systems
+----------------------------------------------------
+
+Summary
+*******
 This section explains the manual installation process for the MozDef system.
   git clone https://github.com/mozilla/MozDef.git
 
@@ -239,7 +243,7 @@ Then::
 
   cd /opt/mozdef
 
-  wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+  wget https://bootstrap.pypa.io/get-pip.py
   export LD_LIBRARY_PATH=/opt/mozdef/python2.7/lib/
   ./python2.7/bin/python get-pip.py
   ./python2.7/bin/pip install virtualenv
