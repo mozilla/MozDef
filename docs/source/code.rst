@@ -47,7 +47,7 @@ to assign custom document types, set static document _id values, etc.
 
 
 Plugin Registration
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Simply place the .py file in the plugins directory where the esworker.py is located, restart the esworker.py process
 and it will recognize the plugin and pass it events as it sees them.
