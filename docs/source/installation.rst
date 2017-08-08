@@ -196,7 +196,7 @@ Marvel plugin
 
 `Marvel`_ is a monitoring plugin developed by Elasticsearch (the company).
 
-WARNING: this plugin is NOT open source. At the time of writing, Marvel is free for 30 days. 
+WARNING: this plugin is NOT open source. At the time of writing, Marvel is free for 30 days.
 After which you can apply for a free basic license to continue using it for it's key monitoring features.
 
 To install Marvel, on each of your elasticsearch node, from the Elasticsearch home directory::
@@ -327,43 +327,45 @@ For meteor, in a terminal::
   make
   sudo make install
 
-Then from the meteor subdirectory of this git repository (/opt/mozdef/MozDef/meteor)  run::
+Then from the meteor subdirectory of this git repository (/opt/mozdef/MozDef/meteor) run::
 
   meteor add iron-router
 
 If you wish to use meteor as the authentication handler you'll also need to install the Accounts-Password pkg::
+
   meteor add accounts-password
 
 You may want to edit the app/lib/settings.js file to properly configure the URLs and Authentication
 The default setting will use Meteor Accounts, but you can just as easily install an external provider like Github, Google, Facebook or your own OIDC::
 
-mozdef = {
-  rootURL: "localhost",
-  port: "443",
-  rootAPI: "https://localhost:8444",
-  kibanaURL: "https://localhost:9443/app/kibana#",
-  enableBlockIP: true,
-  enableClientAccountCreation: true,
-  authenticationType: "meteor-password"
-}
+  mozdef = {
+    rootURL: "localhost",
+    port: "443",
+    rootAPI: "https://localhost:8444",
+    kibanaURL: "https://localhost:9443/app/kibana#",
+    enableBlockIP: true,
+    enableClientAccountCreation: true,
+    authenticationType: "meteor-password"
+  }
 
 or for an OIDC implementation that passes a header to the nginx reverse proxy (for example using OpenResty with Lua and Auth0)::
 
-mozdef = {
-  rootURL: "localhost",
-  port: "443",
-  rootAPI: "https://localhost:8444",
-  kibanaURL: "https://localhost:9443/app/kibana#",
-  enableBlockIP: true,
-  enableClientAccountCreation: false,
-  authenticationType: "OIDC"
-}
+  mozdef = {
+    rootURL: "localhost",
+    port: "443",
+    rootAPI: "https://localhost:8444",
+    kibanaURL: "https://localhost:9443/app/kibana#",
+    enableBlockIP: true,
+    enableClientAccountCreation: false,
+    authenticationType: "OIDC"
+  }
 
 Then start meteor with::
 
   meteor
 
-.. _meteor: https://guide.meteor.com/
+.. _Meteor: https://guide.meteor.com/
+.. _Mongodb: https://www.mongodb.org/
 .. _meteor-accounts: https://guide.meteor.com/accounts.html
 
 
@@ -405,7 +407,7 @@ the fibers node module::
   rm -rf fibers
   sudo npm install fibers@1.0.1
 
-There are systemd unit files available in the systemd directory of the public repo you can use to start meteor using node. 
+There are systemd unit files available in the systemd directory of the public repo you can use to start meteor using node.
 If you aren't using systemd, then run the mozdef UI via node manually::
 
   export MONGO_URL=mongodb://mongoservername:3002/meteor
@@ -413,9 +415,6 @@ If you aren't using systemd, then run the mozdef UI via node manually::
   export PORT=443
   node bundle/main.js
 
-
-.. _Meteor: https://www.meteor.com/
-.. _Mongodb: https://www.mongodb.org/
 
 Nginx
 *****
