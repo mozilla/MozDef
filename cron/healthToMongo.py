@@ -80,7 +80,8 @@ def getEsNodesStats():
     results = []
     for nodeid in jsonobj['nodes']:
         # Skip non masters and data nodes since it won't have full stats
-        if (jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
+        if ('attributes' in jsonobj['nodes'][nodeid] and
+                jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
                 jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
             continue
 

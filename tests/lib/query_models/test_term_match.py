@@ -36,17 +36,8 @@ class TestTermMatchPositiveTestSuite(PositiveTestSuite):
 
             TermMatch('details.results', 'LDAP_INVALID_CREDENTIALS'): [
                 {
-                    'details':
-                    {
+                    'details': {
                         "results": "LDAP_INVALID_CREDENTIALS",
-                    }
-                }
-            ],
-            TermMatch('details.results', 'ldap'): [
-                {
-                    'details':
-                    {
-                        "results": "LDAP",
                     }
                 }
             ],
@@ -61,6 +52,13 @@ class TestTermMatchPositiveTestSuite(PositiveTestSuite):
 class TestTermMatchNegativeTestSuite(NegativeTestSuite):
     def query_tests(self):
         tests = {
+            TermMatch('details.resultss', 'ldap'): [
+                {
+                    'details': {
+                        "resultss": "LDAP",
+                    }
+                }
+            ],
             TermMatch('summary', 'test'): [
                 {'summary': 'example summary'},
                 {'summary': 'example summary tes'},
@@ -68,6 +66,14 @@ class TestTermMatchNegativeTestSuite(NegativeTestSuite):
                 {'summary': 'test.mozilla.domain'},
                 {'summary': 'mozilla.test.domain'},
                 {'summary': 'mozilla.test'},
+            ],
+            TermMatch('note', 'test'): [
+                {'note': 'example note'},
+                {'note': 'example note tes'},
+                {'note': 'testing'},
+                {'summnoteary': 'test.mozilla.domain'},
+                {'note': 'mozilla.test.domain'},
+                {'note': 'mozilla.test'},
             ],
             TermMatch('summary', 'sum'): [
                 {'summary': 'example test summary'},

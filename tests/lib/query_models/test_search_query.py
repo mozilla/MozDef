@@ -261,14 +261,11 @@ class TestExecute(SearchQueryUnitTest):
 
         assert results['aggregations']['note'].keys() == ['terms']
 
-        assert len(results['aggregations']['note']['terms']) == 2
+        assert len(results['aggregations']['note']['terms']) == 1
 
         results['aggregations']['note']['terms'].sort()
         assert results['aggregations']['note']['terms'][0]['count'] == 2
-        assert results['aggregations']['note']['terms'][0]['key'] == 'example'
-
-        assert results['aggregations']['note']['terms'][1]['count'] == 2
-        assert results['aggregations']['note']['terms'][1]['key'] == 'note'
+        assert results['aggregations']['note']['terms'][0]['key'] == 'Example note'
 
     def test_simple_query_execute(self):
         query = SearchQuery()

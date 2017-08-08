@@ -18,8 +18,7 @@ from elasticsearch_client import ElasticsearchClient
 
 from utilities.toUTC import toUTC
 
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from dateutil.parser import parse
 
 import random
@@ -42,9 +41,10 @@ else:
 class UnitTestSuite(object):
 
     def setup(self):
-        self.event_index_name = datetime.now().strftime("events-%Y%m%d")
-        self.previous_event_index_name = (datetime.now() - timedelta(days=1)).strftime("events-%Y%m%d")
-        self.alert_index_name = datetime.now().strftime("alerts-%Y%m")
+        current_date = datetime.now()
+        self.event_index_name = current_date.strftime("events-%Y%m%d")
+        self.previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
+        self.alert_index_name = current_date.strftime("alerts-%Y%m")
         self.es_client = ElasticsearchClient(ES['servers'])
 
         if pytest.config.option.delete_indexes:
@@ -59,11 +59,16 @@ class UnitTestSuite(object):
         self.es_client.save_event(body=event, doc_type=event_type)
 
     def setup_elasticsearch(self):
-        self.es_client.create_index(self.event_index_name)
+        default_mapping_file = os.path.join(os.path.dirname(__file__), "../config/defaultMappingTemplate.json")
+        mapping_str = ''
+        with open(default_mapping_file) as data_file:
+            mapping_str = data_file.read()
+
+        self.es_client.create_index(self.event_index_name, mapping=mapping_str)
         self.es_client.create_alias('events', self.event_index_name)
-        self.es_client.create_index(self.previous_event_index_name)
+        self.es_client.create_index(self.previous_event_index_name, mapping=mapping_str)
         self.es_client.create_alias('events-previous', self.previous_event_index_name)
-        self.es_client.create_index(self.alert_index_name)
+        self.es_client.create_index(self.alert_index_name, mapping=mapping_str)
         self.es_client.create_alias('alerts', self.alert_index_name)
 
     def reset_elasticsearch(self):

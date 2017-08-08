@@ -7,6 +7,7 @@
 #
 # Contributors:
 # Anthony Verez averez@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 from celery.schedules import crontab, timedelta
 import time
@@ -18,7 +19,7 @@ ALERTS = {
 }
 
 RABBITMQ = {
-    'mqserver': 'localhost',
+    'mqserver': 'rabbitmq',
     'mquser': 'guest',
     'mqpassword': 'guest',
     'mqport': 5672,
@@ -27,7 +28,7 @@ RABBITMQ = {
 }
 
 ES = {
-    'servers': ['http://localhost:9200']
+    'servers': ['http://elasticsearch:9200']
 }
 
 OPTIONS = {

@@ -7,6 +7,7 @@
 # Jeff Bryner jbryner@mozilla.com
 # Anthony Verez averez@mozilla.com
 # Yash Mehrotra yashmehrotra95@gmail.com
+# Brandon Myers bmyers@mozilla.com
 
 import bottle
 import json
@@ -31,6 +32,8 @@ from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
 
 from utilities.toUTC import toUTC
+from utilities.logger import logger, initLogger
+
 
 options = None
 pluginList = list()   # tuple of module,registration dict,priority
@@ -442,7 +445,7 @@ def registerPlugins():
                         mdescription = mfile
 
                     if isinstance(mreg, list):
-                        print('[*] plugin {0} registered to receive messages from /{1}'.format(mfile, mreg))
+                        logger.info('[*] plugin {0} registered to receive messages from /{1}'.format(mfile, mreg))
                         pluginList.append((mfile, mname, mdescription, mreg, mpriority, mclass))
 
 
@@ -503,7 +506,6 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
         for t in results['aggregations']['details.dn']['terms']:
             if t['key'] in stoplist:
                 continue
-            #print(t['key'])
             failures = 0
             success = 0
             dn = t['key']
@@ -517,7 +519,6 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
             results = details_query.execute(es_client)
 
             for t in results['aggregations']['details.result']['terms']:
-                #print(t['key'],t['count'])
                 if t['key'].upper() == 'LDAP_SUCCESS':
                     success = t['count']
                 if t['key'].upper() == 'LDAP_INVALID_CREDENTIALS':
@@ -552,9 +553,6 @@ def kibanaDashboards():
 
     except Exception as e:
         sys.stderr.write('Kibana dashboard received error: {0}\n'.format(e))
-
-    if resultsList == []:
-        sys.stderr.write('No Kibana dashboard found\n')
 
     return json.dumps(resultsList)
 
@@ -605,6 +603,10 @@ def verisSummary(verisRegex=None):
             sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
 
 def initConfig():
+    # output our log to stdout or syslog
+    options.output = getConfig('output', 'stdout', options.configfile)
+    options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)
+    options.syslogport = getConfig('syslogport', 514, options.configfile)
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
@@ -617,23 +619,16 @@ def initConfig():
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
 
+parser = OptionParser()
+parser.add_option("-c", dest='configfile',
+    default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
+    help="configuration file to use")
+(options, args) = parser.parse_args()
+initConfig()
+initLogger(options)
+registerPlugins()
+
 if __name__ == "__main__":
-    parser = OptionParser()
-    parser.add_option("-c", dest='configfile',
-        default=sys.argv[0].replace('.py', '.conf'),
-        help="configuration file to use")
-    (options, args) = parser.parse_args()
-    initConfig()
-    registerPlugins()
-
-    run(host="localhost", port=8081)
+    run(host="0.0.0.0", port=8081)
 else:
-    parser = OptionParser()
-    parser.add_option("-c", dest='configfile',
-        default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
-        help="configuration file to use")
-    (options, args) = parser.parse_args()
-    initConfig()
-    registerPlugins()
-
     application = default_app()
