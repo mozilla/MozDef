@@ -35,7 +35,6 @@ License
 Contact
 =======
 
-* opsec+mozdef INSERTAT mozilla.com
-* Jeff Bryner, jbryner INSERTAT mozilla.com @0x7eff
-* Anthony Verez, @netantho
+* mozdef INSERTAT mozilla.com
+* `#mozdef <irc://irc.mozilla.org/mozdef>`_
 * https://lists.mozilla.org/listinfo/dev-mozdef
