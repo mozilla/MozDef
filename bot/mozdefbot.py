@@ -15,7 +15,6 @@ import kombu
 import logging
 import netaddr
 import os
-import pygeoip
 import pytz
 import random
 import select
@@ -126,9 +125,8 @@ def isIP(ip):
 def ipLocation(ip):
     location = ""
     try:
-        geoip_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../lib/GeoLiteCity.dat")
-        gi = pygeoip.GeoIP(geoip_location, pygeoip.MEMORY_CACHE)
-        geoDict = gi.record_by_addr(str(netaddr.IPNetwork(ip)[0]))
+        geoip = GeoIP()
+        geoDict = geoip.lookup_ip(ip)
         if geoDict is not None:
             location = geoDict['country_name']
             if geoDict['country_code'] in ('US'):
