@@ -28,8 +28,7 @@ RUN \
                     python-pip && \
   chown -R mozdef:mozdef /opt/mozdef/ && \
   pip install virtualenv && \
-  mkdir /opt/mozdef/envs/mozdef && \
-  yum clean all
+  mkdir /opt/mozdef/envs/mozdef
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
