@@ -56,6 +56,9 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_base/Dockerfile
+    command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data
   bootstrap:
     build:
       context: ../../
@@ -98,7 +101,7 @@ services:
   #     context: ../../
   #     dockerfile: docker/compose/mozdef_bot/Dockerfile
   #   restart: always
-  #   command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python bot/mozdefbot.py -c bot/mozdefbot.conf'
+  #   command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python mozdefbot.py -c mozdefbot.conf'
   #   depends_on:
   #     - base
   #     - rabbitmq
@@ -106,6 +109,8 @@ services:
   #     - bootstrap
   #   networks:
   #     - default
+  #   volumes:
+  #     - geolite_db:/opt/mozdef/envs/mozdef/data/
   cron:
     build:
       context: ../../
@@ -114,6 +119,7 @@ services:
     command: crond -n
     volumes:
       - cron:/opt/mozdef/envs/mozdef/cron
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
     depends_on:
       - base
       - rabbitmq
@@ -127,7 +133,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_loginput/Dockerfile
     restart: always
-    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python loginput/index.py -c loginput/index.conf'
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
     depends_on:
       - base
       - elasticsearch
@@ -152,6 +158,8 @@ services:
       - bootstrap
     networks:
       - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
   meteor:
     build:
       context: ../../
@@ -168,7 +176,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_rest/Dockerfile
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python rest/index.py -c rest/index.conf'
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
     depends_on:
       - base
       - elasticsearch
@@ -184,6 +192,7 @@ volumes:
   rabbitmq:
   mongodb:
   cron:
+  geolite_db:
 
 networks:
   default:

@@ -5,6 +5,6 @@ COPY config/defaultMappingTemplate.json /opt/mozdef/envs/mozdef/defaultMappingTe
 
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/
 
-USER mozdef
-
 WORKDIR /opt/mozdef/envs/mozdef
+
+USER mozdef
