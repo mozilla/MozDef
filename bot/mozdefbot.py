@@ -130,6 +130,8 @@ def ipLocation(ip):
         geoip = GeoIP()
         geoDict = geoip.lookup_ip(ip)
         if geoDict is not None:
+            if 'error' in geoDict:
+                return geoDict['error']
             location = geoDict['country_name']
             if geoDict['country_code'] in ('US'):
                 if geoDict['metro_code']:

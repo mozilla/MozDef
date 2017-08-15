@@ -1,12 +1,35 @@
-import netaddr
-import pygeoip
 import os
+import geoip2.database
 
 
 class GeoIP(object):
     def __init__(self):
-        geoip_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "GeoLiteCity.dat")
-        self.db = pygeoip.GeoIP(geoip_location, pygeoip.MEMORY_CACHE)
+        db_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "GeoLite2-City.mmdb")
+        try:
+            self.db = geoip2.database.Reader(db_location)
+        except IOError:
+            self.error = 'No Geolite DB Found!'
 
     def lookup_ip(self, ip):
-        return self.db.record_by_addr(str(netaddr.IPNetwork(ip)[0]))
+        if hasattr(self, 'error'):
+            return {'error': self.error}
+
+        result = self.db.city(ip)
+        geo_dict = {}
+        geo_dict['city'] = result.city.name
+        geo_dict['continent'] = result.continent.code
+        geo_dict['country_code'] = result.country.iso_code
+        geo_dict['country_name'] = result.country.name
+        geo_dict['dma_code'] = result.location.metro_code
+        geo_dict['latitude'] = result.location.latitude
+        geo_dict['longitude'] = result.location.longitude
+        geo_dict['metro_code'] = ""
+        if result.city.names:
+            geo_dict['metro_code'] = result.city.names['en'] + ', ' + result.subdivisions[0].iso_code
+        geo_dict['postal_code'] = result.postal.code
+        geo_dict['region_code'] = ""
+        if result.subdivisions:
+            geo_dict['region_code'] = result.subdivisions[0].iso_code
+        geo_dict['time_zone'] = result.location.time_zone
+
+        return geo_dict
