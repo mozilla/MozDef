@@ -1,4 +1,4 @@
-FROM mozdef_base:latest
+FROM centos:7
 
 MAINTAINER mozdef@mozilla.com
 
@@ -11,6 +11,8 @@ ENV ROOT_URL=http://localhost
 ENV PORT=3000
 
 RUN \
+  useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
+  mkdir -p /opt/mozdef/envs/mozdef && \
   cd /opt/mozdef && \
   curl -sL -o /opt/mozdef/nodesource.rpm https://rpm.nodesource.com/pub_4.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm && \
   rpm -i --nosignature --force /opt/mozdef/nodesource.rpm && \
