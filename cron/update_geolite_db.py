@@ -37,13 +37,12 @@ def fetch_db_data(db_download_location):
 
 
 def save_db_data(save_path, db_data):
-    logger.debug("Saving db data to " + save_path)
-    if os.path.isfile(save_path):
-        logger.debug("Overwriting db data in " + str(save_path))
-    else:
-        logger.debug("Creating new db data file at " + str(save_path))
-    with open(save_path, "wb+") as text_file:
+    temp_save_path = save_path + ".bak"
+    logger.debug("Saving db data to " + temp_save_path)
+    with open(temp_save_path, "wb+") as text_file:
         text_file.write(db_data)
+    logger.debug("Moving temp file to " + save_path)
+    os.rename(temp_save_path, save_path)
 
 
 def main():
