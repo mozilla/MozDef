@@ -17,6 +17,7 @@ import tempfile
 import tarfile
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from geo_ip import GeoIP
 from utilities.logger import logger, initLogger
 
 
@@ -37,10 +38,14 @@ def fetch_db_data(db_download_location):
 
 
 def save_db_data(save_path, db_data):
-    temp_save_path = save_path + ".bak"
+    temp_save_path = save_path + ".tmp"
     logger.debug("Saving db data to " + temp_save_path)
     with open(temp_save_path, "wb+") as text_file:
         text_file.write(db_data)
+    logger.debug("Testing temp geolite db file")
+    geo_ip = GeoIP(temp_save_path)
+    # Do a generic lookup to verify we don't get any errors (malformed data)
+    geo_ip.lookup_ip('8.8.8.8')
     logger.debug("Moving temp file to " + save_path)
     os.rename(temp_save_path, save_path)
 
