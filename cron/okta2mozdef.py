@@ -102,6 +102,7 @@ def main():
                         try:
                             mozdefEvent = dict()
                             mozdefEvent['utctimestamp']=toUTC(event['published']).isoformat()
+                            mozdefEvent['receivedtimestamp']=toUTC(datetime.now()).isoformat()
                             mozdefEvent['category'] = 'okta'
                             mozdefEvent['tags'] = ['okta']
                             if 'action' in event.keys() and 'message' in event['action'].keys():
