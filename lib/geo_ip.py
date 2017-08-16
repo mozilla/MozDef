@@ -3,8 +3,9 @@ import geoip2.database
 
 
 class GeoIP(object):
-    def __init__(self):
-        db_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/GeoLite2-City.mmdb")
+    def __init__(self, db_location=None):
+        if db_location is None:
+            db_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/GeoLite2-City.mmdb")
         try:
             self.db = geoip2.database.Reader(db_location)
         except IOError:
