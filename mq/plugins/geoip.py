@@ -5,10 +5,15 @@
 #
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
 
 import netaddr
-import pygeoip
 import os
+
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+from geo_ip import GeoIP
+
 
 def isIP(ip):
     try:
@@ -27,13 +32,12 @@ class message(object):
         '''
         self.registration = ['sourceipaddress', 'destinationipaddress']
         self.priority = 20
-        geoip_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../lib/GeoLiteCity.dat")
-        self.geoip = pygeoip.GeoIP(geoip_location, pygeoip.MEMORY_CACHE)
+        self.geoip = GeoIP()
 
     def ipLocation(self, ip):
         location = dict()
         try:
-            geoDict = self.geoip.record_by_addr(str(netaddr.IPNetwork(ip)[0]))
+            geoDict = self.geoip.lookup_ip(ip)
             if geoDict is not None:
                 return geoDict
             else:

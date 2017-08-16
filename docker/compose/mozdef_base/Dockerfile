@@ -28,10 +28,15 @@ RUN \
                     python-pip && \
   chown -R mozdef:mozdef /opt/mozdef/ && \
   pip install virtualenv && \
-  mkdir /opt/mozdef/envs/mozdef
+  mkdir /opt/mozdef/envs/mozdef && \
+  mkdir /opt/mozdef/envs/mozdef/cron
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
+
+COPY cron/update_geolite_db.py /opt/mozdef/envs/mozdef/cron/update_geolite_db.py
+COPY cron/update_geolite_db.conf /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
+COPY cron/update_geolite_db.sh /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
 
 USER mozdef
 RUN \
@@ -44,4 +49,15 @@ COPY lib /opt/mozdef/envs/mozdef/lib
 USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef
 
+USER mozdef
+# We have to replace the python virtualenv path until
+# https://github.com/mozilla/MozDef/issues/421 is fixed
+RUN sed -i 's|/opt/mozdef/envs/mozdef/bin/activate|/opt/mozdef/envs/python/bin/activate|g' /opt/mozdef/envs/mozdef/cron/*.sh
+
+RUN mkdir /opt/mozdef/envs/mozdef/data
+
 WORKDIR /opt/mozdef/envs/mozdef
+
+VOLUME /opt/mozdef/envs/mozdef/data
+
+USER root

@@ -7,4 +7,6 @@ RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/loginput
 
 EXPOSE 8080
 
+WORKDIR /opt/mozdef/envs/mozdef/loginput
+
 USER mozdef
