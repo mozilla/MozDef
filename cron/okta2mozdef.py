@@ -18,6 +18,7 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import date
 import requests
+import netaddr
 
 import sys
 import os
@@ -115,7 +116,8 @@ def main():
                             if 'actors' in event.keys():
                                 for actor in event['actors']:
                                     if 'ipAddress' in actor.keys():
-                                        mozdefEvent['details']['sourceipaddress'] = actor['ipAddress']
+                                        if netaddr.valid_ipv4(actor['ipAddress']):
+                                            mozdefEvent['details']['sourceipaddress'] = actor['ipAddress']
                                     if 'login' in actor.keys():
                                         mozdefEvent['details']['username'] = actor['login']
                                     if 'requestUri' in actor.keys():
