@@ -17,7 +17,7 @@ from elasticsearch.exceptions import ConnectionError
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
 from elasticsearch_client import ElasticsearchClient
 
 
