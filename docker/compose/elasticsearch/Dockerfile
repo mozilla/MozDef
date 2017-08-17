@@ -7,11 +7,15 @@ ENV ES_JAVA_VERSION 1.8.0
 
 RUN \
   yum install -y java-$ES_JAVA_VERSION && \
-  curl -s -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C / -xz && \
+  mkdir -p /opt/mozdef/envs && \
+  curl -s -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
+  mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch && \
   yum clean all
 
-WORKDIR /elasticsearch-$ES_VERSION
+COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
 
-VOLUME /usr/share/elasticsearch/data
+WORKDIR /opt/mozdef/envs/elasticsearch
+
+VOLUME /var/lib/elasticsearch
 
 EXPOSE 9200
