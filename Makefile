@@ -35,6 +35,10 @@ single-run:
 		-p 9090:9090 \
 		-p 8080:8080 \
 		-p 8081:8081 \
+		-v mozdef-elasticsearch:/var/lib/elasticsearch \
+		-v mozdef-mongodb:/var/lib/mongo \
+		-v mozdef-rabbitmq:/var/lib/rabbitmq \
+		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
 		-h $(NAME) --name $(NAME) -d $(NAME):$(VERSION)
 
 single-debug:build
@@ -48,6 +52,10 @@ single-debug:build
 		-p 5672:5672 \
 		-p 15672:15672 \
 		-p 9200:9200 \
+		-v mozdef-elasticsearch:/var/lib/elasticsearch \
+		-v mozdef-mongodb:/var/lib/mongo \
+		-v mozdef-rabbitmq:/var/lib/rabbitmq \
+		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
 		-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
 
 single-try: single-build single-run
