@@ -147,7 +147,7 @@ RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef
 
 # VOLUMES
 #  Elasticsearch
-VOLUME /usr/share/elasticsearch/data
+VOLUME /var/lib/elasticsearch
 #  Mongodb
 VOLUME /var/lib/mongo
 # RabbitMQ
