@@ -11,4 +11,6 @@ RUN \
 
 COPY files/mongod.conf /etc/mongod.conf
 
+VOLUME /var/lib/mongo
+
 EXPOSE 3002
