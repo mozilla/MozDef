@@ -31,7 +31,6 @@ RUN \
   cp /opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
 COPY meteor /opt/mozdef/envs/mozdef/meteor
-COPY docker/compose/mozdef_meteor/files/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 RUN chown -R mozdef:mozdef /opt/mozdef/
 
@@ -41,7 +40,15 @@ RUN \
   meteor npm install --save babel-runtime && \
   meteor add accounts-password && \
   meteor add npm-bcrypt && \
-  mkdir -p /opt/mozdef/envs/meteor/mozdef && \
+  mkdir -p /opt/mozdef/envs/meteor/mozdef
+
+USER root
+COPY docker/compose/mozdef_meteor/files/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
+
+USER mozdef
+RUN \
+  cd /opt/mozdef/envs/mozdef/meteor && \
   meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/ --allow-incompatible-update
 
 WORKDIR /opt/mozdef/envs/meteor/mozdef
