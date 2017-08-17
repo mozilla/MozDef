@@ -41,7 +41,8 @@ RUN \
                     libstdc++ \
                     supervisor \
                     libffi-devel \
-                    zlib-devel && \
+                    zlib-devel \
+                    cronie && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
   curl -s -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
@@ -82,25 +83,31 @@ RUN \
   rm -r /opt/mozdef/meteor && \
   cp /opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
-COPY meteor /opt/mozdef/envs/mozdef/src/meteor
-RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/src/meteor
+COPY meteor /opt/mozdef/envs/mozdef/meteor
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 USER mozdef
 RUN \
-  cd /opt/mozdef/envs/mozdef/src/meteor && \
+  cd /opt/mozdef/envs/mozdef/meteor && \
   meteor npm install --save babel-runtime && \
   meteor add accounts-password && \
   meteor add npm-bcrypt && \
-  mkdir -p /opt/mozdef/envs/meteor/mozdef && \
+  mkdir -p /opt/mozdef/envs/meteor/mozdef
+USER root
+COPY docker/conf/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
+USER mozdef
+RUN \
+  cd /opt/mozdef/envs/mozdef/meteor && \
   meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/ --allow-incompatible-update
 
 # Create python virtual environment and install dependencies
-COPY requirements.txt /opt/mozdef/envs/mozdef/src/requirements.txt
-USER mozdef
+COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
 RUN \
   virtualenv /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
-  pip install -r /opt/mozdef/envs/mozdef/src/requirements.txt
+  pip install -r /opt/mozdef/envs/mozdef/requirements.txt
 
+USER root
 COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
 COPY docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 COPY docker/conf/mongod.conf /etc/mongod.conf
@@ -108,34 +115,54 @@ COPY docker/conf/rabbitmq.config /etc/rabbitmq/
 COPY docker/conf/enabled_plugins /etc/rabbitmq/
 COPY docker/conf/nginx.conf /etc/nginx/nginx.conf
 
-COPY static /opt/mozdef/envs/mozdef/src/static
-COPY rest /opt/mozdef/envs/mozdef/src/rest
-COPY loginput /opt/mozdef/envs/mozdef/src/loginput
-COPY bot /opt/mozdef/envs/mozdef/src/bot
-COPY lib /opt/mozdef/envs/mozdef/src/lib
-COPY cron /opt/mozdef/envs/mozdef/src/cron
-COPY alerts /opt/mozdef/envs/mozdef/src/alerts
-COPY mq /opt/mozdef/envs/mozdef/src/mq
+COPY static /opt/mozdef/envs/mozdef/static
+COPY rest /opt/mozdef/envs/mozdef/rest
+COPY loginput /opt/mozdef/envs/mozdef/loginput
+COPY bot /opt/mozdef/envs/mozdef/bot
+COPY lib /opt/mozdef/envs/mozdef/lib
+COPY cron /opt/mozdef/envs/mozdef/cron
+COPY alerts /opt/mozdef/envs/mozdef/alerts
+COPY mq /opt/mozdef/envs/mozdef/mq
+
+COPY docker/conf/config.py /opt/mozdef/envs/mozdef/alerts/lib/config.py
+COPY docker/conf/cron_entries.txt /cron_entries.txt
+
+USER mozdef
+RUN crontab /cron_entries.txt
 
 USER root
-RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/src
+RUN \
+  mkdir /opt/mozdef/envs/mozdef/data && \
+  mkdir /opt/mozdef/envs/mozdef/config && \
+  mkdir -p /opt/mozdef/envs/mozdef/docker/conf
+
+COPY docker/conf/initial_setup.py /opt/mozdef/envs/mozdef/docker/conf/initial_setup.py
+COPY config/defaultMappingTemplate.json /opt/mozdef/envs/mozdef/config/defaultMappingTemplate.json
+
+# We have to replace the python virtualenv path until
+# https://github.com/mozilla/MozDef/issues/421 is fixed
+RUN sed -i 's|/opt/mozdef/envs/mozdef/bin/activate|/opt/mozdef/envs/python/bin/activate|g' /opt/mozdef/envs/mozdef/cron/*.sh
+
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef
 
 # VOLUMES
 #  Elasticsearch
-VOLUME ['/var/lib/elasticsearch','/var/log/elasticsearch']
+VOLUME /usr/share/elasticsearch/data
 #  Mongodb
-VOLUME ['/var/lib/mongodb','/var/log/mongodb']
-#  Nginx
-VOLUME ['/var/log/nginx','/var/log/mozdef']
+VOLUME /var/lib/mongo
+# RabbitMQ
+VOLUME /var/lib/rabbitmq
+# MozDef data (geolite db for example)
+VOLUME /opt/mozdef/envs/mozdef/data
 
 # 80 = MozDef Web UI (meteor)
-# 9200 = Elasticsearch
-# 5672 = RabbitMQ endpoint
-# 15672 = RabbitMQ Management endpoint (private by default)
-# 5601 = Kibana Web UI
-# 3002 = Mongodb (private by default)
+# 3002 = Mongodb
+# 5672 = RabbitMQ
+# 15672 = RabbitMQ Management
 # 8080 = Loginput
 # 8081 = RestAPI
-EXPOSE 80 9200 5672 5601 8080 8081
+# 9090 = Kibana Web UI "localhost:9090/app/kibana"
+# 9200 = Elasticsearch
+EXPOSE 80 3002 5672 15672 8080 8081 9090 9200
 
 CMD supervisord -n -c /etc/supervisor/conf.d/supervisor.conf

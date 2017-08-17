@@ -35,7 +35,7 @@ single-run:
 		-p 9090:9090 \
 		-p 8080:8080 \
 		-p 8081:8081 \
-		-h $(NAME) -d $(NAME):$(VERSION)
+		-h $(NAME) --name $(NAME) -d $(NAME):$(VERSION)
 
 single-debug:build
 	docker run \
@@ -50,10 +50,17 @@ single-debug:build
 		-p 9200:9200 \
 		-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
 
-single-try: build run
+single-try: single-build single-run
 
+single-stop:
+	docker stop $(NAME)
 
-.PHONY: build debug run
+single-rm:
+	docker rm -f $(NAME)
+
+single-rebuild: single-build single-rm single-run
+
+.PHONY: single-build single-debug single-run
 
 
 multiple-run:
