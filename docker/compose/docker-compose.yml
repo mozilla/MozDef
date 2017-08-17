@@ -30,11 +30,13 @@ services:
     networks:
       - default
   elasticsearch:
-    build: elasticsearch/
+    build:
+      context: ../../
+      dockerfile: docker/compose/elasticsearch/Dockerfile
     restart: always
     command: bin/elasticsearch -Des.insecure.allow.root=true -Dnetwork.host=0.0.0.0
     volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
+      - elasticsearch:/var/lib/elasticsearch
     ports:
       - 9200:9200
     networks:
