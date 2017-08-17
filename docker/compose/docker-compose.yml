@@ -63,7 +63,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
-    command: bash -c 'sleep 7 && source /opt/mozdef/envs/python/bin/activate && python initial_setup.py http://elasticsearch:9200 defaultMappingTemplate.json'
+    command: bash -c 'sleep 7 && source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 config/defaultMappingTemplate.json'
     depends_on:
       - base
       - elasticsearch
