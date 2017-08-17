@@ -40,7 +40,9 @@ services:
     networks:
       - default
   rabbitmq:
-    build: rabbitmq/
+    build:
+      context: ../../
+      dockerfile: docker/compose/rabbitmq/Dockerfile
     restart: always
     command: rabbitmq-server
     volumes:
