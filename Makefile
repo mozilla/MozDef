@@ -32,28 +32,43 @@ single-run:
 	docker run \
 		-e TZ=UTC \
 		-p 80:80 \
-		-p 5672:5672 \
 		-p 9090:9090 \
-		-p 9200:9200 \
 		-p 8080:8080 \
 		-p 8081:8081 \
-		-h $(NAME) -d $(NAME):$(VERSION)
+		-v mozdef-elasticsearch:/var/lib/elasticsearch \
+		-v mozdef-mongodb:/var/lib/mongo \
+		-v mozdef-rabbitmq:/var/lib/rabbitmq \
+		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
+		-h $(NAME) --name $(NAME) -d $(NAME):$(VERSION)
 
 single-debug:build
-	docker run -p 3000:3000 -p 9090:9090 -p 9200:9200 -p 8080:8080 -p 8081:8081 \
-		-v $(shell pwd)/container/var/lib/elasticsearch:/var/lib/elasticsearch \
-		-v $(shell pwd)/container/var/log/elasticsearch:/var/log/elasticsearch \
-		-v $(shell pwd)/container/var/lib/mongodb:/var/lib/mongodb \
-		-v $(shell pwd)/container/var/log/mongodb:/var/log/mongodb \
-		-v $(shell pwd)/container/var/log/nginx:/var/log/nginx \
-		-v $(shell pwd)/container/var/log/mozdef:/var/log/mozdef \
-	 	-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
+	docker run \
+		-e TZ=UTC \
+		-p 80:80 \
+		-p 9090:9090 \
+		-p 8080:8080 \
+		-p 8081:8081 \
+		-p 3002:3002 \
+		-p 5672:5672 \
+		-p 15672:15672 \
+		-p 9200:9200 \
+		-v mozdef-elasticsearch:/var/lib/elasticsearch \
+		-v mozdef-mongodb:/var/lib/mongo \
+		-v mozdef-rabbitmq:/var/lib/rabbitmq \
+		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
+		-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
 
+single-try: single-build single-run
 
-single-try: build run
+single-stop:
+	docker stop $(NAME)
 
+single-rm:
+	docker rm -f $(NAME)
 
-.PHONY: build debug run
+single-rebuild: single-build single-rm single-run
+
+.PHONY: single-build single-debug single-run
 
 
 multiple-run:

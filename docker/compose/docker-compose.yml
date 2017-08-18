@@ -30,17 +30,21 @@ services:
     networks:
       - default
   elasticsearch:
-    build: elasticsearch/
+    build:
+      context: ../../
+      dockerfile: docker/compose/elasticsearch/Dockerfile
     restart: always
     command: bin/elasticsearch -Des.insecure.allow.root=true -Dnetwork.host=0.0.0.0
     volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
+      - elasticsearch:/var/lib/elasticsearch
     ports:
       - 9200:9200
     networks:
       - default
   rabbitmq:
-    build: rabbitmq/
+    build:
+      context: ../../
+      dockerfile: docker/compose/rabbitmq/Dockerfile
     restart: always
     command: rabbitmq-server
     volumes:
@@ -63,7 +67,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
-    command: bash -c 'sleep 7 && source /opt/mozdef/envs/python/bin/activate && python initial_setup.py http://elasticsearch:9200 defaultMappingTemplate.json'
+    command: bash -c 'sleep 7 && source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 config/defaultMappingTemplate.json'
     depends_on:
       - base
       - elasticsearch

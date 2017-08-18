@@ -3,7 +3,7 @@ FROM mozdef_base:latest
 RUN yum install -y cronie
 
 COPY cron /opt/mozdef/envs/mozdef/cron
-COPY docker/compose/mozdef_cron/files/cron_entries.txt /cron_entries.txt
+COPY docker/conf/cron_entries.txt /cron_entries.txt
 
 # Copy config files for crons
 COPY docker/compose/mozdef_cron/files/backup.conf /opt/mozdef/envs/mozdef/cron/backup.conf
