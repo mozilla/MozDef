@@ -26,11 +26,12 @@ class GeoIP(object):
         geo_dict['longitude'] = result.location.longitude
         geo_dict['metro_code'] = ""
         if result.city.names:
-            geo_dict['metro_code'] = result.city.names['en'] + ', ' + result.subdivisions[0].iso_code
+            geo_dict['metro_code'] = result.city.names['en']
         geo_dict['postal_code'] = result.postal.code
         geo_dict['region_code'] = ""
         if result.subdivisions:
             geo_dict['region_code'] = result.subdivisions[0].iso_code
+            geo_dict['metro_code'] += ', ' + result.subdivisions[0].iso_code
         geo_dict['time_zone'] = result.location.time_zone
 
         return geo_dict
