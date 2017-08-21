@@ -15,7 +15,11 @@ class GeoIP(object):
         if hasattr(self, 'error'):
             return {'error': self.error}
 
-        result = self.db.city(ip)
+        try:
+            result = self.db.city(ip)
+        except Exception as e:
+            return {'error': e.message}
+
         geo_dict = {}
         geo_dict['city'] = result.city.name
         geo_dict['continent'] = result.continent.code
