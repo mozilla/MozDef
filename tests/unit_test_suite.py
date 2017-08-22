@@ -131,8 +131,9 @@ class UnitTestSuite(object):
         return custom_date.isoformat()
 
     @staticmethod
-    def subtract_from_timestamp_lambda(date_timedelta, timestamp=None):
-        return lambda: UnitTestSuite.subtract_from_timestamp(date_timedelta, timestamp)
+    def create_timestamp_from_now(hour, minute, second):
+         notnow = toUTC(datetime.now().replace(hour=hour, minute=minute, second=second).isoformat())
+         return notnow
 
     @staticmethod
     def current_timestamp_lambda():

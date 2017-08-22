@@ -10,16 +10,13 @@
 #
 # This code alerts on every successfully opened session for any user in the list
 
-import json
-import sys
 import datetime
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch, RangeMatch
-from utilities.toUTC import toUTC
 
 
 class SessionOpenedUser(AlertTask):
-    
+   
     def __init__(self):
         AlertTask.__init__(self)
         self._config = self.parse_json_alert_config('critical_users.json')
@@ -28,7 +25,7 @@ class SessionOpenedUser(AlertTask):
 
         superquery = None
         run = 0
-        
+
         for user in self._config['users']:
             if run == 0:
                 superquery = PhraseMatch('summary', user)
@@ -70,4 +67,3 @@ class SessionOpenedUser(AlertTask):
         summary = '{0} session opened for scanning user outside of the expected window on {1} [{2}]'.format(prog, aggreg['value'], aggreg['count'])
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-

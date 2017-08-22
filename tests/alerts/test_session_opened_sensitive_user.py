@@ -10,9 +10,7 @@
 
 from positive_alert_test_case import PositiveAlertTestCase
 from negative_alert_test_case import NegativeAlertTestCase
-
 from alert_test_suite import AlertTestSuite
-
 from datetime import datetime
 
 
