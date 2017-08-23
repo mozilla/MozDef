@@ -49,6 +49,7 @@ class TestAlertOpenPortViolation(AlertTestSuite):
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 239})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 239})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events a minute earlier",
@@ -80,6 +81,7 @@ class TestAlertOpenPortViolation(AlertTestSuite):
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 241})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 241})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
