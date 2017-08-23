@@ -114,6 +114,7 @@ class TestAlertUnauthPortScan(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
+    event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
     event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
     test_cases.append(
         NegativeAlertTestCase(
