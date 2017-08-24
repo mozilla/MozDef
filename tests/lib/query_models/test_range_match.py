@@ -23,7 +23,7 @@ class TestRangeMatchPositiveTestSuite(PositiveTestSuite):
         return tests
 
 
-class TestTermMatchNegativeTestSuite(NegativeTestSuite):
+class TestRangeMatchNegativeTestSuite(NegativeTestSuite):
     def query_tests(self):
         begin_date = "2016-08-12T21:07:12.316450+00:00"
         end_date = "2016-08-13T21:07:12.316450+00:00"
