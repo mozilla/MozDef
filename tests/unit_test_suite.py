@@ -97,6 +97,7 @@ class UnitTestSuite(object):
                 "category": "excategory",
                 "utctimestamp": current_timestamp,
                 "receivedtimestamp": current_timestamp,
+                "mozdefhostname": "mozdefhost",
                 "hostname": "exhostname",
                 "severity": "NOTICE",
                 "source": "exsource",
