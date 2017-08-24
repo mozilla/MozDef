@@ -96,6 +96,7 @@ class UnitTestSuite(object):
             "_source": {
                 "category": "excategory",
                 "utctimestamp": current_timestamp,
+                "receivedtimestamp": current_timestamp,
                 "hostname": "exhostname",
                 "severity": "NOTICE",
                 "source": "exsource",

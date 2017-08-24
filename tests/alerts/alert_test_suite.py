@@ -100,6 +100,7 @@ class AlertTestSuite(UnitTestSuite):
 
             merged_event = self.dict_merge(temp_event, event)
             merged_event['_source']['utctimestamp'] = merged_event['_source']['utctimestamp']()
+            merged_event['_source']['receivedtimestamp'] = merged_event['_source']['receivedtimestamp']()
             test_case.full_events.append(merged_event)
             self.populate_test_event(merged_event['_source'], merged_event['_type'])
 

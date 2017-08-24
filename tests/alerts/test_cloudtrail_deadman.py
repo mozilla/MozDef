@@ -28,6 +28,7 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
 
     event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'hours': 2})
+    event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'hours': 2})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
@@ -48,6 +49,7 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
 
     event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 30})
+    event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 30})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
