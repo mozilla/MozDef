@@ -21,7 +21,7 @@ class TestLessThanMatchPositiveTestSuite(PositiveTestSuite):
         return tests
 
 
-class TestTermMatchNegativeTestSuite(NegativeTestSuite):
+class TestLessThanMatchNegativeTestSuite(NegativeTestSuite):
     def query_tests(self):
         boundry_date = "2016-08-12T21:07:12.316450+00:00"
         tests = {
