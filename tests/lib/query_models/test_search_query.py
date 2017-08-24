@@ -205,6 +205,7 @@ class TestExecute(SearchQueryUnitTest):
     def test_aggregation_without_must_fields(self):
         event = self.generate_default_event()
         event['_source']['utctimestamp'] = event['_source']['utctimestamp']()
+        event['_source']['receivedtimestamp'] = event['_source']['receivedtimestamp']()
         self.populate_test_event(event)
         self.flush(self.event_index_name)
 
