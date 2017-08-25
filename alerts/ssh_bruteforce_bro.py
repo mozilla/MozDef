@@ -15,7 +15,7 @@ from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 class AlertSSHManyConns(AlertTask):
     def main(self):
-        self.parse_config('sshbruteforce_bro.conf', ['url'])
+        self.parse_config('ssh_bruteforce_bro.conf', ['url'])
 
         search_query = SearchQuery(minutes=15)
 

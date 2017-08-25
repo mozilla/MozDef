@@ -9,7 +9,7 @@
 # Aaron Meihm ameihm@mozilla.com
 
 # Reads from papertrail using the API and inserts log data into ES in
-# the same manner as esworker.py
+# the same manner as esworker_eventtask.py
 
 
 import json

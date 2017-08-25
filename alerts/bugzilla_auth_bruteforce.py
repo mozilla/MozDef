@@ -15,7 +15,7 @@ from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 class AlertBugzillaPBruteforce(AlertTask):
     def main(self):
-        self.parse_config('bugzillaauthbruteforce.conf', ['url'])
+        self.parse_config('bugzilla_auth_bruteforce.conf', ['url'])
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
