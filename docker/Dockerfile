@@ -38,6 +38,7 @@ RUN \
                     java-$ES_JAVA_VERSION \
                     glibc-devel \
                     gcc \
+                    gcc-c++ \
                     libstdc++ \
                     supervisor \
                     libffi-devel \
