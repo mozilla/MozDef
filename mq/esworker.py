@@ -14,15 +14,11 @@ import json
 import kombu
 import math
 import os
-import pytz
 import pynsive
-import re
 import sys
 import socket
-import time
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
-from dateutil.parser import parse
 from operator import itemgetter
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
@@ -40,38 +36,6 @@ try:
     hasUWSGI = True
 except ImportError as e:
     hasUWSGI = False
-
-
-def isNumber(s):
-    'check if a token is numeric, return bool'
-    try:
-        float(s)  # for int, long and float
-    except ValueError:
-        try:
-            complex(s)  # for complex
-        except ValueError:
-            return False
-    return True
-
-
-def digits(n):
-    '''return the number of digits in a number'''
-    if n > 0:
-        digits = int(math.log10(n))+1
-    elif n == 0:
-        digits = 1
-    else:
-        digits = int(math.log10(-n))+2
-    return digits
-
-
-def removeDictAt(aDict):
-    '''remove the @ symbol from any field/key names'''
-    returndict = dict()
-    for k, v in aDict.iteritems():
-        k = k.replace('@', '')
-        returndict[k] = v
-    return returndict
 
 
 def removeAt(astring):
@@ -95,16 +59,6 @@ def isCEF(aDict):
         if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
             return True
     return False
-
-
-def safeString(aString):
-    '''return a safe string given a potentially unsafe, unicode, etc'''
-    returnString = ''
-    if isinstance(aString, str):
-        returnString = aString
-    if isinstance(aString, unicode):
-        returnString = aString.encode('ascii', 'ignore')
-    return returnString
 
 
 def toUnicode(obj, encoding='utf-8'):

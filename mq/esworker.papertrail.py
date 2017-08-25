@@ -16,19 +16,14 @@ import json
 import math
 import os
 import kombu
-import pytz
 import pynsive
-import re
 import sys
 import socket
 import time
-import urllib
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
-from dateutil.parser import parse
 import calendar
 from operator import itemgetter
-import base64
 import requests
 
 import os
@@ -96,38 +91,6 @@ class PTRequestor(object):
         return self._events
 
 
-def isNumber(s):
-    'check if a token is numeric, return bool'
-    try:
-        float(s)  # for int, long and float
-    except ValueError:
-        try:
-            complex(s)  # for complex
-        except ValueError:
-            return False
-    return True
-
-
-def digits(n):
-    '''return the number of digits in a number'''
-    if n > 0:
-        digits = int(math.log10(n))+1
-    elif n == 0:
-        digits = 1
-    else:
-        digits = int(math.log10(-n))+2
-    return digits
-
-
-def removeDictAt(aDict):
-    '''remove the @ symbol from any field/key names'''
-    returndict = dict()
-    for k, v in aDict.iteritems():
-        k = k.replace('@', '')
-        returndict[k] = v
-    return returndict
-
-
 def removeAt(astring):
     '''remove the leading @ from a string'''
     return astring.replace('@', '')
@@ -149,16 +112,6 @@ def isCEF(aDict):
         if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
             return True
     return False
-
-
-def safeString(aString):
-    '''return a safe string given a potentially unsafe, unicode, etc'''
-    returnString = ''
-    if isinstance(aString, str):
-        returnString = aString
-    if isinstance(aString, unicode):
-        returnString = aString.encode('ascii', 'ignore')
-    return returnString
 
 
 def toUnicode(obj, encoding='utf-8'):
@@ -466,43 +419,6 @@ def checkPlugins(pluginList, lastPluginCheck):
         return pluginList, lastPluginCheck
     else:
         return pluginList, lastPluginCheck
-
-
-def flattenDict(inDict, pre=None, values=True):
-    '''given a dictionary, potentially with multiple sub dictionaries
-       return a period delimited version of the dict with or without values
-       i.e. {'something':'value'} becomes something=value
-            {'something':{'else':'value'}} becomes something.else=value
-    '''
-    pre = pre[:] if pre else []
-    if isinstance(inDict, dict):
-        for key, value in inDict.iteritems():
-            if isinstance(value, dict):
-                for d in flattenDict(value, pre + [key], values):
-                    yield d
-            else:
-                if pre:
-                    if values:
-                        if isinstance(value, str):
-                            yield '.'.join(pre) + '.' + key + '=' + str(value)
-                        elif isinstance(value, unicode):
-                            yield '.'.join(pre) + '.' + key + '=' + value.encode('ascii', 'ignore')
-                        elif value is None:
-                            yield '.'.join(pre) + '.' + key + '=None'
-                    else:
-                        yield '.'.join(pre) + '.' + key
-                else:
-                    if values:
-                        if isinstance(value, str):
-                            yield key + '=' + str(value)
-                        elif isinstance(value, unicode):
-                            yield key + '=' + value.encode('ascii', 'ignore')
-                        elif value is None:
-                            yield key + '=None'
-                    else:
-                        yield key
-    else:
-        yield '-'.join(pre) + '.' + inDict
 
 
 def dict2List(inObj):
