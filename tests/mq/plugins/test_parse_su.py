@@ -30,10 +30,6 @@ session_su['details']['program'] = 'su'
 session_su['details']['hostname'] = 'irc1.dmz.scl3.mozilla.com'
 
 
-# msgs.append(u'')
-# msgs.append(u'')
-# msgs.append(u'')
-# 
 class TestSuSessionOpenedMessageV1():
     def setup(self):
         

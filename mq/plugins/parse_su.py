@@ -33,11 +33,11 @@ class message(object):
                 if message['details']['program'] == 'su':
                     msg_unparsed = message['summary']
                     if msg_unparsed.startswith('pam_unix'):
-                        accepted_search = re.search(self.session_regexp, msg_unparsed)
-                        if accepted_search:
-                            message['details']['originuser'] = accepted_search.group('originuser')
-                            message['details']['status'] = accepted_search.group('status')
-                            message['details']['uid'] = accepted_search.group('uid')
-                            message['details']['username'] = accepted_search.group('username')
+                        session_search = re.search(self.session_regexp, msg_unparsed)
+                        if session_search:
+                            message['details']['originuser'] = session_search.group('originuser')
+                            message['details']['status'] = session_search.group('status')
+                            message['details']['uid'] = session_search.group('uid')
+                            message['details']['username'] = session_search.group('username')
                             
         return (message, metadata)
