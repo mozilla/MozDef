@@ -199,8 +199,9 @@ Mandatory Fields
 +-----------------+-------------------------------------+-----------------------------------+
 |receivedtimestamp| Full UTC date plus time timestamp of| 2014-01-30T13:24:43+00:00         |
 |                 | the event in ISO format when mozdef |                                   |
-|						      | received the event   							  |                                   |
+|                 | received the event                  |                                   |
 +-----------------+-------------------------------------+-----------------------------------+
+
 Details substructure (mandatory if such data is sent, otherwise optional)
 *************************************************************************
 
