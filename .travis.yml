@@ -4,7 +4,6 @@ python:
   - '2.7.12'
   - '2.7.13'
 before_install:
-  - export BOTO_CONFIG=/dev/null
   - ES_VERSION=2.4.4; curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
   - sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
@@ -15,5 +14,6 @@ install:
   - "pip install -r tests/requirements_tests.txt"
 before_script:
   - sleep 5
+  - export BOTO_CONFIG=/dev/null
 script:
   - py.test --delete_indexes tests
