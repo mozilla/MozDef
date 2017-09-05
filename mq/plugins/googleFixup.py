@@ -6,30 +6,6 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-import netaddr
-
-
-def isIPv4(ip):
-    try:
-        # netaddr on it's own considers 1 and 0 to be valid_ipv4
-        # so a little sanity check prior to netaddr.
-        # Use IPNetwork instead of valid_ipv4 to allow CIDR
-        if '.' in ip and len(ip.split('.'))==4:
-            # some ips are quoted
-            netaddr.IPNetwork(ip)
-            return True
-        else:
-            return False
-    except:
-        return False
-
-
-def findIPv4(words):
-    for word in words.strip().split():
-        saneword = word.strip().strip('"').strip("'").strip(",")
-        if isIPv4(saneword):
-            yield saneword
-
 
 class message(object):
     def __init__(self):

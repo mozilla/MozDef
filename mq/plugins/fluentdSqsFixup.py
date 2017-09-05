@@ -15,17 +15,13 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from utilities.toUTC import toUTC
 
+
 def isIPv4(ip):
     try:
         return netaddr.valid_ipv4(ip)
     except:
         return False
 
-def isIPv6(ip):
-    try:
-        return netaddr.valid_ipv6(ip)
-    except:
-        return False
 
 def addError(message, error):
     '''add an error note to a message'''
