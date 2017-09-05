@@ -23,10 +23,8 @@ RUN \
                     gcc \
                     gcc-c++ \
                     libstdc++ \
-                    supervisor \
                     libffi-devel \
-                    zlib-devel \
-                    cronie && \
+                    zlib-devel && \
   yum install -y nodejs-$NODE_VERSION && \
   npm install source-map-support@0.4.2 \
                  semver@5.3.0 \
