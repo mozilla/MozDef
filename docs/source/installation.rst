@@ -13,11 +13,12 @@ Dockerfile
 
 After `installing docker`_, use this to build a new image::
 
-  cd docker && sudo make build
+  git clone https://github.com/mozilla/MozDef.git && cd MozDef
+  make
 
 Running the container::
 
-  sudo make run
+  make run
 
 You're done! Now go to:
 
