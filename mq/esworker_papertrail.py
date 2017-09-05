@@ -547,4 +547,4 @@ if __name__ == '__main__':
     lastPluginCheck = datetime.now()-timedelta(minutes=60)
     pluginList, lastPluginCheck = checkPlugins(pluginList, lastPluginCheck)
 
-main()
+    main()

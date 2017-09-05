@@ -11,7 +11,7 @@
 # kombu's support for SQS is buggy
 # so this version uses boto
 # to read an SQS queue and put events into elastic search
-# in the same manner as esworker-eventtask.py
+# in the same manner as esworker_eventtask.py
 
 
 import json
