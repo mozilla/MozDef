@@ -6,17 +6,6 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-import re
-import netaddr
-
-
-def isIP(ip):
-    try:
-        netaddr.IPNetwork(ip)
-        return True
-    except:
-        return False
-
 
 class message(object):
     def __init__(self):
