@@ -43,6 +43,11 @@ class AlertTestSuite(UnitTestSuite):
                     self.alert_classname.startswith('Alert') else
                     self.alert_classname)).lower()
 
+        # Boolean to determine if an alert is a 'deadman' type of alert
+        # Meaning, this will throw if no events are found
+        if not hasattr(self, 'deadman'):
+            self.deadman = False
+
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):
         # Verify the description for the test case is populated
@@ -113,6 +118,11 @@ class AlertTestSuite(UnitTestSuite):
         """
         Verifies the events saved in ES has expected values from an alert running
         """
+        # Deadman alerts throw when no events are found, so skip
+        # any of the event validation
+        if self.deadman:
+            return
+
         assert len(found_alert['_source']['events']) == len(test_case.full_events)
         for event in found_alert['_source']['events']:
             event_id = event['documentid']
