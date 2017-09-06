@@ -12,8 +12,9 @@
 # usage:
 #	make single-build	- build new single image from Dockerfile
 #	make single-debug	- debug run already created image by tag
-#	make single-try	- build and run in debug mode
 # make single-run - run a single instance of MozDef
+# make single-stop - stop a single instance of MozDef
+# make single-rebuild - build, stop and run a new single instance of MozDef
 # make multiple-build - build new mozdef container environment (includes multiple containers)
 # make multiple-clean - remove any mozdef container environments
 # make multiple-run - run new mozdef environment from containers
@@ -58,18 +59,12 @@ single-debug:build
 		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
 		-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
 
-single-try: single-build single-run
-
 single-stop:
-	docker stop $(NAME)
+	-docker rm -f $(NAME)
 
-single-rm:
-	docker rm -f $(NAME)
+single-rebuild: single-build single-stop single-run
 
-single-rebuild: single-build single-rm single-run
-
-.PHONY: single-build single-debug single-run
-
+.PHONY: single-build single-build-no-cache single-run single-debug single-stop single-rebuild
 
 multiple-run:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
@@ -78,6 +73,8 @@ multiple-build:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build
 
 multiple-stop:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
+	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
 
 multiple-rebuild: multiple-build multiple-stop multiple-run
+
+.PHONY: multiple-build multiple-run multiple-stop multiple-rebuild
