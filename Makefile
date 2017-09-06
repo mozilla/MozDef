@@ -15,9 +15,10 @@
 # make single-run - run a single instance of MozDef
 # make single-stop - stop a single instance of MozDef
 # make single-rebuild - build, stop and run a new single instance of MozDef
-# make multiple-build - build new mozdef container environment (includes multiple containers)
-# make multiple-clean - remove any mozdef container environments
-# make multiple-run - run new mozdef environment from containers
+# make multiple-build - build new mozdef environment in multiple containers
+# make multiple-run - run new mozdef environment in multiple containers
+# make multiple-stop - stop new mozdef environment in multiple containers
+# make multiple-rebuild - build, stop and run new mozdef environment in multiple containers
 
 NAME=mozdef
 VERSION=0.1
