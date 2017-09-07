@@ -10,12 +10,14 @@
 # Brandon Myers bmyers@mozilla.com
 
 # usage:
-#	make single-build	- build new single image from Dockerfile
-#	make single-debug	- debug run already created image by tag
+# make single-build - build new single image from Dockerfile
+# make single-build-no-cache - build new single image from Dockerfile from scratch
+# make single-debug - debug run already created image by tag
 # make single-run - run a single instance of MozDef
 # make single-stop - stop a single instance of MozDef
 # make single-rebuild - build, stop and run a new single instance of MozDef
 # make multiple-build - build new mozdef environment in multiple containers
+# make multiple-build-no-cache - build new mozdef environment in multiple containers from scratch
 # make multiple-run - run new mozdef environment in multiple containers
 # make multiple-stop - stop new mozdef environment in multiple containers
 # make multiple-rebuild - build, stop and run new mozdef environment in multiple containers
@@ -72,6 +74,9 @@ multiple-run:
 
 multiple-build:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build
+
+multiple-build-no-cache:
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build --no-cache
 
 multiple-stop:
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
