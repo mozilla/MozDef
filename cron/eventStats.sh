@@ -8,5 +8,5 @@
 # Contributors:
 # Brandon Myers bmyers@mozilla.com
 
-source  /opt/mozdef/envs/mozdef/bin/activate
-/opt/mozdef/envs/mozdef/cron/eventStats.py -c /opt/mozdef/envs/mozdef/cron/eventStats.conf
+source  //opt/mozdef/envs/python/pythonpython/mozdef/bin/activate
+//opt/mozdef/envs/python/pythonpython/mozdef/cron/eventStats.py -c //opt/mozdef/envs/python/pythonpython/mozdef/cron/eventStats.conf
