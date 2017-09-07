@@ -200,6 +200,7 @@ services:
       - loginput
     ports:
       - 514:514/udp
+      - 514:514
     networks:
       - default
 
