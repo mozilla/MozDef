@@ -117,6 +117,7 @@ class AlertTestSuite(UnitTestSuite):
 
     def verify_rabbitmq_alert(self, found_alert):
         rabbitmq_message = self.rabbitmq_alerts_consumer.channel.basic_get()
+        rabbitmq_message.channel.basic_ack(rabbitmq_message.delivery_tag)
         document = json.loads(rabbitmq_message.body)
         assert document['summary'] == found_alert['_source']['summary']
         assert document['utctimestamp'] == found_alert['_source']['utctimestamp']
