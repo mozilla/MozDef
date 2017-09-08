@@ -17,6 +17,7 @@ from unit_test_suite import UnitTestSuite
 
 import copy
 import re
+import json
 
 
 class AlertTestSuite(UnitTestSuite):
@@ -114,6 +115,14 @@ class AlertTestSuite(UnitTestSuite):
         alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
         self.verify_alert_task(alert_task, test_case)
 
+    def verify_rabbitmq_alert(self, found_alert):
+        rabbitmq_message = self.rabbitmq_alerts_consumer.channel.basic_get()
+        document = json.loads(rabbitmq_message.body)
+        assert document['summary'] == found_alert['_source']['summary']
+        assert document['utctimestamp'] == found_alert['_source']['utctimestamp']
+        assert document['category'] == found_alert['_source']['category']
+        assert len(document['events']) == len(found_alert['_source']['events'])
+
     def verify_saved_events(self, found_alert, test_case):
         """
         Verifies the events saved in ES has expected values from an alert running
@@ -171,6 +180,7 @@ class AlertTestSuite(UnitTestSuite):
                 found_alert = self.es_client.get_alert_by_id(alert_id)
                 self.verify_expected_alert(found_alert, test_case)
                 self.verify_saved_events(found_alert, test_case)
+                self.verify_rabbitmq_alert(found_alert)
         else:
             assert len(alert_task.alert_ids) is 0, 'Alert fired when it was expected not to'
 
