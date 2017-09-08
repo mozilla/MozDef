@@ -45,6 +45,7 @@ class TestAlertUnauthPortScan(AlertTestSuite):
         'summary': "nsmhost: Unauthorized Port Scan Event from [u'1.2.3.4'] scanning ports on host 5.6.7.8",
         'tags': [],
         'url': 'https://www.mozilla.org',
+        'notify_mozdefbot': False,
     }
 
     test_cases = []

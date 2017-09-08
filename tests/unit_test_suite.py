@@ -118,6 +118,10 @@ class UnitTestSuite(object):
         if pytest.config.option.delete_queues:
             self.reset_rabbitmq()
 
+        self.es_client.close()
+        self.rabbitmq_alerts_consumer.connection.close()
+        self.rabbitmq_alerts_consumer.close()
+
     def populate_test_event(self, event, event_type='event'):
         self.es_client.save_event(body=event, doc_type=event_type)
 

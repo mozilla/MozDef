@@ -40,6 +40,9 @@ class ElasticsearchClient():
         self.es_connection.ping()
         self.bulk_queue = BulkQueue(self, threshold=bulk_amount, flush_time=bulk_refresh_time)
 
+    def close(self):
+        self.es_connection.transport.close()
+
     def delete_index(self, index_name, ignore_fail=False):
         ignore_codes = []
         if ignore_fail is True:
