@@ -118,7 +118,6 @@ class UnitTestSuite(object):
         if pytest.config.option.delete_queues:
             self.reset_rabbitmq()
 
-        self.es_client.close()
         self.rabbitmq_alerts_consumer.connection.close()
         self.rabbitmq_alerts_consumer.close()
 
@@ -200,8 +199,7 @@ class UnitTestSuite(object):
 
     @staticmethod
     def create_timestamp_from_now(hour, minute, second):
-         notnow = toUTC(datetime.now().replace(hour=hour, minute=minute, second=second).isoformat())
-         return notnow
+        return toUTC(datetime.now().replace(hour=hour, minute=minute, second=second).isoformat())
 
     @staticmethod
     def current_timestamp_lambda():
