@@ -26,6 +26,7 @@ from datetime import datetime
 from dateutil.parser import parse
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
+from ipwhois import IPWhois
 
 import sys
 import os
@@ -230,6 +231,18 @@ class mozdefBot():
 
                 if "!panic" in message:
                     self.client.msg(recipient, random.choice(panics))
+
+                if '!ipwhois' in message:
+                    for field in message.split():
+                        if isIP(field):
+                            ip = netaddr.IPNetwork(field)[0]
+                            if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
+                                whois = IPWhois(ip).lookup_whois()
+                                self.client.msg(
+                                    recipient, "{0} name: {1}".format(field, whois['nets'][0]['name']))
+                            else:
+                                self.client.msg(
+                                    recipient, "{0}: hrm..loopback? private ip?".format(field))
 
                 if "!ipinfo" in message:
                     for i in message.split():
