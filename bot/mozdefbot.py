@@ -238,8 +238,9 @@ class mozdefBot():
                             ip = netaddr.IPNetwork(field)[0]
                             if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                                 whois = IPWhois(ip).lookup_whois()
+                                description = whois['nets'][0]['description'].encode('string_escape')
                                 self.client.msg(
-                                    recipient, "{0} name: {1}".format(field, whois['nets'][0]['name']))
+                                    recipient, "{0} description: {1}".format(field, description))
                             else:
                                 self.client.msg(
                                     recipient, "{0}: hrm..loopback? private ip?".format(field))
