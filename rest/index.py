@@ -562,7 +562,7 @@ def getWhois(ipaddress):
         whois = dict()
         ip = netaddr.IPNetwork(ipaddress)[0]
         if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
-            whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup()
+            whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup_whois()
 
         whois['fqdn']=socket.getfqdn(str(netaddr.IPNetwork(ipaddress)[0]))
         return (json.dumps(whois))
