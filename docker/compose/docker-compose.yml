@@ -190,6 +190,19 @@ services:
       - 8081:8081
     networks:
       - default
+  fluentd:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_fluentd/Dockerfile
+    restart: always
+    command: bash -c '/usr/local/bundle/bin/fluentd -c /etc/fluent/fluent.conf'
+    depends_on:
+      - loginput
+    ports:
+      - 514:514/udp
+      - 514:514
+    networks:
+      - default
 
 volumes:
   elasticsearch:
