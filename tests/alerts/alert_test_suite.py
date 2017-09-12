@@ -43,6 +43,11 @@ class AlertTestSuite(UnitTestSuite):
                     self.alert_classname.startswith('Alert') else
                     self.alert_classname)).lower()
 
+        # Boolean to determine if an alert is a 'deadman' type of alert
+        # Meaning, this will throw if no events are found
+        if not hasattr(self, 'deadman'):
+            self.deadman = False
+
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):
         # Verify the description for the test case is populated
@@ -109,6 +114,26 @@ class AlertTestSuite(UnitTestSuite):
         alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
         self.verify_alert_task(alert_task, test_case)
 
+    def verify_saved_events(self, found_alert, test_case):
+        """
+        Verifies the events saved in ES has expected values from an alert running
+        """
+        # Deadman alerts throw when no events are found, so skip
+        # any of the event validation
+        if self.deadman:
+            return
+
+        assert len(found_alert['_source']['events']) == len(test_case.full_events)
+        for event in found_alert['_source']['events']:
+            event_id = event['documentid']
+            found_event = self.es_client.get_event_by_id(event_id)
+            assert found_event['_source']['alert_names'] == [self.alert_classname]
+            assert len(found_event['_source']['alerts']) > 0
+            for alert in found_event['_source']['alerts']:
+                assert alert['id'] == found_alert['_id']
+                assert alert['index'] == found_alert['_index']
+                assert alert['type'] == found_alert['_type']
+
     def verify_expected_alert(self, found_alert, test_case):
         # Verify index is set correctly
         assert found_alert['_index'] == self.alert_index_name, 'Alert index not propertly set, got: {}'.format(found_alert['_index'])
@@ -137,12 +162,15 @@ class AlertTestSuite(UnitTestSuite):
             assert found_alert['_source'][key] == value, '{0} does not match, got: {1}'.format(key, found_alert['_source'][key])
 
     def verify_alert_task(self, alert_task, test_case):
+        assert alert_task.classname() == self.alert_classname, 'Alert classname did not match expected name'
         if test_case.expected_test_result is True:
             assert len(alert_task.alert_ids) is not 0, 'Alert did not fire as expected'
             self.flush('alerts')
+            self.flush('events')
             for alert_id in alert_task.alert_ids:
                 found_alert = self.es_client.get_alert_by_id(alert_id)
                 self.verify_expected_alert(found_alert, test_case)
+                self.verify_saved_events(found_alert, test_case)
         else:
             assert len(alert_task.alert_ids) is 0, 'Alert fired when it was expected not to'
 
