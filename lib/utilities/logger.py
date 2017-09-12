@@ -22,11 +22,11 @@ def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
 
 
-def initLogger(options):
+def initLogger(options=None):
     logger.level = logging.INFO
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     formatter.formatTime = loggerTimeStamp
-    if options.output == 'syslog':
+    if options is not None and options.output == 'syslog':
         logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
     else:
         sh = logging.StreamHandler(sys.stderr)

@@ -1,18 +1,14 @@
-from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
-
 import json
-import logging
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch.helpers import bulk, BulkIndexError
 
+from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
 from bulk_queue import BulkQueue
 
-logger = logging.getLogger(__name__)
-logger.level = logging.DEBUG
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+from utilities.logger import logger, initLogger
 
 
 class ElasticsearchBadServer(Exception):
@@ -39,6 +35,7 @@ class ElasticsearchClient():
         self.es_connection = Elasticsearch(servers)
         self.es_connection.ping()
         self.bulk_queue = BulkQueue(self, threshold=bulk_amount, flush_time=bulk_refresh_time)
+        initLogger()
 
     def delete_index(self, index_name, ignore_fail=False):
         ignore_codes = []
