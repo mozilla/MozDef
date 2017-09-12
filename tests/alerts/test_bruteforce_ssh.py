@@ -34,7 +34,8 @@ class TestAlertBruteforceSsh(AlertTestSuite):
         "category": "bruteforce",
         "severity": "NOTICE",
         "summary": "10 ssh bruteforce attempts by 1.2.3.4 exhostname (10 hits)",
-        "tags": ['ssh']
+        "tags": ['ssh'],
+        'notify_mozdefbot': False,
     }
 
     test_cases = []

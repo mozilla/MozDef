@@ -16,3 +16,9 @@ def pytest_addoption(parser):
         default=False,
         help="A flag to indicate if we should delete all indexes in ES before each test. This could result in inconsistent tests if not specified."
     )
+    parser.addoption(
+        "--delete_queues",
+        action='store_true',
+        default=False,
+        help="A flag to indicate if we should delete the contents of rabbitmq queues. This could result in inconsistent tests if not specified."
+    )
