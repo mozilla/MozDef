@@ -14,7 +14,7 @@ from configlib import getConfig, OptionParser
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from elasticsearch_client import ElasticsearchClient
-from query_models import SearchQuery, ExistsMatch, Aggregation
+from query_models import SearchQuery, ExistsMatch, Aggregation, TermMatch
 from utilities.logger import logger, initLogger
 
 
@@ -24,6 +24,11 @@ def verify_events(options):
         logger.debug('Looking for events without ' + required_field)
         search_query = SearchQuery(hours=12)
         search_query.add_must_not(ExistsMatch(required_field))
+
+        # Exclude all events that are mozdef related health and stats
+        search_query.add_must_not(TermMatch('_type', 'mozdefstats'))
+        search_query.add_must_not(TermMatch('_type', 'mozdefhealth'))
+
         search_query.add_aggregation(Aggregation('_type'))
         # We don't care about the actual events, we only want the numbers
         results = search_query.execute(es_client, size=1)
