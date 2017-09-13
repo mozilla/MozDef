@@ -16,6 +16,7 @@ from alert_test_suite import AlertTestSuite
 
 class TestAlertSQSQueuesDeadman(AlertTestSuite):
     alert_filename = "sqs_queues_deadman"
+    deadman = True
 
     default_event = {
         '_source': {

@@ -12,7 +12,7 @@ Anthony Verez averez@mozilla.com
 <template name="alertdetails">
 <div class="container">
     <div class="row">
-        
+
         <div class="row"><button class="btn btn-sm btn-warning col-xs-2 makeinvestigation" data-alertid={{esmetadata.id}}>Escalate To Investigation</button></div>
         <div class="row"><button class="btn btn-sm btn-danger  col-xs-2 makeincident" data-alertid={{esmetadata.id}}>Escalate To Incident</button></div>
         <div class="row" id="alert" >
@@ -29,7 +29,7 @@ Anthony Verez averez@mozilla.com
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="alerttimestamp">{{utctimestamp}}</td>
+                        <td>{{utctimestamp}}</td>
                         <td>
                             <a target="_blank" href="{{kibanaurl}}">open in kibana</a>
                             {{#if url}}
@@ -51,8 +51,8 @@ Anthony Verez averez@mozilla.com
             {{/each}}
         </tbody>
     </table>
-    
-   
+
+
 </div>
 
 </template>
@@ -60,7 +60,7 @@ Anthony Verez averez@mozilla.com
 
 <!--each individual event -->
 <template name="alert_event">
-    
+
         <tr>
             <td>{{documentindex}}</td>
             <td>{{documentid}}</td>

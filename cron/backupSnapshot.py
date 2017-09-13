@@ -36,7 +36,6 @@ import json
 from os.path import expanduser
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.DEBUG
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
