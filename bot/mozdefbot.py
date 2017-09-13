@@ -225,6 +225,8 @@ class mozdefBot():
                     self.client.msg(recipient, "!panic  --panic (or not )")
                     self.client.msg(
                         recipient, "!ipinfo --do a geoip lookup on an ip address")
+                    self.client.msg(
+                        recipient, "!ipwhois --do a whois lookup on an ip address")
 
                 if "!quote" in message:
                     self.client.msg(recipient, getQuote())
