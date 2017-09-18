@@ -32,10 +32,10 @@ def verify_events(options):
         search_query.add_aggregation(Aggregation('_type'))
         # We don't care about the actual events, we only want the numbers
         results = search_query.execute(es_client, size=1)
-        for category_result in results['aggregations']['_type']['terms']:
-            count = category_result['count']
-            category = category_result['key']
-            logger.error("Found {0} bad events of category '{1}' missing '{2}' field".format(
+        for aggreg_term in results['aggregations']['_type']['terms']:
+            count = aggreg_term['count']
+            category = aggreg_term['key']
+            logger.error("Found {0} bad events of _type '{1}' missing '{2}' field".format(
                 count,
                 category,
                 required_field
