@@ -303,7 +303,7 @@ if (Meteor.isClient) {
             //default selection criteria
             //$and will be used by the charts
             basecriteria={$and: [
-                                {lastseentimestamp: {$gte: moment(0)._d}}
+                                {lastseentimestamp: {$exists: true}}
                                 ]
                     }
             return basecriteria;
