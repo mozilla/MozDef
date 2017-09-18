@@ -1,15 +1,15 @@
 [Unit]
-Description=uWSGI mozdef mqwSyslog
+Description=uWSGI eventtask mworker
 After=rabbitmq-server.service
 
 [Service]
 # Requires systemd version 211 or newer
 PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/mkdir /var/run/mozdefmqwSyslog
-ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdefmqwSyslog
+ExecStartPre=-/usr/bin/mkdir -p /var/run/mozdef_mq_worker_pids
+ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdef_mq_worker_pids
 User=mozdef
 Group=mozdef
-ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/mq; source /opt/mozdef/envs/mozdef/bin/activate; uwsgi --ini mqwSyslog.ini'
+ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/mq/; source /opt/mozdef/envs/mozdef/bin/activate; uwsgi --ini eventtask.ini'
 Restart=always
 KillSignal=SIGQUIT
 Type=notify
@@ -18,4 +18,4 @@ NotifyAccess=all
 
 [Install]
 WantedBy=multi-user.target
-Alias=mqwsyslog
+Alias=eventtask
