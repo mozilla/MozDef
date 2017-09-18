@@ -13,7 +13,7 @@ Brandon Myers bmyers@mozilla.com
 //configuration settings
 
 mozdef = {
-  rootURL: "localhost",
+  rootURL: "http://localhost",
   port: "80",
   rootAPI: "http://rest:8081",
   kibanaURL: "http://localhost:9090/app/kibana#",
