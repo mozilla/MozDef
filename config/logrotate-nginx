@@ -1,7 +1,7 @@
-/var/log/mozdef/nginx/*.log {
+/var/log/mozdef/nginx/*.error_log {
         weekly
         missingok
-        rotate 17
+        rotate 4
         compress
         delaycompress
         notifempty

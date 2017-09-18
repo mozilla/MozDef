@@ -76,6 +76,16 @@
           }
         } ],
         "properties" : {
+          "apiVersion" : {
+            "index" : "not_analyzed",
+            "doc_values" : true,
+            "type" : "string"
+          },
+          "version" : {
+            "index" : "not_analyzed",
+            "doc_values" : true,
+            "type" : "string"
+          },
           "summary" : {
             "type" : "string"
           },
