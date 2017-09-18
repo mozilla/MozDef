@@ -1,5 +1,5 @@
 [Unit]
-Description=uWSGI mozdef Alert Service
+Description=uWSGI MozDef Alert Service
 After=rabbitmq-server.service
 
 [Service]
