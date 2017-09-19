@@ -11,15 +11,18 @@
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../alerts/lib"))
-from config import ES
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient
 
 from utilities.toUTC import toUTC
+from utilities.dot_dict import DotDict
 
 from datetime import datetime, timedelta
 from dateutil.parser import parse
+
+from configlib import getConfig
+
+from kombu import Connection, Queue, Exchange
 
 import random
 import pytest
@@ -29,11 +32,22 @@ import time
 if not pytest.config.option.delete_indexes:
     warning_text = "\n\n** WARNING - Some unit tests will not pass unless the --delete_indexes is specified."
     warning_text += "\nThis is due to the fact that some tests need a 'clean' ES environment **\n"
-    warning_text += "\n** DISCLAIMER - If you enable this flag, all indexes that MozDef uses will be deleted upon test execution **\n\n"
+    warning_text += "\n** DISCLAIMER - If you enable this flag, all indexes that MozDef uses will be deleted upon test execution **\n"
     print warning_text
 else:
     warning_text = "\n\n** WARNING - The --delete_indexes flag has been set. We will be deleting important indexes from ES before test execution**\n"
     warning_text += "Continuing the unit test execution in 10 seconds...CANCEL ME IF YOU DO NOT WANT PREVIOUS INDEXES DELETED!!! **\n"
+    print warning_text
+    time.sleep(10)
+
+if not pytest.config.option.delete_queues:
+    warning_text = "\n\n** WARNING - Some unit tests will not pass unless the --delete_queues is specified."
+    warning_text += "\nThis is due to the fact that some tests need a 'clean' RabbitMQ environment **\n"
+    warning_text += "\n** DISCLAIMER - If you enable this flag, the queues in rabbitmq that MozDef uses will be deleted upon test execution **\n"
+    print warning_text
+else:
+    warning_text = "\n** WARNING - The --delete_queues flag has been set. We will be purging RabbitMQ queues before test execution**\n"
+    warning_text += "Continuing the unit test execution in 10 seconds...CANCEL ME IF YOU DO NOT WANT PREVIOUS QUEUES PURGED!!! **\n"
     print warning_text
     time.sleep(10)
 
@@ -45,15 +59,67 @@ class UnitTestSuite(object):
         self.event_index_name = current_date.strftime("events-%Y%m%d")
         self.previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
         self.alert_index_name = current_date.strftime("alerts-%Y%m")
-        self.es_client = ElasticsearchClient(ES['servers'])
+        self.parse_config()
+
+        # Elasticsearch
+        self.es_client = ElasticsearchClient(list('{0}'.format(s) for s in self.options.esservers))
+
+        # RabbitMQ
+        mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(self.options.mquser,
+                                                        self.options.mqpassword,
+                                                        self.options.mqalertserver,
+                                                        self.options.mqport)
+
+        mqAlertConn = Connection(mqConnString)
+        alertExchange = Exchange(name=self.options.alertExchange, type='topic', durable=True, delivery_mode=1)
+        alertExchange(mqAlertConn).declare()
+
+        alertQueue = Queue(self.options.queueName,
+                           exchange=alertExchange,
+                           routing_key=self.options.alerttopic,
+                           durable=False,
+                           no_ack=(not self.options.mqack))
+        alertQueue(mqAlertConn).declare()
+
+        self.rabbitmq_alerts_consumer = mqAlertConn.Consumer(alertQueue, accept=['json'])
 
         if pytest.config.option.delete_indexes:
             self.reset_elasticsearch()
             self.setup_elasticsearch()
 
+        if pytest.config.option.delete_queues:
+            self.reset_rabbitmq()
+
+    def parse_config(self):
+        default_config = os.path.join(os.path.dirname(__file__), "config.conf")
+        options = DotDict()
+        options.configfile = default_config
+
+        options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
+
+        options.alertExchange = getConfig('alertexchange', 'alerts', options.configfile)
+        options.queueName = getConfig('alertqueuename', 'alertBot', options.configfile)
+        options.alerttopic = getConfig('alerttopic', 'mozdef.*', options.configfile)
+
+        options.mquser = getConfig('mquser', 'guest', options.configfile)
+        options.mqalertserver = getConfig('mqalertserver', 'localhost', options.configfile)
+        options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
+        options.mqport = getConfig('mqport', 5672, options.configfile)
+        options.mqack = getConfig('mqack', True, options.configfile)
+
+        self.options = options
+
+    def reset_rabbitmq(self):
+        self.rabbitmq_alerts_consumer.channel.queue_purge()
+
     def teardown(self):
         if pytest.config.option.delete_indexes:
             self.reset_elasticsearch()
+        if pytest.config.option.delete_queues:
+            self.reset_rabbitmq()
+
+        self.rabbitmq_alerts_consumer.connection.close()
+        self.rabbitmq_alerts_consumer.close()
 
     def populate_test_event(self, event, event_type='event'):
         self.es_client.save_event(body=event, doc_type=event_type)
@@ -97,6 +163,7 @@ class UnitTestSuite(object):
                 "category": "excategory",
                 "utctimestamp": current_timestamp,
                 "receivedtimestamp": current_timestamp,
+                "mozdefhostname": "mozdefhost",
                 "hostname": "exhostname",
                 "severity": "NOTICE",
                 "source": "exsource",
@@ -133,8 +200,7 @@ class UnitTestSuite(object):
 
     @staticmethod
     def create_timestamp_from_now(hour, minute, second):
-         notnow = toUTC(datetime.now().replace(hour=hour, minute=minute, second=second).isoformat())
-         return notnow
+        return toUTC(datetime.now().replace(hour=hour, minute=minute, second=second).isoformat())
 
     @staticmethod
     def current_timestamp_lambda():
@@ -147,4 +213,3 @@ class UnitTestSuite(object):
     @staticmethod
     def create_timestamp_from_now_lambda(hour, minute, second):
         return lambda: UnitTestSuite.create_timestamp_from_now(hour, minute, second)
-

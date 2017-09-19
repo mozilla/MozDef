@@ -6,6 +6,7 @@ from alert_test_suite import AlertTestSuite
 
 class TestAlertCloudtrailDeadman(AlertTestSuite):
     alert_filename = "cloudtrail_deadman"
+    deadman = True
 
     # This event is the default positive event that will cause the
     # alert to trigger

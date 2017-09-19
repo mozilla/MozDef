@@ -49,6 +49,7 @@ class TestAlertUnauthScan(AlertTestSuite):
         'summary': "nsmservername: Unauthorized Internal Scan Event from [u'1.2.3.4'] scanning ports 22",
         'tags': [],
         'url': 'https://www.mozilla.org',
+        'notify_mozdefbot': False,
     }
 
     test_cases = []

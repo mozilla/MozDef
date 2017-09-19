@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=forking
 PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/mkdir /var/run/mozdefdb
+ExecStartPre=-/usr/bin/mkdir -p /var/run/mozdefdb
 ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdefdb/
 PIDFile=/var/run/mozdefdb/mozdefdb.pid
 ExecStart=/usr/bin/mongod  --storageEngine=mmapv1 --config /etc/mongod.conf --syslog
