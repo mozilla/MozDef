@@ -1,5 +1,5 @@
 [Unit]
-Description=uWSGI mozdef bot
+Description=uWSGI MozDef Bot Service
 After=rabbitmq-server.service
 
 [Service]

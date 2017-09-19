@@ -395,7 +395,7 @@ Manual Installation
 
 *Use sudo whereever required*
 
-**(Currently only for apt-based systems)**
+**(Currently only for apt-based systems using Docker)**
 
 
 1. Cloning repository ::
