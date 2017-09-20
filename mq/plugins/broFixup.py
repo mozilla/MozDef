@@ -115,7 +115,7 @@ class message(object):
                         u'{destinationport} '+
                         u'{history} '+
                         u'{originipbytes} bytes / '
-                        u'{responseipbytes} bytes)'
+                        u'{responseipbytes} bytes'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)        
                 
@@ -158,7 +158,7 @@ class message(object):
                         u'{destinationipaddress}:{destinationport} '
                         u'{qtype_name} '
                         u'{query} '
-                        u'{rcode_name} '
+                        u'{rcode_name}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
