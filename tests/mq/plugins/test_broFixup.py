@@ -280,3 +280,67 @@ class TestBroFixup(object):
         assert 'host' in result['details']
         assert 'method' in result['details']
         assert result['summary'] == 'GET hg.mozilla.org /projects/build-system?cmd=batch 200'
+
+    def test_ssl_log(self):
+        event = {
+            "ts":1502751597.597052,
+            "uid":"CWmwax23B9dBtn3s16",
+            "sourceipaddress":"36.70.241.31",
+            "sourceport":49322,
+            "destinationipaddress":"63.245.215.82",
+            "destinationport":443,
+            "version":"TLSv12",
+            "cipher":"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+            "curve":"secp256r1",
+            "server_name":"geo.mozilla.org",
+            "resumed":'false',
+            "established":'true',
+            "cert_chain_fuids":["Fo4Xkx1WrJPQJVG6Zk","FZcDnY15qCFTlPt0E7"],
+            "client_cert_chain_fuids":[],
+            "subject":"CN=geo.mozilla.org,OU=WebOps,O=Mozilla Foundation,L=Mountain View,ST=California,C=US",
+            "issuer":"CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US",
+            "validation_status":"ok",
+            "pfs":'true',
+            'category': 'bro',
+            'type': 'ssl'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'SSL: 36.70.241.31 -> 63.245.215.82:443 geo.mozilla.org'
+    
+    def test_ssl_log2(self):
+        event = {
+            "ts":1502751597.597052,
+            "uid":"CWmwax23B9dBtn3s16",
+            "sourceipaddress":"36.70.241.31",
+            "sourceport":49322,
+            "destinationipaddress":"63.245.215.82",
+            "destinationport":443,
+            "version":"TLSv12",
+            "cipher":"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+            "curve":"secp256r1",
+            "resumed":'false',
+            "established":'true',
+            "cert_chain_fuids":["Fo4Xkx1WrJPQJVG6Zk","FZcDnY15qCFTlPt0E7"],
+            "client_cert_chain_fuids":[],
+            "subject":"CN=geo.mozilla.org,OU=WebOps,O=Mozilla Foundation,L=Mountain View,ST=California,C=US",
+            "issuer":"CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US",
+            "validation_status":"ok",
+            "pfs":'true',
+            'category': 'bro',
+            'type': 'ssl'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'server_name' in result['details']
+        assert result['summary'] == 'SSL: 36.70.241.31 -> 63.245.215.82:443 63.245.215.82'
