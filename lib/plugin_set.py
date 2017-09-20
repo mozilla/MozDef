@@ -85,4 +85,8 @@ class PluginSet(object):
         return (message_copy, metadata)
 
     def send_message_to_plugin(self, plugin_class, message, metadata):
+        '''moving this logic to a separate function allows
+           different types of plugin_sets, such as alerts that might not care
+           about receiving metadata in its plugins
+        '''
         return plugin_class.onMessage(message, metadata)
