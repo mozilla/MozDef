@@ -14,7 +14,9 @@ class TestPluginSet(object):
         }
 
     def test_registered_plugins(self):
-        assert len(self.plugin_set.enabled_plugins) == 6
+        total_num_plugins = len([name for name in os.listdir(self.plugin_dir)])
+        # We exclude the __init__.py file
+        assert len(self.plugin_set.enabled_plugins) == total_num_plugins - 1
 
     def test_registered_plugins_specific_enabled_plugins(self):
         enabled_plugins = ['plugin1']
