@@ -68,16 +68,12 @@ class PluginSet(object):
         message_copy = copy.deepcopy(message)
         for plugin in self.ordered_enabled_plugins:
             send = False
-            try:
-                if isinstance(plugin['registration'], list):
-                    if (set(plugin['registration']).intersection([e for e in dict2List(message_copy)])):
-                        send = True
-                elif isinstance(plugin['registration'], str):
-                    if plugin['registration'] in [e for e in dict2List(message_copy)]:
-                        send = True
-            except TypeError:
-                # If we can't parse the message, then return the original message and metadata
-                return (message, metadata)
+            if isinstance(plugin['registration'], list):
+                if (set(plugin['registration']).intersection([e for e in dict2List(message_copy)])):
+                    send = True
+            elif isinstance(plugin['registration'], str):
+                if plugin['registration'] in [e for e in dict2List(message_copy)]:
+                    send = True
             if send:
                 (message_copy, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message_copy, metadata=metadata)
                 if message_copy is None:

@@ -13,7 +13,7 @@ class message(object):
         registers based on a value that a previous plugin should set
         '''
         self.registration = ['apples']
-        self.priority = 25
+        self.priority = 30
 
     def onMessage(self, message, metadata):
         message['plugin6_key'] = 'plums'
