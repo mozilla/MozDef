@@ -14,7 +14,7 @@ class TestPluginSet(object):
         }
 
     def test_registered_plugins(self):
-        assert len(self.plugin_set.enabled_plugins) == 5
+        assert len(self.plugin_set.enabled_plugins) == 6
 
     def test_registered_plugins_specific_enabled_plugins(self):
         enabled_plugins = ['plugin1']
@@ -111,3 +111,15 @@ class TestPluginSet(object):
         assert parsed_message['unit_test_key'] == 'bananas'
         assert parsed_message['plugin3_key'] == 'oranges'
         assert parsed_metadata == expected_metadata
+
+    def test_run_plugins_modified_message_plugins(self):
+        '''This unit tests checks to see if we modify a message
+           in a plugin, that a plugin further down the 'line'
+           can register and get the updated message
+        '''
+        message = {'apples': 'test', 'testkey': 'othervalue'}
+
+        parsed_message, parsed_metadata = self.plugin_set.run_plugins(message, self.metadata)
+        assert 'plugin6_key' not in message
+        assert parsed_message['plugin6_key'] == 'plums'
+        assert parsed_metadata == self.metadata
