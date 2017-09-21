@@ -217,12 +217,9 @@ class message(object):
                         newmessage['details']['os'] = ''
                     if 'subsystem' not in newmessage['details']:
                         newmessage['details']['subsystem'] = ''
-                    if 'sectionnames' not in newmessage['details']:
-                        newmessage['details']['sectionnames'] = ''
                     newmessage[u'summary'] = (
                         u'PE file: {os} '
-                        u'{subsystem} '
-                        u'{sectionnames}'
+                        u'{subsystem}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
@@ -248,10 +245,10 @@ class message(object):
                     if 'auth_success' not in newmessage['details']:
                         newmessage['details'][u'auth_success'] = u'unknown'
                     newmessage[u'summary'] = (
-                        u'{sourceipaddress} -> '
+                        u'SSH: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
-                        u'status {auth_success}'
+                        u'success {auth_success}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
@@ -270,7 +267,6 @@ class message(object):
                     return (newmessage, metadata)
                 
                 if logtype == 'intel':
-                    newmessage[u'severity'] = u'WARNING'
                     if 'seenindicator' not in newmessage['details']:
                         newmessage['details'][u'seenindicator'] = u''
                     newmessage[u'summary'] = (
@@ -331,7 +327,6 @@ class message(object):
                     return (newmessage, metadata)
                 
                 if logtype == 'notice':
-                    newmessage[u'severity'] = u'NOTICE'
                     newmessage['details'][u'indicators'] = []
                     if 'sub' not in newmessage['details']:
                         newmessage['details'][u'sub'] = u''
