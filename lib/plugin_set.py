@@ -2,7 +2,6 @@ import os
 import pynsive
 from operator import itemgetter
 from utilities.dict2List import dict2List
-import copy
 
 
 class PluginSet(object):
@@ -63,22 +62,22 @@ class PluginSet(object):
         if not isinstance(message, dict):
             raise TypeError('event is type {0}, should be a dict'.format(type(message)))
 
-        # We deep copy the message in case the caller of this function wants
-        # to reference the original one (so we don't change it in here)
-        message_copy = copy.deepcopy(message)
         for plugin in self.ordered_enabled_plugins:
             send = False
+            message_fields = [e for e in dict2List(message)]
+            # this is to make it so we can match on all fields
+            message_fields.append('*')
             if isinstance(plugin['registration'], list):
-                if (set(plugin['registration']).intersection([e for e in dict2List(message_copy)])):
+                if set(plugin['registration']).intersection(message_fields):
                     send = True
             elif isinstance(plugin['registration'], str):
-                if plugin['registration'] in [e for e in dict2List(message_copy)]:
+                if plugin['registration'] in message_fields:
                     send = True
             if send:
-                (message_copy, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message_copy, metadata=metadata)
-                if message_copy is None:
-                    return (message_copy, metadata)
-        return (message_copy, metadata)
+                (message, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message, metadata=metadata)
+                if message is None:
+                    return (message, metadata)
+        return (message, metadata)
 
     def send_message_to_plugin(self, plugin_class, message, metadata):
         '''moving this logic to a separate function allows

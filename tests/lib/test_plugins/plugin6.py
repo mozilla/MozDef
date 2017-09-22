@@ -12,7 +12,7 @@ class message(object):
         '''
         registers based on a value that a previous plugin should set
         '''
-        self.registration = ['apples']
+        self.registration = ['somesecretvalue']
         self.priority = 30
 
     def onMessage(self, message, metadata):

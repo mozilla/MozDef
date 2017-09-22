@@ -10,15 +10,11 @@
 class message(object):
     def __init__(self):
         '''
-        intended to be the first plugin that will run
-        and adds a term to the message to signal
-        it has run
+        registers based on all values
         '''
-        self.registration = ['apples']
-        self.priority = 1
+        self.registration = ['*']
+        self.priority = 35
 
     def onMessage(self, message, metadata):
-        message['unit_test_key'] = 'apples'
-        # Used for plugin6 to match on
-        message['secretkey'] = 'somesecretvalue'
+        message['plugin7_key'] = 'lime'
         return message, metadata
