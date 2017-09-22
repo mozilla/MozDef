@@ -26,7 +26,8 @@ class PluginSet(object):
             module_filename, module_name = found_module.split('.')
             if module_name not in enabled_plugins and len(enabled_plugins) > 0:
                 # Skip this plugin since it's not listed as enabled plugins
-                # or don't skip plugin if we don't have any enabled plugins set (which means all)
+                # as long as we have specified some enabled plugins though
+                # this allows us to specify no specific plugins and get all of them
                 continue
 
             module_obj = pynsive.import_module(found_module)
