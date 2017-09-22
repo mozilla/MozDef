@@ -53,19 +53,35 @@ class message(object):
 
 
     def onMessage(self, message, metadata):
+        
+        # make sure I really wanted to see this message
+        # bail out early if not
+        if 'category' not in message:
+            return message, metadata
+        if 'type' not in message:
+            return message, metadata
+        if message['category'] is not 'bro':
+            return message, metadata
+
         # set the doc type to bro
         # to avoid data type conflicts with other doc types
         # (int v string, etc)
         # index holds documents of type 'type'
         # index -> type -> doc
         metadata['doc_type']= 'nsm'
-        whitelist = ['hostname', 'type', 'tags', 'customendpoint']
+        whitelist = ['hostname', 'tags', 'category', 'customendpoint']
 
         # move Bro specific fields under 'details' while preserving metadata
         newmessage = dict()
 
         newmessage['details'] = message
         newmessage['customendpoint'] = 'bro'
+
+        # move some fields that are expected at the event 'root' where they belong
+        for wl in whitelist:
+            if wl in message:
+                newmessage[wl] = message[wl]
+                del(newmessage['details'][wl])
 
 
         # add mandatory fields
@@ -78,16 +94,11 @@ class message(object):
             newmessage[u'timestamp'] = toUTC(datetime.now()).isoformat()
 
         newmessage[u'receivedtimestamp'] = toUTC(datetime.now()).isoformat()
-
-
-        # add mandatory fields
-        # move bro data under details
         newmessage[u'eventsource'] = u'nsm'
         newmessage[u'severity'] = u'INFO'
         #newmessage[u'processname'] = u''
         #newmessage[u'processid'] = u''
         newmessage[u'mozdefhostname'] = self.mozdefhostname
-        newmessage[u'category'] = u'bro'
 
 
         # re-arrange the position of some fields
@@ -97,8 +108,12 @@ class message(object):
             #newmessage[u'hostname'] = newmessage['details']['hostname']
             #del(newmessage['details']['hostname'])
 
-            # some Bro logs need special treatment
-            if 'type' in newmessage['details']:
+            # All Bro logs need special treatment, so we provide it
+            # Not a known log type? Mark it as such and return
+            if 'type' not in newmessage['details']:
+                newmessage['details']['type'] = 'unknown'
+                return message, metadata
+            else:
                 logtype = newmessage['details']['type']
 
                 if logtype == 'conn':
@@ -308,6 +323,8 @@ class message(object):
                     return (newmessage, metadata)
 
                 if logtype == 'knownservices':
+                    if 'service' not in newmessage['details']:
+                        newmessage['details']['service'] = []
                     if not newmessage['details']['service']:
                         newmessage['details'][u'service'] = [u'Unknown']
                     if 'host' not in newmessage['details']:
@@ -361,7 +378,7 @@ class message(object):
                         u'RDP: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
-                        u'user {cookie}'
+                        u'cookie {cookie}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -369,11 +386,11 @@ class message(object):
                     if 'status_msg' not in newmessage['details']:
                         newmessage['details'][u'status_msg'] = u'unknown'
                     if 'uri' not in newmessage['details']:
-                        newmessage['details'][u'uri'] = u''
+                        newmessage['details'][u'uri'] = u'unknown'
                     if 'method' not in newmessage['details']:
-                        newmessage['details'][u'method'] = u''
+                        newmessage['details'][u'method'] = u'unknown'
                     newmessage[u'summary'] = (
-                        u'{sourceipaddress} -> '
+                        u'SIP: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
                         u'method {method} '
@@ -384,14 +401,14 @@ class message(object):
 
                 if logtype == 'software':
                     if 'name' not in newmessage['details']:
-                        newmessage['details'][u'name'] = u''
+                        newmessage['details'][u'name'] = u'unparsed'
                     if 'software_type' not in newmessage['details']:
-                        newmessage['details'][u'software_type'] = u''
+                        newmessage['details'][u'software_type'] = u'unknown software'
                     if 'host' not in newmessage['details']:
                         newmessage['details'] = u''
                     newmessage[u'summary'] = (
                         u'Found {software_type} '
-                        u'{name} '
+                        u'name {name} '
                         u'on {host}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
@@ -401,15 +418,12 @@ class message(object):
                         newmessage['details'][u'version'] = u'0'
                     if 'status' not in newmessage['details']:
                         newmessage['details'][u'status'] = u'unknown'
-                    if 'bound_p' not in newmessage['details']['bound_p']:
-                        newmessage['details'][u'bound_p'] = u'0'
                     newmessage[u'summary'] = (
                         u'SOCKSv{version}: '
                         u'{sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
                         u'status {status}'
-                        u'{bound_p}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -443,18 +457,20 @@ class message(object):
                         u'{destinationipaddress}:'
                         u'{destinationport} '
                         u'client {client} '
-                        u'requested {request_type} '
+                        u'request {request_type} '
                         u'service {service} '
-                        u'status {success} '
+                        u'success {success} '
                         u'{error_msg}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
                 if logtype == 'ntlm':
-                    if 'domainname' not in newmessage['details']:
-                        newmessage['details'][u'domainname'] = u''
-                    if 'username' not in newmessage['details']:
-                        newmessage['details'][u'username'] = u''
+                    if 'ntlmdomainname' not in newmessage['details']:
+                        newmessage['details'][u'ntlmdomainname'] = u'unknown'
+                    if 'ntlmhostname' not in newmessage['details']:
+                        newmessage['details'][u'ntlmhostname'] = u'unknown'
+                    if 'ntlmusername' not in newmessage['details']:
+                        newmessage['details'][u'ntlmusername'] = u'unknown'
                     if 'success' not in newmessage['details']:
                         newmessage['details'][u'success'] = u'unknown'
                     if 'status' not in newmessage['details']:
@@ -463,8 +479,9 @@ class message(object):
                         u'NTLM: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
-                        u'user {username} '
-                        u'domain {domainname} '
+                        u'user {ntlmusername} '
+                        u'host {ntlmhostname} '
+                        u'domain {ntlmdomainname} '
                         u'success {success} '
                         u'status {status}'
                     ).format(**newmessage['details'])
@@ -478,13 +495,11 @@ class message(object):
                     if 'action' not in newmessage['details']:
                         newmessage['details'][u'action'] = u''
                     newmessage[u'summary'] = (
-                        'SMB file operation: '
+                        'SMB file: '
                         u'{sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
-                        u'{action} '
-                        u'{path} '
-                        u'{name}'
+                        u'{action}'
                     ).format(**newmessage['details'])
                     return(newmessage, metadata)
 
@@ -498,25 +513,30 @@ class message(object):
                         u'{sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
-                        u'{share_type} '
-                        u'{path}'
+                        u'{share_type}'
                     ).format(**newmessage['details'])
                     return(newmessage, metadata)
 
                 if logtype == 'snmp':
                     if 'version' not in newmessage['details']:
-                        newmessage['details'][u'version'] = u'0'
+                        newmessage['details'][u'version'] = u'Unknown'
+                    if 'get_bulk_requests' not in newmessage['details']:
+                        newmessage['details']['get_bulk_requests'] = 0
+                    if 'get_requests' not in newmessage['details']:
+                        newmessage['details']['get_requests'] = 0
+                    if 'set_requests' not in newmessage['details']:
+                        newmessage['details']['set_requests'] = 0
+                    if 'get_responses' not in newmessage['details']:
+                        newmessage['details']['get_responses'] = 0
                     newmessage['details']['getreqestssum'] = u'{0}'.format(newmessage['details']['get_bulk_requests'] + newmessage['details']['get_requests'])
-                    getresp = newmessage['details'][u'get_responses']
-                    setreq = newmessage['details'][u'set_requests']
                     newmessage[u'summary'] = (
-                        u'{version}: '
+                        u'SNMPv{version}: '
                         u'{sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
                         u'({getreqestssum} get / '
-                        u'{get_responses} put requests '
-                        u'{set_requests} responses)'
+                        u'{set_requests} set requests '
+                        u'{get_responses} get responses)'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -527,6 +547,6 @@ class message(object):
                         'Certificate seen serial {certificateserial}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-
-
+        
+        
         return (newmessage, metadata)

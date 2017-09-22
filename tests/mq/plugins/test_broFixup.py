@@ -13,14 +13,71 @@ class TestBroFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
+            'doc_type': 'nsm',
+            'index': 'events'
+        }
+
+    def test_notbro_log(self):
+        metadata = {
             'doc_type': 'event',
             'index': 'events'
         }
+        event = {
+            'key1': 'bro'
+        }
+        
+        result, metadata = self.plugin.onMessage(event, metadata)
+        assert result
+        assert metadata['doc_type'] is not 'nsm'
+
+    def test_notbro_log2(self):
+        metadata = {
+            'doc_type': 'event',
+            'index': 'events'
+        }
+        event = {
+           'bro': 'value1'
+        }
+       
+        result, metadata = self.plugin.onMessage(event, metadata)
+        assert result
+        assert metadata['doc_type'] is not 'nsm'
+
+    def test_bro_notype_log(self):
+        metadata = {
+            'doc_type': 'event',
+            'index': 'events'
+        }
+        event = {
+           'category': 'bro'
+        }
+       
+        result, metadata = self.plugin.onMessage(event, metadata)
+        assert result
+        assert metadata['doc_type'] is not 'nsm'
+    
+    def test_bro_wrongtype_log(self):
+        event = {
+           'category': 'bro',
+           'type': 'nosuchtype',
+           'ts': 1505701210.163043
+        }
+       
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert metadata['doc_type'] is 'nsm'
 
     @mock.patch('broFixup.node')
     def test_mozdefhostname_mock_string(self, mock_path):
         mock_path.return_value = 'samplehostname'
-        event = {}
+        event = {
+            'category': 'bro',
+            'type': 'something'
+        }
         plugin = message()
         result, metadata = plugin.onMessage(event, self.metadata)
         assert result['mozdefhostname'] == 'samplehostname'
@@ -28,7 +85,10 @@ class TestBroFixup(object):
     @mock.patch('broFixup.node')
     def test_mozdefhostname_mock_exception(self, mock_path):
         mock_path.side_effect = ValueError
-        event = {}
+        event = {
+            'category': 'bro',
+            'type': 'something'
+        }
         plugin = message()
         result, metadata = plugin.onMessage(event, self.metadata)
         assert result['mozdefhostname'] == 'failed to fetch mozdefhostname'
@@ -37,11 +97,16 @@ class TestBroFixup(object):
         assert metadata['doc_type'] == 'nsm'
 
     def test_defaults(self):
-        event = {}
+        event = {
+            'category': 'bro',
+            'type': 'something'
+        }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert result['details'] == {}
+        assert result['details'] == {
+            'type': 'something'
+        }
 
     def verify_defaults(self, result):
         assert result['category'] == 'bro'
@@ -52,6 +117,24 @@ class TestBroFixup(object):
         assert toUTC(result['timestamp']).isoformat() == result['timestamp']
         assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
 
+    def test_whitelist(self):
+        event = {
+            'category': 'bro',
+            'type': 'sometype',
+            'hostname': 'somefancyyhost',
+            'tags': ['tag1','tag2'],
+            'customendpoint': 'bro'
+        }
+
+        whitelist = ['hostname', 'tags', 'category', 'customendpoint']
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        for wl in whitelist:
+            assert wl in result
+            assert wl not in result['details']
+    
     # Would just need to duplicate this function, with your event json as the event variable
     def test_conn_log(self):
         event = {
@@ -753,6 +836,111 @@ class TestBroFixup(object):
         assert 'serial' in result['details']
         assert result['summary'] == 'Certificate seen from: 10.22.75.54:8443 serial 0'
     
+    def test_knowndevices_log(self):
+        event = {
+            "ts":1258531221.486539,
+            "mac":"00:0b:db:63:58:a6",
+            "dhcp_host_name":"m57-jo",
+            'category':'bro',
+            'type':'knowndevices'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'New host: 00:0b:db:63:58:a6 m57-jo'
+    
+    def test_knowndevices_log2(self):
+        event = {
+            "ts":1258531221.486539,
+            'category':'bro',
+            'type':'knowndevices'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'mac' in result['details']
+        assert 'dhcp_host_name' in result['details']
+        assert result['summary'] == 'New host:  '
+    
+    def test_knownhosts_log(self):
+        event = {
+            "ts":1258535653.085939,
+            "host":"65.54.95.64",
+            'category':'bro',
+            'type':'knownhosts'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'New host: 65.54.95.64'
+    
+    def test_knownhosts_log2(self):
+        event = {
+            "ts":1258535653.085939,
+            'category':'bro',
+            'type':'knownhosts'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'host' in result['details']
+        assert result['summary'] == 'New host: '
+    
+    def test_knownservices_log(self):
+        event = {
+            "ts":1505701209.937973,
+            "host":"10.22.70.91",
+            "port_num":3306,
+            "port_proto":"tcp",
+            "service":["MYSQL"],
+            'category':'bro',
+            'type':'knownservices'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'New service: MYSQL on host 10.22.70.91:3306 / tcp'
+
+    def test_knownservices_log2(self):
+        event = {
+            "ts":1505701209.937973,
+            'service':[],
+            'category':'bro',
+            'type':'knownservices'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'host' in result['details']
+        assert 'port_num' in result['details']
+        assert 'port_proto' in result['details']
+        assert 'service' in result['details']
+        assert result['summary'] == 'New service: Unknown on host unknown:0 / '
+    
     def test_notice_log(self):
         event = {
             "ts":1505701210.803008,
@@ -786,6 +974,558 @@ class TestBroFixup(object):
         assert 'msg' in result['details']
         assert 'sub' in result['details']
         assert result['summary'] == "SSL::Certificate_Expires_Soon Certificate CN=support.mozilla.org,O=Mozilla Foundation,L=Mountain View,ST=California,C=US,postalCode=94041,street=650 Castro St Ste 300,serialNumber=C2543436,1.3.6.1.4.1.311.60.2.1.2=#130A43616C69666F726E6961,1.3.6.1.4.1.311.60.2.1.3=#13025553,businessCategory=Private Organization is going to expire at 2017-10-06-12:00:00.000000000 "
+
+    def test_snmp_log(self):
+        event = {
+            "ts":1505703535.041376,
+            "uid":"ClusjHyL4YWvyV0rd",
+            "sourceipaddress":"10.22.75.137",
+            "sourceport":36318,
+            "destinationipaddress":"10.26.8.128",
+            "destinationport":161,
+            "duration":0.012456,
+            "version":"2c",
+            "community":"yourcommunity",
+            "get_requests":90,
+            "get_bulk_requests":0,
+            "get_responses":120,
+            "set_requests":0,
+            'category': 'bro',
+            'type': 'snmp'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'SNMPv2c: 10.22.75.137 -> 10.26.8.128:161 (90 get / 0 set requests 120 get responses)'
+    
+    def test_snmp_log2(self):
+        event = {
+            "ts":1505703535.041376,
+            "uid":"ClusjHyL4YWvyV0rd",
+            "sourceipaddress":"10.22.75.137",
+            "sourceport":36318,
+            "destinationipaddress":"10.26.8.128",
+            "destinationport":161,
+            "duration":0.012456,
+            "community":"yourcommunity",
+            'category': 'bro',
+            'type': 'snmp'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'SNMPvUnknown: 10.22.75.137 -> 10.26.8.128:161 (0 get / 0 set requests 0 get responses)'
+    
+    def test_rdp_log(self):
+        event = {
+            "ts":1297551041.284715,
+            "uid":"CbbyKC4V7tEzua9N8h",
+            "sourceipaddress":"192.168.1.200",
+            "sourceport":49206,
+            "destinationipaddress":"192.168.1.150",
+            "destinationport":3389,
+            "cookie":"AWAKECODI",
+            "result":"encrypted",
+            "security_protocol":"HYBRID",
+            "cert_count":0,
+            'category': 'bro',
+            'type': 'rdp'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'RDP: 192.168.1.200 -> 192.168.1.150:3389 cookie AWAKECODI'
+    
+    def test_rdp_log2(self):
+        event = {
+            "ts":1297551041.284715,
+            "uid":"CbbyKC4V7tEzua9N8h",
+            "sourceipaddress":"192.168.1.200",
+            "sourceport":49206,
+            "destinationipaddress":"192.168.1.150",
+            "destinationport":3389,
+            "result":"encrypted",
+            "security_protocol":"HYBRID",
+            "cert_count":0,
+            'category': 'bro',
+            'type': 'rdp'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'cookie' in result['details']
+        assert result['summary'] == 'RDP: 192.168.1.200 -> 192.168.1.150:3389 cookie unknown'
+
+    def test_sip_log(self):
+        event = {
+            "ts":1120469590.259876,
+            "uid":"C4tJSk2uEibu6Ty4hc",
+            "sourceipaddress":"192.168.1.2",
+            "sourceport":5060,
+            "destinationipaddress":"212.242.33.35",
+            "destinationport":5060,
+            "trans_depth":0,
+            "method":"REGISTER",
+            "uri":"sip:sip.cybercity.dk",
+            "request_from":"<sip:voi18063@sip.cybercity.dk>",
+            "request_to":"<sip:voi18063@sip.cybercity.dk>",
+            "response_from":"<sip:voi18063@sip.cybercity.dk>",
+            "response_to":"<sip:voi18063@sip.cybercity.dk>",
+            "call_id":"578222729-4665d775@578222732-4665d772",
+            "seq":"69 REGISTER",
+            "request_path":["SIP/2.0/UDP 192.168.1.2"],
+            "response_path":["SIP/2.0/UDP 192.168.1.2;received=80.230.219.70;rport=5060"],
+            "user_agent":"Nero SIPPS IP Phone Version 2.0.51.16",
+            "status_code":100,
+            "status_msg":"Trying",
+            "request_body_len":0,
+            "response_body_len":0,
+            'category': 'bro',
+            'type': 'sip'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'SIP: 192.168.1.2 -> 212.242.33.35:5060 method REGISTER uri sip:sip.cybercity.dk status Trying'
+    
+    def test_sip_log2(self):
+        event = {
+            "ts":1120469590.259876,
+            "uid":"C4tJSk2uEibu6Ty4hc",
+            "sourceipaddress":"192.168.1.2",
+            "sourceport":5060,
+            "destinationipaddress":"212.242.33.35",
+            "destinationport":5060,
+            "trans_depth":0,
+            "request_from":"<sip:voi18063@sip.cybercity.dk>",
+            "request_to":"<sip:voi18063@sip.cybercity.dk>",
+            "response_from":"<sip:voi18063@sip.cybercity.dk>",
+            "response_to":"<sip:voi18063@sip.cybercity.dk>",
+            "call_id":"578222729-4665d775@578222732-4665d772",
+            "seq":"69 REGISTER",
+            "request_path":["SIP/2.0/UDP 192.168.1.2"],
+            "response_path":["SIP/2.0/UDP 192.168.1.2;received=80.230.219.70;rport=5060"],
+            "user_agent":"Nero SIPPS IP Phone Version 2.0.51.16",
+            "request_body_len":0,
+            "response_body_len":0,
+            'category': 'bro',
+            'type': 'sip'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'method' in result['details']
+        assert 'uri' in result['details']
+        assert 'status_msg' in result['details']
+        assert result['summary'] == 'SIP: 192.168.1.2 -> 212.242.33.35:5060 method unknown uri unknown status unknown'
+    
+    def test_software_log(self):
+        event = {
+            "ts":1505703596.442367,
+            "host":"10.8.81.221",
+            "software_type":"HTTP::BROWSER",
+            "name":"Thunderbird",
+            "version.major":16,
+            "version.minor":0,
+            "version.minor2":1,
+            "unparsed_version":"Mozilla/5.0 (X11; Linux i686; rv:16.0) Gecko/20121010 Thunderbird/16.0.1",
+            'category': 'bro',
+            'type': 'software'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'Found HTTP::BROWSER name Thunderbird on 10.8.81.221'
+    
+    def test_software_log2(self):
+        event = {
+            "ts":1505703596.442367,
+            "host":"10.8.81.221",
+            "version.major":16,
+            "version.minor":0,
+            "version.minor2":1,
+            "unparsed_version":"Mozilla/5.0 (X11; Linux i686; rv:16.0) Gecko/20121010 Thunderbird/16.0.1",
+            'category': 'bro',
+            'type': 'software'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'Found unknown software name unparsed on 10.8.81.221'
+    
+    def test_socks_log(self):
+        event = {
+            "ts":1340213015.276495,
+            "uid":"CUy63t6qOCaFvn6nd",
+            "sourceipaddress":"10.0.0.55",
+            "sourceport":53994,
+            "destinationipaddress":"60.190.189.214",
+            "destinationport":8124,
+            "version":5,
+            "status":"succeeded",
+            "request.name":"www.osnews.com",
+            "request_p":80,
+            "bound.host":"192.168.0.31",
+            "bound_p":2688,
+            'category': 'bro',
+            'type': 'socks'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'SOCKSv5: 10.0.0.55 -> 60.190.189.214:8124 status succeeded'
+
+    def test_socks_log2(self):
+        event = {
+            "ts":1340213015.276495,
+            "uid":"CUy63t6qOCaFvn6nd",
+            "sourceipaddress":"10.0.0.55",
+            "sourceport":53994,
+            "destinationipaddress":"60.190.189.214",
+            "destinationport":8124,
+            "request.name":"www.osnews.com",
+            "request_p":80,
+            "bound.host":"192.168.0.31",
+            "bound_p":2688,
+            'category': 'bro',
+            'type': 'socks'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'status' in result['details']
+        assert 'version' in result['details']
+        assert result['summary'] == 'SOCKSv0: 10.0.0.55 -> 60.190.189.214:8124 status unknown'
+
+    def test_dcerpc_log(self):
+        event = {
+            "ts":1505701213.40556,
+            "uid":"C2g5CK5JxgQ5x6b",
+            "sourceipaddress":"10.26.40.121",
+            "sourceport":49446,
+            "destinationipaddress":"10.22.69.21",
+            "destinationport":445,
+            "rtt":0.001135,
+            "named_pipe":"\u005cpipe\u005clsass",
+            "endpoint":"samr",
+            "operation":"SamrEnumerateDomainsInSamServer",
+            'category': 'bro',
+            'type': 'dcerpc'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'DCERPC: 10.26.40.121 -> 10.22.69.21:445 endpoint samr operation SamrEnumerateDomainsInSamServer'
+
+    def test_dcerpc_log2(self):
+        event = {
+            "ts":1505701213.40556,
+            "uid":"C2g5CK5JxgQ5x6b",
+            "sourceipaddress":"10.26.40.121",
+            "sourceport":49446,
+            "destinationipaddress":"10.22.69.21",
+            "destinationport":445,
+            "rtt":0.001135,
+            "named_pipe":"\u005cpipe\u005clsass",
+            'category': 'bro',
+            'type': 'dcerpc'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'endpoint' in result['details']
+        assert 'operation' in result['details']
+        assert result['summary'] == 'DCERPC: 10.26.40.121 -> 10.22.69.21:445 endpoint unknown operation unknown'
+
+    def test_kerberos_log(self):
+        event = {
+            "ts":1505701219.06897,
+            "uid":"CQ9RPTR8ORJEgof37",
+            "sourceipaddress":"10.26.40.121",
+            "sourceport":49467,
+            "destinationipaddress":"10.22.69.21",
+            "destinationport":88,
+            "request_type":"TGS",
+            "service":"host/t-w864-ix-091.releng.ad.mozilla.com",
+            "till":2136422885.0,
+            "forwardable":'true',
+            "renewable":'true',
+            'category': 'bro',
+            'type': 'kerberos'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == '10.26.40.121 -> 10.22.69.21:88 client unknown request TGS service host/t-w864-ix-091.releng.ad.mozilla.com success unknown '
+
+    def test_kerberos_log2(self):
+        event = {
+            "ts":1421708043.07936,
+            "uid":"CjoUSf1cih7HpLipTf",
+            "sourceipaddress":"192.168.1.31",
+            "sourceport":64726,
+            "destinationipaddress":"192.168.1.32",
+            "destinationport":88,
+            "request_type":"AS",
+            "client":"valid_client_principal/VLADG.NET",
+            "service":"krbtgt/VLADG.NET",
+            "success":'true',
+            "till":1421708111.0,
+            "cipher":"aes256-cts-hmac-sha1-96",
+            "forwardable":'false',
+            "renewable":'true',
+            'category': 'bro',
+            'type': 'kerberos'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'request_type' in result['details']
+        assert 'client' in result['details']
+        assert 'service' in result['details']
+        assert 'success' in result['details']
+        assert 'error_msg' in result['details']
+        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 client valid_client_principal/VLADG.NET request AS service krbtgt/VLADG.NET success true '
+    
+    def test_kerberos_log3(self):
+        event = {
+            "ts":1421708043.196544,
+            "uid":"CIOsYa3u0IxeiYPH7d",
+            "sourceipaddress":"192.168.1.31",
+            "sourceport":58922,
+            "destinationipaddress":"192.168.1.32",
+            "destinationport":88,
+            "request_type":"TGS",
+            "client":"valid_client_principal/VLADG.NET",
+            "service":"krbtgt/VLADG.NET",
+            "success":'false',
+            "error_msg":"TICKET NOT RENEWABLE",
+            "till":1421708111.0,
+            "forwardable":'false',
+            "renewable":'false',
+            'category': 'bro',
+            'type': 'kerberos'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'request_type' in result['details']
+        assert 'client' in result['details']
+        assert 'service' in result['details']
+        assert 'success' in result['details']
+        assert 'error_msg' in result['details']
+        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 client valid_client_principal/VLADG.NET request TGS service krbtgt/VLADG.NET success false TICKET NOT RENEWABLE'
+    
+    def test_ntlm_log(self):
+        event = {
+            "ts":1505701552.66651,
+            "uid":"Cml9hN1SSy5nwYEVLl",
+            "sourceipaddress":"10.26.40.48",
+            "sourceport":49176,
+            "destinationipaddress":"10.22.69.18",
+            "destinationport":445,
+            "ntlmusername":"T-W864-IX-018$",
+            "ntlmhostname":"T-W864-IX-018",
+            "ntlmdomainname":"RELENG",
+            "success":'true',
+            "status":"SUCCESS",
+            'category': 'bro',
+            'type': 'ntlm'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 user T-W864-IX-018$ host T-W864-IX-018 domain RELENG success true status SUCCESS'
+    
+    def test_ntlm_log2(self):
+        event = {
+            "ts":1505701552.66651,
+            "uid":"Cml9hN1SSy5nwYEVLl",
+            "sourceipaddress":"10.26.40.48",
+            "sourceport":49176,
+            "destinationipaddress":"10.22.69.18",
+            "destinationport":445,
+            'category': 'bro',
+            'type': 'ntlm'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'ntlmusername' in result['details']
+        assert 'ntlmhostname' in result['details']
+        assert 'ntlmdomainname' in result['details']
+        assert 'success' in result['details']
+        assert 'status' in result['details']
+        assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 user unknown host unknown domain unknown success unknown status unknown'
+
+    def test_smbfiles_log(self):
+        event = {
+            "ts":1505703595.833874,
+            "uid":"C8vKSp2oSqoQtJZyM2",
+            "sourceipaddress":"10.26.42.82",
+            "sourceport":53939,
+            "destinationipaddress":"10.22.69.21",
+            "destinationport":445,
+            "action":"SMB::FILE_OPEN",
+            "name":"releng.ad.mozilla.com\u005cfiles\u005cstartTalos",
+            "size":4096,
+            "times.modified":1401486067.13068,
+            "times.accessed":1401486067.13068,
+            "times.created":1393344470.022491,
+            "times.changed":1401486067.13068,
+            'category': 'bro',
+            'type': 'smbfiles'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'action' in result['details']
+        assert 'name' in result['details']
+        assert 'path' in result['details']
+        assert result['summary'] == 'SMB file: 10.26.42.82 -> 10.22.69.21:445 SMB::FILE_OPEN'
+
+    def test_smbfiles_log2(self):
+        event = {
+            "ts":1505703595.833874,
+            "uid":"C8vKSp2oSqoQtJZyM2",
+            "sourceipaddress":"10.26.42.82",
+            "sourceport":53939,
+            "destinationipaddress":"10.22.69.21",
+            "destinationport":445,
+            "size":4096,
+            "times.modified":1401486067.13068,
+            "times.accessed":1401486067.13068,
+            "times.created":1393344470.022491,
+            "times.changed":1401486067.13068,
+            'category': 'bro',
+            'type': 'smbfiles'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'action' in result['details']
+        assert 'name' in result['details']
+        assert 'path' in result['details']
+        assert result['summary'] == 'SMB file: 10.26.42.82 -> 10.22.69.21:445 '
+    
+    def test_smbmapping_log(self):
+        event = {
+            "ts":1505703606.752588,
+            "uid":"CgvFmm2FAseGbXjC6h",
+            "sourceipaddress":"10.26.41.138",
+            "sourceport":49720,
+            "destinationipaddress":"10.22.69.18",
+            "destinationport":445,
+            "path":"\u005c\u005cDC6\u005cSYSVOL",
+            "share_type":"DISK",
+            'category': 'bro',
+            'type': 'smbmapping'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert result['summary'] == 'SMB mapping: 10.26.41.138 -> 10.22.69.18:445 DISK'
+    
+    def test_smbmapping_log2(self):
+        event = {
+            "ts":1505703606.752588,
+            "uid":"CgvFmm2FAseGbXjC6h",
+            "sourceipaddress":"10.26.41.138",
+            "sourceport":49720,
+            "destinationipaddress":"10.22.69.18",
+            "destinationport":445,
+            'category': 'bro',
+            'type': 'smbmapping'
+        }
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'share_type' in result['details']
+        assert 'path' in result['details']
+        assert result['summary'] == 'SMB mapping: 10.26.41.138 -> 10.22.69.18:445 '
 
     def test_x509_log(self):
         event = {
