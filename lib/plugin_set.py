@@ -5,7 +5,7 @@ from utilities.dict2List import dict2List
 
 
 class PluginSet(object):
-    def __init__(self, plugin_location, enabled_plugins=[]):
+    def __init__(self, plugin_location, enabled_plugins=None):
         self.plugin_location = plugin_location
         self.enabled_plugins = self.identify_plugins(enabled_plugins)
 
@@ -24,7 +24,7 @@ class PluginSet(object):
         found_modules = pynsive.list_modules(module_name)
         for found_module in found_modules:
             module_filename, module_name = found_module.split('.')
-            if module_name not in enabled_plugins and len(enabled_plugins) > 0:
+            if enabled_plugins is not None and module_name not in enabled_plugins:
                 # Skip this plugin since it's not listed as enabled plugins
                 # as long as we have specified some enabled plugins though
                 # this allows us to specify no specific plugins and get all of them
@@ -52,7 +52,7 @@ class PluginSet(object):
     def ordered_enabled_plugins(self):
         return sorted(self.enabled_plugins, key=itemgetter('priority'), reverse=False)
 
-    def run_plugins(self, message, metadata):
+    def run_plugins(self, message, metadata=None):
         '''compare the message to the plugin registrations.
            plugins register with a list of keys or values
            or values they want to match on

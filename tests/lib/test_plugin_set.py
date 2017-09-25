@@ -28,6 +28,11 @@ class TestPluginSet(object):
         plugin_set = PluginSet(self.plugin_dir, enabled_plugins)
         assert len(plugin_set.enabled_plugins) == 0
 
+    def test_run_plugins_empty_set_plugins(self):
+        enabled_plugins = []
+        plugin_set = PluginSet(self.plugin_dir, enabled_plugins)
+        assert len(plugin_set.enabled_plugins) == 0
+
     def test_ordered_enabled_plugins(self):
         ordered_plugins = self.plugin_set.ordered_enabled_plugins
         assert ordered_plugins[0]['registration'] == ['apples']
