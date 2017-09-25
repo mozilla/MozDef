@@ -13,10 +13,14 @@ from celery.schedules import crontab, timedelta
 import time
 import logging
 
-ALERTS={
+ALERTS = {
 # 'pythonfile.pythonclass':{'schedule': crontab(minute='*/10')},
 # 'pythonfile.pythonclass':{'schedule': timedelta(minutes=10),'kwargs':dict(hostlist=['nsm3', 'nsm5'])},
 }
+
+ALERT_PLUGINS = [
+    # 'relative pythonfile name (exclude the .py) - EX: sso_dashboard',
+]
 
 RABBITMQ = {
     'mqserver': 'localhost',
