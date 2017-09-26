@@ -105,8 +105,86 @@ class TestBroFixup(object):
         self.verify_defaults(result)
         self.verify_metadata(metadata)
         assert result['details'] == {
-            'type': 'something'
+            'type': 'something',
+            'category': 'bro'
         }
+    
+    def test_nomatch_syslog(self):
+        event = {
+                "category": "syslog",
+                "processid": "0",
+                "receivedtimestamp": "2017-09-26T00:22:24.210945+00:00",
+                "severity": "7",
+                "utctimestamp": "2017-09-26T00:22:23+00:00",
+                "timestamp": "2017-09-26T00:22:23+00:00",
+                "hostname": "syslog1.private.scl3.mozilla.com",
+                "mozdefhostname": "mozdef1.private.scl3.mozilla.com",
+                "summary": "Connection from 10.22.74.208 port 9071 on 10.22.74.45 nsm bro port 22\n",
+                "eventsource": "systemslogs",
+                "details": {
+                    "processid": "21233",
+                    "Random": 2,
+                    "sourceipv4address": "10.22.74.208",
+                    "hostname": "hgssh4.dmz.scl3.mozilla.com",
+                    "program": "sshd",
+                    "sourceipaddress": "10.22.74.208"
+                }
+            }
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        assert result['category'] == 'syslog'
+        assert result['eventsource'] == 'systemslogs'
+        assert result == event
+    
+    def test_nomatch_auditd(self):
+        event = {
+            "category": "execve",
+            "processid": "0",
+            "receivedtimestamp": "2017-09-26T00:36:27.463745+00:00",
+            "severity": "INFO",
+            "utctimestamp": "2017-09-26T00:36:27+00:00",
+            "tags": [
+                "audisp-json",
+                "2.1.1",
+                "audit"
+                ],
+            "summary": "Execve: sh -c sudo bro nsm /usr/lib64/nagios/plugins/custom/check_auditd.sh",
+            "processname": "audisp-json",
+            "details": {
+                "fsuid": "398",
+                "tty": "(none)",
+                "uid": "398",
+                "process": "/bin/bash",
+                "auditkey": "exec",
+                "pid": "10553",
+                "processname": "sh",
+                "session": "16467",
+                "fsgid": "398",
+                "sgid": "398",
+                "auditserial": "3834716",
+                "inode": "1835094",
+                "ouid": "0",
+                "ogid": "0",
+                "suid": "398",
+                "originaluid": "0",
+                "gid": "398",
+                "originaluser": "root",
+                "ppid": "10552",
+                "cwd": "/",
+                "parentprocess": "nrpe",
+                "euid": "398",
+                "path": "/bin/sh",
+                "rdev": "00:00",
+                "dev": "08:03",
+                "egid": "398",
+                "command": "sh -c sudo /usr/lib64/nagios/plugins/custom/check_auditd.sh",
+                "mode": "0100755",
+                "user": "nagios"
+            }
+        }
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        assert result['category'] == 'execve'
+        assert 'eventsource' not in result
+        assert result == event
 
     def verify_defaults(self, result):
         assert result['category'] == 'bro'
@@ -116,24 +194,6 @@ class TestBroFixup(object):
         assert result['severity'] == 'INFO'
         assert toUTC(result['timestamp']).isoformat() == result['timestamp']
         assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
-
-    def test_whitelist(self):
-        event = {
-            'category': 'bro',
-            'type': 'sometype',
-            'hostname': 'somefancyyhost',
-            'tags': ['tag1','tag2'],
-            'customendpoint': 'bro'
-        }
-
-        whitelist = ['hostname', 'tags', 'category', 'customendpoint']
-
-        result, metadata = self.plugin.onMessage(event, self.metadata)
-        self.verify_defaults(result)
-        self.verify_metadata(metadata)
-        for wl in whitelist:
-            assert wl in result
-            assert wl not in result['details']
     
     # Would just need to duplicate this function, with your event json as the event variable
     def test_conn_log(self):
@@ -163,7 +223,6 @@ class TestBroFixup(object):
             'category': 'bro',
             'type': 'conn',
         }
-
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)

@@ -56,12 +56,13 @@ class message(object):
         
         # make sure I really wanted to see this message
         # bail out early if not
-        if 'category' not in message:
+        if u'category' not in message:
             return message, metadata
-        if 'type' not in message:
+        if u'type' not in message:
             return message, metadata
-        if message['category'] is not 'bro':
+        if message['category'] != 'bro':
             return message, metadata
+        
 
         # set the doc type to bro
         # to avoid data type conflicts with other doc types
@@ -69,7 +70,6 @@ class message(object):
         # index holds documents of type 'type'
         # index -> type -> doc
         metadata['doc_type']= 'nsm'
-        whitelist = ['hostname', 'tags', 'category', 'customendpoint']
 
         # move Bro specific fields under 'details' while preserving metadata
         newmessage = dict()
@@ -78,10 +78,12 @@ class message(object):
         newmessage['customendpoint'] = 'bro'
 
         # move some fields that are expected at the event 'root' where they belong
-        for wl in whitelist:
-            if wl in message:
-                newmessage[wl] = message[wl]
-                del(newmessage['details'][wl])
+        if 'hostname' in message:
+            newmessage['hostname'] = message['hostname']
+        if 'tags' in message:
+            newmessage['tags'] = message['tags']
+        if 'category' in message:
+            newmessage['category'] = message['category']
 
 
         # add mandatory fields
@@ -96,23 +98,20 @@ class message(object):
         newmessage[u'receivedtimestamp'] = toUTC(datetime.now()).isoformat()
         newmessage[u'eventsource'] = u'nsm'
         newmessage[u'severity'] = u'INFO'
-        #newmessage[u'processname'] = u''
-        #newmessage[u'processid'] = u''
         newmessage[u'mozdefhostname'] = self.mozdefhostname
+
+        del(message)
 
 
         # re-arrange the position of some fields
         # {} vs {'details':{}}
         if 'details' in newmessage.keys():
 
-            #newmessage[u'hostname'] = newmessage['details']['hostname']
-            #del(newmessage['details']['hostname'])
-
             # All Bro logs need special treatment, so we provide it
             # Not a known log type? Mark it as such and return
             if 'type' not in newmessage['details']:
-                newmessage['details']['type'] = 'unknown'
-                return message, metadata
+                newmessage['details']['type'] = u'unknown'
+                return newmessage, metadata
             else:
                 logtype = newmessage['details']['type']
 
