@@ -27,7 +27,7 @@ class TestSSODashboard(object):
             "tags": [
                 "geomodel"
             ],
-            "summary": "ttesterson@mozillafoundation.org NEWCOUNTRY Saint-Jean-sur-Richelieu, Canada access from 74.57.23.10 (duo) [deviation:2] last activity was from Stuarts Draft, United States (941 km away) approx 97.49 hours before",
+            "summary": "ttesterson@mozillafoundation.org NEWCOUNTRY Saint-Jean-sur-Richelieu, Canada access from 1.2.3.4 (duo) [deviation:2] last activity was from Stuarts Draft, United States (941 km away) approx 97.49 hours before",
         }
 
         assert self.test_result_record is None
