@@ -75,21 +75,31 @@ class message(object):
         newmessage = dict()
 
         newmessage['details'] = message
+        #del(message)
+
         newmessage['customendpoint'] = 'bro'
 
         # move some fields that are expected at the event 'root' where they belong
-        if 'hostname' in message:
-            newmessage['hostname'] = message['hostname']
-        if 'tags' in message:
-            newmessage['tags'] = message['tags']
-        if 'category' in message:
-            newmessage['category'] = message['category']
+        if 'hostname' in newmessage['details']:
+            newmessage['hostname'] = newmessage['details']['hostname']
+            del(newmessage['details']['hostname'])
+        if 'tags' in newmessage['details']:
+            newmessage['tags'] = newmessage['details']['tags']
+            del(newmessage['details']['tags'])
+        if 'category' in newmessage['details']:
+            newmessage['category'] = newmessage['details']['category']
+            del(newmessage['details']['category'])
+        if 'customendpoint' in newmessage['details']:
+            del(newmessage['details']['customendpoint'])
+        if 'type' in newmessage['details']:
+            newmessage['type'] = newmessage['details']['type']
+            del(newmessage['details']['type'])
 
 
         # add mandatory fields
-        if 'ts' in message.keys():
-            newmessage[u'utctimestamp'] = toUTC(message['ts']).isoformat()
-            newmessage[u'timestamp'] = toUTC(message['ts']).isoformat()
+        if 'ts' in newmessage['details']:
+            newmessage[u'utctimestamp'] = toUTC(newmessage['details']['ts']).isoformat()
+            newmessage[u'timestamp'] = toUTC(newmessage['details']['ts']).isoformat()
         else:
             # a malformed message somehow managed to crawl to us, let's put it somewhat together
             newmessage[u'utctimestamp'] = toUTC(datetime.now()).isoformat()
@@ -100,20 +110,18 @@ class message(object):
         newmessage[u'severity'] = u'INFO'
         newmessage[u'mozdefhostname'] = self.mozdefhostname
 
-        del(message)
-
 
         # re-arrange the position of some fields
         # {} vs {'details':{}}
-        if 'details' in newmessage.keys():
+        if 'details' in newmessage:
 
             # All Bro logs need special treatment, so we provide it
             # Not a known log type? Mark it as such and return
-            if 'type' not in newmessage['details']:
-                newmessage['details']['type'] = u'unknown'
+            if 'type' not in newmessage:
+                newmessage['type'] = u'unknown'
                 return newmessage, metadata
             else:
-                logtype = newmessage['details']['type']
+                logtype = newmessage['type']
 
                 if logtype == 'conn':
                     newmessage[u'details'][u'originipbytes'] = newmessage['details']['orig_ip_bytes']
