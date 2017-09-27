@@ -34,11 +34,7 @@ class AlertSSHPasswordAuthViolation(AlertTask):
         category = 'ssh_password_auth_policy_violation'
         tags = ['ssh_password_auth_policy_violation']
         severity = 'WARNING'
-
-        summary = ('SSH password authentication allowed on {0} ('.format(aggreg['value']))
-        for event in aggreg['events'][:5]:
-            summary += str(event['_source']['details']['destinationport']) + ' '
-        summary += ')'
+        summary = 'SSH password authentication allowed on {0}'.format(aggreg['value'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
