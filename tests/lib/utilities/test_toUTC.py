@@ -4,10 +4,24 @@ from dateutil.parser import parse
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../lib'))
+import pytz
+
+import tzlocal
+
+
+def utc_timezone():
+    return pytz.timezone('UTC')
+
+
+tzlocal.get_localzone = utc_timezone
+
+
 from utilities.toUTC import toUTC
 
 
 class TestToUTC():
+    def setup(self):
+        tzlocal.get_localzone = utc_timezone
 
     def result_is_datetime(self, result):
         assert type(result) == datetime

@@ -2,14 +2,15 @@ from datetime import datetime
 from dateutil.parser import parse
 import pytz
 import math
+import tzlocal
+
+local_timezone = tzlocal.get_localzone()
+
 
 def toUTC(suspectedDate):
     '''make a UTC date out of almost anything'''
-
-    localTimeZone = 'UTC'
     utc=pytz.UTC
     objDate=None
-
     if type(suspectedDate) == datetime:
         objDate = suspectedDate
     elif type(suspectedDate) == float:
@@ -18,16 +19,16 @@ def toUTC(suspectedDate):
         magnitude = int(math.log10(int(suspectedDate)))
         if magnitude > EPOCH_MAGNITUDE:
             suspectedDate = suspectedDate / 10 ** (magnitude - EPOCH_MAGNITUDE)
-        objDate = datetime.fromtimestamp(suspectedDate)
+        objDate = datetime.fromtimestamp(suspectedDate, local_timezone)
     elif str(suspectedDate).isdigit():
         # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
         epochDivisor = int(str(1) + '0'*(len(str(suspectedDate)) % 10))
-        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor))
+        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor), local_timezone)
     elif type(suspectedDate) in (str, unicode):
         objDate = parse(suspectedDate, fuzzy=True)
     try:
         if objDate.tzinfo is None:
-            objDate=pytz.timezone(localTimeZone).localize(objDate)
+            objDate=local_timezone.localize(objDate)
     except AttributeError as e:
         raise ValueError(
             "Date %s which was converted to %s has no "
