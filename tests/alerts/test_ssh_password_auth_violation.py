@@ -29,7 +29,7 @@ class TestAlertSSHPasswordAuthViolation(AlertTestSuite):
     default_alert = {
         "category": "ssh_password_auth_policy_violation",
         "tags": ['ssh_password_auth_policy_violation'],
-        "severity": "CRITICAL",
+        "severity": "WARNING",
         "summary": 'SSH password authentication allowed on 1.2.3.4',
     }
 
