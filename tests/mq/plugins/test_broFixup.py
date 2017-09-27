@@ -17,6 +17,7 @@ class TestBroFixup(object):
             'index': 'events'
         }
 
+    # Should never match and be modified by the plugin
     def test_notbro_log(self):
         metadata = {
             'doc_type': 'event',
@@ -27,9 +28,11 @@ class TestBroFixup(object):
         }
         
         result, metadata = self.plugin.onMessage(event, metadata)
-        assert result
+        # in = out - plugin didn't touch it
+        assert result == event
         assert metadata['doc_type'] is not 'nsm'
 
+    # Should never match and be modified by the plugin
     def test_notbro_log2(self):
         metadata = {
             'doc_type': 'event',
@@ -40,9 +43,11 @@ class TestBroFixup(object):
         }
        
         result, metadata = self.plugin.onMessage(event, metadata)
-        assert result
+        # in = out - plugin didn't touch it
+        assert result == event
         assert metadata['doc_type'] is not 'nsm'
 
+    # Should never match and be modified by the plugin
     def test_bro_notype_log(self):
         metadata = {
             'doc_type': 'event',
@@ -53,7 +58,8 @@ class TestBroFixup(object):
         }
        
         result, metadata = self.plugin.onMessage(event, metadata)
-        assert result
+        # in = out - plugin didn't touch it
+        assert result == event
         assert metadata['doc_type'] is not 'nsm'
     
     def test_bro_wrongtype_log(self):
@@ -123,7 +129,7 @@ class TestBroFixup(object):
                     "processid": "21233",
                     "Random": 2,
                     "sourceipv4address": "10.22.74.208",
-                    "hostname": "hgssh4.dmz.scl3.mozilla.com",
+                    "hostname": "hostname1.subdomain.domain.com",
                     "program": "sshd",
                     "sourceipaddress": "10.22.74.208"
                 }
@@ -220,7 +226,7 @@ class TestBroFixup(object):
             'uid': 'CYxwva4RBFtKpxWLba',
             'category': 'bro',
             'type': 'conn',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -228,8 +234,6 @@ class TestBroFixup(object):
         assert toUTC(event['ts']).isoformat() == result['utctimestamp']
         assert toUTC(event['ts']).isoformat() == result['timestamp']
         assert sorted(result['details'].keys()) == sorted(event.keys())
-        # Then need to add assert statements here for the values that you've changed in the plugin
-        # for example:  assert result['summary'] == 'Modified summary from plugin'
         assert result['details']['originipbytes'] == 2452
         assert result['details']['responseipbytes'] == 2132
         assert 'orig_ip_bytes' not in result['details']
@@ -261,7 +265,7 @@ class TestBroFixup(object):
             "filename":"arandomfile",
             'category': 'bro',
             'type': 'files',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -293,7 +297,7 @@ class TestBroFixup(object):
             "timedout":'false',
             'category': 'bro',
             'type': 'files',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -338,7 +342,7 @@ class TestBroFixup(object):
             "rejected":'false',
             'category': 'bro',
             'type': 'dns',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -373,7 +377,7 @@ class TestBroFixup(object):
             "rejected":'false',
             'category': 'bro',
             'type': 'dns',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -412,7 +416,7 @@ class TestBroFixup(object):
             "cluster_client_ip":"34.212.32.13",
             'category': 'bro',
             'type': 'http',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -449,7 +453,7 @@ class TestBroFixup(object):
             "pfs":'true',
             'category': 'bro',
             'type': 'ssl',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -481,7 +485,7 @@ class TestBroFixup(object):
             "pfs":'true',
             'category': 'bro',
             'type': 'ssl',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -507,7 +511,7 @@ class TestBroFixup(object):
             "trans_id":1504605887,
             'category': 'bro',
             'type': 'dhcp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -537,7 +541,7 @@ class TestBroFixup(object):
             "data_channel.resp_p":38141,
             'category': 'bro',
             'type': 'ftp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -565,7 +569,7 @@ class TestBroFixup(object):
             "data_channel.resp_p":38141,
             'category': 'bro',
             'type': 'ftp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -599,7 +603,7 @@ class TestBroFixup(object):
             "section_names":[".text",".rdata",".data",".rsrc",".reloc"],
             'category': 'bro',
             'type': 'pe',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -628,7 +632,7 @@ class TestBroFixup(object):
             "section_names":[".text",".rdata",".data",".rsrc",".reloc"],
             'category': 'bro',
             'type': 'pe',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -666,7 +670,7 @@ class TestBroFixup(object):
             "is_webmail":'false',
             'category': 'bro',
             'type': 'smtp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -674,7 +678,7 @@ class TestBroFixup(object):
         assert toUTC(event['ts']).isoformat() == result['utctimestamp']
         assert toUTC(event['ts']).isoformat() == result['timestamp']
         assert sorted(result['details'].keys()) == sorted(event.keys())
-        #assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25 from \u0022Bugzilla@Mozilla\u0022 <bugzilla-daemon@mozilla.org> to bugmail@firebot.glob.uno ID <bug-1400759-507647@https.bugzilla.mozilla.org/>'.decode('unicode-escape')
+        assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25 from "Bugzilla@Mozilla" <bugzilla-daemon@mozilla.org> to bugmail@firebot.glob.uno ID <bug-1400759-507647@https.bugzilla.mozilla.org/>'
     
     def test_smtp_log2(self):
         event = {
@@ -699,7 +703,7 @@ class TestBroFixup(object):
             "is_webmail":'false',
             'category': 'bro',
             'type': 'smtp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -711,6 +715,7 @@ class TestBroFixup(object):
         assert 'from' in result['details']
         assert 'to' in result['details']
         assert 'msg_id' in result['details']
+        assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25 from  to  ID '
     
     def test_ssh_log(self):
         event = {
@@ -734,7 +739,7 @@ class TestBroFixup(object):
             "host_key":"16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48",
             'category': 'bro',
             'type': 'ssh',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -766,7 +771,7 @@ class TestBroFixup(object):
             "host_key":"16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48",
             'category': 'bro',
             'type': 'ssh',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -789,7 +794,7 @@ class TestBroFixup(object):
             "action":"Tunnel::DISCOVER",
             'category': 'bro',
             'type': 'tunnel',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -808,7 +813,7 @@ class TestBroFixup(object):
             "destinationport":3128,
             'category': 'bro',
             'type': 'tunnel',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -836,7 +841,7 @@ class TestBroFixup(object):
             "sources":["test"],
             'category':'bro',
             'type':'intel',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -862,7 +867,7 @@ class TestBroFixup(object):
             "sources":["test"],
             'category':'bro',
             'type':'intel',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -884,7 +889,7 @@ class TestBroFixup(object):
             "serial":"0B2BF706734AA1CCC969F7990FD20424",
             'category': 'bro',
             'type': 'knowncerts',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -904,7 +909,7 @@ class TestBroFixup(object):
             "issuer_subject":"CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US",
             'category': 'bro',
             'type': 'knowncerts',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -923,7 +928,7 @@ class TestBroFixup(object):
             "dhcp_host_name":"m57-jo",
             'category':'bro',
             'type':'knowndevices',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -939,7 +944,7 @@ class TestBroFixup(object):
             "ts":1258531221.486539,
             'category':'bro',
             'type':'knowndevices',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -958,7 +963,7 @@ class TestBroFixup(object):
             "host":"65.54.95.64",
             'category':'bro',
             'type':'knownhosts',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -974,7 +979,7 @@ class TestBroFixup(object):
             "ts":1258535653.085939,
             'category':'bro',
             'type':'knownhosts',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -995,7 +1000,7 @@ class TestBroFixup(object):
             "service":["MYSQL"],
             'category':'bro',
             'type':'knownservices',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1012,7 +1017,7 @@ class TestBroFixup(object):
             'service':[],
             'category':'bro',
             'type':'knownservices',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1048,7 +1053,7 @@ class TestBroFixup(object):
             "dropped":'false',
             'category': 'bro',
             'type': 'notice',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1079,7 +1084,7 @@ class TestBroFixup(object):
             "set_requests":0,
             'category': 'bro',
             'type': 'snmp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1102,7 +1107,7 @@ class TestBroFixup(object):
             "community":"yourcommunity",
             'category': 'bro',
             'type': 'snmp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1127,7 +1132,7 @@ class TestBroFixup(object):
             "cert_count":0,
             'category': 'bro',
             'type': 'rdp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1151,7 +1156,7 @@ class TestBroFixup(object):
             "cert_count":0,
             'category': 'bro',
             'type': 'rdp',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1189,7 +1194,7 @@ class TestBroFixup(object):
             "response_body_len":0,
             'category': 'bro',
             'type': 'sip',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1222,7 +1227,7 @@ class TestBroFixup(object):
             "response_body_len":0,
             'category': 'bro',
             'type': 'sip',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1248,7 +1253,7 @@ class TestBroFixup(object):
             "unparsed_version":"Mozilla/5.0 (X11; Linux i686; rv:16.0) Gecko/20121010 Thunderbird/16.0.1",
             'category': 'bro',
             'type': 'software',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1269,7 +1274,7 @@ class TestBroFixup(object):
             "unparsed_version":"Mozilla/5.0 (X11; Linux i686; rv:16.0) Gecko/20121010 Thunderbird/16.0.1",
             'category': 'bro',
             'type': 'software',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1296,7 +1301,7 @@ class TestBroFixup(object):
             "bound_p":2688,
             'category': 'bro',
             'type': 'socks',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1321,7 +1326,7 @@ class TestBroFixup(object):
             "bound_p":2688,
             'category': 'bro',
             'type': 'socks',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1348,7 +1353,7 @@ class TestBroFixup(object):
             "operation":"SamrEnumerateDomainsInSamServer",
             'category': 'bro',
             'type': 'dcerpc',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1371,7 +1376,7 @@ class TestBroFixup(object):
             "named_pipe":"\u005cpipe\u005clsass",
             'category': 'bro',
             'type': 'dcerpc',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1399,7 +1404,7 @@ class TestBroFixup(object):
             "renewable":'true',
             'category': 'bro',
             'type': 'kerberos',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1428,7 +1433,7 @@ class TestBroFixup(object):
             "renewable":'true',
             'category': 'bro',
             'type': 'kerberos',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1462,7 +1467,7 @@ class TestBroFixup(object):
             "renewable":'false',
             'category': 'bro',
             'type': 'kerberos',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1493,7 +1498,7 @@ class TestBroFixup(object):
             "status":"SUCCESS",
             'category': 'bro',
             'type': 'ntlm',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1514,7 +1519,7 @@ class TestBroFixup(object):
             "destinationport":445,
             'category': 'bro',
             'type': 'ntlm',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1547,7 +1552,7 @@ class TestBroFixup(object):
             "times.changed":1401486067.13068,
             'category': 'bro',
             'type': 'smbfiles',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1576,7 +1581,7 @@ class TestBroFixup(object):
             "times.changed":1401486067.13068,
             'category': 'bro',
             'type': 'smbfiles',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1602,7 +1607,7 @@ class TestBroFixup(object):
             "share_type":"DISK",
             'category': 'bro',
             'type': 'smbmapping',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1623,7 +1628,7 @@ class TestBroFixup(object):
             "destinationport":445,
             'category': 'bro',
             'type': 'smbmapping',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -1654,7 +1659,7 @@ class TestBroFixup(object):
             "certificate.basic_constraintsca":'false',
             'category': 'bro',
             'type': 'x509',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -1684,7 +1689,7 @@ class TestBroFixup(object):
             "certificate.basic_constraintsca":'false',
             'category': 'bro',
             'type': 'x509',
-            'customendpoint': ' '
+            'customendpoint': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
