@@ -10,6 +10,10 @@ import tzlocal
 
 
 def utc_timezone():
+    ''' This is a mock function, so when we run tests
+        we trick the system into thinking we're on UTC
+        no matter what the real timezone is
+    '''
     return pytz.timezone('UTC')
 
 
