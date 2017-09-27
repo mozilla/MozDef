@@ -56,6 +56,8 @@ class message(object):
         
         # make sure I really wanted to see this message
         # bail out early if not
+        if u'customendpoint' not in message:
+            return message, metadata
         if u'category' not in message:
             return message, metadata
         if u'type' not in message:

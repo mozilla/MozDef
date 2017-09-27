@@ -66,7 +66,8 @@ class TestBroFixup(object):
         event = {
            'category': 'bro',
            'type': 'nosuchtype',
-           'ts': 1505701210.163043
+           'ts': 1505701210.163043,
+           'customendpoint': 'bro'
         }
        
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -82,7 +83,8 @@ class TestBroFixup(object):
         mock_path.return_value = 'samplehostname'
         event = {
             'category': 'bro',
-            'type': 'something'
+            'type': 'something',
+            'customendpoint': 'bro'
         }
         plugin = message()
         result, metadata = plugin.onMessage(event, self.metadata)
@@ -93,7 +95,8 @@ class TestBroFixup(object):
         mock_path.side_effect = ValueError
         event = {
             'category': 'bro',
-            'type': 'something'
+            'type': 'something',
+            'customendpoint': 'bro'
         }
         plugin = message()
         result, metadata = plugin.onMessage(event, self.metadata)
@@ -105,7 +108,8 @@ class TestBroFixup(object):
     def test_defaults(self):
         event = {
             'category': 'bro',
-            'type': 'something'
+            'type': 'something',
+            'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
