@@ -27,7 +27,7 @@ class TestAggregation(UnitTestSuite):
             {"test": "value", "summary": "abvc space line"},
         ]
         for event in events:
-            self.populate_test_event(event)
+            self.populate_test_object(event)
         self.flush(self.event_index_name)
 
         search_query = SearchQuery()
@@ -62,7 +62,7 @@ class TestAggregation(UnitTestSuite):
             {"test": "value", "note": "abvc space line"},
         ]
         for event in events:
-            self.populate_test_event(event)
+            self.populate_test_object(event)
         self.flush(self.event_index_name)
 
         search_query = SearchQuery()
@@ -93,8 +93,7 @@ class TestAggregation(UnitTestSuite):
             {"test": "value", "summary": "think"},
         ]
         for event in events:
-            self.populate_test_event(event)
-
+            self.populate_test_object(event)
         self.flush(self.event_index_name)
 
         search_query = SearchQuery()
@@ -132,8 +131,7 @@ class TestAggregation(UnitTestSuite):
             {"test": "value", "summary": "think"},
         ]
         for event in events:
-            self.populate_test_event(event)
-
+            self.populate_test_object(event)
         self.flush(self.event_index_name)
 
         search_query = SearchQuery()
@@ -165,8 +163,7 @@ class TestAggregation(UnitTestSuite):
         ]
 
         for event in events:
-            self.populate_test_event(event)
-
+            self.populate_test_object(event)
         self.flush(self.event_index_name)
 
         search_query = SearchQuery()
@@ -192,8 +189,7 @@ class TestAggregation(UnitTestSuite):
             {"test": "value", "summary": "think"},
         ]
         for event in events:
-            self.populate_test_event(event)
-
+            self.populate_test_object(event)
         self.flush(self.event_index_name)
 
         search_query = SearchQuery()
@@ -208,8 +204,7 @@ class TestAggregation(UnitTestSuite):
     def test_aggregation_with_default_size(self):
         for num in range(0, 100):
             event = {'keyname': 'value' + str(num)}
-            self.populate_test_event(event)
-
+            self.populate_test_object(event)
         self.flush(self.event_index_name)
 
         search_query = SearchQuery()
@@ -221,8 +216,7 @@ class TestAggregation(UnitTestSuite):
     def test_aggregation_with_aggregation_size(self):
         for num in range(0, 100):
             event = {'keyname': 'value' + str(num)}
-            self.populate_test_event(event)
-
+            self.populate_test_object(event)
         self.flush(self.event_index_name)
 
         search_query = SearchQuery()
