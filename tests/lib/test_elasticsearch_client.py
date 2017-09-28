@@ -21,6 +21,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
 
 import time
+import json
 
 from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 import pytest
@@ -123,7 +124,7 @@ class TestWithBadIndex(ElasticsearchClientTest):
 
 class TestSimpleWrites(ElasticsearchClientTest):
 
-    def test_simple_writing(self):
+    def test_simple_writing_event_dict(self):
         mock_class = MockTransportClass()
         mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
         self.es_client.es_connection.transport.perform_request = mock_class.perform_request
@@ -140,6 +141,22 @@ class TestSimpleWrites(ElasticsearchClientTest):
         self.flush(self.event_index_name)
         num_events = self.get_num_events()
         assert num_events == 100
+
+    def test_simple_writing_event_string(self):
+        event = json.dumps({"key": "example value for string of json test"})
+        self.es_client.save_event(body=event)
+
+        self.flush(self.event_index_name)
+        num_events = self.get_num_events()
+        assert num_events == 1
+
+        query = SearchQuery()
+        query.add_must(ExistsMatch('key'))
+        results = query.execute(self.es_client)
+        assert results['hits'][0]['_source']['key'] == 'example value for string of json test'
+
+        assert len(results['hits']) == 1
+        assert results['hits'][0]['_type'] == 'event'
 
     def test_writing_event_defaults(self):
         query = SearchQuery()

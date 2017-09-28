@@ -132,6 +132,8 @@ class ElasticsearchClient():
         return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
 
     def save_event(self, body, index='events', doc_type='event', doc_id=None, bulk=False):
+        if type(body) is str:
+            body = json.loads(body)
         event = Event(body)
         event.add_required_fields()
         return self.save_object(index=index, doc_type=doc_type, body=event, doc_id=doc_id, bulk=bulk)
