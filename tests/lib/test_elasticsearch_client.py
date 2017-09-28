@@ -141,6 +141,31 @@ class TestSimpleWrites(ElasticsearchClientTest):
         num_events = self.get_num_events()
         assert num_events == 100
 
+    def test_writing_event_defaults(self):
+        query = SearchQuery()
+        default_event = {}
+        self.populate_test_event(default_event)
+        self.flush(self.event_index_name)
+
+        query.add_must(ExistsMatch('summary'))
+        results = query.execute(self.es_client)
+        assert len(results['hits']) == 1
+        saved_event = results['hits'][0]['_source']
+        assert 'category' in saved_event
+        assert 'details' in saved_event
+        assert 'hostname' in saved_event
+        assert 'mozdefhostname' in saved_event
+        assert 'processid' in saved_event
+        assert 'processname' in saved_event
+        assert 'receivedtimestamp' in saved_event
+        assert 'severity' in saved_event
+        assert 'source' in saved_event
+        assert 'summary' in saved_event
+        assert 'tags' in saved_event
+        assert 'timestamp' in saved_event
+        assert 'utctimestamp' in saved_event
+        assert 'category' in saved_event
+
     def test_writing_with_type(self):
         query = SearchQuery()
         default_event = {
@@ -287,7 +312,6 @@ class TestWriteWithIDExists(ElasticsearchClientTest):
         assert saved_event['_id'] == event_id
         self.flush(self.event_index_name)
         fetched_event = self.es_client.get_event_by_id(event_id)
-        assert fetched_event['_source'] == event
 
 
 class TestGetIndices(ElasticsearchClientTest):

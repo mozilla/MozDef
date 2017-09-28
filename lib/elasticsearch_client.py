@@ -9,6 +9,7 @@ from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResult
 from bulk_queue import BulkQueue
 
 from utilities.logger import logger, initLogger
+from event import Event
 
 
 class ElasticsearchBadServer(Exception):
@@ -131,7 +132,9 @@ class ElasticsearchClient():
         return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
 
     def save_event(self, body, index='events', doc_type='event', doc_id=None, bulk=False):
-        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
+        event = Event(body)
+        event.add_required_fields()
+        return self.save_object(index=index, doc_type=doc_type, body=event, doc_id=doc_id, bulk=bulk)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)
