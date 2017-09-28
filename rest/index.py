@@ -618,6 +618,8 @@ def initConfig():
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
+    options.host = getConfig('host', '127.0.0.1', options.configfile)
+
 
 parser = OptionParser()
 parser.add_option("-c", dest='configfile',
@@ -629,6 +631,6 @@ initLogger(options)
 registerPlugins()
 
 if __name__ == "__main__":
-    run(host="0.0.0.0", port=8081)
+    run(host=options.host, port=8081)
 else:
     application = default_app()
