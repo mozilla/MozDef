@@ -202,7 +202,8 @@ class TestSimpleWrites(ElasticsearchClientTest):
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
         assert results['hits'][0]['_type'] == 'example'
-        assert results['hits'][0]['_source'] == default_event['_source']
+        assert results['hits'][0]['_source']['summary'] == 'Test summary'
+        assert results['hits'][0]['_source']['details'] == {"note": "Example note"}
 
     def test_writing_with_source(self):
         query = SearchQuery()

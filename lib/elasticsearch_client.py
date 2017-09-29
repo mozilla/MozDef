@@ -104,15 +104,20 @@ class ElasticsearchClient():
         if not self.bulk_queue.started():
             self.bulk_queue.start_timer()
 
-    def bulk_save_object(self, index, doc_type, body, doc_id=None):
-        self.start_bulk_timer()
-        self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
-
     def finish_bulk(self):
         self.bulk_queue.stop_timer()
 
-    def save_object(self, index, doc_type, body, doc_id=None, bulk=False):
-        # Try and parse it as json if it's a string
+    def __bulk_save_document(self, index, doc_type, body, doc_id=None):
+        self.start_bulk_timer()
+        self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+
+    def __save_document(self, index, doc_type, body, doc_id=None, bulk=False):
+        if bulk:
+            self.__bulk_save_document(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+        else:
+            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=body)
+
+    def __parse_document(self, body, doc_type):
         if type(body) is str:
             body = json.loads(body)
 
@@ -122,19 +127,19 @@ class ElasticsearchClient():
         doc_body = body
         if '_source' in body:
             doc_body = body['_source']
+        return doc_body, doc_type
 
-        if bulk:
-            self.bulk_save_object(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id)
-        else:
-            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=doc_body)
+    def save_object(self, index, doc_type, body, doc_id=None, bulk=False):
+        doc_body, doc_type = self.__parse_document(body, doc_type)
+        return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
 
     def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):
-        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
+        doc_body, doc_type = self.__parse_document(body, doc_type)
+        return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
 
     def save_event(self, body, index='events', doc_type='event', doc_id=None, bulk=False):
-        if type(body) is str:
-            body = json.loads(body)
-        event = Event(body)
+        doc_body, doc_type = self.__parse_document(body, doc_type)
+        event = Event(doc_body)
         event.add_required_fields()
         return self.save_object(index=index, doc_type=doc_type, body=event, doc_id=doc_id, bulk=bulk)
 
