@@ -129,7 +129,7 @@ class ElasticsearchClient():
             doc_body = body['_source']
         return doc_body, doc_type
 
-    def save_object(self, index, doc_type, body, doc_id=None, bulk=False):
+    def save_object(self, body, index, doc_type, doc_id=None, bulk=False):
         doc_body, doc_type = self.__parse_document(body, doc_type)
         return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
 
