@@ -141,7 +141,7 @@ class ElasticsearchClient():
         doc_body, doc_type = self.__parse_document(body, doc_type)
         event = Event(doc_body)
         event.add_required_fields()
-        return self.save_object(index=index, doc_type=doc_type, body=event, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, doc_type=doc_type, body=event, doc_id=doc_id, bulk=bulk)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)
