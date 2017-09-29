@@ -153,6 +153,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query = SearchQuery()
         query.add_must(ExistsMatch('key'))
         results = query.execute(self.es_client)
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         assert results['hits'][0]['_source']['key'] == 'example value for string of json test'
 
         assert len(results['hits']) == 1
@@ -167,6 +168,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         saved_event = results['hits'][0]['_source']
         assert 'category' in saved_event
         assert 'details' in saved_event
@@ -201,6 +203,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         assert results['hits'][0]['_type'] == 'example'
         assert results['hits'][0]['_source']['summary'] == 'Test summary'
         assert results['hits'][0]['_source']['details'] == {"note": "Example note"}
@@ -222,6 +225,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         assert results['hits'][0]['_type'] == 'event'
 
 
