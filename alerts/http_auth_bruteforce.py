@@ -15,7 +15,7 @@ from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 class AlertHTTPBruteforce(AlertTask):
     def main(self):
-        self.parse_config('httpauthbruteforce.conf', ['url'])
+        self.parse_config('http_auth_bruteforce.conf', ['url'])
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
