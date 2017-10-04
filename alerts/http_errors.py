@@ -15,7 +15,7 @@ from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 class AlertHTTPErrors(AlertTask):
     def main(self):
-        self.parse_config('httperrors.conf', ['url'])
+        self.parse_config('http_errors.conf', ['url'])
 
         search_query = SearchQuery(minutes=15)
 

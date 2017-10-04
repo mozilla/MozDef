@@ -64,7 +64,7 @@ class message(object):
 
         # set my own conf file
         # relative path to the rest index.py file
-        self.configfile = './plugins/facebookThreatExchange.conf'
+        self.configfile = './plugins/facebook_threatexchange.conf'
         self.options = None
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))

@@ -2,7 +2,7 @@
 {
  copytruncate
  dateext
- rotate 17
+ rotate 4
  weekly
  missingok
  notifempty
