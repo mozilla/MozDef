@@ -30,7 +30,7 @@ class SSHKey(AlertTask):
         self._whitelist = []
 
         AlertTask.__init__(self)
-        self._parse_whitelist('sshkey.conf')
+        self._parse_whitelist('ssh_key.conf')
 
     def main(self):
         search_query = SearchQuery(minutes=30)
