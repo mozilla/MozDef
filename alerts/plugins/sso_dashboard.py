@@ -59,9 +59,22 @@ class message(object):
         for name, alert in self.config['alerts'].iteritems():
             # we have a message that matches an alert we care about
             if message['category'] == alert['category']:
+                if 'details' not in message:
+                    return message
+
+                if 'principal' not in message['details']:
+                    return message
+
                 full_email = message['details']['principal']
                 username = full_email.split('@')[0]
                 auth_full_username = self.config['auth_id_prefix'] + username
+
+                if 'city' not in message['details']['locality_details']:
+                    return message
+
+                if 'country' not in message['details']['locality_details']:
+                    return message
+
                 city = message['details']['locality_details']['city']
                 country = message['details']['locality_details']['country']
                 summary = alert['summary'].format(city, country)
