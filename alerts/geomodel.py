@@ -54,6 +54,7 @@ class AlertGeomodel(AlertTask):
         alert_dict['details'] = {
             'locality_details': ev['details']['locality_details'],
             'category': ev['details']['category'],
+            'principal': ev['details']['principal'],
         }
 
         return alert_dict

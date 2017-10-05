@@ -25,6 +25,7 @@ class TestAlertGeomodel(AlertTestSuite):
                     "city": "Diamond Bar",
                     "country": "United States"
                 },
+                "principal": "ttesterson@mozilla.com",
             }
         }
     }
@@ -41,6 +42,7 @@ class TestAlertGeomodel(AlertTestSuite):
                 "city": "Diamond Bar",
                 "country": "United States"
             },
+            "principal": "ttesterson@mozilla.com",
         }
     }
 
