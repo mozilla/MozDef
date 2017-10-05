@@ -59,11 +59,12 @@ class message(object):
         for name, alert in self.config['alerts'].iteritems():
             # we have a message that matches an alert we care about
             if message['category'] == alert['category']:
-                summary_fields = message['summary'].split(' ')
-                full_email = summary_fields[0]
+                full_email = message['details']['principal']
                 username = full_email.split('@')[0]
                 auth_full_username = self.config['auth_id_prefix'] + username
-                summary = alert['summary'].format(summary_fields[2], summary_fields[3])
+                city = message['details']['locality_details']['city']
+                country = message['details']['locality_details']['country']
+                summary = alert['summary'].format(city, country)
 
                 alert_record = {
                     'alert_id': b2a_hex(os.urandom(15)),

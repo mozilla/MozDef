@@ -3,7 +3,7 @@
     "AlertGeomodel": { // The classname of the alert that we want to send to dashboard
       "category": "geomodel", // This is how to verify if we match on an alert or not
       "risk": "high", // low,medium,high values used to control display in dashboard
-      "summary": "Did you recently login from {0} {1}?", // the text that is displayed to the user in the browser
+      "summary": "Did you recently login from {0}, {1}?", // the text that is displayed to the user in the browser
       "description": "This alert is created based on geo ip information about the last login of a user.", // will be used to store in future
       "url": "https://www.mozilla.org", // the url of the button
       "url_title": "Get Help", // the button text
