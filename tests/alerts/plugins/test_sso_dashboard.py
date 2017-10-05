@@ -21,7 +21,7 @@ class TestSSODashboard(object):
 
         self.plugin = message()
 
-    def test_geoip_message(self):
+    def test_geoip_message_good(self):
         message_dict = {
             "category": "geomodel",
             "tags": ['geomodel'],
@@ -54,3 +54,24 @@ class TestSSODashboard(object):
         assert result_db_entry['url'] == 'https://www.mozilla.org'
         assert result_db_entry['url_title'] == 'Get Help'
         assert result_db_entry['user_id'] == 'ttesterson'
+
+    def test_geoip_message_bad(self):
+        message_dict = {
+            "category": "geomodel",
+            "tags": ['geomodel'],
+            "summary": "ttesterson@mozilla.com MOVEMENT Diamond Bar, United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
+            "details": {
+                "category": "MOVEMENT",
+                "locality_details": {
+                    "city": "Diamond Bar",
+                    "country": "United States"
+                },
+                "principal": "ttesterson@mozilla.com",
+            }
+        }
+
+        assert self.test_result_record is None
+        result_message = self.plugin.onMessage(message_dict)
+        assert result_message == message_dict
+        assert self.test_connect_called is True
+        assert self.test_result_record is None

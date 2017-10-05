@@ -65,6 +65,12 @@ class message(object):
                 if 'principal' not in message['details']:
                     return message
 
+                if 'category' not in message['details']:
+                    return message
+
+                if message['details']['category'].lower() != 'newcountry':
+                    return message
+
                 full_email = message['details']['principal']
                 username = full_email.split('@')[0]
                 auth_full_username = self.config['auth_id_prefix'] + username
