@@ -13,10 +13,9 @@ from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
-class AlertSSHManyConns(AlertTask):
+class AlertBugzillaPBruteforce(AlertTask):
     def main(self):
-        self.parse_config('sshbruteforce_bro.conf', ['url'])
-
+        self.parse_config('bugzilla_auth_bruteforce.conf', ['url'])
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
@@ -24,7 +23,7 @@ class AlertSSHManyConns(AlertTask):
             TermMatch('eventsource', 'nsm'),
             TermMatch('category', 'bronotice'),
             ExistsMatch('details.sourceipaddress'),
-            PhraseMatch('details.note', 'SSH::Password_Guessing'),
+            PhraseMatch('details.note', 'BugzBruteforcing::HTTP_BugzBruteforcing_Attacker'),
         ])
 
         self.filtersManual(search_query)
@@ -35,7 +34,7 @@ class AlertSSHManyConns(AlertTask):
 
     # Set alert properties
     def onEvent(self, event):
-        category = 'bruteforce'
+        category = 'httperrors'
         tags = ['http']
         severity = 'NOTICE'
         hostname = event['_source']['hostname']

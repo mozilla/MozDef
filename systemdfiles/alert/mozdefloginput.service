@@ -1,5 +1,5 @@
 [Unit]
-Description=uWSGI mozdefloginput
+Description=uWSGI MozDef Loginput Service
 After=rabbitmq-server.service
 
 [Service]
