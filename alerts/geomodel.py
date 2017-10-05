@@ -49,4 +49,11 @@ class AlertGeomodel(AlertTask):
             severity = 'WARNING'
 
         summary = ev['summary']
-        return self.createAlertDict(summary, category, tags, [event], severity)
+        alert_dict = self.createAlertDict(summary, category, tags, [event], severity)
+
+        alert_dict['details'] = {
+            'locality_details': ev['details']['locality_details'],
+            'category': ev['details']['category'],
+        }
+
+        return alert_dict
