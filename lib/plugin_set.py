@@ -2,6 +2,7 @@ import os
 import pynsive
 from operator import itemgetter
 from utilities.dict2List import dict2List
+from utilities.logger import logger
 
 
 class PluginSet(object):
@@ -75,7 +76,10 @@ class PluginSet(object):
                 if plugin['registration'] in message_fields:
                     send = True
             if send:
-                (message, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message, metadata=metadata)
+                try:
+                    (message, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message, metadata=metadata)
+                except Exception as e:
+                    logger.error('Received exception in {0}: message: {1}\n{2}'.format(plugin['plugin_class'], message, e.message))
                 if message is None:
                     return (message, metadata)
         return (message, metadata)

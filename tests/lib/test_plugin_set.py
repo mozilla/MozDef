@@ -37,11 +37,12 @@ class TestPluginSet(object):
         ordered_plugins = self.plugin_set.ordered_enabled_plugins
         assert ordered_plugins[0]['registration'] == ['apples']
         assert ordered_plugins[1]['registration'] == 'bananas'
-        assert ordered_plugins[2]['registration'] == ['oranges']
-        assert ordered_plugins[3]['registration'] == ['pears']
-        assert ordered_plugins[4]['registration'] == ['grapes']
-        assert ordered_plugins[5]['registration'] == ['somesecretvalue']
-        assert ordered_plugins[6]['registration'] == ['*']
+        assert ordered_plugins[2]['registration'] == ['*']
+        assert ordered_plugins[3]['registration'] == ['oranges']
+        assert ordered_plugins[4]['registration'] == ['pears']
+        assert ordered_plugins[5]['registration'] == ['grapes']
+        assert ordered_plugins[6]['registration'] == ['somesecretvalue']
+        assert ordered_plugins[7]['registration'] == ['*']
 
     def test_run_plugins_matching_key_plugin1(self):
         '''
