@@ -23,9 +23,9 @@ class AlertUnauthPortScan(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
-            TermMatch('_type', 'bro'),
-            TermMatch('category', 'bronotice'),
-            TermMatch('eventsource', 'nsm'),
+            TermMatch('_type', 'nsm'),
+            TermMatch('category', 'bro'),
+            TermMatch('type', 'notice'),
             ExistsMatch('details.indicators'),
             PhraseMatch('details.note', 'Scan::Port_Scan'),
         ])
