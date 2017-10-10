@@ -1,6 +1,6 @@
 /var/log/mozdef/*.log
 {
- rotate 17
+ rotate 4
  weekly
  missingok
  notifempty

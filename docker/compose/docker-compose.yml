@@ -49,9 +49,9 @@ services:
     command: rabbitmq-server
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-    # ports:
-    #   - 5672:5672
-    #   - 15672:15672
+    ports:
+      - 5672:5672
+    #   - 15672:15672 Admin interface
     networks:
       - default
 
