@@ -3,35 +3,37 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-# Copyright (c) 2015 Mozilla Corporation
+# Copyright (c) 2014 Mozilla Corporation
 #
 # Contributors:
-# Aaron Meihm ameihm@mozilla.com
+# Jeff Bryner jbryner@mozilla.com
 
-# Reads from papertrail using the API and inserts log data into ES in
-# the same manner as esworker.py
+# kombu's support for SQS is buggy
+# so this version uses boto
+# to read an SQS queue and put events into elastic search
+# in the same manner as esworker_eventtask.py
 
 
 import json
 import math
 import os
-import kombu
 import pynsive
 import sys
 import socket
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
-import calendar
 from operator import itemgetter
-import requests
+import boto.sqs
+from boto.sqs.message import RawMessage
+import base64
+import kombu
 
+import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
-
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
-
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 # running under uwsgi?
 try:
@@ -39,56 +41,6 @@ try:
     hasUWSGI = True
 except ImportError as e:
     hasUWSGI = False
-
-
-class PTRequestor(object):
-
-    def __init__(self, apikey, evmax=2000):
-        self._papertrail_api = 'https://papertrailapp.com/api/v1/events/search.json'
-        self._apikey = apikey
-        self._events = {}
-        self._evmax = evmax
-        self._evidcache = []
-
-
-    def parse_events(self, resp):
-        for x in resp['events']:
-            if x['id'] in self._evidcache:
-                # saw this event last time, just ignore it
-                continue
-            self._events[x['id']] = x
-        if 'reached_record_limit' in resp.keys() and resp['reached_record_limit']:
-            return resp['min_id']
-        return None
-
-
-    def makerequest(self, query, stime, etime, maxid):
-        payload = {
-                'min_time': calendar.timegm(stime.utctimetuple()),
-                'max_time': calendar.timegm(etime.utctimetuple()),
-                'q': query
-                }
-        if maxid != None:
-            payload['max_id'] = maxid
-        hdrs = {'X-Papertrail-Token': self._apikey}
-        resp = requests.get(self._papertrail_api, headers=hdrs, params=payload)
-        return self.parse_events(resp.json())
-
-
-    def request(self, query, stime, etime):
-        self._events = {}
-        maxid = None
-        while True:
-            maxid = self.makerequest(query, stime, etime, maxid)
-            if maxid == None:
-                break
-            if len(self._events.keys()) > self._evmax:
-                sys.stderr.write('WARNING: papertrail esworker hitting event request limit\n')
-                break
-        # cache event ids we return to allow for some duplicate filtering checks
-        # during next run
-        self._evidcache = self._events.keys()
-        return self._events
 
 
 def removeAt(astring):
@@ -229,7 +181,8 @@ def keyMapping(aDict):
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
     except Exception as e:
-        sys.stderr.write('esworker exception normalizing the message %r\n' % e)
+        sys.stderr.write(
+            'esworker.sqs exception normalizing the message %r\n' % e)
         return None
 
     return returndict
@@ -242,12 +195,10 @@ def esConnect():
 
 class taskConsumer(object):
 
-    def __init__(self, ptRequestor, esConnection):
-        self.ptrequestor = ptRequestor
+    def __init__(self, mqConnection, taskQueue,  esConnection):
+        self.connection = mqConnection
         self.esConnection = esConnection
-        # calculate our initial request window
-        self.lastRequestTime = toUTC(datetime.now()) - timedelta(seconds=options.ptinterval) - \
-            timedelta(seconds=options.ptbackoff)
+        self.taskQueue = taskQueue
 
         if options.esbulksize != 0:
             # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
@@ -255,39 +206,56 @@ class taskConsumer(object):
             self.esConnection.start_bulk_timer()
 
     def run(self):
+        # Boto expects base64 encoded messages - but if the writer is not boto it's not necessarily base64 encoded
+        # Thus we've to detect that and decode or not decode accordingly
+        self.taskQueue.set_message_class(RawMessage)
         while True:
             try:
-                curRequestTime = toUTC(datetime.now()) - timedelta(seconds=options.ptbackoff)
-                records = self.ptrequestor.request(options.ptquery, self.lastRequestTime, curRequestTime)
-                # update last request time for the next request
-                self.lastRequestTime = curRequestTime
-                for msgid in records:
-                    msgdict = records[msgid]
+                records=self.taskQueue.get_messages(options.prefetch)  #10 max
+                for msg in records:
+                    # msg.id is the id,
+                    # get_body() should be json
 
-                    # strip any line feeds from the message itself, we just convert them
-                    # into spaces
-                    msgdict['message'] = msgdict['message'].replace('\n', ' ').replace('\r', '')
+                    # pre process the message a bit
+                    tmp = msg.get_body()
+                    try:
+                        msgbody = json.loads(tmp)
+                    except ValueError:
+                        # If Boto wrote to the queue, it might be base64 encoded, so let's decode that
+                        try:
+                            tmp = base64.b64decode(tmp)
+                            msgbody = json.loads(tmp)
+                        except:
+                            sys.stdout.write('invalid message, not JSON <dropping message and continuing>: %r\n' % msg.get_body())
+                            self.taskQueue.delete_message(msg)
+                            continue
 
                     event = dict()
-                    event['tags'] = ['papertrail', options.ptacctname]
-                    event['details'] = msgdict
+                    event = msgbody
 
-                    if event['details'].has_key('generated_at'):
-                        event['utctimestamp'] = toUTC(event['details']['generated_at']).isoformat()
-                    if event['details'].has_key('hostname'):
-                        event['hostname'] = event['details']['hostname']
-                    if event['details'].has_key('message'):
-                        event['summary'] = event['details']['message']
-                    if event['details'].has_key('severity'):
-                        event['severity'] = event['details']['severity']
+                    # Was this message sent by fluentd-sqs
+                    fluentd_sqs_specific_fields = {
+                        'az', 'instance_id', '__tag'}
+                    if fluentd_sqs_specific_fields.issubset(
+                            set(msgbody.keys())):
+                        # Until we can influence fluentd-sqs to set the
+                        # 'customendpoint' key before submitting to SQS, we'll
+                        # need to do it here
+                        # TODO : Change nubis fluentd output to include
+                        # 'customendpoint'
+                        event['customendpoint'] = True
+
+                    if 'tags' in event:
+                        event['tags'].extend([options.taskexchange])
                     else:
-                        event['severity'] = 'INFO'
-                    event['category'] = 'syslog'
+                        event['tags'] = [options.taskexchange]
 
                     #process message
-                    self.on_message(event, msgdict)
+                    self.on_message(event, msg)
 
-                time.sleep(options.ptinterval)
+                    #delete message from queue
+                    self.taskQueue.delete_message(msg)
+                time.sleep(.1)
 
             except KeyboardInterrupt:
                 sys.exit(1)
@@ -312,11 +280,15 @@ class taskConsumer(object):
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
-                    sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                    sys.stderr.write(
+                        "esworker.sqs exception: unknown body type received "
+                        "%r\n" % body)
                     #message.ack()
                     return
             else:
-                sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                sys.stderr.write(
+                    "esworker.sqs exception: unknown body type received "
+                    "%r\n" % body)
                 #message.ack()
                 return
 
@@ -384,7 +356,8 @@ class taskConsumer(object):
 
             #message.ack()
         except ValueError as e:
-            sys.stderr.write("esworker exception in events queue %r\n" % e)
+            sys.stderr.write(
+                "esworker.sqs exception in events queue %r\n" % e)
 
 
 def registerPlugins():
@@ -494,17 +467,26 @@ def sendEventToPlugins(anevent, metadata, pluginList):
 
 
 def main():
+    # meant only to talk to SQS using boto
+    # and process events as json.
+
     if hasUWSGI:
         sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
     else:
         sys.stdout.write('started without uwsgi\n')
 
-    # establish api interface with papertrail
-    ptRequestor = PTRequestor(options.ptapikey, evmax=options.ptquerymax)
+    if options.mqprotocol not in ('sqs'):
+        sys.stdout.write('Can only process SQS queues, terminating\n');
+        sys.exit(1)
+
+    mqConn = boto.sqs.connect_to_region(options.region,
+                                      aws_access_key_id=options.accesskey,
+                                      aws_secret_access_key=options.secretkey)
+    # attach to the queue
+    eventTaskQueue = mqConn.get_queue(options.taskexchange)
 
     # consume our queue
-    taskConsumer(ptRequestor, es).run()
-
+    taskConsumer(mqConn, eventTaskQueue, es).run()
 
 
 def initConfig():
@@ -516,13 +498,31 @@ def initConfig():
     options.esbulksize = getConfig('esbulksize', 0, options.configfile)
     options.esbulktimeout = getConfig('esbulktimeout', 30, options.configfile)
 
-    # papertrail configuration
-    options.ptapikey = getConfig('papertrailapikey', 'none', options.configfile)
-    options.ptquery = getConfig('papertrailquery', '', options.configfile)
-    options.ptinterval = getConfig('papertrailinterval', 60, options.configfile)
-    options.ptbackoff = getConfig('papertrailbackoff', 300, options.configfile)
-    options.ptacctname = getConfig('papertrailaccount', 'unset', options.configfile)
-    options.ptquerymax = getConfig('papertrailmaxevents', 2000, options.configfile)
+    # set to sqs for Amazon
+    options.mqprotocol = getConfig('mqprotocol', 'sqs', options.configfile)
+
+    # rabbit message queue options
+    options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
+    options.taskexchange = getConfig('taskexchange', 'eventtask', options.configfile)
+    options.eventexchange = getConfig('eventexchange', 'events', options.configfile)
+    # rabbit: how many messages to ask for at once from the message queue
+    options.prefetch = getConfig('prefetch', 10, options.configfile)
+    # rabbit: user creds
+    options.mquser = getConfig('mquser', 'guest', options.configfile)
+    options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
+    # rabbit: port/vhost
+    options.mqport = getConfig('mqport', 5672, options.configfile)
+    options.mqvhost = getConfig('mqvhost', '/', options.configfile)
+
+    # rabbit: run with message acking?
+    # also toggles transient/persistant delivery (messages in memory only or stored on disk)
+    # ack=True sets persistant delivery, False sets transient delivery
+    options.mqack = getConfig('mqack', True, options.configfile)
+
+    # aws options
+    options.accesskey = getConfig('accesskey', '', options.configfile)
+    options.secretkey = getConfig('secretkey', '', options.configfile)
+    options.region = getConfig('region', 'us-west-1', options.configfile)
 
     # plugin options
     # secs to pass before checking for new/updated plugins

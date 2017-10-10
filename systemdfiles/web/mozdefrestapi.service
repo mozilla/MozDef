@@ -1,5 +1,5 @@
 [Unit]
-Description=uWSGI mozdef restapi
+Description=uWSGI MozDef Rest API Service
 After=mozdefweb.service
 
 [Service]

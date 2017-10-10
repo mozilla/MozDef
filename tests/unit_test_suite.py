@@ -27,30 +27,6 @@ from kombu import Connection, Queue, Exchange
 import random
 import pytest
 
-import time
-
-if not pytest.config.option.delete_indexes:
-    warning_text = "\n\n** WARNING - Some unit tests will not pass unless the --delete_indexes is specified."
-    warning_text += "\nThis is due to the fact that some tests need a 'clean' ES environment **\n"
-    warning_text += "\n** DISCLAIMER - If you enable this flag, all indexes that MozDef uses will be deleted upon test execution **\n"
-    print warning_text
-else:
-    warning_text = "\n\n** WARNING - The --delete_indexes flag has been set. We will be deleting important indexes from ES before test execution**\n"
-    warning_text += "Continuing the unit test execution in 10 seconds...CANCEL ME IF YOU DO NOT WANT PREVIOUS INDEXES DELETED!!! **\n"
-    print warning_text
-    time.sleep(10)
-
-if not pytest.config.option.delete_queues:
-    warning_text = "\n\n** WARNING - Some unit tests will not pass unless the --delete_queues is specified."
-    warning_text += "\nThis is due to the fact that some tests need a 'clean' RabbitMQ environment **\n"
-    warning_text += "\n** DISCLAIMER - If you enable this flag, the queues in rabbitmq that MozDef uses will be deleted upon test execution **\n"
-    print warning_text
-else:
-    warning_text = "\n** WARNING - The --delete_queues flag has been set. We will be purging RabbitMQ queues before test execution**\n"
-    warning_text += "Continuing the unit test execution in 10 seconds...CANCEL ME IF YOU DO NOT WANT PREVIOUS QUEUES PURGED!!! **\n"
-    print warning_text
-    time.sleep(10)
-
 
 class UnitTestSuite(object):
 
