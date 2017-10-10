@@ -1,5 +1,5 @@
 [Unit]
-Description=uWSGI eventtask mworker
+Description=uWSGI MozDef Eventtask mworker Service
 After=rabbitmq-server.service
 
 [Service]
@@ -9,7 +9,7 @@ ExecStartPre=-/usr/bin/mkdir -p /var/run/mozdef_mq_worker_pids
 ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdef_mq_worker_pids
 User=mozdef
 Group=mozdef
-ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/mq/; source /opt/mozdef/envs/mozdef/bin/activate; uwsgi --ini eventtask.ini'
+ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/mq; source /opt/mozdef/envs/mozdef/bin/activate; uwsgi --ini eventtask.ini'
 Restart=always
 KillSignal=SIGQUIT
 Type=notify
@@ -19,3 +19,4 @@ NotifyAccess=all
 [Install]
 WantedBy=multi-user.target
 Alias=eventtask
+
