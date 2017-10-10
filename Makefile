@@ -39,6 +39,8 @@ single-run:
 		-p 9090:9090 \
 		-p 8080:8080 \
 		-p 8081:8081 \
+		-p 9200:9200 \
+		-p 5672:5672 \
 		-v mozdef-elasticsearch:/var/lib/elasticsearch \
 		-v mozdef-mongodb:/var/lib/mongo \
 		-v mozdef-rabbitmq:/var/lib/rabbitmq \

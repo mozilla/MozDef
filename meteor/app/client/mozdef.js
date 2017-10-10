@@ -18,7 +18,7 @@ if (Meteor.isClient) {
     //default session variables
     //and session init actions
     Meteor.startup(function () {
-        Session.set('verisfilter','  ');
+        Session.set('verisfilter','category');
         Session.set('alertssearchtext','');
         Session.set('alertssearchtime','tail');
         Session.set('alertsfiltertext','');

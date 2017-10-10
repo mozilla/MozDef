@@ -25,6 +25,7 @@ from boto.sqs.message import RawMessage
 import gzip
 from StringIO import StringIO
 from threading import Timer
+import re
 
 
 import sys
@@ -34,6 +35,7 @@ from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient
 from utilities.logger import logger, initLogger
 
+CLOUDTRAIL_VERB_REGEX = re.compile(r'^([A-Z][^A-Z]*)')
 
 # running under uwsgi?
 try:
@@ -234,6 +236,10 @@ class taskConsumer(object):
             message['eventSource']
         )
         message['summary'] = summary_str
+        message['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(
+            message['eventName'])[0]
+        message['eventReadOnly'] = (
+            message['eventVerb'] in ['Describe', 'Get', 'List'])
         es.save_event(body=message, doc_type='cloudtrail', bulk=True)
 
 
