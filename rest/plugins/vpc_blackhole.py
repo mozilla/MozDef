@@ -43,18 +43,17 @@ class message(object):
            (i.e. blockip matches /blockip)
            set the priority if you have a preference for order of plugins
            0 goes first, 100 is assumed/default if not sent
-           
+
            Plugins will register in Meteor with attributes:
            name: (as below)
            description: (as below)
            priority: (as below)
            file: "plugins.filename" where filename.py is the plugin code.
-           
+
            Plugin gets sent main rest options as:
            self.restoptions
            self.restoptions['configfile'] will be the .conf file
            used by the restapi's index.py file.
-           
         '''
 
         self.registration = ['blockip']
@@ -64,13 +63,12 @@ class message(object):
 
         # set my own conf file
         # relative path to the rest index.py file
-        self.configfile = './plugins/vpcblackhole.conf'
+        self.configfile = './plugins/vpc_blackhole.conf'
         self.options = None
         self.multioptions = []
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
-        
 
     def initConfiguration(self):
         myparser = ConfigParser.ConfigParser()
@@ -81,7 +79,7 @@ class message(object):
                 cur_options = myparser.options(cur_section)
                 if cur_options is not None:
                     self.multioptions.append({ 'region': myparser.get(cur_section, 'region'), 'aws_access_key_id': myparser.get(cur_section, 'aws_access_key_id'), 'aws_secret_access_key': myparser.get(cur_section, 'aws_secret_access_key') } )
-        
+
     def addBlackholeEntry(self,
                           ipaddress=None):
         try:
@@ -154,7 +152,7 @@ class message(object):
                         else:
                             sys.stdout.write('Skipping route table {0} in the VPC {1} - blackhole ENI could not be found\n'.format(rt_id, vpc_id))
                             continue
-                
+
         except Exception as e:
             sys.stderr.write('Error while creating a blackhole entry %s: %r\n' % (ipaddress, e))
 
@@ -163,16 +161,16 @@ class message(object):
         '''
         request: http://bottlepy.org/docs/dev/api.html#the-request-object
         response: http://bottlepy.org/docs/dev/api.html#the-response-object
-        
-        '''        
+
+        '''
         # format/validate request.json:
         ipaddress = None
         CIDR = None
         sendToBHVPC = False
-        
+
         # loop through the fields of the form
         # and fill in our values
-        try: 
+        try:
             for i in request.json:
                 # were we checked?
                 if self.name in i.keys():
@@ -197,5 +195,5 @@ class message(object):
                         sys.stdout.write ('Blackholed {0}\n'.format(ipaddress))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
-                
+
         return (request, response)

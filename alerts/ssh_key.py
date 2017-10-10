@@ -13,7 +13,7 @@ from query_models import SearchQuery, TermMatch
 import re
 
 # This alert consumes data produced by the MIG sshkey module and mig-runner.
-# sshkey related events are compared against a whitelist which is the
+# ssh key related events are compared against a whitelist which is the
 # alerts configuration file (sshkey.conf). The format of this whitelist
 # is as follows:
 #
@@ -30,7 +30,7 @@ class SSHKey(AlertTask):
         self._whitelist = []
 
         AlertTask.__init__(self)
-        self._parse_whitelist('sshkey.conf')
+        self._parse_whitelist('ssh_key.conf')
 
     def main(self):
         search_query = SearchQuery(minutes=30)

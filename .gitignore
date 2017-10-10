@@ -11,3 +11,4 @@ cron/ipblocklist.txt
 alerts/generic_alerts
 /.project
 /data
+.vscode
