@@ -120,7 +120,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_cron/Dockerfile
     restart: always
-    command: crond -n
+    command: bash -c 'sleep 5 && crond -n'
     volumes:
       - cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
