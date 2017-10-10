@@ -52,7 +52,7 @@ RUN \
   yum install -y rabbitmq-server-$RABBITMQ_VERSION && \
   yum install -y nginx && \
   mkdir /var/log/mozdef/ && \
-  curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x64.tar.gz | tar -C /opt/mozdef/ -xz && \
+  curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C /opt/mozdef/ -xz && \
   mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x64 /opt/mozdef/envs/kibana && \
   yum install -y mongodb-org && \
   curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz && \
