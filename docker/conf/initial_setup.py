@@ -27,11 +27,6 @@ parser.add_argument('default_mapping_file', help='The relative path to default m
 args = parser.parse_args()
 
 
-# This file is meant to be run from the root of the project
-# even though we store this file in the mozdef container files directory
-# the dockerfile moves it to the correct spot
-
-
 print "Connecting to " + args.esserver
 client = ElasticsearchClient(args.esserver)
 
@@ -47,16 +42,17 @@ with open(args.default_mapping_file) as data_file:
 
 
 all_indices = []
-for attempt in range(5):
+total_num_tries = 15
+for attempt in range(total_num_tries):
     try:
         all_indices = client.get_indices()
     except ConnectionError:
         print 'Unable to connect to Elasticsearch...retrying'
-        sleep(2)
+        sleep(5)
     else:
         break
 else:
-    print 'Cannot connect to Elasticsearch after 5 tries, exiting script.'
+    print 'Cannot connect to Elasticsearch after ' + str(total_num_tries) + ' tries, exiting script.'
     exit(1)
 
 if event_index_name not in all_indices:
