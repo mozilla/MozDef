@@ -78,7 +78,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_alertplugins/Dockerfile
     restart: always
-    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python alertWorker.py -c alertWorker.conf'
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python alert_worker.py -c alert_worker.conf'
     depends_on:
       - base
       - elasticsearch
@@ -147,12 +147,12 @@ services:
       - 8080:8080
     networks:
       - default
-  mq_syslog:
+  mq_eventtask:
     build:
       context: ../../
-      dockerfile: docker/compose/mozdef_mq_worker/Dockerfile
+      dockerfile: docker/compose/mozdef_mq_eventtask/Dockerfile
     restart: always
-    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python esworker.py -c syslog_worker.conf'
+    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
     scale: 1
     depends_on:
       - base
