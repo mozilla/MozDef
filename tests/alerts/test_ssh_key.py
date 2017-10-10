@@ -5,7 +5,7 @@ from alert_test_suite import AlertTestSuite
 
 
 class TestSSHKey(AlertTestSuite):
-    alert_filename = 'sshkey'
+    alert_filename = 'ssh_key'
     alert_classname = 'SSHKey'
 
     # This event is the default positive event that will cause the
