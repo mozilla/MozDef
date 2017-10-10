@@ -9,7 +9,6 @@
 import requests
 import json
 import os
-import sys
 from configlib import getConfig, OptionParser
 
 
@@ -23,10 +22,9 @@ class message(object):
 
         # set my own conf file
         # relative path to the rest index.py file
-        self.configfile = './plugins/pagerDutyTriggerEvent.conf'
+        self.configfile = os.path.join(os.path.dirname(__file__), 'pagerDutyTriggerEvent.conf')
         self.options = None
         if os.path.exists(self.configfile):
-            sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
 
         self.registration = self.options.keywords.split(" ")
