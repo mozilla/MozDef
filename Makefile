@@ -20,7 +20,9 @@
 # make multiple-build-no-cache - build new mozdef environment in multiple containers from scratch
 # make multiple-run - run new mozdef environment in multiple containers
 # make multiple-stop - stop new mozdef environment in multiple containers
+# make multiple-rm - stop new mozdef environment in multiple containers and deattach volumes
 # make multiple-rebuild - build, stop and run new mozdef environment in multiple containers
+# make multiple-rebuild-new - build, stop/rm and run new mozdef environment in multiple containers
 
 NAME=mozdef
 VERSION=0.1
@@ -83,6 +85,11 @@ multiple-build-no-cache:
 multiple-stop:
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
 
+multiple-rm:
+	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
+
 multiple-rebuild: multiple-build multiple-stop multiple-run
+
+multiple-rebuild-new: multiple-build multiple-rm multiple-run
 
 .PHONY: multiple-build multiple-run multiple-stop multiple-rebuild
