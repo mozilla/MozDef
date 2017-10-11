@@ -100,6 +100,9 @@ class UnitTestSuite(object):
     def populate_test_event(self, event, event_type='event'):
         self.es_client.save_event(body=event, doc_type=event_type)
 
+    def populate_test_object(self, event, event_type='event'):
+        self.es_client.save_object(index='events', body=event, doc_type=event_type)
+
     def setup_elasticsearch(self):
         default_mapping_file = os.path.join(os.path.dirname(__file__), "../config/defaultMappingTemplate.json")
         mapping_str = ''

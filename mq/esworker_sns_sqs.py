@@ -154,7 +154,7 @@ class taskConsumer(object):
                 if self.options.esbulksize != 0:
                     bulk = True
 
-                self.esConnection.save_object(
+                self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
                     doc_type=metadata['doc_type'],

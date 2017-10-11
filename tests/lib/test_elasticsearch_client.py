@@ -21,6 +21,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
 
 import time
+import json
 
 from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 import pytest
@@ -123,7 +124,7 @@ class TestWithBadIndex(ElasticsearchClientTest):
 
 class TestSimpleWrites(ElasticsearchClientTest):
 
-    def test_simple_writing(self):
+    def test_simple_writing_event_dict(self):
         mock_class = MockTransportClass()
         mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
         self.es_client.es_connection.transport.perform_request = mock_class.perform_request
@@ -140,6 +141,49 @@ class TestSimpleWrites(ElasticsearchClientTest):
         self.flush(self.event_index_name)
         num_events = self.get_num_events()
         assert num_events == 100
+
+    def test_simple_writing_event_string(self):
+        event = json.dumps({"key": "example value for string of json test"})
+        self.es_client.save_event(body=event)
+
+        self.flush(self.event_index_name)
+        num_events = self.get_num_events()
+        assert num_events == 1
+
+        query = SearchQuery()
+        query.add_must(ExistsMatch('key'))
+        results = query.execute(self.es_client)
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert results['hits'][0]['_source']['key'] == 'example value for string of json test'
+
+        assert len(results['hits']) == 1
+        assert results['hits'][0]['_type'] == 'event'
+
+    def test_writing_event_defaults(self):
+        query = SearchQuery()
+        default_event = {}
+        self.populate_test_event(default_event)
+        self.flush(self.event_index_name)
+
+        query.add_must(ExistsMatch('summary'))
+        results = query.execute(self.es_client)
+        assert len(results['hits']) == 1
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        saved_event = results['hits'][0]['_source']
+        assert 'category' in saved_event
+        assert 'details' in saved_event
+        assert 'hostname' in saved_event
+        assert 'mozdefhostname' in saved_event
+        assert 'processid' in saved_event
+        assert 'processname' in saved_event
+        assert 'receivedtimestamp' in saved_event
+        assert 'severity' in saved_event
+        assert 'source' in saved_event
+        assert 'summary' in saved_event
+        assert 'tags' in saved_event
+        assert 'timestamp' in saved_event
+        assert 'utctimestamp' in saved_event
+        assert 'category' in saved_event
 
     def test_writing_with_type(self):
         query = SearchQuery()
@@ -159,8 +203,10 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         assert results['hits'][0]['_type'] == 'example'
-        assert results['hits'][0]['_source'] == default_event['_source']
+        assert results['hits'][0]['_source']['summary'] == 'Test summary'
+        assert results['hits'][0]['_source']['details'] == {"note": "Example note"}
 
     def test_writing_with_source(self):
         query = SearchQuery()
@@ -179,6 +225,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         assert results['hits'][0]['_type'] == 'event'
 
 
@@ -287,7 +334,6 @@ class TestWriteWithIDExists(ElasticsearchClientTest):
         assert saved_event['_id'] == event_id
         self.flush(self.event_index_name)
         fetched_event = self.es_client.get_event_by_id(event_id)
-        assert fetched_event['_source'] == event
 
 
 class TestGetIndices(ElasticsearchClientTest):
