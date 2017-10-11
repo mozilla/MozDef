@@ -40,6 +40,7 @@ class PluginSet(object):
             else:
                 priority = 100
 
+            logger.info('[*] plugin {0} registered to receive messages with {1}'.format(module_name, plugin_class_obj.registration))
             plugins.append(
                 {
                     'plugin_class': plugin_class_obj,
