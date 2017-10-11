@@ -9,7 +9,7 @@ class Event(dict):
     # We set default vaules so that we can later
     # create an alert around these, and know when events
     # have to use defaults
-    DEFAULT_STRING = 'None'
+    DEFAULT_STRING = 'UNKNOWN'
 
     def add_required_fields(self):
         if 'receivedtimestamp' not in self:

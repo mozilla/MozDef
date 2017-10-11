@@ -45,12 +45,12 @@ class TestEvent(object):
         assert toUTC(self.event['timestamp']).isoformat() == self.event['timestamp']
         assert self.event['mozdefhostname'] == 'randomhostname'
         assert self.event['tags'] == []
-        assert self.event['category'] == 'None'
-        assert self.event['hostname'] == 'None'
-        assert self.event['processid'] == 'None'
-        assert self.event['processname'] == 'None'
-        assert self.event['severity'] == 'None'
-        assert self.event['source'] == 'None'
+        assert self.event['category'] == 'UNKNOWN'
+        assert self.event['hostname'] == 'UNKNOWN'
+        assert self.event['processid'] == 'UNKNOWN'
+        assert self.event['processname'] == 'UNKNOWN'
+        assert self.event['severity'] == 'UNKNOWN'
+        assert self.event['source'] == 'UNKNOWN'
         assert self.event['summary'] == 'example summary'
         assert self.event['tags'] == []
         assert self.event['details'] == {}
