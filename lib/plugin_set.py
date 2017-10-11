@@ -77,12 +77,15 @@ class PluginSet(object):
                 if plugin['registration'] in message_fields:
                     send = True
             if send:
-                (message, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message, metadata=metadata)
+                try:
+                    (message, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message, metadata=metadata)
+                except Exception as e:
+                    logger.error('Received exception in {0}: message: {1}\n{2}'.format(plugin['plugin_class'], message, e.message))
                 if message is None:
                     return (message, metadata)
         return (message, metadata)
 
-    def send_message_to_plugin(self, plugin_class, message, metadata):
+    def send_message_to_plugin(self, plugin_class, message, metadata=None):
         '''moving this logic to a separate function allows
            different types of plugin_sets, such as alerts that might not care
            about receiving metadata in its plugins
