@@ -148,7 +148,7 @@ def initConfig():
     options.mquser=getConfig('mquser','guest',options.configfile)
     options.mqpassword=getConfig('mqpassword','guest',options.configfile)
     options.mqport=getConfig('mqport',5672,options.configfile)
-    options.host=getConfig('host', '127.0.0.1', options.configfile)
+    options.listen_host=getConfig('listen_host', '127.0.0.1', options.configfile)
 
 
 #get config info:
@@ -168,6 +168,6 @@ eventTaskQueue(mqConn).declare()
 mqproducer = mqConn.Producer(serializer='json')
 
 if __name__ == "__main__":
-    run(host=options.host, port=8080)
+    run(host=options.listen_host, port=8080)
 else:
     application = default_app()
