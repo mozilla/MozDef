@@ -277,10 +277,6 @@ circle:hover{
 
 #header h2 {
     font: 30px sans-serif;
-    background-image: url(/images/fx-usage-logo.png);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: 0px,0px;
     float: left;
     margin: 0;
     padding: 2px 10px;
