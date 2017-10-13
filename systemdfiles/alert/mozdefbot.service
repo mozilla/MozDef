@@ -1,11 +1,11 @@
 [Unit]
-Description=uWSGI mozdef bot
+Description=uWSGI MozDef Bot Service
 After=rabbitmq-server.service
 
 [Service]
 # Requires systemd version 211 or newer
 PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/mkdir /var/run/mozdefbot
+ExecStartPre=-/usr/bin/mkdir -p /var/run/mozdefbot
 ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdefbot/
 User=mozdef
 Group=mozdef

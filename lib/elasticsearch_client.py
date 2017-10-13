@@ -1,18 +1,15 @@
-from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
-
 import json
-import logging
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch.helpers import bulk, BulkIndexError
 
+from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
 from bulk_queue import BulkQueue
 
-logger = logging.getLogger(__name__)
-logger.level = logging.DEBUG
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+from utilities.logger import logger, initLogger
+from event import Event
 
 
 class ElasticsearchBadServer(Exception):
@@ -39,6 +36,7 @@ class ElasticsearchClient():
         self.es_connection = Elasticsearch(servers)
         self.es_connection.ping()
         self.bulk_queue = BulkQueue(self, threshold=bulk_amount, flush_time=bulk_refresh_time)
+        initLogger()
 
     def delete_index(self, index_name, ignore_fail=False):
         ignore_codes = []
@@ -106,15 +104,20 @@ class ElasticsearchClient():
         if not self.bulk_queue.started():
             self.bulk_queue.start_timer()
 
-    def bulk_save_object(self, index, doc_type, body, doc_id=None):
-        self.start_bulk_timer()
-        self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
-
     def finish_bulk(self):
         self.bulk_queue.stop_timer()
 
-    def save_object(self, index, doc_type, body, doc_id=None, bulk=False):
-        # Try and parse it as json if it's a string
+    def __bulk_save_document(self, index, doc_type, body, doc_id=None):
+        self.start_bulk_timer()
+        self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+
+    def __save_document(self, index, doc_type, body, doc_id=None, bulk=False):
+        if bulk:
+            self.__bulk_save_document(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+        else:
+            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=body)
+
+    def __parse_document(self, body, doc_type):
         if type(body) is str:
             body = json.loads(body)
 
@@ -124,17 +127,21 @@ class ElasticsearchClient():
         doc_body = body
         if '_source' in body:
             doc_body = body['_source']
+        return doc_body, doc_type
 
-        if bulk:
-            self.bulk_save_object(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id)
-        else:
-            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=doc_body)
+    def save_object(self, body, index, doc_type, doc_id=None, bulk=False):
+        doc_body, doc_type = self.__parse_document(body, doc_type)
+        return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
 
     def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):
-        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
+        doc_body, doc_type = self.__parse_document(body, doc_type)
+        return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
 
     def save_event(self, body, index='events', doc_type='event', doc_id=None, bulk=False):
-        return self.save_object(index=index, doc_type=doc_type, body=body, doc_id=doc_id, bulk=bulk)
+        doc_body, doc_type = self.__parse_document(body, doc_type)
+        event = Event(doc_body)
+        event.add_required_fields()
+        return self.__save_document(index=index, doc_type=doc_type, body=event, doc_id=doc_id, bulk=bulk)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)

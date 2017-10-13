@@ -17,6 +17,7 @@ from unit_test_suite import UnitTestSuite
 
 import copy
 import re
+import json
 
 
 class AlertTestSuite(UnitTestSuite):
@@ -42,6 +43,11 @@ class AlertTestSuite(UnitTestSuite):
                     self.alert_classname[5:] if
                     self.alert_classname.startswith('Alert') else
                     self.alert_classname)).lower()
+
+        # Boolean to determine if an alert is a 'deadman' type of alert
+        # Meaning, this will throw if no events are found
+        if not hasattr(self, 'deadman'):
+            self.deadman = False
 
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):
@@ -94,12 +100,20 @@ class AlertTestSuite(UnitTestSuite):
 
     def test_alert_test_case(self, test_case):
         self.verify_starting_values(test_case)
+        if test_case.expected_test_result is True:
+            # if we dont set notify_mozdefbot field, autoset it to True
+            if 'notify_mozdefbot' not in test_case.expected_alert:
+                test_case.expected_alert['notify_mozdefbot'] = True
+            if 'ircchannel' not in test_case.expected_alert:
+                test_case.expected_alert['ircchannel'] = None
+
         temp_events = test_case.events
         for event in temp_events:
             temp_event = self.dict_merge(self.generate_default_event(), self.default_event)
 
             merged_event = self.dict_merge(temp_event, event)
             merged_event['_source']['utctimestamp'] = merged_event['_source']['utctimestamp']()
+            merged_event['_source']['receivedtimestamp'] = merged_event['_source']['receivedtimestamp']()
             test_case.full_events.append(merged_event)
             self.populate_test_event(merged_event['_source'], merged_event['_type'])
 
@@ -107,6 +121,37 @@ class AlertTestSuite(UnitTestSuite):
 
         alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
         self.verify_alert_task(alert_task, test_case)
+
+    def verify_rabbitmq_alert(self, found_alert, test_case):
+        rabbitmq_message = self.rabbitmq_alerts_consumer.channel.basic_get()
+        rabbitmq_message.channel.basic_ack(rabbitmq_message.delivery_tag)
+        document = json.loads(rabbitmq_message.body)
+        assert document['notify_mozdefbot'] is test_case.expected_alert['notify_mozdefbot'], 'Alert from rabbitmq has bad notify_mozdefbot field'
+        assert document['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert from rabbitmq has bad ircchannel field'
+        assert document['summary'] == found_alert['_source']['summary'], 'Alert from rabbitmq has bad summary field'
+        assert document['utctimestamp'] == found_alert['_source']['utctimestamp'], 'Alert from rabbitmq has bad utctimestamp field'
+        assert document['category'] == found_alert['_source']['category'], 'Alert from rabbitmq has bad category field'
+        assert len(document['events']) == len(found_alert['_source']['events']), 'Alert from rabbitmq has bad events field'
+
+    def verify_saved_events(self, found_alert, test_case):
+        """
+        Verifies the events saved in ES has expected values from an alert running
+        """
+        # Deadman alerts throw when no events are found, so skip
+        # any of the event validation
+        if self.deadman:
+            return
+
+        assert len(found_alert['_source']['events']) == len(test_case.full_events)
+        for event in found_alert['_source']['events']:
+            event_id = event['documentid']
+            found_event = self.es_client.get_event_by_id(event_id)
+            assert found_event['_source']['alert_names'] == [self.alert_classname]
+            assert len(found_event['_source']['alerts']) > 0
+            for alert in found_event['_source']['alerts']:
+                assert alert['id'] == found_alert['_id']
+                assert alert['index'] == found_alert['_index']
+                assert alert['type'] == found_alert['_type']
 
     def verify_expected_alert(self, found_alert, test_case):
         # Verify index is set correctly
@@ -123,6 +168,12 @@ class AlertTestSuite(UnitTestSuite):
         # Verify there is a utctimestamp field
         assert 'utctimestamp' in found_alert['_source'], 'Alert does not have utctimestamp specified'
 
+        # Verify notify_mozdefbot is set correctly
+        assert found_alert['_source']['notify_mozdefbot'] is test_case.expected_alert['notify_mozdefbot'], 'Alert notify_mozdefbot field is bad'
+
+        # Verify ircchannel is set correctly
+        assert found_alert['_source']['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert ircchannel field is bad'
+
         # Verify the events are added onto the alert
         assert type(found_alert['_source']['events']) == list, 'Alert events field is not a list'
         alert_events = found_alert['_source']['events']
@@ -136,12 +187,16 @@ class AlertTestSuite(UnitTestSuite):
             assert found_alert['_source'][key] == value, '{0} does not match, got: {1}'.format(key, found_alert['_source'][key])
 
     def verify_alert_task(self, alert_task, test_case):
+        assert alert_task.classname() == self.alert_classname, 'Alert classname did not match expected name'
         if test_case.expected_test_result is True:
             assert len(alert_task.alert_ids) is not 0, 'Alert did not fire as expected'
             self.flush('alerts')
+            self.flush('events')
             for alert_id in alert_task.alert_ids:
                 found_alert = self.es_client.get_alert_by_id(alert_id)
                 self.verify_expected_alert(found_alert, test_case)
+                self.verify_saved_events(found_alert, test_case)
+                self.verify_rabbitmq_alert(found_alert, test_case)
         else:
             assert len(alert_task.alert_ids) is 0, 'Alert fired when it was expected not to'
 

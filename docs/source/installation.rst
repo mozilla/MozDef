@@ -8,164 +8,44 @@ Docker
 
 You can quickly install MozDef with an automated build generation using `docker`_.
 
-Dockerfile
-***********
 
-After `installing docker`_, use this to build a new image::
+Single Container
+****************
 
-  cd docker && sudo make build
+MozDef can run in a single docker container, which uses supervisord to handle executing all of the MozDef processes. In order to run a single container::
 
-Running the container::
-
-  sudo make run
+  make single-build
+  make single-run
+  make single-stop # When you want to stop the container
 
 You're done! Now go to:
 
- * http://localhost:3000 < meteor (main web interface)
- * http://localhost:9090 < kibana
+ * http://localhost < meteor (main web interface)
+ * http://localhost:9090/app/kibana < kibana
  * http://localhost:9200 < elasticsearch
  * http://localhost:8080 < loginput
  * http://localhost:8081 < rest api
 
-Get a terminal in the container
-*******************************
 
-An common problem in Docker is that once you start a container, you cannot enter it as there is no ssh by default.
+Multiple Containers
+*******************
 
-When you make the container, you will enter it as root by default, but if you
-would like to enter it manually use `nsenter` present in the `util-linux` > 2.23 package.
-Debian and Ubuntu currently provide the 2.20 version so you need to download and compile the source code::
+Since MozDef consists of many processes running at once, we also support running MozDef with each process given it's own container. This can be useful during development, since you can turn off a single process to debug/troubleshoot while maintaining a functioning MozDef environment.
+In order to run in multiple containers::
 
-  cd /tmp
-  curl https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz | tar -zxf-
-  cd util-linux-2.24
-  ./configure --without-ncurses
-  make nsenter
-  cp nsenter /usr/local/bin
+  make multiple-build
+  make multiple-run
+  make multiple-stop # When you want to stop the containers
 
-Now we can create a script for docker (/usr/local/sbin/dkenter)::
+You're done! Now go to:
 
-  #!/bin/bash
-
-  CNAME=$1
-  CPID=$(docker inspect --format '{{ .State.Pid }}' $CNAME)
-  nsenter --target $CPID --mount --uts --ipc --net --pid
-
-While your MozDef container is running::
-
-  docker ps # find the container ID, fc4917f00ead in this example
-  dkenter fc4917f00ead
-  root@fc4917f00ead:/# ...
-  root@fc4917f00ead:/# exit
-
-Docker config in AWS
---------------------
-
-Summary
-*******
-
-If you don't want to install MozDef with docker on your own machine because for example it doesn't support docker or you fear you don't have enough memory, AWS supports docker.
-
-1. Create a t2.small instance (enough to test MozDef) with the following details:
-
-   * AMI: Ubuntu LTS-14-04 HVM
-   * In "Configure Instance Details", expand the "Advanced Details" section. Under "User data", select "As text". Enter `#include https://get.docker.io` into the instance "User data". It will bootstrap docker in your instance boot.
-2. In this instance, clone our github repo
-3. Follow our docker config install `instructions`_
-4. Configure your security group to open the ports you need. Keep in mind that it's probably a bad idea to have a public facing elasticsearch.
-
-Detailed Steps
-**************
-Step by Step::
-
-    Sign into AWS
-    Choose EC2
-    Choose Images->AMIs
-    Find  Public Image ami-a7fdfee2 or a suitable Ubuntu 14.04 LTS(HVM) SSD 64bit server with HVM virtualization.
-    Choose Launch
-    Choose an instance type according to your budget. (at least a t2.small)
-    Choose next: configure instance details
-    Choose a network or create a VPC
-    Choose or create a new subnet
-    Choose to Assign a public IP
-    Under advanced details: user data choose 'as text' and enter #include https://get.docker.io
-    Choose next: add storage and add appropriate storage according to your budget
-    Choose next and add any tags you may want
-    Choose next and select any security group you may want to limit incoming traffic.
-    Choose launch and select an ssh key-pair or create a new one for ssh access to the instance.
-
-    For easy connect instructions, select your instance in the Ec2 dashboard->instances menu and choose connect for instructions.
-    ssh into your new instance according to the instructions ^^
-
-    clone the github repo to get the latest code:
-    from your home directory (/home/ubuntu if using the AMI instance from above)
-        sudo apt-get update
-        sudo apt-get install git
-        git clone https://github.com/mozilla/MozDef.git
-
-    change the settings.js file to match your install:
-    vim /home/ubuntu/MozDef/docker/conf/settings.js
-        <change rootURL,rootAPI, kibanaURL from localhost to the FQDN or ip address of your AMI instance: i.e. http://1.2.3.4 >
-
-    Inbound port notes:
-    You will need to allow the AWS/docker instance to talk to the FQDN or ip address you specify in settings.js
-    or the web ui will likely fail as it tries to contact internal services.
-    i.e. you may need to setup custom TCP rules in your AWS security group to allow the instance to talk to itself
-    if you use the public IP on the ports specified in settings.js. (usually 3000 for meteor, 8081 for rest api, 9090 for kibana and 9200 for kibana/ES)
-
-    build docker:
-        cd MozDef/docker
-        sudo apt-get install make
-        sudo make build (this will take awhile)
-            [ make build-no-cache     (if needed use to disable docker caching routines or rebuild)
-            [ at the end you should see a message like: Successfully built e8e075e66d8d ]
-
-    starting docker:
-        <build dkenter which will allow you to enter the docker container and control services, change settings, etc>
-            sudo apt-get install gcc
-            cd /tmp
-            curl https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz | tar -zxf-
-            cd util-linux-2.24
-            ./configure --without-ncurses
-            make nsenter
-            sudo cp nsenter /usr/local/bin
-
-            sudo vim /usr/local/bin/dkenter
-                #!/bin/bash
-
-                CNAME=$1
-                CPID=$(docker inspect --format '{{ .State.Pid }}' $CNAME)
-                nsenter --target $CPID --mount --uts --ipc --net --pid
-
-            sudo chmod +x /usr/local/bin/dkenter
-
-        cd && cd MozDef/docker/
-        screen
-        sudo make run
-        (once inside the container)
-        #/etc/init.d/supervisor start
-
-        Browse to http://youripaddress:3000 for the MozDef UI
-
-    Build notes:
-    ************
-    You can sign in using any Persona-enabled service (i.e. any yahoo or gmail account will work)
-    supervisor config that starts everything is in /etc/supervisor/conf.d/supervisor.conf
-    MozDef runs as root in /opt/MozDef
-    Logs are in /var/log/mozdef
-    MozDef will automatically start sending sample events to itself. To turn this off:
-        0) get a new screen ( ctrl a c)
-        1) sudo docker ps (to get the container id)
-        2) sudo dkenter <containerid>
-        3) supervisorctl
-        4) stop realTimeEvents
-
-
-
+ * http://localhost < meteor (main web interface)
+ * http://localhost:9090/app/kibana < kibana
+ * http://localhost:9200 < elasticsearch
+ * http://localhost:8080 < loginput
+ * http://localhost:8081 < rest api
 
 .. _docker: https://www.docker.io/
-.. _installing docker: https://docs.docker.com/installation/#installation
-.. _instructions: http://mozdef.readthedocs.org/en/latest/installation.html#dockerfile
 
 
 MozDef manual installation process on RedHat systems
@@ -515,7 +395,7 @@ Manual Installation
 
 *Use sudo whereever required*
 
-**(Currently only for apt-based systems)**
+**(Currently only for apt-based systems using Docker)**
 
 
 1. Cloning repository ::

@@ -156,7 +156,6 @@ class TestExecute(SearchQueryUnitTest):
 
         assert sorted_hits[0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
-        assert sorted_hits[0]['_source'].keys() == ['ip', 'details', 'summary']
         assert sorted_hits[0]['_source']['ip'] == '1.2.3.4'
         assert sorted_hits[0]['_source']['summary'] == 'Test Summary'
 
@@ -169,20 +168,17 @@ class TestExecute(SearchQueryUnitTest):
 
         assert sorted_hits[1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
-        assert sorted_hits[1]['_source'].keys() == ['ip', 'details', 'summary']
         assert sorted_hits[1]['_source']['ip'] == '1.2.3.4'
         assert sorted_hits[1]['_source']['summary'] == 'Test Summary'
 
         assert sorted_hits[1]['_source']['details'].keys() == ['information']
         assert sorted_hits[1]['_source']['details']['information'] == 'Example information'
 
-        assert sorted_hits[2].keys() == ['_score', '_type', '_id', '_source', '_index']
         assert type(sorted_hits[2]['_id']) == unicode
         assert sorted_hits[2]['_type'] == 'event'
 
         assert sorted_hits[2]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
-        assert sorted_hits[2]['_source'].keys() == ['ip', 'details', 'summary']
         assert sorted_hits[2]['_source']['ip'] == '127.0.0.1'
         assert sorted_hits[2]['_source']['summary'] == 'Test Summary'
 
@@ -205,6 +201,7 @@ class TestExecute(SearchQueryUnitTest):
     def test_aggregation_without_must_fields(self):
         event = self.generate_default_event()
         event['_source']['utctimestamp'] = event['_source']['utctimestamp']()
+        event['_source']['receivedtimestamp'] = event['_source']['receivedtimestamp']()
         self.populate_test_event(event)
         self.flush(self.event_index_name)
 
@@ -237,7 +234,6 @@ class TestExecute(SearchQueryUnitTest):
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
-        assert results['hits'][0]['_source'].keys() == ['note', 'details', 'summary']
         assert results['hits'][0]['_source']['note'] == 'Example note'
         assert results['hits'][0]['_source']['summary'] == 'Test Summary'
 
@@ -250,7 +246,6 @@ class TestExecute(SearchQueryUnitTest):
 
         assert results['hits'][1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
-        assert results['hits'][1]['_source'].keys() == ['note', 'details', 'summary']
         assert results['hits'][1]['_source']['note'] == 'Example note'
         assert results['hits'][1]['_source']['summary'] == 'Test Summary'
 
@@ -288,7 +283,6 @@ class TestExecute(SearchQueryUnitTest):
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
-        assert results['hits'][0]['_source'].keys() == ['note', 'details', 'summary']
         assert results['hits'][0]['_source']['note'] == 'Example note'
         assert results['hits'][0]['_source']['summary'] == 'Test Summary'
 
@@ -317,10 +311,12 @@ class TestExecute(SearchQueryUnitTest):
 
         too_old_event = default_event
         too_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 11})
+        too_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 11})
         self.populate_test_event(too_old_event)
 
         not_old_event = default_event
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
+        not_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
         self.populate_test_event(not_old_event)
 
         self.flush(self.event_index_name)
@@ -343,10 +339,12 @@ class TestExecute(SearchQueryUnitTest):
 
         self.populate_test_event(default_event)
         default_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'minutes': 11})
+        default_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'minutes': 11})
         self.populate_test_event(default_event)
 
         not_old_event = default_event
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'minutes': 9})
+        not_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'minutes': 9})
         self.populate_test_event(not_old_event)
 
         self.flush(self.event_index_name)
@@ -369,10 +367,12 @@ class TestExecute(SearchQueryUnitTest):
 
         self.populate_test_event(default_event)
         default_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'hours': 11})
+        default_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'hours': 11})
         self.populate_test_event(default_event)
 
         not_old_event = default_event
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'hours': 9})
+        not_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'hours': 9})
         self.populate_test_event(not_old_event)
 
         self.flush(self.event_index_name)
@@ -395,10 +395,12 @@ class TestExecute(SearchQueryUnitTest):
 
         self.populate_test_event(default_event)
         default_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 11})
+        default_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 11})
         self.populate_test_event(default_event)
 
         not_old_event = default_event
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 9})
+        not_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 9})
         self.populate_test_event(not_old_event)
 
         self.flush(self.event_index_name)
@@ -421,10 +423,12 @@ class TestExecute(SearchQueryUnitTest):
 
         self.populate_test_event(default_event)
         default_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 11})
+        default_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 11})
         self.populate_test_event(default_event)
 
         not_old_event = default_event
         not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 9})
+        not_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'days': 9})
         self.populate_test_event(not_old_event)
 
         self.flush(self.event_index_name)
@@ -445,7 +449,7 @@ class TestExecute(SearchQueryUnitTest):
             }
         }
 
-        self.populate_test_event(default_event)
+        self.populate_test_object(default_event)
         self.flush(self.event_index_name)
 
         results = query.execute(self.es_client)
@@ -503,10 +507,12 @@ class TestExecute(SearchQueryUnitTest):
 
         too_old_event = default_event
         too_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 11})
+        too_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 11})
         self.populate_test_event(too_old_event)
 
         not_old_event = default_event
         not_old_event['receivedtimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
+        not_old_event['utctimestamp'] = UnitTestSuite.subtract_from_timestamp({'seconds': 9})
         self.populate_test_event(not_old_event)
 
         self.flush(self.event_index_name)

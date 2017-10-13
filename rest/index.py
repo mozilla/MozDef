@@ -562,7 +562,7 @@ def getWhois(ipaddress):
         whois = dict()
         ip = netaddr.IPNetwork(ipaddress)[0]
         if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
-            whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup()
+            whois = IPWhois(netaddr.IPNetwork(ipaddress)[0]).lookup_whois()
 
         whois['fqdn']=socket.getfqdn(str(netaddr.IPNetwork(ipaddress)[0]))
         return (json.dumps(whois))
@@ -618,6 +618,8 @@ def initConfig():
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
+    options.listen_host = getConfig('host', '127.0.0.1', options.configfile)
+
 
 parser = OptionParser()
 parser.add_option("-c", dest='configfile',
@@ -629,6 +631,6 @@ initLogger(options)
 registerPlugins()
 
 if __name__ == "__main__":
-    run(host="0.0.0.0", port=8081)
+    run(host=options.listen_host, port=8081)
 else:
     application = default_app()

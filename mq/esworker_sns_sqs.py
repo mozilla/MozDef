@@ -115,7 +115,7 @@ class taskConsumer(object):
                     message_json = json.loads(message_value)
                     for inside_message_key, inside_message_value in message_json.iteritems():
                         if inside_message_key in ('processid', 'pid'):
-                            processid = inside_message_value
+                            processid = str(inside_message_value)
                             processid = processid.replace('[', '')
                             processid = processid.replace(']', '')
                             event['processid'] = processid
@@ -154,7 +154,7 @@ class taskConsumer(object):
                 if self.options.esbulksize != 0:
                     bulk = True
 
-                self.esConnection.save_object(
+                self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
                     doc_type=metadata['doc_type'],

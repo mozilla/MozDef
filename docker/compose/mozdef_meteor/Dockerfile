@@ -16,6 +16,15 @@ RUN \
   cd /opt/mozdef && \
   curl -sL -o /opt/mozdef/nodesource.rpm https://rpm.nodesource.com/pub_4.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm && \
   rpm -i --nosignature --force /opt/mozdef/nodesource.rpm && \
+  yum install -y \
+                    wget \
+                    make \
+                    glibc-devel \
+                    gcc \
+                    gcc-c++ \
+                    libstdc++ \
+                    libffi-devel \
+                    zlib-devel && \
   yum install -y nodejs-$NODE_VERSION && \
   npm install source-map-support@0.4.2 \
                  semver@5.3.0 \
@@ -24,7 +33,7 @@ RUN \
                  underscore@1.8.3 \
                  bcrypt && \
   mkdir /opt/mozdef/meteor && \
-  curl -sL -o /opt/mozdef/meteor.tar.gz https://meteorinstall-4168.kxcdn.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
+  curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
   tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
   mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
   rm -r /opt/mozdef/meteor && \

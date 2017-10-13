@@ -45,6 +45,7 @@ class TestAlertUnauthPortScan(AlertTestSuite):
         'summary': "nsmhost: Unauthorized Port Scan Event from [u'1.2.3.4'] scanning ports on host 5.6.7.8",
         'tags': [],
         'url': 'https://www.mozilla.org',
+        'notify_mozdefbot': False,
     }
 
     test_cases = []
@@ -59,6 +60,7 @@ class TestAlertUnauthPortScan(AlertTestSuite):
 
     event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 29})
+    event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 29})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
@@ -114,6 +116,7 @@ class TestAlertUnauthPortScan(AlertTestSuite):
 
     event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
+    event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",

@@ -10,13 +10,19 @@
 # Brandon Myers bmyers@mozilla.com
 
 # usage:
-#	make single-build	- build new single image from Dockerfile
-#	make single-debug	- debug run already created image by tag
-#	make single-try	- build and run in debug mode
+# make single-build - build new single image from Dockerfile
+# make single-build-no-cache - build new single image from Dockerfile from scratch
+# make single-debug - debug run already created image by tag
 # make single-run - run a single instance of MozDef
-# make multiple-build - build new mozdef container environment (includes multiple containers)
-# make multiple-clean - remove any mozdef container environments
-# make multiple-run - run new mozdef environment from containers
+# make single-stop - stop a single instance of MozDef
+# make single-rebuild - build, stop and run a new single instance of MozDef
+# make multiple-build - build new mozdef environment in multiple containers
+# make multiple-build-no-cache - build new mozdef environment in multiple containers from scratch
+# make multiple-run - run new mozdef environment in multiple containers
+# make multiple-stop - stop new mozdef environment in multiple containers
+# make multiple-rm - stop new mozdef environment in multiple containers and deattach volumes
+# make multiple-rebuild - build, stop and run new mozdef environment in multiple containers
+# make multiple-rebuild-new - build, stop/rm and run new mozdef environment in multiple containers
 
 NAME=mozdef
 VERSION=0.1
@@ -32,29 +38,40 @@ single-run:
 	docker run \
 		-e TZ=UTC \
 		-p 80:80 \
-		-p 5672:5672 \
 		-p 9090:9090 \
-		-p 9200:9200 \
 		-p 8080:8080 \
 		-p 8081:8081 \
-		-h $(NAME) -d $(NAME):$(VERSION)
+		-p 9200:9200 \
+		-p 5672:5672 \
+		-v mozdef-elasticsearch:/var/lib/elasticsearch \
+		-v mozdef-mongodb:/var/lib/mongo \
+		-v mozdef-rabbitmq:/var/lib/rabbitmq \
+		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
+		-h $(NAME) --name $(NAME) -d $(NAME):$(VERSION)
 
 single-debug:build
-	docker run -p 3000:3000 -p 9090:9090 -p 9200:9200 -p 8080:8080 -p 8081:8081 \
-		-v $(shell pwd)/container/var/lib/elasticsearch:/var/lib/elasticsearch \
-		-v $(shell pwd)/container/var/log/elasticsearch:/var/log/elasticsearch \
-		-v $(shell pwd)/container/var/lib/mongodb:/var/lib/mongodb \
-		-v $(shell pwd)/container/var/log/mongodb:/var/log/mongodb \
-		-v $(shell pwd)/container/var/log/nginx:/var/log/nginx \
-		-v $(shell pwd)/container/var/log/mozdef:/var/log/mozdef \
-	 	-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
+	docker run \
+		-e TZ=UTC \
+		-p 80:80 \
+		-p 9090:9090 \
+		-p 8080:8080 \
+		-p 8081:8081 \
+		-p 3002:3002 \
+		-p 5672:5672 \
+		-p 15672:15672 \
+		-p 9200:9200 \
+		-v mozdef-elasticsearch:/var/lib/elasticsearch \
+		-v mozdef-mongodb:/var/lib/mongo \
+		-v mozdef-rabbitmq:/var/lib/rabbitmq \
+		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
+		-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
 
+single-stop:
+	-docker rm -f $(NAME)
 
-single-try: build run
+single-rebuild: single-build single-stop single-run
 
-
-.PHONY: build debug run
-
+.PHONY: single-build single-build-no-cache single-run single-debug single-stop single-rebuild
 
 multiple-run:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
@@ -62,7 +79,17 @@ multiple-run:
 multiple-build:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build
 
+multiple-build-no-cache:
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build --no-cache
+
 multiple-stop:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
+	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
+
+multiple-rm:
+	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
 
 multiple-rebuild: multiple-build multiple-stop multiple-run
+
+multiple-rebuild-new: multiple-build multiple-rm multiple-run
+
+.PHONY: multiple-build multiple-run multiple-stop multiple-rebuild
