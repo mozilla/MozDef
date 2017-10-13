@@ -4,7 +4,7 @@ import pytz
 import math
 import tzlocal
 
-local_timezone = tzlocal.get_localzone()
+LOCAL_TIMEZONE = tzlocal.get_localzone()
 
 
 def toUTC(suspectedDate):
@@ -19,16 +19,16 @@ def toUTC(suspectedDate):
         magnitude = int(math.log10(int(suspectedDate)))
         if magnitude > EPOCH_MAGNITUDE:
             suspectedDate = suspectedDate / 10 ** (magnitude - EPOCH_MAGNITUDE)
-        objDate = datetime.fromtimestamp(suspectedDate, local_timezone)
+        objDate = datetime.fromtimestamp(suspectedDate, LOCAL_TIMEZONE)
     elif str(suspectedDate).isdigit():
         # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
         epochDivisor = int(str(1) + '0'*(len(str(suspectedDate)) % 10))
-        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor), local_timezone)
+        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor), LOCAL_TIMEZONE)
     elif type(suspectedDate) in (str, unicode):
         objDate = parse(suspectedDate, fuzzy=True)
     try:
         if objDate.tzinfo is None:
-            objDate=local_timezone.localize(objDate)
+            objDate=LOCAL_TIMEZONE.localize(objDate)
     except AttributeError as e:
         raise ValueError(
             "Date %s which was converted to %s has no "
