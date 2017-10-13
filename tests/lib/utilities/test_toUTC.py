@@ -21,6 +21,10 @@ def utc_timezone():
 
 tzlocal.get_localzone = utc_timezone
 
+import sys
+if 'utilities.toUTC' in sys.modules:
+    reload(sys.modules['utilities.toUTC'])
+
 from utilities.toUTC import toUTC
 
 
