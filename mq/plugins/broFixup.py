@@ -60,7 +60,7 @@ class message(object):
             return message, metadata
         if u'category' not in message:
             return message, metadata
-        if u'type' not in message:
+        if u'source' not in message:
             return message, metadata
         if message['category'] != 'bro':
             return message, metadata
@@ -92,9 +92,9 @@ class message(object):
             del(newmessage['details']['category'])
         if 'customendpoint' in newmessage['details']:
             del(newmessage['details']['customendpoint'])
-        if 'type' in newmessage['details']:
-            newmessage['type'] = newmessage['details']['type']
-            del(newmessage['details']['type'])
+        if 'source' in newmessage['details']:
+            newmessage['source'] = newmessage['details']['source']
+            del(newmessage['details']['source'])
 
 
         # add mandatory fields
@@ -117,12 +117,12 @@ class message(object):
         if 'details' in newmessage:
 
             # All Bro logs need special treatment, so we provide it
-            # Not a known log type? Mark it as such and return
-            if 'type' not in newmessage:
-                newmessage['type'] = u'unknown'
+            # Not a known log source? Mark it as such and return
+            if 'source' not in newmessage:
+                newmessage['source'] = u'unknown'
                 return newmessage, metadata
             else:
-                logtype = newmessage['type']
+                logtype = newmessage['source']
 
                 if logtype == 'conn':
                     newmessage[u'details'][u'originipbytes'] = newmessage['details']['orig_ip_bytes']
@@ -155,8 +155,8 @@ class message(object):
                         newmessage['details'][u'total_bytes'] = u'0'
                     if 'md5' not in newmessage['details']:
                         newmessage['details'][u'md5'] = u'None'
-                    if 'source' not in newmessage['details']:
-                        newmessage['details'][u'source'] = u'None'
+                    if 'filesource' not in newmessage['details']:
+                        newmessage['details'][u'filesource'] = u'None'
                     newmessage[u'summary'] = (
                         u'{rx_hosts[0]} '
                         u'downloaded (MD5) '
@@ -165,7 +165,7 @@ class message(object):
                         u'MIME {mime_type} '
                         u'({total_bytes} bytes) '
                         u'from {tx_hosts[0]} '
-                        u'via {source}'
+                        u'via {filesource}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
