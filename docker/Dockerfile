@@ -15,8 +15,7 @@ FROM centos:7
 MAINTAINER mozdef@mozilla.com
 
 ENV NODE_VERSION 4.7.0
-ENV METEOR_VERSION 1.4.0.1
-ENV METEOR_FILE_VERSION 1.4.0-1
+ENV METEOR_VERSION 1.4.4.2
 ENV PYTHON_VERSION 2.7.11
 ENV KIBANA_VERSION 4.6.5
 ENV ES_VERSION 2.4.6
@@ -53,7 +52,7 @@ RUN \
   yum install -y nginx && \
   mkdir /var/log/mozdef/ && \
   curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C /opt/mozdef/ -xz && \
-  mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x64 /opt/mozdef/envs/kibana && \
+  mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x86_64 /opt/mozdef/envs/kibana && \
   yum install -y mongodb-org && \
   curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz && \
   cd /opt/mozdef/Python-$PYTHON_VERSION && \
@@ -82,9 +81,11 @@ RUN \
   tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
   mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
   rm -r /opt/mozdef/meteor && \
-  cp /opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
+  cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
+USER mozdef
 COPY meteor /opt/mozdef/envs/mozdef/meteor
+USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 USER mozdef
 RUN \
