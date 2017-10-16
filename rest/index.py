@@ -196,7 +196,11 @@ def index():
     if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
         url="https://isc.sans.edu/api/ip/"
 
-        dresponse = requests.get('{0}{1}?json'.format(url, requestDict['ipaddress']))
+        headers = {
+            'User-Agent': options.user_agent
+        }
+
+        dresponse = requests.get('{0}{1}?json'.format(url, requestDict['ipaddress']), headers=headers)
         if dresponse.status_code == 200:
             response.content_type = "application/json"
             response.body = dresponse.content
@@ -620,6 +624,8 @@ def initConfig():
 
     options.listen_host = getConfig('host', '127.0.0.1', options.configfile)
 
+    default_user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/58.0'
+    options.user_agent = getConfig('user_agent', default_user_agent, options.configfile)
 
 parser = OptionParser()
 parser.add_option("-c", dest='configfile',
