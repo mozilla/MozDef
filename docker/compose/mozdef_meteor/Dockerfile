@@ -2,9 +2,10 @@ FROM centos:7
 
 MAINTAINER mozdef@mozilla.com
 
+#updated meteor version to avoid EXDEV: cross-device link not permitted errors
 ENV NODE_VERSION 4.7.0
-ENV METEOR_VERSION 1.4.0.1
-ENV METEOR_FILE_VERSION 1.4.0-1
+ENV METEOR_VERSION 1.4.4.2
+ENV METEOR_FILE_VERSION 1.4.4-1
 
 ENV MONGO_URL=mongodb://mongodb:3002/meteor
 ENV ROOT_URL=http://localhost
@@ -37,12 +38,16 @@ RUN \
   tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
   mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
   rm -r /opt/mozdef/meteor && \
-  cp /opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
+  cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
+#copy our source dir and set ownership
+USER mozdef
 COPY meteor /opt/mozdef/envs/mozdef/meteor
+USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
-RUN chown -R mozdef:mozdef /opt/mozdef/
 
+#avoiding -R due to massive list of files from meteor
+RUN chown  mozdef:mozdef /opt/mozdef/envs
 USER mozdef
 RUN \
   cd /opt/mozdef/envs/mozdef/meteor && \
