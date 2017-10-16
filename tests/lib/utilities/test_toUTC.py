@@ -4,6 +4,27 @@ from dateutil.parser import parse
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../lib'))
+import pytz
+
+import tzlocal
+
+UTC_TIMEZONE_COUNT = 0
+def utc_timezone():
+    ''' This is a mock function, so when we run tests
+        we trick the system into thinking we're on UTC
+        no matter what the real timezone is
+    '''
+    global UTC_TIMEZONE_COUNT
+    UTC_TIMEZONE_COUNT += 1
+    return pytz.timezone('UTC')
+
+
+tzlocal.get_localzone = utc_timezone
+
+import sys
+if 'utilities.toUTC' in sys.modules:
+    reload(sys.modules['utilities.toUTC'])
+
 from utilities.toUTC import toUTC
 
 
@@ -11,6 +32,13 @@ class TestToUTC():
 
     def result_is_datetime(self, result):
         assert type(result) == datetime
+
+    def test_timezone_function_call_count(self):
+        toUTC("2016-07-11 14:33:31.625443")
+        toUTC("2016-07-12 14:33:31.625444")
+        toUTC("2016-07-13 14:33:31.625445")
+        toUTC("2016-07-14 14:33:31.625446")
+        assert UTC_TIMEZONE_COUNT == 1
 
     def test_normal_date_str_with_default_timezone(self):
         result = toUTC("2016-07-13 14:33:31.625443")
