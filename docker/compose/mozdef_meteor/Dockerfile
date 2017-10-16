@@ -5,7 +5,6 @@ MAINTAINER mozdef@mozilla.com
 #updated meteor version to avoid EXDEV: cross-device link not permitted errors
 ENV NODE_VERSION 4.7.0
 ENV METEOR_VERSION 1.4.4.2
-ENV METEOR_FILE_VERSION 1.4.4-1
 
 ENV MONGO_URL=mongodb://mongodb:3002/meteor
 ENV ROOT_URL=http://localhost
