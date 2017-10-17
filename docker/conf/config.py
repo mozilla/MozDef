@@ -17,6 +17,10 @@ ALERTS = {
     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
 }
 
+ALERT_PLUGINS = [
+    # 'relative pythonfile name (exclude the .py) - EX: sso_dashboard',
+]
+
 RABBITMQ = {
     'mqserver': 'localhost',
     'mquser': 'guest',
