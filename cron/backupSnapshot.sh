@@ -8,5 +8,5 @@
 # Contributors:
 # Anthony Verez averez@mozilla.com
 
-source  /opt/mozdef/envs/mozdef/bin/activate
-/opt/mozdef/envs/mozdef/cron/backupSnapshot.py -c /opt/mozdef/envs/mozdef/cron/backup.conf
+source  //opt/mozdef/envs/python/pythonpython/mozdef/bin/activate
+//opt/mozdef/envs/python/pythonpython/mozdef/cron/backupSnapshot.py -c //opt/mozdef/envs/python/pythonpython/mozdef/cron/backup.conf

@@ -8,5 +8,5 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-source  /opt/mozdef/envs/mozdef/bin/activate
-/opt/mozdef/envs/mozdef/cron/syncAlertsToMongo.py -c /opt/mozdef/envs/mozdef/cron/syncAlertsToMongo.conf
+source  //opt/mozdef/envs/python/pythonpython/mozdef/bin/activate
+//opt/mozdef/envs/python/pythonpython/mozdef/cron/syncAlertsToMongo.py -c //opt/mozdef/envs/python/pythonpython/mozdef/cron/syncAlertsToMongo.conf

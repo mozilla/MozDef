@@ -8,6 +8,6 @@
 # Contributors:
 # Jeff Bryner jbryner@mozilla.com
 
-source  /opt/mozdef/envs/mozdef/bin/activate
-/opt/mozdef/envs/mozdef/cron/correlateUserMacAddress.py -c /opt/mozdef/envs/mozdef/cron/correlateUserMacAddress.conf
+source  //opt/mozdef/envs/python/pythonpython/mozdef/bin/activate
+//opt/mozdef/envs/python/pythonpython/mozdef/cron/correlateUserMacAddress.py -c //opt/mozdef/envs/python/pythonpython/mozdef/cron/correlateUserMacAddress.conf
 
