@@ -24,9 +24,9 @@ class AlertUnauthInternalScan(AlertTask):
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
-            TermMatch('_type', 'bro'),
-            TermMatch('category', 'bronotice'),
-            TermMatch('eventsource', 'nsm'),
+            TermMatch('_type', 'nsm'),
+            TermMatch('category', 'bro'),
+            TermMatch('type', 'notice'),
             TermMatch('hostname', self.config.nsm_host),
             ExistsMatch('details.indicators'),
             PhraseMatch('details.note', 'Scan::Address_Scan'),
