@@ -30,7 +30,7 @@ class broNSM(AlertTask):
                     PhraseMatch("details.note", "MozillaAlive::Bro_Is_Watching_You"),
                     PhraseMatch("details.peer_descr", host),
                     TermMatch('category', 'bro'),
-                    TermMatch('type', 'notice'),
+                    TermMatch('source', 'notice'),
                     TermMatch('_type', 'nsm')
                 ])
 

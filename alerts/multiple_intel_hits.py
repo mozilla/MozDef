@@ -19,9 +19,9 @@ class AlertMultipleIntelHits(AlertTask):
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
-            TermMatch('_type', 'bro'),
-            TermMatch('eventsource', 'nsm'),
-            TermMatch('category', 'brointel'),
+            TermMatch('_type', 'nsm'),
+            TermMatch('category', 'bro'),
+            TermMatch('source', 'intel'),
             ExistsMatch('details.seenindicator'),
             TermsMatch('hostname', ['sensor1', 'sensor2', 'sensor3'])
         ])
