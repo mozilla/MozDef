@@ -19,10 +19,9 @@ class AlertHTTPBruteforce(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermMatch('_type', 'bro'),
-            TermMatch('eventsource', 'nsm'),
-            TermMatch('category', 'bronotice'),
-            ExistsMatch('details.sourceipaddress'),
+            TermMatch('_type', 'nsm'),
+            TermMatch('category', 'bro'),
+            TermMatch('source', 'notice'),
             PhraseMatch('details.note', 'AuthBruteforcing::HTTP_AuthBruteforcing_Attacker'),
         ])
 
