@@ -80,15 +80,6 @@ def esRotateIndexes():
                     if newindex not in indices:
                         logger.debug('Creating %s index' % newindex)
                         es.create_index(newindex)
-                    # set aliases: events to events-YYYYMMDD
-                    # and events-previous to events-YYYYMMDD-1 for example
-                    logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
-                    es.create_alias(index, newindex)
-                    if oldindex in indices:
-                        logger.debug('Setting {0}-previous alias to index: {1}'.format(index, oldindex))
-                        es.create_alias('%s-previous' % index, oldindex)
-                    else:
-                        logger.debug('Old index %s is missing, do not change %s-previous alias' % (oldindex, index))
             except Exception as e:
                 logger.error("Unhandled exception while rotating %s, terminating: %r" % (index, e))
 
