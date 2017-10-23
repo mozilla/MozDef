@@ -54,6 +54,7 @@ def esRotateIndexes():
         indices = es.get_indices()
 
         # calc dates for use in index names events-YYYYMMDD, alerts-YYYYMM, etc.
+        pdate_day = date.strftime(toUTC(datetime.now()) - timedelta(days=2), '%Y%m%d')
         odate_day = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m%d')
         odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m')
         ndate_day = date.strftime(toUTC(datetime.now()), '%Y%m%d')
@@ -65,9 +66,11 @@ def esRotateIndexes():
             options.dobackup, options.rotation, options.pruning):
             try:
                 if rotation != 'none':
+                    previndex = index
                     oldindex = index
                     newindex = index
                     if rotation == 'daily':
+                        previndex += '-%s' % pdate_day
                         oldindex += '-%s' % odate_day
                         newindex += '-%s' % ndate_day
                     elif rotation == 'monthly':
@@ -81,12 +84,17 @@ def esRotateIndexes():
                         logger.debug('Creating %s index' % newindex)
                         es.create_index(newindex)
                     # set aliases: events to events-YYYYMMDD
-                    # and events-previous to events-YYYYMMDD-1 for example
+                    # and events-previous to events-YYYYMMDD-1
                     logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
-                    es.create_alias(index, newindex)
+                    alias = index
+                    index = newindex
+                    es.update_alias(oldindex, index, alias)
                     if oldindex in indices:
-                        logger.debug('Setting {0}-previous alias to index: {1}'.format(index, oldindex))
-                        es.create_alias('%s-previous' % index, oldindex)
+                        alias = 'events-previous'
+                        index = oldindex
+                        oldindex = previndex
+                        logger.debug('Setting {0} to index: {1}'.format(alias, index))
+                        es.update_alias(oldindex, index, alias)
                     else:
                         logger.debug('Old index %s is missing, do not change %s-previous alias' % (oldindex, index))
             except Exception as e:
@@ -99,7 +107,7 @@ def esRotateIndexes():
         current_date = toUTC(datetime.now())
         for index in options.weekly_rotation_indices:
             weekly_index_alias = '%s-weekly' % index
-            logger.debug('Trying to realias {0} to indices since {1}'.format(weekly_index_alias, week_ago_str))
+            logger.debug('Trying to re-alias {0} to indices since {1}'.format(weekly_index_alias, week_ago_str))
             existing_weekly_indices = []
             for day_obj in daterange(week_ago_date, current_date):
                 day_str = day_obj.strftime('%Y%m%d')
@@ -160,12 +168,23 @@ def initConfig():
         '20,0,0',
         options.configfile).split(',')
         )
-
     options.weekly_rotation_indices = list(getConfig(
         'weekly_rotation_indices',
         'events',
         options.configfile).split(',')
         )
+    options.daily_index_alias = list(getConfig(
+        'daily_index_alias',
+        'events',
+        options.configfile)
+        )
+    options.previous_alias = list(getConfig(
+        'previous_alias',
+        'events-previous',
+        options.configfile)
+        )
+
+
 
 
 if __name__ == '__main__':
