@@ -96,7 +96,7 @@ def esRotateIndexes():
                         logger.debug('Setting {0} to index: {1}'.format(alias, index))
                         es.update_alias(oldindex, index, alias)
                     else:
-                        logger.debug('Old index %s is missing, do not change % alias' % (oldindex, alias))
+                        logger.debug('Old index %s is missing, do not change %s alias' % (oldindex, alias))
             except Exception as e:
                 logger.error("Unhandled exception while rotating %s, terminating: %r" % (index, e))
 
