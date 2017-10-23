@@ -173,17 +173,6 @@ def initConfig():
         'events',
         options.configfile).split(',')
         )
-    options.daily_index_alias = list(getConfig(
-        'daily_index_alias',
-        'events',
-        options.configfile)
-        )
-    options.previous_alias = list(getConfig(
-        'previous_alias',
-        'events-previous',
-        options.configfile)
-        )
-
 
 
 
@@ -196,4 +185,4 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     initConfig()
     esRotateIndexes()
-    
+
