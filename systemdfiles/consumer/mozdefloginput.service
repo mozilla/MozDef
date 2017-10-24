@@ -1,11 +1,11 @@
 [Unit]
-Description=uWSGI mozdefloginput
+Description=uWSGI MozDef Loginput Service
 After=rabbitmq-server.service
 
 [Service]
 # Requires systemd version 211 or newer
 PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/mkdir /var/run/mozdef-loginput
+ExecStartPre=-/usr/bin/mkdir -p /var/run/mozdef-loginput
 ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdef-loginput/
 User=mozdef
 Group=mozdef

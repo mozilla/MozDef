@@ -11,6 +11,7 @@ Table of Contents
 
   overview
   introduction
+  demo
   installation
   screenshots
   usage

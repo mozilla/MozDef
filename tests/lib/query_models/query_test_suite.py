@@ -35,7 +35,7 @@ class QueryTestSuite(UnitTestSuite):
                     self.reset_elasticsearch()
                     self.setup_elasticsearch()
 
-                self.populate_test_event(event)
+                self.populate_test_object(event)
                 self.flush(self.event_index_name)
 
                 # Testing must

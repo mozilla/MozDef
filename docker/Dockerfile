@@ -15,11 +15,10 @@ FROM centos:7
 MAINTAINER mozdef@mozilla.com
 
 ENV NODE_VERSION 4.7.0
-ENV METEOR_VERSION 1.4.0.1
-ENV METEOR_FILE_VERSION 1.4.0-1
+ENV METEOR_VERSION 1.4.4.2
 ENV PYTHON_VERSION 2.7.11
-ENV KIBANA_VERSION 4.5.4
-ENV ES_VERSION 2.4.2
+ENV KIBANA_VERSION 4.6.5
+ENV ES_VERSION 2.4.6
 ENV ES_JAVA_VERSION 1.8.0
 ENV RABBITMQ_VERSION 3.3.5
 
@@ -38,6 +37,7 @@ RUN \
                     java-$ES_JAVA_VERSION \
                     glibc-devel \
                     gcc \
+                    gcc-c++ \
                     libstdc++ \
                     supervisor \
                     libffi-devel \
@@ -51,8 +51,8 @@ RUN \
   yum install -y rabbitmq-server-$RABBITMQ_VERSION && \
   yum install -y nginx && \
   mkdir /var/log/mozdef/ && \
-  curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x64.tar.gz | tar -C /opt/mozdef/ -xz && \
-  mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x64 /opt/mozdef/envs/kibana && \
+  curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C /opt/mozdef/ -xz && \
+  mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x86_64 /opt/mozdef/envs/kibana && \
   yum install -y mongodb-org && \
   curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz && \
   cd /opt/mozdef/Python-$PYTHON_VERSION && \
@@ -77,13 +77,15 @@ RUN \
                  underscore@1.8.3 \
                  bcrypt && \
   mkdir /opt/mozdef/meteor && \
-  curl -sL -o /opt/mozdef/meteor.tar.gz https://meteorinstall-4168.kxcdn.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
+  curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
   tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
   mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
   rm -r /opt/mozdef/meteor && \
-  cp /opt/mozdef/.meteor/packages/meteor-tool/$METEOR_FILE_VERSION/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
+  cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
+USER mozdef
 COPY meteor /opt/mozdef/envs/mozdef/meteor
+USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 USER mozdef
 RUN \

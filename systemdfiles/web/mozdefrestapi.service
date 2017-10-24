@@ -1,11 +1,11 @@
 [Unit]
-Description=uWSGI mozdef restapi
+Description=uWSGI MozDef Rest API Service
 After=mozdefweb.service
 
 [Service]
 # Requires systemd version 211 or newer
 PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/mkdir /var/run/mozdef-rest
+ExecStartPre=-/usr/bin/mkdir -p /var/run/mozdef-rest
 ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdef-rest/
 User=mozdef
 Group=mozdef

@@ -14,5 +14,6 @@ install:
   - "pip install -r tests/requirements_tests.txt"
 before_script:
   - sleep 5
+  - export BOTO_CONFIG=/dev/null
 script:
-  - py.test --delete_indexes tests
+  - py.test --delete_indexes --delete_queues tests

@@ -49,9 +49,9 @@ services:
     command: rabbitmq-server
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-    # ports:
-    #   - 5672:5672
-    #   - 15672:15672
+    ports:
+      - 5672:5672
+    #   - 15672:15672 Admin interface
     networks:
       - default
 
@@ -67,7 +67,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
-    command: bash -c 'sleep 7 && source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 config/defaultMappingTemplate.json'
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 config/defaultMappingTemplate.json'
     depends_on:
       - base
       - elasticsearch
@@ -78,7 +78,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_alertplugins/Dockerfile
     restart: always
-    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python alertWorker.py -c alertWorker.conf'
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python alert_worker.py -c alert_worker.conf'
     depends_on:
       - base
       - elasticsearch
@@ -92,7 +92,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_alerts/Dockerfile
     restart: always
-    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
     depends_on:
       - base
       - elasticsearch
@@ -105,7 +105,7 @@ services:
   #     context: ../../
   #     dockerfile: docker/compose/mozdef_bot/Dockerfile
   #   restart: always
-  #   command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python mozdefbot.py -c mozdefbot.conf'
+  #   command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python mozdefbot.py -c mozdefbot.conf'
   #   depends_on:
   #     - base
   #     - rabbitmq
@@ -120,7 +120,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_cron/Dockerfile
     restart: always
-    command: crond -n
+    command: bash -c 'sleep 90 && crond -n'
     volumes:
       - cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
@@ -137,7 +137,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_loginput/Dockerfile
     restart: always
-    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
     depends_on:
       - base
       - elasticsearch
@@ -147,12 +147,12 @@ services:
       - 8080:8080
     networks:
       - default
-  mq_syslog:
+  mq_eventtask:
     build:
       context: ../../
-      dockerfile: docker/compose/mozdef_mq_worker/Dockerfile
+      dockerfile: docker/compose/mozdef_mq_eventtask/Dockerfile
     restart: always
-    command: bash -c 'sleep 5 && source /opt/mozdef/envs/python/bin/activate && python esworker.py -c syslog_worker.conf'
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
     scale: 1
     depends_on:
       - base
@@ -188,6 +188,19 @@ services:
       - bootstrap
     ports:
       - 8081:8081
+    networks:
+      - default
+  fluentd:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_fluentd/Dockerfile
+    restart: always
+    command: bash -c '/usr/local/bundle/bin/fluentd -c /etc/fluent/fluent.conf'
+    depends_on:
+      - loginput
+    ports:
+      - 514:514/udp
+      - 514:514
     networks:
       - default
 

@@ -26,7 +26,7 @@ from config import RABBITMQ, ES
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient
-from query_models import ExistsMatch
+from query_models import TermMatch
 
 
 # utility functions used by AlertTask.mostCommon
@@ -89,6 +89,9 @@ class AlertTask(Task):
         self._configureES()
 
         self.event_indices = ['events', 'events-previous']
+
+    def classname(self):
+        return self.__class__.__name__
 
     @property
     def log(self):
@@ -223,10 +226,10 @@ class AlertTask(Task):
         query is a search query object with date_timedelta populated
 
         """
-
         # Don't fire on already alerted events
-        if ExistsMatch('alerttimestamp') not in query.must_not:
-            query.add_must_not(ExistsMatch('alerttimestamp'))
+        duplicate_matcher = TermMatch('alert_names', self.classname())
+        if duplicate_matcher not in query.must_not:
+            query.add_must_not(duplicate_matcher)
 
         self.main_query = query
 
@@ -406,7 +409,7 @@ class AlertTask(Task):
     def tagEventsAlert(self, events, alertResultES):
         """
         Update the event with the alertid/index
-        and update the alerttimestamp on the event itself so it's
+        and update the alert_names on the event itself so it's
         not re-alerted
         """
         try:
@@ -417,7 +420,10 @@ class AlertTask(Task):
                     'index': alertResultES['_index'],
                     'type': alertResultES['_type'],
                     'id': alertResultES['_id']})
-                event['_source']['alerttimestamp'] = toUTC(datetime.now()).isoformat()
+
+                if 'alert_names' not in event['_source']:
+                    event['_source']['alert_names'] = []
+                event['_source']['alert_names'].append(self.classname())
 
                 self.es.save_event(index=event['_index'], doc_type=event['_type'], body=event['_source'], doc_id=event['_id'])
         except Exception as e:

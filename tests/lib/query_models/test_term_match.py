@@ -45,6 +45,10 @@ class TestTermMatchPositiveTestSuite(PositiveTestSuite):
             TermMatch('hostname', 'hostname.domain.com'): [
                 {'hostname': 'hostname.domain.com'},
             ],
+
+            TermMatch('somekey', 'tag'): [
+                {'somekey': ['tag', 'other']},
+            ],
         }
         return tests
 
@@ -86,6 +90,9 @@ class TestTermMatchNegativeTestSuite(NegativeTestSuite):
                 {'hostname': 'hostnames.domain.com'},
                 {'hostname': 'domain.com'},
                 {'hostname': 'com'},
+            ],
+            TermMatch('somekey', 'tag'): [
+                {'somekey': ['atag', 'tagging']},
             ],
         }
         return tests

@@ -70,6 +70,7 @@ class TestEsworkerSNSSQS(UnitTestSuite):
             u'processname': u'dhclient',
             u'receivedtimestamp': u'2017-05-26T17:47:17.813876+00:00',
             u'severity': u'INFO',
+            u'source': u'UNKNOWN',
             u'summary': u'DHCPREQUEST of 1.2.3.4 on eth0 to 5.6.7.8 port 67 (xid=0x123456)',
             u'tags': [u'example-logs-mozdef'],
             u'timestamp': u'2017-05-25T07:14:15+00:00',

@@ -29,6 +29,7 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
         "severity": "NOTICE",
         "summary": "SSH login from 1.2.3.4 on host1 as user ttesterson",
         "tags": ['ssh'],
+        'ircchannel': '#somechannel',
     }
 
     test_cases = []
@@ -44,6 +45,7 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
 
     event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 14})
+    event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 14})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with an event with somewhat old timestamp",
@@ -78,6 +80,7 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
 
     event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 16})
+    event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 16})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",

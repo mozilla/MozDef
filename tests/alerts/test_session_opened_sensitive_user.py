@@ -11,7 +11,6 @@
 from positive_alert_test_case import PositiveAlertTestCase
 from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
-from datetime import datetime
 
 
 class TestSessionOpenedUser(AlertTestSuite):
@@ -52,6 +51,7 @@ class TestSessionOpenedUser(AlertTestSuite):
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events a minute earlier",
@@ -62,101 +62,103 @@ class TestSessionOpenedUser(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-       event['_source']['summary'] = 'pam_unix(sshd:session): session opened for user user2 by (uid=0)'
+        event['_source']['summary'] = 'pam_unix(sshd:session): session opened for user user2 by (uid=0)'
     test_cases.append(
-       PositiveAlertTestCase(
-           description="Positive test with events with a user 'user2'",
-           events=events,
-           expected_alert=default_alert
-       )
+        PositiveAlertTestCase(
+            description="Positive test with events with a user 'user2'",
+            events=events,
+            expected_alert=default_alert
+        )
     )
-    
+
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-       event['_source']['summary'] = 'pam_unix(sshd:session): session opened for user user1 by (uid=0)'
+        event['_source']['summary'] = 'pam_unix(sshd:session): session opened for user user1 by (uid=0)'
     test_cases.append(
-       PositiveAlertTestCase(
-           description="Positive test with events with a user 'user1'",
-           events=events,
-           expected_alert=default_alert
-       )
+        PositiveAlertTestCase(
+            description="Positive test with events with a user 'user1'",
+            events=events,
+            expected_alert=default_alert
+        )
     )
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['summary'] = 'pam_unix(sshd:session): session opened for user user3 by (uid=0)'
     test_cases.append(
-       NegativeAlertTestCase(
-           description="Negative test with wrong username",
-           events=events
-       )
+        NegativeAlertTestCase(
+            description="Negative test with wrong username",
+            events=events
+        )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['utctimestamp'] = AlertTestSuite.create_timestamp_from_now_lambda(hour=5, minute=55, second=30)
+        event['_source']['receivedtimestamp'] = AlertTestSuite.create_timestamp_from_now_lambda(hour=5, minute=55, second=30)
     test_cases.append(
-       NegativeAlertTestCase(
-           description="Negative test with events inside whitelisted time",
-           events=events,
-       )
+        NegativeAlertTestCase(
+            description="Negative test with events inside whitelisted time",
+            events=events,
+        )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-       event['_source']['summary'] = 'login failed'
+        event['_source']['summary'] = 'login failed'
     test_cases.append(
-       NegativeAlertTestCase(
-           description="Negative test with events with a summary of 'login failed'",
-           events=events
-       )
+        NegativeAlertTestCase(
+            description="Negative test with events with a summary of 'login failed'",
+            events=events
+        )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-       event['_type'] = 'badtype'
+        event['_type'] = 'badtype'
     test_cases.append(
-       NegativeAlertTestCase(
-           description="Negative test case with events with wrong type",
-           events=events,
-       )
+        NegativeAlertTestCase(
+            description="Negative test case with events with wrong type",
+            events=events,
+        )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-       event['_source']['category'] = 'badcategory'
+        event['_source']['category'] = 'badcategory'
     test_cases.append(
-       NegativeAlertTestCase(
-           description="Negative test case with events with wrong category",
-           events=events,
-       )
+        NegativeAlertTestCase(
+            description="Negative test case with events with wrong category",
+            events=events,
+        )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-       event['_source']['details']['program'] = 'ssh'
+        event['_source']['details']['program'] = 'ssh'
     test_cases.append(
-       NegativeAlertTestCase(
-           description="Negative test case with events with wrong program",
-           events=events,
-       )
+        NegativeAlertTestCase(
+            description="Negative test case with events with wrong program",
+            events=events,
+        )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-       event['_source']['summary'] = 'pam_unix(sshd:session): session closed for user user1 by (uid=0)'
+        event['_source']['summary'] = 'pam_unix(sshd:session): session closed for user user1 by (uid=0)'
     test_cases.append(
-       NegativeAlertTestCase(
-           description="Negative test case with events with 'session closed' summary",
-           events=events,
-       )
+        NegativeAlertTestCase(
+            description="Negative test case with events with 'session closed' summary",
+            events=events,
+        )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-       event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 5})
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 5})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 5})
     test_cases.append(
-       NegativeAlertTestCase(
-           description="Negative test case with old timestamp",
-           events=events,
-       )
+        NegativeAlertTestCase(
+            description="Negative test case with old timestamp",
+            events=events,
+        )
     )

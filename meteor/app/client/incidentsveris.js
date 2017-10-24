@@ -46,7 +46,8 @@ if (Meteor.isClient) {
                         tableData,
                         {
                             cols: ["phase"],
-                            rows: ["tags"]
+                            rows: ["tags"],
+                            menuLimit: 500,
                         }
                     );
         }
