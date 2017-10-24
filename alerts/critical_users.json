@@ -1,2 +1,3 @@
 {
-    "users": {"user1": "value1", "user2": "value2"}, "scan_expected": {"period1": {"start_minute": "1", "end_second": "00", "start_hour": "1", "end_hour": "1", "start_second": "00", "end_minute": "01"}}}
+    "users": ["user1", "user2"]
+}
