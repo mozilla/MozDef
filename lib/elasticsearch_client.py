@@ -56,14 +56,9 @@ class ElasticsearchClient():
             }'''
         self.es_connection.indices.create(index=index_name, update_all_types='true', body=mapping)
 
-#    def create_alias(self, alias_name, index_name):
-#        if self.es_connection.indices.exists_alias(index='*', name=alias_name):
-#            self.es_connection.indices.delete_alias(index='*', name=alias_name)
-#
-#        self.es_connection.indices.put_alias(index=index_name, name=alias_name)
-
     def update_alias(self, oldindex, index, alias):
         actions = None
+        oldindex = '*'
         if self.es_connection.indices.exists_alias(oldindex, alias):
         # Add and remove aliases.
             actions = [

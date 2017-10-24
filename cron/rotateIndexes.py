@@ -85,12 +85,14 @@ def esRotateIndexes():
                         es.create_index(newindex)
                     # set aliases: events to events-YYYYMMDD
                     # and events-previous to events-YYYYMMDD-1
-                    logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
+                    logger.debug('Setting {0} alias to index: {1}'.format(index, newindex)
+                    # cast our vars into variables the alias_update function will recognize
                     alias = index
                     index = newindex
                     es.update_alias(oldindex, index, alias)
                     if oldindex in indices:
-                        alias = 'events-previous'
+                        # cast our vars into variables the alias_update function will recognize
+                        alias = options.previous_alias
                         index = oldindex
                         oldindex = previndex
                         logger.debug('Setting {0} to index: {1}'.format(alias, index))
@@ -173,7 +175,11 @@ def initConfig():
         'events',
         options.configfile).split(',')
         )
-
+    options.previous_alias = list(getConfig(
+        'previous_alias',
+        'events-previous',
+        options.configfile)
+        )
 
 
 if __name__ == '__main__':
