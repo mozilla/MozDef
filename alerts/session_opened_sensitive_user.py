@@ -66,6 +66,6 @@ class SessionOpenedUser(AlertTask):
             if e['_source']['details']['hostname'] not in uniquehosts:
                 uniquehosts.append(e['_source']['details']['hostname'])
 
-        summary = 'Session opened by the scan user outside of the expected window - sample hosts: {0} [total {1} hosts]'.format(' '.join(uniquehosts), aggreg['count'])
+        summary = 'Session opened by a sensitive user outside of the expected window - sample hosts: {0} [total {1} hosts]'.format(' '.join(uniquehosts), aggreg['count'])
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
