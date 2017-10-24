@@ -13,6 +13,7 @@
 import datetime
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch, RangeMatch
+import json
 
 
 class SessionOpenedUser(AlertTask):
@@ -26,17 +27,14 @@ class SessionOpenedUser(AlertTask):
         superquery = None
         run = 0
 
-        for user in self._config['users']:
+        for user in self._config['users'].values():
             if run == 0:
                 superquery = PhraseMatch('summary', user)
             else:
                 superquery |= PhraseMatch('summary', user)
             run += 1
 
-        r1 = datetime.datetime.now().replace(hour=5, minute=50, second=00).isoformat()
-        r2 = datetime.datetime.now().replace(hour=6, minute=0, second=00).isoformat()
-
-        search_query = SearchQuery(minutes=5)
+        search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
             TermMatch('_type', 'event'),
@@ -45,13 +43,17 @@ class SessionOpenedUser(AlertTask):
             QueryStringMatch('summary:"session opened"'),
         ])
 
-        search_query.add_must_not([
-            RangeMatch('utctimestamp', r1, r2)
-        ])
+        for expectedtime in self._config['scan_expected'].values():
+            r1 = datetime.datetime.now().replace(hour=int(expectedtime['start_hour']), minute=int(expectedtime['start_minute']), second=int(expectedtime['start_second'])).isoformat()
+            r2 = datetime.datetime.now().replace(hour=int(expectedtime['end_hour']), minute=int(expectedtime['end_minute']), second=int(expectedtime['end_second'])).isoformat()
+            search_query.add_must_not([
+                RangeMatch('utctimestamp', r1, r2)
+            ])
+
         search_query.add_must(superquery)
 
         self.filtersManual(search_query)
-        self.searchEventsAggregated('details.hostname', samplesLimit=10)
+        self.searchEventsAggregated('details.program', samplesLimit=10)
         self.walkAggregations(threshold=1)
 
     def onAggregation(self, aggreg):
@@ -59,11 +61,11 @@ class SessionOpenedUser(AlertTask):
         severity = 'WARNING'
         tags = ['pam', 'syslog']
 
-        prog = ''
-        for p in aggreg['events']:
-            if p['_source']['details']['program'] != prog:
-                prog += p['_source']['details']['program']
+        uniquehosts = []
+        for e in aggreg['events']:
+            if e['_source']['details']['hostname'] not in uniquehosts:
+                uniquehosts.append(e['_source']['details']['hostname'])
 
-        summary = '{0} session opened for scanning user outside of the expected window on {1} [{2}]'.format(prog, aggreg['value'], aggreg['count'])
+        summary = 'Session opened by the scan user outside of the expected window - sample hosts: {0} [total {1} hosts]'.format(' '.join(uniquehosts), aggreg['count'])
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
