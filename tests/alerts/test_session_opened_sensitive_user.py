@@ -36,7 +36,7 @@ class TestSessionOpenedUser(AlertTestSuite):
         "category": "session",
         "severity": "WARNING",
         "tags": ['pam', 'syslog'],
-        "summary": "Session opened by the scan user outside of the expected window - sample hosts: exhostname [total 10 hosts]"
+        "summary": "Session opened by a sensitive user outside of the expected window - sample hosts: exhostname [total 10 hosts]"
     }
 
     test_cases = []
@@ -85,7 +85,7 @@ class TestSessionOpenedUser(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     randomhostsalert = AlertTestSuite.copy(default_alert)
-    randomhostsalert['summary'] = "Session opened by the scan user outside of the expected window - sample hosts:"
+    randomhostsalert['summary'] = "Session opened by a sensitive user outside of the expected window - sample hosts:"
     for event in events:
         randomhostname = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
         event['_source']['details']['hostname'] = randomhostname
