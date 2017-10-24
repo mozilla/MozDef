@@ -175,12 +175,10 @@ def initConfig():
         'events',
         options.configfile).split(',')
         )
-    options.previous_alias = list(getConfig(
+    options.previous_alias = getConfig(
         'previous_alias',
         'events-previous',
         options.configfile)
-        )
-
 
 if __name__ == '__main__':
     parser = OptionParser()
