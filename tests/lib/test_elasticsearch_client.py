@@ -387,11 +387,10 @@ class TestCreatingAlias(ElasticsearchClientTest):
             self.es_client.delete_index('index2', True)
             self.es_client.delete_index('alias1', True)
 
-    def test_simple_update_alias(self):
+    def test_simple_create_alias(self):
         if pytest.config.option.delete_indexes:
-            oldindex = '*'
             self.es_client.create_index('index1')
-            self.es_client.update_alias(oldindex, 'index1', 'alias1')
+            self.es_client.create_alias('alias1', 'index1')
         alias_indices = self.es_client.get_alias('alias1')
         assert alias_indices == ['index1']
         indices = self.es_client.get_indices()
@@ -399,21 +398,20 @@ class TestCreatingAlias(ElasticsearchClientTest):
 
     def test_alias_multiple_indices(self):
         if pytest.config.option.delete_indexes:
-            oldindex = '*'
             self.es_client.create_index('index1')
             self.es_client.create_index('index2')
-            self.es_client.update_alias(oldindex, 'index1', 'alias1')
-            self.es_client.update_alias(oldindex, 'index2', 'alias1')
+            self.es_client.create_alias('alias1', 'index1')
+            self.es_client.create_alias('alias1', 'index2')
         alias_indices = self.es_client.get_alias('alias1')
         assert alias_indices == ['index2']
         indices = self.es_client.get_indices()
         assert 'index1' in indices
         assert 'index2' in indices
 
-    def test_update_alias_multiple_indices(self):
+    def test_create_alias_multiple_indices(self):
         self.es_client.create_index('index1')
         self.es_client.create_index('index2')
-        self.es_client.update_alias_multiple_indices('alias1', ['index1', 'index2'])
+        self.es_client.create_alias_multiple_indices('alias1', ['index1', 'index2'])
         alias_indices = self.es_client.get_alias('alias1')
         assert len(alias_indices) == 2
         assert 'index1' in alias_indices
@@ -444,12 +442,11 @@ class TestBulkInvalidFormatProblem(BulkTest):
         # Recreate the test indexes with a custom mapping to throw
         # parsing errors
         if pytest.config.option.delete_indexes:
-            oldindex = '*'
             self.es_client.delete_index("events", True)
             self.es_client.delete_index(self.event_index_name, True)
             self.es_client.create_index(self.event_index_name, mapping=mapping)
-            self.es_client.update_alias(oldindex, self.event_index_name, alias='events')
-            self.es_client.update_alias(oldindex, self.event_index_name, alias='events-previous')
+            self.es_client.create_alias('events', self.event_index_name)
+            self.es_client.create_alias('events-previous', self.event_index_name)
 
     def test_bulk_problems(self):
         event = {
