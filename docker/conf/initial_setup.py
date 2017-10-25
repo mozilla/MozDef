@@ -34,6 +34,7 @@ client = ElasticsearchClient(args.esserver)
 current_date = datetime.now()
 event_index_name = current_date.strftime("events-%Y%m%d")
 previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
+weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
 
 mapping_str = ''
@@ -69,3 +70,7 @@ if alert_index_name not in all_indices:
     print "Creating " + alert_index_name
     client.create_index(alert_index_name)
 client.create_alias('alerts', alert_index_name)
+
+if weekly_index_alias not in all_indices:
+    print "Creating " + weekly_index_alias
+    client.create_alias_multiple_indices(weekly_index_alias, [event_index_name, previous_event_index_name])
