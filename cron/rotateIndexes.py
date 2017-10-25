@@ -58,11 +58,9 @@ def esRotateIndexes():
         odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m')
         ndate_day = date.strftime(toUTC(datetime.now()), '%Y%m%d')
         ndate_month = date.strftime(toUTC(datetime.now()), '%Y%m')
-
         # examine each index in the .conf file
         # for rotation settings
-        for (index, dobackup, rotation, pruning) in zip(options.indices,
-            options.dobackup, options.rotation, options.pruning):
+        for (index, dobackup, rotation, pruning) in zip(options.indices, options.dobackup, options.rotation, options.pruning):
             try:
                 if rotation != 'none':
                     oldindex = index
@@ -81,7 +79,7 @@ def esRotateIndexes():
                         logger.debug('Creating %s index' % newindex)
                         es.create_index(newindex)
                     # set aliases: events to events-YYYYMMDD
-                    # and events-previous to events-YYYYMMDD-1 for example
+                    # and events-previous to events-YYYYMMDD-1
                     logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
                     es.create_alias(index, newindex)
                     if oldindex in indices:
@@ -99,7 +97,7 @@ def esRotateIndexes():
         current_date = toUTC(datetime.now())
         for index in options.weekly_rotation_indices:
             weekly_index_alias = '%s-weekly' % index
-            logger.debug('Trying to realias {0} to indices since {1}'.format(weekly_index_alias, week_ago_str))
+            logger.debug('Trying to re-alias {0} to indices since {1}'.format(weekly_index_alias, week_ago_str))
             existing_weekly_indices = []
             for day_obj in daterange(week_ago_date, current_date):
                 day_str = day_obj.strftime('%Y%m%d')
@@ -160,7 +158,6 @@ def initConfig():
         '20,0,0',
         options.configfile).split(',')
         )
-
     options.weekly_rotation_indices = list(getConfig(
         'weekly_rotation_indices',
         'events',
