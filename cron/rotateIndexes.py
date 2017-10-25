@@ -54,23 +54,18 @@ def esRotateIndexes():
         indices = es.get_indices()
 
         # calc dates for use in index names events-YYYYMMDD, alerts-YYYYMM, etc.
-        pdate_day = date.strftime(toUTC(datetime.now()) - timedelta(days=2), '%Y%m%d')
         odate_day = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m%d')
         odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=1), '%Y%m')
         ndate_day = date.strftime(toUTC(datetime.now()), '%Y%m%d')
         ndate_month = date.strftime(toUTC(datetime.now()), '%Y%m')
-
         # examine each index in the .conf file
         # for rotation settings
-        for (index, dobackup, rotation, pruning) in zip(options.indices,
-            options.dobackup, options.rotation, options.pruning):
+        for (index, dobackup, rotation, pruning) in zip(options.indices, options.dobackup, options.rotation, options.pruning):
             try:
                 if rotation != 'none':
-                    previndex = index
                     oldindex = index
                     newindex = index
                     if rotation == 'daily':
-                        previndex += '-%s' % pdate_day
                         oldindex += '-%s' % odate_day
                         newindex += '-%s' % ndate_day
                     elif rotation == 'monthly':
@@ -85,20 +80,13 @@ def esRotateIndexes():
                         es.create_index(newindex)
                     # set aliases: events to events-YYYYMMDD
                     # and events-previous to events-YYYYMMDD-1
-                    logger.debug('Setting {0} alias to index: {1}'.format(index, newindex)
-                    # cast our vars into variables the alias_update function will recognize
-                    alias = index
-                    index = newindex
-                    es.update_alias(oldindex, index, alias)
+                    logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
+                    es.create_alias(index, newindex)
                     if oldindex in indices:
-                        # cast our vars into variables the alias_update function will recognize
-                        alias = options.previous_alias
-                        index = oldindex
-                        oldindex = previndex
-                        logger.debug('Setting {0} to index: {1}'.format(alias, index))
-                        es.update_alias(oldindex, index, alias)
+                        logger.debug('Setting {0}-previous alias to index: {1}'.format(index, oldindex))
+                        es.create_alias('%s-previous' % index, oldindex)
                     else:
-                        logger.debug('Old index %s is missing, do not change %s alias' % (oldindex, alias))
+                        logger.debug('Old index %s is missing, do not change %s alias' % (oldindex, index))
             except Exception as e:
                 logger.error("Unhandled exception while rotating %s, terminating: %r" % (index, e))
 
@@ -175,10 +163,7 @@ def initConfig():
         'events',
         options.configfile).split(',')
         )
-    options.previous_alias = getConfig(
-        'previous_alias',
-        'events-previous',
-        options.configfile)
+
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -189,4 +174,3 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     initConfig()
     esRotateIndexes()
-
