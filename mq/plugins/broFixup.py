@@ -29,6 +29,13 @@ def isIPv4(ip):
         return False
 
 
+def isIPv6(ip):
+    try:
+        return netaddr.valid_ipv6(ip)
+    except:
+        return False
+
+
 def findIPv4(words):
     for word in words.strip().split():
         saneword = word.strip().strip('"').strip("'").strip(",")
@@ -377,9 +384,17 @@ class message(object):
                     # remove the details.src field and add it to indicators
                     # as it may not be the actual source.
                     if 'src' in newmessage['details']:
-                        if isIPv4(newmessage['details']['src']):
-                            newmessage['details']['indicators'].append(newmessage['details']['src'])
-                            del newmessage['details']['src']
+                        if isIPv4(newmessage[u'details'][u'src']):
+                            newmessage[u'details'][u'indicators'].append(newmessage[u'details'][u'src'])
+                            # If details.src is present overwrite the source IP address with it
+                            newmessage[u'details'][u'sourceipaddress'] = newmessage[u'details'][u'src']
+                            newmessage[u'details'][u'sourceipv4address'] = newmessage[u'details'][u'src']
+                        if isIPv6(newmessage[u'details'][u'src']):
+                            newmessage[u'details'][u'indicators'].append(newmessage[u'details'][u'src'])
+                            # If details.src is present overwrite the source IP address with it
+                            newmessage[u'details'][u'sourceipv6address'] = newmessage[u'details'][u'src']
+                        # Thank you for your service
+                        del newmessage[u'details'][u'src']
                     return (newmessage, metadata)
                 
                 if logtype == 'rdp':
