@@ -33,7 +33,7 @@ class SessionOpenedUser(AlertTask):
                 superquery |= PhraseMatch('summary', user)
             run += 1
 
-        search_query = SearchQuery(minutes=2)
+        search_query = SearchQuery(minutes=10)
 
         search_query.add_must([
             TermMatch('_type', 'event'),
