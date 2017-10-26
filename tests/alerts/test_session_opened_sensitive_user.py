@@ -35,7 +35,7 @@ class TestSessionOpenedUser(AlertTestSuite):
         "category": "session",
         "severity": "WARNING",
         "tags": ['pam', 'syslog'],
-        "summary": "sshd session opened for scanning user outside of the expected window on exhostname [10]"
+        "summary": "Session opened by a sensitive user outside of the expected window - sample hosts: exhostname [total 10 hosts]"
     }
 
     test_cases = []
@@ -81,6 +81,23 @@ class TestSessionOpenedUser(AlertTestSuite):
             expected_alert=default_alert
         )
     )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    randomhostsalert = AlertTestSuite.copy(default_alert)
+    randomhostsalert['summary'] = "Session opened by a sensitive user outside of the expected window - sample hosts:"
+    for event in events:
+        randomhostname = 'host' + str(events.index(event))
+        event['_source']['details']['hostname'] = randomhostname
+        randomhostsalert['summary'] += ' {0}'.format(randomhostname)
+    randomhostsalert['summary'] += " [total 10 hosts]"
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with events with a user 'user1'",
+            events=events,
+            expected_alert=randomhostsalert
+        )
+    )
+
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['summary'] = 'pam_unix(sshd:session): session opened for user user3 by (uid=0)'
@@ -93,8 +110,8 @@ class TestSessionOpenedUser(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['utctimestamp'] = AlertTestSuite.create_timestamp_from_now_lambda(hour=5, minute=55, second=30)
-        event['_source']['receivedtimestamp'] = AlertTestSuite.create_timestamp_from_now_lambda(hour=5, minute=55, second=30)
+        event['_source']['utctimestamp'] = AlertTestSuite.create_timestamp_from_now_lambda(hour=3, minute=45, second=30)
+        event['_source']['receivedtimestamp'] = AlertTestSuite.create_timestamp_from_now_lambda(hour=3, minute=45, second=30)
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test with events inside whitelisted time",
