@@ -1071,6 +1071,68 @@ class TestBroFixup(object):
         assert 'sub' in result['details']
         assert result['summary'] == "SSL::Certificate_Expires_Soon Certificate CN=support.mozilla.org,O=Mozilla Foundation,L=Mountain View,ST=California,C=US,postalCode=94041,street=650 Castro St Ste 300,serialNumber=C2543436,1.3.6.1.4.1.311.60.2.1.2=#130A43616C69666F726E6961,1.3.6.1.4.1.311.60.2.1.3=#13025553,businessCategory=Private Organization is going to expire at 2017-10-06-12:00:00.000000000 "
 
+    def test_notice_log2(self):
+        event = {
+            "ts":1505701210.803008,
+            "uid":"ClM3Um3n5pZjcZZ843",
+            "note":"Scan::Address_Scan",
+            "msg": "10.252.55.230 scanned at least 5 unique hosts on port 3283/tcp in 0m11s",
+            "src":"10.252.55.230",
+            "p":3283,
+            "peer_descr":"nsm-stage1-eth4-2",
+            "actions":["Notice::ACTION_LOG"],
+            "suppress_for":86400.0,
+            "dropped":'false',
+            'category': 'bro',
+            'source': 'notice',
+            'customendpoint': 'bro'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'note' in result['details']
+        assert 'msg' in result['details']
+        assert 'sub' in result['details']
+        assert 'src' not in result['details']
+        assert 'sourceipaddress' in result['details']
+        assert result['details']['sourceipaddress'] == "10.252.55.230"
+        assert result['details']['sourceipv4address'] == "10.252.55.230"
+        assert result['summary'] == "Scan::Address_Scan 10.252.55.230 scanned at least 5 unique hosts on port 3283/tcp in 0m11s "
+
+    def test_notice_log3(self):
+        event = {
+            "ts":1505701210.803008,
+            "uid":"ClM3Um3n5pZjcZZ843",
+            "note":"Scan::Address_Scan",
+            "msg": "2620:101:80fc:232:b5a9:5071:1dc1:1499 scanned at least 5 unique hosts on port 445/tcp in 0m13s",
+            "src":"2620:101:80fc:232:b5a9:5071:1dc1:1499",
+            "p":445,
+            "peer_descr":"nsm-stage1-eth4-2",
+            "actions":["Notice::ACTION_LOG"],
+            "suppress_for":86400.0,
+            "dropped":'false',
+            'category': 'bro',
+            'source': 'notice',
+            'customendpoint': 'bro'
+        }
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(event['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert 'note' in result['details']
+        assert 'msg' in result['details']
+        assert 'sub' in result['details']
+        assert 'src' not in result['details']
+        assert result['details']['sourceipv6address'] == "2620:101:80fc:232:b5a9:5071:1dc1:1499"
+        assert result['summary'] == "Scan::Address_Scan 2620:101:80fc:232:b5a9:5071:1dc1:1499 scanned at least 5 unique hosts on port 445/tcp in 0m13s "
+
     def test_snmp_log(self):
         event = {
             "ts":1505703535.041376,
