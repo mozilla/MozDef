@@ -13,11 +13,10 @@
 import datetime
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch, RangeMatch
-import json
 
 
 class SessionOpenedUser(AlertTask):
-   
+
     def __init__(self):
         AlertTask.__init__(self)
         self._config = self.parse_json_alert_config('critical_users.json')
@@ -62,7 +61,8 @@ class SessionOpenedUser(AlertTask):
         tags = ['pam', 'syslog']
 
         uniquehosts = []
-        for e in aggreg['events']:
+        sorted_events = sorted(aggreg['events'], key=lambda x: x['_source']['details']['hostname'])
+        for e in sorted_events:
             if e['_source']['details']['hostname'] not in uniquehosts:
                 uniquehosts.append(e['_source']['details']['hostname'])
 

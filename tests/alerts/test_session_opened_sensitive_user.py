@@ -11,8 +11,7 @@
 from positive_alert_test_case import PositiveAlertTestCase
 from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
-import random
-import string
+
 
 class TestSessionOpenedUser(AlertTestSuite):
     alert_filename = "session_opened_sensitive_user"
@@ -87,7 +86,7 @@ class TestSessionOpenedUser(AlertTestSuite):
     randomhostsalert = AlertTestSuite.copy(default_alert)
     randomhostsalert['summary'] = "Session opened by a sensitive user outside of the expected window - sample hosts:"
     for event in events:
-        randomhostname = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        randomhostname = 'host' + str(events.index(event))
         event['_source']['details']['hostname'] = randomhostname
         randomhostsalert['summary'] += ' {0}'.format(randomhostname)
     randomhostsalert['summary'] += " [total 10 hosts]"
