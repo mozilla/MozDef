@@ -622,7 +622,7 @@ def initConfig():
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
-    options.listen_host = getConfig('host', '127.0.0.1', options.configfile)
+    options.listen_host = getConfig('listen_host', '127.0.0.1', options.configfile)
 
     default_user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/58.0'
     options.user_agent = getConfig('user_agent', default_user_agent, options.configfile)
