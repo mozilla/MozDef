@@ -176,15 +176,10 @@ class AlertTestSuite(UnitTestSuite):
 
         # Verify the events are added onto the alert
         assert type(found_alert['_source']['events']) == list, 'Alert events field is not a list'
-        alert_events = found_alert['_source']['events']
-        sorted_alert_events = sorted(alert_events, key=lambda k: k['documentsource']['utctimestamp'])
-
-        created_events = test_case.full_events
-        sorted_created_events = sorted(created_events, key=lambda k: k['_source']['utctimestamp'])
 
         # Verify that the alert properties are set correctly
         for key, value in test_case.expected_alert.iteritems():
-            assert found_alert['_source'][key] == value, '{0} does not match, got: {1}'.format(key, found_alert['_source'][key])
+            assert found_alert['_source'][key] == value, '{0} does not match!\n\tgot: {1}\n\texpected: {2}'.format(key, found_alert['_source'][key], value)
 
     def verify_alert_task(self, alert_task, test_case):
         assert alert_task.classname() == self.alert_classname, 'Alert classname did not match expected name'
