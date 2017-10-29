@@ -12,11 +12,11 @@ Anthony Verez averez@mozilla.com
 <template name="menu">
     <div class="container">
         <div id="header"  class="row center">
-            <span >
-                <h2><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></h2>
-            </span>
             <span id="nav-main">
-                <ul>
+                    <ul>
+                    <li><img class="mozillalogo" src="/images/mozilla.svg" ></li>
+                    <li><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></li>
+                
                     <li class="first"><a href="#">Kibanas</a>
                         <ul>
                             {{#each kibanadashboards as item}}
@@ -47,8 +47,6 @@ Anthony Verez averez@mozilla.com
                     </li>
                     <li><a href="/about">About</a></li>
                 </ul>
-
-                <a class="mozilla" href="http://mozilla.org"><img src="/images/mozilla-tab.png"></a>
                 <label>
                     {{#if loggingIn}}
                             loading
@@ -56,7 +54,9 @@ Anthony Verez averez@mozilla.com
                     {{/if}}
                     {{> loginButtons align="right"}}
                 </label>
+                
             </span>
+
         </div>
     </div>
 </template>
