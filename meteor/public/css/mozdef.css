@@ -163,6 +163,36 @@ caption, legend {
     background-color: rgba(245,245,245,.7)
 }
 
+/*alerts screen alert color scheme*/
+.alert.alert-NOTICE {
+    --alert-bg-color: #4a6785;
+    --alert-color: white;
+  }
+.alert.alert-WARNING {
+    --alert-bg-color: #ffd351;
+    --alert-color: black;
+  }
+.alert.alert-CRITICAL {
+    --alert-bg-color: #d04437;
+    --alert-color: white;
+  }
+.alert.alert-INFO {
+    --alert-bg-color: #cccccc;
+    --alert-color: black;
+  }
+
+.alert  {
+    color: var(--alert-color);
+    background-color: var(--alert-bg-color);
+    text-transform: uppercase;
+    display: table-cell;
+    font-weight: bold;
+  }
+
+.alert-row a{
+    color: wheat;
+}
+
 /*bootstrap overrides*/
 
 .btn {
