@@ -1,0 +1,10 @@
+[syslog-ng-312]
+name=Copr repo for syslog-ng312 owned by czanik
+baseurl=https://copr-be.cloud.fedoraproject.org/results/czanik/syslog-ng312/epel-7-$basearch/
+type=rpm-md
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://copr-be.cloud.fedoraproject.org/results/czanik/syslog-ng312/pubkey.gpg
+repo_gpgcheck=0
+enabled=1
+enabled_metadata=1
