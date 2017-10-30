@@ -51,7 +51,7 @@ class TestKeyMapping():
         assert result['mozdefhostname'] == 'sample'
         assert result['hostname'] == 'ub_server'
         assert result['summary'] == 'Stopped Getty on tty1.'
-        assert result['facility'] == 'daemon'
+        assert result['source'] == 'daemon'
         assert result['receivedtimestamp'] != result['utctimestamp']
         assert result['utctimestamp'] == '2017-10-27T19:01:12+00:00'
         assert result['timestamp'] == '2017-10-27T19:01:12+00:00'
