@@ -8,6 +8,15 @@
 # Contributors:
 # Brandon Myers bmyers@mozilla.com
 
+import pytz
+import tzlocal
+
+
+def utc_timezone():
+    return pytz.timezone('UTC')
+
+tzlocal.get_localzone = utc_timezone
+
 
 import os
 import sys
@@ -54,8 +63,8 @@ class TestKeyMapping():
         assert result['summary'] == 'Stopped Getty on tty1.'
         assert result['source'] == 'daemon'
         assert result['receivedtimestamp'] != result['utctimestamp']
-        assert result['utctimestamp'] == '2017-10-27T19:01:12+00:00'
-        assert result['timestamp'] == '2017-10-27T19:01:12+00:00'
+        assert result['utctimestamp'] == '2017-10-27T14:01:12+00:00'
+        assert result['timestamp'] == '2017-10-27T14:01:12+00:00'
         assert result['details']['sourceipaddress'] == '10.1.20.139'
         assert result['tags'] == ['.source.syslog_tcp']
         assert result['category'] == 'syslog'
