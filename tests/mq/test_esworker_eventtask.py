@@ -29,6 +29,7 @@ class TestKeyMapping():
 
     def test_syslog_dict(self):
         syslog_dict = {
+            u'CATEGORY': 'syslog',
             u'DATE': u'Oct 27 14:01:12',
             u'FACILITY': u'daemon',
             u'HOST': u'ub_server',
@@ -57,6 +58,7 @@ class TestKeyMapping():
         assert result['timestamp'] == '2017-10-27T19:01:12+00:00'
         assert result['details']['sourceipaddress'] == '10.1.20.139'
         assert result['tags'] == ['.source.syslog_tcp']
+        assert result['category'] == 'syslog'
 
     def test_tags_list(self):
         tags_dict = {
