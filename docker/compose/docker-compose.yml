@@ -195,7 +195,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_syslog/Dockerfile
     restart: always
-    command: bash -c 'sleep 3 && /usr/sbin/syslog-ng --no-caps -F'
+    command: bash -c 'sleep 95 && /usr/sbin/syslog-ng --no-caps -F'
     depends_on:
       - loginput
     ports:
