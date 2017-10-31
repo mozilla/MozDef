@@ -4,6 +4,7 @@ MAINTAINER mozdef@mozilla.com
 
 RUN \
   mkdir /var/log/mozdef && \
+  yum makecache fast && \
   yum install -y epel-release && \
   yum install -y nginx && \
   yum clean all

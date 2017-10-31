@@ -6,6 +6,7 @@ ENV PYTHON_VERSION 2.7.11
 ENV TZ UTC
 
 RUN \
+  yum makecache fast && \
   yum install -y epel-release && \
   yum install -y \
                   glibc-devel \
