@@ -91,6 +91,14 @@ def keyMapping(aDict):
         for k, v in aDict.iteritems():
             k = removeAt(k).lower()
 
+            if k == 'sourceip':
+                if 'details' not in returndict.keys():
+                    returndict[u'details'] = dict()
+                returndict[u'details']['sourceipaddress'] = v
+
+            if k == 'facility':
+                returndict[u'source'] = v
+
             if k in ('message', 'summary'):
                 returndict[u'summary'] = toUnicode(v)
 
@@ -102,7 +110,7 @@ def keyMapping(aDict):
                     returndict[u'details'] = dict()
                 returndict[u'details']['payload'] = toUnicode(v)
 
-            if k in ('eventtime', 'timestamp', 'utctimestamp'):
+            if k in ('eventtime', 'timestamp', 'utctimestamp', 'date'):
                 returndict[u'utctimestamp'] = toUTC(v).isoformat()
                 returndict[u'timestamp'] = toUTC(v).isoformat()
 
@@ -110,11 +118,16 @@ def keyMapping(aDict):
                 returndict[u'hostname'] = toUnicode(v)
 
             if k in ('tags'):
-                if len(v) > 0:
-                    returndict[u'tags'] = v
+                if 'tags' not in returndict.keys():
+                    returndict[u'tags'] = []
+                if type(v) == list:
+                    returndict[u'tags'] += v
+                else:
+                    if len(v) > 0:
+                        returndict[u'tags'].append(v)
 
             # nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
-            if k in ('syslogseverity', 'severity', 'severityvalue', 'level'):
+            if k in ('syslogseverity', 'severity', 'severityvalue', 'level', 'priority'):
                 returndict[u'severity'] = toUnicode(v).upper()
 
             if k in ('facility', 'syslogfacility'):
@@ -124,7 +137,7 @@ def keyMapping(aDict):
                 returndict[u'processid'] = toUnicode(v)
 
             # nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
-            if k in ('pname', 'processname', 'sourcename'):
+            if k in ('pname', 'processname', 'sourcename', 'program'):
                 returndict[u'processname'] = toUnicode(v)
 
             # the file, or source

@@ -190,12 +190,12 @@ services:
       - 8081:8081
     networks:
       - default
-  fluentd:
+  syslog:
     build:
       context: ../../
-      dockerfile: docker/compose/mozdef_fluentd/Dockerfile
+      dockerfile: docker/compose/mozdef_syslog/Dockerfile
     restart: always
-    command: bash -c '/usr/local/bundle/bin/fluentd -c /etc/fluent/fluent.conf'
+    command: bash -c 'sleep 3 && /usr/sbin/syslog-ng --no-caps -F'
     depends_on:
       - loginput
     ports:
