@@ -1,6 +1,6 @@
 FROM centos:7
 
-MAINTAINER mozdef@mozilla.com
+LABEL maintainer="mozdef@mozilla.com"
 
 RUN \
   mkdir /var/log/mozdef && \

@@ -1,6 +1,6 @@
 FROM centos:7
 
-MAINTAINER mozdef@mozilla.com
+LABEL maintainer="mozdef@mozilla.com"
 
 #updated meteor version to avoid EXDEV: cross-device link not permitted errors
 ENV NODE_VERSION 4.7.0
