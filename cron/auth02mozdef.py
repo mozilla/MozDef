@@ -56,11 +56,11 @@ log_types=DotDict({
             "level": 3 # Error
             },
         'seacft': {
-            "event": 'Success Exchange',
+            "event": 'Success Exchange (Authorization Code for Access Token)',
             "level": 1 # Info
             },
         'feacft': {
-            "event": 'Failed Exchange',
+            "event": 'Failed Exchange (Authorization Code for Access Token)',
             "level": 3 # Error
             },
         'f': {
@@ -208,11 +208,11 @@ log_types=DotDict({
                 "level": 3 # Error
                 },
         'sd': {
-                "event": 'Success delegation',
+                "event": 'Success Delegation',
                 "level": 3 # error
          },
         'fd': {
-                "event": 'Failed delegation',
+                "event": 'Failed Delegation',
                 "level": 3 # error
          },
         'seccft': {
@@ -222,6 +222,30 @@ log_types=DotDict({
         'feccft': {
                 "event": "Failed Exchange (Client Credentials for Access Token)",
                 "level": 1
+        },
+        'fsa': {
+                "event": "Failed Silent Auth",
+                "level": 3
+        },
+        'ssa': {
+                "event": "Success Silent Auth",
+                "level": 1
+        },
+        'fepft': {
+                "event": "Failed Exchange (Password for Access Token)",
+                "level": 3
+        },
+        'limit_mu': {
+                "event": "Blocked IP Address",
+                "level": 3
+        },
+        'sepft': {
+                "event": "Success Exchange (Password for Access Token)",
+                "level": 1
+        },
+        'fcoa': {
+                "event": "Failed Cross Origin Authentication",
+                "level": 3
         }
 })
 
