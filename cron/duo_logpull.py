@@ -106,6 +106,8 @@ def main():
     duo = duo_client.Admin(ikey=options.IKEY, skey=options.SKEY, host=options.URL)
     mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
     mozmsg.tags=['duosecurity', 'logs']
+    if options.update_tags != '':
+        mozmsg.tags.append(options.update_tags)
     mozmsg.category = 'Authentication'
     mozmsg.source = 'DuoSecurity API'
     if options.DEBUG:
@@ -128,6 +130,7 @@ def initConfig():
     options.MOZDEF_URL = getConfig('MOZDEF_URL', '', options.configfile)
     options.DEBUG = getConfig('DEBUG', True, options.configfile)
     options.statepath = getConfig('statepath', '', options.configfile)
+    options.update_tags = getConfig('addtag', '', options.configfile)
 
 if __name__ == '__main__':
     parser = OptionParser()
