@@ -1,5 +1,7 @@
 FROM mozdef_base:latest
 
+LABEL maintainer="mozdef@mozilla.com"
+
 COPY rest /opt/mozdef/envs/mozdef/rest
 COPY docker/compose/mozdef_rest/files/index.conf /opt/mozdef/envs/mozdef/rest/index.conf
 

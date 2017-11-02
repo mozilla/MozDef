@@ -1,5 +1,7 @@
 FROM mozdef_base:latest
 
+LABEL maintainer="mozdef@mozilla.com"
+
 RUN yum install -y cronie
 
 COPY cron /opt/mozdef/envs/mozdef/cron

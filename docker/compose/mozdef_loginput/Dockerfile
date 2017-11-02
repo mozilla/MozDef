@@ -1,5 +1,7 @@
 FROM mozdef_base:latest
 
+LABEL maintainer="mozdef@mozilla.com"
+
 COPY loginput /opt/mozdef/envs/mozdef/loginput
 COPY docker/compose/mozdef_loginput/files/index.conf /opt/mozdef/envs/mozdef/loginput/index.conf
 
