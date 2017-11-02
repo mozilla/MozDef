@@ -1,6 +1,6 @@
 FROM centos:7
 
-MAINTAINER mozdef@mozilla.com
+LABEL maintainer="mozdef@mozilla.com"
 
 COPY docker/compose/mozdef_syslog/files/syslog-ng.repo /etc/yum.repos.d/syslog-ng.repo
 

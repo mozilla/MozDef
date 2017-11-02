@@ -12,7 +12,7 @@
 
 FROM centos:7
 
-MAINTAINER mozdef@mozilla.com
+LABEL maintainer="mozdef@mozilla.com"
 
 ENV NODE_VERSION 4.7.0
 ENV METEOR_VERSION 1.4.4.2

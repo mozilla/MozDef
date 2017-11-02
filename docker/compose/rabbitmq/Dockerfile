@@ -1,6 +1,6 @@
 FROM centos:7
 
-MAINTAINER mozdef@mozilla.com
+LABEL maintainer="mozdef@mozilla.com"
 
 ENV RABBITMQ_VERSION 3.3.5
 

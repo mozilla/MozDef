@@ -1,6 +1,6 @@
 FROM centos:7
 
-MAINTAINER mozdef@mozilla.com
+LABEL maintainer="mozdef@mozilla.com"
 
 ENV ES_VERSION 2.4.6
 ENV ES_JAVA_VERSION 1.8.0
