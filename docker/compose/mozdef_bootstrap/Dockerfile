@@ -1,5 +1,7 @@
 FROM mozdef_base:latest
 
+LABEL maintainer="mozdef@mozilla.com"
+
 RUN \
   mkdir /opt/mozdef/envs/mozdef/config && \
   mkdir -p /opt/mozdef/envs/mozdef/docker/conf
