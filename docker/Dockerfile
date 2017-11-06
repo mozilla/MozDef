@@ -117,6 +117,9 @@ COPY cron /opt/mozdef/envs/mozdef/cron
 COPY alerts /opt/mozdef/envs/mozdef/alerts
 COPY mq /opt/mozdef/envs/mozdef/mq
 
+COPY docker/conf/loginput_index.conf /opt/mozdef/envs/mozdef/loginput/index.conf
+COPY docker/conf/rest_index.conf /opt/mozdef/envs/mozdef/rest/index.conf
+
 COPY docker/conf/config.py /opt/mozdef/envs/mozdef/alerts/lib/config.py
 COPY docker/conf/cron_entries.txt /cron_entries.txt
 
