@@ -180,6 +180,10 @@ caption, legend {
     --alert-bg-color: #cccccc;
     --alert-color: black;
   }
+.alert.alert-ERROR {
+    --alert-bg-color: #d04437;
+    --alert-color: white;
+  }
 
 .alert  {
     color: var(--alert-color);
