@@ -23,35 +23,38 @@ import os
 # Minimum data needed for an alert (this is an example alert json)
 '''
     {
-        # Lucene search string
+        // Lucene search string
         'search_string': 'field1: matchingvalue and field2: matchingothervalue',
 
-        # ES Filters as such: [['field', 'value'], ['field', 'value']]
+        // ES Filters as such: [['field', 'value'], ['field', 'value']]
         'filters': [],
 
-        # What to aggregate on if we get multiple matches?
+        // What to aggregate on if we get multiple matches?
         'aggregation_key': 'summary',
 
-        # How long to search and aggregate for? The longer the slower.
-        # These defaults work well for alerts that basically don't *need*
-        # much aggregation
-        'threshold': {
-            'timerange_min': 5,
-            'count': 1
-        },
+        // Number of minutes from current time to look for events
+        "time_window": 5,
 
-        # This is the category that will show up in mozdef, and the severity
+        // Max number of samples to include in alert
+        // If the total number of events is less than this, the alert
+        // will still throw
+        "num_samples": 10,
+
+        // Total number of different type of values from aggregation key
+        "num_aggregations": 1,
+
+        // This is the category that will show up in mozdef, and the severity
         'alert_category': 'generic_alerts',
         'alert_severity': 'INFO',
 
-        # This will show up as the alert text when it trigger
-        'summary': 'Example summary that shows up in the alert',
+        // This will show up as the alert text when it trigger
+        'alert_summary': 'Example summary that shows up in the alert',
 
-        # This helps sorting out alerts, so it's nice if you fill this in
-        'tags': ['generic'],
+        // This helps sorting out alerts, so it's nice if you fill this in
+        'alert_tags': ['generic'],
 
-        # This is the alert documentation
-        'url': 'https://mozilla.org'
+        // This is the alert documentation
+        'alert_url': 'https://mozilla.org'
     }
 '''
 
