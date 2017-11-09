@@ -68,7 +68,8 @@ class Zilla(Module):
                 return
             try:
                 res = self._bugzilla.search_bugs(terms)
-            except:
+            except Exception as e:
+                _log.error('Error querying bugzilla' + str(e))
                 return
             for bug in res['bugs']:
                 bugsummary = bug['summary'].encode('utf-8', 'replace')
