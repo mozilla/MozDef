@@ -547,9 +547,8 @@ def kibanaDashboards():
         for dashboard in results['hits']:
             resultsList.append({
                 'name': dashboard['_source']['title'],
-                'url': "%s/%s/%s" % (options.kibanaurl,
-                "dashboard",
-                dashboard['_source']['title'])
+                'url': "%s/%s" % (options.kibanaurl,
+                dashboard['_id'])
             })
 
     except ElasticsearchInvalidIndex as e:
