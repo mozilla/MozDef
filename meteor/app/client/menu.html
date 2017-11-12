@@ -17,11 +17,13 @@ Anthony Verez averez@mozilla.com
             </span>
             <span id="nav-main">
                 <ul>
-                    <li class="first"><a href="#">Kibanas</a>
+                    <li> <a target=" _blank" href={{mozdef.kibanaURL}}>Kibana</a>
                         <ul>
-                            {{#each kibanadashboards as item}}
-                                {{>kibanaDashboardItem}}
-                            {{/each}}
+                            <li class="first"> 
+                                {{#each kibanadashboards as item}}
+                                    {{>kibanaDashboardItem}}
+                                {{/each}}
+                            </li>
                         </ul>
                     </li>
                     <li><a href="/alerts/">Alerts</a>
