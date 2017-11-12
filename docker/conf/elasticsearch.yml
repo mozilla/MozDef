@@ -111,14 +111,14 @@ path.data: /var/lib/elasticsearch
 # index.number_of_shards: 5
 
 # Set the number of replicas (additional copies) of an index (1 by default):
-#
+
 # index.number_of_replicas: 1
 
 # Note, that for development on a local machine, with small indices, it usually
 # makes sense to "disable" the distributed features:
 #
-# index.number_of_shards: 1
-# index.number_of_replicas: 0
+ index.number_of_shards: 1
+ index.number_of_replicas: 0
 
 # These settings directly affect the performance of index and search operations
 # in your cluster. Assuming you have enough machines to hold shards and
