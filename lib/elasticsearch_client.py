@@ -176,7 +176,6 @@ class ElasticsearchClient():
         f.close()
         title = dashboardjson['title']
         dashid = dash_name.replace(' ', '-')
-        _id = title.replace(' ', '-')
         if dash_name:
             title = dash_name
         dashboarddata = {
