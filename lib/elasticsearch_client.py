@@ -170,11 +170,13 @@ class ElasticsearchClient():
     def get_event_by_id(self, event_id):
         return self.get_object_by_id(event_id, ['events'])
 
-    def save_dashboard(self, dash_file, dash_name=None):
+    def save_dashboard(self, dash_file, dash_name):
         f = open(dash_file)
         dashboardjson = json.load(f)
         f.close()
         title = dashboardjson['title']
+        dashid = dash_name.replace(' ', '-')
+        _id = title.replace(' ', '-')
         if dash_name:
             title = dash_name
         dashboarddata = {
@@ -184,7 +186,7 @@ class ElasticsearchClient():
             "dashboard": json.dumps(dashboardjson)
         }
 
-        return self.es_connection.index(index='.kibana', doc_type='dashboard', body=dashboarddata)
+        return self.es_connection.index(index='.kibana', doc_type='dashboard', body=dashboarddata id=dashid)
 
     def get_cluster_health(self):
         health_dict = self.es_connection.cluster.health()
