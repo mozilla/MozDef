@@ -549,7 +549,7 @@ def kibanaDashboards():
                 'name': dashboard['_source']['title'],
                 'url': "%s/%s/%s" % (options.kibanaurl,
                 "dashboard",
-                dashboard['_source']['title'])
+                dashboard['_id'])
             })
 
     except ElasticsearchInvalidIndex as e:
