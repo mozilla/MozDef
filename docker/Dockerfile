@@ -15,7 +15,7 @@ FROM centos:7
 LABEL maintainer="mozdef@mozilla.com"
 
 ENV NODE_VERSION 4.7.0
-ENV METEOR_VERSION 1.4.4.2
+ENV METEOR_VERSION 1.4.2.3
 ENV PYTHON_VERSION 2.7.11
 ENV KIBANA_VERSION 4.6.5
 ENV ES_VERSION 2.4.6
@@ -70,12 +70,6 @@ RUN \
   curl -sL -o /opt/mozdef/nodesource.rpm https://rpm.nodesource.com/pub_4.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm && \
   rpm -i --nosignature --force /opt/mozdef/nodesource.rpm && \
   yum install -y nodejs-$NODE_VERSION && \
-  npm install source-map-support@0.4.2 \
-                 semver@5.3.0 \
-                 fibers@1.0.13 \
-                 amdefine@1.0.0 \
-                 underscore@1.8.3 \
-                 bcrypt && \
   mkdir /opt/mozdef/meteor && \
   curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
   tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
@@ -87,20 +81,17 @@ USER mozdef
 COPY meteor /opt/mozdef/envs/mozdef/meteor
 USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
-USER mozdef
-RUN \
-  cd /opt/mozdef/envs/mozdef/meteor && \
-  meteor npm install --save babel-runtime && \
-  meteor add accounts-password && \
-  meteor add npm-bcrypt && \
-  mkdir -p /opt/mozdef/envs/meteor/mozdef
-USER root
+
 COPY docker/conf/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
+
 USER mozdef
 RUN \
+  mkdir -p /opt/mozdef/envs/meteor/mozdef && \
   cd /opt/mozdef/envs/mozdef/meteor && \
-  meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/ --allow-incompatible-update
+  meteor npm install && \
+  meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/ && \
+  mv /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
@@ -125,6 +116,9 @@ COPY lib /opt/mozdef/envs/mozdef/lib
 COPY cron /opt/mozdef/envs/mozdef/cron
 COPY alerts /opt/mozdef/envs/mozdef/alerts
 COPY mq /opt/mozdef/envs/mozdef/mq
+
+COPY docker/conf/loginput_index.conf /opt/mozdef/envs/mozdef/loginput/index.conf
+COPY docker/conf/rest_index.conf /opt/mozdef/envs/mozdef/rest/index.conf
 
 COPY docker/conf/config.py /opt/mozdef/envs/mozdef/alerts/lib/config.py
 COPY docker/conf/cron_entries.txt /cron_entries.txt
