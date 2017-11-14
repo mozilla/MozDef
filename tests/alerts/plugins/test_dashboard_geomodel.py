@@ -1,3 +1,5 @@
+import json
+
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../alerts/plugins"))
@@ -54,7 +56,7 @@ class TestDashboardGeomodel(object):
         assert result_db_entry['url'] == 'https://www.mozilla.org'
         assert result_db_entry['url_title'] == 'Get Help'
         assert result_db_entry['user_id'] == 'ttesterson'
-        assert result_db_entry['alert_obj'] == self.good_message_dict
+        assert result_db_entry['alert_str_json'] == json.dumps(self.good_message_dict)
 
     def test_unknown_city_message(self):
         message_dict = self.good_message_dict
