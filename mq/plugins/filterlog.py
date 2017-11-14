@@ -9,9 +9,8 @@
 
 class message(object):
     def __init__(self):
-        '''register our criteria for being passed a message
-           as a list of lower case strings or values to match with an event's dictionary of keys or values
-           set the priority if you have a preference for order of plugins to run. 0 goes first, 100 is assumed/default if not sent
+        '''
+            Plugin used to parse a filterlog type firewall message
         '''
         self.registration = ['filterlog']
         self.priority = 10
