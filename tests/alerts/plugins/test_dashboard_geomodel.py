@@ -1,10 +1,10 @@
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../alerts/plugins"))
-from sso_dashboard import message
+from dashboard_geomodel import message
 
 
-class TestSSODashboard(object):
+class TestDashboardGeomodel(object):
 
     def mock_write_db_entry(self, alert_record):
         self.test_result_record = alert_record
@@ -20,9 +20,7 @@ class TestSSODashboard(object):
         self.test_connect_called = False
 
         self.plugin = message()
-
-    def test_geoip_message_good(self):
-        message_dict = {
+        self.good_message_dict = {
             "category": "geomodel",
             "tags": ['geomodel'],
             "summary": "ttesterson@mozilla.com NEWCOUNTRY Diamond Bar, United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
@@ -32,13 +30,15 @@ class TestSSODashboard(object):
                     "city": "Diamond Bar",
                     "country": "United States"
                 },
+                'source_ip': '1.2.3.4',
                 "principal": "ttesterson@mozilla.com",
             }
         }
 
+    def test_message_good(self):
         assert self.test_result_record is None
-        result_message = self.plugin.onMessage(message_dict)
-        assert result_message == message_dict
+        result_message = self.plugin.onMessage(self.good_message_dict)
+        assert result_message == self.good_message_dict
         assert self.test_connect_called is True
         result_db_entry = self.test_result_record
         assert type(result_db_entry['alert_code']) is str
@@ -50,12 +50,24 @@ class TestSSODashboard(object):
         assert result_db_entry['description'] == 'This alert is created based on geo ip information about the last login of a user.'
         assert result_db_entry['duplicate'] is True
         assert result_db_entry['risk'] == 'high'
-        assert result_db_entry['summary'] == 'Did you recently login from Diamond Bar, United States?'
+        assert result_db_entry['summary'] == 'Did you recently login from Diamond Bar, United States (1.2.3.4)?'
         assert result_db_entry['url'] == 'https://www.mozilla.org'
         assert result_db_entry['url_title'] == 'Get Help'
         assert result_db_entry['user_id'] == 'ttesterson'
+        assert result_db_entry['alert_obj'] == self.good_message_dict
 
-    def test_geoip_message_bad(self):
+    def test_unknown_city_message(self):
+        message_dict = self.good_message_dict
+        message_dict['details']['locality_details']['city'] = 'UNKNOWN'
+        assert self.test_result_record is None
+        result_message = self.plugin.onMessage(message_dict)
+        assert result_message == self.good_message_dict
+        assert self.test_connect_called is True
+        result_db_entry = self.test_result_record
+        assert type(result_db_entry['alert_code']) is str
+        assert result_db_entry['summary'] == 'Did you recently login from United States (1.2.3.4)?'
+
+    def test_malformed_message_bad(self):
         message_dict = {
             "category": "geomodel",
             "tags": ['geomodel'],

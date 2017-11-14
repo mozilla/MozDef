@@ -26,6 +26,7 @@ class TestAlertGeomodel(AlertTestSuite):
                     "country": "United States"
                 },
                 "principal": "ttesterson@mozilla.com",
+                "source_ipv4": "1.2.3.4"
             }
         }
     }
@@ -43,6 +44,7 @@ class TestAlertGeomodel(AlertTestSuite):
                 "country": "United States"
             },
             "principal": "ttesterson@mozilla.com",
+            "source_ip": "1.2.3.4"
         }
     }
 
