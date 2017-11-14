@@ -12,6 +12,7 @@ import sys
 from binascii import b2a_hex
 import boto3
 import datetime
+import json
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
 from utilities.logger import logger
@@ -100,7 +101,7 @@ class message(object):
             'url': self.config['url'],
             'url_title': self.config['url_title'],
             'duplicate': self.config['duplicate'],
-            'alert_obj': message,
+            'alert_str_json': json.dumps(message),
         }
         self.write_db_entry(alert_record)
         return message
