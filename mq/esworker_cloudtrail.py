@@ -424,7 +424,6 @@ class taskConsumer(object):
                     body=jbody,
                     bulk=bulk
                 )
-                import pdb; pdb.set_trace()
 
             except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
