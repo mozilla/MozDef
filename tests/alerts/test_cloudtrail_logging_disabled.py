@@ -12,9 +12,11 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     default_event = {
         "_type": "cloudtrail",
         "_source": {
-            "eventName": "StopLogging",
-            "requestParameters": {
-                "name": "cloudtrail_example_name"
+            "details": {
+               "eventName": "StopLogging",
+                "requestParameters": {
+                    "name": "cloudtrail_example_name"
+                }
             }
         }
     }
@@ -59,7 +61,7 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['eventName'] = 'Badeventname'
+    event['_source']['details']['eventName'] = 'Badeventname'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad eventName",
@@ -78,7 +80,7 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['errorCode'] = 'AccessDenied'
+    event['_source']['details']['errorCode'] = 'AccessDenied'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with excluding errorCode",
