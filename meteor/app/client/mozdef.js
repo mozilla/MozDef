@@ -405,4 +405,27 @@ if (Meteor.isClient) {
         // noop - allow meteor to pass through
     };
 
+    Meteor.logout = function(callback) {
+        var authenticationType = mozdef.authenticationType;
+        switch(authenticationType){
+            case 'meteor-password':
+                Meteor.logoutViaAccounts(callback);
+                break;
+            case 'oidc':
+                Meteor.logoutViaHeader(callback);
+                break;
+            default:
+                Meteor.logoutViaAccounts(callback);
+                break;
+        }
+    };
+
+    // Logout via custom URL
+    Meteor.logoutViaHeader = function(callback) {
+        window.location.href = mozdef.rootURL + '/logout';
+    };
+
+    Meteor.logoutViaAccounts = function(callback) {
+        return Accounts.logout(callback);
+    };
 };
