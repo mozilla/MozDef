@@ -372,7 +372,7 @@ if (Meteor.isClient) {
 
     // login abstraction
     Meteor.login = function(callback) {
-        var authenticationType = mozdef.authenticationType;
+        var authenticationType = mozdef.authenticationType.toLowerCase();
         switch(authenticationType){
             case 'meteor-password':
                 Meteor.loginViaPassword(callback);
@@ -406,7 +406,7 @@ if (Meteor.isClient) {
     };
 
     Meteor.logout = function(callback) {
-        var authenticationType = mozdef.authenticationType;
+        var authenticationType = mozdef.authenticationType.toLowerCase();
         switch(authenticationType){
             case 'meteor-password':
                 Meteor.logoutViaAccounts(callback);
