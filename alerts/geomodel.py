@@ -7,6 +7,7 @@
 #
 # Contributors:
 # Aaron Meihm <ameihm@mozilla.com>
+# Brandon Myers <bmyers@mozilla.com>
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch
@@ -51,11 +52,12 @@ class AlertGeomodel(AlertTask):
         summary = ev['summary']
         alert_dict = self.createAlertDict(summary, category, tags, [event], severity)
 
-        alert_dict['details'] = {
-            'locality_details': ev['details']['locality_details'],
-            'category': ev['details']['category'],
-            'principal': ev['details']['principal'],
-            'source_ip': ev['details']['source_ipv4']
-        }
+        if 'category' in ev['details'] and ev['details']['category'].lower() == 'newcountry':
+            alert_dict['details'] = {
+                'locality_details': ev['details']['locality_details'],
+                'category': ev['details']['category'],
+                'principal': ev['details']['principal'],
+                'source_ip': ev['details']['source_ipv4']
+            }
 
         return alert_dict
