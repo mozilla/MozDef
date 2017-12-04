@@ -82,6 +82,32 @@ class TestAlertGeomodel(AlertTestSuite):
         )
     )
 
+    movement_event = {
+        "_source": {
+            u'category': u'geomodelnotice',
+            u'details': {
+                'category': 'MOVEMENT',
+            },
+            'severity': 'NOTICE',
+            'source': 'UNKNOWN',
+            'summary': 'person1@mozilla.com MOVEMENT window violation (London, United Kingdom) -> (San Jose, United States) -> (Frankfurt am Main, Germany) within 4h window',
+        }
+    }
+    movement_alert = {
+        "category": "geomodel",
+        "tags": ['geomodel'],
+        "severity": "NOTICE",
+        "notify_mozdefbot": False,
+        "summary": "person1@mozilla.com MOVEMENT window violation (London, United Kingdom) -> (San Jose, United States) -> (Frankfurt am Main, Germany) within 4h window",
+    }
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with multiple localities",
+            events=[AlertTestSuite.create_event(movement_event)],
+            expected_alert=movement_alert
+        )
+    )
+
     event = AlertTestSuite.create_event(default_event)
     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
     event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 31})
