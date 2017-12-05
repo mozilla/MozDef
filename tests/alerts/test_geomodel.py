@@ -45,7 +45,8 @@ class TestAlertGeomodel(AlertTestSuite):
             },
             "principal": "ttesterson@mozilla.com",
             "source_ip": "1.2.3.4"
-        }
+        },
+        "url": "https://www.mozilla.org",
     }
 
     test_cases = []
