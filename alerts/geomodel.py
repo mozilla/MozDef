@@ -18,12 +18,18 @@ class AlertGeomodel(AlertTask):
     MINSEVERITY = 2
 
     def main(self):
+        self.parse_config('geomodel.conf', ['exclusions'])
+
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
             TermMatch('_type', 'event'),
             TermMatch('category', 'geomodelnotice'),
         ])
+
+        # Allow the ability to ignore certain users
+        for exclusion in self.config.exclusions.split(','):
+            search_query.add_must_not(TermMatch('summary', exclusion))
 
         self.filtersManual(search_query)
         self.searchEventsSimple()
