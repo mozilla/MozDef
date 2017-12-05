@@ -135,3 +135,12 @@ class TestAlertGeomodel(AlertTestSuite):
             events=[event],
         )
     )
+
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['summary'] = 'user1@mozilla.com MOVEMENT window violation (London, United Kingdom) -> (San Jose, United States) -> (Frankfurt am Main, Germany) within 4h window'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with an event with excluded username",
+            events=[event],
+        )
+    )
