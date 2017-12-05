@@ -18,7 +18,7 @@ class AlertGeomodel(AlertTask):
     MINSEVERITY = 2
 
     def main(self):
-        self.parse_config('geomodel.conf', ['exclusions'])
+        self.parse_config('geomodel.conf', ['exclusions', 'url'])
 
         search_query = SearchQuery(minutes=30)
 
@@ -56,7 +56,7 @@ class AlertGeomodel(AlertTask):
             severity = 'WARNING'
 
         summary = ev['summary']
-        alert_dict = self.createAlertDict(summary, category, tags, [event], severity)
+        alert_dict = self.createAlertDict(summary, category, tags, [event], severity, self.config.url)
 
         if 'category' in ev['details'] and ev['details']['category'].lower() == 'newcountry':
             alert_dict['details'] = {
