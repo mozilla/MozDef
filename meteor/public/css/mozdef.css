@@ -60,6 +60,12 @@ caption, legend {
 
 }
 
+.headercontainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #header a.mozilla {
     position: relative;
     float: right;
