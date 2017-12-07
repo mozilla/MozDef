@@ -60,6 +60,12 @@ caption, legend {
 
 }
 
+.headercontainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #header a.mozilla {
     position: relative;
     float: right;
@@ -311,12 +317,12 @@ circle:hover{
     color:white;
     text-shadow: #000 5px 3px 3px;
     text-align: center;
-    font-size: 1vw;
+    font-size: large;
     margin-top: -.25em;
 }
 
 .mozillalogo{
-    width: 5vw;
+    width: 90px;
 }
 
 #header label{
