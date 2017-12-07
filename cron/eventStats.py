@@ -15,6 +15,7 @@ import sys
 from datetime import datetime
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
+import socket
 
 import sys
 import os
@@ -52,14 +53,20 @@ def esSearch(es):
     try:
         results = search_query.execute(es)
 
-        mozdefstats=dict(utctimestamp=toUTC(datetime.now()).isoformat())
-        mozdefstats['summary']='Aggregated category counts'
-        mozdefstats['processid']=os.getpid()
-        mozdefstats['processname']=sys.argv[0]
-        mozdefstats['details']=dict(counts=list())
+        mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
+        mozdefstats['category'] = 'stats'
+        mozdefstats['hostname'] = socket.gethostname()
+        mozdefstats['mozdefhostname'] = mozdefstats['hostname']
+        mozdefstats['severity'] = 'INFO'
+        mozdefstats['source'] = 'mozdef'
+        mozdefstats['tags'] = ['mozdef', 'stats']
+        mozdefstats['summary'] = 'Aggregated category counts'
+        mozdefstats['processid'] = os.getpid()
+        mozdefstats['processname'] = sys.argv[0]
+        mozdefstats['details'] = dict(counts=list())
         for bucket in results['aggregations']['category']['terms']:
-            entry=dict()
-            entry[bucket['key']]=bucket['count']
+            entry = dict()
+            entry[bucket['key']] = bucket['count']
             mozdefstats['details']['counts'].append(entry)
         return mozdefstats
 
