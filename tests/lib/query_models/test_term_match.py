@@ -94,10 +94,5 @@ class TestTermMatchNegativeTestSuite(NegativeTestSuite):
             TermMatch('somekey', 'tag'): [
                 {'somekey': ['atag', 'tagging']},
             ],
-            TermMatch('CamelCaseKey', 'test'): [
-                {'camelcasekey': 'test'},
-                {'camelCaseKey': 'test'},
-                {'camelcaseKey': 'test'},
-            ],
         }
         return tests
