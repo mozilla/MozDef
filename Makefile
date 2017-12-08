@@ -26,7 +26,7 @@
 # make multiple-rm - stop new mozdef environment in multiple containers and deattach volumes
 # make multiple-rebuild - build, stop and run new mozdef environment in multiple containers
 # make multiple-rebuild-new - build, stop/rm and run new mozdef environment in multiple containers
-# make multiple-rebuild-new - build, stop/rm and run new mozdef environment for tests in multiple containers
+# make multiple-rebuild-tests - build, stop/rm and run new mozdef environment for tests in multiple containers
 
 NAME=mozdef
 VERSION=0.1
