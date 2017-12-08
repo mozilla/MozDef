@@ -51,7 +51,7 @@ services:
       - rabbitmq:/var/lib/rabbitmq
     ports:
       - 5672:5672
-    #   - 15672:15672 Admin interface
+      # - 15672:15672 # Admin interface
     networks:
       - default
 

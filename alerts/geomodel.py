@@ -7,6 +7,7 @@
 #
 # Contributors:
 # Aaron Meihm <ameihm@mozilla.com>
+# Brandon Myers <bmyers@mozilla.com>
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch
@@ -17,12 +18,18 @@ class AlertGeomodel(AlertTask):
     MINSEVERITY = 2
 
     def main(self):
+        self.parse_config('geomodel.conf', ['exclusions', 'url'])
+
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
             TermMatch('_type', 'event'),
             TermMatch('category', 'geomodelnotice'),
         ])
+
+        # Allow the ability to ignore certain users
+        for exclusion in self.config.exclusions.split(','):
+            search_query.add_must_not(TermMatch('summary', exclusion))
 
         self.filtersManual(search_query)
         self.searchEventsSimple()
@@ -49,13 +56,14 @@ class AlertGeomodel(AlertTask):
             severity = 'WARNING'
 
         summary = ev['summary']
-        alert_dict = self.createAlertDict(summary, category, tags, [event], severity)
+        alert_dict = self.createAlertDict(summary, category, tags, [event], severity, self.config.url)
 
-        alert_dict['details'] = {
-            'locality_details': ev['details']['locality_details'],
-            'category': ev['details']['category'],
-            'principal': ev['details']['principal'],
-            'source_ip': ev['details']['source_ipv4']
-        }
+        if 'category' in ev['details'] and ev['details']['category'].lower() == 'newcountry':
+            alert_dict['details'] = {
+                'locality_details': ev['details']['locality_details'],
+                'category': ev['details']['category'],
+                'principal': ev['details']['principal'],
+                'source_ip': ev['details']['source_ipv4']
+            }
 
         return alert_dict
