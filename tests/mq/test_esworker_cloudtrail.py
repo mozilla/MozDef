@@ -132,16 +132,3 @@ class TestKeyMapping():
         }
 
         assert result['details'] == expected_details
-
-    def test_cloudtrail_dict_eventname_lowercase(self):
-        cloudtrail_dict = {
-            'eventName': 'listDomains',
-        }
-        result = self.key_mapping(cloudtrail_dict)
-        expected_details = {
-            'eventReadOnly': True,
-            'eventVerb': 'List',
-            'eventname': 'ListDomains'
-        }
-        assert result['details'] == expected_details
-

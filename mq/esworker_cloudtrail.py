@@ -23,13 +23,13 @@ import gzip
 from StringIO import StringIO
 from threading import Timer
 import re
-import time
+
 
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from elasticsearch_client import ElasticsearchClient
 from utilities.logger import logger, initLogger
 
 from lib.plugins import sendEventToPlugins, registerPlugins
@@ -167,8 +167,6 @@ def keyMapping(aDict):
         returndict['summary'] = summary_str
 
     if 'eventName' in aDict:
-        # Uppercase first character
-        aDict['eventName'] = aDict['eventName'][0].upper() + aDict['eventName'][1:]
         returndict['details']['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(aDict['eventName'])[0]
         returndict['details']['eventReadOnly'] = (returndict['details']['eventVerb'] in ['Describe', 'Get', 'List'])
     # set the timestamp when we received it, i.e. now
