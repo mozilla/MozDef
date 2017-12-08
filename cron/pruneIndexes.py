@@ -60,7 +60,7 @@ def esPruneIndexes():
                         index_to_prune += '-%s' % idate
 
                     if index_to_prune in indices:
-                        logger.info('Deleting index: %s' % index_to_prune)
+                        logger.debug('Deleting index: %s' % index_to_prune)
                         es.delete_index(index_to_prune, True)
                     else:
                         logger.error('Error deleting index %s, index missing' % index_to_prune)
