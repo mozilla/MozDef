@@ -18,10 +18,10 @@ class AlertCloudtrailLoggingDisabled(AlertTask):
 
         search_query.add_must([
             TermMatch('_type', 'cloudtrail'),
-            TermMatch('details.eventname', 'StopLogging'),
+            TermMatch('eventName', 'StopLogging'),
         ])
 
-        search_query.add_must_not(TermMatch('details.errorcode', 'AccessDenied'))
+        search_query.add_must_not(TermMatch('errorCode', 'AccessDenied'))
 
         self.filtersManual(search_query)
         self.searchEventsSimple()
@@ -32,6 +32,6 @@ class AlertCloudtrailLoggingDisabled(AlertTask):
         tags = ['cloudtrail', 'aws', 'cloudtrailpagerduty']
         severity = 'CRITICAL'
 
-        summary = 'Cloudtrail Logging Disabled: ' + event['_source']['details']['requestparameters']['name']
+        summary = 'Cloudtrail Logging Disabled: ' + event['_source']['requestParameters']['name']
 
         return self.createAlertDict(summary, category, tags, [event], severity)

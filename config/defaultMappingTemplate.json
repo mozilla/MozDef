@@ -140,11 +140,6 @@
               "sourceport" : {
                 "index" : "not_analyzed",
                 "type" : "long"
-              },
-              "apiVersion" : {
-                "type" : "string",
-                "index" : "not_analyzed",
-                "doc_values" : true
               }
             }
           },
@@ -156,10 +151,10 @@
             "format" : "dateOptionalTime",
             "type" : "date"
           },
-          "apiversion" : {
-          "type" : "string",
-          "index" : "not_analyzed",
-          "doc_values" : true
+          "apiVersion" : {
+            "type" : "string",
+            "index" : "not_analyzed",
+            "doc_values" : true
           },
           "version" : {
             "index" : "not_analyzed",

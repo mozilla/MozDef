@@ -13,9 +13,7 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
     default_event = {
         "_type": "cloudtrail",
         "_source": {
-            "details": {
-                "eventname": "somename"
-            }
+            "eventName": "somename"
         }
     }
 
