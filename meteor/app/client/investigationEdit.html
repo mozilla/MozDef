@@ -57,41 +57,44 @@ Jeff Bryner jbryner@mozilla.com
             <div class="col-xs-9">
             <form id="editinvestigationform" class="form-horizontal  col-xs-10 col-xs-offset-2">
                 <div class="form-group">
-                    <label class="col-xs-2 control-label" for="summary">Summary</label>
-                    <i class="fa fa-info-circle" data-toggle="tooltip" title="Enter 'Category': 'Reason for Investigation' on 'Affected Target(s)' "></i>
+                    <label class="col-xs-2 control-label" for="summary">Summary:
+                        <i class="fa fa-info-circle" data-toggle="tooltip" title="Enter 'Category': 'Reason for Investigation' on 'Affected Target(s)' "></i>
+                    </label>
                     <div class="col-xs-10">
-                        <input id="summary" name="summary" placeholder="short description" class="summary form-control" required type="text" value="{{summary}}">
+                        <input id="summary" name="summary" placeholder="Detailed description of the investigation" class="summary form-control" required type="text" value="{{summary}}">
                     </div>
                 </div>
     
                 <div class="form-group">
-                    <label class="col-xs-2 control-label" for="description">Description</label>
+                    <label class="col-xs-2 control-label" for="description">Description:
+                        <i class="fa fa-info-circle" data-toggle="tooltip" title="Enter a detailed description of the investigation and what was affected."></i>
+                    </label>
                     <div class="col-xs-10">
-                        <textarea id="description" name="description" placeholder="long description" class="form-control description" rows=4>{{description}}</textarea>
+                        <textarea id="description" name="description" placeholder="Detailed description of reason for investigation" class="form-control description" rows=4>{{description}}</textarea>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-xs-2 control-label" for="dateOpened">Date Opened</label>
+                    <label class="col-xs-2 control-label" for="dateOpened">Date Opened:</label>
                     <div class="col-xs-10">
                     <div class="input-group">
                         <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="dateOpened calendarfield form-control" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{uiDateFormat dateOpened}}">
+                        <input class="dateOpened calendarfield form-control" name="dateOpened" id="dateOpened" type="text" placeholder="Your Local Time" value="{{uiDateFormat dateOpened}}">
                     </div>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label class="col-xs-2 control-label" for="dateClosed">Date Closed</label>
+                    <label class="col-xs-2 control-label" for="dateClosed">Date Closed:</label>
                     <div class="col-xs-10">
                     <div class="input-group">
                         <span class="input-group-addon"></span>
-                        <input class="form-control dateClosed calendarfield form-control" name="dateClosed" id="dateClosed" type="text" value="{{uiDateFormat dateClosed}}">
+                        <input class="form-control dateClosed calendarfield form-control" name="dateClosed" id="dateClosed" type="text" placeholder="Your Local Time" value="{{uiDateFormat dateClosed}}">
                     </div>
                     </div>
                 </div>                
                 <!-- Phase -->
                 <div class="form-group">
-                    <label class="col-xs-2 control-label" for="phase">Phase</label>
+                    <label class="col-xs-2 control-label" for="phase">Phase:</label>
                     <div class="col-xs-10">
                       <select id="phase" name="phase" class="form-control">
                           <option {{ isselected 'Identification' phase }}>Identification</option>
@@ -103,7 +106,9 @@ Jeff Bryner jbryner@mozilla.com
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-xs-2 control-label" for="tags">Tags</label>                
+                    <label class="col-xs-2 control-label" for="tags">Tags:
+                        <i class="fa fa-info-circle" data-toggle="tooltip" title="Drag and Drop the veris tags from the upper right to the area below"></i>
+                    </label>              
                     <div class="tags col-xs-10">
                         <span class="form-control alert alert-info">drag here to add a tag
                             <ul class="pull-left list-unstyled">
@@ -117,7 +122,7 @@ Jeff Bryner jbryner@mozilla.com
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-xs-2" for="dateReported">Timeline</label>
+                    <label class="control-label col-xs-2" for="dateReported">Timeline:</label>
                     <div class="col-xs-10">
                         <div class="input-prepend input-group input-append">
                             <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
@@ -144,9 +149,9 @@ Jeff Bryner jbryner@mozilla.com
             <form id="referencesform" class="form-horizontal col-xs-12 col-xs-offset-3" >
                 <div class="form-group">
                     <div class="row">
-                        <label class="control-label col-xs-2" for="newReference">Reference</label>
+                        <label class="control-label col-xs-2" for="newReference">Reference:</label>
                         <div class="col-xs-8">
-                          <input id="newReference" class="form-control" type="text" value="">
+                          <input id="newReference" class="form-control" type="text" value="" placeholder="bug/articles/third-party ticket links">
                         </div>
                         <div class="col-xs-2">
                             <button id="saveReference" type="submit" class="form-control btn btn-primary submit">Save</button>
@@ -177,19 +182,19 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="theorySummary">Theory:</label>
                     <div class="col-xs-9">
-                        <input id="theorySummary" class="form-control" type="text" value="" placeholder="short summary" required>
+                        <input id="theorySummary" class="form-control" type="text" value="" placeholder="Description of theory (cause)" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="theoryDescription">Description:</label>
                     <div class="col-xs-10">
-                        <textarea id="theoryDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
+                        <textarea id="theoryDescription" placeholder="Enter your theory in detail" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="theoryStatus">Status:</label>
                     <div class="col-xs-5">
-                        <input id="theoryStatus" placeholder="status" class="form-control" type="text">
+                        <input id="theoryStatus" placeholder="Confirmed/Unconfirmed" class="form-control" type="text">
                     </div>
                 </div>                
                 <div class="form-group">
@@ -230,15 +235,17 @@ Jeff Bryner jbryner@mozilla.com
         <div class="row col-xs-8">
             <form id="timestampsform" class="form-horizontal col-xs-12 col-xs-offset-3" >
                 <div class="form-group">
-                    <label class="control-label col-xs-2" for="timestampText">Timestamp:</label>
+                    <label class="control-label col-xs-2" for="timestampText">Timestamp:
+                        <i class="fa fa-info-circle" data-toggle="tooltip" title="Formats: 'MM/dd/YYYY HH:mm' , 'YYYY/MM/dd HH:mm' , 'YYYY-MM-dd HH:mm'"></i>
+                    </label>
                     <div class="col-xs-9">
-                        <input id="timestampText" class="form-control" type="text" value="" placeholder="date/time" required>
+                        <input id="timestampText" class="form-control" type="text" value="" placeholder="Enter your local day and time: YYYY/MM/dd HH:mm" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="timestampDescription">Description:</label>
                     <div class="col-xs-10">
-                        <textarea id="timestampDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
+                        <textarea id="timestampDescription" placeholder="Description of actions taken at this time" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="form-group">
@@ -279,11 +286,13 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="mitigationSummary">Mitigation:</label>
                     <div class="col-xs-9">
-                        <input id="mitigationSummary" class="form-control" type="text" value="" placeholder="short summary" required>
+                        <input id="mitigationSummary" class="form-control" type="text" value="" placeholder="Action taken to contain risk/threat" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-xs-2" for="mitigationTemporary">Temporary?</label>
+                    <label class="control-label col-xs-2" for="mitigationTemporary">Temporary?
+                        <i class="fa fa-info-circle" data-toggle="tooltip" title="Select if the action is a temporary mitigation."></i>
+                    </label>
                     <div class="col-xs-2">
                         <input type="checkbox"  class="form-control" id="mitigationTemporary">
                     </div>
@@ -291,13 +300,13 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="mitigationDescription">Description:</label>
                     <div class="col-xs-10">
-                        <textarea id="mitigationDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
+                        <textarea id="mitigationDescription" placeholder="Description of mitigation implmented" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="mitigationStatus">Status:</label>
                     <div class="col-xs-5">
-                        <input id="mitigationStatus" placeholder="status" class="form-control" type="text">
+                        <input id="mitigationStatus" placeholder="Implemented/Removed" class="form-control" type="text">
                     </div>
                 </div>
 
@@ -343,13 +352,13 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="lessonSummary">Lesson:</label>
                     <div class="col-xs-9">
-                        <input id="lessonSummary" class="form-control" type="text" value="" placeholder="short summary" required>
+                        <input id="lessonSummary" class="form-control" type="text" value="" placeholder="Method/Technique that did or didn't work" required>
                     </div>
                 </div>              
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="lessonDescription">Description:</label>
                     <div class="col-xs-10">
-                        <textarea id="lessonDescription" placeholder="long description" class="form-control" rows=4 required></textarea>
+                        <textarea id="lessonDescription" placeholder="Description of lessons learned as a result of using this method/technique in this incident." class="form-control" rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="form-group">
@@ -390,13 +399,13 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="noteSummary">Note:</label>
                     <div class="col-xs-9">
-                        <input id="noteSummary" class="form-=control" type="text" value="" placeholder="short summary" required>
+                        <input id="noteSummary" class="form-=control" type="text" value="" placeholder="Any possibly related info" required>
                     </div>
                 </div>              
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="noteDescription">Description:</label>
                     <div class="col-xs-10">
-                        <textarea id="noteDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
+                        <textarea id="noteDescription" placeholder="Details that may be related to the investigation. (conversations/behavior/activity recalled but not documented)" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="form-group">
@@ -437,15 +446,15 @@ Jeff Bryner jbryner@mozilla.com
         <div class="row col-xs-8">
             <form id="indicatorsform" class="form-horizontal col-xs-12 col-xs-offset-3" >
                 <div class="form-group">
-                    <label class="control-label col-xs-2" for="indicatorSummary">indicator:</label>
+                    <label class="control-label col-xs-2" for="indicatorSummary">Indicator:</label>
                     <div class="col-xs-9">
-                        <input id="indicatorSummary" class="form-=control" type="text" value="" placeholder="short summary" required>
+                        <input id="indicatorSummary" class="form-=control" type="text" value="" placeholder="Alert or Anomalous Activity" required>
                     </div>
                 </div>              
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="indicatorDescription">Description:</label>
                     <div class="col-xs-10">
-                        <textarea id="indicatorDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
+                        <textarea id="indicatorDescription" placeholder="Detailed description of what indicated a need for an investigation" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="form-group">
@@ -485,13 +494,13 @@ Jeff Bryner jbryner@mozilla.com
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="evidenceSummary">Summary:</label>
                     <div class="col-xs-9">
-                        <input id="evidenceSummary" class="form-control" type="text" value="" placeholder="short summary" required>
+                        <input id="evidenceSummary" class="form-control" type="text" value="" placeholder="Summary of evidence obtained" required>
                     </div>
                 </div>              
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="evidenceDescription">Description:</label>
                     <div class="col-xs-10">
-                        <textarea id="evidenceDescription" placeholder="long description" class="form-control"  rows=4 required></textarea>
+                        <textarea id="evidenceDescription" placeholder="Detailed description of evidence obtained, who is accountable for it, and where it's stored" class="form-control"  rows=4 required></textarea>
                     </div>
                 </div>
                 <div class="form-group">
