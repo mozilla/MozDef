@@ -481,6 +481,10 @@ if (Meteor.isClient) {
                                                 });
         };
 
+        this.$('[data-toggle="tooltip"]').tooltip({
+            'placement': 'top'
+        }); 
+
         //log the user entering the template
         activity=models.userAction();
         activity.path='incident';

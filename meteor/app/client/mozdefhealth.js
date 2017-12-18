@@ -100,6 +100,10 @@ if (Meteor.isClient) {
                refreshChartData();
             }
         }); //end deps.autorun
+
+        this.$('[data-toggle="tooltip"]').tooltip({
+            'placement': 'top'
+        });
      };
 
     Template.mozdefhealth.destroyed = function () {
