@@ -44,6 +44,8 @@ def main():
     ips = fetch_ip_list(options.aws_access_key_id, options.aws_secret_access_key, options.aws_bucket_name, options.aws_document_key_name)
 
     for manual_addition in options.manual_additions:
+        if manual_addition == '':
+            continue
         logger.debug("Adding manual addition: " + manual_addition)
         ips.append(manual_addition)
 
@@ -64,7 +66,7 @@ def initConfig():
 
     options.local_ip_list_path = getConfig('local_ip_list_path', '', options.configfile)
     options.ips_list_threshold = getConfig('ips_list_threshold', 20, options.configfile)
-    options.manual_additions = getConfig('manual_additions', [], options.configfile).split(',')
+    options.manual_additions = getConfig('manual_additions', '', options.configfile).split(',')
 
 if __name__ == '__main__':
     parser = OptionParser()
