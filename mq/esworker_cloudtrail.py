@@ -222,25 +222,38 @@ class taskConsumer(object):
             time.sleep(.1)
 
     def on_message(self, message):
-        message['category'] = 'cloudtrail'
-        message['utctimestamp'] = toUTC(message['eventTime']).isoformat()
-        message['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
-        message['mozdefhostname'] = socket.gethostname()
-        message['hostname'] = message['eventSource']
-        message['processid'] = os.getpid()
-        message['processname'] = sys.argv[0]
-        message['severity'] = 'INFO'
-        summary_str = "{0} performed {1} in {2}".format(
-            message['sourceIPAddress'],
-            message['eventName'],
-            message['eventSource']
-        )
-        message['summary'] = summary_str
-        message['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(
-            message['eventName'])[0]
-        message['eventReadOnly'] = (
-            message['eventVerb'] in ['Describe', 'Get', 'List'])
-        es.save_event(body=message, doc_type='cloudtrail', bulk=True)
+        returndict = dict()
+
+        returndict['category'] = 'cloudtrail'
+        returndict['source'] = 'cloudtrail'
+        returndict['details'] = {}
+        returndict['utctimestamp'] = toUTC(message['eventTime']).isoformat()
+        returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
+        returndict['mozdefhostname'] = socket.gethostname()
+        returndict['hostname'] = message['eventSource']
+        returndict['processid'] = str(os.getpid())
+        returndict['processname'] = sys.argv[0]
+        returndict['severity'] = 'INFO'
+        returndict['tags'] = ['cloudtrail']
+
+        if 'sourceIPAddress' in message and 'eventName' in message and 'eventSource' in message:
+            summary_str = "{0} performed {1} in {2}".format(
+                message['sourceIPAddress'],
+                message['eventName'],
+                message['eventSource']
+            )
+            returndict['summary'] = summary_str
+
+        if 'eventName' in message:
+            # Uppercase first character
+            verb_name = message['eventName'][0].upper() + message['eventName'][1:]
+            returndict['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(verb_name)[0]
+            returndict['eventReadOnly'] = (returndict['eventVerb'] in ['Describe', 'Get', 'List'])
+
+        # Save original message for now since we're dropping other fields
+        returndict['raw_msg'] = json.dumps(message)
+
+        es.save_event(body=returndict, doc_type='cloudtrail', bulk=True)
 
 
 def registerPlugins():
