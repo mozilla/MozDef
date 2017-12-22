@@ -5,8 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2015 Mozilla Corporation
 #
-# Contributors:
-# Aaron Meihm ameihm@mozilla.com
 
 # Reads from papertrail using the API and inserts log data into ES in
 # the same manner as esworker_eventtask.py

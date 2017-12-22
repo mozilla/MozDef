@@ -5,8 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 #
-# Contributors:
-# bmyers@mozilla.com
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch
