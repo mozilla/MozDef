@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
+# This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch

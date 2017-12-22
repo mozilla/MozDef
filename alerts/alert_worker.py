@@ -5,6 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
+# Alert Worker to listen for alerts and call python plugins
+# for user-controlled reaction to alerts.
 
 import json
 import os

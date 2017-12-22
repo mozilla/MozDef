@@ -5,6 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 #
+# Looks for events that have an old timestamp
+# which could mean theres something wrong in the event pipeline
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, LessThanMatch

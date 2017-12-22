@@ -5,6 +5,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
+# This script alerts when openvpn's duo security failed to contact the duo server and let the user in.
+# This is a very serious warning that must be acted upon as it means MFA failed and only one factor was validated (in
+# this case a VPN certificate)
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, PhraseMatch
