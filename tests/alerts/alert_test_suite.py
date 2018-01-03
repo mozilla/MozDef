@@ -100,7 +100,7 @@ class AlertTestSuite(UnitTestSuite):
                 target[k] = v
         return target
 
-    @freeze_time("2017-01-01 01:00:00")
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
     def test_alert_test_case(self, test_case):
         self.verify_starting_values(test_case)
         if test_case.expected_test_result is True:
