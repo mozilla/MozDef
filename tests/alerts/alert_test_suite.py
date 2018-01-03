@@ -15,6 +15,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from unit_test_suite import UnitTestSuite
 
+from freezegun import freeze_time
+
 import copy
 import re
 import json
@@ -98,6 +100,7 @@ class AlertTestSuite(UnitTestSuite):
                 target[k] = v
         return target
 
+    @freeze_time("2017-01-01 01:00:00")
     def test_alert_test_case(self, test_case):
         self.verify_starting_values(test_case)
         if test_case.expected_test_result is True:
