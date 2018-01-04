@@ -103,12 +103,12 @@ if (Meteor.isClient) {
             });
         },
 
-        "keypress .description, keypress .summary": function (e,t){
+        "keypress .description, keypress .summary, keypress .contact": function (e,t){
             e.stopImmediatePropagation();
             incidentSaveTimer.run(e, t);
         },
 
-        "blur .description, blur .summary": function(e, t) {
+        "blur .description, blur .summary, blur .contact": function(e, t) {
             e.stopImmediatePropagation();
             saveIncident(e,t);
         },
@@ -479,6 +479,13 @@ if (Meteor.isClient) {
                                                 format: 'MM/DD/YYYY hh:mm:ss A',
                                                 startDate: dateOrNull($('#dateContained').val() ) || moment()
                                                 });
+            $('#timestampText').daterangepicker({
+                                                singleDatePicker: true,
+                                                timePicker:true,
+                                                timePickerIncrement:1,
+                                                format: 'MM/DD/YYYY hh:mm:ss A',
+                                                startDate: dateOrNull($('#timestampText').val() ) || moment()
+                                                });
         };
 
         this.$('[data-toggle="tooltip"]').tooltip({
@@ -524,6 +531,7 @@ if (Meteor.isClient) {
             var incidentobj = {
               summary: template.find("#summary").value,
               description: template.find("#description").value,
+              contact: template.find("#contact").value,
               dateOpened: dateOrNull(template.find("#dateOpened").value),
               dateClosed: dateOrNull(template.find("#dateClosed").value),
               phase: template.find("#phase").value,

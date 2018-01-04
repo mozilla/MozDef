@@ -72,6 +72,14 @@ Jeff Bryner jbryner@mozilla.com
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="col-xs-2 control-label" for="contact">Contact:
+                        <i class="fa fa-info-circle" data-toggle="tooltip" title="Enter the contact info (email or chat ID) of the person that is the point of contact for the affected target"></i>
+                    </label>
+                    <div class="col-xs-10">
+                        <input id="contact" name="contact" placeholder="someone@email.com :id" class="contact form-control" value="{{contact}}">
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="col-xs-2 control-label" for="dateOpened">Date Opened:</label>
                     <div class="col-xs-10">
                     <div class="input-group">
@@ -244,11 +252,9 @@ Jeff Bryner jbryner@mozilla.com
         <div class="row col-xs-8">
             <form id="timestampsform" class="form-horizontal col-xs-12 col-xs-offset-3" >
                 <div class="form-group">
-                    <label class="control-label col-xs-2" for="timestampText">Timestamp:
-                        <i class="fa fa-info-circle" data-toggle="tooltip" title="Formats: 'MM/dd/YYYY HH:mm' , 'YYYY/MM/dd HH:mm' , 'YYYY-MM-dd HH:mm'"></i>
-                    </label>
+                    <label class="control-label col-xs-2" for="timestampText">Timestamp:</label>
                     <div class="col-xs-9">
-                        <input id="timestampText" class="form-control" type="text" value="" placeholder="Enter your local day and time: YYYY/MM/dd HH:mm" required>
+                        <input id="timestampText" class="form-control" type="text" value="" placeholder="Enter your local day and time" required>
                     </div>
                 </div>
                 <div class="form-group">

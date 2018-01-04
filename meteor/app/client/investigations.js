@@ -87,7 +87,7 @@ if (Meteor.isClient) {
             });
         },
 
-        "blur .description, blur .summary": function(e, t) {
+        "blur .description, blur .summary, blur .contact": function(e, t) {
             e.stopImmediatePropagation();
             saveInvestigation(e,t);
         },        
@@ -548,6 +548,13 @@ if (Meteor.isClient) {
                                                 format: 'MM/DD/YYYY hh:mm:ss A',
                                                 startDate: dateOrNull($('#dateEnd').val() ) || moment()
                                                 });
+            $('#timestampText').daterangepicker({
+                                                singleDatePicker: true,
+                                                timePicker:true,
+                                                timePickerIncrement:1,
+                                                format: 'MM/DD/YYYY hh:mm:ss A',
+                                                startDate: dateOrNull($('#timestampText').val() ) || moment()
+                                                });
         };
 
         this.$('[data-toggle="tooltip"]').tooltip({
@@ -596,6 +603,7 @@ if (Meteor.isClient) {
             var investigationobj = {
                 summary: template.find("#summary").value,
                 description: template.find("#description").value,
+                contact: template.find("#contact").value,
                 dateOpened: dateOrNull(template.find("#dateOpened").value),
                 dateClosed: dateOrNull(template.find("#dateClosed").value),
                 phase: template.find("#phase").value,
