@@ -79,20 +79,22 @@ def getEsNodesStats():
     jsonobj = r.json()
     results = []
     for nodeid in jsonobj['nodes']:
-        # Skip non masters and data nodes since it won't have full stats
+        # Skip non masters and non data nodes since it won't have full stats
         if ('attributes' in jsonobj['nodes'][nodeid] and
                 jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
                 jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
             continue
-
+t
         results.append({
             'hostname': jsonobj['nodes'][nodeid]['host'],
             'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
             'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024),
             'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
+            'gc_old': jsonobj['nodes'][nodeid]['jvm']['gc']['collectors']['old']['collection_time_in_millis'] / 1000,
             'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu_percent'],
             'load': jsonobj['nodes'][nodeid]['os']['load_average']
         })
+    print(results)
     return results
 
 
