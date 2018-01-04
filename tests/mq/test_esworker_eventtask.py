@@ -10,6 +10,7 @@
 
 import pytz
 import tzlocal
+import datetime
 
 
 def utc_timezone():
@@ -63,8 +64,9 @@ class TestKeyMapping():
         assert result['summary'] == 'Stopped Getty on tty1.'
         assert result['source'] == 'daemon'
         assert result['receivedtimestamp'] != result['utctimestamp']
-        assert result['utctimestamp'] == '2017-10-27T14:01:12+00:00'
-        assert result['timestamp'] == '2017-10-27T14:01:12+00:00'
+        expected_year = datetime.datetime.now().year
+        assert result['utctimestamp'] == str(expected_year) + '-10-27T14:01:12+00:00'
+        assert result['timestamp'] == str(expected_year) + '-10-27T14:01:12+00:00'
         assert result['details']['sourceipaddress'] == '10.1.20.139'
         assert result['tags'] == ['.source.syslog_tcp']
         assert result['category'] == 'syslog'
