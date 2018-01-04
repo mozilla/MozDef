@@ -200,3 +200,13 @@ class TestAlertBruteforceSsh(AlertTestSuite):
             events=events,
         )
     )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['details']['sourceipaddress'] = None
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case aggregation key excluded",
+            events=events,
+        )
+    )
