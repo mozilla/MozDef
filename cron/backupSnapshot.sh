@@ -5,8 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Contributors:
-# Anthony Verez averez@mozilla.com
 
 source  /opt/mozdef/envs/mozdef/bin/activate
 /opt/mozdef/envs/mozdef/cron/backupSnapshot.py -c /opt/mozdef/envs/mozdef/cron/backup.conf

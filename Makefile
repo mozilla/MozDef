@@ -3,11 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Contributors:
-# 2xyo <yohann@lepage.info>
-# Yohann Lepage yohann@lepage.info
-# Anthony Verez averez@mozilla.com
-# Brandon Myers bmyers@mozilla.com
 
 # usage:
 # make single-build - build new single image from Dockerfile

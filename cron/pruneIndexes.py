@@ -5,9 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
-# Anthony Verez averez@mozilla.com
 
 # set this to run as a cronjob (after backup has completed)
 # to regularly remove indexes

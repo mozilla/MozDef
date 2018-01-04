@@ -3,10 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 #
-# Contributors:
-# Arzhel Younsi arzhel@mozilla.com
-# Jeff Bryner jbryner@mozilla.com
-# Brandon Myers bmyers@mozilla.com
 
 import os
 from configlib import getConfig

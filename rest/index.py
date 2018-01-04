@@ -3,11 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
-# Anthony Verez averez@mozilla.com
-# Yash Mehrotra yashmehrotra95@gmail.com
-# Brandon Myers bmyers@mozilla.com
 
 import bottle
 import json

@@ -4,8 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Contributors:
-# Brandon Myers bmyers@mozilla.com
 
 """ mozdef bot using slack
     to install - 'pip install slackclient'
