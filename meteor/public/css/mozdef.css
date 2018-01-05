@@ -3,10 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Avijit Gupta 526avijit@gmail.com
 */
 
 /*base css */
@@ -19,7 +15,7 @@ html{
 
 body{
 	/*gradient*/
-    
+
     background: rgb(32,87,153); /* Old browsers */
     background: -moz-linear-gradient(top, rgba(30,87,153,1) 0%, rgba(32,124,202,1) 43%, rgba(41,137,216,1) 62%, rgba(41,150,217,1) 100%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(43%,rgba(32,124,202,1)), color-stop(62%,rgba(41,137,216,1)), color-stop(100%,rgba(41,150,217,1))); /* Chrome,Safari4+ */
@@ -126,7 +122,7 @@ caption, legend {
     border: 1px solid rgba(127,255,255,0.25);
     text-align: center;
     cursor: default;
-    z-index: 99;    
+    z-index: 99;
 }
 
 .attackercallout .id {
@@ -151,7 +147,7 @@ caption, legend {
     float: left;
     left: auto;
     margin: 0px;
-    padding: 0px;  
+    padding: 0px;
 }
 
 .attackercallout .indicator{
@@ -207,7 +203,7 @@ caption, legend {
 
 .btn {
   border: 1px outset;
-  border-radius: 4px;    
+  border-radius: 4px;
 }
 
 
@@ -243,14 +239,14 @@ td{
 
 .welcome {
     text-align: center;
-}    
+}
 
 .tabcontent{
     margin-top: 20px;
 }
 
 
-/* uncomment this login ui css to hide the local account/password signup options 
+/* uncomment this login ui css to hide the local account/password signup options
 .logins-wrapper .svgtextlabel {
   font-size: 20px;
   color: white;
@@ -278,7 +274,7 @@ td{
 .successcircle{
     /*
     fill: rgb(217,206,178);
-    
+
     fill: rgb(60,179,113);
     */
     /*fill: rgba(0,150,221,.8);*/
@@ -489,7 +485,7 @@ circle:hover{
     border: 0px none;
     position: relative;
     background: none repeat scroll 0% 0% transparent;
-    box-shadow: none;    
+    box-shadow: none;
 }
 
 #nav-main ul ul a:hover,
