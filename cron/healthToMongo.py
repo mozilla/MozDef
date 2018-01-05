@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+
 import logging
 import requests
 import sys
@@ -81,7 +82,7 @@ def getEsNodesStats():
                 jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
                 jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
             continue
-t
+
         results.append({
             'hostname': jsonobj['nodes'][nodeid]['host'],
             'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
@@ -91,7 +92,6 @@ t
             'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu_percent'],
             'load': jsonobj['nodes'][nodeid]['os']['load_average']
         })
-    print(results)
     return results
 
 
@@ -161,4 +161,3 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
-
