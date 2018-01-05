@@ -4,10 +4,6 @@
 # Copyright (c) 2015 Mozilla Corporation
 #
 # This script copies the format/handling mechanism of ipFixup.py (git f5734b0c7e412424b44a6d7af149de6250fc70a2)
-#
-# Contributors:
-# Guillaume Destuynder kang@mozilla.com
-# Jeff Bryner jbryner@mozilla.com
 
 import netaddr
 import sys
