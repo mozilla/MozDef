@@ -20,6 +20,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from utilities.toUTC import toUTC
+from utilities.logger import logger, initLogger
 from utilities.to_unicode import toUnicode
 from utilities.remove_at import removeAt
 from utilities.is_cef import isCEF
@@ -137,8 +138,7 @@ def keyMapping(aDict):
                 else:
                     returndict[u'details'][unicode(newName)] = toUnicode(v)
 
-
-        #nxlog windows log handling
+        # nxlog windows log handling
         if 'Domain' in aDict.keys() and 'SourceModuleType' in aDict.keys():
             # add a dict to hold the details if it doesn't exist
             if 'details' not in returndict.keys():
@@ -146,14 +146,15 @@ def keyMapping(aDict):
 
             # nxlog parses all windows event fields very well
             # copy all fields to details
-            returndict[u'details'][k]=v
+            returndict[u'details'][k] = v
 
         if 'utctimestamp' not in returndict.keys():
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
     except Exception as e:
-        sys.stderr.write('esworker exception normalizing the message %r\n' % e)
+        logger.exception('Received exception while normalizing message: %r' % e)
+        logger.error('Malformed message: %r' % aDict)
         return None
 
     return returndict
@@ -203,11 +204,11 @@ class taskConsumer(ConsumerMixin):
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
-                    sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                    logger.error("Exception: unknown body type received: %r" % body)
                     message.ack()
                     return
             else:
-                sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                logger.error("Exception: unknown body type received: %r" % body)
                 message.ack()
                 return
 
@@ -246,7 +247,7 @@ class taskConsumer(ConsumerMixin):
                 if options.esbulksize != 0:
                     bulk = True
 
-                res = self.esConnection.save_event(
+                self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
                     doc_type=metadata['doc_type'],
@@ -266,7 +267,8 @@ class taskConsumer(ConsumerMixin):
             except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
                 try:
-                    sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
+                    logger.exception('ElasticSearchException while indexing event: %r' % e)
+                    logger.error('Malformed message body: %r' % body)
                     message.requeue()
                     return
                 except kombu.exceptions.MessageStateError:
@@ -277,8 +279,9 @@ class taskConsumer(ConsumerMixin):
             # ensurePublish = self.connection.ensure(self.mqproducer, self.mqproducer.publish, max_retries=10)
             # ensurePublish(normalizedDict, exchange=self.topicExchange, routing_key='mozdef.event')
             message.ack()
-        except ValueError as e:
-            sys.stderr.write("esworker exception in events queue %r\n" % e)
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Malformed message body: %r' % body)
 
 
 def main():
@@ -311,15 +314,15 @@ def main():
     eventTopicExchange(mqConn).declare()
 
     if hasUWSGI:
-        sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}".format(uwsgi.mule_id()))
     else:
-        sys.stdout.write('started without uwsgi\n')
+        logger.info('started without uwsgi')
     # consume our queue and publish on the topic exchange
     taskConsumer(mqConn, eventTaskQueue, eventTopicExchange, es).run()
 
 
 def initConfig():
-    #capture the hostname
+    # capture the hostname
     options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
@@ -358,6 +361,7 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
+    initLogger(options)
 
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
