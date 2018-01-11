@@ -8,13 +8,11 @@
 
 import json
 import os
-import pynsive
 import sys
 import socket
 import time
 from configlib import getConfig, OptionParser
-from datetime import datetime, timedelta
-from operator import itemgetter
+from datetime import datetime
 import boto.sqs
 import boto.sts
 import boto.s3
@@ -24,13 +22,11 @@ from StringIO import StringIO
 from threading import Timer
 import re
 
-
-import sys
-import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient
 from utilities.logger import logger, initLogger
+
 
 CLOUDTRAIL_VERB_REGEX = re.compile(r'^([A-Z][^A-Z]*)')
 
@@ -253,111 +249,6 @@ class taskConsumer(object):
         es.save_event(body=returndict, doc_type='cloudtrail', bulk=True)
 
 
-def registerPlugins():
-    pluginList = list()   # tuple of module,registration dict,priority
-    if os.path.exists('plugins'):
-        modules = pynsive.list_modules('plugins')
-        for mname in modules:
-            module = pynsive.import_module(mname)
-            reload(module)
-            if not module:
-                raise ImportError('Unable to load module {}'.format(mname))
-            else:
-                if 'message' in dir(module):
-                    mclass = module.message()
-                    mreg = mclass.registration
-                    if 'priority' in dir(mclass):
-                        mpriority = mclass.priority
-                    else:
-                        mpriority = 100
-                    if isinstance(mreg, list):
-                        print('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
-                        pluginList.append((mclass, mreg, mpriority))
-    return pluginList
-
-
-def checkPlugins(pluginList, lastPluginCheck):
-    if abs(datetime.now() - lastPluginCheck).seconds > options.plugincheckfrequency:
-        # print('[*] checking plugins')
-        lastPluginCheck = datetime.now()
-        pluginList = registerPlugins()
-        return pluginList, lastPluginCheck
-    else:
-        return pluginList, lastPluginCheck
-
-
-def dict2List(inObj):
-    '''given a dictionary, potentially with multiple sub dictionaries
-       return a list of the dict keys and values
-    '''
-    if isinstance(inObj, dict):
-        for key, value in inObj.iteritems():
-            if isinstance(value, dict):
-                for d in dict2List(value):
-                    yield d
-            elif isinstance(value, list):
-                yield key.encode('ascii', 'ignore').lower()
-                for l in dict2List(value):
-                    yield l
-            else:
-                yield key.encode('ascii', 'ignore').lower()
-                if isinstance(value, str):
-                    yield value.lower()
-                elif isinstance(value, unicode):
-                    yield value.encode('ascii', 'ignore').lower()
-                else:
-                    yield value
-    elif isinstance(inObj, list):
-        for v in inObj:
-            if isinstance(v, str):
-                yield v.lower()
-            elif isinstance(v, unicode):
-                yield v.encode('ascii', 'ignore').lower()
-            elif isinstance(v, list):
-                for l in dict2List(v):
-                    yield l
-            elif isinstance(v, dict):
-                for d in dict2List(v):
-                    yield d
-            else:
-                yield v
-    else:
-        yield ''
-
-
-def sendEventToPlugins(anevent, metadata, pluginList):
-    '''compare the event to the plugin registrations.
-       plugins register with a list of keys or values
-       or values they want to match on
-       this function compares that registration list
-       to the current event and sends the event to plugins
-       in order
-    '''
-    if not isinstance(anevent, dict):
-        raise TypeError('event is type {0}, should be a dict'.format(type(anevent)))
-
-    # expecting tuple of module,criteria,priority in pluginList
-    # sort the plugin list by priority
-    for plugin in sorted(pluginList, key=itemgetter(2), reverse=False):
-        # assume we don't run this event through the plugin
-        send = False
-        if isinstance(plugin[1], list):
-            try:
-                if (set(plugin[1]).intersection([e for e in dict2List(anevent)])):
-                    send = True
-            except TypeError:
-                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
-                return (anevent, metadata)
-        if send:
-            (anevent, metadata) = plugin[0].onMessage(anevent, metadata)
-            if anevent is None:
-                # plug-in is signalling to drop this message
-                # early exit
-                return (anevent, metadata)
-
-    return (anevent, metadata)
-
-
 def main():
     # meant only to talk to SQS using boto
     # and process events as json.
@@ -438,8 +329,4 @@ if __name__ == '__main__':
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
 
-    # force a check for plugins and establish the plugin list
-    pluginList = list()
-    lastPluginCheck = datetime.now() - timedelta(minutes=60)
-    pluginList, lastPluginCheck = checkPlugins(pluginList, lastPluginCheck)
     main()
