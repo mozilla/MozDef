@@ -13,7 +13,7 @@ import sys
 import socket
 import time
 from configlib import getConfig, OptionParser
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytz
 
 import boto.sqs
@@ -22,9 +22,11 @@ import kombu
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
+from utilities.logger import logger, initLogger
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-from lib.plugins import sendEventToPlugins, checkPlugins
+from lib.plugins import sendEventToPlugins, registerPlugins
+
 
 # running under uwsgi?
 try:
@@ -46,9 +48,7 @@ class taskConsumer(object):
         self.esConnection = esConnection
         self.taskQueue = taskQueue
 
-        self.pluginList = list()
-        lastPluginCheck = datetime.now() - timedelta(minutes=60)
-        self.pluginList, lastPluginCheck = checkPlugins(self.pluginList, lastPluginCheck, options.plugincheckfrequency)
+        self.pluginList = registerPlugins()
 
         self.options = options
 
@@ -68,71 +68,75 @@ class taskConsumer(object):
                     try:
                         # get_body() should be json
                         message_json = json.loads(msg_body)
-                        event = self.on_message(message_json)
+                        self.on_message(message_json)
                         # delete message from queue
                         self.taskQueue.delete_message(msg)
                     except ValueError:
-                        sys.stdout.write('Invalid message, not JSON <dropping message and continuing>: %r\n' % msg_body)
+                        logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
                         self.taskQueue.delete_message(msg)
                         continue
                 time.sleep(.1)
-            except ValueError as e:
-                sys.stdout.write('Exception while handling message: %r' % e)
+            except Exception as e:
+                logger.exception(e)
                 sys.exit(1)
 
     def on_message(self, message):
-        # default elastic search metadata for an event
-        metadata = {
-            'index': 'events',
-            'doc_type': 'event',
-            'id': None
-        }
-        event = {}
+        try:
+            # default elastic search metadata for an event
+            metadata = {
+                'index': 'events',
+                'doc_type': 'event',
+                'id': None
+            }
+            event = {}
 
-        event['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
-        event['mozdefhostname'] = self.options.mozdefhostname
+            event['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
+            event['mozdefhostname'] = self.options.mozdefhostname
 
-        if 'tags' in event:
-            event['tags'].extend([self.options.taskexchange])
-        else:
-            event['tags'] = [self.options.taskexchange]
+            if 'tags' in event:
+                event['tags'].extend([self.options.taskexchange])
+            else:
+                event['tags'] = [self.options.taskexchange]
 
-        event['severity'] = 'INFO'
+            event['severity'] = 'INFO'
 
-        # Set defaults
-        event['processid'] = ''
-        event['processname'] = ''
-        event['category'] = 'syslog'
+            # Set defaults
+            event['processid'] = ''
+            event['processname'] = ''
+            event['category'] = 'syslog'
 
-        for message_key, message_value in message.iteritems():
-            if 'Message' == message_key:
-                try:
-                    message_json = json.loads(message_value)
-                    for inside_message_key, inside_message_value in message_json.iteritems():
-                        if inside_message_key in ('processid', 'pid'):
-                            processid = str(inside_message_value)
-                            processid = processid.replace('[', '')
-                            processid = processid.replace(']', '')
-                            event['processid'] = processid
-                        elif inside_message_key in ('pname'):
-                            event['processname'] = inside_message_value
-                        elif inside_message_key in ('hostname'):
-                            event['hostname'] = inside_message_value
-                        elif inside_message_key in ('time', 'timestamp'):
-                            event['timestamp'] = toUTC(inside_message_value).isoformat()
-                            event['utctimestamp'] = toUTC(event['timestamp']).astimezone(pytz.utc).isoformat()
-                        elif inside_message_key in ('type'):
-                            event['category'] = inside_message_value
-                        elif inside_message_key in ('payload', 'message'):
-                            event['summary'] = inside_message_value
-                        else:
-                            if 'details' not in event:
-                                event['details'] = {}
-                            event['details'][inside_message_key] = inside_message_value
-                except ValueError:
-                    event['summary'] = message_value
-        (event, metadata) = sendEventToPlugins(event, metadata, self.pluginList)
-        self.save_event(event, metadata)
+            for message_key, message_value in message.iteritems():
+                if 'Message' == message_key:
+                    try:
+                        message_json = json.loads(message_value)
+                        for inside_message_key, inside_message_value in message_json.iteritems():
+                            if inside_message_key in ('processid', 'pid'):
+                                processid = str(inside_message_value)
+                                processid = processid.replace('[', '')
+                                processid = processid.replace(']', '')
+                                event['processid'] = processid
+                            elif inside_message_key in ('pname'):
+                                event['processname'] = inside_message_value
+                            elif inside_message_key in ('hostname'):
+                                event['hostname'] = inside_message_value
+                            elif inside_message_key in ('time', 'timestamp'):
+                                event['timestamp'] = toUTC(inside_message_value).isoformat()
+                                event['utctimestamp'] = toUTC(event['timestamp']).astimezone(pytz.utc).isoformat()
+                            elif inside_message_key in ('type'):
+                                event['category'] = inside_message_value
+                            elif inside_message_key in ('payload', 'message'):
+                                event['summary'] = inside_message_value
+                            else:
+                                if 'details' not in event:
+                                    event['details'] = {}
+                                event['details'][inside_message_key] = inside_message_value
+                    except ValueError:
+                        event['summary'] = message_value
+            (event, metadata) = sendEventToPlugins(event, metadata, self.pluginList)
+            self.save_event(event, metadata)
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Malformed message: %r' % message)
 
     def save_event(self, event, metadata):
         try:
@@ -165,20 +169,22 @@ class taskConsumer(object):
                 except kombu.exceptions.MessageStateError:
                     return
             except ElasticsearchException as e:
-                sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
+                logger.exception('ElasticSearchException: {0} reported while indexing event'.format(e))
+                logger.error('Malformed jbody: %r' % jbody)
                 return
-        except ValueError as e:
-            sys.stderr.write("esworker.sqs exception in events queue %r\n" % e)
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Malformed message: %r' % event)
 
 
 def main():
     if hasUWSGI:
-        sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
     else:
-        sys.stdout.write('started without uwsgi\n')
+        logger.info('started without uwsgi\n')
 
     if options.mqprotocol not in ('sqs'):
-        sys.stdout.write('Can only process SQS queues, terminating\n')
+        logger.error('Can only process SQS queues, terminating\n')
         sys.exit(1)
 
     mqConn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
@@ -225,6 +231,7 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
+    initLogger(options)
 
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
