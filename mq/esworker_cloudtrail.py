@@ -216,38 +216,42 @@ class taskConsumer(object):
             time.sleep(.1)
 
     def on_message(self, message):
-        returndict = dict()
+        try:
+            returndict = dict()
 
-        returndict['category'] = 'cloudtrail'
-        returndict['source'] = 'cloudtrail'
-        returndict['details'] = {}
-        returndict['utctimestamp'] = toUTC(message['eventTime']).isoformat()
-        returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
-        returndict['mozdefhostname'] = socket.gethostname()
-        returndict['hostname'] = message['eventSource']
-        returndict['processid'] = str(os.getpid())
-        returndict['processname'] = sys.argv[0]
-        returndict['severity'] = 'INFO'
-        returndict['tags'] = ['cloudtrail']
+            returndict['category'] = 'cloudtrail'
+            returndict['source'] = 'cloudtrail'
+            returndict['details'] = {}
+            returndict['utctimestamp'] = toUTC(message['eventTime']).isoformat()
+            returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
+            returndict['mozdefhostname'] = socket.gethostname()
+            returndict['hostname'] = message['eventSource']
+            returndict['processid'] = str(os.getpid())
+            returndict['processname'] = sys.argv[0]
+            returndict['severity'] = 'INFO'
+            returndict['tags'] = ['cloudtrail']
 
-        if 'sourceIPAddress' in message and 'eventName' in message and 'eventSource' in message:
-            summary_str = "{0} performed {1} in {2}".format(
-                message['sourceIPAddress'],
-                message['eventName'],
-                message['eventSource']
-            )
-            returndict['summary'] = summary_str
+            if 'sourceIPAddress' in message and 'eventName' in message and 'eventSource' in message:
+                summary_str = "{0} performed {1} in {2}".format(
+                    message['sourceIPAddress'],
+                    message['eventName'],
+                    message['eventSource']
+                )
+                returndict['summary'] = summary_str
 
-        if 'eventName' in message:
-            # Uppercase first character
-            verb_name = message['eventName'][0].upper() + message['eventName'][1:]
-            returndict['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(verb_name)[0]
-            returndict['eventReadOnly'] = (returndict['eventVerb'] in ['Describe', 'Get', 'List'])
+            if 'eventName' in message:
+                # Uppercase first character
+                verb_name = message['eventName'][0].upper() + message['eventName'][1:]
+                returndict['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(verb_name)[0]
+                returndict['eventReadOnly'] = (returndict['eventVerb'] in ['Describe', 'Get', 'List'])
 
-        # Save original message for now since we're dropping other fields
-        returndict['raw_msg'] = json.dumps(message)
+            # Save original message for now since we're dropping other fields
+            returndict['raw_msg'] = json.dumps(message)
 
-        es.save_event(body=returndict, doc_type='cloudtrail', bulk=True)
+            es.save_event(body=returndict, doc_type='cloudtrail', bulk=True)
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Malformed message: %r' % message)
 
 
 def main():
@@ -255,12 +259,12 @@ def main():
     # and process events as json.
 
     if hasUWSGI:
-        logger.info("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}".format(uwsgi.mule_id()))
     else:
-        logger.info('started without uwsgi\n')
+        logger.info('started without uwsgi')
 
     if options.mqprotocol not in ('sqs'):
-        logger.error('Can only process SQS queues, terminating\n')
+        logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
     sqs_conn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
