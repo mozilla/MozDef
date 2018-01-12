@@ -96,7 +96,6 @@ class RoleManager:
                 policy=policy).credentials
             logger.debug("Assumed new role with credential %s" % self.credentials[role_arn].to_dict())
         except Exception, e:
-            print e
             logger.error("Unable to assume role %s due to exception %s" % (role_arn, e.message))
             self.credentials[role_arn] = False
         return self.credentials[role_arn]
@@ -180,6 +179,7 @@ class taskConsumer(object):
 
                     if not event['Message']:
                         logger.error('Invalid message format for cloudtrail SQS messages')
+                        logger.error('Malformed Message: %r' % body_message)
                         continue
 
                     if event['Message'] == 'CloudTrail validation message.':
@@ -190,6 +190,7 @@ class taskConsumer(object):
 
                     if 's3ObjectKey' not in message_json.keys():
                         logger.error('Invalid message format, expecting an s3ObjectKey in Message')
+                        logger.error('Malformed Message: %r' % body_message)
                         continue
 
                     s3_log_files = message_json['s3ObjectKey']
@@ -207,9 +208,9 @@ class taskConsumer(object):
             except KeyboardInterrupt:
                 sys.exit(1)
             except ValueError as e:
-                logger.error('Exception while handling message: %r' % e)
+                logger.exception('Exception while handling message: %r' % e)
             except Exception as e:
-                logger.error('Exception received: %r' % e)
+                logger.exception(e)
                 time.sleep(3)
 
             time.sleep(.1)
@@ -254,12 +255,12 @@ def main():
     # and process events as json.
 
     if hasUWSGI:
-        sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
     else:
-        sys.stdout.write('started without uwsgi\n')
+        logger.info('started without uwsgi\n')
 
     if options.mqprotocol not in ('sqs'):
-        sys.stdout.write('Can only process SQS queues, terminating\n')
+        logger.error('Can only process SQS queues, terminating\n')
         sys.exit(1)
 
     sqs_conn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
