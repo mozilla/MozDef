@@ -133,6 +133,9 @@ class taskConsumer(object):
                     except ValueError:
                         event['summary'] = message_value
             (event, metadata) = sendEventToPlugins(event, metadata, self.pluginList)
+            # Drop message if plugins set to None
+            if event is None:
+                return
             self.save_event(event, metadata)
         except Exception as e:
             logger.exception(e)
