@@ -80,7 +80,7 @@ class PTRequestor(object):
             if maxid is None:
                 break
             if len(self._events.keys()) > self._evmax:
-                logger.warning('papertrail esworker hitting event request limit\n')
+                logger.warning('papertrail esworker hitting event request limit')
                 break
         # cache event ids we return to allow for some duplicate filtering checks
         # during next run
@@ -354,9 +354,9 @@ class taskConsumer(object):
 
 def main():
     if hasUWSGI:
-        logger.info("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}".format(uwsgi.mule_id()))
     else:
-        logger.info('started without uwsgi\n')
+        logger.info('started without uwsgi')
 
     # establish api interface with papertrail
     ptRequestor = PTRequestor(options.ptapikey, evmax=options.ptquerymax)

@@ -179,12 +179,12 @@ class taskConsumer(object):
 
 def main():
     if hasUWSGI:
-        logger.info("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}".format(uwsgi.mule_id()))
     else:
-        logger.info('started without uwsgi\n')
+        logger.info('started without uwsgi')
 
     if options.mqprotocol not in ('sqs'):
-        logger.error('Can only process SQS queues, terminating\n')
+        logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
     mqConn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
