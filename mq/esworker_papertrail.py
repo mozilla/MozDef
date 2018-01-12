@@ -30,6 +30,8 @@ from utilities.is_cef import isCEF
 
 from lib.plugins import sendEventToPlugins, registerPlugins
 
+from utilities.logger import logger, initLogger
+
 
 # running under uwsgi?
 try:
@@ -48,7 +50,6 @@ class PTRequestor(object):
         self._evmax = evmax
         self._evidcache = []
 
-
     def parse_events(self, resp):
         for x in resp['events']:
             if x['id'] in self._evidcache:
@@ -59,29 +60,27 @@ class PTRequestor(object):
             return resp['min_id']
         return None
 
-
     def makerequest(self, query, stime, etime, maxid):
         payload = {
-                'min_time': calendar.timegm(stime.utctimetuple()),
-                'max_time': calendar.timegm(etime.utctimetuple()),
-                'q': query
-                }
-        if maxid != None:
+            'min_time': calendar.timegm(stime.utctimetuple()),
+            'max_time': calendar.timegm(etime.utctimetuple()),
+            'q': query
+        }
+        if maxid is not None:
             payload['max_id'] = maxid
         hdrs = {'X-Papertrail-Token': self._apikey}
         resp = requests.get(self._papertrail_api, headers=hdrs, params=payload)
         return self.parse_events(resp.json())
-
 
     def request(self, query, stime, etime):
         self._events = {}
         maxid = None
         while True:
             maxid = self.makerequest(query, stime, etime, maxid)
-            if maxid == None:
+            if maxid is None:
                 break
             if len(self._events.keys()) > self._evmax:
-                sys.stderr.write('WARNING: papertrail esworker hitting event request limit\n')
+                logger.warning('papertrail esworker hitting event request limit\n')
                 break
         # cache event ids we return to allow for some duplicate filtering checks
         # during next run
@@ -178,8 +177,7 @@ def keyMapping(aDict):
                 else:
                     returndict[u'details'][unicode(newName)] = toUnicode(v)
 
-
-        #nxlog windows log handling
+        # nxlog windows log handling
         if 'Domain' in aDict.keys() and 'SourceModuleType' in aDict.keys():
             # add a dict to hold the details if it doesn't exist
             if 'details' not in returndict.keys():
@@ -187,14 +185,15 @@ def keyMapping(aDict):
 
             # nxlog parses all windows event fields very well
             # copy all fields to details
-            returndict[u'details'][k]=v
+            returndict[u'details'][k] = v
 
         if 'utctimestamp' not in returndict.keys():
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
     except Exception as e:
-        sys.stderr.write('esworker exception normalizing the message %r\n' % e)
+        logger.exception('Received exception while normalizing message: %r' % e)
+        logger.error('Malformed message: %r' % aDict)
         return None
 
     return returndict
@@ -237,19 +236,19 @@ class taskConsumer(object):
                     event['tags'] = ['papertrail', options.ptacctname]
                     event['details'] = msgdict
 
-                    if event['details'].has_key('generated_at'):
+                    if 'generated_at' in event['details']:
                         event['utctimestamp'] = toUTC(event['details']['generated_at']).isoformat()
-                    if event['details'].has_key('hostname'):
+                    if 'hostname' in event['details']:
                         event['hostname'] = event['details']['hostname']
-                    if event['details'].has_key('message'):
+                    if 'message' in event['details']:
                         event['summary'] = event['details']['message']
-                    if event['details'].has_key('severity'):
+                    if 'severity' in event['details']:
                         event['severity'] = event['details']['severity']
                     else:
                         event['severity'] = 'INFO'
                     event['category'] = 'syslog'
 
-                    #process message
+                    # process message
                     self.on_message(event, msgdict)
 
                 time.sleep(options.ptinterval)
@@ -257,11 +256,11 @@ class taskConsumer(object):
             except KeyboardInterrupt:
                 sys.exit(1)
             except ValueError as e:
-                sys.stdout.write('Exception while handling message: %r'%e)
+                logger.exception('Exception while handling message: %r' % e)
                 sys.exit(1)
 
     def on_message(self, body, message):
-        #print("RECEIVED MESSAGE: %r" % (body, ))
+        # print("RECEIVED MESSAGE: %r" % (body, ))
         try:
             # default elastic search metadata for an event
             metadata = {
@@ -277,12 +276,12 @@ class taskConsumer(object):
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
-                    sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
-                    #message.ack()
+                    logger.error("esworker exception: unknown body type received %r" % body)
+                    # message.ack()
                     return
             else:
-                sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
-                #message.ack()
+                logger.error("esworker exception: unknown body type received %r" % body)
+                # message.ack()
                 return
 
             if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
@@ -301,7 +300,7 @@ class taskConsumer(object):
             # drop the message if a plug in set it to None
             # signaling a discard
             if normalizedDict is None:
-                #message.ack()
+                # message.ack()
                 return
 
             # make a json version for posting to elastic search
@@ -320,7 +319,7 @@ class taskConsumer(object):
                 if options.esbulksize != 0:
                     bulk = True
 
-                res = self.esConnection.save_event(
+                self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
                     doc_type=metadata['doc_type'],
@@ -332,7 +331,7 @@ class taskConsumer(object):
                 # handle loss of server or race condition with index rotation/creation/aliasing
                 try:
                     self.esConnection = esConnect()
-                    #message.requeue()
+                    # message.requeue()
                     return
                 except kombu.exceptions.MessageStateError:
                     # state may be already set.
@@ -340,23 +339,24 @@ class taskConsumer(object):
             except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
                 try:
-                    sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
-                    #message.requeue()
+                    logger.exception('ElasticSearchException: {0} reported while indexing event'.format(e))
+                    # message.requeue()
                     return
                 except kombu.exceptions.MessageStateError:
                     # state may be already set.
                     return
 
-            #message.ack()
-        except ValueError as e:
-            sys.stderr.write("esworker exception in events queue %r\n" % e)
+            # message.ack()
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Malformed message body: %r' % body)
 
 
 def main():
     if hasUWSGI:
-        sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
     else:
-        sys.stdout.write('started without uwsgi\n')
+        logger.info('started without uwsgi\n')
 
     # establish api interface with papertrail
     ptRequestor = PTRequestor(options.ptapikey, evmax=options.ptquerymax)
@@ -365,9 +365,8 @@ def main():
     taskConsumer(ptRequestor, es).run()
 
 
-
 def initConfig():
-    #capture the hostname
+    # capture the hostname
     options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
@@ -397,6 +396,7 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
+    initLogger(options)
 
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
