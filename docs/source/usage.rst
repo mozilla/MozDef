@@ -197,9 +197,10 @@ Mandatory Fields
 |                 | the event in ISO format including   |                                   |
 |                 | the timezone offset                 |                                   |
 +-----------------+-------------------------------------+-----------------------------------+
-|receivedtimestamp| Full UTC date plus time timestamp of| 2014-01-30T13:24:43+00:00         |
-|                 | the event in ISO format when mozdef |                                   |
-|                 | received the event                  |                                   |
+|receivedtimestamp| Full UTC date plus time timestamp in| 2014-01-30T13:24:43+00:00         |
+|                 | ISO format when mozdef parses the   |                                   |
+|                 | event. This is set by mozdef upon   |                                   |
+|                 | receipt of the event                |                                   |
 +-----------------+-------------------------------------+-----------------------------------+
 
 Details substructure (mandatory if such data is sent, otherwise optional)
