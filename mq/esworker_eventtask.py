@@ -8,22 +8,24 @@
 
 import json
 import kombu
-import math
 import os
-import pynsive
 import sys
 import socket
 from configlib import getConfig, OptionParser
-from datetime import datetime, timedelta
-from operator import itemgetter
+from datetime import datetime
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 
-import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from utilities.toUTC import toUTC
+from utilities.logger import logger, initLogger
+from utilities.to_unicode import toUnicode
+from utilities.remove_at import removeAt
+from utilities.is_cef import isCEF
+
+from lib.plugins import sendEventToPlugins, registerPlugins
 
 
 # running under uwsgi?
@@ -32,39 +34,6 @@ try:
     hasUWSGI = True
 except ImportError as e:
     hasUWSGI = False
-
-
-def removeAt(astring):
-    '''remove the leading @ from a string'''
-    return astring.replace('@', '')
-
-
-def isCEF(aDict):
-    # determine if this is a CEF event
-    # could be an event posted to the /cef http endpoint
-    if 'endpoint' in aDict.keys() and aDict['endpoint'] == 'cef':
-        return True
-    # maybe it snuck in some other way
-    # check some key CEF indicators (the header fields)
-    if 'fields' in aDict.keys() and isinstance(aDict['fields'], dict):
-        lowerKeys = [s.lower() for s in aDict['fields'].keys()]
-        if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
-            return True
-    if 'details' in aDict.keys() and isinstance(aDict['details'], dict):
-        lowerKeys = [s.lower() for s in aDict['details'].keys()]
-        if 'devicevendor' in lowerKeys and 'deviceproduct' in lowerKeys and 'deviceversion' in lowerKeys:
-            return True
-    return False
-
-
-def toUnicode(obj, encoding='utf-8'):
-    if type(obj) in [int, long, float, complex]:
-        # likely a number, convert it to string to get to unicode
-        obj = str(obj)
-    if isinstance(obj, basestring):
-        if not isinstance(obj, unicode):
-            obj = unicode(obj, encoding)
-    return obj
 
 
 def keyMapping(aDict):
@@ -169,8 +138,7 @@ def keyMapping(aDict):
                 else:
                     returndict[u'details'][unicode(newName)] = toUnicode(v)
 
-
-        #nxlog windows log handling
+        # nxlog windows log handling
         if 'Domain' in aDict.keys() and 'SourceModuleType' in aDict.keys():
             # add a dict to hold the details if it doesn't exist
             if 'details' not in returndict.keys():
@@ -178,14 +146,15 @@ def keyMapping(aDict):
 
             # nxlog parses all windows event fields very well
             # copy all fields to details
-            returndict[u'details'][k]=v
+            returndict[u'details'][k] = v
 
         if 'utctimestamp' not in returndict.keys():
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
     except Exception as e:
-        sys.stderr.write('esworker exception normalizing the message %r\n' % e)
+        logger.exception('Received exception while normalizing message: %r' % e)
+        logger.error('Malformed message: %r' % aDict)
         return None
 
     return returndict
@@ -235,11 +204,11 @@ class taskConsumer(ConsumerMixin):
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
-                    sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                    logger.error("Exception: unknown body type received: %r" % body)
                     message.ack()
                     return
             else:
-                sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                logger.error("Exception: unknown body type received: %r" % body)
                 message.ack()
                 return
 
@@ -278,7 +247,7 @@ class taskConsumer(ConsumerMixin):
                 if options.esbulksize != 0:
                     bulk = True
 
-                res = self.esConnection.save_event(
+                self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
                     doc_type=metadata['doc_type'],
@@ -298,7 +267,8 @@ class taskConsumer(ConsumerMixin):
             except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
                 try:
-                    sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
+                    logger.exception('ElasticSearchException while indexing event: %r' % e)
+                    logger.error('Malformed message body: %r' % body)
                     message.requeue()
                     return
                 except kombu.exceptions.MessageStateError:
@@ -309,151 +279,9 @@ class taskConsumer(ConsumerMixin):
             # ensurePublish = self.connection.ensure(self.mqproducer, self.mqproducer.publish, max_retries=10)
             # ensurePublish(normalizedDict, exchange=self.topicExchange, routing_key='mozdef.event')
             message.ack()
-        except ValueError as e:
-            sys.stderr.write("esworker exception in events queue %r\n" % e)
-
-
-def registerPlugins():
-    pluginList = list()   # tuple of module,registration dict,priority
-    plugin_manager = pynsive.PluginManager()
-    if os.path.exists('plugins'):
-        modules = pynsive.list_modules('plugins')
-        for mname in modules:
-            module = pynsive.import_module(mname)
-            reload(module)
-            if not module:
-                raise ImportError('Unable to load module {}'.format(mname))
-            else:
-                if 'message' in dir(module):
-                    mclass = module.message()
-                    mreg = mclass.registration
-                    if 'priority' in dir(mclass):
-                        mpriority = mclass.priority
-                    else:
-                        mpriority = 100
-                    if isinstance(mreg, list):
-                        print('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
-                        pluginList.append((mclass, mreg, mpriority))
-    return pluginList
-
-
-def checkPlugins(pluginList, lastPluginCheck):
-    if abs(datetime.now() - lastPluginCheck).seconds > options.plugincheckfrequency:
-        # print('[*] checking plugins')
-        lastPluginCheck = datetime.now()
-        pluginList = registerPlugins()
-        return pluginList, lastPluginCheck
-    else:
-        return pluginList, lastPluginCheck
-
-
-def flattenDict(inDict, pre=None, values=True):
-    '''given a dictionary, potentially with multiple sub dictionaries
-       return a period delimited version of the dict with or without values
-       i.e. {'something':'value'} becomes something=value
-            {'something':{'else':'value'}} becomes something.else=value
-    '''
-    pre = pre[:] if pre else []
-    if isinstance(inDict, dict):
-        for key, value in inDict.iteritems():
-            if isinstance(value, dict):
-                for d in flattenDict(value, pre + [key], values):
-                    yield d
-            else:
-                if pre:
-                    if values:
-                        if isinstance(value, str):
-                            yield '.'.join(pre) + '.' + key + '=' + str(value)
-                        elif isinstance(value, unicode):
-                            yield '.'.join(pre) + '.' + key + '=' + value.encode('ascii', 'ignore')
-                        elif value is None:
-                            yield '.'.join(pre) + '.' + key + '=None'
-                    else:
-                        yield '.'.join(pre) + '.' + key
-                else:
-                    if values:
-                        if isinstance(value, str):
-                            yield key + '=' + str(value)
-                        elif isinstance(value, unicode):
-                            yield key + '=' + value.encode('ascii', 'ignore')
-                        elif value is None:
-                            yield key + '=None'
-                    else:
-                        yield key
-    else:
-        yield '-'.join(pre) + '.' + inDict
-
-
-def dict2List(inObj):
-    '''given a dictionary, potentially with multiple sub dictionaries
-       return a list of the dict keys and values
-    '''
-    if isinstance(inObj, dict):
-        for key, value in inObj.iteritems():
-            if isinstance(value, dict):
-                for d in dict2List(value):
-                    yield d
-            elif isinstance(value, list):
-                yield key.encode('ascii', 'ignore').lower()
-                for l in dict2List(value):
-                    yield l
-            else:
-                yield key.encode('ascii', 'ignore').lower()
-                if isinstance(value, str):
-                    yield value.lower()
-                elif isinstance(value, unicode):
-                    yield value.encode('ascii', 'ignore').lower()
-                else:
-                    yield value
-    elif isinstance(inObj, list):
-        for v in inObj:
-            if isinstance(v, str):
-                yield v.lower()
-            elif isinstance(v, unicode):
-                yield v.encode('ascii', 'ignore').lower()
-            elif isinstance(v, list):
-                for l in dict2List(v):
-                    yield l
-            elif isinstance(v,dict):
-                for d in dict2List(v):
-                    yield d
-            else:
-                yield v
-    else:
-        yield ''
-
-
-def sendEventToPlugins(anevent, metadata, pluginList):
-    '''compare the event to the plugin registrations.
-       plugins register with a list of keys or values
-       or values they want to match on
-       this function compares that registration list
-       to the current event and sends the event to plugins
-       in order
-    '''
-    if not isinstance(anevent, dict):
-        raise TypeError('event is type {0}, should be a dict'.format(type(anevent)))
-
-    # expecting tuple of module,criteria,priority in pluginList
-    # sort the plugin list by priority
-    for plugin in sorted(pluginList, key=itemgetter(2), reverse=False):
-        # assume we don't run this event through the plugin
-        send = False
-        if isinstance(plugin[1], list):
-            try:
-                if (set(plugin[1]).intersection([e for e in dict2List(anevent)])):
-                    send = True
-            except TypeError:
-                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
-                return (anevent, metadata)
-        if send:
-            (anevent, metadata) = plugin[0].onMessage(anevent, metadata)
-            if anevent is None:
-                # plug-in is signalling to drop this message
-                # early exit
-                return (anevent, metadata)
-
-    return (anevent, metadata)
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Malformed message body: %r' % body)
 
 
 def main():
@@ -486,15 +314,15 @@ def main():
     eventTopicExchange(mqConn).declare()
 
     if hasUWSGI:
-        sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}".format(uwsgi.mule_id()))
     else:
-        sys.stdout.write('started without uwsgi\n')
+        logger.info('started without uwsgi')
     # consume our queue and publish on the topic exchange
     taskConsumer(mqConn, eventTaskQueue, eventTopicExchange, es).run()
 
 
 def initConfig():
-    #capture the hostname
+    # capture the hostname
     options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
@@ -533,13 +361,11 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
+    initLogger(options)
 
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
 
-    # force a check for plugins and establish the plugin list
-    pluginList = list()
-    lastPluginCheck = datetime.now()-timedelta(minutes=60)
-    pluginList, lastPluginCheck = checkPlugins(pluginList, lastPluginCheck)
+    pluginList = registerPlugins()
 
     main()

@@ -5,6 +5,9 @@
 
 import hashlib
 import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
+from utilities.logger import logger
 
 
 class message(object):
@@ -12,7 +15,7 @@ class message(object):
         self.registration = ['complianceitems']
         self.priority = 20
 
-    def validate(self,item):
+    def validate(self, item):
         """
             Validate that a compliance item has all the necessary keys
         """
@@ -31,7 +34,7 @@ class message(object):
                 return False
         return True
 
-    def cleanup_item(self,item):
+    def cleanup_item(self, item):
         ci = {}
         ci['target'] = item['target']
         ci['policy'] = {}
@@ -61,7 +64,7 @@ class message(object):
             index, with doctype last_known_state
         """
         if not self.validate(message['details']):
-            sys.stderr.write('error: invalid format for complianceitem {0}'.format(message))
+            logger.error('Invalid format for complianceitem {0}'.format(message))
             return (None, None)
         item = self.cleanup_item(message['details'])
         docidstr = 'complianceitems'

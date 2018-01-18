@@ -8,13 +8,11 @@
 
 import json
 import os
-import pynsive
 import sys
 import socket
 import time
 from configlib import getConfig, OptionParser
-from datetime import datetime, timedelta
-from operator import itemgetter
+from datetime import datetime
 import boto.sqs
 import boto.sts
 import boto.s3
@@ -24,13 +22,11 @@ from StringIO import StringIO
 from threading import Timer
 import re
 
-
-import sys
-import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient
 from utilities.logger import logger, initLogger
+
 
 CLOUDTRAIL_VERB_REGEX = re.compile(r'^([A-Z][^A-Z]*)')
 
@@ -100,7 +96,6 @@ class RoleManager:
                 policy=policy).credentials
             logger.debug("Assumed new role with credential %s" % self.credentials[role_arn].to_dict())
         except Exception, e:
-            print e
             logger.error("Unable to assume role %s due to exception %s" % (role_arn, e.message))
             self.credentials[role_arn] = False
         return self.credentials[role_arn]
@@ -184,6 +179,7 @@ class taskConsumer(object):
 
                     if not event['Message']:
                         logger.error('Invalid message format for cloudtrail SQS messages')
+                        logger.error('Malformed Message: %r' % body_message)
                         continue
 
                     if event['Message'] == 'CloudTrail validation message.':
@@ -194,6 +190,7 @@ class taskConsumer(object):
 
                     if 's3ObjectKey' not in message_json.keys():
                         logger.error('Invalid message format, expecting an s3ObjectKey in Message')
+                        logger.error('Malformed Message: %r' % body_message)
                         continue
 
                     s3_log_files = message_json['s3ObjectKey']
@@ -211,151 +208,50 @@ class taskConsumer(object):
             except KeyboardInterrupt:
                 sys.exit(1)
             except ValueError as e:
-                logger.error('Exception while handling message: %r' % e)
+                logger.exception('Exception while handling message: %r' % e)
             except Exception as e:
-                logger.error('Exception received: %r' % e)
+                logger.exception(e)
                 time.sleep(3)
 
             time.sleep(.1)
 
     def on_message(self, message):
-        returndict = dict()
+        try:
+            returndict = dict()
 
-        returndict['category'] = 'cloudtrail'
-        returndict['source'] = 'cloudtrail'
-        returndict['details'] = {}
-        returndict['utctimestamp'] = toUTC(message['eventTime']).isoformat()
-        returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
-        returndict['mozdefhostname'] = socket.gethostname()
-        returndict['hostname'] = message['eventSource']
-        returndict['processid'] = str(os.getpid())
-        returndict['processname'] = sys.argv[0]
-        returndict['severity'] = 'INFO'
-        returndict['tags'] = ['cloudtrail']
+            returndict['category'] = 'cloudtrail'
+            returndict['source'] = 'cloudtrail'
+            returndict['details'] = {}
+            returndict['utctimestamp'] = toUTC(message['eventTime']).isoformat()
+            returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
+            returndict['mozdefhostname'] = socket.gethostname()
+            returndict['hostname'] = message['eventSource']
+            returndict['processid'] = str(os.getpid())
+            returndict['processname'] = sys.argv[0]
+            returndict['severity'] = 'INFO'
+            returndict['tags'] = ['cloudtrail']
 
-        if 'sourceIPAddress' in message and 'eventName' in message and 'eventSource' in message:
-            summary_str = "{0} performed {1} in {2}".format(
-                message['sourceIPAddress'],
-                message['eventName'],
-                message['eventSource']
-            )
-            returndict['summary'] = summary_str
+            if 'sourceIPAddress' in message and 'eventName' in message and 'eventSource' in message:
+                summary_str = "{0} performed {1} in {2}".format(
+                    message['sourceIPAddress'],
+                    message['eventName'],
+                    message['eventSource']
+                )
+                returndict['summary'] = summary_str
 
-        if 'eventName' in message:
-            # Uppercase first character
-            verb_name = message['eventName'][0].upper() + message['eventName'][1:]
-            returndict['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(verb_name)[0]
-            returndict['eventReadOnly'] = (returndict['eventVerb'] in ['Describe', 'Get', 'List'])
+            if 'eventName' in message:
+                # Uppercase first character
+                verb_name = message['eventName'][0].upper() + message['eventName'][1:]
+                returndict['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(verb_name)[0]
+                returndict['eventReadOnly'] = (returndict['eventVerb'] in ['Describe', 'Get', 'List'])
 
-        # Save original message for now since we're dropping other fields
-        returndict['raw_msg'] = json.dumps(message)
+            # Save original message for now since we're dropping other fields
+            returndict['raw_msg'] = json.dumps(message)
 
-        es.save_event(body=returndict, doc_type='cloudtrail', bulk=True)
-
-
-def registerPlugins():
-    pluginList = list()   # tuple of module,registration dict,priority
-    if os.path.exists('plugins'):
-        modules = pynsive.list_modules('plugins')
-        for mname in modules:
-            module = pynsive.import_module(mname)
-            reload(module)
-            if not module:
-                raise ImportError('Unable to load module {}'.format(mname))
-            else:
-                if 'message' in dir(module):
-                    mclass = module.message()
-                    mreg = mclass.registration
-                    if 'priority' in dir(mclass):
-                        mpriority = mclass.priority
-                    else:
-                        mpriority = 100
-                    if isinstance(mreg, list):
-                        print('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
-                        pluginList.append((mclass, mreg, mpriority))
-    return pluginList
-
-
-def checkPlugins(pluginList, lastPluginCheck):
-    if abs(datetime.now() - lastPluginCheck).seconds > options.plugincheckfrequency:
-        # print('[*] checking plugins')
-        lastPluginCheck = datetime.now()
-        pluginList = registerPlugins()
-        return pluginList, lastPluginCheck
-    else:
-        return pluginList, lastPluginCheck
-
-
-def dict2List(inObj):
-    '''given a dictionary, potentially with multiple sub dictionaries
-       return a list of the dict keys and values
-    '''
-    if isinstance(inObj, dict):
-        for key, value in inObj.iteritems():
-            if isinstance(value, dict):
-                for d in dict2List(value):
-                    yield d
-            elif isinstance(value, list):
-                yield key.encode('ascii', 'ignore').lower()
-                for l in dict2List(value):
-                    yield l
-            else:
-                yield key.encode('ascii', 'ignore').lower()
-                if isinstance(value, str):
-                    yield value.lower()
-                elif isinstance(value, unicode):
-                    yield value.encode('ascii', 'ignore').lower()
-                else:
-                    yield value
-    elif isinstance(inObj, list):
-        for v in inObj:
-            if isinstance(v, str):
-                yield v.lower()
-            elif isinstance(v, unicode):
-                yield v.encode('ascii', 'ignore').lower()
-            elif isinstance(v, list):
-                for l in dict2List(v):
-                    yield l
-            elif isinstance(v, dict):
-                for d in dict2List(v):
-                    yield d
-            else:
-                yield v
-    else:
-        yield ''
-
-
-def sendEventToPlugins(anevent, metadata, pluginList):
-    '''compare the event to the plugin registrations.
-       plugins register with a list of keys or values
-       or values they want to match on
-       this function compares that registration list
-       to the current event and sends the event to plugins
-       in order
-    '''
-    if not isinstance(anevent, dict):
-        raise TypeError('event is type {0}, should be a dict'.format(type(anevent)))
-
-    # expecting tuple of module,criteria,priority in pluginList
-    # sort the plugin list by priority
-    for plugin in sorted(pluginList, key=itemgetter(2), reverse=False):
-        # assume we don't run this event through the plugin
-        send = False
-        if isinstance(plugin[1], list):
-            try:
-                if (set(plugin[1]).intersection([e for e in dict2List(anevent)])):
-                    send = True
-            except TypeError:
-                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
-                return (anevent, metadata)
-        if send:
-            (anevent, metadata) = plugin[0].onMessage(anevent, metadata)
-            if anevent is None:
-                # plug-in is signalling to drop this message
-                # early exit
-                return (anevent, metadata)
-
-    return (anevent, metadata)
+            es.save_event(body=returndict, doc_type='cloudtrail', bulk=True)
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Malformed message: %r' % message)
 
 
 def main():
@@ -363,12 +259,12 @@ def main():
     # and process events as json.
 
     if hasUWSGI:
-        sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}".format(uwsgi.mule_id()))
     else:
-        sys.stdout.write('started without uwsgi\n')
+        logger.info('started without uwsgi')
 
     if options.mqprotocol not in ('sqs'):
-        sys.stdout.write('Can only process SQS queues, terminating\n')
+        logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
     sqs_conn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
@@ -438,8 +334,4 @@ if __name__ == '__main__':
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
 
-    # force a check for plugins and establish the plugin list
-    pluginList = list()
-    lastPluginCheck = datetime.now() - timedelta(minutes=60)
-    pluginList, lastPluginCheck = checkPlugins(pluginList, lastPluginCheck)
     main()
