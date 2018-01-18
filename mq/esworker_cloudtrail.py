@@ -10,7 +10,6 @@ import json
 import os
 import sys
 import socket
-import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 import boto.sqs
@@ -21,11 +20,16 @@ import gzip
 from StringIO import StringIO
 from threading import Timer
 import re
+import time
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
+from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 from utilities.logger import logger, initLogger
+from utilities.to_unicode import toUnicode
+from utilities.remove_at import removeAt
+
+from lib.plugins import sendEventToPlugins, registerPlugins
 
 
 CLOUDTRAIL_VERB_REGEX = re.compile(r'^([A-Z][^A-Z]*)')
@@ -96,6 +100,7 @@ class RoleManager:
                 policy=policy).credentials
             logger.debug("Assumed new role with credential %s" % self.credentials[role_arn].to_dict())
         except Exception, e:
+            print e
             logger.error("Unable to assume role %s due to exception %s" % (role_arn, e.message))
             self.credentials[role_arn] = False
         return self.credentials[role_arn]
@@ -117,6 +122,138 @@ class RoleManager:
             'aws_access_key_id': credential.access_key,
             'aws_secret_access_key': credential.secret_key,
             'security_token': credential.session_token} if credential else {}
+
+
+def keyMapping(aDict):
+    '''map common key/fields to a normalized structure,
+       explicitly typed when possible to avoid schema changes for upsteam consumers
+       Special accomodations made for logstash,nxlog, beaver, heka and CEF
+       Some shippers attempt to conform to logstash-style @fieldname convention.
+       This strips the leading at symbol since it breaks some elastic search
+       libraries like elasticutils.
+    '''
+    returndict = dict()
+
+    returndict['source'] = 'cloudtrail'
+    returndict['details'] = {}
+    returndict['category'] = 'cloudtrail'
+    returndict['processid'] = str(os.getpid())
+    returndict['processname'] = sys.argv[0]
+    returndict['severity'] = 'INFO'
+    if 'sourceIPAddress' in aDict and 'eventName' in aDict and 'eventSource' in aDict:
+        summary_str = "{0} performed {1} in {2}".format(
+            aDict['sourceIPAddress'],
+            aDict['eventName'],
+            aDict['eventSource']
+        )
+        returndict['summary'] = summary_str
+
+    if 'eventName' in aDict:
+        # Uppercase first character
+        aDict['eventName'] = aDict['eventName'][0].upper() + aDict['eventName'][1:]
+        returndict['details']['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(aDict['eventName'])[0]
+        returndict['details']['eventReadOnly'] = (returndict['details']['eventVerb'] in ['Describe', 'Get', 'List'])
+    # set the timestamp when we received it, i.e. now
+    returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
+    returndict['mozdefhostname'] = options.mozdefhostname
+    try:
+        for k, v in aDict.iteritems():
+            k = removeAt(k).lower()
+
+            if k == 'sourceip':
+                returndict[u'details']['sourceipaddress'] = v
+
+            elif k == 'sourceipaddress':
+                returndict[u'details']['sourceipaddress'] = v
+
+            elif k == 'facility':
+                returndict[u'source'] = v
+
+            elif k in ('eventsource'):
+                returndict[u'hostname'] = v
+
+            elif k in ('message', 'summary'):
+                returndict[u'summary'] = toUnicode(v)
+
+            elif k in ('payload') and 'summary' not in aDict.keys():
+                # special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
+                returndict[u'summary'] = toUnicode(v)
+            elif k in ('payload'):
+                returndict[u'details']['payload'] = toUnicode(v)
+
+            elif k in ('eventtime', 'timestamp', 'utctimestamp', 'date'):
+                returndict[u'utctimestamp'] = toUTC(v).isoformat()
+                returndict[u'timestamp'] = toUTC(v).isoformat()
+
+            elif k in ('hostname', 'source_host', 'host'):
+                returndict[u'hostname'] = toUnicode(v)
+
+            elif k in ('tags'):
+                if 'tags' not in returndict.keys():
+                    returndict[u'tags'] = []
+                if type(v) == list:
+                    returndict[u'tags'] += v
+                else:
+                    if len(v) > 0:
+                        returndict[u'tags'].append(v)
+
+            # nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
+            elif k in ('syslogseverity', 'severity', 'severityvalue', 'level', 'priority'):
+                returndict[u'severity'] = toUnicode(v).upper()
+
+            elif k in ('facility', 'syslogfacility'):
+                returndict[u'facility'] = toUnicode(v)
+
+            elif k in ('pid', 'processid'):
+                returndict[u'processid'] = toUnicode(v)
+
+            # nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
+            elif k in ('pname', 'processname', 'sourcename', 'program'):
+                returndict[u'processname'] = toUnicode(v)
+
+            # the file, or source
+            elif k in ('path', 'logger', 'file'):
+                returndict[u'eventsource'] = toUnicode(v)
+
+            elif k in ('type', 'eventtype', 'category'):
+                returndict[u'category'] = toUnicode(v)
+
+            # custom fields as a list/array
+            elif k in ('fields', 'details'):
+                if len(v) > 0:
+                    returndict[u'details'] = v
+
+            # custom fields/details as a one off, not in an array
+            # i.e. fields.something=value or details.something=value
+            # move them to a dict for consistency in querying
+            elif k.startswith('fields.') or k.startswith('details.'):
+                newName = k.replace('fields.', '')
+                newName = newName.lower().replace('details.', '')
+                # add a dict to hold the details if it doesn't exist
+                if 'details' not in returndict.keys():
+                    returndict[u'details'] = dict()
+                # add field with a special case for shippers that
+                # don't send details
+                # in an array as int/floats/strings
+                # we let them dictate the data type with field_datatype
+                # convention
+                if newName.endswith('_int'):
+                    returndict[u'details'][unicode(newName)] = int(v)
+                elif newName.endswith('_float'):
+                    returndict[u'details'][unicode(newName)] = float(v)
+                else:
+                    returndict[u'details'][unicode(newName)] = toUnicode(v)
+            else:
+                returndict[u'details'][k] = v
+
+        if 'utctimestamp' not in returndict.keys():
+            # default in case we don't find a reasonable timestamp
+            returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
+    except Exception as e:
+        logger.exception(e)
+        logger.error('Malformed message: %r' % aDict)
+
+    return returndict
 
 
 def esConnect():
@@ -207,51 +344,100 @@ class taskConsumer(object):
 
             except KeyboardInterrupt:
                 sys.exit(1)
-            except ValueError as e:
-                logger.exception('Exception while handling message: %r' % e)
             except Exception as e:
                 logger.exception(e)
                 time.sleep(3)
 
             time.sleep(.1)
 
-    def on_message(self, message):
+    def on_message(self, body):
+        # print("RECEIVED MESSAGE: %r" % (body, ))
         try:
-            returndict = dict()
+            # default elastic search metadata for an event
+            metadata = {
+                'index': 'events',
+                'doc_type': 'cloudtrail',
+                'id': None
+            }
+            # just to be safe..check what we were sent.
+            if isinstance(body, dict):
+                bodyDict = body
+            elif isinstance(body, str) or isinstance(body, unicode):
+                try:
+                    bodyDict = json.loads(body)   # lets assume it's json
+                except ValueError as e:
+                    # not json..ack but log the message
+                    logger.error("Unknown body type received %r" % body)
+                    return
+            else:
+                logger.error("Unknown body type received %r\n" % body)
+                return
 
-            returndict['category'] = 'cloudtrail'
-            returndict['source'] = 'cloudtrail'
-            returndict['details'] = {}
-            returndict['utctimestamp'] = toUTC(message['eventTime']).isoformat()
-            returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
-            returndict['mozdefhostname'] = socket.gethostname()
-            returndict['hostname'] = message['eventSource']
-            returndict['processid'] = str(os.getpid())
-            returndict['processname'] = sys.argv[0]
-            returndict['severity'] = 'INFO'
-            returndict['tags'] = ['cloudtrail']
+            if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
+                # custom document
+                # send to plugins to allow them to modify it if needed
+                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
+            else:
+                # normalize the dict
+                # to the mozdef events standard
+                normalizedDict = keyMapping(bodyDict)
 
-            if 'sourceIPAddress' in message and 'eventName' in message and 'eventSource' in message:
-                summary_str = "{0} performed {1} in {2}".format(
-                    message['sourceIPAddress'],
-                    message['eventName'],
-                    message['eventSource']
+                # send to plugins to allow them to modify it if needed
+                if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
+                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
+
+            # drop the message if a plug in set it to None
+            # signaling a discard
+            if normalizedDict is None:
+                return
+
+            # This handles the fact that cloudtrail sends
+            # inconsistent data types in the iamInstanceProfile field
+            if 'details' in normalizedDict:
+                if 'requestparameters' in normalizedDict['details']:
+                    if normalizedDict['details']['requestparameters'] is not None and 'iamInstanceProfile' in normalizedDict['details']['requestparameters']:
+                        iam_instance_profile = normalizedDict['details']['requestparameters']['iamInstanceProfile']
+                        if type(iam_instance_profile) is not dict:
+                            normalizedDict['details']['requestparameters']['iamInstanceProfile'] = {
+                                'name': iam_instance_profile
+                            }
+
+            # make a json version for posting to elastic search
+            jbody = json.JSONEncoder().encode(normalizedDict)
+
+            try:
+                bulk = False
+                if options.esbulksize != 0:
+                    bulk = True
+
+                bulk = False
+                self.esConnection.save_event(
+                    index=metadata['index'],
+                    doc_id=metadata['id'],
+                    doc_type=metadata['doc_type'],
+                    body=jbody,
+                    bulk=bulk
                 )
-                returndict['summary'] = summary_str
 
-            if 'eventName' in message:
-                # Uppercase first character
-                verb_name = message['eventName'][0].upper() + message['eventName'][1:]
-                returndict['eventVerb'] = CLOUDTRAIL_VERB_REGEX.findall(verb_name)[0]
-                returndict['eventReadOnly'] = (returndict['eventVerb'] in ['Describe', 'Get', 'List'])
-
-            # Save original message for now since we're dropping other fields
-            returndict['raw_msg'] = json.dumps(message)
-
-            es.save_event(body=returndict, doc_type='cloudtrail', bulk=True)
+            except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
+                # handle loss of server or race condition with index rotation/creation/aliasing
+                try:
+                    self.esConnection = esConnect()
+                    return
+                except kombu.exceptions.MessageStateError:
+                    # state may be already set.
+                    return
+            except ElasticsearchException as e:
+                # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
+                try:
+                    logger.exception('ElasticSearchException: {0} reported while indexing event'.format(e))
+                    return
+                except kombu.exceptions.MessageStateError:
+                    # state may be already set.
+                    return
         except Exception as e:
             logger.exception(e)
-            logger.error('Malformed message: %r' % message)
+            logger.error('Malformed message: %r' % body)
 
 
 def main():
@@ -276,6 +462,9 @@ def main():
 
 
 def initConfig():
+    # capture the hostname
+    options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
+
     # output our log to stdout or syslog
     options.output = getConfig('output', 'stdout', options.configfile)
     options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)
@@ -302,22 +491,10 @@ def initConfig():
     options.mqport = getConfig('mqport', 5672, options.configfile)
     options.mqvhost = getConfig('mqvhost', '/', options.configfile)
 
-    # rabbit: run with message acking?
-    # also toggles transient/persistant delivery (messages in memory only or stored on disk)
-    # ack=True sets persistant delivery, False sets transient delivery
-    options.mqack = getConfig('mqack', True, options.configfile)
-
     # aws options
     options.accesskey = getConfig('accesskey', '', options.configfile)
     options.secretkey = getConfig('secretkey', '', options.configfile)
     options.region = getConfig('region', 'us-west-1', options.configfile)
-
-    # plugin options
-    # secs to pass before checking for new/updated plugins
-    # seems to cause memory leaks..
-    # regular updates are disabled for now,
-    # though we set the frequency anyway.
-    options.plugincheckfrequency = getConfig('plugincheckfrequency', 120, options.configfile)
 
     # This is the full ARN that the s3 bucket lives under
     options.cloudtrail_arn = getConfig('cloudtrail_arn', 'cloudtrail_arn', options.configfile)
@@ -334,4 +511,5 @@ if __name__ == '__main__':
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
 
+    pluginList = registerPlugins()
     main()
