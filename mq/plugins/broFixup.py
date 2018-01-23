@@ -55,18 +55,20 @@ class message(object):
 
 
     def onMessage(self, message, metadata):
-        
+
         # make sure I really wanted to see this message
         # bail out early if not
         if u'customendpoint' not in message:
+            #message['customendpoint'] = ''
             return message, metadata
         if u'category' not in message:
+            #message['category'] = 'DUPA'
             return message, metadata
         if u'source' not in message:
+            #message['source'] = 'conn'
             return message, metadata
         if message['category'] != 'bro':
             return message, metadata
-        
 
         # set the doc type to bro
         # to avoid data type conflicts with other doc types
@@ -81,11 +83,10 @@ class message(object):
         newmessage['details'] = message
 
         newmessage['customendpoint'] = 'bro'
-
         # move some fields that are expected at the event 'root' where they belong
-        if 'hostname' in newmessage['details']:
-            newmessage['hostname'] = newmessage['details']['hostname']
-            del(newmessage['details']['hostname'])
+        if 'host' in newmessage['details']:
+            newmessage['hostname'] = newmessage['details']['host']
+            del(newmessage['details']['host'])
         if 'tags' in newmessage['details']:
             newmessage['tags'] = newmessage['details']['tags']
             del(newmessage['details']['tags'])
@@ -98,11 +99,10 @@ class message(object):
             newmessage['source'] = newmessage['details']['source']
             del(newmessage['details']['source'])
 
-
         # add mandatory fields
         if 'ts' in newmessage['details']:
-            newmessage[u'utctimestamp'] = toUTC(newmessage['details']['ts']).isoformat()
-            newmessage[u'timestamp'] = toUTC(newmessage['details']['ts']).isoformat()
+            newmessage[u'utctimestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
+            newmessage[u'timestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
         else:
             # a malformed message somehow managed to crawl to us, let's put it somewhat together
             newmessage[u'utctimestamp'] = toUTC(datetime.now()).isoformat()
@@ -112,6 +112,19 @@ class message(object):
         newmessage[u'eventsource'] = u'nsm'
         newmessage[u'severity'] = u'INFO'
         newmessage[u'mozdefhostname'] = self.mozdefhostname
+
+        if 'orig_h' in newmessage['details']['id']:
+            newmessage[u'details'][u'sourceipaddress'] = newmessage['details']['id']['orig_h']
+            del(newmessage['details']['id']['orig_h'])
+        if 'orig_p' in newmessage['details']['id']:
+            newmessage[u'details'][u'sourceport'] = newmessage['details']['id']['orig_p']
+            del(newmessage['details']['id']['orig_p'])
+        if 'resp_h' in newmessage['details']['id']:
+            newmessage[u'details'][u'destinationipaddress'] = newmessage['details']['id']['resp_h']
+            del(newmessage['details']['id']['resp_h'])
+        if 'resp_p' in newmessage['details']['id']:
+            newmessage[u'details'][u'destinationport'] = newmessage['details']['id']['resp_p']
+            del(newmessage['details']['id']['resp_p'])
 
 
         # re-arrange the position of some fields
@@ -142,8 +155,8 @@ class message(object):
                         u'{originipbytes} bytes / '
                         u'{responseipbytes} bytes'
                     ).format(**newmessage['details'])
-                    return (newmessage, metadata)        
-                
+                    return (newmessage, metadata)
+
                 if logtype == 'files':
                     if 'rx_hosts' in newmessage['details']:
                         newmessage['details'][u'sourceipaddress'] = u'{0}'.format(newmessage['details']['rx_hosts'][0])
@@ -170,7 +183,7 @@ class message(object):
                         u'via {filesource}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'dns':
                     if 'qtype_name' not in newmessage['details']:
                         newmessage['details'][u'qtype_name'] = u''
@@ -186,7 +199,7 @@ class message(object):
                         u'{rcode_name}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'http':
                     if 'method' not in newmessage['details']:
                         newmessage['details'][u'method'] = u''
@@ -203,7 +216,7 @@ class message(object):
                         u'{status_code}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'ssl':
                     if 'server_name' not in newmessage['details']:
                         # fake it till you make it
@@ -215,14 +228,14 @@ class message(object):
                         u'{server_name}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'dhcp':
                     newmessage[u'summary'] = (
                         '{assigned_ip} assigned to '
                         '{mac}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-            
+
                 if logtype == 'ftp':
                     if 'command' not in newmessage['details']:
                         newmessage['details'][u'command'] = u''
@@ -236,7 +249,7 @@ class message(object):
                         u'{user}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'pe':
                     if 'os' not in newmessage['details']:
                         newmessage['details']['os'] = ''
@@ -247,7 +260,7 @@ class message(object):
                         u'{subsystem}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'smtp':
                     if 'from' in newmessage['details']:
                         from_decoded = newmessage['details'][u'from'].decode('unicode-escape')
@@ -268,7 +281,7 @@ class message(object):
                         u'ID {msg_id}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-               
+
                 if logtype == 'ssh':
                     if 'auth_success' not in newmessage['details']:
                         newmessage['details'][u'auth_success'] = u'unknown'
@@ -279,7 +292,7 @@ class message(object):
                         u'success {auth_success}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'tunnel':
                     if 'tunnel_type' not in newmessage['details']:
                         newmessage['details'][u'tunnel_type'] = u''
@@ -293,7 +306,7 @@ class message(object):
                         u'{action}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'intel':
                     if 'seenindicator' not in newmessage['details']:
                         newmessage['details'][u'seenindicator'] = u''
@@ -348,14 +361,14 @@ class message(object):
                         newmessage['details'][u'port_proto'] = u''
                     newmessage[u'summary'] = (
                         u'New service: '
-                        u'{service[0]} ' 
+                        u'{service[0]} '
                         u'on host '
                         u'{host}:'
                         u'{port_num} / '
                         u'{port_proto}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'notice':
                     newmessage['details'][u'indicators'] = []
                     if 'sub' not in newmessage['details']:
@@ -391,7 +404,7 @@ class message(object):
                         # Thank you for your service
                         del newmessage[u'details'][u'src']
                     return (newmessage, metadata)
-                
+
                 if logtype == 'rdp':
                     if 'cookie' not in newmessage['details']:
                         newmessage['details'][u'cookie'] = u'unknown'
@@ -433,7 +446,7 @@ class message(object):
                         u'on {host}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-                
+
                 if logtype == 'socks':
                     if 'version' not in newmessage['details']:
                         newmessage['details'][u'version'] = u'0'
@@ -568,6 +581,6 @@ class message(object):
                         'Certificate seen serial {certificateserial}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-        
-        
+
+
         return (newmessage, metadata)
