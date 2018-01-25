@@ -220,8 +220,12 @@ def keyMapping(aDict):
 
             # custom fields as a list/array
             elif k in ('fields', 'details'):
-                if len(v) > 0:
-                    returndict[u'details'] = v
+                if type(v) is not dict:
+                    returndict[u'details'][u'message'] = v
+                else:
+                    if len(v) > 0:
+                        for details_key, details_value in v.iteritems():
+                            returndict[u'details'][details_key] = details_value
 
             # custom fields/details as a one off, not in an array
             # i.e. fields.something=value or details.something=value
