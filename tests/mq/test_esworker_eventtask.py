@@ -74,3 +74,22 @@ class TestKeyMapping():
         }
         result = self.key_mapping(tags_dict)
         assert result['tags'] == ['example1']
+
+    def test_details_nondict(self):
+        message = {
+            'summary': 'example summary',
+            'payload': 'examplepayload',
+            'details': 'somestring',
+        }
+        result = self.key_mapping(message)
+        assert result['summary'] == 'example summary'
+        assert result['details'].keys() == ['message', 'payload']
+        assert result['details']['message'] == 'somestring'
+        assert result['details']['payload'] == 'examplepayload'
+
+    def test_no_details(self):
+        message = {
+            'summary': 'example summary',
+        }
+        result = self.key_mapping(message)
+        assert result['details'] == {}
