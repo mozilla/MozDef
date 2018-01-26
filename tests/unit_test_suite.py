@@ -101,9 +101,9 @@ class UnitTestSuite(object):
         self.es_client.save_object(index='events', body=event, doc_type=event_type)
 
     def setup_elasticsearch(self):
-        mapping_file = os.path.join(os.path.dirname(__file__), "../config/defaultMappingTemplate.json")
+        default_mapping_file = os.path.join(os.path.dirname(__file__), "../config/defaultMappingTemplate.json")
         mapping_str = ''
-        with open(mapping_file) as data_file:
+        with open(default_mapping_file) as data_file:
             mapping_str = data_file.read()
 
         self.es_client.create_index(self.event_index_name, index_config=mapping_str)
