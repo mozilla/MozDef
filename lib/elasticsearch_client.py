@@ -52,7 +52,7 @@ class ElasticsearchClient():
         if not index_config:
             index_config = '''
             {
-                {}
+              "mappings":{}
             }'''
         self.es_connection.indices.create(index=index_name, update_all_types='true', body=index_config)
 

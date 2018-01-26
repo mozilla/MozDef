@@ -72,6 +72,14 @@ def esRotateIndexes():
                             logger.debug('do not rotate %s index, month has not changed yet' % index)
                             continue
                     if newindex not in indices:
+                        if 'alerts' in newindex:
+                            logger.debug('Creating %s index with single shard' % newindex)
+                            index_config = {
+                              "settings": {
+                                  "number_of_shards": 1
+                              }
+                            }
+                            es.create_index(newindex, index_config)
                         logger.debug('Creating %s index' % newindex)
                         es.create_index(newindex)
                     # set aliases: events to events-YYYYMMDD

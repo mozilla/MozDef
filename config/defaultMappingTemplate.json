@@ -1,10 +1,7 @@
 {
     "order" : 0,
     "template" : "*",
-    "settings" : { 
-      "number_of_shards": 6,
-      "number_of_replicas": 1
-    },
+    "settings" : { },
     "mappings" : {
       "_default_" : {
         "dynamic_templates" : [ {
