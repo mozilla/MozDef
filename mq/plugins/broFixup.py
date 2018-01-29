@@ -2,8 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
+#
+# Contributors:
+# Jeff Bryner jbryner@mozilla.com
+# Brandon Myers bmyers@mozilla.com
+# Michal Purzynski mpurzynski@mozilla.com
 
 import netaddr
+import json
 from utilities.toUTC import toUTC
 from datetime import datetime
 from platform import node
@@ -45,7 +51,7 @@ class message(object):
         and sets the doc_type
         '''
 
-        self.registration = ['bro', 'nsm']
+        self.registration = ['bro', 'nsm', '*', 'duration']
         self.priority = 5
         try:
             self.mozdefhostname = u'{0}'.format(node())
@@ -67,7 +73,6 @@ class message(object):
         if message['category'] != 'bro':
             return message, metadata
         
-
         # set the doc type to bro
         # to avoid data type conflicts with other doc types
         # (int v string, etc)
@@ -77,32 +82,32 @@ class message(object):
 
         # move Bro specific fields under 'details' while preserving metadata
         newmessage = dict()
-
-        newmessage['details'] = message
+        
+        try:
+            newmessage['details'] = json.loads(message['MESSAGE'])
+        except:
+            newmessage['details'] = {}
+            newmessage['rawdetails'] = message
 
         newmessage['customendpoint'] = 'bro'
-
         # move some fields that are expected at the event 'root' where they belong
-        if 'hostname' in newmessage['details']:
-            newmessage['hostname'] = newmessage['details']['hostname']
-            del(newmessage['details']['hostname'])
-        if 'tags' in newmessage['details']:
-            newmessage['tags'] = newmessage['details']['tags']
-            del(newmessage['details']['tags'])
-        if 'category' in newmessage['details']:
-            newmessage['category'] = newmessage['details']['category']
-            del(newmessage['details']['category'])
-        if 'customendpoint' in newmessage['details']:
-            del(newmessage['details']['customendpoint'])
-        if 'source' in newmessage['details']:
-            newmessage['source'] = newmessage['details']['source']
-            del(newmessage['details']['source'])
-
+        if 'HOST_FROM' in message:
+            newmessage['hostname'] = message['HOST_FROM']
+        if 'tags' in message:
+            newmessage['tags'] = message['tags']
+        if 'category' in message:
+            newmessage['category'] = message['category']
+        if 'SOURCE' in message:
+            # transform bro_files into files fast
+            newmessage['source'] = message['SOURCE'][4:]
+        if 'resp_cc' in newmessage['details']:
+            del(newmessage['details']['resp_cc'])
 
         # add mandatory fields
         if 'ts' in newmessage['details']:
-            newmessage[u'utctimestamp'] = toUTC(newmessage['details']['ts']).isoformat()
-            newmessage[u'timestamp'] = toUTC(newmessage['details']['ts']).isoformat()
+            newmessage[u'utctimestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
+            newmessage[u'timestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
+            del(newmessage['details']['ts'])
         else:
             # a malformed message somehow managed to crawl to us, let's put it somewhat together
             newmessage[u'utctimestamp'] = toUTC(datetime.now()).isoformat()
@@ -114,9 +119,30 @@ class message(object):
         newmessage[u'mozdefhostname'] = self.mozdefhostname
 
 
+        if 'id.orig_h' in newmessage['details']:
+            newmessage[u'details'][u'sourceipaddress'] = newmessage['details']['id.orig_h']
+            del(newmessage['details']['id.orig_h'])
+        if 'id.orig_p' in newmessage['details']:
+            newmessage[u'details'][u'sourceport'] = newmessage['details']['id.orig_p']
+            del(newmessage['details']['id.orig_p'])
+        if 'id.resp_h' in newmessage['details']:
+            newmessage[u'details'][u'destinationipaddress'] = newmessage['details']['id.resp_h']
+            del(newmessage['details']['id.resp_h'])
+        if 'id.resp_p' in newmessage['details']:
+            newmessage[u'details'][u'destinationport'] = newmessage['details']['id.resp_p']
+            del(newmessage['details']['id.resp_p'])
+
+
         # re-arrange the position of some fields
         # {} vs {'details':{}}
         if 'details' in newmessage:
+
+            if 'FILE_NAME' in newmessage['details']:
+                del(newmessage['details']['FILE_NAME'])
+            if 'MESSAGE' in newmessage['details']:
+                del(newmessage['details']['MESSAGE'])
+            if 'SOURCE' in newmessage['details']:
+                del(newmessage['details']['SOURCE'])
 
             # All Bro logs need special treatment, so we provide it
             # Not a known log source? Mark it as such and return
@@ -295,15 +321,27 @@ class message(object):
                     return (newmessage, metadata)
                 
                 if logtype == 'intel':
-                    if 'seenindicator' not in newmessage['details']:
+                    if 'seen.indicator' in newmessage['details']:
+                        newmessage['details']['seenindicator'] = newmessage['details']['seen.indicator']
+                        del(newmessage['details']['seen.indicator'])
+                    else:
                         newmessage['details'][u'seenindicator'] = u''
+                    if 'seen.node' in newmessage['details']:
+                        newmessage['details'][u'seennode'] = newmessage['details']['seen.node']
+                        del(newmessage['details']['seen.node'])
+                    if 'seen.where' in newmessage['details']:
+                        newmessage['details'][u'seenwhere'] = newmessage['details']['seen.where']
+                        del(newmessage['details']['seen.where'])
+                    if 'seen.indicator_type' in newmessage['details']:
+                        newmessage['details'][u'seenindicatortype'] = newmessage['details']['seen.indicator_type']
+                        del(newmessage['details']['seen.indicator_type'])
                     newmessage[u'summary'] = (
                         u'Bro intel match: '
                         u'{seenindicator}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
-                if logtype == 'knowncerts':
+                if logtype == 'known_certs':
                     if 'serial' not in newmessage['details']:
                         newmessage['details'][u'serial'] = u'0'
                     newmessage[u'summary'] = (
@@ -314,7 +352,7 @@ class message(object):
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
-                if logtype == 'knowndevices':
+                if logtype == 'known_devices':
                     if 'mac' not in newmessage['details']:
                         newmessage['details'][u'mac'] = u''
                     if 'dhcp_host_name' not in newmessage['details']:
@@ -326,7 +364,7 @@ class message(object):
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
-                if logtype == 'knownhosts':
+                if logtype == 'known_hosts':
                     if 'host' not in newmessage['details']:
                         newmessage['details'][u'host'] = u''
                     newmessage[u'summary'] = (
@@ -335,7 +373,7 @@ class message(object):
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
-                if logtype == 'knownservices':
+                if logtype == 'known_services':
                     if 'service' not in newmessage['details']:
                         newmessage['details']['service'] = []
                     if not newmessage['details']['service']:
@@ -448,7 +486,7 @@ class message(object):
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
-                if logtype == 'dcerpc':
+                if logtype == 'dce_rpc':
                     if 'endpoint' not in newmessage['details']:
                         newmessage['details'][u'endpoint'] = u'unknown'
                     if 'operation' not in newmessage['details']:
@@ -486,11 +524,20 @@ class message(object):
                     return (newmessage, metadata)
 
                 if logtype == 'ntlm':
-                    if 'ntlmdomainname' not in newmessage['details']:
+                    if 'domainname' in newmessage['details']:
+                        newmessage['details']['ntlmdomainname'] = newmessage['details']['domainname']
+                        del(newmessage['details']['domainname'])
+                    else:
                         newmessage['details'][u'ntlmdomainname'] = u'unknown'
-                    if 'ntlmhostname' not in newmessage['details']:
+                    if 'hostname' in newmessage['details']:
+                        newmessage['details']['ntlmhostname'] = newmessage['details']['hostname']
+                        del(newmessage['details']['hostname'])
+                    else:
                         newmessage['details'][u'ntlmhostname'] = u'unknown'
-                    if 'ntlmusername' not in newmessage['details']:
+                    if 'username' in newmessage['details']:
+                        newmessage['details']['ntlmusername'] = newmessage['details']['username']
+                        del(newmessage['details']['username'])
+                    else:
                         newmessage['details'][u'ntlmusername'] = u'unknown'
                     if 'success' not in newmessage['details']:
                         newmessage['details'][u'success'] = u'unknown'
@@ -508,13 +555,25 @@ class message(object):
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
-                if logtype == 'smbfiles':
+                if logtype == 'smb_files':
                     if 'path' not in newmessage['details']:
                         newmessage['details'][u'path'] = u''
                     if 'name' not in newmessage['details']:
                         newmessage['details'][u'name'] = u''
                     if 'action' not in newmessage['details']:
                         newmessage['details'][u'action'] = u''
+                    if 'times.accessed' in newmessage['details']:
+                        newmessage['details']['timesaccessed'] = toUTC(float(newmessage['details']['times.accessed'])).isoformat()
+                        del(newmessage['details']['times.accessed'])
+                    if 'times.changed' in newmessage['details']:
+                        newmessage['details']['timeschanged'] = toUTC(float(newmessage['details']['times.changed'])).isoformat()
+                        del(newmessage['details']['times.changed'])
+                    if 'times.created' in newmessage['details']:
+                        newmessage['details']['timescreated'] = toUTC(float(newmessage['details']['times.created'])).isoformat()
+                        del(newmessage['details']['times.created'])
+                    if 'times.modified' in newmessage['details']:
+                        newmessage['details']['timesmodified'] = toUTC(float(newmessage['details']['times.modified'])).isoformat()
+                        del(newmessage['details']['times.modified'])
                     newmessage[u'summary'] = (
                         'SMB file: '
                         u'{sourceipaddress} -> '
@@ -524,7 +583,7 @@ class message(object):
                     ).format(**newmessage['details'])
                     return(newmessage, metadata)
 
-                if logtype == 'smbmapping':
+                if logtype == 'smb_mapping':
                     if 'share_type' not in newmessage['details']:
                         newmessage['details'][u'share_type'] = u''
                     if 'path' not in newmessage['details']:
@@ -562,11 +621,50 @@ class message(object):
                     return (newmessage, metadata)
 
                 if logtype == 'x509':
-                    if 'certificateserial' not in newmessage['details']:
-                        newmessage['details'][u'certificateserial'] = u'0'
+                    newmessage['details'][u'certificate'] = {}
+                    if 'basic_constraints.ca' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'basic_constraints_ca'] = newmessage['details'][u'basic_constraints.ca']
+                            del(newmessage['details'][u'basic_constraints.ca'])
+                    if 'certificate.exponent' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'exponent'] = newmessage['details'][u'certificate.exponent']
+                            del(newmessage['details'][u'certificate.exponent'])
+                    if 'certificate.issuer' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'issuer'] = newmessage['details'][u'certificate.issuer']
+                            del(newmessage['details'][u'certificate.issuer'])
+                    if 'certificate.key_alg' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'key_alg'] = newmessage['details'][u'certificate.key_alg']
+                            del(newmessage['details'][u'certificate.key_alg'])
+                    if 'certificate.key_length' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'key_length'] = newmessage['details'][u'certificate.key_length']
+                            del(newmessage['details'][u'certificate.key_length'])
+                    if 'certificate.key_type' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'key_type'] = newmessage['details'][u'certificate.key_type']
+                            del(newmessage['details'][u'certificate.key_type'])
+                    if 'certificate.not_valid_after' in newmessage['details']:
+#                        newmessage['details']['timesaccessed'] = toUTC(float(newmessage['details']['times.accessed'])).isoformat()
+
+                            newmessage['details'][u'certificate'][u'not_valid_after'] = toUTC(float(newmessage['details'][u'certificate.not_valid_after'])).isoformat()
+                            del(newmessage['details'][u'certificate.not_valid_after'])
+                    if 'certificate.not_valid_before' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'not_valid_before'] = toUTC(float(newmessage['details'][u'certificate.not_valid_before'])).isoformat()
+                            del(newmessage['details'][u'certificate.not_valid_before'])
+                    if 'certificate.sig_alg' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'sig_alg'] = newmessage['details'][u'certificate.sig_alg']
+                            del(newmessage['details'][u'certificate.sig_alg'])
+                    if 'certificate.subject' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'subject'] = newmessage['details'][u'certificate.subject']
+                            del(newmessage['details'][u'certificate.subject'])
+                    if 'certificate.version' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'certificate.version'] = newmessage['details'][u'certificate.version']
+                            del(newmessage['details'][u'certificate.version'])
+                    if 'certificate.serial' in newmessage['details']:
+                            newmessage['details'][u'certificate'][u'serial'] = newmessage['details'][u'certificate.serial']
+                            del(newmessage['details'][u'certificate.serial'])
+                    else:
+                            newmessage['details'][u'certificateserial'] = u'0'
                     newmessage[u'summary'] = (
-                        'Certificate seen serial {certificateserial}'
-                    ).format(**newmessage['details'])
+                        'Certificate seen serial {serial}'
+                    ).format(**newmessage['details']['certificate'])
                     return (newmessage, metadata)
         
         
