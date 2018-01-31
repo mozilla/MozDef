@@ -81,7 +81,9 @@ def esRotateIndexes():
                             }
                             es.create_index(newindex, index_config)
                         logger.debug('Creating %s index' % newindex)
-                        es.create_index(newindex)
+                        else:
+                            es.create_index(newindex)
+                            logger.debug('Creating %s index' % newindex)
                     # set aliases: events to events-YYYYMMDD
                     # and events-previous to events-YYYYMMDD-1
                     logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
