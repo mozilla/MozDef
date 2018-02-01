@@ -25,6 +25,9 @@ class message(object):
         if 'requestparameters' not in message['details']:
             return (message, metadata)
 
+        if type(message['details']['requestparameters']) is not dict:
+            return (message, metadata)
+
         # Handle iamInstanceProfile strings
         if 'iamInstanceProfile' in message['details']['requestparameters']:
             iam_instance_profile = message['details']['requestparameters']['iamInstanceProfile']
