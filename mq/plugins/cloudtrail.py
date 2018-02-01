@@ -13,10 +13,10 @@ class message(object):
         self.priority = 10
 
     def onMessage(self, message, metadata):
-        if 'category' not in message:
+        if 'source' not in message:
             return (message, metadata)
 
-        if not message['category'] == 'cloudtrail':
+        if not message['source'] == 'cloudtrail':
             return (message, metadata)
 
         if 'details' not in message:

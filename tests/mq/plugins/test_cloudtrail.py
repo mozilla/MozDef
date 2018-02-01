@@ -13,15 +13,7 @@ class TestCloudtrailPlugin():
     def setup(self):
         self.plugin = message()
 
-    def test_nonexistent_category(self):
-        msg = {
-            'source': 'someother',
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-        assert retmessage == msg
-        assert retmeta == {}
-
-    def test_incorrect_category(self):
+    def test_nonexistent_source(self):
         msg = {
             'category': 'someother',
         }
@@ -29,9 +21,17 @@ class TestCloudtrailPlugin():
         assert retmessage == msg
         assert retmeta == {}
 
+    def test_incorrect_source(self):
+        msg = {
+            'source': 'someother',
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+        assert retmessage == msg
+        assert retmeta == {}
+
     def test_iamInstanceProfile(self):
         msg = {
-            'category': 'cloudtrail',
+            'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
                     'iamInstanceProfile': 'astringvalue',
@@ -41,7 +41,7 @@ class TestCloudtrailPlugin():
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
 
         expected_message = {
-            'category': 'cloudtrail',
+            'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
                     'iamInstanceProfile': {
@@ -55,7 +55,7 @@ class TestCloudtrailPlugin():
 
     def test_attribute(self):
         msg = {
-            'category': 'cloudtrail',
+            'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
                     'attribute': 'astringvalue',
@@ -65,7 +65,7 @@ class TestCloudtrailPlugin():
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
 
         expected_message = {
-            'category': 'cloudtrail',
+            'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
                     'attribute': {
