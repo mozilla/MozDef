@@ -395,17 +395,6 @@ class taskConsumer(object):
             if normalizedDict is None:
                 return
 
-            # This handles the fact that cloudtrail sends
-            # inconsistent data types in the iamInstanceProfile field
-            if 'details' in normalizedDict:
-                if 'requestparameters' in normalizedDict['details']:
-                    if normalizedDict['details']['requestparameters'] is not None and 'iamInstanceProfile' in normalizedDict['details']['requestparameters']:
-                        iam_instance_profile = normalizedDict['details']['requestparameters']['iamInstanceProfile']
-                        if type(iam_instance_profile) is not dict:
-                            normalizedDict['details']['requestparameters']['iamInstanceProfile'] = {
-                                'name': iam_instance_profile
-                            }
-
             # make a json version for posting to elastic search
             jbody = json.JSONEncoder().encode(normalizedDict)
 
