@@ -45,7 +45,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'iamInstanceProfile': {
-                        'name': 'astringvalue',
+                        'raw_value': 'astringvalue',
                     }
                 }
             }
@@ -69,7 +69,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'attribute': {
-                        'name': 'astringvalue',
+                        'raw_value': 'astringvalue',
                     }
                 }
             }

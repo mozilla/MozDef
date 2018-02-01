@@ -30,7 +30,7 @@ class message(object):
             iam_instance_profile = message['details']['requestparameters']['iamInstanceProfile']
             if type(iam_instance_profile) is not dict:
                 message['details']['requestparameters']['iamInstanceProfile'] = {
-                    'name': iam_instance_profile
+                    'raw_value': iam_instance_profile
                 }
 
         # Handle attribute strings
@@ -38,7 +38,7 @@ class message(object):
             attribute = message['details']['requestparameters']['attribute']
             if type(attribute) is not dict:
                 message['details']['requestparameters']['attribute'] = {
-                    'name': attribute
+                    'raw_value': attribute
                 }
 
         return (message, metadata)
