@@ -421,28 +421,4 @@ if (Meteor.isClient) {
     Meteor.logoutViaAccounts = function(callback) {
         return Accounts.logout(callback);
     };
-
-    (function(xhr) {
-        var authenticationType = mozdef.authenticationType.toLowerCase();
-        function intercept_xhr(xhrInstance) {
-            // If we need to reauthenticate, let's reload page
-            // so we get redirected to auth site
-            if (xhrInstance.readyState == 4 && xhrInstance.status != 200) {
-                location.reload();
-            }
-        }
-        var send = xhr.send;
-        xhr.send = function(data) {
-            var origFunc = this.onreadystatechange;
-            if (origFunc) {
-                this.onreadystatechange = function() {
-                    if (authenticationType == 'oidc'){
-                        intercept_xhr(this);
-                    }
-                    return origFunc.apply(this, arguments);
-                };
-            }
-            return send.apply(this, arguments);
-        };
-    })(XMLHttpRequest.prototype);
 };
