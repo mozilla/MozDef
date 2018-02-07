@@ -16,7 +16,6 @@ class AlertCorrelatedIntelNotice(AlertTask):
         # look for events in last 15 mins
         search_query = SearchQuery(minutes=15)
         search_query.add_must([
-            TermMatch('_type', 'bro'),
             TermMatch('eventsource', 'nsm'),
             TermMatch('category', 'bronotice'),
             ExistsMatch('details.sourceipaddress'),

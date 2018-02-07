@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+5   #!/usr/bin/env python
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -14,7 +14,6 @@ class AlertSFTPEvent(AlertTask):
         search_query = SearchQuery(minutes=5)
 
         search_query.add_must([
-            TermMatch('_type', 'auditd'),
             TermMatch('category', 'execve'),
             TermMatch('processname', 'audisp-json'),
             TermMatch('details.processname', 'ssh'),

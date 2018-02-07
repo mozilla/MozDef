@@ -15,7 +15,7 @@ class AlertConfluenceShellUsage(AlertTask):
         search_query = SearchQuery(minutes=5)
 
         search_query.add_must([
-            TermMatch('_type', 'auditd'),
+            TermMatch('category', 'execve'),
             TermMatch('details.user', 'confluence'),
             QueryStringMatch('hostname: /.*(mana|confluence).*/'),
         ])
