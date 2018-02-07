@@ -44,4 +44,12 @@ class message(object):
                     'raw_value': attribute
                 }
 
+        # Handle description strings
+        if 'description' in message['details']['requestparameters']:
+            description = message['details']['requestparameters']['description']
+            if type(description) is not dict:
+                message['details']['requestparameters']['description'] = {
+                    'raw_value': description
+                }
+
         return (message, metadata)
