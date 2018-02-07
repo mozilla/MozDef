@@ -14,7 +14,6 @@ class AlertManyVPNDuoAuthFailures(AlertTask):
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
             TermMatch('category', 'event'),
             TermMatch('tags', 'duosecurity'),
             PhraseMatch('details.integration', 'global and external openvpn'),
