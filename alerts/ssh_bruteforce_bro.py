@@ -16,7 +16,6 @@ class AlertSSHManyConns(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermMatch('_type', 'nsm'),
             TermMatch('category', 'bro'),
             TermMatch('source', 'notice'),
             PhraseMatch('details.note', 'SSH::Password_Guessing'),
