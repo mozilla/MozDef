@@ -81,7 +81,7 @@ def main():
                 processname=sys.argv[0],
                 severity='INFO',
                 summary='mozdef health/status',
-                category='mozdef',
+                category='health',
                 source='mozdef',
                 tags=[],
                 details=[])
@@ -123,11 +123,11 @@ def main():
 
             # post to elastic search servers directly without going through
             # message queues in case there is an availability issue
-            es.save_event(doc_type='mozdefhealth', body=json.dumps(healthlog))
+            es.save_event(body=json.dumps(healthlog))
             # post another doc with a static docid and tag
             # for use when querying for the latest status
             healthlog['tags'] = ['mozdef', 'status', 'latest']
-            es.save_event(doc_type='mozdefhealth', doc_id=getDocID(server), body=json.dumps(healthlog))
+            es.save_event(doc_id=getDocID(server), body=json.dumps(healthlog))
     except Exception as e:
         logger.error("Exception %r when gathering health and status " % e)
 
