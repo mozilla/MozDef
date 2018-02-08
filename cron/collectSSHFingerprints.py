@@ -53,7 +53,6 @@ def genMeteorID():
 def searchForSSHKeys(es):
     search_query = SearchQuery(minutes=5)
     search_query.add_must([
-        TermMatch('_type', 'event'),
         TermMatch('details.program', 'sshd'),
         QueryStringMatch('summary:found matching key accepted publickey')
     ])
