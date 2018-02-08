@@ -46,8 +46,8 @@ def initLogger():
 def getFrontendStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
-        TermMatch('_type', 'mozdefhealth'),
-        TermMatch('category', 'mozdef'),
+        TermMatch('source', 'mozdef'),
+        TermMatch('category', 'health'),
         TermMatch('tags', 'latest'),
     ])
     results = search_query.execute(es, indices=['events'])

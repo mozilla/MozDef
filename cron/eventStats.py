@@ -108,7 +108,7 @@ def initConfig():
                                        'http://localhost:9200',
                                        options.configfile).split(','))
 
-    # field to use as the aggegation point (category, _type, etc)
+    # field to use as the aggegation point (category, severity, etc)
     options.aggregationfield = getConfig('aggregationfield',
                                          'category',
                                          options.configfile)
