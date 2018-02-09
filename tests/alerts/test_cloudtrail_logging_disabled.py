@@ -64,7 +64,6 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
         NegativeAlertTestCase(
             description="Negative test case with bad source",
             events=[event],
-            expected_alert=default_alert
         )
     )
 
