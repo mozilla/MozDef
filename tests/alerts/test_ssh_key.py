@@ -70,6 +70,15 @@ class TestSSHKey(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
+    event['_source']['category'] = 'badcategory'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description='Negative test case with bad category',
+            events=[event],
+        )
+    )
+
+    event = AlertTestSuite.create_event(default_event)
     event['_source']['details']['agent'] = 'somehost.ignorehosts.com'
     event['_source']['details']['private'] = [
                     {
