@@ -19,6 +19,7 @@
 # make multiple-stop - stop new mozdef environment in multiple containers
 # make multiple-stop-tests - stop new mozdef environment for tests in multiple containers
 # make multiple-rm - stop new mozdef environment in multiple containers and deattach volumes
+# make multiple-rm-tests - stop new mozdef tests environment in multiple containers and deattach volumes
 # make multiple-rebuild - build, stop and run new mozdef environment in multiple containers
 # make multiple-rebuild-new - build, stop/rm and run new mozdef environment in multiple containers
 # make multiple-rebuild-tests - build, stop/rm and run new mozdef environment for tests in multiple containers
@@ -96,10 +97,13 @@ multiple-stop-tests:
 multiple-rm:
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
 
+multiple-rm-tests:
+	-docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) down -v --remove-orphans
+
 multiple-rebuild: multiple-build multiple-stop multiple-run
 
 multiple-rebuild-new: multiple-build multiple-rm multiple-run
 
-multiple-rebuild-tests: multiple-build-tests multiple-stop-tests multiple-run-tests
+multiple-rebuild-tests: multiple-build-tests multiple-rm-tests multiple-run-tests
 
 .PHONY: multiple-build multiple-run multiple-stop multiple-rebuild
