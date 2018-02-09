@@ -117,15 +117,6 @@ class TestAlertGeomodel(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_type'] = 'badtype'
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with an event with bad type",
-            events=[event],
-        )
-    )
-
-    event = AlertTestSuite.create_event(default_event)
     event['_source']['category'] = 'badcategory'
     test_cases.append(
         NegativeAlertTestCase(

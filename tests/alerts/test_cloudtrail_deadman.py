@@ -11,7 +11,7 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "cloudtrail",
+        "source": "cloudtrail",
         "_source": {
             "eventName": "somename"
         }
@@ -39,10 +39,10 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_type'] = "event"
+    event['source'] = "event"
     test_cases.append(
         PositiveAlertTestCase(
-            description="Postive test case with bad event type",
+            description="Postive test case with bad event source",
             events=[event],
             expected_alert=default_alert
         )
