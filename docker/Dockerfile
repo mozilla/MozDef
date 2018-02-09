@@ -41,6 +41,10 @@ RUN \
   mkdir /opt/mozdef/envs && \
   curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
   mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch && \
+  mkdir /var/log/elasticsearch && \
+  chown -R mozdef:mozdef /var/log/elasticsearch && \
+  mkdir /var/lib/elasticsearch && \
+  chown -R mozdef:mozdef /var/lib/elasticsearch && \
   rpm --import https://www.rabbitmq.com/rabbitmq-release-signing-key.asc && \
   yum install -y rabbitmq-server-$RABBITMQ_VERSION && \
   yum install -y nginx && \
@@ -75,6 +79,7 @@ USER mozdef
 COPY meteor /opt/mozdef/envs/mozdef/meteor
 USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/elasticsearch
 
 COPY docker/conf/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
