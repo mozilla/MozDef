@@ -61,7 +61,7 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     event = AlertTestSuite.create_event(default_event)
     event['_source']['source'] = 'badsource'
     test_cases.append(
-        PositiveAlertTestCase(
+        NegativeAlertTestCase(
             description="Negative test case with bad source",
             events=[event],
             expected_alert=default_alert
