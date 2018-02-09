@@ -6,7 +6,9 @@ services:
       context: ../../
       dockerfile: docker/compose/elasticsearch/Dockerfile
     restart: always
-    command: bin/elasticsearch -Des.insecure.allow.root=true -Dnetwork.host=0.0.0.0
+    command: bin/elasticsearch -Enetwork.host=0.0.0.0
+    volumes:
+      - elasticsearch:/var/lib/elasticsearch
     ports:
       - 9200:9200
     networks:
@@ -17,6 +19,8 @@ services:
       dockerfile: docker/compose/rabbitmq/Dockerfile
     restart: always
     command: rabbitmq-server
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
     ports:
       - 5672:5672
     networks:
@@ -24,3 +28,7 @@ services:
 
 networks:
   default:
+
+volumes:
+  elasticsearch:
+  rabbitmq:

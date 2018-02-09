@@ -83,14 +83,16 @@ def getEsNodesStats():
                 jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
             continue
 
+        load_average = jsonobj['nodes'][nodeid]['os']['cpu']['load_average']
+        load_str = "{0},{1},{2}".format(load_average['1m'], load_average['5m'], load_average['15m'])
         results.append({
             'hostname': jsonobj['nodes'][nodeid]['host'],
             'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
             'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024),
             'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
             'gc_old': jsonobj['nodes'][nodeid]['jvm']['gc']['collectors']['old']['collection_time_in_millis'] / 1000,
-            'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu_percent'],
-            'load': jsonobj['nodes'][nodeid]['os']['load_average']
+            'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu']['percent'],
+            'load': load_str
         })
     return results
 

@@ -11,8 +11,8 @@ LABEL maintainer="mozdef@mozilla.com"
 ENV NODE_VERSION 4.7.0
 ENV METEOR_VERSION 1.4.2.3
 ENV PYTHON_VERSION 2.7.11
-ENV KIBANA_VERSION 4.6.5
-ENV ES_VERSION 2.4.6
+ENV KIBANA_VERSION 5.6.7
+ENV ES_VERSION 5.6.7
 ENV ES_JAVA_VERSION 1.8.0
 ENV RABBITMQ_VERSION 3.3.5
 
@@ -39,13 +39,17 @@ RUN \
                     cronie && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
-  curl -s -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
+  curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
   mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch && \
+  mkdir /var/log/elasticsearch && \
+  chown -R mozdef:mozdef /var/log/elasticsearch && \
+  mkdir /var/lib/elasticsearch && \
+  chown -R mozdef:mozdef /var/lib/elasticsearch && \
   rpm --import https://www.rabbitmq.com/rabbitmq-release-signing-key.asc && \
   yum install -y rabbitmq-server-$RABBITMQ_VERSION && \
   yum install -y nginx && \
   mkdir /var/log/mozdef/ && \
-  curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C /opt/mozdef/ -xz && \
+  curl -s -L https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C /opt/mozdef/ -xz && \
   mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x86_64 /opt/mozdef/envs/kibana && \
   yum install -y mongodb-org && \
   curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz && \
@@ -75,6 +79,7 @@ USER mozdef
 COPY meteor /opt/mozdef/envs/mozdef/meteor
 USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/elasticsearch
 
 COPY docker/conf/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
