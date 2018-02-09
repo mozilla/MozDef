@@ -11,9 +11,9 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "source": "cloudtrail",
         "_source": {
-            "eventName": "somename"
+            "eventName": "somename",
+            "source": "cloudtrail"
         }
     }
 
