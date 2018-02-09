@@ -52,13 +52,12 @@ def keyMapping(aDict):
     # set the timestamp when we received it, i.e. now
     returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
     returndict['mozdefhostname'] = options.mozdefhostname
+    returndict[u'details'] = {}
     try:
         for k, v in aDict.iteritems():
             k = removeAt(k).lower()
 
             if k == 'sourceip':
-                if 'details' not in returndict.keys():
-                    returndict[u'details'] = dict()
                 returndict[u'details']['sourceipaddress'] = v
 
             if k == 'facility':
@@ -71,8 +70,6 @@ def keyMapping(aDict):
                 # special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
                 returndict[u'summary'] = toUnicode(v)
             elif k in ('payload'):
-                if 'details' not in returndict.keys():
-                    returndict[u'details'] = dict()
                 returndict[u'details']['payload'] = toUnicode(v)
 
             if k in ('eventtime', 'timestamp', 'utctimestamp', 'date'):
@@ -114,8 +111,12 @@ def keyMapping(aDict):
 
             # custom fields as a list/array
             if k in ('fields', 'details'):
-                if len(v) > 0:
-                    returndict[u'details'] = v
+                if type(v) is not dict:
+                    returndict[u'details'][u'message'] = v
+                else:
+                    if len(v) > 0:
+                        for details_key, details_value in v.iteritems():
+                            returndict[u'details'][details_key] = details_value
 
             # custom fields/details as a one off, not in an array
             # i.e. fields.something=value or details.something=value
@@ -123,9 +124,6 @@ def keyMapping(aDict):
             if k.startswith('fields.') or k.startswith('details.'):
                 newName = k.replace('fields.', '')
                 newName = newName.lower().replace('details.', '')
-                # add a dict to hold the details if it doesn't exist
-                if 'details' not in returndict.keys():
-                    returndict[u'details'] = dict()
                 # add field with a special case for shippers that
                 # don't send details
                 # in an array as int/floats/strings
@@ -140,10 +138,6 @@ def keyMapping(aDict):
 
         # nxlog windows log handling
         if 'Domain' in aDict.keys() and 'SourceModuleType' in aDict.keys():
-            # add a dict to hold the details if it doesn't exist
-            if 'details' not in returndict.keys():
-                returndict[u'details'] = dict()
-
             # nxlog parses all windows event fields very well
             # copy all fields to details
             returndict[u'details'][k] = v
