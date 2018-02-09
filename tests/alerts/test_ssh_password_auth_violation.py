@@ -45,16 +45,6 @@ class TestAlertSSHPasswordAuthViolation(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_type'] = 'bad'
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with events with incorrect _type",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
         event['_source']['tags'] = 'bad tag example'
     test_cases.append(
         NegativeAlertTestCase(
