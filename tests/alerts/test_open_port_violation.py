@@ -58,7 +58,7 @@ class TestAlertOpenPortViolation(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['category'] = 'bad'
+        event['_source']['category'] = 'bad'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with incorrect category",
