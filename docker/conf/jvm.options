@@ -111,6 +111,7 @@
 #-Delasticsearch.json.allow_unquoted_field_names=true
 
 
-# Mozdef Specific Configuration #
+# Mozdef Custom Settings #
 -Xms512m
 -Xmx512m
+# Mozdef Custom Settings #
