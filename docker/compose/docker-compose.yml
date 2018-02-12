@@ -35,8 +35,8 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/elasticsearch/Dockerfile
+    command: bin/elasticsearch
     restart: always
-    command: bin/elasticsearch -Enetwork.host=0.0.0.0
     volumes:
       - elasticsearch:/var/lib/elasticsearch
     ports:

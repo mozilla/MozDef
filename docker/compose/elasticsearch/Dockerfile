@@ -19,6 +19,7 @@ RUN \
   yum clean all
 
 COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
+COPY docker/conf/jvm.options /opt/mozdef/envs/elasticsearch/config/
 
 WORKDIR /opt/mozdef/envs/elasticsearch
 

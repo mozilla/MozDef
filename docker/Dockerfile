@@ -101,6 +101,7 @@ RUN \
 
 USER root
 COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
+COPY docker/conf/jvm.options /opt/mozdef/envs/elasticsearch/config/
 COPY docker/conf/kibana.yml /opt/mozdef/envs/kibana/config/kibana.yml
 COPY docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 COPY docker/conf/mongod.conf /etc/mongod.conf
