@@ -93,5 +93,4 @@ path.logs: /var/log/elasticsearch
 path.data: /var/lib/elasticsearch
 http.host: 0.0.0.0
 discovery.type: single-node
-bootstrap.memory_lock: true
 # Mozdef Custom Settings #
