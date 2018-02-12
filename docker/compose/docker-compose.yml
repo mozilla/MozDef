@@ -22,7 +22,9 @@ services:
     networks:
       - default
   kibana:
-    build: kibana/
+    build:
+      context: ../../
+      dockerfile: docker/compose/kibana/Dockerfile
     restart: always
     command: bin/kibana --elasticsearch=http://elasticsearch:9200
     depends_on:
