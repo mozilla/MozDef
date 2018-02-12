@@ -2,7 +2,7 @@ language: python
 python:
   - '2.7.11'
 before_install:
-  - ES_VERSION=2.4.4; curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
+  - ES_VERSION=5.6.7; curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.deb && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
   - sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
 services:
