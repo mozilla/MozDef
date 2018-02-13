@@ -4,9 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2015 Mozilla Corporation
-#
-# Contributors:
-# Brandon Myers <bmyers@mozilla.com>
 
 from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch
@@ -18,7 +15,6 @@ class AlertFeedbackEvents(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
             TermMatch('category', 'user_feedback'),
             TermMatch('details.action', 'escalate')
         ])
