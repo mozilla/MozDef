@@ -22,34 +22,65 @@ class message(object):
         if 'details' not in message:
             return (message, metadata)
 
-        if 'requestparameters' not in message['details']:
+        if type(message['details']) is not dict:
             return (message, metadata)
 
-        if type(message['details']['requestparameters']) is not dict:
-            return (message, metadata)
+        if 'requestparameters' in message['details'] and type(message['details']['requestparameters']) is dict:
+            # Handle details.requestparameters.iamInstanceProfile strings
+            if 'iamInstanceProfile' in message['details']['requestparameters']:
+                iam_instance_profile = message['details']['requestparameters']['iamInstanceProfile']
+                if type(iam_instance_profile) is not dict:
+                    message['details']['requestparameters']['iamInstanceProfile'] = {
+                        'raw_value': iam_instance_profile
+                    }
 
-        # Handle iamInstanceProfile strings
-        if 'iamInstanceProfile' in message['details']['requestparameters']:
-            iam_instance_profile = message['details']['requestparameters']['iamInstanceProfile']
-            if type(iam_instance_profile) is not dict:
-                message['details']['requestparameters']['iamInstanceProfile'] = {
-                    'raw_value': iam_instance_profile
+            # Handle details.requestparameters.attribute strings
+            if 'attribute' in message['details']['requestparameters']:
+                attribute = message['details']['requestparameters']['attribute']
+                if type(attribute) is not dict:
+                    message['details']['requestparameters']['attribute'] = {
+                        'raw_value': attribute
+                    }
+
+            # Handle details.requestparameters.description strings
+            if 'description' in message['details']['requestparameters']:
+                description = message['details']['requestparameters']['description']
+                if type(description) is not dict:
+                    message['details']['requestparameters']['description'] = {
+                        'raw_value': description
+                    }
+
+            # Handle details.requestparameters.filter strings
+            if 'filter' in message['details']['requestparameters']:
+                filter_str = message['details']['requestparameters']['filter']
+                if type(filter_str) is not dict:
+                    message['details']['requestparameters']['filter'] = {
+                        'raw_value': filter_str
+                    }
+
+        if 'responseelements' in message['details'] and type(message['details']['responseelements']) is dict:
+            # Handle details.responseelements.role strings
+            if 'role' in message['details']['responseelements']:
+                role_str = message['details']['responseelements']['role']
+                if type(role_str) is not dict:
+                    message['details']['responseelements']['role'] = {
+                        'raw_value': role_str
+                    }
+
+        # Handle details.additionaleventdata strings
+        if 'additionaleventdata' in message['details']:
+            additionaleventdata_str = message['details']['additionaleventdata']
+            if type(additionaleventdata_str) is not dict:
+                message['details']['additionaleventdata'] = {
+                    'raw_value': additionaleventdata_str
                 }
 
-        # Handle attribute strings
-        if 'attribute' in message['details']['requestparameters']:
-            attribute = message['details']['requestparameters']['attribute']
-            if type(attribute) is not dict:
-                message['details']['requestparameters']['attribute'] = {
-                    'raw_value': attribute
-                }
-
-        # Handle description strings
-        if 'description' in message['details']['requestparameters']:
-            description = message['details']['requestparameters']['description']
-            if type(description) is not dict:
-                message['details']['requestparameters']['description'] = {
-                    'raw_value': description
+        # Handle details.serviceeventdetails strings
+        if 'serviceeventdetails' in message['details']:
+            serviceeventdetails_str = message['details']['serviceeventdetails']
+            if type(serviceeventdetails_str) is not dict:
+                message['details']['serviceeventdetails'] = {
+                    'raw_value': serviceeventdetails_str
                 }
 
         return (message, metadata)
