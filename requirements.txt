@@ -15,8 +15,8 @@ cryptography==1.7.1
 dnspython==1.15.0
 docutils==0.14
 duo-client==3.0
-elasticsearch==2.4.0
-elasticsearch-dsl==2.1.0
+elasticsearch>=5.0.0
+elasticsearch-dsl>=5.0.0
 elasticutils==0.8.2
 enum34==1.1.6
 futures==3.1.1
