@@ -4,10 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
-# Anthony Verez averez@mozilla.com
 
 # set this to run as a cronjob (after backup has completed)
 # to regularly remove indexes
@@ -60,7 +56,7 @@ def esPruneIndexes():
                         index_to_prune += '-%s' % idate
 
                     if index_to_prune in indices:
-                        logger.info('Deleting index: %s' % index_to_prune)
+                        logger.debug('Deleting index: %s' % index_to_prune)
                         es.delete_index(index_to_prune, True)
                     else:
                         logger.error('Error deleting index %s, index missing' % index_to_prune)

@@ -5,9 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-# Contributor: gdestuynder@mozilla.com
-# Contributor: jbryner@mozilla.com
-
 import copy
 import os
 import sys

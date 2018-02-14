@@ -4,9 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
-#
-# Contributors:
-# Brandon Myers bmyers@mozilla.com
 
 import sys
 import os
@@ -42,6 +39,13 @@ def main():
     logger.debug('Starting')
     logger.debug(options)
     ips = fetch_ip_list(options.aws_access_key_id, options.aws_secret_access_key, options.aws_bucket_name, options.aws_document_key_name)
+
+    for manual_addition in options.manual_additions:
+        if manual_addition == '':
+            continue
+        logger.debug("Adding manual addition: " + manual_addition)
+        ips.append(manual_addition)
+
     if len(ips) < options.ips_list_threshold:
         raise LookupError('IP List contains less than ' + str(options.ips_list_threshold) + ' entries...something is probably up here.')
     save_ip_list(options.local_ip_list_path, ips)
@@ -59,7 +63,7 @@ def initConfig():
 
     options.local_ip_list_path = getConfig('local_ip_list_path', '', options.configfile)
     options.ips_list_threshold = getConfig('ips_list_threshold', 20, options.configfile)
-
+    options.manual_additions = getConfig('manual_additions', '', options.configfile).split(',')
 
 if __name__ == '__main__':
     parser = OptionParser()

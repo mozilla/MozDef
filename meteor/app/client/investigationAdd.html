@@ -3,9 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
 -->
 
 <!--new investigation form -->
@@ -17,17 +14,17 @@ Jeff Bryner jbryner@mozilla.com
     }
 </style>
     <form id="addinvestigationform" class="form-horizontal" style="margin: 0px 30% 20px;">
-        <legend>New investigation</legend>
+        <legend>New Investigation</legend>
             <!-- Summary -->        
             <div class="form-group">
-              <label class="col-xs-3 control-label" for="summary">Investigation Summary</label>
+              <label class="col-xs-3 control-label" for="summary">Investigation Summary:</label>
               <div class="col-xs-5">
-                <input id="summary" name="summary" placeholder="summary" class="form-control summary" required="" type="text">
+                <input id="summary" name="summary" placeholder="'Category': 'activity' on 'target'" class="form-control summary" required="" type="text">
               </div>
             </div>            
             <!-- date Opened -->
             <div class="form-group">
-                <label class="col-xs-3 control-label" for="dateOpened">Date Opened</label>
+                <label class="col-xs-3 control-label" for="dateOpened">Date Opened:</label>
                 <div class="col-xs-5">
                     <div class="input-prepend input-group">
                         <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
@@ -37,7 +34,7 @@ Jeff Bryner jbryner@mozilla.com
             </div>
             <!-- Phase -->
             <div class="form-group">
-              <label class="col-xs-3 control-label" for="phase">Phase</label>
+              <label class="col-xs-3 control-label" for="phase">Phase:</label>
               <div class="col-xs-5">
                 <select id="phase" name="phase" class="form-control">
                   <option>Identification</option>

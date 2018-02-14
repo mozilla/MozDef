@@ -4,9 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
-#
 # Copy of https://github.com/gdestuynder/Stupid-python-bot/blob/master/modules/roulette.py
 # ported to kitnirc
 

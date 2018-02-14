@@ -4,9 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Brandon Myers bmyers@mozilla.com
 
 import argparse
 
@@ -58,12 +55,12 @@ else:
 
 if event_index_name not in all_indices:
     print "Creating " + event_index_name
-    client.create_index(event_index_name, mapping=mapping_str)
+    client.create_index(event_index_name, index_config=mapping_str)
 client.create_alias('events', event_index_name)
 
 if previous_event_index_name not in all_indices:
     print "Creating " + previous_event_index_name
-    client.create_index(previous_event_index_name, mapping=mapping_str)
+    client.create_index(previous_event_index_name, index_config=mapping_str)
 client.create_alias('events-previous', previous_event_index_name)
 
 if alert_index_name not in all_indices:

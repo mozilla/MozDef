@@ -8,7 +8,8 @@ from elasticsearch.helpers import bulk, BulkIndexError
 from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
 from bulk_queue import BulkQueue
 
-from utilities.logger import logger, initLogger
+from utilities.logger import logger
+
 from event import Event
 
 
@@ -36,7 +37,6 @@ class ElasticsearchClient():
         self.es_connection = Elasticsearch(servers)
         self.es_connection.ping()
         self.bulk_queue = BulkQueue(self, threshold=bulk_amount, flush_time=bulk_refresh_time)
-        initLogger()
 
     def delete_index(self, index_name, ignore_fail=False):
         ignore_codes = []
@@ -48,13 +48,13 @@ class ElasticsearchClient():
     def get_indices(self):
         return self.es_connection.indices.stats()['indices'].keys()
 
-    def create_index(self, index_name, ignore_fail=False, mapping=None):
-        if not mapping:
-            mapping = '''
+    def create_index(self, index_name, ignore_fail=False, index_config=None):
+        if not index_config:
+            index_config = '''
             {
               "mappings":{}
             }'''
-        self.es_connection.indices.create(index=index_name, update_all_types='true', body=mapping)
+        self.es_connection.indices.create(index=index_name, update_all_types='true', body=index_config)
 
     def create_alias(self, alias, index):
         actions = []

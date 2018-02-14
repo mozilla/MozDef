@@ -2,9 +2,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
-#
-# Contributors:
-# Brandon Myers bmyers@mozilla.com
 
 from positive_alert_test_case import PositiveAlertTestCase
 from negative_alert_test_case import NegativeAlertTestCase
@@ -197,6 +194,16 @@ class TestAlertBruteforceSsh(AlertTestSuite):
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with 55.66.77.88 as a whitelisted ip",
+            events=events,
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['details']['sourceipaddress'] = None
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case aggregation key excluded",
             events=events,
         )
     )

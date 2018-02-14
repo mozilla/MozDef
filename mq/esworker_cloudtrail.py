@@ -4,9 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
-#
-# Contributors:
-# Brandon Myers bmyers@mozilla.com
 
 
 import json
@@ -25,12 +22,12 @@ from threading import Timer
 import re
 import time
 
-import sys
-import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 from utilities.logger import logger, initLogger
+from utilities.to_unicode import toUnicode
+from utilities.remove_at import removeAt
 
 from lib.plugins import sendEventToPlugins, registerPlugins
 
@@ -125,21 +122,6 @@ class RoleManager:
             'aws_access_key_id': credential.access_key,
             'aws_secret_access_key': credential.secret_key,
             'security_token': credential.session_token} if credential else {}
-
-
-def toUnicode(obj, encoding='utf-8'):
-    if type(obj) in [int, long, float, complex]:
-        # likely a number, convert it to string to get to unicode
-        obj = str(obj)
-    if isinstance(obj, basestring):
-        if not isinstance(obj, unicode):
-            obj = unicode(obj, encoding)
-    return obj
-
-
-def removeAt(astring):
-    '''remove the leading @ from a string'''
-    return astring.replace('@', '')
 
 
 def keyMapping(aDict):
@@ -238,8 +220,12 @@ def keyMapping(aDict):
 
             # custom fields as a list/array
             elif k in ('fields', 'details'):
-                if len(v) > 0:
-                    returndict[u'details'] = v
+                if type(v) is not dict:
+                    returndict[u'details'][u'message'] = v
+                else:
+                    if len(v) > 0:
+                        for details_key, details_value in v.iteritems():
+                            returndict[u'details'][details_key] = details_value
 
             # custom fields/details as a one off, not in an array
             # i.e. fields.something=value or details.something=value
@@ -267,10 +253,9 @@ def keyMapping(aDict):
         if 'utctimestamp' not in returndict.keys():
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
-
     except Exception as e:
-        sys.stderr.write('esworker-cloudtrail exception normalizing the message %r\n' % e)
-        return None
+        logger.exception(e)
+        logger.error('Malformed message: %r' % aDict)
 
     return returndict
 
@@ -335,6 +320,7 @@ class taskConsumer(object):
 
                     if not event['Message']:
                         logger.error('Invalid message format for cloudtrail SQS messages')
+                        logger.error('Malformed Message: %r' % body_message)
                         continue
 
                     if event['Message'] == 'CloudTrail validation message.':
@@ -345,6 +331,7 @@ class taskConsumer(object):
 
                     if 's3ObjectKey' not in message_json.keys():
                         logger.error('Invalid message format, expecting an s3ObjectKey in Message')
+                        logger.error('Malformed Message: %r' % body_message)
                         continue
 
                     s3_log_files = message_json['s3ObjectKey']
@@ -361,16 +348,14 @@ class taskConsumer(object):
 
             except KeyboardInterrupt:
                 sys.exit(1)
-            except ValueError as e:
-                logger.error('Exception while handling message: %r' % e)
             except Exception as e:
-                logger.error('Exception received: %r' % e)
+                logger.exception(e)
                 time.sleep(3)
 
             time.sleep(.1)
 
     def on_message(self, body):
-        #print("RECEIVED MESSAGE: %r" % (body, ))
+        # print("RECEIVED MESSAGE: %r" % (body, ))
         try:
             # default elastic search metadata for an event
             metadata = {
@@ -386,10 +371,10 @@ class taskConsumer(object):
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
-                    sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                    logger.error("Unknown body type received %r" % body)
                     return
             else:
-                sys.stderr.write("esworker exception: unknown body type received %r\n" % body)
+                logger.error("Unknown body type received %r\n" % body)
                 return
 
             if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
@@ -419,7 +404,7 @@ class taskConsumer(object):
                     bulk = True
 
                 bulk = False
-                res = self.esConnection.save_event(
+                self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
                     doc_type=metadata['doc_type'],
@@ -438,14 +423,14 @@ class taskConsumer(object):
             except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
                 try:
-                    sys.stderr.write('ElasticSearchException: {0} reported while indexing event'.format(e))
+                    logger.exception('ElasticSearchException: {0} reported while indexing event'.format(e))
                     return
                 except kombu.exceptions.MessageStateError:
                     # state may be already set.
                     return
-
-        except ValueError as e:
-            sys.stderr.write("esworker exception in events queue %r\n" % e)
+        except Exception as e:
+            logger.exception(e)
+            logger.error('Malformed message: %r' % body)
 
 
 def main():
@@ -453,12 +438,12 @@ def main():
     # and process events as json.
 
     if hasUWSGI:
-        sys.stdout.write("started as uwsgi mule {0}\n".format(uwsgi.mule_id()))
+        logger.info("started as uwsgi mule {0}".format(uwsgi.mule_id()))
     else:
-        sys.stdout.write('started without uwsgi\n')
+        logger.info('started without uwsgi')
 
     if options.mqprotocol not in ('sqs'):
-        sys.stdout.write('Can only process SQS queues, terminating\n')
+        logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
     sqs_conn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)

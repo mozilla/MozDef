@@ -3,10 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
 -->
 
 <template name="mozdefhealth">
@@ -70,6 +66,7 @@ Anthony Verez averez@mozilla.com
                 <td>CPU %</td>
                 <td>Load Average</td>
                 <td>JVM Memory %</td>
+                <td>GC Old (s)</td>
                 <td>Disk Free (GB)</td>
                 <td>Disk Total (GB)</td>
             </tr>
@@ -81,7 +78,7 @@ Anthony Verez averez@mozilla.com
         </tbody>
         </table>
 
-        Hot threads:<br>
+        <i class="fa fa-info-circle" data-toggle="tooltip" title="These are Java threads that use high CPU volume and execute for longer periods of time."></i> Hot Threads:<br>
         <code>
             {{#each eshotthreadshealthitems}}
                 {{line}}<br>
@@ -111,6 +108,7 @@ Anthony Verez averez@mozilla.com
         <td>{{cpu_usage}}</td>
         <td>{{load}}</td>
         <td>{{mem_heap_per}}</td>
+        <td>{{gc_old}}</td>
         <td>{{disk_free}}</td>
         <td>{{disk_total}}</td>
     </tr>

@@ -4,11 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
-#
-# Contributors:
-# Anthony Verez averez@mozilla.com
-# Jeff Bryner jbryner@mozilla.com
-# Brandon Myers bmyers@mozilla.com
 
 import collections
 import json
@@ -26,7 +21,7 @@ from config import RABBITMQ, ES
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient
-from query_models import TermMatch
+from query_models import TermMatch, ExistsMatch
 
 
 # utility functions used by AlertTask.mostCommon
@@ -258,6 +253,13 @@ class AlertTask(Task):
         relative to the _source that's returned from elastic search.
         ex: details.sourceipaddress
         """
+
+        # We automatically add the key that we're matching on
+        # for aggregation, as a query requirement
+        aggreg_key_exists = ExistsMatch(aggregationPath)
+        if aggreg_key_exists not in self.main_query.must:
+            self.main_query.add_must(aggreg_key_exists)
+
         try:
             esresults = self.main_query.execute(self.es, indices=self.event_indices)
             results = esresults['hits']

@@ -4,12 +4,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
-#
-# Contributors:
-# Brandon Myers bmyers@mozilla.com
 
 import pytz
 import tzlocal
+import datetime
 
 
 def utc_timezone():
@@ -63,8 +61,9 @@ class TestKeyMapping():
         assert result['summary'] == 'Stopped Getty on tty1.'
         assert result['source'] == 'daemon'
         assert result['receivedtimestamp'] != result['utctimestamp']
-        assert result['utctimestamp'] == '2017-10-27T14:01:12+00:00'
-        assert result['timestamp'] == '2017-10-27T14:01:12+00:00'
+        expected_year = datetime.datetime.now().year
+        assert result['utctimestamp'] == str(expected_year) + '-10-27T14:01:12+00:00'
+        assert result['timestamp'] == str(expected_year) + '-10-27T14:01:12+00:00'
         assert result['details']['sourceipaddress'] == '10.1.20.139'
         assert result['tags'] == ['.source.syslog_tcp']
         assert result['category'] == 'syslog'
@@ -75,3 +74,22 @@ class TestKeyMapping():
         }
         result = self.key_mapping(tags_dict)
         assert result['tags'] == ['example1']
+
+    def test_details_nondict(self):
+        message = {
+            'summary': 'example summary',
+            'payload': 'examplepayload',
+            'details': 'somestring',
+        }
+        result = self.key_mapping(message)
+        assert result['summary'] == 'example summary'
+        assert result['details'].keys() == ['message', 'payload']
+        assert result['details']['message'] == 'somestring'
+        assert result['details']['payload'] == 'examplepayload'
+
+    def test_no_details(self):
+        message = {
+            'summary': 'example summary',
+        }
+        result = self.key_mapping(message)
+        assert result['details'] == {}

@@ -4,9 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
-#
-# Contributors:
-# Brandon Myers bmyers@mozilla.com
 
 
 import sys
@@ -17,6 +14,7 @@ import pynsive
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.dict2List import dict2List
+from utilities.logger import logger
 
 
 def sendEventToPlugins(anevent, metadata, pluginList):
@@ -40,7 +38,7 @@ def sendEventToPlugins(anevent, metadata, pluginList):
                 if (set(plugin[1]).intersection([e for e in dict2List(anevent)])):
                     send = True
             except TypeError:
-                sys.stderr.write('TypeError on set intersection for dict {0}'.format(anevent))
+                logger.error('TypeError on set intersection for dict {0}'.format(anevent))
                 return (anevent, metadata)
         if send:
             (anevent, metadata) = plugin[0].onMessage(anevent, metadata)
@@ -70,7 +68,7 @@ def registerPlugins():
                     else:
                         mpriority = 100
                     if isinstance(mreg, list):
-                        print('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
+                        logger.info('[*] plugin {0} registered to receive messages with {1}'.format(mname, mreg))
                         pluginList.append((mclass, mreg, mpriority))
     return pluginList
 

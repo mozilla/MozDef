@@ -1434,7 +1434,7 @@ pre code {
   width: 91.66666667%;
 }
 .col-xs-10 {
-  width: 83.33333333%;
+  width: 80%;
 }
 .col-xs-9 {
   width: 75%;
@@ -1458,7 +1458,7 @@ pre code {
   width: 25%;
 }
 .col-xs-2 {
-  width: 16.66666667%;
+  width: 20%;
 }
 .col-xs-1 {
   width: 8.33333333%;
@@ -5620,7 +5620,8 @@ button.close {
   margin-left: -3px;
 }
 .tooltip-inner {
-  max-width: 200px;
+  max-width: 350px;
+  width: 300px;
   padding: 3px 8px;
   color: #fff;
   text-align: center;

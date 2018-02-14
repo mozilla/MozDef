@@ -3,11 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
-Yash Mehrotra yashmehrotra95@gmail.com
 */
 
 if (Meteor.isClient) {
@@ -87,7 +82,7 @@ if (Meteor.isClient) {
             });
         },
 
-        "blur .description, blur .summary": function(e, t) {
+        "blur .description, blur .summary, blur .contact": function(e, t) {
             e.stopImmediatePropagation();
             saveInvestigation(e,t);
         },        
@@ -548,7 +543,18 @@ if (Meteor.isClient) {
                                                 format: 'MM/DD/YYYY hh:mm:ss A',
                                                 startDate: dateOrNull($('#dateEnd').val() ) || moment()
                                                 });
+            $('#timestampText').daterangepicker({
+                                                singleDatePicker: true,
+                                                timePicker:true,
+                                                timePickerIncrement:1,
+                                                format: 'MM/DD/YYYY hh:mm:ss A',
+                                                startDate: dateOrNull($('#timestampText').val() ) || moment()
+                                                });
         };
+
+        this.$('[data-toggle="tooltip"]').tooltip({
+            'placement': 'top'
+        });
 
         //log the user entering the template
         activity=models.userAction();
@@ -592,6 +598,7 @@ if (Meteor.isClient) {
             var investigationobj = {
                 summary: template.find("#summary").value,
                 description: template.find("#description").value,
+                contact: template.find("#contact").value,
                 dateOpened: dateOrNull(template.find("#dateOpened").value),
                 dateClosed: dateOrNull(template.find("#dateClosed").value),
                 phase: template.find("#phase").value,

@@ -4,9 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
-#
-# Contributors:
-# Brandon Myers bmyers@mozilla.com
 
 import os
 import sys
@@ -444,7 +441,7 @@ class TestBulkInvalidFormatProblem(BulkTest):
         if pytest.config.option.delete_indexes:
             self.es_client.delete_index("events", True)
             self.es_client.delete_index(self.event_index_name, True)
-            self.es_client.create_index(self.event_index_name, mapping=mapping)
+            self.es_client.create_index(self.event_index_name, index_config=mapping)
             self.es_client.create_alias('events', self.event_index_name)
             self.es_client.create_alias('events-previous', self.event_index_name)
 

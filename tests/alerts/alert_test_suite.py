@@ -4,9 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
-#
-# Contributors:
-# bmyers@mozilla.com
 
 import os.path
 import sys
@@ -14,6 +11,8 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from unit_test_suite import UnitTestSuite
+
+from freezegun import freeze_time
 
 import copy
 import re
@@ -98,6 +97,7 @@ class AlertTestSuite(UnitTestSuite):
                 target[k] = v
         return target
 
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
     def test_alert_test_case(self, test_case):
         self.verify_starting_values(test_case)
         if test_case.expected_test_result is True:

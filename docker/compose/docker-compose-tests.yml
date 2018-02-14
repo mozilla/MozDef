@@ -1,0 +1,26 @@
+---
+version: '2.2'
+services:
+  elasticsearch:
+    build:
+      context: ../../
+      dockerfile: docker/compose/elasticsearch/Dockerfile
+    restart: always
+    command: bin/elasticsearch -Des.insecure.allow.root=true -Dnetwork.host=0.0.0.0
+    ports:
+      - 9200:9200
+    networks:
+      - default
+  rabbitmq:
+    build:
+      context: ../../
+      dockerfile: docker/compose/rabbitmq/Dockerfile
+    restart: always
+    command: rabbitmq-server
+    ports:
+      - 5672:5672
+    networks:
+      - default
+
+networks:
+  default:

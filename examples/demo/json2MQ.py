@@ -5,12 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 #
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
-# Brandon Myers bmyers@mozilla.com
-#
 # Simple sample code to generate an event and deposit as json on rabbitmq
-#
+
 
 import os
 import pytz
