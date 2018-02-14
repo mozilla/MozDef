@@ -58,6 +58,14 @@ class message(object):
                         'raw_value': filter_str
                     }
 
+            # Handle details.requestparameters.rule strings
+            if 'rule' in message['details']['requestparameters']:
+                rule_str = message['details']['requestparameters']['rule']
+                if type(rule_str) is not dict:
+                    message['details']['requestparameters']['rule'] = {
+                        'raw_value': rule_str
+                    }
+
         if 'responseelements' in message['details'] and type(message['details']['responseelements']) is dict:
             # Handle details.responseelements.role strings
             if 'role' in message['details']['responseelements']:
@@ -65,6 +73,14 @@ class message(object):
                 if type(role_str) is not dict:
                     message['details']['responseelements']['role'] = {
                         'raw_value': role_str
+                    }
+
+            # Handle details.responseelements.subnets strings
+            if 'subnets' in message['details']['responseelements']:
+                subnets_str = message['details']['responseelements']['subnets']
+                if type(subnets_str) is not dict:
+                    message['details']['responseelements']['subnets'] = {
+                        'raw_value': subnets_str
                     }
 
         # Handle details.additionaleventdata strings
