@@ -24,6 +24,7 @@ class SearchQueryUnitTest(UnitTestSuite):
     def populate_example_event(self):
         event = {
             'summary': 'Test Summary',
+            'source': 'Test Source',
             'note': 'Example note',
             'details': {
                 'information': 'Example information'
@@ -100,8 +101,8 @@ class TestAggregationInput(SearchQueryUnitTest):
 
     def test_multiple_values(self):
         self.query.add_aggregation(Aggregation('note'))
-        self.query.add_aggregation(Aggregation('summary'))
-        assert self.query.aggregation == [Aggregation('note'), Aggregation('summary')]
+        self.query.add_aggregation(Aggregation('source'))
+        assert self.query.aggregation == [Aggregation('note'), Aggregation('source')]
 
 
 class TestExecute(SearchQueryUnitTest):
@@ -207,9 +208,9 @@ class TestExecute(SearchQueryUnitTest):
 
         search_query = SearchQuery(minutes=10)
 
-        search_query.add_aggregation(Aggregation('summary'))
+        search_query.add_aggregation(Aggregation('source'))
         results = search_query.execute(self.es_client)
-        assert results['aggregations']['summary']['terms'][0]['count'] == 1
+        assert results['aggregations']['source']['terms'][0]['count'] == 1
 
     def test_aggregation_query_execute(self):
         query = SearchQuery()
