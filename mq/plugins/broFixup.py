@@ -68,7 +68,7 @@ class message(object):
             return message, metadata
         if u'category' not in message:
             return message, metadata
-        if u'source' not in message:
+        if u'SOURCE' not in message:
             return message, metadata
         if message['category'] != 'bro':
             return message, metadata
@@ -102,12 +102,13 @@ class message(object):
             newmessage['source'] = message['SOURCE'][4:]
         if 'resp_cc' in newmessage['details']:
             del(newmessage['details']['resp_cc'])
+        
 
         # add mandatory fields
         if 'ts' in newmessage['details']:
             newmessage[u'utctimestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
             newmessage[u'timestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
-            del(newmessage['details']['ts'])
+            #del(newmessage['details']['ts'])
         else:
             # a malformed message somehow managed to crawl to us, let's put it somewhat together
             newmessage[u'utctimestamp'] = toUTC(datetime.now()).isoformat()
@@ -133,10 +134,7 @@ class message(object):
             del(newmessage['details']['id.resp_p'])
 
 
-        # re-arrange the position of some fields
-        # {} vs {'details':{}}
         if 'details' in newmessage:
-
             if 'FILE_NAME' in newmessage['details']:
                 del(newmessage['details']['FILE_NAME'])
             if 'MESSAGE' in newmessage['details']:
@@ -189,7 +187,6 @@ class message(object):
                         u'{rx_hosts[0]} '
                         u'downloaded (MD5) '
                         u'{md5} '
-                        u'filename {filename} '
                         u'MIME {mime_type} '
                         u'({total_bytes} bytes) '
                         u'from {tx_hosts[0]} '
@@ -199,17 +196,15 @@ class message(object):
                 
                 if logtype == 'dns':
                     if 'qtype_name' not in newmessage['details']:
-                        newmessage['details'][u'qtype_name'] = u''
+                        newmessage['details'][u'qtype_name'] = u'unknown'
                     if 'query' not in newmessage['details']:
                         newmessage['details'][u'query'] = u''
                     if 'rcode_name' not in newmessage['details']:
                         newmessage['details'][u'rcode_name'] = u''
                     newmessage[u'summary'] = (
+                        u'DNS {qtype_name} type query '
                         u'{sourceipaddress} -> '
-                        u'{destinationipaddress}:{destinationport} '
-                        u'{qtype_name} '
-                        u'{query} '
-                        u'{rcode_name}'
+                        u'{destinationipaddress}:{destinationport}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
@@ -223,10 +218,10 @@ class message(object):
                     if 'status_code' not in newmessage['details']:
                         newmessage['details'][u'status_code'] = u''
                     newmessage[u'summary'] = (
-                        u'{method} '
-                        u'{host} '
-                        u'{uri} '
-                        u'{status_code}'
+                        u'HTTP {method} '
+                        u'{sourceipaddress} -> '
+                        u'{destinationipaddress}:'
+                        u'{destinationport}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
@@ -237,8 +232,7 @@ class message(object):
                     newmessage[u'summary'] = (
                         u'SSL: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
-                        u'{destinationport} '
-                        u'{server_name}'
+                        u'{destinationport}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
@@ -257,9 +251,7 @@ class message(object):
                     newmessage[u'summary'] = (
                         u'FTP: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
-                        u'{destinationport} '
-                        u'{command} '
-                        u'{user}'
+                        u'{destinationport}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
@@ -287,11 +279,7 @@ class message(object):
                     newmessage[u'summary'] = (
                         u'SMTP: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
-                        u'{destinationport} '
-                        u'from {from} '
-                        u'to '
-                        u'{to[0]} '
-                        u'ID {msg_id}'
+                        u'{destinationport}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                
@@ -336,8 +324,9 @@ class message(object):
                         newmessage['details'][u'seenindicatortype'] = newmessage['details']['seen.indicator_type']
                         del(newmessage['details']['seen.indicator_type'])
                     newmessage[u'summary'] = (
-                        u'Bro intel match: '
-                        u'{seenindicator}'
+                        u'Bro intel match '
+                        u'of {seenindicatortype} '
+                        u'in {seenwhere}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -345,10 +334,9 @@ class message(object):
                     if 'serial' not in newmessage['details']:
                         newmessage['details'][u'serial'] = u'0'
                     newmessage[u'summary'] = (
-                        u'Certificate seen from: '
+                        u'Certificate X509 seen from: '
                         u'{host}:'
-                        u'{port_num} '
-                        u'serial {serial}'
+                        u'{port_num}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -359,8 +347,7 @@ class message(object):
                         newmessage['details'][u'dhcp_host_name'] = u''
                     newmessage[u'summary'] = (
                         u'New host: '
-                        u'{mac} '
-                        u'{dhcp_host_name}'
+                        u'{mac}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -402,11 +389,6 @@ class message(object):
                         newmessage['details'][u'msg'] = u''
                     if 'note' not in newmessage['details']:
                         newmessage['details'][u'note'] = u''
-                    newmessage[u'summary'] = (
-                        u'{note} '
-                        u'{msg} '
-                        u'{sub}'
-                    ).format(**newmessage['details'])
                     # clean up the action notice IP addresses
                     if 'actions' in newmessage['details']:
                         if newmessage['details']['actions'] == "Notice::ACTION_LOG":
@@ -426,8 +408,38 @@ class message(object):
                             newmessage[u'details'][u'indicators'].append(newmessage[u'details'][u'src'])
                             # If details.src is present overwrite the source IP address with it
                             newmessage[u'details'][u'sourceipv6address'] = newmessage[u'details'][u'src']
+                    sumstruct = {}
+                    sumstruct['note'] = newmessage['details'][u'note']
+                    if 'sourceipv6address' in newmessage['details']:
+                        sumstruct['src'] = newmessage['details']['sourceipv6address']
+                    else:
+                        if 'sourceipv4address' in newmessage['details']:
+                            sumstruct['src'] = newmessage['details']['sourceipv4address']
+                        else:
+                            sumstruct['src'] = u'unknown'
+                    if 'dst' in newmessage['details']:
+                        sumstruct['dst'] = newmessage['details']['dst']
+                        del(newmessage[u'details'][u'dst'])
+                        if isIPv4(sumstruct[u'dst']):
+                            newmessage['details'][u'destinationipaddress'] = sumstruct['dst']
+                            newmessage['details'][u'destinationipv4address'] = sumstruct['dst']
+                        if isIPv6(sumstruct[u'dst']):
+                            newmessage['details'][u'destinationipv6address'] = sumstruct['dst']
+                    else:
+                        sumstruct['dst'] = u'unknown'
+                    if 'p' in newmessage['details']:
+                        sumstruct['p'] = newmessage['details']['p']
+                    else:
+                        sumstruct['p'] = u'unknown'
+                    sumstruct['indicators'] = newmessage[u'details'][u'indicators'][0]
+                    newmessage[u'summary'] = (
+                        u'{note} '
+                        u'source {src} '
+                        u'destination {dst} '
+                        u'port {p}'
+                        ).format(**sumstruct)
                         # Thank you for your service
-                        del newmessage[u'details'][u'src']
+                    del newmessage[u'details'][u'src']
                     return (newmessage, metadata)
                 
                 if logtype == 'rdp':
@@ -436,8 +448,7 @@ class message(object):
                     newmessage[u'summary'] = (
                         u'RDP: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
-                        u'{destinationport} '
-                        u'cookie {cookie}'
+                        u'{destinationport}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -453,7 +464,6 @@ class message(object):
                         u'{destinationipaddress}:'
                         u'{destinationport} '
                         u'method {method} '
-                        u'uri {uri} '
                         u'status {status_msg}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
@@ -462,12 +472,11 @@ class message(object):
                     if 'name' not in newmessage['details']:
                         newmessage['details'][u'name'] = u'unparsed'
                     if 'software_type' not in newmessage['details']:
-                        newmessage['details'][u'software_type'] = u'unknown software'
+                        newmessage['details'][u'software_type'] = u'unknown'
                     if 'host' not in newmessage['details']:
                         newmessage['details'] = u''
                     newmessage[u'summary'] = (
-                        u'Found {software_type} '
-                        u'name {name} '
+                        u'Found {software_type} software '
                         u'on {host}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
@@ -494,9 +503,7 @@ class message(object):
                     newmessage[u'summary'] = (
                         u'DCERPC: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
-                        u'{destinationport} '
-                        u'endpoint {endpoint} '
-                        u'operation {operation}'
+                        u'{destinationport}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -515,30 +522,28 @@ class message(object):
                         u'{sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
-                        u'client {client} '
                         u'request {request_type} '
-                        u'service {service} '
-                        u'success {success} '
-                        u'{error_msg}'
+                        u'success {success}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
                 if logtype == 'ntlm':
+                    newmessage['details'][u'ntlm'] = {}
                     if 'domainname' in newmessage['details']:
-                        newmessage['details']['ntlmdomainname'] = newmessage['details']['domainname']
+                        newmessage['details'][u'ntlm'][u'domainname'] = newmessage['details']['domainname']
                         del(newmessage['details']['domainname'])
                     else:
-                        newmessage['details'][u'ntlmdomainname'] = u'unknown'
+                        newmessage['details'][u'ntlm'][u'domainname'] = u'unknown'
                     if 'hostname' in newmessage['details']:
-                        newmessage['details']['ntlmhostname'] = newmessage['details']['hostname']
+                        newmessage['details'][u'ntlm'][u'hostname'] = newmessage['details']['hostname']
                         del(newmessage['details']['hostname'])
                     else:
-                        newmessage['details'][u'ntlmhostname'] = u'unknown'
+                        newmessage['details'][u'ntlm'][u'hostname'] = u'unknown'
                     if 'username' in newmessage['details']:
-                        newmessage['details']['ntlmusername'] = newmessage['details']['username']
+                        newmessage['details'][u'ntlm'][u'username'] = newmessage['details']['username']
                         del(newmessage['details']['username'])
                     else:
-                        newmessage['details'][u'ntlmusername'] = u'unknown'
+                        newmessage['details'][u'ntlm'][u'username'] = u'unknown'
                     if 'success' not in newmessage['details']:
                         newmessage['details'][u'success'] = u'unknown'
                     if 'status' not in newmessage['details']:
@@ -547,15 +552,13 @@ class message(object):
                         u'NTLM: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
-                        u'user {ntlmusername} '
-                        u'host {ntlmhostname} '
-                        u'domain {ntlmdomainname} '
                         u'success {success} '
                         u'status {status}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
                 if logtype == 'smb_files':
+                    newmessage['details']['smbtimes'] = {}
                     if 'path' not in newmessage['details']:
                         newmessage['details'][u'path'] = u''
                     if 'name' not in newmessage['details']:
@@ -563,16 +566,16 @@ class message(object):
                     if 'action' not in newmessage['details']:
                         newmessage['details'][u'action'] = u''
                     if 'times.accessed' in newmessage['details']:
-                        newmessage['details']['timesaccessed'] = toUTC(float(newmessage['details']['times.accessed'])).isoformat()
+                        newmessage['details']['smbtimes']['accessed'] = toUTC(float(newmessage['details']['times.accessed'])).isoformat()
                         del(newmessage['details']['times.accessed'])
                     if 'times.changed' in newmessage['details']:
-                        newmessage['details']['timeschanged'] = toUTC(float(newmessage['details']['times.changed'])).isoformat()
+                        newmessage['details']['smbtimes']['changed'] = toUTC(float(newmessage['details']['times.changed'])).isoformat()
                         del(newmessage['details']['times.changed'])
                     if 'times.created' in newmessage['details']:
-                        newmessage['details']['timescreated'] = toUTC(float(newmessage['details']['times.created'])).isoformat()
+                        newmessage['details']['smbtimes']['created'] = toUTC(float(newmessage['details']['times.created'])).isoformat()
                         del(newmessage['details']['times.created'])
                     if 'times.modified' in newmessage['details']:
-                        newmessage['details']['timesmodified'] = toUTC(float(newmessage['details']['times.modified'])).isoformat()
+                        newmessage['details']['smbtimes']['modified'] = toUTC(float(newmessage['details']['times.modified'])).isoformat()
                         del(newmessage['details']['times.modified'])
                     newmessage[u'summary'] = (
                         'SMB file: '
@@ -623,47 +626,48 @@ class message(object):
                 if logtype == 'x509':
                     newmessage['details'][u'certificate'] = {}
                     if 'basic_constraints.ca' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'basic_constraints_ca'] = newmessage['details'][u'basic_constraints.ca']
-                            del(newmessage['details'][u'basic_constraints.ca'])
+                        newmessage['details'][u'certificate'][u'basic_constraints_ca'] = newmessage['details'][u'basic_constraints.ca']
+                        del(newmessage['details'][u'basic_constraints.ca'])
+                    if 'basic_constraints.path_len' in newmessage['details']:
+                        newmessage['details'][u'certificate'][u'basic_constraints_path_len'] = newmessage['details'][u'basic_constraints.path_len']
+                        del(newmessage['details'][u'basic_constraints.path_len'])
                     if 'certificate.exponent' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'exponent'] = newmessage['details'][u'certificate.exponent']
-                            del(newmessage['details'][u'certificate.exponent'])
+                        newmessage['details'][u'certificate'][u'exponent'] = newmessage['details'][u'certificate.exponent']
+                        del(newmessage['details'][u'certificate.exponent'])
                     if 'certificate.issuer' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'issuer'] = newmessage['details'][u'certificate.issuer']
-                            del(newmessage['details'][u'certificate.issuer'])
+                        newmessage['details'][u'certificate'][u'issuer'] = newmessage['details'][u'certificate.issuer']
+                        del(newmessage['details'][u'certificate.issuer'])
                     if 'certificate.key_alg' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'key_alg'] = newmessage['details'][u'certificate.key_alg']
-                            del(newmessage['details'][u'certificate.key_alg'])
+                        newmessage['details'][u'certificate'][u'key_alg'] = newmessage['details'][u'certificate.key_alg']
+                        del(newmessage['details'][u'certificate.key_alg'])
                     if 'certificate.key_length' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'key_length'] = newmessage['details'][u'certificate.key_length']
-                            del(newmessage['details'][u'certificate.key_length'])
+                        newmessage['details'][u'certificate'][u'key_length'] = newmessage['details'][u'certificate.key_length']
+                        del(newmessage['details'][u'certificate.key_length'])
                     if 'certificate.key_type' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'key_type'] = newmessage['details'][u'certificate.key_type']
-                            del(newmessage['details'][u'certificate.key_type'])
+                        newmessage['details'][u'certificate'][u'key_type'] = newmessage['details'][u'certificate.key_type']
+                        del(newmessage['details'][u'certificate.key_type'])
                     if 'certificate.not_valid_after' in newmessage['details']:
-#                        newmessage['details']['timesaccessed'] = toUTC(float(newmessage['details']['times.accessed'])).isoformat()
-
-                            newmessage['details'][u'certificate'][u'not_valid_after'] = toUTC(float(newmessage['details'][u'certificate.not_valid_after'])).isoformat()
-                            del(newmessage['details'][u'certificate.not_valid_after'])
+                        newmessage['details'][u'certificate'][u'not_valid_after'] = toUTC(float(newmessage['details'][u'certificate.not_valid_after'])).isoformat()
+                        del(newmessage['details'][u'certificate.not_valid_after'])
                     if 'certificate.not_valid_before' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'not_valid_before'] = toUTC(float(newmessage['details'][u'certificate.not_valid_before'])).isoformat()
-                            del(newmessage['details'][u'certificate.not_valid_before'])
+                        newmessage['details'][u'certificate'][u'not_valid_before'] = toUTC(float(newmessage['details'][u'certificate.not_valid_before'])).isoformat()
+                        del(newmessage['details'][u'certificate.not_valid_before'])
                     if 'certificate.sig_alg' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'sig_alg'] = newmessage['details'][u'certificate.sig_alg']
-                            del(newmessage['details'][u'certificate.sig_alg'])
+                        newmessage['details'][u'certificate'][u'sig_alg'] = newmessage['details'][u'certificate.sig_alg']
+                        del(newmessage['details'][u'certificate.sig_alg'])
                     if 'certificate.subject' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'subject'] = newmessage['details'][u'certificate.subject']
-                            del(newmessage['details'][u'certificate.subject'])
+                        newmessage['details'][u'certificate'][u'subject'] = newmessage['details'][u'certificate.subject']
+                        del(newmessage['details'][u'certificate.subject'])
                     if 'certificate.version' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'certificate.version'] = newmessage['details'][u'certificate.version']
-                            del(newmessage['details'][u'certificate.version'])
+                        newmessage['details'][u'certificate'][u'version'] = newmessage['details'][u'certificate.version']
+                        del(newmessage['details'][u'certificate.version'])
                     if 'certificate.serial' in newmessage['details']:
-                            newmessage['details'][u'certificate'][u'serial'] = newmessage['details'][u'certificate.serial']
-                            del(newmessage['details'][u'certificate.serial'])
+                        newmessage['details'][u'certificate'][u'serial'] = newmessage['details'][u'certificate.serial']
+                        del(newmessage['details'][u'certificate.serial'])
                     else:
-                            newmessage['details'][u'certificateserial'] = u'0'
+                        newmessage['details'][u'certificate'][u'serial'] = u'0'
                     newmessage[u'summary'] = (
-                        'Certificate seen serial {serial}'
+                        'X509 certificate seen'
                     ).format(**newmessage['details']['certificate'])
                     return (newmessage, metadata)
         
