@@ -47,7 +47,7 @@ def getFrontendStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
         TermMatch('source', 'mozdef'),
-        TermMatch('category', 'health'),
+        TermMatch('category', 'mozdefhealth'),
         TermMatch('tags', 'latest'),
     ])
     results = search_query.execute(es, indices=['events'])

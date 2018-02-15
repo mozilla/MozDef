@@ -23,8 +23,8 @@ def verify_events(options):
         search_query.add_must_not(ExistsMatch(required_field))
 
         # Exclude all events that are mozdef related health and stats
-        search_query.add_must_not(TermMatch('category', 'stats'))
-        search_query.add_must_not(TermMatch('category', 'health'))
+        search_query.add_must_not(TermMatch('category', 'mozdefstats'))
+        search_query.add_must_not(TermMatch('category', 'mozdefhealth'))
 
         search_query.add_aggregation(Aggregation('category'))
         # We don't care about the actual events, we only want the numbers

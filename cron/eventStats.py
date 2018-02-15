@@ -51,7 +51,7 @@ def esSearch(es):
         results = search_query.execute(es)
 
         mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
-        mozdefstats['category'] = 'stats'
+        mozdefstats['category'] = 'mozdefstats'
         mozdefstats['hostname'] = socket.gethostname()
         mozdefstats['mozdefhostname'] = mozdefstats['hostname']
         mozdefstats['severity'] = 'INFO'
