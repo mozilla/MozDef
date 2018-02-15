@@ -83,6 +83,14 @@ class message(object):
                         'raw_value': subnets_str
                     }
 
+            # Handle details.responseelements.endpoint strings
+            if 'endpoint' in message['details']['responseelements']:
+                endpoint_str = message['details']['responseelements']['endpoint']
+                if type(endpoint_str) is not dict:
+                    message['details']['responseelements']['endpoint'] = {
+                        'raw_value': endpoint_str
+                    }
+
         # Handle details.additionaleventdata strings
         if 'additionaleventdata' in message['details']:
             additionaleventdata_str = message['details']['additionaleventdata']
