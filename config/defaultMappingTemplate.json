@@ -94,8 +94,7 @@
             "doc_values" : true
           },
           "summary" : {
-            "type" : "text",
-            "fielddata": true
+            "type" : "keyword"
           },
           "details" : {
             "properties" : {
