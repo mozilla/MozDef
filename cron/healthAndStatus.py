@@ -81,7 +81,7 @@ def main():
                 processname=sys.argv[0],
                 severity='INFO',
                 summary='mozdef health/status',
-                category='health',
+                category='mozdefhealth',
                 source='mozdef',
                 tags=[],
                 details=[])
