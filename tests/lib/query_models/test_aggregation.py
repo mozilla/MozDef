@@ -15,13 +15,13 @@ from unit_test_suite import UnitTestSuite
 
 
 class TestAggregation(UnitTestSuite):
-    def test_simple_aggregation_summary_field(self):
+    def test_simple_aggregation_source_field(self):
         events = [
-            {"test": "value", "summary": "abvc"},
-            {"test": "value", "summary": "abvc"},
-            {"test": "value", "summary": "think"},
+            {"test": "value", "source": "abvc"},
+            {"test": "value", "source": "abvc"},
+            {"test": "value", "source": "think"},
             {"test": "value", "note": "think"},
-            {"test": "value", "summary": "abvc space line"},
+            {"test": "value", "source": "abvc space line"},
         ]
         for event in events:
             self.populate_test_object(event)
@@ -29,26 +29,26 @@ class TestAggregation(UnitTestSuite):
 
         search_query = SearchQuery()
         search_query.add_must(TermMatch('test', 'value'))
-        search_query.add_aggregation(Aggregation('summary'))
+        search_query.add_aggregation(Aggregation('source'))
         results = search_query.execute(self.es_client)
 
-        assert results['aggregations'].keys() == ['summary']
+        assert results['aggregations'].keys() == ['source']
 
-        assert results['aggregations']['summary'].keys() == ['terms']
-        assert len(results['aggregations']['summary']['terms']) == 4
-        assert results['aggregations']['summary']['terms'][0].keys() == ['count', 'key']
+        assert results['aggregations']['source'].keys() == ['terms']
+        assert len(results['aggregations']['source']['terms']) == 4
+        assert results['aggregations']['source']['terms'][0].keys() == ['count', 'key']
 
-        assert results['aggregations']['summary']['terms'][0]['count'] == 3
-        assert results['aggregations']['summary']['terms'][0]['key'] == 'abvc'
+        assert results['aggregations']['source']['terms'][0]['count'] == 3
+        assert results['aggregations']['source']['terms'][0]['key'] == 'abvc'
 
-        assert results['aggregations']['summary']['terms'][1]['count'] == 1
-        assert results['aggregations']['summary']['terms'][1]['key'] == 'line'
+        assert results['aggregations']['source']['terms'][1]['count'] == 1
+        assert results['aggregations']['source']['terms'][1]['key'] == 'line'
 
-        assert results['aggregations']['summary']['terms'][2]['count'] == 1
-        assert results['aggregations']['summary']['terms'][2]['key'] == 'space'
+        assert results['aggregations']['source']['terms'][2]['count'] == 1
+        assert results['aggregations']['source']['terms'][2]['key'] == 'space'
 
-        assert results['aggregations']['summary']['terms'][3]['count'] == 1
-        assert results['aggregations']['summary']['terms'][3]['key'] == 'think'
+        assert results['aggregations']['source']['terms'][3]['count'] == 1
+        assert results['aggregations']['source']['terms'][3]['key'] == 'think'
 
     def test_simple_aggregation_note_field(self):
         events = [
