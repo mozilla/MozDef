@@ -31,7 +31,7 @@ class message(object):
                 iam_instance_profile = message['details']['requestparameters']['iamInstanceProfile']
                 if type(iam_instance_profile) is not dict:
                     message['details']['requestparameters']['iamInstanceProfile'] = {
-                        'raw_value': iam_instance_profile
+                        'raw_value': str(iam_instance_profile)
                     }
 
             # Handle details.requestparameters.attribute strings
@@ -39,7 +39,7 @@ class message(object):
                 attribute = message['details']['requestparameters']['attribute']
                 if type(attribute) is not dict:
                     message['details']['requestparameters']['attribute'] = {
-                        'raw_value': attribute
+                        'raw_value': str(attribute)
                     }
 
             # Handle details.requestparameters.description strings
@@ -47,7 +47,7 @@ class message(object):
                 description = message['details']['requestparameters']['description']
                 if type(description) is not dict:
                     message['details']['requestparameters']['description'] = {
-                        'raw_value': description
+                        'raw_value': str(description)
                     }
 
             # Handle details.requestparameters.filter strings
@@ -55,7 +55,7 @@ class message(object):
                 filter_str = message['details']['requestparameters']['filter']
                 if type(filter_str) is not dict:
                     message['details']['requestparameters']['filter'] = {
-                        'raw_value': filter_str
+                        'raw_value': str(filter_str)
                     }
 
             # Handle details.requestparameters.rule strings
@@ -63,7 +63,7 @@ class message(object):
                 rule_str = message['details']['requestparameters']['rule']
                 if type(rule_str) is not dict:
                     message['details']['requestparameters']['rule'] = {
-                        'raw_value': rule_str
+                        'raw_value': str(rule_str)
                     }
 
         if 'responseelements' in message['details'] and type(message['details']['responseelements']) is dict:
@@ -72,7 +72,7 @@ class message(object):
                 role_str = message['details']['responseelements']['role']
                 if type(role_str) is not dict:
                     message['details']['responseelements']['role'] = {
-                        'raw_value': role_str
+                        'raw_value': str(role_str)
                     }
 
             # Handle details.responseelements.subnets strings
@@ -80,7 +80,7 @@ class message(object):
                 subnets_str = message['details']['responseelements']['subnets']
                 if type(subnets_str) is not dict:
                     message['details']['responseelements']['subnets'] = {
-                        'raw_value': subnets_str
+                        'raw_value': str(subnets_str)
                     }
 
             # Handle details.responseelements.endpoint strings
@@ -88,7 +88,7 @@ class message(object):
                 endpoint_str = message['details']['responseelements']['endpoint']
                 if type(endpoint_str) is not dict:
                     message['details']['responseelements']['endpoint'] = {
-                        'raw_value': endpoint_str
+                        'raw_value': str(endpoint_str)
                     }
 
         # Handle details.additionaleventdata strings
@@ -96,7 +96,7 @@ class message(object):
             additionaleventdata_str = message['details']['additionaleventdata']
             if type(additionaleventdata_str) is not dict:
                 message['details']['additionaleventdata'] = {
-                    'raw_value': additionaleventdata_str
+                    'raw_value': str(additionaleventdata_str)
                 }
 
         # Handle details.serviceeventdetails strings
@@ -104,7 +104,7 @@ class message(object):
             serviceeventdetails_str = message['details']['serviceeventdetails']
             if type(serviceeventdetails_str) is not dict:
                 message['details']['serviceeventdetails'] = {
-                    'raw_value': serviceeventdetails_str
+                    'raw_value': str(serviceeventdetails_str)
                 }
 
         return (message, metadata)
