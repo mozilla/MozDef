@@ -109,7 +109,7 @@ def main():
         docs = pull_threat_exchange_data(param_key, param)
         logger.debug('Saving {0} {1} to ES'.format(len(docs), param_key))
         for doc in docs:
-            client.save_object(index='threat-exchange', doc_type=param_key, body=doc)
+            client.save_object(index='threat-exchange', body=doc)
 
     state.data['lastrun'] = current_timestamp
     state.save()
