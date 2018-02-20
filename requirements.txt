@@ -1,13 +1,12 @@
-amqp==1.4.9
+amqp==2.2.2
 anyjson==0.3.3
 appdirs==1.4.0
-billiard==3.3.0.23
 boto==2.38.0
 boto3==1.4.7
 botocore==1.7.36
 bottle==0.12.4
 bugzilla==1.0.0
-celery==3.1.23
+celery==4.1.0
 cffi==1.9.1
 configlib==1.0.0
 configparser==3.5.0b2
@@ -32,7 +31,7 @@ ipaddress==1.0.17
 ipwhois==0.15.0
 jmespath==0.9.3
 KitnIRC==0.2.6
-kombu==3.0.35
+kombu==4.1.0
 meld3==1.0.2
 mozdef-client==1.0.11
 MySQL-python==1.2.5
@@ -56,7 +55,7 @@ requests-futures==0.9.7
 rsa==3.1.4
 s3cmd==1.0.1
 setuptools-scm==1.11.1
-simplejson==3.3.3
+simplejson==3.13.2
 six==1.11.0
 supervisor==3.3.1
 tzlocal==1.4
