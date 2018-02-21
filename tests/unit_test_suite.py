@@ -5,56 +5,32 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
+from datetime import datetime, timedelta
+from dateutil.parser import parse
+
+import random
+import pytest
 
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient
-
 from utilities.toUTC import toUTC
-from utilities.dot_dict import DotDict
 
-from datetime import datetime, timedelta
-from dateutil.parser import parse
-
-from configlib import getConfig
-
-from kombu import Connection, Queue, Exchange
-
-import random
-import pytest
+from suite_helper import parse_config_file, parse_mapping_file, setup_es_client, setup_rabbitmq_client
 
 
 class UnitTestSuite(object):
 
     def setup(self):
+        self.options = parse_config_file()
+        self.mapping_options = parse_mapping_file()
+        self.es_client = setup_es_client(self.options)
+        self.rabbitmq_alerts_consumer = setup_rabbitmq_client(self.options)
+
         current_date = datetime.now()
         self.event_index_name = current_date.strftime("events-%Y%m%d")
         self.previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
         self.alert_index_name = current_date.strftime("alerts-%Y%m")
-        self.parse_config()
-
-        # Elasticsearch
-        self.es_client = ElasticsearchClient(list('{0}'.format(s) for s in self.options.esservers))
-
-        # RabbitMQ
-        mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(self.options.mquser,
-                                                        self.options.mqpassword,
-                                                        self.options.mqalertserver,
-                                                        self.options.mqport)
-
-        mqAlertConn = Connection(mqConnString)
-        alertExchange = Exchange(name=self.options.alertExchange, type='topic', durable=True, delivery_mode=1)
-        alertExchange(mqAlertConn).declare()
-
-        alertQueue = Queue(self.options.queueName,
-                           exchange=alertExchange,
-                           routing_key=self.options.alerttopic,
-                           durable=False,
-                           no_ack=(not self.options.mqack))
-        alertQueue(mqAlertConn).declare()
-
-        self.rabbitmq_alerts_consumer = mqAlertConn.Consumer(alertQueue, accept=['json'])
 
         if pytest.config.option.delete_indexes:
             self.reset_elasticsearch()
@@ -62,25 +38,6 @@ class UnitTestSuite(object):
 
         if pytest.config.option.delete_queues:
             self.reset_rabbitmq()
-
-    def parse_config(self):
-        default_config = os.path.join(os.path.dirname(__file__), "config.conf")
-        options = DotDict()
-        options.configfile = default_config
-
-        options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
-
-        options.alertExchange = getConfig('alertexchange', 'alerts', options.configfile)
-        options.queueName = getConfig('alertqueuename', 'alertBot', options.configfile)
-        options.alerttopic = getConfig('alerttopic', 'mozdef.*', options.configfile)
-
-        options.mquser = getConfig('mquser', 'guest', options.configfile)
-        options.mqalertserver = getConfig('mqalertserver', 'localhost', options.configfile)
-        options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
-        options.mqport = getConfig('mqport', 5672, options.configfile)
-        options.mqack = getConfig('mqack', True, options.configfile)
-
-        self.options = options
 
     def reset_rabbitmq(self):
         self.rabbitmq_alerts_consumer.channel.queue_purge()
@@ -91,9 +48,6 @@ class UnitTestSuite(object):
         if pytest.config.option.delete_queues:
             self.reset_rabbitmq()
 
-        self.rabbitmq_alerts_consumer.connection.close()
-        self.rabbitmq_alerts_consumer.close()
-
     def populate_test_event(self, event, event_type='event'):
         self.es_client.save_event(body=event, doc_type=event_type)
 
@@ -101,16 +55,11 @@ class UnitTestSuite(object):
         self.es_client.save_object(index='events', body=event, doc_type=event_type)
 
     def setup_elasticsearch(self):
-        default_mapping_file = os.path.join(os.path.dirname(__file__), "../config/defaultMappingTemplate.json")
-        mapping_str = ''
-        with open(default_mapping_file) as data_file:
-            mapping_str = data_file.read()
-
-        self.es_client.create_index(self.event_index_name, index_config=mapping_str)
+        self.es_client.create_index(self.event_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('events', self.event_index_name)
-        self.es_client.create_index(self.previous_event_index_name, index_config=mapping_str)
+        self.es_client.create_index(self.previous_event_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('events-previous', self.previous_event_index_name)
-        self.es_client.create_index(self.alert_index_name, index_config=mapping_str)
+        self.es_client.create_index(self.alert_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('alerts', self.alert_index_name)
 
     def reset_elasticsearch(self):
