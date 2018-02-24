@@ -55,7 +55,7 @@ class TestSSHDAcceptedMessageV1():
         assert retmessage['details']['sourceipaddress'] == '10.22.74.208'
 
 # Long Username and SHA256 fpr present
-class TestSSHDAcceptedMessageV1():
+class TestSSHDAcceptedMessageV2():
     def setup(self):
         
         self.msgobj = message()
@@ -79,7 +79,7 @@ class TestSSHDAcceptedMessageV1():
 
 
 # Long username
-class TestSSHDAcceptedMessageV2():
+class TestSSHDAcceptedMessageV3():
     def setup(self):
 
         self.msgobj = message()
@@ -103,7 +103,7 @@ class TestSSHDAcceptedMessageV2():
 
 
 # Short username, RSA fpr missing
-class TestSSHDAcceptedMessageV3():
+class TestSSHDAcceptedMessageV4():
     def setup(self):
 
         self.msgobj = message()
