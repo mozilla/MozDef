@@ -51,7 +51,7 @@ class message(object):
         and sets the doc_type
         '''
 
-        self.registration = ['bro', 'nsm', '*', 'duration']
+        self.registration = ['bro']
         self.priority = 5
         try:
             self.mozdefhostname = u'{0}'.format(node())
@@ -408,6 +408,7 @@ class message(object):
                             newmessage[u'details'][u'indicators'].append(newmessage[u'details'][u'src'])
                             # If details.src is present overwrite the source IP address with it
                             newmessage[u'details'][u'sourceipv6address'] = newmessage[u'details'][u'src']
+                        del newmessage[u'details'][u'src']
                     sumstruct = {}
                     sumstruct['note'] = newmessage['details'][u'note']
                     if 'sourceipv6address' in newmessage['details']:
@@ -431,7 +432,6 @@ class message(object):
                         sumstruct['p'] = newmessage['details']['p']
                     else:
                         sumstruct['p'] = u'unknown'
-                    sumstruct['indicators'] = newmessage[u'details'][u'indicators'][0]
                     newmessage[u'summary'] = (
                         u'{note} '
                         u'source {src} '
@@ -439,7 +439,6 @@ class message(object):
                         u'port {p}'
                         ).format(**sumstruct)
                         # Thank you for your service
-                    del newmessage[u'details'][u'src']
                     return (newmessage, metadata)
                 
                 if logtype == 'rdp':
