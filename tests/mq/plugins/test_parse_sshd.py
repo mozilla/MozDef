@@ -53,6 +53,29 @@ class TestSSHDAcceptedMessageV1():
         assert retmessage['details']['authstatus'] == 'Accepted'
         assert retmessage['details']['sourceipaddress'] == '10.22.74.208'
 
+# Long Username and SHA256 fpr present
+class TestSSHDAcceptedMessageV1():
+    def setup(self):
+        
+        self.msgobj = message()
+        self.msg = copy.deepcopy(accept_message)
+        self.msg['summary'] = 'Accepted publickey for user1@domainname.com from 10.22.248.134 port 52216 ssh2: RSA SHA256:1fPhSawXQzFDrJoN2uSos2nGg3wS3oGp15x8/HR+pBc'
+    
+    def test_onMessage(self):
+        metadata = {}
+        metadata['doc_type'] = 'event'
+
+        (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
+
+        assert retmessage is not None
+        assert retmeta is not None
+        assert retmessage['details']['username'] == 'user1@domainname.com'
+        assert retmessage['details']['rsakeyfingerprint'] == 'SHA256:1fPhSawXQzFDrJoN2uSos2nGg3wS3oGp15x8/HR+pBc'
+        assert retmessage['details']['authmethod'] == 'publickey'
+        assert retmessage['details']['sourceport'] == '52216'
+        assert retmessage['details']['authstatus'] == 'Accepted'
+        assert retmessage['details']['sourceipaddress'] == '10.22.248.134'
+
 
 # Long username
 class TestSSHDAcceptedMessageV2():
