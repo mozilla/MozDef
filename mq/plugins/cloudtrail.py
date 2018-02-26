@@ -66,6 +66,14 @@ class message(object):
                         'raw_value': str(rule_str)
                     }
 
+            # Handle details.requestparameters.ebsOptimized strings
+            if 'ebsOptimized' in message['details']['requestparameters']:
+                ebsOptimized_str = message['details']['requestparameters']['ebsOptimized']
+                if type(ebsOptimized_str) is not dict:
+                    message['details']['requestparameters']['ebsOptimized'] = {
+                        'raw_value': str(ebsOptimized_str)
+                    }
+
         if 'responseelements' in message['details'] and type(message['details']['responseelements']) is dict:
             # Handle details.responseelements.role strings
             if 'role' in message['details']['responseelements']:
