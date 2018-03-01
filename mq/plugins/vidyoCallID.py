@@ -21,5 +21,4 @@ class message(object):
     def onMessage(self, message, metadata):
         docid=hashlib.md5('vidyoUniqueCallID'+message['details']['UniqueCallID']).hexdigest()
         metadata['id']=docid
-        metadata['doc_type'] = 'vidyo'
         return (message, metadata)
