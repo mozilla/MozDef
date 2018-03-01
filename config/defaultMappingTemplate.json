@@ -7,9 +7,8 @@
         "dynamic_templates" : [ {
           "string_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
               "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "string"
@@ -17,9 +16,8 @@
         }, {
           "float_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
               "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "float"
@@ -27,9 +25,8 @@
         }, {
           "double_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
               "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "double"
@@ -37,9 +34,8 @@
         }, {
           "byte_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
               "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "byte"
@@ -47,9 +43,8 @@
         }, {
           "short_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
               "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "short"
@@ -57,9 +52,8 @@
         }, {
           "integer_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
               "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "integer"
@@ -67,9 +61,8 @@
         }, {
           "long_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
               "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "long"
@@ -77,47 +70,39 @@
         } ],
         "properties" : {
           "category" : {
-            "type" : "string",
-            "index" : "not_analyzed",
+            "type" : "keyword",
             "doc_values" : true
           },
           "hostname" : {
-            "type" : "string",
-            "index" : "not_analyzed",
+            "type" : "keyword",
             "doc_values" : true
           },
           "processid" : {
-            "type" : "string",
-            "index" : "not_analyzed",
+            "type" : "keyword",
             "doc_values" : true
           },
           "processname": {
-            "type" : "string",
-            "index" : "not_analyzed",
+            "type" : "keyword",
             "doc_values": true
           },
           "severity" : {
-            "type" : "string",
-            "index" : "not_analyzed",
+            "type" : "keyword",
             "doc_values" : true
           },
           "source" : {
-            "type" : "string",
-            "index" : "not_analyzed",
+            "type" : "keyword",
             "doc_values" : true
           },
           "summary" : {
-            "type" : "string"
+            "type" : "keyword"
           },
           "details" : {
             "properties" : {
               "destinationport" : {
-                "index" : "not_analyzed",
                 "type" : "long"
               },
               "hostname" : {
-                "type" : "string",
-                "index" : "not_analyzed",
+                "type" : "keyword",
                 "doc_values" : true
               },
               "sourceipaddress" : {
@@ -127,8 +112,7 @@
                 "type" : "ip"
               },
               "sourceipv4address" : {
-                "type" : "string",
-                "index" : "not_analyzed",
+                "type" : "keyword",
                 "doc_values" : true
               },
               "destinationipaddress" : {
@@ -138,12 +122,10 @@
                 "type" : "boolean"
               },
               "sourceport" : {
-                "index" : "not_analyzed",
                 "type" : "long"
               },
               "apiversion" : {
-                "type" : "string",
-                "index" : "not_analyzed",
+                "type" : "keyword",
                 "doc_values" : true
               }
             }
@@ -157,8 +139,7 @@
             "type" : "date"
           },
           "version" : {
-            "index" : "not_analyzed",
-            "type" : "string",
+            "type" : "keyword",
             "doc_values" : true
           }
         },
