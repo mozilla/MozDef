@@ -14,7 +14,7 @@ class AlertCloudtrailLoggingDisabled(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
-            TermMatch('_type', 'cloudtrail'),
+            TermMatch('source', 'cloudtrail'),
             TermMatch('eventName', 'StopLogging'),
         ])
 

@@ -14,7 +14,6 @@ class AlertSFTPEvent(AlertTask):
         search_query = SearchQuery(minutes=5)
 
         search_query.add_must([
-            TermMatch('_type', 'auditd'),
             TermMatch('category', 'execve'),
             TermMatch('processname', 'audisp-json'),
             TermMatch('details.processname', 'ssh'),

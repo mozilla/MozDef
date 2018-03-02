@@ -29,7 +29,6 @@ class AlertUnauthSSH(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
             TermMatch('category', 'syslog'),
             TermMatch('details.program', 'sshd'),
             QueryStringMatch('details.hostname: /{}/'.format(self.config.hostfilter)),

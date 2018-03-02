@@ -27,7 +27,6 @@ class broNSM(AlertTask):
                     PhraseMatch("details.peer_descr", host),
                     TermMatch('category', 'bro'),
                     TermMatch('source', 'notice'),
-                    TermMatch('_type', 'nsm')
                 ])
 
                 self.filtersManual(search_query)
