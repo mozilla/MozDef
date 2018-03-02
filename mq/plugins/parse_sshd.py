@@ -31,7 +31,7 @@ class message(object):
         self.session_closed_regex = re.compile('^pam_unix\(sshd\:session\)\: session closed for user (?P<username>[a-zA-Z0-9\@._-]+)$')
 
         if 'processname' in message or 'details' in message:
-            if ('program' in message['details'] and message['details'] == 'sshd') or message['processname'] == 'sshd':
+            if ('program' in message['details'] and message['details']['program'] == 'sshd') or message['processname'] == 'sshd':
                     msg_unparsed = message['summary']
                     if msg_unparsed.startswith('Accepted'):
                         accepted_search = re.search(self.accepted_regex, msg_unparsed)
