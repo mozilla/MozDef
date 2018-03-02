@@ -28,7 +28,6 @@ class message(object):
         self.session_opened_regex = re.compile('^pam_unix\(sshd\:session\)\: session (opened|closed) for user (?P<username>[a-zA-Z0-9\@._-]+)(?: by \(uid\=\d*\))?$')
         self.postponed_regex = re.compile('^Postponed (?P<authmethod>\w+) for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5}) ssh2(?: \[preauth\])?$')
         self.starting_session_regex = re.compile('^Starting session: (?P<sessiontype>\w+)(?: on )?(?P<device>pts/0)? for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5})$')
-        self.session_closed_regex = re.compile('^pam_unix\(sshd\:session\)\: session closed for user (?P<username>[a-zA-Z0-9\@._-]+)$')
 
         if 'processname' in message or 'details' in message:
             if ('program' in message['details'] and message['details']['program'] == 'sshd') or message['processname'] == 'sshd':
@@ -44,11 +43,8 @@ class message(object):
                             message['details']['rsakeyfingerprint'] = accepted_search.group('rsakeyfingerprint')
                     if msg_unparsed.startswith('pam_unix'):
                         session_opened_search = re.search(self.session_opened_regex, msg_unparsed)
-                        session_closed_search = re.search(self.session_closed_regex, msg_unparsed)
                         if session_opened_search:
                             message['details']['username'] = session_opened_search.group('username')
-                        if session_closed_search:
-                            message['details']['username'] = session_closed_search.group('username')
                     if msg_unparsed.startswith('Postponed'):
                         postponed_search = re.search(self.postponed_regex, msg_unparsed)
                         if postponed_search:
