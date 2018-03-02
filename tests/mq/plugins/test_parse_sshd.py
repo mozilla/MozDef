@@ -17,6 +17,7 @@ accept_message['timestamp'] = '2017-08-24T22:49:42+00:00'
 accept_message['receivedtimestamp'] = '2017-08-24T22:49:42+00:00'
 accept_message['category'] = 'syslog'
 accept_message['processid'] = '0'
+accept_message['processname'] = 'sshd'
 accept_message['severity'] = '7'
 accept_message['hostname'] = 'syslog1.private.scl3.mozilla.com'
 accept_message['mozdefhostname'] = 'mozdef4.private.scl3.mozilla.com'
@@ -53,9 +54,32 @@ class TestSSHDAcceptedMessageV1():
         assert retmessage['details']['authstatus'] == 'Accepted'
         assert retmessage['details']['sourceipaddress'] == '10.22.74.208'
 
+# Long Username and SHA256 fpr present
+class TestSSHDAcceptedMessageV2():
+    def setup(self):
+        
+        self.msgobj = message()
+        self.msg = copy.deepcopy(accept_message)
+        self.msg['summary'] = 'Accepted publickey for user1@domainname.com from 10.22.248.134 port 52216 ssh2: RSA SHA256:1fPhSawXQzFDrJoN2uSos2nGg3wS3oGp15x8/HR+pBc'
+    
+    def test_onMessage(self):
+        metadata = {}
+        metadata['doc_type'] = 'event'
+
+        (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
+
+        assert retmessage is not None
+        assert retmeta is not None
+        assert retmessage['details']['username'] == 'user1@domainname.com'
+        assert retmessage['details']['rsakeyfingerprint'] == 'SHA256:1fPhSawXQzFDrJoN2uSos2nGg3wS3oGp15x8/HR+pBc'
+        assert retmessage['details']['authmethod'] == 'publickey'
+        assert retmessage['details']['sourceport'] == '52216'
+        assert retmessage['details']['authstatus'] == 'Accepted'
+        assert retmessage['details']['sourceipaddress'] == '10.22.248.134'
+
 
 # Long username
-class TestSSHDAcceptedMessageV2():
+class TestSSHDAcceptedMessageV3():
     def setup(self):
 
         self.msgobj = message()
@@ -79,7 +103,7 @@ class TestSSHDAcceptedMessageV2():
 
 
 # Short username, RSA fpr missing
-class TestSSHDAcceptedMessageV3():
+class TestSSHDAcceptedMessageV4():
     def setup(self):
 
         self.msgobj = message()
