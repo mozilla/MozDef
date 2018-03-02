@@ -14,8 +14,8 @@ class AlertOpenPortViolation(AlertTask):
         search_query = SearchQuery(hours=4)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
-            PhraseMatch('tags', 'open_port_policy_violation'),
+            TermMatch('category', 'open_port_policy_violation'),
+            PhraseMatch('tags', 'open_port_policy_violation')
         ])
 
         self.filtersManual(search_query)

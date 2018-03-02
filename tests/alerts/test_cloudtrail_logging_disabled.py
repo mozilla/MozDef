@@ -13,6 +13,7 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
         "_type": "cloudtrail",
         "_source": {
             "eventName": "StopLogging",
+            "source": "cloudtrail",
             "requestParameters": {
                 "name": "cloudtrail_example_name"
             }
@@ -50,10 +51,10 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_type'] = 'event'
+    event['_source']['source'] = 'event'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with bad event type",
+            description="Negative test case with bad event source",
             events=[event],
         )
     )

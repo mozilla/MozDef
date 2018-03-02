@@ -70,10 +70,10 @@ class TestSSHKey(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_type'] = 'audit'
+    event['_source']['category'] = 'bad'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with bad event type",
+            description="Negative test case with bad event category",
             events=[event],
         )
     )

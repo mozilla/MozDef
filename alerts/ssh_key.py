@@ -33,8 +33,8 @@ class SSHKey(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
-            TermMatch('tags', 'mig-runner-sshkey'),
+            TermMatch('category', 'event'),
+            TermMatch('tags', 'mig-runner-sshkey')
         ])
 
         self.filtersManual(search_query)

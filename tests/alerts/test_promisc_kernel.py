@@ -53,16 +53,6 @@ class TestPromiscKernel(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_type'] = "audit"
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with bad event type",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
         event['_source']['category'] = "badcategory"
     test_cases.append(
         NegativeAlertTestCase(

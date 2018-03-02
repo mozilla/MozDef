@@ -79,10 +79,9 @@ class SshLateral(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=2)
         search_query.add_must([
-            TermMatch('_type', 'event'),
             TermMatch('category', 'syslog'),
             TermMatch('details.program', 'sshd'),
-            PhraseMatch('summary', 'Accepted publickey'),
+            PhraseMatch('summary', 'Accepted publickey')
         ])
 
         self.filtersManual(search_query)

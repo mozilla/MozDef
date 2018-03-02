@@ -15,7 +15,7 @@ class AlertCloudtrailDeadman(AlertTask):
         search_query = SearchQuery(hours=1)
 
         search_query.add_must([
-            TermMatch('_type', 'cloudtrail'),
+            TermMatch('source', 'cloudtrail')
         ])
 
         self.filtersManual(search_query)
