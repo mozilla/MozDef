@@ -323,7 +323,7 @@ def process_msg(mozmsg, msg):
     )
 
     mozmsg.details = details
-    mozmsg.details['auth0_raw'] = msg
+    mozmsg.details['auth0_raw'] = str(msg)
 
     return mozmsg
 
