@@ -15,7 +15,7 @@ class AlertCloudtrailLoggingDisabled(AlertTask):
 
         search_query.add_must([
             TermMatch('source', 'cloudtrail'),
-            TermMatch('eventName', 'StopLogging'),
+            TermMatch('eventName', 'StopLogging')
         ])
 
         search_query.add_must_not(TermMatch('errorCode', 'AccessDenied'))
