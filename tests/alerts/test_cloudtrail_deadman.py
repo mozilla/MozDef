@@ -39,10 +39,10 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['source'] = 'event'
+    event['_source']['source'] = 'cloudtrail'
     test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with bad event source",
+        PositiveAlertTestCase(
+            description="Positive test case with bad event source",
             events=[event],
         )
     )
