@@ -15,7 +15,7 @@ class AlertSSHPasswordAuthViolation(AlertTask):
 
         search_query.add_must([
             TermMatch('category', 'ssh_password_auth_policy_violation'),
-            PhraseMatch('tags', 'ssh_password_auth_policy_violation'),
+            PhraseMatch('tags', 'ssh_password_auth_policy_violation')
         ])
 
         self.filtersManual(search_query)
