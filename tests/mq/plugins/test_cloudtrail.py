@@ -260,3 +260,27 @@ class TestCloudtrailPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_ebs_optimized(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'ebsOptimized': 'astringvalue',
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'ebsOptimized': {
+                        'raw_value': 'astringvalue',
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
