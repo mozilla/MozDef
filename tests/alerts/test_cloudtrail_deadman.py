@@ -44,6 +44,7 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
         PositiveAlertTestCase(
             description="Positive test case with bad event source",
             events=[event],
+            expected_alert=default_alert
         )
     )
 
