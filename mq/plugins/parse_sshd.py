@@ -30,7 +30,7 @@ class message(object):
         self.starting_session_regex = re.compile('^Starting session: (?P<sessiontype>\w+)(?: on )?(?P<device>pts/0)? for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5})$')
 
         if 'processname' in message or 'details' in message:
-            if ('program' in message['details'] and message['details']['program'] == 'sshd') or message['processname'] == 'sshd':
+            if ('program' in message['details'] and message['details']['program'] == 'sshd') or ('processname' in message and message['processname'] == 'sshd'):
                     msg_unparsed = message['summary']
                     if msg_unparsed.startswith('Accepted'):
                         accepted_search = re.search(self.accepted_regex, msg_unparsed)
