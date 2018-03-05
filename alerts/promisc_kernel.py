@@ -17,10 +17,9 @@ class PromiscKernel(AlertTask):
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
             TermMatch('category', 'syslog'),
             PhraseMatch('summary', 'promiscuous'),
-            PhraseMatch('summary', 'entered'),
+            PhraseMatch('summary', 'entered')
         ])
 
         search_query.add_must_not([

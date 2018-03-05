@@ -33,10 +33,9 @@ class SessionOpenedUser(AlertTask):
         search_query = SearchQuery(minutes=10)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
             TermMatch('category', 'syslog'),
             TermMatch('details.program', 'sshd'),
-            QueryStringMatch('summary:"session opened"'),
+            QueryStringMatch('summary:"session opened"')
         ])
 
         for expectedtime in self._config['scan_expected'].values():

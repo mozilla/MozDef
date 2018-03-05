@@ -16,10 +16,9 @@ class PromiscAudit(AlertTask):
         search_query = SearchQuery(minutes=2)
 
         search_query.add_must([
-            TermMatch('_type', 'auditd'),
             TermMatch('category', 'promiscuous'),
             PhraseMatch('summary', 'promiscuous'),
-            PhraseMatch('summary', 'on'),
+            PhraseMatch('summary', 'on')
         ])
 
         search_query.add_must_not([

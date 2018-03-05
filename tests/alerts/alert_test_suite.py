@@ -115,7 +115,7 @@ class AlertTestSuite(UnitTestSuite):
             merged_event['_source']['utctimestamp'] = merged_event['_source']['utctimestamp']()
             merged_event['_source']['receivedtimestamp'] = merged_event['_source']['receivedtimestamp']()
             test_case.full_events.append(merged_event)
-            self.populate_test_event(merged_event['_source'], merged_event['_type'])
+            self.populate_test_event(merged_event['_source'])
 
         self.flush('events')
 
@@ -151,13 +151,10 @@ class AlertTestSuite(UnitTestSuite):
             for alert in found_event['_source']['alerts']:
                 assert alert['id'] == found_alert['_id']
                 assert alert['index'] == found_alert['_index']
-                assert alert['type'] == found_alert['_type']
 
     def verify_expected_alert(self, found_alert, test_case):
         # Verify index is set correctly
         assert found_alert['_index'] == self.alert_index_name, 'Alert index not propertly set, got: {}'.format(found_alert['_index'])
-        # Verify alert type is correct
-        assert found_alert['_type'] == 'alert', 'Alert _type is not alert'
 
         # Verify that the alert has the right "look to it"
         assert found_alert.keys() == ['_score', '_type', '_id', '_source', '_index'], 'Alert format is malformed'

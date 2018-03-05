@@ -59,15 +59,6 @@ class TestAlertDuoAuthFail(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_type'] = 'wrongtype'
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with bad event type",
-            events=[event],
-        )
-    )
-
-    event = AlertTestSuite.create_event(default_event)
     event['_source']['category'] = 'badcategory'
     test_cases.append(
         NegativeAlertTestCase(

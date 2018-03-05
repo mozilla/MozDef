@@ -14,7 +14,6 @@ class AlertSSHIOC(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
             TermMatch('tags', 'mig-runner-sshioc'),
         ])
 
