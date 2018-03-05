@@ -85,7 +85,6 @@ class taskConsumer(object):
             # default elastic search metadata for an event
             metadata = {
                 'index': 'events',
-                'doc_type': 'event',
                 'id': None
             }
             event = {}
@@ -159,7 +158,6 @@ class taskConsumer(object):
                 self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
-                    doc_type=metadata['doc_type'],
                     body=jbody,
                     bulk=bulk
                 )
