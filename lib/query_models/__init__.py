@@ -2,7 +2,6 @@ from aggregated_results import AggregatedResults
 from aggregation import Aggregation
 from boolean_match import BooleanMatch
 from exists_match import ExistsMatch
-from missing_match import MissingMatch
 from phrase_match import PhraseMatch
 from query_string_match import QueryStringMatch
 from range_match import RangeMatch

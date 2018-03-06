@@ -19,7 +19,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
 from elasticsearch_client import ElasticsearchClient
-from query_models import SearchQuery, TermMatch
+from query_models import SearchQuery, ExistsMatch
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -49,7 +49,7 @@ def genMeteorID():
 
 def getESAlerts(es):
     search_query = SearchQuery(minutes=50)
-    search_query.add_must(TermMatch('_type', 'alert'))
+    search_query.add_must(ExistsMatch('summary'))
     results = search_query.execute(es, indices=['alerts'], size=10000)
     return results
 
@@ -85,7 +85,6 @@ def updateMongo(mozdefdb, esAlerts):
             mrecord['esmetadata'] = dict()
             mrecord['esmetadata']['id'] = a['_id']
             mrecord['esmetadata']['index'] = a['_index']
-            mrecord['esmetadata']['type'] = a['_type']
             alerts.insert(mrecord)
 
 
