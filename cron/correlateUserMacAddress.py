@@ -134,7 +134,7 @@ def main():
 
     es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
     # create intelligence index if it's not already there
-    es.create_index('intelligence', ignore_fail=True)
+    es.create_index('intelligence')
 
     # read in the OUI file for mac prefix to vendor dictionary
     macassignments = readOUIFile(options.ouifilename)
