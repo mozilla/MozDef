@@ -2,11 +2,13 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV KIBANA_VERSION 4.6.5
+ENV KIBANA_VERSION 5.6.7
 
-RUN curl -s -L https://download.elastic.co/kibana/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C / -xz && \
-    cd /kibana-$KIBANA_VERSION-linux-x86_64 && \
-    bin/kibana plugin --install elastic/sense
+RUN \
+    curl -s -L https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C / -xz && \
+    cd /kibana-$KIBANA_VERSION-linux-x86_64
+
+COPY docker/conf/kibana.yml /kibana-$KIBANA_VERSION-linux-x86_64/config/kibana.yml
 
 WORKDIR /kibana-$KIBANA_VERSION-linux-x86_64
 
