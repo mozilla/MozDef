@@ -1,171 +1,155 @@
 {
-    "order" : 0,
-    "template" : "*",
-    "settings" : { },
-    "mappings" : {
-      "_default_" : {
-        "dynamic_templates" : [ {
-          "string_fields" : {
-            "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
-            },
-            "match" : "*",
-            "match_mapping_type" : "string"
-          }
-        }, {
-          "float_fields" : {
-            "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
-            },
-            "match" : "*",
-            "match_mapping_type" : "float"
-          }
-        }, {
-          "double_fields" : {
-            "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
-            },
-            "match" : "*",
-            "match_mapping_type" : "double"
-          }
-        }, {
-          "byte_fields" : {
-            "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
-            },
-            "match" : "*",
-            "match_mapping_type" : "byte"
-          }
-        }, {
-          "short_fields" : {
-            "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
-            },
-            "match" : "*",
-            "match_mapping_type" : "short"
-          }
-        }, {
-          "integer_fields" : {
-            "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
-            },
-            "match" : "*",
-            "match_mapping_type" : "integer"
-          }
-        }, {
-          "long_fields" : {
-            "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
-            },
-            "match" : "*",
-            "match_mapping_type" : "long"
-          }
-        } ],
-        "properties" : {
-          "category" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
+  "order" : 0,
+  "index_patterns" : "*",
+  "settings" : {
+          "index" : {
+          "mapping.total_fields.limit": 5000,
+          "mapping.ignore_malformed": true
+      }
+  },
+  "mappings" : {
+    "event" : {
+      "dynamic": true,
+      "dynamic_templates" : [ {
+        "string_fields" : {
+          "mapping" : {
+            "doc_values" : false,
+            "norms": false,
+            "index_options": "docs",
+            "type" : "keyword"
           },
-          "hostname" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
+          "match" : "*",
+          "match_mapping_type" : "string"
+        }
+      }, {
+        "double_fields" : {
+          "mapping" : {
+            "doc_values" : false,
+            "norms": false,
+            "type" : "keyword"
           },
-          "processid" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
+          "match" : "*",
+          "match_mapping_type" : "double"
+        }
+      }, {
+        "long_fields" : {
+          "mapping" : {
+            "doc_values" : false,
+            "norms": false,
+            "type" : "keyword"
           },
-          "processname": {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values": true
-          },
-          "severity" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
-          },
-          "source" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
-          },
-          "summary" : {
-            "type" : "string"
-          },
-          "details" : {
-            "properties" : {
-              "destinationport" : {
-                "index" : "not_analyzed",
-                "type" : "long"
-              },
-              "hostname" : {
-                "type" : "string",
-                "index" : "not_analyzed",
-                "doc_values" : true
-              },
-              "sourceipaddress" : {
-                "type" : "ip"
-              },
-              "srcip" : {
-                "type" : "ip"
-              },
-              "sourceipv4address" : {
-                "type" : "string",
-                "index" : "not_analyzed",
-                "doc_values" : true
-              },
-              "destinationipaddress" : {
-                "type" : "ip"
-              },
-              "success" : {
-                "type" : "boolean"
-              },
-              "sourceport" : {
-                "index" : "not_analyzed",
-                "type" : "long"
-              },
-              "apiversion" : {
-                "type" : "string",
-                "index" : "not_analyzed",
-                "doc_values" : true
-              }
+          "match" : "*",
+          "match_mapping_type" : "long"
+        }
+      } ],
+      "properties" : {
+        "category" : {
+          "type" : "keyword",
+          "norms": false,
+          "index_options": "docs",
+          "doc_values" : false
+        },
+        "hostname" : {
+          "type" : "keyword",
+          "norms": false,
+          "index_options": "docs",
+          "doc_values" : false
+        },
+        "processid" : {
+          "type" : "keyword",
+          "norms": false,
+          "index_options": "docs",
+          "doc_values" : false
+        },
+        "processname": {
+          "type" : "keyword",
+          "norms": false,
+          "index_options": "docs",
+          "doc_values": false
+        },
+        "severity" : {
+          "type" : "keyword",
+          "norms": false,
+          "index_options": "docs",
+          "doc_values" : false
+        },
+        "source" : {
+          "type" : "keyword",
+          "norms": false,
+          "index_options": "docs",
+          "doc_values" : false
+        },
+        "summary" : {
+          "type" : "text",
+          "norms": false,
+          "index_options": "docs",
+          "doc_values" : false
+        },
+        "details" : {
+          "dynamic": true,
+          "properties" : {
+            "destinationport" : {
+              "type" : "long",
+              "doc_values" : false
+            },
+            "hostname" : {
+              "type" : "keyword",
+              "norms": false,
+              "index_options": "docs",
+              "doc_values" : false
+            },
+            "sourceipaddress" : {
+              "type" : "ip",
+              "doc_values" : false
+            },
+            "srcip" : {
+              "type" : "ip",
+              "doc_values" : false
+            },
+            "sourceipv4address" : {
+              "type" : "keyword",
+              "norms": false,
+              "index_options": "docs",
+              "doc_values" : false
+            },
+            "destinationipaddress" : {
+              "type" : "ip",
+              "doc_values" : false
+            },
+            "success" : {
+              "type" : "boolean",
+              "doc_values" : false
+            },
+            "sourceport" : {
+              "type" : "long",
+              "doc_values" : false
+            },
+            "apiversion" : {
+              "type" : "keyword",
+              "norms": false,
+              "index_options": "docs",
+              "doc_values" : false
             }
-          },
-          "receivedtimestamp" : {
-            "format" : "dateOptionalTime",
-            "type" : "date"
-          },
-          "utctimestamp" : {
-            "format" : "dateOptionalTime",
-            "type" : "date"
-          },
-          "version" : {
-            "index" : "not_analyzed",
-            "type" : "string",
-            "doc_values" : true
           }
         },
-        "_all" : {
-          "enabled" : true
+        "receivedtimestamp" : {
+          "format" : "dateOptionalTime",
+          "type" : "date",
+          "doc_values" : false
+        },
+        "utctimestamp" : {
+          "format" : "dateOptionalTime",
+          "type" : "date",
+          "doc_values" : false
+        },
+        "version" : {
+          "type" : "keyword",
+          "norms": false,
+          "index_options": "docs",
+          "doc_values" : false
         }
       }
-    },
-    "aliases" : { }
+    }
+  },
+  "aliases" : { }
 }
