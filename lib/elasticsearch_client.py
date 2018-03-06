@@ -48,7 +48,7 @@ class ElasticsearchClient():
     def get_indices(self):
         return self.es_connection.indices.stats()['indices'].keys()
 
-    def create_index(self, index_name, ignore_fail=False, index_config=None):
+    def create_index(self, index_name, index_config=None):
         if not index_config:
             index_config = '''
             {
