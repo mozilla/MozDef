@@ -4,6 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
 from utilities.toUTC import toUTC
 
 import mock
+import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
 from broFixup import message
@@ -65,17 +66,20 @@ class TestBroFixup(object):
     def test_bro_wrongtype_log(self):
         event = {
            'category': 'bro',
-           'source': 'nosuchtype',
-           'ts': 1505701210.163043,
+           'SOURCE': 'nosuchtype',
            'customendpoint': 'bro'
         }
+        MESSAGE = {
+            'ts': 1505701210.163043
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
        
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert sorted(result['details'].keys()) == sorted(MESSAGE.keys())
         assert metadata['doc_type'] is 'nsm'
 
     @mock.patch('broFixup.node')
@@ -83,7 +87,7 @@ class TestBroFixup(object):
         mock_path.return_value = 'samplehostname'
         event = {
             'category': 'bro',
-            'source': 'something',
+            'SOURCE': 'something',
             'customendpoint': 'bro'
         }
         plugin = message()
@@ -95,7 +99,7 @@ class TestBroFixup(object):
         mock_path.side_effect = ValueError
         event = {
             'category': 'bro',
-            'source': 'something',
+            'SOURCE': 'something',
             'customendpoint': 'bro'
         }
         plugin = message()
@@ -108,14 +112,14 @@ class TestBroFixup(object):
     def test_defaults(self):
         event = {
             'category': 'bro',
-            'source': 'something',
+            'SOURCE': 'something',
             'customendpoint': 'bro'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
         assert result['category'] == 'bro'
-        assert result['source'] == 'something'
+        assert result['source'] == 'thing'
     
     def test_nomatch_syslog(self):
         event = {
@@ -203,16 +207,20 @@ class TestBroFixup(object):
         assert toUTC(result['timestamp']).isoformat() == result['timestamp']
         assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
     
-    # Would just need to duplicate this function, with your event json as the event variable
     def test_conn_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_conn',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             'conn_state': 'SF',
             'duration': 0.047874,
             'history': 'ShADadfF',
-            'sourceipaddress': '1.2.3.4',
-            'sourceport': 39246,
-            'destinationipaddress': '5.6.7.8',
-            'destinationport': 80,
+            'id.orig_h': '1.2.3.4',
+            'id.orig_p': 39246,
+            'id.resp_h': '5.6.7.8',
+            'id.resp_p': 80,
             'local_orig': True,
             'local_resp': True,
             'missed_bytes': 0,
@@ -227,17 +235,15 @@ class TestBroFixup(object):
             'service': 'http',
             'ts': 1505701210.163043,
             'tunnel_parents': [],
-            'uid': 'CYxwva4RBFtKpxWLba',
-            'category': 'bro',
-            'source': 'conn',
-            'customendpoint': 'bro'
+            'uid': 'CYxwva4RBFtKpxWLba'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert result['details']['originipbytes'] == 2452
         assert result['details']['responseipbytes'] == 2132
         assert 'orig_ip_bytes' not in result['details']
@@ -247,6 +253,11 @@ class TestBroFixup(object):
 
     def test_files_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_files',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701210.155542,
             "fuid":"FxAKGz3eoA79wYCAwc",
             "tx_hosts":["23.61.194.147"],
@@ -267,23 +278,29 @@ class TestBroFixup(object):
             "md5":"f30cb6b67044c9871b51dc0263717c92",
             "sha1":"a0a1def8b8f264f6431b973007fca15b90a39aa9",
             "filename":"arandomfile",
-            'category': 'bro',
-            'source': 'files',
-            'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert result['details']['sourceipaddress'] == '63.245.214.159'
         assert result['details']['destinationipaddress'] == '23.61.194.147'
-        assert result['summary'] == '63.245.214.159 downloaded (MD5) f30cb6b67044c9871b51dc0263717c92 filename arandomfile MIME application/ocsp-response (527 bytes) from 23.61.194.147 via HTTP'
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == '63.245.214.159 downloaded (MD5) f30cb6b67044c9871b51dc0263717c92 MIME application/ocsp-response (527 bytes) from 23.61.194.147 via HTTP'
 
     def test_files_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_files',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701210.155542,
             "fuid":"FxAKGz3eoA79wYCAwc",
             "tx_hosts":["23.61.194.147"],
@@ -298,34 +315,40 @@ class TestBroFixup(object):
             "total_bytes":527,
             "missing_bytes":0,
             "overflow_bytes":0,
-            "timedout":'false',
-            'category': 'bro',
-            'source': 'files',
-            'customendpoint': 'bro'
+            "timedout":'false'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert result['details']['sourceipaddress'] == '63.245.214.159'
         assert result['details']['destinationipaddress'] == '23.61.194.147'
         assert 'md5' in result['details']
         assert 'filename' in result['details']
         assert 'mime_type' in result['details']
         assert 'filesource' in result['details']
-        assert result['summary'] == '63.245.214.159 downloaded (MD5) None filename unknown MIME unknown (527 bytes) from 23.61.194.147 via None'
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == '63.245.214.159 downloaded (MD5) None MIME unknown (527 bytes) from 23.61.194.147 via None'
 
     def test_dns_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_dns',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701210.060553,
             "uid":"C6gQDU2AZJBxU1n3qd",
-            "sourceipaddress":"10.22.81.65",
-            "sourceport":14092,
-            "destinationipaddress":"10.22.75.41",
-            "destinationport":53,
+            "id.orig_h":"10.22.81.65",
+            "id.orig_p":14092,
+            "id.resp_h":"10.22.75.41",
+            "id.resp_p":53,
             "proto":"udp",
             "trans_id":37909,
             "rtt":0.001138,
@@ -343,28 +366,34 @@ class TestBroFixup(object):
             "Z":0,
             "answers":["bedrockadm.private.phx1.mozilla.com"],
             "TTLs":'[3600.0]',
-            "rejected":'false',
-            'category': 'bro',
-            'source': 'dns',
-            'customendpoint': 'bro'
+            "rejected":'false'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == '10.22.81.65 -> 10.22.75.41:53 PTR 50.75.8.10.in-addr.arpa NOERROR'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'DNS PTR type query 10.22.81.65 -> 10.22.75.41:53'
     
     def test_dns_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_dns',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701210.060553,
             "uid":"C6gQDU2AZJBxU1n3qd",
-            "sourceipaddress":"10.22.81.65",
-            "sourceport":14092,
-            "destinationipaddress":"10.22.75.41",
-            "destinationport":53,
+            "id.orig_h":"10.22.81.65",
+            "id.orig_p":14092,
+            "id.resp_h":"10.22.75.41",
+            "id.resp_p":53,
             "proto":"udp",
             "trans_id":37909,
             "rtt":0.001138,
@@ -378,25 +407,31 @@ class TestBroFixup(object):
             "Z":0,
             "answers":["bedrockadm.private.phx1.mozilla.com"],
             "TTLs":'[3600.0]',
-            "rejected":'false',
-            'category': 'bro',
-            'source': 'dns',
-            'customendpoint': 'bro'
+            "rejected":'false'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'rcode_name' in result['details']
         assert 'query' in result['details']
         assert 'qtype_name' in result['details']
-        assert result['summary'] == '10.22.81.65 -> 10.22.75.41:53   '
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'DNS unknown type query 10.22.81.65 -> 10.22.75.41:53'
 
     def test_http_log(self):
-        event =  {
+        event = {
+            'category': 'bro',
+            'SOURCE': 'bro_http',
+            'customendpoint': 'bro'
+        }
+        MESSAGE =  {
             "ts":1505701210.163246,
             "uid":"CMxwva4RHFtKpxWLba",
             "id.orig_h":"10.22.74.212",
@@ -418,31 +453,37 @@ class TestBroFixup(object):
             "resp_fuids":["FFy3254KdpcjRJbjY4"],
             "resp_mime_types":["text/plain"],
             "cluster_client_ip":"34.212.32.13",
-            'category': 'bro',
-            'source': 'http',
-            'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'status_code' in result['details']
         assert 'uri' in result['details']
         assert 'host' in result['details']
         assert 'method' in result['details']
-        assert result['summary'] == 'GET hg.mozilla.org /projects/build-system?cmd=batch 200'
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'HTTP GET 10.22.74.212 -> 10.22.74.175:80'
 
     def test_ssl_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_ssl',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1502751597.597052,
             "uid":"CWmwax23B9dBtn3s16",
-            "sourceipaddress":"36.70.241.31",
-            "sourceport":49322,
-            "destinationipaddress":"63.245.215.82",
-            "destinationport":443,
+            "id.orig_h":"36.70.241.31",
+            "id.orig_p":49322,
+            "id.resp_h":"63.245.215.82",
+            "id.resp_p":443,
             "version":"TLSv12",
             "cipher":"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
             "curve":"secp256r1",
@@ -454,28 +495,34 @@ class TestBroFixup(object):
             "subject":"CN=geo.mozilla.org,OU=WebOps,O=Mozilla Foundation,L=Mountain View,ST=California,C=US",
             "issuer":"CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US",
             "validation_status":"ok",
-            "pfs":'true',
-            'category': 'bro',
-            'source': 'ssl',
-            'customendpoint': 'bro'
+            "pfs":'true'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'SSL: 36.70.241.31 -> 63.245.215.82:443 geo.mozilla.org'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'SSL: 36.70.241.31 -> 63.245.215.82:443'
     
     def test_ssl_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_ssl',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1502751597.597052,
             "uid":"CWmwax23B9dBtn3s16",
-            "sourceipaddress":"36.70.241.31",
-            "sourceport":49322,
-            "destinationipaddress":"63.245.215.82",
-            "destinationport":443,
+            "id.orig_h":"36.70.241.31",
+            "id.orig_p":49322,
+            "id.resp_h":"63.245.215.82",
+            "id.resp_p":443,
             "version":"TLSv12",
             "cipher":"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
             "curve":"secp256r1",
@@ -486,54 +533,66 @@ class TestBroFixup(object):
             "subject":"CN=geo.mozilla.org,OU=WebOps,O=Mozilla Foundation,L=Mountain View,ST=California,C=US",
             "issuer":"CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US",
             "validation_status":"ok",
-            "pfs":'true',
-            'category': 'bro',
-            'source': 'ssl',
-            'customendpoint': 'bro'
+            "pfs":'true'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'server_name' in result['details']
-        assert result['summary'] == 'SSL: 36.70.241.31 -> 63.245.215.82:443 63.245.215.82'
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'SSL: 36.70.241.31 -> 63.245.215.82:443'
 
     def test_dhcp_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_dhcp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701256.181043,
             "uid":"Cbs59u2x6KXu85dsOi",
-            "sourceipaddress":"10.26.40.65",
-            "sourceport":68,
-            "destinationipaddress":"10.26.40.1",
-            "destinationport":67,
+            "id.orig_h":"10.26.40.65",
+            "id.orig_p":68,
+            "id.resp_h":"10.26.40.1",
+            "id.resp_p":67,
             "mac":"00:25:90:9b:67:b2",
             "assigned_ip":"10.26.40.65",
             "lease_time":86400.0,
-            "trans_id":1504605887,
-            'category': 'bro',
-            'source': 'dhcp',
-            'customendpoint': 'bro'
+            "trans_id":1504605887
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == '10.26.40.65 assigned to 00:25:90:9b:67:b2'
 
     def test_ftp_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_ftp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1363628702.035108,
             "uid":"CdS183kIs8TBugKDf",
-            "sourceipaddress":"141.142.228.5",
-            "sourceport":50736,
-            "destinationipaddress":"141.142.192.162",
-            "destinationport":21,
+            "id.orig_h":"141.142.228.5",
+            "id.orig_p":50736,
+            "id.resp_h":"141.142.192.162",
+            "id.resp_p":21,
             "user":"anonymous",
             "password":"chrome@example.com",
             "command":"EPSV",
@@ -542,52 +601,64 @@ class TestBroFixup(object):
             "data_channel.passive":'true',
             "data_channel.orig_h":"141.142.228.5",
             "data_channel.resp_h":"141.142.192.162",
-            "data_channel.resp_p":38141,
-            'category': 'bro',
-            'source': 'ftp',
-            'customendpoint': 'bro'
+            "data_channel.resp_p":38141
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'FTP: 141.142.228.5 -> 141.142.192.162:21 EPSV anonymous'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'FTP: 141.142.228.5 -> 141.142.192.162:21'
 
     def test_ftp_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_ftp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1363628702.035108,
             "uid":"CdS183kIs8TBugKDf",
-            "sourceipaddress":"141.142.228.5",
-            "sourceport":50736,
-            "destinationipaddress":"141.142.192.162",
-            "destinationport":21,
+            "id.orig_h":"141.142.228.5",
+            "id.orig_p":50736,
+            "id.resp_h":"141.142.192.162",
+            "id.resp_p":21,
             "password":"chrome@example.com",
             "reply_code":229,
             "reply_msg":"Entering Extended Passive Mode (|||38141|)",
             "data_channel.passive":'true',
             "data_channel.orig_h":"141.142.228.5",
             "data_channel.resp_h":"141.142.192.162",
-            "data_channel.resp_p":38141,
-            'category': 'bro',
-            'source': 'ftp',
-            'customendpoint': 'bro'
+            "data_channel.resp_p":38141
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'command' in result['details']
         assert 'user' in result['details']
-        assert result['summary'] == 'FTP: 141.142.228.5 -> 141.142.192.162:21  '
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'FTP: 141.142.228.5 -> 141.142.192.162:21'
 
     def test_pe_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_pe',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701209.93718,
             "id":"FlFe5r3GnwleZBqEVd",
             "machine":"I386",
@@ -604,21 +675,28 @@ class TestBroFixup(object):
             "has_export_table":'true',
             "has_cert_table":'false',
             "has_debug_data":'true',
-            "section_names":[".text",".rdata",".data",".rsrc",".reloc"],
-            'category': 'bro',
-            'source': 'pe',
-            'customendpoint': 'bro'
+            "section_names":[".text",".rdata",".data",".rsrc",".reloc"]
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'PE file: Windows 95 or NT 4.0 WINDOWS_GUI'
 
     def test_pe_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_pe',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701209.93718,
             "id":"FlFe5r3GnwleZBqEVd",
             "machine":"I386",
@@ -633,29 +711,36 @@ class TestBroFixup(object):
             "has_export_table":'true',
             "has_cert_table":'false',
             "has_debug_data":'true',
-            "section_names":[".text",".rdata",".data",".rsrc",".reloc"],
-            'category': 'bro',
-            'source': 'pe',
-            'customendpoint': 'bro'
+            "section_names":[".text",".rdata",".data",".rsrc",".reloc"]
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'subsystem' in result['details']
         assert 'os' in result['details']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'PE file:  '
 
     def test_smtp_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_smtp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703597.295432,
             "uid":"Ct7e4waRBwsLoRvfg",
-            "sourceipaddress":"63.245.214.155",
-            "sourceport":4523,
-            "destinationipaddress":"128.199.139.6",
-            "destinationport":25,
+            "id.orig_h":"63.245.214.155",
+            "id.orig_p":4523,
+            "id.resp_h":"128.199.139.6",
+            "id.resp_p":25,
             "trans_depth":1,
             "helo":"smtp.mozilla.org",
             "mailfrom":"bugzilla-daemon@mozilla.org",
@@ -671,27 +756,30 @@ class TestBroFixup(object):
             "path":["128.199.139.6","63.245.214.155","127.0.0.1","10.22.82.42"],
             "tls":'false',
             "fuids":["FnR86s3vp0xKw286Ei","FiYNQo4ygv3xPAeocd"],
-            "is_webmail":'false',
-            'category': 'bro',
-            'source': 'smtp',
-            'customendpoint': 'bro'
+            "is_webmail":'false'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25 from "Bugzilla@Mozilla" <bugzilla-daemon@mozilla.org> to bugmail@firebot.glob.uno ID <bug-1400759-507647@https.bugzilla.mozilla.org/>'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
     
     def test_smtp_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_smtp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703597.295432,
             "uid":"Ct7e4waRBwsLoRvfg",
-            "sourceipaddress":"63.245.214.155",
-            "sourceport":4523,
-            "destinationipaddress":"128.199.139.6",
-            "destinationport":25,
+            "id.orig_h":"63.245.214.155",
+            "id.orig_p":4523,
+            "id.resp_h":"128.199.139.6",
+            "id.resp_p":25,
             "trans_depth":1,
             "helo":"smtp.mozilla.org",
             "mailfrom":"bugzilla-daemon@mozilla.org",
@@ -704,31 +792,33 @@ class TestBroFixup(object):
             "path":["128.199.139.6","63.245.214.155","127.0.0.1","10.22.82.42"],
             "tls":'false',
             "fuids":["FnR86s3vp0xKw286Ei","FiYNQo4ygv3xPAeocd"],
-            "is_webmail":'false',
-            'category': 'bro',
-            'source': 'smtp',
-            'customendpoint': 'bro'
+            "is_webmail":'false'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'from' in result['details']
         assert 'to' in result['details']
         assert 'msg_id' in result['details']
-        assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25 from  to  ID '
+        assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
     
     def test_ssh_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_ssh',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703601.393284,
             "uid":"CBiwrdGg2CGf0Y6U9",
-            "sourceipaddress":"63.245.214.162",
-            "sourceport":22418,
-            "destinationipaddress":"192.30.255.112",
-            "destinationport":22,
+            "id.orig_h":"63.245.214.162",
+            "id.orig_p":22418,
+            "id.resp_h":"192.30.255.112",
+            "id.resp_p":22,
             "version":2,
             "auth_success":'true',
             "auth_attempts":1,
@@ -740,28 +830,34 @@ class TestBroFixup(object):
             "compression_alg":"none",
             "kex_alg":"ecdh-sha2-nistp256",
             "host_key_alg":"ssh-dss",
-            "host_key":"16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48",
-            'category': 'bro',
-            'source': 'ssh',
-            'customendpoint': 'bro'
+            "host_key":"16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48"
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SSH: 63.245.214.162 -> 192.30.255.112:22 success true'
 
     def test_ssh_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_ssh',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703601.393284,
             "uid":"CBiwrdGg2CGf0Y6U9",
-            "sourceipaddress":"63.245.214.162",
-            "sourceport":22418,
-            "destinationipaddress":"192.30.255.112",
-            "destinationport":22,
+            "id.orig_h":"63.245.214.162",
+            "id.orig_p":22418,
+            "id.resp_h":"192.30.255.112",
+            "id.resp_p":22,
             "version":2,
             "auth_attempts":1,
             "direction":"OUTBOUND",
@@ -772,264 +868,310 @@ class TestBroFixup(object):
             "compression_alg":"none",
             "kex_alg":"ecdh-sha2-nistp256",
             "host_key_alg":"ssh-dss",
-            "host_key":"16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48",
-            'category': 'bro',
-            'source': 'ssh',
-            'customendpoint': 'bro'
+            "host_key":"16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48"
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'auth_success' in result['details']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SSH: 63.245.214.162 -> 192.30.255.112:22 success unknown'
-    
+
     def test_tunnel_log(self):
         event = {
-            "ts":1505703604.92601,
-            "sourceipaddress":"10.22.24.167",
-            "sourceport":0,
-            "destinationipaddress":"10.22.74.74",
-            "destinationport":3128,
-            "tunnel_type":"Tunnel::HTTP",
-            "action":"Tunnel::DISCOVER",
             'category': 'bro',
-            'source': 'tunnel',
+            'SOURCE': 'bro_tunnel',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1505703604.92601,
+            "id.orig_h":"10.22.24.167",
+            "id.orig_p":0,
+            "id.resp_h":"10.22.74.74",
+            "id.resp_p":3128,
+            "tunnel_type":"Tunnel::HTTP",
+            "action":"Tunnel::DISCOVER"
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == '10.22.24.167 -> 10.22.74.74:3128 Tunnel::HTTP Tunnel::DISCOVER'
     
     def test_tunnel_log2(self):
         event = {
-            "ts":1505703604.92601,
-            "sourceipaddress":"10.22.24.167",
-            "sourceport":0,
-            "destinationipaddress":"10.22.74.74",
-            "destinationport":3128,
             'category': 'bro',
-            'source': 'tunnel',
+            'SOURCE': 'bro_tunnel',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1505703604.92601,
+            "id.orig_h":"10.22.24.167",
+            "id.orig_p":0,
+            "id.resp_h":"10.22.74.74",
+            "id.resp_p":3128
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'tunnel_type' in result['details']
         assert 'action' in result['details']
         assert result['summary'] == '10.22.24.167 -> 10.22.74.74:3128  '
     
     def test_intel_log(self):
         event = {
+            'category':'bro',
+            'SOURCE':'bro_intel',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701213.244219,
             "uid":"CwO41Y3TzqvScTyRk",
-            "sourceipaddress":"10.8.81.221",
-            "sourceport":46606,
-            "destinationipaddress":"10.8.81.42",
-            "destinationport":81,
+            "id.orig_h":"10.8.81.221",
+            "id.orig_p":46606,
+            "id.resp_h":"10.8.81.42",
+            "id.resp_p":81,
             "seenindicator":"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)",
             "seen.indicator_type":"Intel::SOFTWARE",
             "seenwhere":"HTTP::IN_USER_AGENT_HEADER",
             "seennode":"nsm-stage1-eth4-4",
             "matched":["Intel::SOFTWARE"],
-            "sources":["test"],
-            'category':'bro',
-            'source':'intel',
-            'customendpoint': 'bro'
+            "sources":["test"]
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'Bro intel match: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert result['summary'] == 'Bro intel match of Intel::SOFTWARE in HTTP::IN_USER_AGENT_HEADER'
 
     def test_intel_log2(self):
         event = {
+            'category':'bro',
+            'SOURCE':'bro_intel',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701213.244219,
             "uid":"CwO41Y3TzqvScTyRk",
-            "sourceipaddress":"10.8.81.221",
-            "sourceport":46606,
-            "destinationipaddress":"10.8.81.42",
-            "destinationport":81,
+            "id.orig_h":"10.8.81.221",
+            "id.orig_p":46606,
+            "id.resp_h":"10.8.81.42",
+            "id.resp_p":81,
             "seen.indicator_type":"Intel::SOFTWARE",
             "seen.where":"HTTP::IN_USER_AGENT_HEADER",
             "seen.node":"nsm-stage1-eth4-4",
             "matched":["Intel::SOFTWARE"],
-            "sources":["test"],
-            'category':'bro',
-            'source':'intel',
-            'customendpoint': 'bro'
+            "sources":["test"]
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'seenindicator' in result['details']
-        assert result['summary'] == 'Bro intel match: '
+        assert result['summary'] == 'Bro intel match of Intel::SOFTWARE in HTTP::IN_USER_AGENT_HEADER'
     
     def test_knowncerts_log(self):
         event = {
+            'category':'bro',
+            'SOURCE':'bro_known_certs',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701209.939031,
             "host":"10.22.75.54",
             "port_num":8443,
             "subject":"CN=syslog1.private.scl3.mozilla.com,OU=WebOps,O=Mozilla Corporation,L=Mountain View,ST=California,C=US",
             "issuer_subject":"CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US",
-            "serial":"0B2BF706734AA1CCC969F7990FD20424",
-            'category': 'bro',
-            'source': 'knowncerts',
-            'customendpoint': 'bro'
+            "serial":"0B2BF706734AA1CCC969F7990FD20424"
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'Certificate seen from: 10.22.75.54:8443 serial 0B2BF706734AA1CCC969F7990FD20424'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            assert key in result['details']
+            assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'Certificate X509 seen from: 10.22.75.54:8443'
     
     def test_knowncerts_log2(self):
         event = {
+            'category':'bro',
+            'SOURCE':'bro_known_certs',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701209.939031,
             "host":"10.22.75.54",
             "port_num":8443,
             "subject":"CN=syslog1.private.scl3.mozilla.com,OU=WebOps,O=Mozilla Corporation,L=Mountain View,ST=California,C=US",
-            "issuer_subject":"CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US",
-            'category': 'bro',
-            'source': 'knowncerts',
-            'customendpoint': 'bro'
+            "issuer_subject":"CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US"
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            assert key in result['details']
+            assert MESSAGE[key] == result['details'][key]
         assert 'serial' in result['details']
-        assert result['summary'] == 'Certificate seen from: 10.22.75.54:8443 serial 0'
+        assert result['summary'] == 'Certificate X509 seen from: 10.22.75.54:8443'
     
     def test_knowndevices_log(self):
         event = {
-            "ts":1258531221.486539,
-            "mac":"00:0b:db:63:58:a6",
-            "dhcp_host_name":"m57-jo",
             'category':'bro',
-            'source':'knowndevices',
+            'SOURCE':'bro_known_devices',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1258531221.486539,
+            "mac":"00:0b:db:63:58:a6",
+            "dhcp_host_name":"m57-jo"
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'New host: 00:0b:db:63:58:a6 m57-jo'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            assert key in result['details']
+            assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'New host: 00:0b:db:63:58:a6'
     
     def test_knowndevices_log2(self):
         event = {
-            "ts":1258531221.486539,
             'category':'bro',
-            'source':'knowndevices',
+            'SOURCE':'bro_known_devices',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1258531221.486539
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'mac' in result['details']
         assert 'dhcp_host_name' in result['details']
-        assert result['summary'] == 'New host:  '
+        assert result['summary'] == 'New host: '
     
     def test_knownhosts_log(self):
         event = {
-            "ts":1258535653.085939,
-            "host":"65.54.95.64",
             'category':'bro',
-            'source':'knownhosts',
+            'SOURCE':'bro_known_hosts',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1258535653.085939,
+            "host":"65.54.95.64"
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            assert key in result['details']
+            assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'New host: 65.54.95.64'
     
     def test_knownhosts_log2(self):
         event = {
-            "ts":1258535653.085939,
             'category':'bro',
-            'source':'knownhosts',
+            'SOURCE':'bro_known_hosts',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1258535653.085939,
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'host' in result['details']
         assert result['summary'] == 'New host: '
     
     def test_knownservices_log(self):
         event = {
+            'category':'bro',
+            'SOURCE':'bro_known_services',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701209.937973,
             "host":"10.22.70.91",
             "port_num":3306,
             "port_proto":"tcp",
             "service":["MYSQL"],
-            'category':'bro',
-            'source':'knownservices',
-            'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            assert key in result['details']
+            assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'New service: MYSQL on host 10.22.70.91:3306 / tcp'
 
     def test_knownservices_log2(self):
         event = {
-            "ts":1505701209.937973,
-            'service':[],
             'category':'bro',
-            'source':'knownservices',
+            'SOURCE':'bro_known_services',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1505701209.937973,
+            'service':[]
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'host' in result['details']
         assert 'port_num' in result['details']
         assert 'port_proto' in result['details']
@@ -1038,12 +1180,17 @@ class TestBroFixup(object):
     
     def test_notice_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_notice',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701210.803008,
             "uid":"ClM3Um3n5pZjcZZ843",
-            "sourceipaddress":"73.72.209.187",
-            "sourceport":61558,
-            "destinationipaddress":"63.245.213.32",
-            "destinationport":443,
+            "id.orig_h":"73.72.209.187",
+            "id.orig_p":61558,
+            "id.resp_h":"63.245.213.32",
+            "id.resp_p":443,
             "fuid":"F75Pce2pj1HH653VA7",
             "proto":"tcp",
             "note":"SSL::Certificate_Expires_Soon",
@@ -1054,25 +1201,44 @@ class TestBroFixup(object):
             "peer_descr":"nsm-stage1-eth4-2",
             "actions":["Notice::ACTION_LOG"],
             "suppress_for":86400.0,
-            "dropped":'false',
-            'category': 'bro',
-            'source': 'notice',
-            'customendpoint': 'bro'
+            "dropped":'false'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'uid' in result['details']
+        assert MESSAGE['uid'] == result['details']['uid']
         assert 'note' in result['details']
+        assert MESSAGE['note'] == result['details']['note']
         assert 'msg' in result['details']
-        assert 'sub' in result['details']
-        assert result['summary'] == "SSL::Certificate_Expires_Soon Certificate CN=support.mozilla.org,O=Mozilla Foundation,L=Mountain View,ST=California,C=US,postalCode=94041,street=650 Castro St Ste 300,serialNumber=C2543436,1.3.6.1.4.1.311.60.2.1.2=#130A43616C69666F726E6961,1.3.6.1.4.1.311.60.2.1.3=#13025553,businessCategory=Private Organization is going to expire at 2017-10-06-12:00:00.000000000 "
+        assert MESSAGE['msg'] == result['details']['msg']
+        assert 'src' not in result['details']
+        assert 'dst' not in result['details']
+        assert 'sourceipv4address' in result['details']
+        assert MESSAGE['src'] == result['details']['sourceipv4address']
+        assert 'sourceipaddress' in result['details']
+        assert MESSAGE['src'] == result['details']['sourceipaddress']
+        assert 'destinationipv4address' in result['details']
+        assert MESSAGE['dst'] == result['details']['destinationipv4address']
+        assert 'destinationipaddress' in result['details']
+        assert MESSAGE['dst'] == result['details']['destinationipaddress']
+        assert 'p' in result['details']
+        assert MESSAGE['p'] == result['details']['p']
+        assert result['details']['indicators']
+        assert MESSAGE['src'] in result['details']['indicators']
+        assert result['summary'] == "SSL::Certificate_Expires_Soon source 73.72.209.187 destination 63.245.213.32 port 443"
 
     def test_notice_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_notice',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701210.803008,
             "uid":"ClM3Um3n5pZjcZZ843",
             "note":"Scan::Address_Scan",
@@ -1087,24 +1253,37 @@ class TestBroFixup(object):
             'source': 'notice',
             'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'uid' in result['details']
+        assert MESSAGE['uid'] == result['details']['uid']
         assert 'note' in result['details']
+        assert MESSAGE['note'] == result['details']['note']
         assert 'msg' in result['details']
-        assert 'sub' in result['details']
+        assert MESSAGE['msg'] == result['details']['msg']
         assert 'src' not in result['details']
+        assert 'sourceipv4address' in result['details']
+        assert MESSAGE['src'] == result['details']['sourceipv4address']
         assert 'sourceipaddress' in result['details']
-        assert result['details']['sourceipaddress'] == "10.252.55.230"
-        assert result['details']['sourceipv4address'] == "10.252.55.230"
-        assert result['summary'] == "Scan::Address_Scan 10.252.55.230 scanned at least 5 unique hosts on port 3283/tcp in 0m11s "
+        assert MESSAGE['src'] == result['details']['sourceipaddress']
+        assert 'p' in result['details']
+        assert MESSAGE['p'] == result['details']['p']
+        assert result['details']['indicators']
+        assert MESSAGE['src'] in result['details']['indicators']
+        assert result['summary'] == "Scan::Address_Scan source 10.252.55.230 destination unknown port 3283"
 
     def test_notice_log3(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_notice',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701210.803008,
             "uid":"ClM3Um3n5pZjcZZ843",
             "note":"Scan::Address_Scan",
@@ -1119,22 +1298,35 @@ class TestBroFixup(object):
             'source': 'notice',
             'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'uid' in result['details']
+        assert MESSAGE['uid'] == result['details']['uid']
         assert 'note' in result['details']
+        assert MESSAGE['note'] == result['details']['note']
         assert 'msg' in result['details']
-        assert 'sub' in result['details']
+        assert MESSAGE['msg'] == result['details']['msg']
         assert 'src' not in result['details']
-        assert result['details']['sourceipv6address'] == "2620:101:80fc:232:b5a9:5071:1dc1:1499"
-        assert result['summary'] == "Scan::Address_Scan 2620:101:80fc:232:b5a9:5071:1dc1:1499 scanned at least 5 unique hosts on port 445/tcp in 0m13s "
+        assert 'sourceipv6address' in result['details']
+        assert MESSAGE['src'] == result['details']['sourceipv6address']
+        assert 'p' in result['details']
+        assert MESSAGE['p'] == result['details']['p']
+        assert result['details']['indicators']
+        assert MESSAGE['src'] in result['details']['indicators']
+        assert result['summary'] == "Scan::Address_Scan source 2620:101:80fc:232:b5a9:5071:1dc1:1499 destination unknown port 445"
 
     def test_snmp_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_snmp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703535.041376,
             "uid":"ClusjHyL4YWvyV0rd",
             "sourceipaddress":"10.22.75.137",
@@ -1147,22 +1339,28 @@ class TestBroFixup(object):
             "get_requests":90,
             "get_bulk_requests":0,
             "get_responses":120,
-            "set_requests":0,
-            'category': 'bro',
-            'source': 'snmp',
-            'customendpoint': 'bro'
+            "set_requests":0
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SNMPv2c: 10.22.75.137 -> 10.26.8.128:161 (90 get / 0 set requests 120 get responses)'
     
     def test_snmp_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_snmp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703535.041376,
             "uid":"ClusjHyL4YWvyV0rd",
             "sourceipaddress":"10.22.75.137",
@@ -1170,22 +1368,28 @@ class TestBroFixup(object):
             "destinationipaddress":"10.26.8.128",
             "destinationport":161,
             "duration":0.012456,
-            "community":"yourcommunity",
-            'category': 'bro',
-            'source': 'snmp',
-            'customendpoint': 'bro'
+            "community":"yourcommunity"
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SNMPvUnknown: 10.22.75.137 -> 10.26.8.128:161 (0 get / 0 set requests 0 get responses)'
     
     def test_rdp_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_rdp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1297551041.284715,
             "uid":"CbbyKC4V7tEzua9N8h",
             "sourceipaddress":"192.168.1.200",
@@ -1195,22 +1399,28 @@ class TestBroFixup(object):
             "cookie":"AWAKECODI",
             "result":"encrypted",
             "security_protocol":"HYBRID",
-            "cert_count":0,
-            'category': 'bro',
-            'source': 'rdp',
-            'customendpoint': 'bro'
+            "cert_count":0
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'RDP: 192.168.1.200 -> 192.168.1.150:3389 cookie AWAKECODI'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'RDP: 192.168.1.200 -> 192.168.1.150:3389'
     
     def test_rdp_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_rdp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1297551041.284715,
             "uid":"CbbyKC4V7tEzua9N8h",
             "sourceipaddress":"192.168.1.200",
@@ -1220,28 +1430,34 @@ class TestBroFixup(object):
             "result":"encrypted",
             "security_protocol":"HYBRID",
             "cert_count":0,
-            'category': 'bro',
-            'source': 'rdp',
-            'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'cookie' in result['details']
-        assert result['summary'] == 'RDP: 192.168.1.200 -> 192.168.1.150:3389 cookie unknown'
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'RDP: 192.168.1.200 -> 192.168.1.150:3389'
 
     def test_sip_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_sip',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1120469590.259876,
             "uid":"C4tJSk2uEibu6Ty4hc",
-            "sourceipaddress":"192.168.1.2",
-            "sourceport":5060,
-            "destinationipaddress":"212.242.33.35",
-            "destinationport":5060,
+            "id.orig_h":"192.168.1.2",
+            "id.orig_p":5060,
+            "id.resp_h":"212.242.33.35",
+            "id.resp_p":5060,
             "trans_depth":0,
             "method":"REGISTER",
             "uri":"sip:sip.cybercity.dk",
@@ -1257,28 +1473,34 @@ class TestBroFixup(object):
             "status_code":100,
             "status_msg":"Trying",
             "request_body_len":0,
-            "response_body_len":0,
-            'category': 'bro',
-            'source': 'sip',
-            'customendpoint': 'bro'
+            "response_body_len":0
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'SIP: 192.168.1.2 -> 212.242.33.35:5060 method REGISTER uri sip:sip.cybercity.dk status Trying'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'SIP: 192.168.1.2 -> 212.242.33.35:5060 method REGISTER status Trying'
     
     def test_sip_log2(self):
         event = {
+        'category': 'bro',
+            'SOURCE': 'bro_sip',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1120469590.259876,
             "uid":"C4tJSk2uEibu6Ty4hc",
-            "sourceipaddress":"192.168.1.2",
-            "sourceport":5060,
-            "destinationipaddress":"212.242.33.35",
-            "destinationport":5060,
+            "id.orig_h":"192.168.1.2",
+            "id.orig_p":5060,
+            "id.resp_h":"212.242.33.35",
+            "id.resp_p":5060,
             "trans_depth":0,
             "request_from":"<sip:voi18063@sip.cybercity.dk>",
             "request_to":"<sip:voi18063@sip.cybercity.dk>",
@@ -1290,25 +1512,31 @@ class TestBroFixup(object):
             "response_path":["SIP/2.0/UDP 192.168.1.2;received=80.230.219.70;rport=5060"],
             "user_agent":"Nero SIPPS IP Phone Version 2.0.51.16",
             "request_body_len":0,
-            "response_body_len":0,
-            'category': 'bro',
-            'source': 'sip',
-            'customendpoint': 'bro'
+            "response_body_len":0
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'method' in result['details']
         assert 'uri' in result['details']
         assert 'status_msg' in result['details']
-        assert result['summary'] == 'SIP: 192.168.1.2 -> 212.242.33.35:5060 method unknown uri unknown status unknown'
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'SIP: 192.168.1.2 -> 212.242.33.35:5060 method unknown status unknown'
     
     def test_software_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_software',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703596.442367,
             "host":"10.8.81.221",
             "software_type":"HTTP::BROWSER",
@@ -1316,22 +1544,28 @@ class TestBroFixup(object):
             "version.major":16,
             "version.minor":0,
             "version.minor2":1,
-            "unparsed_version":"Mozilla/5.0 (X11; Linux i686; rv:16.0) Gecko/20121010 Thunderbird/16.0.1",
-            'category': 'bro',
-            'source': 'software',
-            'customendpoint': 'bro'
+            "unparsed_version":"Mozilla/5.0 (X11; Linux i686; rv:16.0) Gecko/20121010 Thunderbird/16.0.1"
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'Found HTTP::BROWSER name Thunderbird on 10.8.81.221'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'Found HTTP::BROWSER software on 10.8.81.221'
     
     def test_software_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_software',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703596.442367,
             "host":"10.8.81.221",
             "version.major":16,
@@ -1342,153 +1576,192 @@ class TestBroFixup(object):
             'source': 'software',
             'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'Found unknown software name unparsed on 10.8.81.221'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'Found unknown software on 10.8.81.221'
     
     def test_socks_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_socks',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1340213015.276495,
             "uid":"CUy63t6qOCaFvn6nd",
-            "sourceipaddress":"10.0.0.55",
-            "sourceport":53994,
-            "destinationipaddress":"60.190.189.214",
-            "destinationport":8124,
+            "id.orig_h":"10.0.0.55",
+            "id.orig_p":53994,
+            "id.resp_h":"60.190.189.214",
+            "id.resp_p":8124,
             "version":5,
             "status":"succeeded",
             "request.name":"www.osnews.com",
             "request_p":80,
             "bound.host":"192.168.0.31",
-            "bound_p":2688,
-            'category': 'bro',
-            'source': 'socks',
-            'customendpoint': 'bro'
+            "bound_p":2688
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SOCKSv5: 10.0.0.55 -> 60.190.189.214:8124 status succeeded'
 
     def test_socks_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_socks',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1340213015.276495,
             "uid":"CUy63t6qOCaFvn6nd",
-            "sourceipaddress":"10.0.0.55",
-            "sourceport":53994,
-            "destinationipaddress":"60.190.189.214",
-            "destinationport":8124,
+            "id.orig_h":"10.0.0.55",
+            "id.orig_p":53994,
+            "id.resp_h":"60.190.189.214",
+            "id.resp_p":8124,
             "request.name":"www.osnews.com",
             "request_p":80,
             "bound.host":"192.168.0.31",
-            "bound_p":2688,
-            'category': 'bro',
-            'source': 'socks',
-            'customendpoint': 'bro'
+            "bound_p":2688
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'status' in result['details']
         assert 'version' in result['details']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SOCKSv0: 10.0.0.55 -> 60.190.189.214:8124 status unknown'
 
     def test_dcerpc_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_dce_rpc',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701213.40556,
             "uid":"C2g5CK5JxgQ5x6b",
-            "sourceipaddress":"10.26.40.121",
-            "sourceport":49446,
-            "destinationipaddress":"10.22.69.21",
-            "destinationport":445,
+            "id.orig_h":"10.26.40.121",
+            "id.orig_p":49446,
+            "id.resp_h":"10.22.69.21",
+            "id.resp_p":445,
             "rtt":0.001135,
             "named_pipe":"\u005cpipe\u005clsass",
             "endpoint":"samr",
-            "operation":"SamrEnumerateDomainsInSamServer",
-            'category': 'bro',
-            'source': 'dcerpc',
-            'customendpoint': 'bro'
+            "operation":"SamrEnumerateDomainsInSamServer"
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'DCERPC: 10.26.40.121 -> 10.22.69.21:445 endpoint samr operation SamrEnumerateDomainsInSamServer'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'DCERPC: 10.26.40.121 -> 10.22.69.21:445'
 
     def test_dcerpc_log2(self):
         event = {
-            "ts":1505701213.40556,
-            "uid":"C2g5CK5JxgQ5x6b",
-            "sourceipaddress":"10.26.40.121",
-            "sourceport":49446,
-            "destinationipaddress":"10.22.69.21",
-            "destinationport":445,
-            "rtt":0.001135,
-            "named_pipe":"\u005cpipe\u005clsass",
             'category': 'bro',
-            'source': 'dcerpc',
+            'SOURCE': 'bro_dce_rpc',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1505701213.40556,
+            "uid":"C2g5CK5JxgQ5x6b",
+            "id.orig_h":"10.26.40.121",
+            "id.orig_p":49446,
+            "id.resp_h":"10.22.69.21",
+            "id.resp_p":445,
+            "rtt":0.001135,
+            "named_pipe":"\u005cpipe\u005clsass"
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'endpoint' in result['details']
         assert 'operation' in result['details']
-        assert result['summary'] == 'DCERPC: 10.26.40.121 -> 10.22.69.21:445 endpoint unknown operation unknown'
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'DCERPC: 10.26.40.121 -> 10.22.69.21:445'
 
     def test_kerberos_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_kerberos',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505701219.06897,
             "uid":"CQ9RPTR8ORJEgof37",
-            "sourceipaddress":"10.26.40.121",
-            "sourceport":49467,
-            "destinationipaddress":"10.22.69.21",
-            "destinationport":88,
+            "id.orig_h":"10.26.40.121",
+            "id.orig_p":49467,
+            "id.resp_h":"10.22.69.21",
+            "id.resp_p":88,
             "request_type":"TGS",
             "service":"host/t-w864-ix-091.releng.ad.mozilla.com",
             "till":2136422885.0,
             "forwardable":'true',
             "renewable":'true',
-            'category': 'bro',
-            'source': 'kerberos',
-            'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == '10.26.40.121 -> 10.22.69.21:88 client unknown request TGS service host/t-w864-ix-091.releng.ad.mozilla.com success unknown '
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == '10.26.40.121 -> 10.22.69.21:88 request TGS success unknown'
 
     def test_kerberos_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_kerberos',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1421708043.07936,
             "uid":"CjoUSf1cih7HpLipTf",
-            "sourceipaddress":"192.168.1.31",
-            "sourceport":64726,
-            "destinationipaddress":"192.168.1.32",
-            "destinationport":88,
+            "id.orig_h":"192.168.1.31",
+            "id.orig_p":64726,
+            "id.resp_h":"192.168.1.32",
+            "id.resp_p":88,
             "request_type":"AS",
             "client":"valid_client_principal/VLADG.NET",
             "service":"krbtgt/VLADG.NET",
@@ -1497,32 +1770,33 @@ class TestBroFixup(object):
             "cipher":"aes256-cts-hmac-sha1-96",
             "forwardable":'false',
             "renewable":'true',
-            'category': 'bro',
-            'source': 'kerberos',
-            'customendpoint': 'bro'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert 'request_type' in result['details']
-        assert 'client' in result['details']
-        assert 'service' in result['details']
-        assert 'success' in result['details']
-        assert 'error_msg' in result['details']
-        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 client valid_client_principal/VLADG.NET request AS service krbtgt/VLADG.NET success true '
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 request AS success true'
     
     def test_kerberos_log3(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_kerberos',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1421708043.196544,
             "uid":"CIOsYa3u0IxeiYPH7d",
-            "sourceipaddress":"192.168.1.31",
-            "sourceport":58922,
-            "destinationipaddress":"192.168.1.32",
-            "destinationport":88,
+            "id.orig_h":"192.168.1.31",
+            "id.orig_p":58922,
+            "id.resp_h":"192.168.1.32",
+            "id.resp_p":88,
             "request_type":"TGS",
             "client":"valid_client_principal/VLADG.NET",
             "service":"krbtgt/VLADG.NET",
@@ -1530,239 +1804,315 @@ class TestBroFixup(object):
             "error_msg":"TICKET NOT RENEWABLE",
             "till":1421708111.0,
             "forwardable":'false',
-            "renewable":'false',
-            'category': 'bro',
-            'source': 'kerberos',
-            'customendpoint': 'bro'
+            "renewable":'false'
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert 'request_type' in result['details']
-        assert 'client' in result['details']
-        assert 'service' in result['details']
-        assert 'success' in result['details']
-        assert 'error_msg' in result['details']
-        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 client valid_client_principal/VLADG.NET request TGS service krbtgt/VLADG.NET success false TICKET NOT RENEWABLE'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 request TGS success false'
     
     def test_ntlm_log(self):
         event = {
-            "ts":1505701552.66651,
-            "uid":"Cml9hN1SSy5nwYEVLl",
-            "sourceipaddress":"10.26.40.48",
-            "sourceport":49176,
-            "destinationipaddress":"10.22.69.18",
-            "destinationport":445,
-            "ntlmusername":"T-W864-IX-018$",
-            "ntlmhostname":"T-W864-IX-018",
-            "ntlmdomainname":"RELENG",
-            "success":'true',
-            "status":"SUCCESS",
             'category': 'bro',
-            'source': 'ntlm',
+            'SOURCE': 'bro_ntlm',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1505701552.66651,
+            "uid":"Cml9hN1SSy5nwYEVLl",
+            "id.orig_h":"10.26.40.48",
+            "id.orig_p":49176,
+            "id.resp_h":"10.22.69.18",
+            "id.resp_p":445,
+            "username":"T-W864-IX-018$",
+            "hostname":"T-W864-IX-018",
+            "domainname":"RELENG",
+            "success":'true',
+            "status":"SUCCESS",
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 user T-W864-IX-018$ host T-W864-IX-018 domain RELENG success true status SUCCESS'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert MESSAGE['username'] == result['details']['ntlm']['username']
+        assert MESSAGE['hostname'] == result['details']['ntlm']['hostname']
+        assert MESSAGE['domainname'] == result['details']['ntlm']['domainname']
+        assert MESSAGE['success'] == result['details']['success']
+        assert MESSAGE['status'] == result['details']['status']
+        assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 success true status SUCCESS'
     
     def test_ntlm_log2(self):
         event = {
-            "ts":1505701552.66651,
-            "uid":"Cml9hN1SSy5nwYEVLl",
-            "sourceipaddress":"10.26.40.48",
-            "sourceport":49176,
-            "destinationipaddress":"10.22.69.18",
-            "destinationport":445,
             'category': 'bro',
-            'source': 'ntlm',
+            'SOURCE': 'bro_ntlm',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1505701552.66651,
+            "uid":"Cml9hN1SSy5nwYEVLl",
+            "id.orig_h":"10.26.40.48",
+            "id.orig_p":49176,
+            "id.resp_h":"10.22.69.18",
+            "id.resp_p":445
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert 'ntlmusername' in result['details']
-        assert 'ntlmhostname' in result['details']
-        assert 'ntlmdomainname' in result['details']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'username' in result['details']['ntlm']
+        assert 'hostname' in result['details']['ntlm']
+        assert 'domainname' in result['details']['ntlm']
         assert 'success' in result['details']
         assert 'status' in result['details']
-        assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 user unknown host unknown domain unknown success unknown status unknown'
+        assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 success unknown status unknown'
 
     def test_smbfiles_log(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_smb_files',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703595.833874,
             "uid":"C8vKSp2oSqoQtJZyM2",
-            "sourceipaddress":"10.26.42.82",
-            "sourceport":53939,
-            "destinationipaddress":"10.22.69.21",
-            "destinationport":445,
+            "id.orig_h":"10.26.42.82",
+            "id.orig_p":53939,
+            "id.resp_h":"10.22.69.21",
+            "id.resp_p":445,
             "action":"SMB::FILE_OPEN",
-            "name":"releng.ad.mozilla.com\u005cfiles\u005cstartTalos",
+            "name":"releng.ad.mozilla.com\u005cPolicies\u005c{8614FE9A-333C-47C1-9EFD-856B4DF64883}\u005cMachine\u005cPreferences\u005cScheduledTasks",
+            "path":"\u005c\u005cDC8.releng.ad.mozilla.com\u005cSysVol",
             "size":4096,
             "times.modified":1401486067.13068,
             "times.accessed":1401486067.13068,
             "times.created":1393344470.022491,
-            "times.changed":1401486067.13068,
-            'category': 'bro',
-            'source': 'smbfiles',
-            'customendpoint': 'bro'
+            "times.changed":1401486067.13068
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert toUTC(float(MESSAGE['times.modified'])).isoformat() == result['details']['smbtimes']['modified']
+        assert toUTC(float(MESSAGE['times.accessed'])).isoformat() == result['details']['smbtimes']['accessed']
+        assert toUTC(float(MESSAGE['times.created'])).isoformat() == result['details']['smbtimes']['created']
+        assert toUTC(float(MESSAGE['times.changed'])).isoformat() == result['details']['smbtimes']['changed']
+        assert 'uid' in result['details']
+        assert MESSAGE['uid'] == result['details']['uid']
         assert 'action' in result['details']
+        assert MESSAGE['action'] == result['details']['action']
         assert 'name' in result['details']
+        assert MESSAGE['name'] == result['details']['name']
         assert 'path' in result['details']
+        assert MESSAGE['path'] == result['details']['path']
+        assert 'size' in result['details']
+        assert MESSAGE['size'] == result['details']['size']
         assert result['summary'] == 'SMB file: 10.26.42.82 -> 10.22.69.21:445 SMB::FILE_OPEN'
 
     def test_smbfiles_log2(self):
         event = {
+            'category': 'bro',
+            'SOURCE': 'bro_smb_files',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
             "ts":1505703595.833874,
             "uid":"C8vKSp2oSqoQtJZyM2",
-            "sourceipaddress":"10.26.42.82",
-            "sourceport":53939,
-            "destinationipaddress":"10.22.69.21",
-            "destinationport":445,
+            "id.orig_h":"10.26.42.82",
+            "id.orig_p":53939,
+            "id.resp_h":"10.22.69.21",
+            "id.resp_p":445,
             "size":4096,
             "times.modified":1401486067.13068,
             "times.accessed":1401486067.13068,
             "times.created":1393344470.022491,
-            "times.changed":1401486067.13068,
-            'category': 'bro',
-            'source': 'smbfiles',
-            'customendpoint': 'bro'
+            "times.changed":1401486067.13068
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert toUTC(float(MESSAGE['times.modified'])).isoformat() == result['details']['smbtimes']['modified']
+        assert toUTC(float(MESSAGE['times.accessed'])).isoformat() == result['details']['smbtimes']['accessed']
+        assert toUTC(float(MESSAGE['times.created'])).isoformat() == result['details']['smbtimes']['created']
+        assert toUTC(float(MESSAGE['times.changed'])).isoformat() == result['details']['smbtimes']['changed']
+        assert 'uid' in result['details']
         assert 'action' in result['details']
         assert 'name' in result['details']
         assert 'path' in result['details']
+        assert 'size' in result['details']
         assert result['summary'] == 'SMB file: 10.26.42.82 -> 10.22.69.21:445 '
     
     def test_smbmapping_log(self):
         event = {
-            "ts":1505703606.752588,
-            "uid":"CgvFmm2FAseGbXjC6h",
-            "sourceipaddress":"10.26.41.138",
-            "sourceport":49720,
-            "destinationipaddress":"10.22.69.18",
-            "destinationport":445,
-            "path":"\u005c\u005cDC6\u005cSYSVOL",
-            "share_type":"DISK",
             'category': 'bro',
-            'source': 'smbmapping',
+            'SOURCE': 'bro_smb_mapping',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1505703606.752588,
+            "uid":"CgvFmm2FAseGbXjC6h",
+            "id.orig_h":"10.26.41.138",
+            "id.orig_p":49720,
+            "id.resp_h":"10.22.69.18",
+            "id.resp_p":445,
+            "path":"\u005c\u005cDC6\u005cSYSVOL",
+            "share_type":"DISK"
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'uid' in result['details']
+        assert MESSAGE['uid'] == result['details']['uid']
+        assert 'path' in result['details']
+        assert MESSAGE['path'] == result['details']['path']
+        assert 'share_type' in result['details']
+        assert MESSAGE['share_type'] == result['details']['share_type']
         assert result['summary'] == 'SMB mapping: 10.26.41.138 -> 10.22.69.18:445 DISK'
     
     def test_smbmapping_log2(self):
         event = {
-            "ts":1505703606.752588,
-            "uid":"CgvFmm2FAseGbXjC6h",
-            "sourceipaddress":"10.26.41.138",
-            "sourceport":49720,
-            "destinationipaddress":"10.22.69.18",
-            "destinationport":445,
             'category': 'bro',
-            'source': 'smbmapping',
+            'SOURCE': 'bro_smb_mapping',
             'customendpoint': 'bro'
         }
+        MESSAGE = {
+            "ts":1505703606.752588,
+            "uid":"CgvFmm2FAseGbXjC6h",
+            "id.orig_h":"10.26.41.138",
+            "id.orig_p":49720,
+            "id.resp_h":"10.22.69.18",
+            "id.resp_p":445
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert 'share_type' in result['details']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'uid' in result['details']
+        assert MESSAGE['uid'] == result['details']['uid']
         assert 'path' in result['details']
+        assert 'share_type' in result['details']
         assert result['summary'] == 'SMB mapping: 10.26.41.138 -> 10.22.69.18:445 '
 
     def test_x509_log(self):
         event = {
-            "ts":1505703595.73864,
-            "id":"FNe2XU16VWFNvpk9F2",
-            "certificateversion":3,
-            "certificateserial":"34B52BD83D80C284892AC63850038833",
-            "certificatesubject":"CN=ssl.wsj.com,OU=Dow Jones and Company,O=Dow Jones and Company,L=Princeton,ST=New Jersey,C=US",
-            "certificateissuer":"CN=GeoTrust SSL CA - G3,O=GeoTrust Inc.,C=US",
-            "certificatenot_valid_before":1498608000.0,
-            "certificatenot_valid_after":1527379199.0,
-            "certificatekey_alg":"rsaEncryption",
-            "certificatesig_alg":"sha256WithRSAEncryption",
-            "certificatekey_type":"rsa",
-            "certificatekey_length":2048,
-            "certificate.exponent":"65537",
-            "san.dns":["m-secure.wsj.net","kr.wsj.com","newsplus.stg.wsj.com","services.dowjones.com","si2.wsj.net","djlogin.stg.dowjones.com","si3.wsj.net","fonts.wsj.net","global.stg.factiva.com","graphics.wsj.com","www.wsj.com","s1.wsj.net","global.factiva.com","cdn.store.wsj.net","m.wsj.net","api.barrons.com","s1.marketwatch.com","city.wsj.com","portfolio.wsj.com","m.barrons.com","s3.marketwatch.com","sts3.wsj.net","s3.wsj.net","rwidget.wsj.net","ss.wsj.net","djlogin.dowjones.com","admin.stream.marketwatch.com","vir.www.wsj.com","cdn.smpdev.wsj.net","si1.wsj.net","art-secure.wsj.net","sc.wsj.net","indo.wsj.com","m.wsj.com","blogs.barrons.com","graphicsweb.wsj.com","widgets.dowjones.com","sj.wsj.net","blogs.marketwatch.com","s4.marketwatch.com","api-staging.wsj.net","blogs.wsj.com","api.wsj.net","newsplus.wsj.com","s2.wsj.net","salesforce.dowjones.com","v-secure.wsj.net","signin.wsj.com","salesforce.stg.dowjones.com","symphony.dowjones.com","admin.stream.wsj.com","suggest.stg.dowjones.com","www.stg.wsj.com","api.beta.dowjones.com","podcast.mktw.net","si4.wsj.net","help.wsj.com","api-staging.barrons.com","s4.wsj.net","ore.www.wsj.com","s2.marketwatch.com","cbuy.wsj.com","assets.efinancialnews.com","video-api.wsj.net","video-api-secure.wsj.com","portfolio.marketwatch.com","dr.marketwatch.com","onlinedr.wsj.com","api.stg.dowjones.com","sf.wsj.net","portfolio.barrons.com","signin.stg.wsj.com","video-api.wsj.com","symphony.stg.dowjones.com","art.wsj.net","widgets.stg.dowjones.com","api-secure.wsj.net","suggest.dowjones.com","sg.wsj.net","api-staging-secure.wsj.net","guides.wsj.com","m.jp.wsj.com","api.dowjones.com","video-api-secure.stg.wsj.com","s.wsj.net","api-staging.wsj.com","np3.stg.wsj.com","sfonts.wsj.net","www.ssl.wsj.com","api.wsj.com","s.marketwatch.com","realtime.wsj.com","newsletters.barrons.com","si.wsj.net","projects.wsj.com","m.cn.wsj.com","wn.wsj.com","ssl.wsj.com"],
-            "certificate.basic_constraintsca":'false',
             'category': 'bro',
-            'source': 'x509',
+            'SOURCE': 'bro_x509',
             'customendpoint': 'bro'
         }
-
-        result, metadata = self.plugin.onMessage(event, self.metadata)
-        self.verify_defaults(result)
-        self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert 'certificateserial' in result['details']
-        assert result['summary'] == 'Certificate seen serial 34B52BD83D80C284892AC63850038833'
-
-    def test_x509_log2(self):
-        event = {
+        MESSAGE = {
             "ts":1505703595.73864,
             "id":"FNe2XU16VWFNvpk9F2",
             "certificate.version":3,
-            "certificatesubject":"CN=ssl.wsj.com,OU=Dow Jones and Company,O=Dow Jones and Company,L=Princeton,ST=New Jersey,C=US",
-            "certificateissuer":"CN=GeoTrust SSL CA - G3,O=GeoTrust Inc.,C=US",
-            "certificatenot_valid_before":1498608000.0,
-            "certificatenot_valid_after":1527379199.0,
-            "certificatekey_alg":"rsaEncryption",
-            "certificatesig_alg":"sha256WithRSAEncryption",
-            "certificatekey_type":"rsa",
-            "certificatekey_length":2048,
+            "certificate.serial":"34B52BD83D80C284892AC63850038833",
+            "certificate.subject":"CN=ssl.wsj.com,OU=Dow Jones and Company,O=Dow Jones and Company,L=Princeton,ST=New Jersey,C=US",
+            "certificate.issuer":"CN=GeoTrust SSL CA - G3,O=GeoTrust Inc.,C=US",
+            "certificate.not_valid_before":1498608000.0,
+            "certificate.not_valid_after":1527379199.0,
+            "certificate.key_alg":"rsaEncryption",
+            "certificate.sig_alg":"sha256WithRSAEncryption",
+            "certificate.key_type":"rsa",
+            "certificate.key_length":2048,
             "certificate.exponent":"65537",
             "san.dns":["m-secure.wsj.net","kr.wsj.com","newsplus.stg.wsj.com","services.dowjones.com","si2.wsj.net","djlogin.stg.dowjones.com","si3.wsj.net","fonts.wsj.net","global.stg.factiva.com","graphics.wsj.com","www.wsj.com","s1.wsj.net","global.factiva.com","cdn.store.wsj.net","m.wsj.net","api.barrons.com","s1.marketwatch.com","city.wsj.com","portfolio.wsj.com","m.barrons.com","s3.marketwatch.com","sts3.wsj.net","s3.wsj.net","rwidget.wsj.net","ss.wsj.net","djlogin.dowjones.com","admin.stream.marketwatch.com","vir.www.wsj.com","cdn.smpdev.wsj.net","si1.wsj.net","art-secure.wsj.net","sc.wsj.net","indo.wsj.com","m.wsj.com","blogs.barrons.com","graphicsweb.wsj.com","widgets.dowjones.com","sj.wsj.net","blogs.marketwatch.com","s4.marketwatch.com","api-staging.wsj.net","blogs.wsj.com","api.wsj.net","newsplus.wsj.com","s2.wsj.net","salesforce.dowjones.com","v-secure.wsj.net","signin.wsj.com","salesforce.stg.dowjones.com","symphony.dowjones.com","admin.stream.wsj.com","suggest.stg.dowjones.com","www.stg.wsj.com","api.beta.dowjones.com","podcast.mktw.net","si4.wsj.net","help.wsj.com","api-staging.barrons.com","s4.wsj.net","ore.www.wsj.com","s2.marketwatch.com","cbuy.wsj.com","assets.efinancialnews.com","video-api.wsj.net","video-api-secure.wsj.com","portfolio.marketwatch.com","dr.marketwatch.com","onlinedr.wsj.com","api.stg.dowjones.com","sf.wsj.net","portfolio.barrons.com","signin.stg.wsj.com","video-api.wsj.com","symphony.stg.dowjones.com","art.wsj.net","widgets.stg.dowjones.com","api-secure.wsj.net","suggest.dowjones.com","sg.wsj.net","api-staging-secure.wsj.net","guides.wsj.com","m.jp.wsj.com","api.dowjones.com","video-api-secure.stg.wsj.com","s.wsj.net","api-staging.wsj.com","np3.stg.wsj.com","sfonts.wsj.net","www.ssl.wsj.com","api.wsj.com","s.marketwatch.com","realtime.wsj.com","newsletters.barrons.com","si.wsj.net","projects.wsj.com","m.cn.wsj.com","wn.wsj.com","ssl.wsj.com"],
-            "certificate.basic_constraintsca":'false',
-            'category': 'bro',
-            'source': 'x509',
-            'customendpoint': 'bro'
+            "basic_constraints.ca":"false",
+            "basic_constraints.path_len": 0
         }
+        event['MESSAGE'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert toUTC(event['ts']).isoformat() == result['utctimestamp']
-        assert toUTC(event['ts']).isoformat() == result['timestamp']
-        assert sorted(result['details'].keys()) == sorted(event.keys())
-        assert 'certificateserial' in result['details']
-        assert result['summary'] == 'Certificate seen serial 0'
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'id' in result['details']
+        assert MESSAGE['id'] == result['details']['id']
+        assert 'basic_constraints_ca' in result['details']['certificate']
+        assert MESSAGE['basic_constraints.ca'] == result['details']['certificate']['basic_constraints_ca']
+        assert 'basic_constraints_path_len' in result['details']['certificate']
+        assert MESSAGE['basic_constraints.path_len'] == result['details']['certificate']['basic_constraints_path_len']
+        assert 'not_valid_before' in result['details']['certificate']
+        assert toUTC(float(MESSAGE['certificate.not_valid_before'])).isoformat() == result['details']['certificate']['not_valid_before']
+        del MESSAGE['certificate.not_valid_before']
+        assert 'not_valid_after' in result['details']['certificate']
+        assert toUTC(float(MESSAGE['certificate.not_valid_after'])).isoformat() == result['details']['certificate']['not_valid_after']
+        del MESSAGE['certificate.not_valid_after']
+        for key in MESSAGE.keys():
+            if key.startswith('certificate'):
+                assert key[12:] in result['details']['certificate']
+                assert MESSAGE[key] == result['details']['certificate'][key[12:]]
+        assert result['summary'] == 'X509 certificate seen'
+
+    def test_x509_log2(self):
+        event = {
+            'category': 'bro',
+            'SOURCE': 'bro_x509',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
+            "ts":1505703595.73864,
+            "id":"FNe2XU16VWFNvpk9F2",
+            "certificate.version":3,
+            "certificate.subject":"CN=ssl.wsj.com,OU=Dow Jones and Company,O=Dow Jones and Company,L=Princeton,ST=New Jersey,C=US",
+            "certificate.issuer":"CN=GeoTrust SSL CA - G3,O=GeoTrust Inc.,C=US",
+            "certificate.not_valid_before":1498608000.0,
+            "certificate.not_valid_after":1527379199.0,
+            "certificate.key_alg":"rsaEncryption",
+            "certificate.sig_alg":"sha256WithRSAEncryption",
+            "certificate.key_type":"rsa",
+            "certificate.key_length":2048,
+            "certificate.exponent":"65537",
+            "san.dns":["m-secure.wsj.net","kr.wsj.com","newsplus.stg.wsj.com","services.dowjones.com","si2.wsj.net","djlogin.stg.dowjones.com","si3.wsj.net","fonts.wsj.net","global.stg.factiva.com","graphics.wsj.com","www.wsj.com","s1.wsj.net","global.factiva.com","cdn.store.wsj.net","m.wsj.net","api.barrons.com","s1.marketwatch.com","city.wsj.com","portfolio.wsj.com","m.barrons.com","s3.marketwatch.com","sts3.wsj.net","s3.wsj.net","rwidget.wsj.net","ss.wsj.net","djlogin.dowjones.com","admin.stream.marketwatch.com","vir.www.wsj.com","cdn.smpdev.wsj.net","si1.wsj.net","art-secure.wsj.net","sc.wsj.net","indo.wsj.com","m.wsj.com","blogs.barrons.com","graphicsweb.wsj.com","widgets.dowjones.com","sj.wsj.net","blogs.marketwatch.com","s4.marketwatch.com","api-staging.wsj.net","blogs.wsj.com","api.wsj.net","newsplus.wsj.com","s2.wsj.net","salesforce.dowjones.com","v-secure.wsj.net","signin.wsj.com","salesforce.stg.dowjones.com","symphony.dowjones.com","admin.stream.wsj.com","suggest.stg.dowjones.com","www.stg.wsj.com","api.beta.dowjones.com","podcast.mktw.net","si4.wsj.net","help.wsj.com","api-staging.barrons.com","s4.wsj.net","ore.www.wsj.com","s2.marketwatch.com","cbuy.wsj.com","assets.efinancialnews.com","video-api.wsj.net","video-api-secure.wsj.com","portfolio.marketwatch.com","dr.marketwatch.com","onlinedr.wsj.com","api.stg.dowjones.com","sf.wsj.net","portfolio.barrons.com","signin.stg.wsj.com","video-api.wsj.com","symphony.stg.dowjones.com","art.wsj.net","widgets.stg.dowjones.com","api-secure.wsj.net","suggest.dowjones.com","sg.wsj.net","api-staging-secure.wsj.net","guides.wsj.com","m.jp.wsj.com","api.dowjones.com","video-api-secure.stg.wsj.com","s.wsj.net","api-staging.wsj.com","np3.stg.wsj.com","sfonts.wsj.net","www.ssl.wsj.com","api.wsj.com","s.marketwatch.com","realtime.wsj.com","newsletters.barrons.com","si.wsj.net","projects.wsj.com","m.cn.wsj.com","wn.wsj.com","ssl.wsj.com"],
+            "basic_constraints.ca":'false',
+            "basic_constraints.path_len": 0
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'id' in result['details']
+        assert MESSAGE['id'] == result['details']['id']
+        assert 'basic_constraints_ca' in result['details']['certificate']
+        assert MESSAGE['basic_constraints.ca'] == result['details']['certificate']['basic_constraints_ca']
+        assert 'basic_constraints_path_len' in result['details']['certificate']
+        assert MESSAGE['basic_constraints.path_len'] == result['details']['certificate']['basic_constraints_path_len']
+        assert 'not_valid_before' in result['details']['certificate']
+        assert toUTC(float(MESSAGE['certificate.not_valid_before'])).isoformat() == result['details']['certificate']['not_valid_before']
+        del MESSAGE['certificate.not_valid_before']
+        assert 'not_valid_after' in result['details']['certificate']
+        assert toUTC(float(MESSAGE['certificate.not_valid_after'])).isoformat() == result['details']['certificate']['not_valid_after']
+        del MESSAGE['certificate.not_valid_after']
+        for key in MESSAGE.keys():
+            if key.startswith('certificate'):
+                assert key[12:] in result['details']['certificate']
+                assert MESSAGE[key] == result['details']['certificate'][key[12:]]
+        assert result['summary'] == 'X509 certificate seen'
