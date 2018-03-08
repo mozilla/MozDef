@@ -119,7 +119,7 @@ def esStoreCorrelations(es, correlations):
                    category='indicators'
                    )
         try:
-            es.save_object(index='intelligence', doc_id=getDocID(c), doc_type='usernamemacaddress', body=json.dumps(event))
+            es.save_object(index='intelligence', doc_id=getDocID(c), body=json.dumps(event))
         except Exception as e:
             logger.error("Exception %r when posting correlation " % e)
 
