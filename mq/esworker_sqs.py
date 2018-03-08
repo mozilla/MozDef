@@ -27,7 +27,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib
 from utilities.toUTC import toUTC
 from utilities.to_unicode import toUnicode
 from utilities.remove_at import removeAt
-from utilities.is_cef import isCEF
 from utilities.logger import logger, initLogger
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
@@ -230,7 +229,6 @@ class taskConsumer(object):
             # default elastic search metadata for an event
             metadata = {
                 'index': 'events',
-                'doc_type': 'event',
                 'id': None
             }
             # just to be safe..check what we were sent.
@@ -271,14 +269,6 @@ class taskConsumer(object):
             # make a json version for posting to elastic search
             jbody = json.JSONEncoder().encode(normalizedDict)
 
-            if isCEF(normalizedDict):
-                # cef records are set to the 'deviceproduct' field value.
-                metadata['doc_type'] = 'cef'
-                if 'details' in normalizedDict.keys() and 'deviceproduct' in normalizedDict['details'].keys():
-                    # don't create strange doc types..
-                    if ' ' not in normalizedDict['details']['deviceproduct'] and '.' not in normalizedDict['details']['deviceproduct']:
-                        metadata['doc_type'] = normalizedDict['details']['deviceproduct']
-
             try:
                 bulk = False
                 if options.esbulksize != 0:
@@ -287,7 +277,6 @@ class taskConsumer(object):
                 self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
-                    doc_type=metadata['doc_type'],
                     body=jbody,
                     bulk=bulk
                 )

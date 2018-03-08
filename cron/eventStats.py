@@ -51,7 +51,7 @@ def esSearch(es):
         results = search_query.execute(es)
 
         mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
-        mozdefstats['category'] = 'stats'
+        mozdefstats['category'] = 'mozdefstats'
         mozdefstats['hostname'] = socket.gethostname()
         mozdefstats['mozdefhostname'] = mozdefstats['hostname']
         mozdefstats['severity'] = 'INFO'
@@ -84,7 +84,7 @@ def main():
     try:
         # post to elastic search servers directly without going through
         # message queues in case there is an availability issue
-        es.save_event(body=json.dumps(stats), doc_type='mozdefstats')
+        es.save_event(body=json.dumps(stats))
 
     except Exception as e:
         logger.error("Exception %r when gathering statistics " % e)
@@ -108,7 +108,7 @@ def initConfig():
                                        'http://localhost:9200',
                                        options.configfile).split(','))
 
-    # field to use as the aggegation point (category, _type, etc)
+    # field to use as the aggegation point (category, severity, etc)
     options.aggregationfield = getConfig('aggregationfield',
                                          'category',
                                          options.configfile)

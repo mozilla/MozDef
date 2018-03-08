@@ -378,10 +378,7 @@ def updateMongoWithESEvents(mozdefdb, results):
                 # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
                 sourceIP.prefixlen = 24
                 if not sourceIP.ip.is_loopback() and not sourceIP.ip.is_private() and not sourceIP.ip.is_reserved():
-                    esrecord = dict(documentid=r['_id'],
-                         documenttype=r['_type'],
-                         documentindex=r['_index'],
-                         documentsource=r['_source'])
+                    body_source = r['_source']
 
                     logger.debug('Trying to find existing attacker at ' + str(sourceIP))
                     attacker = attackers.find_one({'indicators.ipv4address': str(sourceIP)})
@@ -393,21 +390,21 @@ def updateMongoWithESEvents(mozdefdb, results):
                         logger.debug('Creating new attacker from ' + str(sourceIP))
                         newAttacker = genNewAttacker()
 
-                        #expand the source ip to a /24 for the indicator match.
+                        # expand the source ip to a /24 for the indicator match.
                         sourceIP.prefixlen = 24
                         # str sourceIP to get the ip/cidr rather than netblock cidr.
                         newAttacker['indicators'].append(dict(ipv4address=str(sourceIP)))
                         newAttacker['eventscount'] = 1
-                        newAttacker['lastseentimestamp'] = esrecord['documentsource']['utctimestamp']
+                        newAttacker['lastseentimestamp'] = body_source['utctimestamp']
                         attackers.insert(newAttacker)
-                        updateAttackerGeoIP(mozdefdb, newAttacker['_id'], esrecord['documentsource'])
+                        updateAttackerGeoIP(mozdefdb, newAttacker['_id'], body_source)
                     else:
                         logger.debug('Attacker found, increasing eventscount and modding geoip')
                         attacker['eventscount'] += 1
-                        attacker['lastseentimestamp'] = esrecord['documentsource']['utctimestamp']
+                        attacker['lastseentimestamp'] = body_source['utctimestamp']
                         attackers.save(attacker)
                         # geo ip could have changed, update it
-                        updateAttackerGeoIP(mozdefdb, attacker['_id'], esrecord['documentsource'])
+                        updateAttackerGeoIP(mozdefdb, attacker['_id'], body_source)
 
 
 def main():
