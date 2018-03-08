@@ -8,7 +8,7 @@ class message(object):
     def __init__(self):
         '''
         takes an incoming message
-        and sets the doc_type
+        and removes quotes from etag field
         '''
 
         self.registration = ['google']
@@ -16,7 +16,6 @@ class message(object):
 
     def onMessage(self, message, metadata):
         # make sure it's a google activity event
-        # set the doc type
         # and do any clean up
 
         # check for details.kind like 'admin#reports#activity'
@@ -27,8 +26,5 @@ class message(object):
             # details.etag might be quoted..unquote it
             if 'etag' in message['details'].keys():
                 message['details']['etag'] = message['details']['etag'].replace('"', '')
-
-            metadata['doc_type']= 'google'
-
 
         return (message, metadata)
