@@ -7,9 +7,7 @@
         "dynamic_templates" : [ {
           "string_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "string"
@@ -17,9 +15,7 @@
         }, {
           "float_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "float"
@@ -27,9 +23,7 @@
         }, {
           "double_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "double"
@@ -37,9 +31,7 @@
         }, {
           "byte_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "byte"
@@ -47,9 +39,7 @@
         }, {
           "short_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "short"
@@ -57,9 +47,7 @@
         }, {
           "integer_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "integer"
@@ -67,9 +55,7 @@
         }, {
           "long_fields" : {
             "mapping" : {
-              "index" : "not_analyzed",
-              "doc_values" : true,
-              "type" : "string"
+              "type" : "keyword"
             },
             "match" : "*",
             "match_mapping_type" : "long"
@@ -77,37 +63,25 @@
         } ],
         "properties" : {
           "category" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
+            "type" : "keyword"
           },
           "hostname" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
+            "type" : "keyword"
           },
           "processid" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
+            "type" : "keyword"
           },
           "processname": {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values": true
+            "type" : "keyword"
           },
           "severity" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
+            "type" : "keyword"
           },
           "source" : {
-            "type" : "string",
-            "index" : "not_analyzed",
-            "doc_values" : true
+            "type" : "keyword"
           },
           "summary" : {
-            "type" : "string"
+            "type" : "text"
           },
           "details" : {
             "properties" : {
@@ -116,9 +90,7 @@
                 "type" : "long"
               },
               "hostname" : {
-                "type" : "string",
-                "index" : "not_analyzed",
-                "doc_values" : true
+                "type" : "keyword"
               },
               "sourceipaddress" : {
                 "type" : "ip"
@@ -127,9 +99,7 @@
                 "type" : "ip"
               },
               "sourceipv4address" : {
-                "type" : "string",
-                "index" : "not_analyzed",
-                "doc_values" : true
+                "type" : "keyword"
               },
               "destinationipaddress" : {
                 "type" : "ip"
@@ -142,9 +112,7 @@
                 "type" : "long"
               },
               "apiversion" : {
-                "type" : "string",
-                "index" : "not_analyzed",
-                "doc_values" : true
+                "type" : "keyword"
               }
             }
           },
@@ -157,9 +125,7 @@
             "type" : "date"
           },
           "version" : {
-            "index" : "not_analyzed",
-            "type" : "string",
-            "doc_values" : true
+            "type" : "keyword"
           }
         },
         "_all" : {
