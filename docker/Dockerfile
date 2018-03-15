@@ -41,7 +41,7 @@ RUN \
   mkdir /opt/mozdef/envs && \
   curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
   mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch && \
-  chown -R mozdef:mozdef /opt/mozdef/envs/elasticsearch
+  chown -R mozdef:mozdef /opt/mozdef/envs/elasticsearch && \
   mkdir /var/log/elasticsearch && \
   chown -R mozdef:mozdef /var/log/elasticsearch && \
   mkdir /var/lib/elasticsearch && \
@@ -134,7 +134,6 @@ RUN \
   mkdir -p /opt/mozdef/envs/mozdef/docker/conf
 
 COPY docker/conf/initial_setup.py /opt/mozdef/envs/mozdef/docker/conf/initial_setup.py
-COPY config/defaultMappingTemplate.json /opt/mozdef/envs/mozdef/config/defaultMappingTemplate.json
 
 # We have to replace the python virtualenv path until
 # https://github.com/mozilla/MozDef/issues/421 is fixed

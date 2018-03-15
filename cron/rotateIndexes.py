@@ -176,7 +176,7 @@ def initConfig():
         options.configfile).split(',')
         )
 
-    default_mapping_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../config/defaultMappingTemplate.json')
+    default_mapping_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'defaultMappingTemplate.json')
     options.default_mapping_file = getConfig('default_mapping_file', default_mapping_location, options.configfile)
     options.refresh_interval = getConfig('refresh_interval', '1s', options.configfile)
     options.number_of_shards = getConfig('number_of_shards', '1', options.configfile)
