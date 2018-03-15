@@ -99,6 +99,14 @@ class message(object):
                         'raw_value': str(endpoint_str)
                     }
 
+            # Handle details.responseelements.securityGroups strings
+            if 'securityGroups' in message['details']['responseelements']:
+                securityGroups_str = message['details']['responseelements']['securityGroups']
+                if type(securityGroups_str) is not dict:
+                    message['details']['responseelements']['securityGroups'] = {
+                        'raw_value': str(securityGroups_str)
+                    }
+
         # Handle details.additionaleventdata strings
         if 'additionaleventdata' in message['details']:
             additionaleventdata_str = message['details']['additionaleventdata']
