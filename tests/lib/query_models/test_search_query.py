@@ -207,9 +207,9 @@ class TestExecute(SearchQueryUnitTest):
 
         search_query = SearchQuery(minutes=10)
 
-        search_query.add_aggregation(Aggregation('summary'))
+        search_query.add_aggregation(Aggregation('source'))
         results = search_query.execute(self.es_client)
-        assert results['aggregations']['summary']['terms'][0]['count'] == 1
+        assert results['aggregations']['source']['terms'][0]['count'] == 1
 
     def test_aggregation_query_execute(self):
         query = SearchQuery()
