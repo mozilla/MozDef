@@ -284,3 +284,27 @@ class TestCloudtrailPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_securityGroups(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'securityGroups': 'astringvalue',
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'securityGroups': {
+                        'raw_value': 'astringvalue',
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
