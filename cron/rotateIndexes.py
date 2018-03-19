@@ -17,6 +17,7 @@ from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
+import json
 
 import sys
 import os
@@ -44,6 +45,9 @@ def esRotateIndexes():
         logger.addHandler(sh)
 
     logger.debug('started')
+    with open(options.default_mapping_file, 'r') as mapping_file:
+        default_mapping_contents = json.loads(mapping_file.read())
+
     try:
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
 
@@ -72,18 +76,20 @@ def esRotateIndexes():
                             logger.debug('do not rotate %s index, month has not changed yet' % index)
                             continue
                     if newindex not in indices:
-                        if 'alerts' in newindex:
-                            logger.debug('Creating %s index with single shard' % newindex)
-                            index_config = {
-                              "settings": {
-                                  "number_of_shards": 1
-                              }
+                        index_settings = {}
+                        if 'events' in newindex:
+                            index_settings = {
+                                "index": {
+                                    "refresh_interval": options.refresh_interval,
+                                    "number_of_shards": options.number_of_shards,
+                                    "number_of_replicas": options.number_of_replicas,
+                                    "search.slowlog.threshold.query.warn": options.slowlog_threshold_query_warn,
+                                    "search.slowlog.threshold.fetch.warn": options.slowlog_threshold_fetch_warn
+                                }
                             }
-                            logger.debug('Creating %s index' % newindex)
-                            es.create_index(newindex, index_config)
-                        else:
-                            logger.debug('Creating %s index' % newindex)
-                            es.create_index(newindex)
+                        default_mapping_contents['settings'] = index_settings
+                        logger.debug('Creating %s index' % newindex)
+                        es.create_index(newindex, default_mapping_contents)
                     # set aliases: events to events-YYYYMMDD
                     # and events-previous to events-YYYYMMDD-1
                     logger.debug('Setting {0} alias to index: {1}'.format(index, newindex))
@@ -169,6 +175,14 @@ def initConfig():
         'events',
         options.configfile).split(',')
         )
+
+    default_mapping_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'defaultMappingTemplate.json')
+    options.default_mapping_file = getConfig('default_mapping_file', default_mapping_location, options.configfile)
+    options.refresh_interval = getConfig('refresh_interval', '1s', options.configfile)
+    options.number_of_shards = getConfig('number_of_shards', '1', options.configfile)
+    options.number_of_replicas = getConfig('number_of_replicas', '1', options.configfile)
+    options.slowlog_threshold_query_warn = getConfig('slowlog_threshold_query_warn', '5s', options.configfile)
+    options.slowlog_threshold_fetch_warn = getConfig('slowlog_threshold_fetch_warn', '5s', options.configfile)
 
 
 if __name__ == '__main__':
