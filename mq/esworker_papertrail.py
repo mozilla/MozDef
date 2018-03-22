@@ -70,6 +70,8 @@ class PTRequestor(object):
             payload['max_id'] = maxid
         hdrs = {'X-Papertrail-Token': self._apikey}
         resp = requests.get(self._papertrail_api, headers=hdrs, params=payload)
+        if resp.status_code != 200:
+            logger.error("Received invalid status code: {0}: {1}".format(resp.status_code, resp.text))
         return self.parse_events(resp.json())
 
     def request(self, query, stime, etime):
