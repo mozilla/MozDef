@@ -10,6 +10,8 @@ services:
       - meteor
     ports:
       - 80:80
+      - 8080:8080
+      - 8081:8081
       - 9090:9090
     networks:
       - default
@@ -39,8 +41,8 @@ services:
     restart: always
     volumes:
       - elasticsearch:/var/lib/elasticsearch
-    ports:
-      - 9200:9200
+    # ports:
+    #   - 9200:9200
     networks:
       - default
   rabbitmq:
@@ -51,9 +53,9 @@ services:
     command: rabbitmq-server
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-    ports:
-      - 5672:5672
-      # - 15672:15672 # Admin interface
+    # ports:
+    #   - 5672:5672
+    #   - 15672:15672 # Admin interface
     networks:
       - default
 
@@ -145,8 +147,6 @@ services:
       - elasticsearch
       - rabbitmq
       - bootstrap
-    ports:
-      - 8080:8080
     networks:
       - default
   mq_eventtask:
@@ -188,8 +188,6 @@ services:
       - elasticsearch
       - mongodb
       - bootstrap
-    ports:
-      - 8081:8081
     networks:
       - default
   syslog:
