@@ -463,12 +463,28 @@ class message(object):
                     return (newmessage, metadata)
 
                 if logtype == 'software':
+                    newmessage['details']['parsed_version'] = {}
                     if 'name' not in newmessage['details']:
                         newmessage['details'][u'name'] = u'unparsed'
                     if 'software_type' not in newmessage['details']:
                         newmessage['details'][u'software_type'] = u'unknown'
                     if 'host' not in newmessage['details']:
                         newmessage['details'] = u''
+                    if 'version.addl' in newmessage['details']:
+                        newmessage['details']['parsed_version']['addl'] = newmessage['details']['version.addl']
+                        del(newmessage['details']['version.addl'])
+                    if 'version.major' in newmessage['details']:
+                        newmessage['details']['parsed_version']['major'] = newmessage['details']['version.major']
+                        del(newmessage['details']['version.major'])
+                    if 'version.minor' in newmessage['details']:
+                        newmessage['details']['parsed_version']['minor'] = newmessage['details']['version.minor']
+                        del(newmessage['details']['version.minor'])
+                    if 'version.minor2' in newmessage['details']:
+                        newmessage['details']['parsed_version']['minor2'] = newmessage['details']['version.minor2']
+                        del(newmessage['details']['version.minor2'])
+                    if 'version.minor3' in newmessage['details']:
+                        newmessage['details']['parsed_version']['minor3'] = newmessage['details']['version.minor3']
+                        del(newmessage['details']['version.minor3'])
                     newmessage[u'summary'] = (
                         u'Found {software_type} software '
                         u'on {host}'
