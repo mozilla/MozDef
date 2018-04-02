@@ -1561,6 +1561,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'Found HTTP::BROWSER software on 10.8.81.221'
+        assert 'version' not in result['details']
         assert result['details']['parsed_version'] == {'major': 16, 'minor': 0, 'minor2': 1}
 
     def test_software_log2(self):
@@ -1595,6 +1596,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'Found unknown software on 10.8.81.221'
+        assert 'version' not in result['details']
         assert result['details']['parsed_version'] == {'major': 16, 'minor': 0, 'minor2': 1}
 
     def test_socks_log(self):
