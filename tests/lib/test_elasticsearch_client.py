@@ -156,6 +156,23 @@ class TestSimpleWrites(ElasticsearchClientTest):
         assert len(results['hits']) == 1
         assert results['hits'][0]['_type'] == 'event'
 
+    def test_writing_dot_fieldname(self):
+        event = json.dumps({"key.othername": "example value for string of json test"})
+        self.es_client.save_event(body=event)
+
+        self.flush(self.event_index_name)
+        num_events = self.get_num_events()
+        assert num_events == 1
+
+        query = SearchQuery()
+        query.add_must(ExistsMatch('key.othername'))
+        results = query.execute(self.es_client)
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert results['hits'][0]['_source']['key.othername'] == 'example value for string of json test'
+
+        assert len(results['hits']) == 1
+        assert results['hits'][0]['_type'] == 'event'
+
     def test_writing_event_defaults(self):
         query = SearchQuery()
         default_event = {}
