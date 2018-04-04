@@ -84,7 +84,8 @@ def esRotateIndexes():
                                     "number_of_shards": options.number_of_shards,
                                     "number_of_replicas": options.number_of_replicas,
                                     "search.slowlog.threshold.query.warn": options.slowlog_threshold_query_warn,
-                                    "search.slowlog.threshold.fetch.warn": options.slowlog_threshold_fetch_warn
+                                    "search.slowlog.threshold.fetch.warn": options.slowlog_threshold_fetch_warn,
+                                    "mapping.total_fields.limit": options.mapping_total_fields_limit
                                 }
                             }
                         default_mapping_contents['settings'] = index_settings
@@ -183,6 +184,7 @@ def initConfig():
     options.number_of_replicas = getConfig('number_of_replicas', '1', options.configfile)
     options.slowlog_threshold_query_warn = getConfig('slowlog_threshold_query_warn', '5s', options.configfile)
     options.slowlog_threshold_fetch_warn = getConfig('slowlog_threshold_fetch_warn', '5s', options.configfile)
+    options.mapping_total_fields_limit = getConfig('mapping_total_fields_limit', '1000', options.configfile)
 
 
 if __name__ == '__main__':
