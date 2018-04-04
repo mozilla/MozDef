@@ -27,7 +27,7 @@ class TestBroFixup(object):
         event = {
             'key1': 'bro'
         }
-        
+
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
@@ -42,7 +42,7 @@ class TestBroFixup(object):
         event = {
            'bro': 'value1'
         }
-       
+
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
@@ -57,12 +57,12 @@ class TestBroFixup(object):
         event = {
            'category': 'bro'
         }
-       
+
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
         assert metadata['doc_type'] is not 'nsm'
-    
+
     def test_bro_wrongtype_log(self):
         event = {
            'category': 'bro',
@@ -73,7 +73,7 @@ class TestBroFixup(object):
             'ts': 1505701210.163043
         }
         event['MESSAGE'] = json.dumps(MESSAGE)
-       
+
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
@@ -120,7 +120,7 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert result['category'] == 'bro'
         assert result['source'] == 'thing'
-    
+
     def test_nomatch_syslog(self):
         event = {
                 "category": "syslog",
@@ -146,7 +146,7 @@ class TestBroFixup(object):
         assert result['category'] == 'syslog'
         assert result['eventsource'] == 'systemslogs'
         assert result == event
-    
+
     def test_nomatch_auditd(self):
         event = {
             "category": "execve",
@@ -206,7 +206,7 @@ class TestBroFixup(object):
         assert result['severity'] == 'INFO'
         assert toUTC(result['timestamp']).isoformat() == result['timestamp']
         assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
-    
+
     def test_conn_log(self):
         event = {
             'category': 'bro',
@@ -380,7 +380,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'DNS PTR type query 10.22.81.65 -> 10.22.75.41:53'
-    
+
     def test_dns_log2(self):
         event = {
             'category': 'bro',
@@ -509,7 +509,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SSL: 36.70.241.31 -> 63.245.215.82:443'
-    
+
     def test_ssl_log2(self):
         event = {
             'category': 'bro',
@@ -766,7 +766,7 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
-    
+
     def test_smtp_log2(self):
         event = {
             'category': 'bro',
@@ -805,7 +805,7 @@ class TestBroFixup(object):
         assert 'to' in result['details']
         assert 'msg_id' in result['details']
         assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
-    
+
     def test_ssh_log(self):
         event = {
             'category': 'bro',
@@ -911,7 +911,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == '10.22.24.167 -> 10.22.74.74:3128 Tunnel::HTTP Tunnel::DISCOVER'
-    
+
     def test_tunnel_log2(self):
         event = {
             'category': 'bro',
@@ -935,7 +935,7 @@ class TestBroFixup(object):
         assert 'tunnel_type' in result['details']
         assert 'action' in result['details']
         assert result['summary'] == '10.22.24.167 -> 10.22.74.74:3128  '
-    
+
     def test_intel_log(self):
         event = {
             'category':'bro',
@@ -993,7 +993,7 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'seenindicator' in result['details']
         assert result['summary'] == 'Bro intel match of Intel::SOFTWARE in HTTP::IN_USER_AGENT_HEADER'
-    
+
     def test_knowncerts_log(self):
         event = {
             'category':'bro',
@@ -1019,7 +1019,7 @@ class TestBroFixup(object):
             assert key in result['details']
             assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'Certificate X509 seen from: 10.22.75.54:8443'
-    
+
     def test_knowncerts_log2(self):
         event = {
             'category':'bro',
@@ -1045,7 +1045,7 @@ class TestBroFixup(object):
             assert MESSAGE[key] == result['details'][key]
         assert 'serial' in result['details']
         assert result['summary'] == 'Certificate X509 seen from: 10.22.75.54:8443'
-    
+
     def test_knowndevices_log(self):
         event = {
             'category':'bro',
@@ -1068,7 +1068,7 @@ class TestBroFixup(object):
             assert key in result['details']
             assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'New host: 00:0b:db:63:58:a6'
-    
+
     def test_knowndevices_log2(self):
         event = {
             'category':'bro',
@@ -1088,7 +1088,7 @@ class TestBroFixup(object):
         assert 'mac' in result['details']
         assert 'dhcp_host_name' in result['details']
         assert result['summary'] == 'New host: '
-    
+
     def test_knownhosts_log(self):
         event = {
             'category':'bro',
@@ -1110,7 +1110,7 @@ class TestBroFixup(object):
             assert key in result['details']
             assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'New host: 65.54.95.64'
-    
+
     def test_knownhosts_log2(self):
         event = {
             'category':'bro',
@@ -1129,7 +1129,7 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'host' in result['details']
         assert result['summary'] == 'New host: '
-    
+
     def test_knownservices_log(self):
         event = {
             'category':'bro',
@@ -1177,7 +1177,7 @@ class TestBroFixup(object):
         assert 'port_proto' in result['details']
         assert 'service' in result['details']
         assert result['summary'] == 'New service: Unknown on host unknown:0 / '
-    
+
     def test_notice_log(self):
         event = {
             'category': 'bro',
@@ -1353,7 +1353,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SNMPv2c: 10.22.75.137 -> 10.26.8.128:161 (90 get / 0 set requests 120 get responses)'
-    
+
     def test_snmp_log2(self):
         event = {
             'category': 'bro',
@@ -1382,7 +1382,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SNMPvUnknown: 10.22.75.137 -> 10.26.8.128:161 (0 get / 0 set requests 0 get responses)'
-    
+
     def test_rdp_log(self):
         event = {
             'category': 'bro',
@@ -1413,7 +1413,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'RDP: 192.168.1.200 -> 192.168.1.150:3389'
-    
+
     def test_rdp_log2(self):
         event = {
             'category': 'bro',
@@ -1487,7 +1487,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SIP: 192.168.1.2 -> 212.242.33.35:5060 method REGISTER status Trying'
-    
+
     def test_sip_log2(self):
         event = {
         'category': 'bro',
@@ -1529,7 +1529,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'SIP: 192.168.1.2 -> 212.242.33.35:5060 method unknown status unknown'
-    
+
     def test_software_log(self):
         event = {
             'category': 'bro',
@@ -1554,11 +1554,16 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         for key in MESSAGE.keys():
+            # We check for version outside of loop
+            if key.startswith('version.'):
+                continue
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'Found HTTP::BROWSER software on 10.8.81.221'
-    
+        assert 'version' not in result['details']
+        assert result['details']['parsed_version'] == {'major': 16, 'minor': 0, 'minor2': 1}
+
     def test_software_log2(self):
         event = {
             'category': 'bro',
@@ -1584,11 +1589,16 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         for key in MESSAGE.keys():
+            # We check for version outside of loop
+            if key.startswith('version.'):
+                continue
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == 'Found unknown software on 10.8.81.221'
-    
+        assert 'version' not in result['details']
+        assert result['details']['parsed_version'] == {'major': 16, 'minor': 0, 'minor2': 1}
+
     def test_socks_log(self):
         event = {
             'category': 'bro',
@@ -1783,7 +1793,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 request AS success true'
-    
+
     def test_kerberos_log3(self):
         event = {
             'category': 'bro',
@@ -1818,7 +1828,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 request TGS success false'
-    
+
     def test_ntlm_log(self):
         event = {
             'category': 'bro',
@@ -1851,7 +1861,7 @@ class TestBroFixup(object):
         assert MESSAGE['success'] == result['details']['success']
         assert MESSAGE['status'] == result['details']['status']
         assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 success true status SUCCESS'
-    
+
     def test_ntlm_log2(self):
         event = {
             'category': 'bro',
@@ -1961,7 +1971,7 @@ class TestBroFixup(object):
         assert 'path' in result['details']
         assert 'size' in result['details']
         assert result['summary'] == 'SMB file: 10.26.42.82 -> 10.22.69.21:445 '
-    
+
     def test_smbmapping_log(self):
         event = {
             'category': 'bro',
@@ -1992,7 +2002,7 @@ class TestBroFixup(object):
         assert 'share_type' in result['details']
         assert MESSAGE['share_type'] == result['details']['share_type']
         assert result['summary'] == 'SMB mapping: 10.26.41.138 -> 10.22.69.18:445 DISK'
-    
+
     def test_smbmapping_log2(self):
         event = {
             'category': 'bro',
