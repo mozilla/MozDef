@@ -54,7 +54,7 @@ def parse_mapping_file():
     try:
         MAPPING_FILE_CONTENTS
     except NameError:
-        default_mapping_file = os.path.join(os.path.dirname(__file__), "../config/defaultMappingTemplate.json")
+        default_mapping_file = os.path.join(os.path.dirname(__file__), "../cron/defaultMappingTemplate.json")
         with open(default_mapping_file) as data_file:
             MAPPING_FILE_CONTENTS = data_file.read()
     return MAPPING_FILE_CONTENTS

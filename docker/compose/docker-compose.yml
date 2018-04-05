@@ -10,6 +10,8 @@ services:
       - meteor
     ports:
       - 80:80
+      - 8080:8080
+      - 8081:8081
       - 9090:9090
     networks:
       - default
@@ -22,7 +24,9 @@ services:
     networks:
       - default
   kibana:
-    build: kibana/
+    build:
+      context: ../../
+      dockerfile: docker/compose/kibana/Dockerfile
     restart: always
     command: bin/kibana --elasticsearch=http://elasticsearch:9200
     depends_on:
@@ -33,12 +37,12 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/elasticsearch/Dockerfile
+    command: bin/elasticsearch
     restart: always
-    command: bin/elasticsearch -Des.insecure.allow.root=true -Dnetwork.host=0.0.0.0
     volumes:
       - elasticsearch:/var/lib/elasticsearch
-    ports:
-      - 9200:9200
+    # ports:
+    #   - 9200:9200
     networks:
       - default
   rabbitmq:
@@ -49,9 +53,9 @@ services:
     command: rabbitmq-server
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-    ports:
-      - 5672:5672
-      # - 15672:15672 # Admin interface
+    # ports:
+    #   - 5672:5672
+    #   - 15672:15672 # Admin interface
     networks:
       - default
 
@@ -67,7 +71,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 config/defaultMappingTemplate.json'
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json'
     depends_on:
       - base
       - elasticsearch
@@ -143,8 +147,6 @@ services:
       - elasticsearch
       - rabbitmq
       - bootstrap
-    ports:
-      - 8080:8080
     networks:
       - default
   mq_eventtask:
@@ -186,8 +188,6 @@ services:
       - elasticsearch
       - mongodb
       - bootstrap
-    ports:
-      - 8081:8081
     networks:
       - default
   syslog:
