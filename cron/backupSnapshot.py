@@ -59,7 +59,7 @@ def main():
         snapshot_config = {
             "type": "s3",
             "settings": {
-                "bucket": "mozdefes2backups",
+                "bucket": options.aws_bucket,
                 "base_path": "elasticsearch/{0}/{1}".format(bucketdate, hostname),
                 "region": "{0}".format(options.aws_region)
             }
@@ -178,6 +178,12 @@ def initConfig():
     options.aws_region = getConfig(
         'aws_region',
         'us-west-1',
+        options.configfile
+        )
+
+    options.aws_bucket = getConfig(
+        'aws_bucket',
+        '',
         options.configfile
         )
 
