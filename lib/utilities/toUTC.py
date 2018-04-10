@@ -25,7 +25,11 @@ def toUTC(suspectedDate):
         epochDivisor = int(str(1) + '0'*(len(str(suspectedDate)) % 10))
         objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor), LOCAL_TIMEZONE)
     elif type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
+        if suspectedDate[0] == '-':
+            # Negative number, so let's pick a date for them
+            objDate = datetime(1970, 1, 1)
+        else:
+            objDate = parse(suspectedDate, fuzzy=True)
     try:
         if objDate.tzinfo is None:
             objDate=LOCAL_TIMEZONE.localize(objDate)
