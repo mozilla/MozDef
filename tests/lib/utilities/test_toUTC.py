@@ -89,3 +89,13 @@ class TestToUTC():
         result = toUTC(1.468443523e+11)
         self.result_is_datetime(result)
         assert str(result) == '2016-07-13 20:58:43+00:00'
+
+    def test_negative_string_float(self):
+        result = toUTC("-86400.000000")
+        self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_negative_string_int(self):
+        result = toUTC("-12345")
+        self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
