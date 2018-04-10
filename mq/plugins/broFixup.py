@@ -210,6 +210,7 @@ class message(object):
                         newmessage['details'][u'host'] = u''
                     if 'uri' not in newmessage['details']:
                         newmessage['details'][u'uri'] = u''
+                    newmessage['details'][u'uri'] = newmessage['details'][u'uri'][:1024]
                     if 'status_code' not in newmessage['details']:
                         newmessage['details'][u'status_code'] = u''
                     newmessage[u'summary'] = (
