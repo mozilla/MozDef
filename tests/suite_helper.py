@@ -15,7 +15,6 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient
 
-from utilities.toUTC import toUTC
 from utilities.dot_dict import DotDict
 
 
