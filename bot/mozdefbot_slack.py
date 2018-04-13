@@ -38,17 +38,10 @@ greetz = ["mozdef bot in da house",
 
 def formatAlert(jsonDictIn):
     # defaults
-    severity = 'INFO'
     summary = ''
-    category = ''
-    if 'severity' in jsonDictIn.keys():
-        severity = jsonDictIn['severity']
     if 'summary' in jsonDictIn.keys():
         summary = jsonDictIn['summary']
-    if 'category' in jsonDictIn.keys():
-        category = jsonDictIn['category']
-
-    return '{0}: {1} {2}'.format(severity, category, summary.encode('ascii', 'replace'))
+    return summary
 
 
 class SlackBot(object):
@@ -180,14 +173,14 @@ class alertConsumer(ConsumerMixin):
                 sys.stdout.write('alert is more than 450 bytes, truncating\n')
                 bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
 
-            summary = bodyDict['summary'].upper()
-            if summary == 'CRITICAL':
+            severity = bodyDict['severity'].upper()
+            if severity == 'CRITICAL':
                 self.bot.post_critical_message(formatAlert(bodyDict), channel)
-            elif summary == 'WARNING':
+            elif severity == 'WARNING':
                 self.bot.post_warning_message(formatAlert(bodyDict), channel)
-            elif summary == 'INFO':
+            elif severity == 'INFO':
                 self.bot.post_info_message(formatAlert(bodyDict), channel)
-            elif summary == 'NOTICE':
+            elif severity == 'NOTICE':
                 self.bot.post_notice_message(formatAlert(bodyDict), channel)
             else:
                 self.bot.post_unknown_severity_message(formatAlert(bodyDict), channel)
