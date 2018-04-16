@@ -18,7 +18,7 @@ class AlertBruteforceSsh(AlertTask):
         search_query.add_must([
             PhraseMatch('summary', 'failed'),
             TermMatch('details.program', 'sshd'),
-            TermsMatch('summary', ['login', 'invalid', 'ldap_count_entries'])
+            TermsMatch('summary', ['login', 'invalid', 'ldap_count_entries', 'publickey'])
         ])
 
         for ip_address in self.config.skiphosts.split():
