@@ -28,7 +28,7 @@ class OldEvents(AlertTask):
         self.walkAggregations(threshold=1)
 
     def onAggregation(self, aggreg):
-        category = 'maitenance'
+        category = 'maintenance'
         tags = ['pipeline']
         severity = 'ERROR'
 
