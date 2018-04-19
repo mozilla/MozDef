@@ -1,0 +1,9 @@
+{
+    "mailServer": "<your SMTP server here>",
+    "mailServerPort": 25,
+    "subject": "MozDef Alert: Duo Bypass codes used",
+    "sender": "<sender email address>",
+    "recipients": [
+        "<recipient email address>"
+    ]
+}
