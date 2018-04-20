@@ -51,9 +51,6 @@ USER root
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef
 
 USER mozdef
-# We have to replace the python virtualenv path until
-# https://github.com/mozilla/MozDef/issues/421 is fixed
-RUN sed -i 's|/opt/mozdef/envs/mozdef/bin/activate|/opt/mozdef/envs/python/bin/activate|g' /opt/mozdef/envs/mozdef/cron/*.sh
 
 RUN mkdir /opt/mozdef/envs/mozdef/data
 

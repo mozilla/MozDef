@@ -135,10 +135,6 @@ RUN \
 
 COPY docker/conf/initial_setup.py /opt/mozdef/envs/mozdef/docker/conf/initial_setup.py
 
-# We have to replace the python virtualenv path until
-# https://github.com/mozilla/MozDef/issues/421 is fixed
-RUN sed -i 's|/opt/mozdef/envs/mozdef/bin/activate|/opt/mozdef/envs/python/bin/activate|g' /opt/mozdef/envs/mozdef/cron/*.sh
-
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef
 
 # VOLUMES
