@@ -38,17 +38,10 @@ greetz = ["mozdef bot in da house",
 
 def formatAlert(jsonDictIn):
     # defaults
-    severity = 'INFO'
     summary = ''
-    category = ''
-    if 'severity' in jsonDictIn.keys():
-        severity = jsonDictIn['severity']
     if 'summary' in jsonDictIn.keys():
         summary = jsonDictIn['summary']
-    if 'category' in jsonDictIn.keys():
-        category = jsonDictIn['category']
-
-    return '{0}: {1} {2}'.format(severity, category, summary.encode('ascii', 'replace'))
+    return summary
 
 
 class SlackBot(object):
@@ -61,21 +54,44 @@ class SlackBot(object):
     def run(self):
         if self.slack_client.rtm_connect():
             print("SlackBot connected and running!")
-            self.post_message(random.choice(greetz))
+            self.post_welcome_message(random.choice(greetz))
         else:
             print("Unable to connect")
 
     def handle_command(self, command, channel):
         print(command)
 
-    def post_message(self, message, channel=None):
+    def post_attachment(self, message, channel, color):
         if channel is None:
             message_channels = self.channels
         else:
             message_channels = [channel]
 
         for message_channel in message_channels:
-            self.slack_client.api_call("chat.postMessage", channel=message_channel, text=message, as_user=True)
+            attachment = {
+                'fallback': message,
+                'text': message,
+                'color': color
+            }
+            self.slack_client.api_call("chat.postMessage", channel=message_channel, attachments=[attachment], as_user=True)
+
+    def post_welcome_message(self, message, channel=None):
+        self.post_attachment(message, channel, '#36a64f')
+
+    def post_info_message(self, message, channel=None):
+        self.post_attachment(message, channel, '#99ccff')
+
+    def post_critical_message(self, message, channel=None):
+        self.post_attachment(message, channel, '#ff0000')
+
+    def post_warning_message(self, message, channel=None):
+        self.post_attachment(message, channel, '#e6e600')
+
+    def post_notice_message(self, message, channel=None):
+        self.post_attachment(message, channel, '#a64dff')
+
+    def post_unknown_severity_message(self, message, channel=None):
+        self.post_attachment(message, channel, '#000000')
 
     def parse_slack_output(self, slack_rtm_output):
         output_list = slack_rtm_output
@@ -157,8 +173,17 @@ class alertConsumer(ConsumerMixin):
                 sys.stdout.write('alert is more than 450 bytes, truncating\n')
                 bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
 
-            self.bot.post_message(formatAlert(bodyDict), channel)
-
+            severity = bodyDict['severity'].upper()
+            if severity == 'CRITICAL':
+                self.bot.post_critical_message(formatAlert(bodyDict), channel)
+            elif severity == 'WARNING':
+                self.bot.post_warning_message(formatAlert(bodyDict), channel)
+            elif severity == 'INFO':
+                self.bot.post_info_message(formatAlert(bodyDict), channel)
+            elif severity == 'NOTICE':
+                self.bot.post_notice_message(formatAlert(bodyDict), channel)
+            else:
+                self.bot.post_unknown_severity_message(formatAlert(bodyDict), channel)
             message.ack()
         except ValueError as e:
             logger.exception("mozdefbot_slack exception while processing events queue %r" % e)
