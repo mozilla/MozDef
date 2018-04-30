@@ -99,3 +99,19 @@ class TestToUTC():
         result = toUTC("-12345")
         self.result_is_datetime(result)
         assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_zero_int(self):
+        result = toUTC(0)
+        self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_zero_string_int(self):
+        result = toUTC("0")
+        self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_zero_string_float(self):
+        # import pdb; pdb.set_trace()
+        result = toUTC("0.0000")
+        self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
