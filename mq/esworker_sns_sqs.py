@@ -99,11 +99,7 @@ class taskConsumer(object):
                 event['tags'] = [self.options.taskexchange]
 
             event['severity'] = 'INFO'
-
-            # Set defaults
-            event['processid'] = ''
-            event['processname'] = ''
-            event['category'] = 'syslog'
+            event['details'] = {}
 
             for message_key, message_value in message.iteritems():
                 if 'Message' == message_key:
@@ -122,13 +118,18 @@ class taskConsumer(object):
                             elif inside_message_key in ('time', 'timestamp'):
                                 event['timestamp'] = toUTC(inside_message_value).isoformat()
                                 event['utctimestamp'] = toUTC(event['timestamp']).astimezone(pytz.utc).isoformat()
-                            elif inside_message_key in ('type'):
+                            elif inside_message_key in ('type', 'category'):
                                 event['category'] = inside_message_value
                             elif inside_message_key in ('payload', 'message'):
                                 event['summary'] = inside_message_value
+                            elif inside_message_key in ('fields', 'details'):
+                                if type(inside_message_value) is not dict:
+                                    event[u'details'][u'message'] = inside_message_value
+                                else:
+                                    if len(inside_message_value) > 0:
+                                        for details_key, details_value in inside_message_value.iteritems():
+                                            event[u'details'][details_key] = details_value
                             else:
-                                if 'details' not in event:
-                                    event['details'] = {}
                                 event['details'][inside_message_key] = inside_message_value
                     except ValueError:
                         event['summary'] = message_value
