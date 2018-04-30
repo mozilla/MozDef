@@ -218,79 +218,6 @@ if (Meteor.isClient) {
         var chartsInitialized   =false;
         var currentSearch=null;
 
-        if (myMyo){
-            //set a default reference orientation
-            myMyo.orientation=new THREE.Quaternion(0,0,0,0);
-            myMyo.zero = new THREE.Quaternion(0,0,0,0);
-            myMyo.panZoom = false;
-            myMyo.rotate = false;
-
-            myMyo.on('fist', function(edge){
-                if(!edge) return;
-                    debugLog('Myo pan/zoom: ' + !myMyo.panZoom);
-                    this.vibrate('short');
-
-                    this.zeroOrientation();
-                    myMyo.panZoom=!myMyo.panZoom;
-                });
-            myMyo.on('wave_out', function(edge){
-                if(!edge) return;
-                    debugLog('Myo rotate: ' + !myMyo.rotate);
-                    this.vibrate('short');
-
-                    this.zeroOrientation();
-                    myMyo.rotate=!myMyo.rotate;
-                });
-            myMyo.on('orientation',function(data){
-
-                var newOrientation = new THREE.Quaternion(data.x,data.y,data.z,data.w);
-
-                //are we just initialized?
-                //accept our starting position as this data
-                if ( myMyo.orientation.equals(myMyo.zero) ){
-                    //console.log('setting orientation to',newOrientation)
-                    myMyo.orientation.copy(newOrientation);
-                }
-
-                //did we put it on backwards?
-                //logo should face elbow, 'on light' closes to wrist.
-                var inverse = (this.direction == 'toward_elbow') ? 1 : -1;
-
-                //what's the difference in this data vs our last
-                delta = myMyo.orientation.slerp(newOrientation,.5);
-
-                if (myMyo.rotate){
-                    //rotate
-                    var vector = sceneControls.target.clone();
-                    var up = sceneCamera.up.clone();
-                    var quaternion = new THREE.Quaternion();
-                    quaternion.setFromAxisAngle(up, delta.y/50);
-                    sceneCamera.position.applyQuaternion(quaternion);
-                    sceneCamera.lookAt(vector);
-                }
-
-                if (myMyo.panZoom){
-                    //pan/zoom
-                    //clone existing object.position and target
-                    //and move their X to pan
-                    panAmount=( inverse * delta.z)
-                    zoomAmount=(-1* inverse * delta.y)
-                    newTarget=sceneControls.object.position.clone();
-                    var v = new THREE.Vector3(panAmount,0,zoomAmount);
-                    newTarget.add(v)
-                    sceneControls.object.position.copy(newTarget);
-                    newTarget=sceneControls.target.clone();
-                    newTarget.add(v)
-                    sceneControls.target.copy(newTarget);
-                }
-
-                //save our new position for next diff
-                myMyo.orientation.copy(newOrientation);
-                sceneControls.update();
-                sceneCamera.updateProjectionMatrix();
-            });
-        };
-
         //faux crossfilter to retrieve it's data from meteor/mongo:
         var mongoCrossfilter = {}
         function getSearchCriteria(){
@@ -1086,14 +1013,5 @@ if (Meteor.isClient) {
             cursorAttackers.stop();
         }
         cursorAttackers=null;
-
-        if (myMyo){
-            //remove our callback events
-            //since they are scene specific
-            myMyo.events=[]
-        }
-
     };//end template.attackers.destroyed
-
-
 }

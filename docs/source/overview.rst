@@ -106,6 +106,5 @@ Mid term:
 Long term:
 
 * Integration into common defense mechanisms used outside Mozilla
-* Enhanced visualizations and interactions including alternative interfaces (myo, omnidirectional treadmills, oculus rift)
 
 

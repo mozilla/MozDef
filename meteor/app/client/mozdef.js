@@ -6,8 +6,6 @@ Copyright (c) 2014 Mozilla Corporation
 */
 
 if (Meteor.isClient) {
-    //global myo (if we have one)
-    myMyo=null;
     //default session variables
     //and session init actions
     Meteor.startup(function () {
@@ -23,31 +21,6 @@ if (Meteor.isClient) {
         // and then to the login function of choice
         // based on how enableClientAccountCreation was set at deployment.
         Meteor.login();
-
-        //see if we have a myo armband
-        try{
-            myMyo = Myo;
-            myMyo.onError=function(e){
-                if ( e.target instanceof WebSocket ){
-                    console.log('Could not connect to myo, is MyoConnect present and running? ')
-                }else{
-                    console.log('error',e)
-                }
-            };
-            if ( typeof mozdef.myoURL =='string' ){
-                // use a custom URL to contact Myo
-                // use this if you have the UI hosted using TLS
-                // to setup a local proxy on 127.0.0.1 that uses TLS
-                // to avoid browsers complaining about insecure websocket connections
-                // set to something like: wss://127.0.0.1:8444/myo
-                // and install a local nginx proxy with a valid TLS cert
-
-                myMyo.options.socket_url=mozdef.myoURL
-            }
-            myMyo.create(0,myMyo.options);
-        }catch(e){
-            debugLog(e,'No myo found..you really should get one.')
-        }
     });
 
     //find plugins registered for a
