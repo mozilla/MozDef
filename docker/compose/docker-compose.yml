@@ -71,7 +71,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json'
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
     depends_on:
       - base
       - elasticsearch

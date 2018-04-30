@@ -3,6 +3,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
+import json
+
 from positive_alert_test_case import PositiveAlertTestCase
 from negative_alert_test_case import NegativeAlertTestCase
 
@@ -10,90 +12,58 @@ from alert_test_suite import AlertTestSuite
 
 
 class TestAlertFeedbackEvents(AlertTestSuite):
+    inner_alert_dict = {
+        "summary": "ttesterson@gmail.com NEWCOUNTRY Montana, Tonga access from 109.117.1.33",
+        "utctimestamp": "2010-04-01T20:49:15+00:00",
+        "url": "https://www.mozilla.org/alert",
+        "category": "geomodel",
+        "severity": "NOTICE",
+        "details": {
+            "locality_details": {
+                "country": "Tonga",
+                "city": "Montana"
+            },
+            "principal": "ttesterson@gmail.com",
+            "source_ip": "109.117.1.33",
+            "category": "NEWCOUNTRY"
+        },
+        "tags": ["geomodel"]
+    }
     default_event = {
         "_type": "event",
         "_source": {
-            "category": "user_feedback",
-            "tags": [
-                "sso-mozdef-feedback-events"
-            ],
-            "details": {
-                "action": "escalate",
-                "alert_information": {
-                    "category": "geomodel",
-                    "severity": "NOTICE",
-                    "utctimestamp": "2017-12-07T14:54:08.092467+00:00",
-                    "tags": [
-                        "geomodel"
-                    ],
-                    "notify_mozdefbot": False,
-                    "ircchannel": None,
-                    "summary": "ttesterson@mozilla.com NEWCOUNTRY Unknown, United States access from 1.2.3.4 (auth0) [deviation:0.5] last activity was from Berlin, Germany (8182 km away) approx 503.93 hours before",
-                    "details": {
-                        "category": "NEWCOUNTRY",
-                        "source_ip": "1.2.3.4",
-                        "locality_details": {
-                            "city": "Unknown",
-                            "country": "United States"
-                        },
-                        "principal": "ttesterson@mozilla.com"
-                    },
-                    "events": [
-                        {
-                            "documentindex": "events-20171207",
-                            "documentsource": {
-                                "category": "geomodelnotice",
-                                "processid": "563",
-                                "mozdefhostname": "mozdefhost",
-                                "severity": "NOTICE",
-                                "utctimestamp": "2017-12-07T14:54:08.092467+00:00",
-                                "tags": [
-                                    "geomodel"
-                                ],
-                                "timestamp": "2017-12-07T14:54:08.092467+00:00",
-                                "hostname": "hostmozdef",
-                                "receivedtimestamp": "2017-12-07T14:54:08.092467+00:00",
-                                "summary": "ttesterson@mozilla.com NEWCOUNTRY Unknown, United States access from 1.2.3.4 (auth0) [deviation:0.5] last activity was from Berlin, Germany (8182 km away) approx 503.93 hours before",
-                                "processname": "/home/geomodel/go/bin/geomodel",
-                                "details": {
-                                    "category": "NEWCOUNTRY",
-                                    "prev_distance": 8182.322788482041,
-                                    "prev_locality_details": {
-                                        "city": "Berlin",
-                                        "country": "Germany"
-                                    },
-                                    "prev_timestamp": "2017-11-14T14:47:13Z",
-                                    "severity": 2,
-                                    "event_time": "2017-12-07T14:42:54.466Z",
-                                    "longitude": -97.822,
-                                    "prev_latitude": 48.179,
-                                    "source_ipv4": "1.2.3.4",
-                                    "latitude": 37.751,
-                                    "locality_details": {
-                                        "city": "Unknown",
-                                        "country": "United States"
-                                    },
-                                    "informer": "auth0",
-                                    "prev_longitude": 11.2547,
-                                    "weight_deviation": 0.5,
-                                    "principal": "ttesterson@mozilla.com"
-                                }
-                            },
-                            "documentid": "AWAnKtprWc8M_JNGim7Q",
-                            "documenttype": "event"
-                        }
-                    ]
+            'category': u'user_feedback',
+            'details': {
+                u'action': u'escalate',
+                u'alert_information': {
+                    u'alert_code': u'123456',
+                    u'alert_id': u'7891011',
+                    u'alert_str_json': json.dumps(inner_alert_dict),
+                    u'date': u'2012-06-15',
+                    u'description': u'This alert is created based on geo ip information about the last login of a user.',
+                    u'duplicate': False,
+                    u'last_update': 1524686938,
+                    u'risk': u'high',
+                    u'state': u'escalate',
+                    u'summary': u'Did you recently login from Montana, Tonga (109.117.1.33)?',
+                    u'url': u'https://www.mozilla.org',
+                    u'url_title': u'Get Help',
+                    u'user_id': u'ad|Mozilla|ttesterson'
                 }
-            }
+            },
+            'mozdefhostname': 'host1',
+            'severity': 'INFO',
+            'summary': u'Did you recently login from Montana, Tonga (109.117.1.33)?',
+            'tags': ['SSODashboardAlertFeedback']
         }
     }
 
     default_alert = {
-        "category": "geomodel",
-        "tags": ['feedback', 'customtag1'],
+        "category": "user_feedback",
+        "tags": ['user_feedback', 'customtag1'],
         "severity": "NOTICE",
         "notify_mozdefbot": False,
-        "summary": "SSO Escalate Event Received",
+        "summary": "ad|Mozilla|ttesterson escalated alert within single-sign on (SSO) dashboard. Event Date: 2012-06-15 Summary: \"Did you recently login from Montana, Tonga (109.117.1.33)?\"",
     }
 
     test_cases = []
@@ -106,9 +76,9 @@ class TestAlertFeedbackEvents(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    default_event['_source']['details']['alert_information']['category'] = 'othercategory'
+    default_event['_source']['details']['alert_information']['alert_code'] = '7891011'
     alert = AlertTestSuite.create_alert(default_alert)
-    alert['tags'] = ['feedback', 'customtag2']
+    alert['tags'] = ['user_feedback', 'customtag2']
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
