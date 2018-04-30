@@ -198,6 +198,7 @@ services:
     command: bash -c 'sleep 95 && /usr/sbin/syslog-ng --no-caps -F'
     depends_on:
       - loginput
+      - mq_eventtask
     ports:
       - 514:514/udp
       - 514:514
