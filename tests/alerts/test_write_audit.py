@@ -131,10 +131,10 @@ class TestWriteAudit(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['details']['processname'] = 'puppet'
+        event['_source']['details']['processname'] = 'process1'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with events with processname that matches exclusion of 'puppet'",
+            description="Negative test case with events with processname that matches exclusion of 'process1'",
             events=events,
         )
     )
