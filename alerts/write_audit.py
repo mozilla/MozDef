@@ -33,7 +33,8 @@ class WriteAudit(AlertTask):
         severity = 'WARNING'
         tags = ['audit']
 
-        summary = '{0} Filesystem write(s) to an auditd path by {1}'.format(aggreg['count'], aggreg['value'], ),
+        summary = ('{0} Filesystem write(s) to an auditd path by {1}'.format(aggreg['count'], aggreg['value'], ))
+        hostnames = self.mostCommon(aggreg['allevents'],'_source.hostname')
         #did they modify more than one host?
         #or just modify an existing configuration more than once?
         if len(hostnames) > 1:
