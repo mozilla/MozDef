@@ -17,7 +17,7 @@ class TestWriteAudit(AlertTestSuite):
     default_event = {
         "_type": "auditd",
         "_source": {
-            "category": "write"
+            "category": "write",
             "summary": "Write: /etc/audit/",
             "details": {
                 "processname": "vi",
