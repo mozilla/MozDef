@@ -23,8 +23,7 @@ class TestWriteAudit(AlertTestSuite):
                 "processname": "vi",
                 "hostname": "exhostname",
                 "originaluser": "randomjoe",
-                "auditkey": "audit"
-                "sourceipaddress": "1.2.3.4",
+                "auditkey": "audit",
             }
         }
     }
