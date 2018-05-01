@@ -11,7 +11,7 @@ class TestOldEvents(AlertTestSuite):
     }
 
     default_alert = {
-        "category": "maitenance",
+        "category": "maintenance",
         "severity": "ERROR",
         "tags": ['pipeline'],
         "summary": "Events have an outdated utctimestamp",
