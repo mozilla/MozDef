@@ -18,7 +18,7 @@ class TestWriteAudit(AlertTestSuite):
         "_type": "auditd",
         "_source": {
             "category": "write"
-            "summary": 'Write: /etc/audit/',
+            "summary": "Write: /etc/audit/",
             "details": {
                 "processname": "vi",
                 "hostname": "exhostname",
