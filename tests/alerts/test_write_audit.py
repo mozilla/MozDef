@@ -33,7 +33,7 @@ class TestWriteAudit(AlertTestSuite):
     default_alert = {
         "category": "write",
         "severity": "WARNING",
-        "summary": "5 Filesystem write(s) to an auditd path by randomjoe on exhostname (5 hits)",
+        "summary": "5 Filesystem write(s) to an auditd path by randomjoe on exhostname",
         "tags": ['audit'],
         "notify_mozdefbot": True,
     }
@@ -83,36 +83,16 @@ class TestWriteAudit(AlertTestSuite):
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with not enough events",
-            events=AlertTestSuite.create_events(default_event, 1),
+            events=AlertTestSuite.create_events(default_event, 0),
         ),
     )
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['summary'] = 'Write: /etc/audisp/'
+        event['_source']['details']['auditkey'] = 'exec'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with events with summary without 'audit'",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 5)
-    for event in events:
-        event['_source']['summary'] = 'audit'
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with events with summary with only 'audit'",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 5)
-    for event in events:
-        event['_source']['summary'] = 'Write'
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with events with summary with only 'Write'",
+            description="Negative test case with events with auditkey without 'audit'",
             events=events,
         )
     )
