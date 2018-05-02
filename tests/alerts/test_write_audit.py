@@ -71,6 +71,18 @@ class TestWriteAudit(AlertTestSuite):
         )
     )
 
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with events a minute earlier",
+            events=events,
+            expected_alert=default_alert
+        )
+    )
+
     events = AlertTestSuite.create_events(default_event, 5)
     events[3]['_source']['details']['originaluser'] = "randomjoe"
     events[2]['_source']['details']['originaluser'] = "randomjane"
@@ -79,13 +91,6 @@ class TestWriteAudit(AlertTestSuite):
             description="Negative test case with 5 events however one has different originaluser",
             events=events,
         )
-    )
-
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with not enough events",
-            events=AlertTestSuite.create_events(default_event, 0),
-        ),
     )
 
     events = AlertTestSuite.create_events(default_event, 5)
@@ -114,6 +119,17 @@ class TestWriteAudit(AlertTestSuite):
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case aggregation key excluded",
+            events=events,
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with old timestamp",
             events=events,
         )
     )
