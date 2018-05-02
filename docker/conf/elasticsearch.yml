@@ -93,4 +93,6 @@ path.logs: /var/log/elasticsearch
 path.data: /var/lib/elasticsearch
 http.host: 0.0.0.0
 discovery.type: single-node
+action.destructive_requires_name: true
+action.auto_create_index: false
 # Mozdef Custom Settings #
