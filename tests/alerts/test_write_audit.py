@@ -20,9 +20,9 @@ class TestWriteAudit(AlertTestSuite):
         "_source": {
             "category": "write",
             "summary": "Write: /etc/audit/",
+            "hostname": "exhostname"
             "details": {
                 "processname": "vi",
-                "hostname": "exhostname",
                 "originaluser": "randomjoe",
                 "auditkey": "audit",
             }
@@ -33,7 +33,7 @@ class TestWriteAudit(AlertTestSuite):
     default_alert = {
         "category": "write",
         "severity": "WARNING",
-        "summary": "5 Filesystem write(s) to an auditd path by randomjoe on exhostname",
+        "summary": "5 Filesystem write(s) to an auditd path by randomjoe on exhostname (5 hits)",
         "tags": ['audit'],
         "notify_mozdefbot": True,
     }
