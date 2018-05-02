@@ -84,16 +84,6 @@ class TestWriteAudit(AlertTestSuite):
     )
 
     events = AlertTestSuite.create_events(default_event, 5)
-    events[3]['_source']['details']['originaluser'] = "randomjoe"
-    events[2]['_source']['details']['originaluser'] = "randomjane"
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with 5 events however one has different originaluser",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
         event['_source']['details']['auditkey'] = 'exec'
     test_cases.append(
