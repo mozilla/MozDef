@@ -49,18 +49,6 @@ class TestWriteAudit(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
-        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
-    test_cases.append(
-        PositiveAlertTestCase(
-            description="Positive test with events a minute earlier",
-            events=events,
-            expected_alert=default_alert
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 5)
-    for event in events:
         event['_source']['summary'] = 'Write: /etc/audit/rules.d/.audit.rules.swp'
     test_cases.append(
         PositiveAlertTestCase(
@@ -134,17 +122,6 @@ class TestWriteAudit(AlertTestSuite):
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with processname that matches exclusion of 'process1'",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 5)
-    for event in events:
-        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
-        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with old timestamp",
             events=events,
         )
     )
