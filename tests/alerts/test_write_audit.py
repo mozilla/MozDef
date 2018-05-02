@@ -11,6 +11,7 @@ from alert_test_suite import AlertTestSuite
 
 class TestWriteAudit(AlertTestSuite):
     alert_filename = "write_audit"
+    alert_classname = 'WriteAudit'
 
     # This event is the default positive event that will cause the
     # alert to trigger

@@ -11,7 +11,7 @@ from lib.alerttask import AlertTask
 from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 
 
-class AlertWriteAudit(AlertTask):
+class WriteAudit(AlertTask):
     def main(self):
         self.parse_config('write_audit.conf', ['skipprocess'])
         search_query = SearchQuery(minutes=5)
