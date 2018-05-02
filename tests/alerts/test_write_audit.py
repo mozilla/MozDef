@@ -71,7 +71,7 @@ class TestWriteAudit(AlertTestSuite):
         )
     )
 
-    events = AlertTestSuite.create_events(default_event, 10)
+    events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
         event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
         event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
@@ -123,7 +123,7 @@ class TestWriteAudit(AlertTestSuite):
         )
     )
 
-    events = AlertTestSuite.create_events(default_event, 10)
+    events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
         event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
         event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
