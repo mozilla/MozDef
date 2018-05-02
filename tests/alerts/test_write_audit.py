@@ -21,6 +21,7 @@ class TestWriteAudit(AlertTestSuite):
             "category": "write",
             "summary": "Write: /etc/audit/",
             "hostname": "exhostname",
+            "tags": ["audisp-json","2.1.0", "audit"],
             "details": {
                 "processname": "vi",
                 "originaluser": "randomjoe",
