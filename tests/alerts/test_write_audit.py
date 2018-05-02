@@ -20,7 +20,7 @@ class TestWriteAudit(AlertTestSuite):
         "_source": {
             "category": "write",
             "summary": "Write: /etc/audit/",
-            "hostname": "exhostname"
+            "hostname": "exhostname",
             "details": {
                 "processname": "vi",
                 "originaluser": "randomjoe",
