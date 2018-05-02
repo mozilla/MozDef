@@ -32,7 +32,7 @@ class TestWriteAudit(AlertTestSuite):
     default_alert = {
         "category": "write",
         "severity": "WARNING",
-        "summary": "18 Filesystem write(s) to an auditd path by randomjoe on exhostname (5 hits)",
+        "summary": "5 Filesystem write(s) to an auditd path by randomjoe on exhostname (5 hits)",
         "tags": ['audit'],
         'notify_mozdefbot': False,
     }
@@ -82,8 +82,8 @@ class TestWriteAudit(AlertTestSuite):
     )
 
     events = AlertTestSuite.create_events(default_event, 5)
-    events[8]['_source']['details']['originaluser'] = "randomjoe"
-    events[9]['_source']['details']['originaluser'] = "randomjane"
+    events[3]['_source']['details']['originaluser'] = "randomjoe"
+    events[2]['_source']['details']['originaluser'] = "randomjane"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with 5 events however one has different originaluser",
