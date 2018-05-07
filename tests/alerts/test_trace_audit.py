@@ -9,7 +9,7 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestWriteAudit(AlertTestSuite):
+class TestTraceAudit(AlertTestSuite):
     alert_filename = "trace_audit"
     alert_classname = 'TraceAudit'
 
