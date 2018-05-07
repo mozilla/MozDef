@@ -73,7 +73,7 @@ class PTRequestor(object):
         max_retries = 3
         total_retries = 0
         while True:
-            logger.info("Sending request to papertrail API")
+            logger.debug("Sending request to papertrail API")
             resp = requests.get(self._papertrail_api, headers=hdrs, params=payload)
             if resp.status_code == 200:
                 break
