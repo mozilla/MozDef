@@ -73,18 +73,7 @@ class TestTraceAudit(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['details']['auditkey'] = 'exec'
-        event['_source']['summary'] = 'Execve: strace -p 1086'
-    test_cases.append(
-        PositiveAlertTestCase(
-            description="Positive test case with events with auditkey without 'trace' and summary of 'Execve: strace -p 1086'",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 5)
-    for event in events:
-        event['_source']['hostname'] = 'example.host.com'
+        event['_source']['hostname'] = 'example.hostname.com'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with example hostname that matches exclusion of 'hostfilter'",
