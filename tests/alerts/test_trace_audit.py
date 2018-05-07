@@ -24,6 +24,7 @@ class TestTraceAudit(AlertTestSuite):
             "details": {
                 "processname": "strace",
                 "originaluser": "randomjoe",
+                "auditkey": "strace",
             }
         }
     }
@@ -76,7 +77,7 @@ class TestTraceAudit(AlertTestSuite):
         event['_source']['summary'] = 'Execve: strace -p 1086'
     test_cases.append(
         PositiveAlertTestCase(
-            description="Positive test case with events with auditkey without 'trace' and summary of strace -p 1086",
+            description="Positive test case with events with auditkey without 'trace' and summary of 'Execve: strace -p 1086'",
             events=events,
         )
     )
