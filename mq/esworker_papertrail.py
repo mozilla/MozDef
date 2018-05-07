@@ -69,9 +69,25 @@ class PTRequestor(object):
         if maxid is not None:
             payload['max_id'] = maxid
         hdrs = {'X-Papertrail-Token': self._apikey}
-        resp = requests.get(self._papertrail_api, headers=hdrs, params=payload)
-        if resp.status_code != 200:
-            logger.error("Received invalid status code: {0}: {1}".format(resp.status_code, resp.text))
+
+        max_retries = 3
+        total_retries = 0
+        while True:
+            logger.info("Sending request to papertrail API")
+            resp = requests.get(self._papertrail_api, headers=hdrs, params=payload)
+            if resp.status_code == 200:
+                break
+            else:
+                logger.info("Received invalid status code: {0}: {1}".format(resp.status_code, resp.text))
+                total_retries += 1
+                if total_retries < max_retries:
+                    logger.info("Sleeping a bit then retrying")
+                    time.sleep(2)
+                else:
+                    logger.error("Received too many error messages...exiting")
+                    logger.error("Last malformed response: {0}: {1}".format(resp.status_code, resp.text))
+                    sys.exit(1)
+
         return self.parse_events(resp.json())
 
     def request(self, query, stime, etime):
