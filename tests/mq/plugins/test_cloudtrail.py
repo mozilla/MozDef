@@ -29,6 +29,15 @@ class TestCloudtrailPlugin():
         assert retmessage == msg
         assert retmeta == {}
 
+    def test_bad_details(self):
+        msg = {
+            'details': 'someother',
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+        assert retmessage == msg
+        assert 'raw_value' not in msg['details']
+        assert retmeta == {}
+
     def test_iamInstanceProfile(self):
         msg = {
             'source': 'cloudtrail',

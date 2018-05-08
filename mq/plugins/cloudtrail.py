@@ -3,6 +3,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+from utilities.key_exists import key_exists
+
 
 class message(object):
     def __init__(self):
@@ -12,6 +17,41 @@ class message(object):
         self.registration = ['cloudtrail']
         self.priority = 10
 
+        # Just add new entry to this dict to
+        # automatically convert key mappings
+        # which are mixed string and dict
+        # into a dict with a raw_value key as the string value
+        self.modify_keys = [
+            'details.requestparameters.iamInstanceProfile',
+            'details.requestparameters.attribute',
+            'details.requestparameters.description',
+            'details.requestparameters.filter',
+            'details.requestparameters.rule',
+            'details.requestparameters.ebsOptimized',
+            'details.responseelements.role',
+            'details.responseelements.subnets',
+            'details.responseelements.endpoint',
+            'details.responseelements.securityGroups',
+            'details.additionaleventdata',
+            'details.serviceeventdetails',
+        ]
+
+    def convert_key_raw_str(self, needle, haystack):
+        num_levels = needle.split(".")
+        if len(num_levels) == 0:
+            return False
+        current_pointer = haystack
+        for updated_key in num_levels:
+            if updated_key == num_levels[-1]:
+                current_pointer[updated_key] = {
+                    'raw_value': current_pointer[updated_key]
+                }
+                return haystack
+            if updated_key in current_pointer:
+                current_pointer = current_pointer[updated_key]
+            else:
+                return haystack
+
     def onMessage(self, message, metadata):
         if 'source' not in message:
             return (message, metadata)
@@ -19,108 +59,8 @@ class message(object):
         if not message['source'] == 'cloudtrail':
             return (message, metadata)
 
-        if 'details' not in message:
-            return (message, metadata)
-
-        if type(message['details']) is not dict:
-            return (message, metadata)
-
-        if 'requestparameters' in message['details'] and type(message['details']['requestparameters']) is dict:
-            # Handle details.requestparameters.iamInstanceProfile strings
-            if 'iamInstanceProfile' in message['details']['requestparameters']:
-                iam_instance_profile = message['details']['requestparameters']['iamInstanceProfile']
-                if type(iam_instance_profile) is not dict:
-                    message['details']['requestparameters']['iamInstanceProfile'] = {
-                        'raw_value': str(iam_instance_profile)
-                    }
-
-            # Handle details.requestparameters.attribute strings
-            if 'attribute' in message['details']['requestparameters']:
-                attribute = message['details']['requestparameters']['attribute']
-                if type(attribute) is not dict:
-                    message['details']['requestparameters']['attribute'] = {
-                        'raw_value': str(attribute)
-                    }
-
-            # Handle details.requestparameters.description strings
-            if 'description' in message['details']['requestparameters']:
-                description = message['details']['requestparameters']['description']
-                if type(description) is not dict:
-                    message['details']['requestparameters']['description'] = {
-                        'raw_value': str(description)
-                    }
-
-            # Handle details.requestparameters.filter strings
-            if 'filter' in message['details']['requestparameters']:
-                filter_str = message['details']['requestparameters']['filter']
-                if type(filter_str) is not dict:
-                    message['details']['requestparameters']['filter'] = {
-                        'raw_value': str(filter_str)
-                    }
-
-            # Handle details.requestparameters.rule strings
-            if 'rule' in message['details']['requestparameters']:
-                rule_str = message['details']['requestparameters']['rule']
-                if type(rule_str) is not dict:
-                    message['details']['requestparameters']['rule'] = {
-                        'raw_value': str(rule_str)
-                    }
-
-            # Handle details.requestparameters.ebsOptimized strings
-            if 'ebsOptimized' in message['details']['requestparameters']:
-                ebsOptimized_str = message['details']['requestparameters']['ebsOptimized']
-                if type(ebsOptimized_str) is not dict:
-                    message['details']['requestparameters']['ebsOptimized'] = {
-                        'raw_value': str(ebsOptimized_str)
-                    }
-
-        if 'responseelements' in message['details'] and type(message['details']['responseelements']) is dict:
-            # Handle details.responseelements.role strings
-            if 'role' in message['details']['responseelements']:
-                role_str = message['details']['responseelements']['role']
-                if type(role_str) is not dict:
-                    message['details']['responseelements']['role'] = {
-                        'raw_value': str(role_str)
-                    }
-
-            # Handle details.responseelements.subnets strings
-            if 'subnets' in message['details']['responseelements']:
-                subnets_str = message['details']['responseelements']['subnets']
-                if type(subnets_str) is not dict:
-                    message['details']['responseelements']['subnets'] = {
-                        'raw_value': str(subnets_str)
-                    }
-
-            # Handle details.responseelements.endpoint strings
-            if 'endpoint' in message['details']['responseelements']:
-                endpoint_str = message['details']['responseelements']['endpoint']
-                if type(endpoint_str) is not dict:
-                    message['details']['responseelements']['endpoint'] = {
-                        'raw_value': str(endpoint_str)
-                    }
-
-            # Handle details.responseelements.securityGroups strings
-            if 'securityGroups' in message['details']['responseelements']:
-                securityGroups_str = message['details']['responseelements']['securityGroups']
-                if type(securityGroups_str) is not dict:
-                    message['details']['responseelements']['securityGroups'] = {
-                        'raw_value': str(securityGroups_str)
-                    }
-
-        # Handle details.additionaleventdata strings
-        if 'additionaleventdata' in message['details']:
-            additionaleventdata_str = message['details']['additionaleventdata']
-            if type(additionaleventdata_str) is not dict:
-                message['details']['additionaleventdata'] = {
-                    'raw_value': str(additionaleventdata_str)
-                }
-
-        # Handle details.serviceeventdetails strings
-        if 'serviceeventdetails' in message['details']:
-            serviceeventdetails_str = message['details']['serviceeventdetails']
-            if type(serviceeventdetails_str) is not dict:
-                message['details']['serviceeventdetails'] = {
-                    'raw_value': str(serviceeventdetails_str)
-                }
+        for modified_key in self.modify_keys:
+            if key_exists(modified_key, message):
+                message = self.convert_key_raw_str(modified_key, message)
 
         return (message, metadata)
