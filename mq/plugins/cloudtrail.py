@@ -46,7 +46,7 @@ class message(object):
         for updated_key in num_levels:
             if updated_key == num_levels[-1]:
                 current_pointer[updated_key] = {
-                    'raw_value': current_pointer[updated_key]
+                    'raw_value': str(current_pointer[updated_key])
                 }
                 return haystack
             if updated_key in current_pointer:
