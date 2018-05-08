@@ -34,6 +34,8 @@ class message(object):
             'details.responseelements.securityGroups',
             'details.additionaleventdata',
             'details.serviceeventdetails',
+            'details.requestparameters.disableApiTermination',
+            'details.responseelements.findings.service.additionalInfo.unusual'
         ]
 
     def convert_key_raw_str(self, needle, haystack):

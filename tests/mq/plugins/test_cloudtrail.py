@@ -317,3 +317,63 @@ class TestCloudtrailPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_disableApiTermination(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'disableApiTermination': 'astringvalue'
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'disableApiTermination': {
+                        'raw_value': 'astringvalue'
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
+    def test_unusual(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'findings': {
+                        'service': {
+                            'additionalInfo': {
+                                'unusual': 'astringvalue'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'findings': {
+                        'service': {
+                            'additionalInfo': {
+                                'unusual': {
+                                    'raw_value': 'astringvalue'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
