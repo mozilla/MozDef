@@ -29,6 +29,15 @@ class TestCloudtrailPlugin():
         assert retmessage == msg
         assert retmeta == {}
 
+    def test_bad_details(self):
+        msg = {
+            'details': 'someother',
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+        assert retmessage == msg
+        assert 'raw_value' not in msg['details']
+        assert retmeta == {}
+
     def test_iamInstanceProfile(self):
         msg = {
             'source': 'cloudtrail',
@@ -302,6 +311,66 @@ class TestCloudtrailPlugin():
                 'responseelements': {
                     'securityGroups': {
                         'raw_value': 'astringvalue',
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
+    def test_disableApiTermination(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'disableApiTermination': 'astringvalue'
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'disableApiTermination': {
+                        'raw_value': 'astringvalue'
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
+    def test_unusual(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'findings': {
+                        'service': {
+                            'additionalInfo': {
+                                'unusual': 'astringvalue'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'findings': {
+                        'service': {
+                            'additionalInfo': {
+                                'unusual': {
+                                    'raw_value': 'astringvalue'
+                                }
+                            }
+                        }
                     }
                 }
             }
