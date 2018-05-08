@@ -178,6 +178,26 @@ class TestCloudtrailPlugin():
         assert retmessage == expected_message
         assert retmeta == {}
 
+    def test_additionaleventdata_int(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'additionaleventdata': 1,
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'additionaleventdata': {
+                    'raw_value': '1',
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
     def test_serviceeventdetails(self):
         msg = {
             'source': 'cloudtrail',
