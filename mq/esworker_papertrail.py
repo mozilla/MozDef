@@ -78,10 +78,10 @@ class PTRequestor(object):
             if resp.status_code == 200:
                 break
             else:
-                logger.info("Received invalid status code: {0}: {1}".format(resp.status_code, resp.text))
+                logger.debug("Received invalid status code: {0}: {1}".format(resp.status_code, resp.text))
                 total_retries += 1
                 if total_retries < max_retries:
-                    logger.info("Sleeping a bit then retrying")
+                    logger.debug("Sleeping a bit then retrying")
                     time.sleep(2)
                 else:
                     logger.error("Received too many error messages...exiting")
