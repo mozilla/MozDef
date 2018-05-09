@@ -317,6 +317,18 @@ def process_msg(mozmsg, msg):
         except KeyError:
             pass
 
+    # Differenciate auto login (session cookie check validated) from logged in and had password verified
+
+    try:
+        for i in msg.details.prompt:
+            # Session cookie check
+            if i.get('name') == 'authenticate':
+                details['auth_type'] = 'Login succeeded due to a valid session cookie being supplied'
+            else if i.get('name') == 'lock-password-authenticate':
+                details['auth_type'] = 'Login succeeded due to a valid plaintext password being supplied'
+    except KeyError:
+        pass
+
     mozmsg.summary = "{mtype} {desc}".format(
         mtype=details.type,
         desc=details.description
