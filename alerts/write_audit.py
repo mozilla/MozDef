@@ -14,7 +14,7 @@ from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 class WriteAudit(AlertTask):
     def main(self):
         self.parse_config('write_audit.conf', ['skipprocess'])
-        search_query = SearchQuery(minutes=5)
+        search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
             TermMatch('category', 'write'),

@@ -115,8 +115,8 @@ class TestWriteAudit(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
-        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 20})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 20})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
