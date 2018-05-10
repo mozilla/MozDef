@@ -4,13 +4,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
 
 import json
 import logging
-import math
 import pytz
 import random
 import requests
@@ -22,10 +18,8 @@ from dateutil.parser import parse
 from elasticsearch import Elasticsearch
 logger = logging.getLogger(sys.argv[0])
 
-
 def loggerTimeStamp(self, record, datefmt=None):
-    return toUTC(datetime.now()).isoformat()
-
+    return datetime.utcnow().isoformat()
 
 def initLogger():
     logger.level = logging.INFO
@@ -34,56 +28,6 @@ def initLogger():
     sh = logging.StreamHandler(sys.stderr)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
-
-
-def isNumber(s):
-    'check if a token is numeric, return bool'
-    try:
-        float(s)  # for int, long and float
-    except ValueError:
-        try:
-            complex(s)  # for complex
-        except ValueError:
-            return False
-    return True
-
-
-def digits(n):
-    '''return the number of digits in a number'''
-    if n > 0:
-        digits = int(math.log10(n))+1
-    elif n == 0:
-        digits = 1
-    else:
-        digits = int(math.log10(-n))+2
-    return digits
-
-
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone
-
-    if type(suspectedDate) == datetime:
-        objDate = suspectedDate
-    elif isNumber(suspectedDate):
-        # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
-        epochDivisor = int(str(1) + '0'*(digits(suspectedDate) % 10))
-        objDate = datetime.fromtimestamp(float(suspectedDate/epochDivisor))
-    elif type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
 
 def esConnect(conn):
     '''open or re-open a connection to elastic search'''
@@ -113,7 +57,6 @@ def isJVMMemoryHigh():
         logger.error(r)
         return False
 
-
 def clearESCache():
     es=esConnect(None)
     indexes=es.indices.stats()['indices']
@@ -123,7 +66,7 @@ def clearESCache():
     indexSuffix = date.strftime(dtNow, '%Y%m%d')
     previousSuffix = date.strftime(dtNow - timedelta(days=1), '%Y%m%d')
     for targetindex in sorted(indexes.keys()):
-        if not options.conservative or (indexSuffix not in targetindex and previousSuffix not in targetindex):
+        if indexSuffix not in targetindex and previousSuffix not in targetindex:
             url = 'http://{0}/{1}/_stats'.format(random.choice(options.esservers), targetindex)
             r = requests.get(url)
             if r.status_code == 200:
@@ -135,13 +78,13 @@ def clearESCache():
                         clearurl = 'http://{0}/{1}/_cache/clear'.format(random.choice(options.esservers), targetindex)
                         clearRequest = requests.post(clearurl)
                         logger.info(clearRequest.text)
+                        # stop at one?
                         if options.conservative:
                             return
                 else:
                     logger.debug('{0}: <ignoring due to current search > field data {1}'.format(targetindex, indexstats['_all']['total']['fielddata']['memory_size_in_bytes']))
             else:
                 logger.error('{0} returned {1}'.format(url, r.status_code))
-
 
 def main():
     if options.checkjvmmemory:
@@ -151,13 +94,8 @@ def main():
     else:
         clearESCache()
 
-
-
 def initConfig():
-    # change this to your default zone for when it's not specified
-    options.defaultTimeZone = getConfig('defaulttimezone', 'US/Pacific', options.configfile)
-
-    # elastic search options.
+    # elastic search servers
     options.esservers = list('{0}'.format(s) for s in getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
 
     # memory watermark, set to 90 (percent) by default
@@ -177,7 +115,6 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    print(options)
     initLogger()
     logger.debug('starting')
 
