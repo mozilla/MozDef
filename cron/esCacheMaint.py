@@ -7,41 +7,24 @@
 
 import json
 import logging
-import pytz
 import random
 import requests
 import sys
-import time
 from configlib import getConfig, OptionParser
 from datetime import datetime, date, timedelta
-from dateutil.parser import parse
 from elasticsearch import Elasticsearch
-logger = logging.getLogger(sys.argv[0])
-
-def loggerTimeStamp(self, record, datefmt=None):
-    return datetime.utcnow().isoformat()
-
-def initLogger():
-    logger.level = logging.INFO
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    formatter.formatTime = loggerTimeStamp
-    sh = logging.StreamHandler(sys.stderr)
-    sh.setFormatter(formatter)
-    logger.addHandler(sh)
+from utilities.logger import logger
 
 def esConnect(conn):
     '''open or re-open a connection to elastic search'''
     return Elasticsearch((options.esservers))
 
-
 def isJVMMemoryHigh():
     url = "http://{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
-    #r=requests.get(url="http://mozdefes5.private.scl3.mozilla.com:9200/_nodes/stats?pretty=true")
     r = requests.get(url)
     logger.debug(r)
     if r.status_code == 200:
         nodestats=r.json()
-        #logger.debug(json.dumps(nodestats, indent=4, sort_keys=True))
 
         for node in nodestats['nodes']:
             loadaverage=nodestats['nodes'][node]['os']['cpu']['load_average']
@@ -107,7 +90,6 @@ def initConfig():
 
     #check jvm memory first? or just clear cache
     options.checkjvmmemory = getConfig('checkjvmmemory', True, options.configfile)
-
 
 if __name__ == '__main__':
     # configure ourselves
