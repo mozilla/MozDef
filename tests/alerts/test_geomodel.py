@@ -18,6 +18,10 @@ class TestAlertGeomodel(AlertTestSuite):
             "details": {
                 "severity": 2,
                 "category": "NEWCOUNTRY",
+                "prev_locality_details": {
+                    "city": "Toronto",
+                    "country": "Canada"
+                },
                 "locality_details": {
                     "city": "Diamond Bar",
                     "country": "United States"
@@ -36,6 +40,10 @@ class TestAlertGeomodel(AlertTestSuite):
         "summary": "ttesterson@mozilla.com NEWCOUNTRY Diamond Bar, United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
         "details": {
             "category": "NEWCOUNTRY",
+            "previous_locality_details": {
+                "city": "Toronto",
+                "country": "Canada"
+            },
             "locality_details": {
                 "city": "Diamond Bar",
                 "country": "United States"
