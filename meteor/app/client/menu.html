@@ -14,7 +14,7 @@ Copyright (c) 2014 Mozilla Corporation
                 <li><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></li>
                 <li> <a target="_blank" href={{mozdef.kibanaURL}}>Kibana</a>
                     <ul>
-                        <li class="first"> 
+                        <li class="first">
                             {{#each kibanadashboards as item}}
                                 {{>kibanaDashboardItem}}
                             {{/each}}
@@ -22,6 +22,9 @@ Copyright (c) 2014 Mozilla Corporation
                     </ul>
                 </li>
                 <li><a href="/alerts/">Alerts</a>
+                    <ul>
+                        <li class="first"><a href="/ipblocklist">ip blocklist</a></li>
+                    </ul>
                 </li>
                 <li><a href="/investigations">Investigations</a>
                     <ul>
@@ -50,7 +53,7 @@ Copyright (c) 2014 Mozilla Corporation
                 {{/if}}
                 {{> loginButtons align="right"}}
             </label>
-                
+
             </span>
 
         </div>
