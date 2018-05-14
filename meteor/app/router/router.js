@@ -42,6 +42,13 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
 
+    this.route('ipblocklist', {
+        path: '/ipblocklist',
+        template: 'ipblocklist',
+        layoutTemplate: 'layout'
+    });
+
+
     this.route('investigations', {
         path: '/investigations',
         template: 'investigations',
