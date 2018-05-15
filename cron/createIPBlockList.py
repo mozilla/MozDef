@@ -27,7 +27,6 @@ logger = logging.getLogger(sys.argv[0])
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
 
-
 def initLogger():
     logger.level = logging.INFO
     formatter = logging.Formatter(
@@ -42,6 +41,25 @@ def initLogger():
         sh.setFormatter(formatter)
         logger.addHandler(sh)
 
+def isIPv4(ip):
+    try:
+        # netaddr on it's own considers 1 and 0 to be valid_ipv4
+        # so a little sanity check prior to netaddr.
+        # Use IPNetwork instead of valid_ipv4 to allow CIDR
+        if '.' in ip and len(ip.split('.'))==4:
+            # some ips are quoted
+            netaddr.IPNetwork(ip.strip("'").strip('"'))
+            return True
+        else:
+            return False
+    except:
+        return False
+
+def isIPv6(ip):
+    try:
+        return netaddr.valid_ipv6(ip)
+    except:
+        return False
 
 def aggregateAttackerIPs(attackers):
     iplist = []
@@ -82,7 +100,6 @@ def aggregateAttackerIPs(attackers):
                 logger.debug('invalid:' + ip)
     return iplist
 
-
 def parse_network_whitelist(self, network_whitelist_location):
     networks = []
     with open(network_whitelist_location, "r") as text_file:
@@ -91,7 +108,6 @@ def parse_network_whitelist(self, network_whitelist_location):
             if isIPv4(line) or isIPv6(line):
                 networks.append(line)
     return networks
-
 
 def main():
     logger.debug('starting')
@@ -127,8 +143,9 @@ def main():
             for ip in IPList:
                 outputfile.write("{0}\n".format(ip))
         outputfile.close()
-        # to s3
-        s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
+        # to s3?
+        if len(options.aws_bucket_name)>0:
+            s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
 
 
     except ValueError as e:
