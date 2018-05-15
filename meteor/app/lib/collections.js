@@ -357,5 +357,6 @@ if (Meteor.isClient) {
     Meteor.subscribe("veris");
     Meteor.subscribe("kibanadashboards");
     Meteor.subscribe("userActivity");
+    Meteor.subscribe("ipblocklist");
 };
 
