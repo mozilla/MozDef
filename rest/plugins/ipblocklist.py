@@ -66,12 +66,15 @@ class message(object):
         self.options = None
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
-            self.initConfiguration()
+        self.initConfiguration()
 
     def parse_network_whitelist(self, network_whitelist_location):
         networks = []
         with open(network_whitelist_location, "r") as text_file:
-            networks = text_file.read().rstrip().split("\n")
+            for line in text_file:
+                line=line.strip().strip("'").strip('"')
+                if isIPv4(line) or isIPv6(line):
+                    networks.append(line)
         return networks
 
     def initConfiguration(self):
@@ -109,41 +112,47 @@ class message(object):
             mongoclient = MongoClient(self.options.mongohost, self.options.mongoport)
             ipblocklist = mongoclient.meteor['ipblocklist']
 
-            # Already in the table?
-            if isIPv4(ipaddress) and ipaddress not in netaddr.IPSet(['0.0.0.0']):
+            # good data?
+            if ( isIPv6(ipaddress) or isIPv4(ipaddress) ) and ( ipaddress not in netaddr.IPSet(['0.0.0.0']) ):
                 ipcidr = netaddr.IPNetwork(ipaddress)
                 # inspect/set the CIDR
                 # todo: lookup ipwhois for asn_cidr value
                 # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
                 # ipcidr.prefixlen = 32
 
-            ipblock = ipblocklist.find_one({'ipaddress': str(ipcidr)})
-            if ipblock is None:
-                # insert
-                ipblock= dict()
-                ipblock['_id'] = genMeteorID()
-                # str to get the ip/cidr rather than netblock cidr.
-                # i.e. '1.2.3.4/24' not '1.2.3.0/24'
-                ipblock['address']= str(ipcidr)
-                ipblock['dateAdded'] = datetime.utcnow()
-                # Compute start and end dates
-                # default
-                end_date = datetime.utcnow() + timedelta(hours=1)
-                if duration == '12hr':
-                    end_date = datetime.utcnow() + timedelta(hours=12)
-                elif duration == '1d':
-                    end_date = datetime.utcnow() + timedelta(days=1)
-                elif duration == '1w':
-                    end_date = datetime.utcnow() + timedelta(days=7)
-                elif duration == '30d':
-                    end_date = datetime.utcnow() + timedelta(days=30)
-                ipblock['dateExpiring'] = end_date
-                ipblock['comment'] = comment
-                ipblock['creator'] = userID
-                ipblock['reference'] = referenceID
-                ipblocklist.insert(ipblock)
+                # already in the table?
+                ipblock = ipblocklist.find_one({'ipaddress': str(ipcidr)})
+                if ipblock is None:
+                    # insert
+                    ipblock= dict()
+                    ipblock['_id'] = genMeteorID()
+                    # str to get the ip/cidr rather than netblock cidr.
+                    # i.e. '1.2.3.4/24' not '1.2.3.0/24'
+                    ipblock['address']= str(ipcidr)
+                    ipblock['dateAdded'] = datetime.utcnow()
+                    # Compute start and end dates
+                    # default
+                    end_date = datetime.utcnow() + timedelta(hours=1)
+                    if duration == '12hr':
+                        end_date = datetime.utcnow() + timedelta(hours=12)
+                    elif duration == '1d':
+                        end_date = datetime.utcnow() + timedelta(days=1)
+                    elif duration == '1w':
+                        end_date = datetime.utcnow() + timedelta(days=7)
+                    elif duration == '30d':
+                        end_date = datetime.utcnow() + timedelta(days=30)
+                    ipblock['dateExpiring'] = end_date
+                    ipblock['comment'] = comment
+                    ipblock['creator'] = userID
+                    ipblock['reference'] = referenceID
+                    ref=ipblocklist.insert(ipblock)
+                    sys.stdout.write('{0} written to db'.format(ref))
 
-            sys.stderr.write('%s: blocked\n' % (ipaddress))
+                    sys.stdout.write('%s: added to the ipblocklist table\n' % (ipaddress))
+                else:
+                    sys.stderr.write('%s: is already present in the ipblocklist table\n' % (ipaddress))
+            else:
+                sys.stderr.write('%s: is not a valid ip address\n' % (ipaddress))
         except Exception as e:
             sys.stderr.write('Error while blocking %s: %s\n' % (ipaddress, e))
 
@@ -201,12 +210,14 @@ class message(object):
                                 sys.stdout.write('{0} is whitelisted as part of {1}\n'.format(ipcidr, whitelist_network))
 
                         if not whitelisted:
-                            self.blockIP(  ipcidr,
+                            self.blockIP(  str(ipcidr),
                                            comment,
                                            duration,
                                            referenceID,
                                            userid)
                             sys.stdout.write('added {0} to blocklist\n'.format(ipaddress))
+                        else:
+                            sys.stdout.write('not adding {0} to blocklist, it was found in whitelist\n'.format(ipaddress))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
