@@ -16,4 +16,18 @@ if (Meteor.isClient) {
         }
     });
 
+    //select an incident for editing
+    Template.ipblocklist.events({
+        "click .ipblockedit": function(e,t){
+            if (this._id != undefined){
+                //Session.set('displayMessage','Starting edit for ipblock._id: ' + this._id);
+                Router.go('/ipblock/' + this._id + '/edit');
+            }
+        },
+
+        "click .ipblockdelete": function(e){
+            ipblocklist.remove(this._id);
+        }
+    });
+
 }
