@@ -43,7 +43,7 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def aggregateIPs(attackers):
+def aggregateAttackerIPs(attackers):
     iplist = []
 
     # We don't want to block ips forever,
@@ -97,17 +97,39 @@ def main():
     logger.debug('starting')
     logger.debug(options)
     try:
+        # connect to mongo
         client = MongoClient(options.mongohost, options.mongoport)
-        # use meteor db/attackers collection
         mozdefdb = client.meteor
+        # First, gather IP addresses from recent attackers and add to the block list
         attackers=mozdefdb['attackers']
-        attackers.ensure_index([('lastseentimestamp',-1)])
-        attackers.ensure_index([('category',1)])
-        IPList = aggregateIPs(attackers)
+        attackers.create_index([('lastseentimestamp',-1)])
+        attackers.create_index([('category',1)])
+        attackerIPList = aggregateAttackerIPs(attackers)
+
+        # add attacker IPs to the blocklist
+        # todo: don't add dups unless the IP is recurrent
+
+        # Lastly, export the combined blocklist
+        ipblocklist = mozdefdb['ipblocklist']
+        ipblocklist.create_index([('dateExpiring',-1)])
+        ipCursor=mozdefdb['ipblocklist'].aggregate([
+                {"$sort": {"dateAdded": -1}},
+                {"$match": {"address": {"$exists": True}}},
+                {"$match": {"dateExpiring": {"$gte": datetime.utcnow()}}},
+                {"$project":{"address":1}},
+                {"$limit": options.iplimit}
+            ])
+        IPList=[]
+        for ip in ipCursor:
+            IPList.append(ip['address'])
+        # to text
         with open(options.outputfile, 'w') as outputfile:
             for ip in IPList:
                 outputfile.write("{0}\n".format(ip))
         outputfile.close()
+        # to s3
+        s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
+
 
     except ValueError as e:
         logger.error("Exception %r generating IP block list" % e)
@@ -179,4 +201,3 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
-    s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
