@@ -83,10 +83,13 @@ def aggregateIPs(attackers):
     return iplist
 
 
-def parse_network_list(network_list_location):
+def parse_network_whitelist(self, network_whitelist_location):
     networks = []
-    with open(network_list_location, "r") as text_file:
-        networks = text_file.read().rstrip().split("\n")
+    with open(network_whitelist_location, "r") as text_file:
+        for line in text_file:
+            line=line.strip().strip("'").strip('"')
+            if isIPv4(line) or isIPv6(line):
+                networks.append(line)
     return networks
 
 
@@ -124,9 +127,9 @@ def initConfig():
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
-    # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
-    options.network_list_file = getConfig('network_list_file', '', options.configfile)
-    options.ipwhitelist = parse_network_list(options.network_list_file)
+    # CIDR whitelist as a line separted list of 8.8.8.0/24 style masks
+    options.network_list_file = getConfig('network_whitelist_file', '', options.configfile)
+    options.ipwhitelist = parse_network_whitelist(options.network_list_file)
 
     # Output File Name
     options.outputfile = getConfig('outputfile', 'ipblocklist.txt', options.configfile)
