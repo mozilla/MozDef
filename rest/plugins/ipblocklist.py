@@ -189,7 +189,7 @@ class message(object):
                     duration = i.values()[0]
                 if 'comment' in i.keys():
                     comment = i.values()[0]
-                if 'referenceID' in i.keys():
+                if 'referenceid' in i.keys():
                     referenceID = i.values()[0]
                 if 'userid' in i.keys():
                     userid = i.values()[0]
