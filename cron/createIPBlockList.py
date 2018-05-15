@@ -116,18 +116,27 @@ def main():
         # connect to mongo
         client = MongoClient(options.mongohost, options.mongoport)
         mozdefdb = client.meteor
-        # First, gather IP addresses from recent attackers and add to the block list
+        ipblocklist = mozdefdb['ipblocklist']
         attackers=mozdefdb['attackers']
+        # ensure indexes
+        ipblocklist.create_index([('dateExpiring',-1)])
         attackers.create_index([('lastseentimestamp',-1)])
         attackers.create_index([('category',1)])
+
+        # First, gather IP addresses from recent attackers and add to the block list
         attackerIPList = aggregateAttackerIPs(attackers)
 
         # add attacker IPs to the blocklist
-        # todo: don't add dups unless the IP is recurrent
+        # first delete ones we've created from an attacker
+        ipblocklist.delete_many({'creator': 'attacker'})
+        # add the aggregations we've found recently
+        for ip in attackerIPList:
+            ipblocklist.insert_one(
+                {'address':ip,
+                 'creator':'attacker',
+                 'dateAdded': datetime.utcnow()})
 
         # Lastly, export the combined blocklist
-        ipblocklist = mozdefdb['ipblocklist']
-        ipblocklist.create_index([('dateExpiring',-1)])
         ipCursor=mozdefdb['ipblocklist'].aggregate([
                 {"$sort": {"dateAdded": -1}},
                 {"$match": {"address": {"$exists": True}}},
