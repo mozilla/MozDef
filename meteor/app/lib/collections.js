@@ -352,11 +352,11 @@ if (Meteor.isServer) {
 if (Meteor.isClient) {
     //client side collections:
     alertsCount = new Meteor.Collection("alerts-count");
-    //client-side subscriptions
+    //client-side subscriptions to low volume collections
     Meteor.subscribe("mozdefsettings");
     Meteor.subscribe("veris");
     Meteor.subscribe("kibanadashboards");
     Meteor.subscribe("userActivity");
-    Meteor.subscribe("ipblocklist");
+
 };
 

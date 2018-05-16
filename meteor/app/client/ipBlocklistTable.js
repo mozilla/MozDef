@@ -30,4 +30,11 @@ if (Meteor.isClient) {
         }
     });
 
+    Template.ipblocklist.rendered = function(){
+        Deps.autorun(function() {
+            Meteor.subscribe("ipblocklist");
+        });
+
+    };
+
 }
