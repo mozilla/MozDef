@@ -128,12 +128,13 @@ def main():
 
         # add attacker IPs to the blocklist
         # first delete ones we've created from an attacker
-        ipblocklist.delete_many({'creator': 'attacker'})
+        ipblocklist.delete_many({'creator': 'mozdef','reference':'attacker'})
         # add the aggregations we've found recently
         for ip in attackerIPList:
             ipblocklist.insert_one(
                 {'address':ip,
-                 'creator':'attacker',
+                 'reference': 'attacker',
+                 'creator':'mozdef',
                  'dateAdded': datetime.utcnow()})
 
         # Lastly, export the combined blocklist
