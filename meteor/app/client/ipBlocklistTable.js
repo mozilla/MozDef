@@ -21,12 +21,14 @@ if (Meteor.isClient) {
         "click .ipblockedit": function(e,t){
             if (this._id != undefined){
                 //Session.set('displayMessage','Starting edit for ipblock._id: ' + this._id);
-                Router.go('/ipblock/' + this._id + '/edit');
+                Session.set('displayMessage', 'coming&soon');
+                //Router.go('/ipblock/' + this._id + '/edit');
             }
         },
 
         "click .ipblockdelete": function(e){
             ipblocklist.remove(this._id);
+            Session.set('displayMessage','Deleted ipblock._id:& ' + this._id);
         }
     });
 
