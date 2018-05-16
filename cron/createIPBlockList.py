@@ -9,6 +9,7 @@ import boto
 import boto.s3
 import logging
 import netaddr
+import random
 import sys
 from datetime import datetime
 from datetime import timedelta
@@ -40,6 +41,9 @@ def initLogger():
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
         logger.addHandler(sh)
+
+def genMeteorID():
+    return('%024x' % random.randrange(16**24))
 
 def isIPv4(ip):
     try:
@@ -131,7 +135,8 @@ def main():
         # add the aggregations we've found recently
         for ip in attackerIPList:
             ipblocklist.insert_one(
-                {'address':ip,
+                {'_id': genMeteorID(),
+                 'address':ip,
                  'reference': 'attacker',
                  'creator':'mozdef',
                  'dateAdded': datetime.utcnow()})
