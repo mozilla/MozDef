@@ -66,7 +66,7 @@ def aggregateAttackerIPs(attackers):
 
     # We don't want to block ips forever,
     # so only care about the ips the past 3 months
-    threshold_days = 30 * 3
+    threshold_days = 300 * 3
     timelimit = datetime.now() - timedelta(days=threshold_days)
 
     ips = attackers.aggregate([
@@ -79,28 +79,27 @@ def aggregateAttackerIPs(attackers):
         {"$limit": options.iplimit}
     ])
 
-    if 'result' in ips.keys():
-        for i in ips['result']:
-            whitelisted = False
-            logger.debug('working {0}'.format(i))
-            ip = i['_id']['ipv4address']
-            ipcidr=netaddr.IPNetwork(ip)
-            if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
-                for whitelist_range in options.ipwhitelist:
-                    whitelist_network = netaddr.IPNetwork(whitelist_range)
-                    if ipcidr in whitelist_network:
-                        logger.debug(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
-                        whitelisted = True
+    for i in ips:
+        whitelisted = False
+        logger.debug('working {0}'.format(i))
+        ip = i['_id']['ipv4address']
+        ipcidr=netaddr.IPNetwork(ip)
+        if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
+            for whitelist_range in options.ipwhitelist:
+                whitelist_network = netaddr.IPNetwork(whitelist_range)
+                if ipcidr in whitelist_network:
+                    logger.debug(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
+                    whitelisted = True
 
-                #strip any host bits 192.168.10/24 -> 192.168.0/24
-                ipcidrnet=str(ipcidr.cidr)
-                if ipcidrnet not in iplist and not whitelisted:
-                    iplist.append(ipcidrnet)
-            else:
-                logger.debug('invalid:' + ip)
+            #strip any host bits 192.168.10/24 -> 192.168.0/24
+            ipcidrnet=str(ipcidr.cidr)
+            if ipcidrnet not in iplist and not whitelisted:
+                iplist.append(ipcidrnet)
+        else:
+            logger.debug('invalid:' + ip)
     return iplist
 
-def parse_network_whitelist(self, network_whitelist_location):
+def parse_network_whitelist(network_whitelist_location):
     networks = []
     with open(network_whitelist_location, "r") as text_file:
         for line in text_file:
@@ -119,7 +118,7 @@ def main():
         ipblocklist = mozdefdb['ipblocklist']
         attackers=mozdefdb['attackers']
         # ensure indexes
-        ipblocklist.create_index([('dateExpiring',-1)])
+        #ipblocklist.create_index([('dateExpiring',-1)])
         attackers.create_index([('lastseentimestamp',-1)])
         attackers.create_index([('category',1)])
 
@@ -141,7 +140,11 @@ def main():
         ipCursor=mozdefdb['ipblocklist'].aggregate([
                 {"$sort": {"dateAdded": -1}},
                 {"$match": {"address": {"$exists": True}}},
-                {"$match": {"dateExpiring": {"$gte": datetime.utcnow()}}},
+                {"$match": {"$or":[
+                {"dateExpiring": {"$gte": datetime.utcnow()}},
+                {"dateExpiring": {"$exists": False}},
+                        ]},
+                },
                 {"$project":{"address":1}},
                 {"$limit": options.iplimit}
             ])
