@@ -144,7 +144,7 @@ Router.map(function () {
     });
 
     this.route('blockip', {
-        path: '/incidents/blockip/:_ipaddr',
+        path: '/blockip/:_ipaddr',
         template: 'blockIPform',
         data: function() {
             Session.set('blockIPipaddress', this.params._ipaddr);
