@@ -137,6 +137,10 @@ class message(object):
                         end_date = datetime.utcnow() + timedelta(hours=12)
                     elif duration == '1d':
                         end_date = datetime.utcnow() + timedelta(days=1)
+                    elif duration == '2d':
+                        end_date = datetime.utcnow() + timedelta(days=2)
+                    elif duration == '3d':
+                        end_date = datetime.utcnow() + timedelta(days=3)
                     elif duration == '1w':
                         end_date = datetime.utcnow() + timedelta(days=7)
                     elif duration == '30d':
