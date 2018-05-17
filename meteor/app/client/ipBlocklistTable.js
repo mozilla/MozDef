@@ -19,13 +19,12 @@ if (Meteor.isClient) {
     //select an incident for editing
     Template.ipblocklist.events({
         "click .ipblockadd": function(e,t){
+            //clear any leftover ip session val
             Session.set('blockIPipaddress','');
             $('#modalBlockIPWindow').modal();
         },
 
         "click .ipblockdelete": function(e,t){
-            console.log(t);
-            console.log(this);
             ipblocklist.remove(this._id);
             Session.set('displayMessage','Deleted ipblock for & ' + this.address);
         }
