@@ -6,7 +6,7 @@ Copyright (c) 2014 Mozilla Corporation
  */
 
 if (Meteor.isClient) {
-    
+
     Template.blockIPform.rendered = function() {
         $('#ipaddress')[0].value = Session.get('blockIPipaddress');
     };
@@ -17,16 +17,16 @@ if (Meteor.isClient) {
             formobj=formToObject("#blockIPform :input");
             formobj.push({userid:Meteor.user().profile.email});
             Meteor.call('blockip', formobj);
-            Router.go('/attackers');
+            Router.go('/ipblocklist');
         }
     });
-    
+
     Template.blockIPModal.rendered = function(){
         Deps.autorun(function() {
             $('#ipaddress')[0].value = Session.get('blockIPipaddress');
         }); //end deps.autorun
     };
-    
+
     Template.blockIPModal.events({
         "submit form": function(event, template) {
             event.preventDefault();
@@ -35,5 +35,5 @@ if (Meteor.isClient) {
             Meteor.call('blockip', formobj);
             $('#modalBlockIPWindow').modal('hide')
         }
-    });    
+    });
 }

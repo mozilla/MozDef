@@ -12,9 +12,9 @@ Copyright (c) 2014 Mozilla Corporation
         <fieldset>
             <!-- IP addr -->
             <div class="control-group">
-              <label class="control-label" for="ipaddr">IP address or subnet (IPv6 supported, use addr/X for subnets)</label>
+              <label class="control-label" for="ipaddress">IP address or subnet (IPv6 supported, use addr/X for subnets)</label>
               <div class="controls">
-                <input id="ipaddr" name="ipaddr" class="form-control" type="text" required>
+                <input id="ipaddress" name="ipaddress" class="form-control" type="text" required>
               </div>
             </div>
             <!-- Duration -->
@@ -39,12 +39,29 @@ Copyright (c) 2014 Mozilla Corporation
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="bugid">Bug/Reference ID</label>
+                <label class="control-label" for="bugid">Reference ID</label>
                 <div class="controls">
-                    <input id="bugid" name="bugid" class="form-control" type="number" placeholder="optional" maxlength="7">
+                    <input id="bugid" name="bugid" class="form-control" type="text" placeholder="optional" maxlength="7">
                 </div>
             </div>
+            <!--plugins-->
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Plugins:</h3>
+                </div>
+                <div class="panel-body">
+                    {{#each pluginsForEndPoint "blockip"}}
 
+                    <div class="form-group">
+                            <div class="col-xs-8 checkbox">
+                                <label>
+                                    <input type="checkbox"  name="{{name}}">{{name}}: ( {{description}} )
+                                </label>
+                            </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
             <!-- Button -->
             <div class="control-group">
               <label class="control-label" for="submit"></label>
