@@ -17,8 +17,8 @@ Copyright (c) 2014 Mozilla Corporation
                         <div class="col-xs-8">
                             <input type="search" name="searchSummary" class="form-control search-query" id="alertssearchtext" placeholder="summary field regex search">
                         </div>
-                    </div>            
-                    
+                    </div>
+
                     <div class="form-group">
                         <label class="control-label col-xs-2" for="searchTime">Time Period</label>
                         <div class="col-xs-8">
@@ -34,22 +34,22 @@ Copyright (c) 2014 Mozilla Corporation
                                 <option value='none'>None</option>
                             </select>
                         </div>
-    
+
                     </div>
                     <div class="form-group">
                         <label class="control-label col-xs-2" for="recordLimit">Record Limit</label>
                         <div class="col-xs-8">
                             <input type="text" name="recordLimit" class="form-control" id="recordLimit" placeholder="# records">
                         </div>
-    
-                    </div>                
+
+                    </div>
                     <div class="form-group">
                         <div class="col-xs-8 col-xs-offset-2">
                             <button class="btn btn-xs alertssearch">search</button>
                         </div>
-    
+
                     </div>
-                    
+
                 </form>
             </div>
         </div>
@@ -84,13 +84,12 @@ Copyright (c) 2014 Mozilla Corporation
                     {{#each selectedalerts}}
                         {{>alertTableItem}}
                     {{/each}}
-                </tbody>            
+                </tbody>
             </table>
         </div>
     </div>
     {{>whoismodal}}
     {{>dshieldmodal}}
-    {{>cifmodal}}
     {{>blockIPModal}}
     {{>intelmodal}}
 </div>
@@ -115,7 +114,7 @@ Copyright (c) 2014 Mozilla Corporation
                 </span>
             {{else}}
                 <button class="btn btn-xs btn-warning btnAlertAck" data-target="{{_id}}">ack</button>
-            {{/if}}            
+            {{/if}}
         </td>
     </tr>
 </template>

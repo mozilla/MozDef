@@ -161,14 +161,6 @@ Router.map(function () {
         }
     });
 
-    this.route('ipcif', {
-        path: '/ipcif/:_ipaddress',
-        template: 'ipcif',
-        data: function() {
-            Session.set('ipcifipaddress', this.params._ipaddress);
-        }
-    });
-
     this.route('ipintel',{
         path: '/ipintel/:_ipaddress',
         template: 'ipintel',
