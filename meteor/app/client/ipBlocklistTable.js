@@ -18,17 +18,16 @@ if (Meteor.isClient) {
 
     //select an incident for editing
     Template.ipblocklist.events({
-        "click .ipblockedit": function(e,t){
-            if (this._id != undefined){
-                //Session.set('displayMessage','Starting edit for ipblock._id: ' + this._id);
-                Session.set('displayMessage', 'coming&soon');
-                //Router.go('/ipblock/' + this._id + '/edit');
-            }
+        "click .ipblockadd": function(e,t){
+            Session.set('blockIPipaddress','');
+            $('#modalBlockIPWindow').modal();
         },
 
-        "click .ipblockdelete": function(e){
+        "click .ipblockdelete": function(e,t){
+            console.log(t);
+            console.log(this);
             ipblocklist.remove(this._id);
-            Session.set('displayMessage','Deleted ipblock._id:& ' + this._id);
+            Session.set('displayMessage','Deleted ipblock for & ' + this.address);
         }
     });
 

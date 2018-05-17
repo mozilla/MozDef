@@ -13,7 +13,7 @@ Copyright (c) 2014 Mozilla Corporation
                 <caption><p class="lead">Last 100 entries</p></caption>
                 <thead>
                     <tr>
-                        <td></td>
+                        <td><button class="btn btn-xs btn-default ipblockadd">add</button></td>
                         <td>Address</td>
                         <td>Added</td>
                         <td>Expiring</td>
@@ -29,6 +29,7 @@ Copyright (c) 2014 Mozilla Corporation
                 </tbody>
             </table>
             </div>
+            {{>blockIPModal}}
     </div>
 </template>
 
@@ -36,7 +37,7 @@ Copyright (c) 2014 Mozilla Corporation
 <template name="each_ipblock">
 
 			<tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateAdded}}" data-toggle="tooltip">
-                <td><button class="btn btn-xs btn-default ipblockedit" data-incidentid={{_id}}>edit</button></td>
+                <td></td>
 				<td>{{address}}</td>
                 <td>{{dateAdded}}</td>
                 <td>{{dateExpiring}}</td>
