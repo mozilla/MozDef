@@ -70,7 +70,7 @@ def aggregateAttackerIPs(attackers):
 
     # We don't want to block ips forever,
     # so only care about the ips the past 3 months
-    threshold_days = 300 * 3
+    threshold_days = 30 * 3
     timelimit = datetime.now() - timedelta(days=threshold_days)
 
     ips = attackers.aggregate([
@@ -122,7 +122,7 @@ def main():
         ipblocklist = mozdefdb['ipblocklist']
         attackers=mozdefdb['attackers']
         # ensure indexes
-        #ipblocklist.create_index([('dateExpiring',-1)])
+        ipblocklist.create_index([('dateExpiring',-1)])
         attackers.create_index([('lastseentimestamp',-1)])
         attackers.create_index([('category',1)])
 
