@@ -68,15 +68,13 @@ def isIPv6(ip):
 def aggregateAttackerIPs(attackers):
     iplist = []
 
-    # We don't want to block ips forever,
-    # so only care about the ips the past 3 months
-    threshold_days = 30 * 3
-    timelimit = datetime.now() - timedelta(days=threshold_days)
+    # Set the attacker age timestamp
+    attackerage = datetime.now() - timedelta(days=options.attackerage)
 
     ips = attackers.aggregate([
         {"$sort": {"lastseentimestamp": -1}},
         {"$match": {"category": options.category}},
-        {"$match": {"lastseentimestamp": {"$gte": timelimit}}},
+        {"$match": {"lastseentimestamp": {"$gte": attackerage}}},
         {"$match": {"indicators.ipv4address": {"$exists": True}}},
         {"$group": {"_id": {"ipv4address": "$indicators.ipv4address"}}},
         {"$unwind": "$_id.ipv4address"},
@@ -145,10 +143,11 @@ def main():
         ipCursor=mozdefdb['ipblocklist'].aggregate([
                 {"$sort": {"dateAdded": -1}},
                 {"$match": {"address": {"$exists": True}}},
-                {"$match": {"$or":[
-                {"dateExpiring": {"$gte": datetime.utcnow()}},
-                {"dateExpiring": {"$exists": False}},
-                        ]},
+                {"$match":
+                    {"$or":[
+                        {"dateExpiring": {"$gte": datetime.utcnow()}},
+                        {"dateExpiring": {"$exists": False}},
+                    ]},
                 },
                 {"$project":{"address":1}},
                 {"$limit": options.iplimit}
@@ -193,6 +192,9 @@ def initConfig():
 
     # Category to choose
     options.category = getConfig('category', 'bruteforcer', options.configfile)
+
+    # Max days to look back for attackers
+    options.attackerage = getConfig('attackerage',90,options.configfile)
 
     # Max IPs to emit
     options.iplimit = getConfig('iplimit', 1000, options.configfile)
