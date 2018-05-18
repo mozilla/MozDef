@@ -130,6 +130,10 @@ def main():
         # add attacker IPs to the blocklist
         # first delete ones we've created from an attacker
         ipblocklist.delete_many({'creator': 'mozdef','reference':'attacker'})
+
+        # delete any that expired
+        ipblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(days=options.expireage)}})
+
         # add the aggregations we've found recently
         for ip in attackerIPList:
             ipblocklist.insert_one(
@@ -195,6 +199,9 @@ def initConfig():
 
     # Max days to look back for attackers
     options.attackerage = getConfig('attackerage',90,options.configfile)
+
+    # Days after expiration that we purge an ipblocklist entry (from the ui, they don't end up in the export after expiring)
+    options.expireage = getConfig('expireage',1,options.configfile)
 
     # Max IPs to emit
     options.iplimit = getConfig('iplimit', 1000, options.configfile)
