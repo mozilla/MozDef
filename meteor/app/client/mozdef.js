@@ -313,8 +313,10 @@ if (Meteor.isClient) {
     //Notify messages for the UI
     Deps.autorun(function() {
         //set Session.set('displayMessage','title&text')
-        //to have a pnotify message
+        //to have a pnotify 'info' style message
         //created with that title/text
+        //set Session.set('errorMessage','title&text')
+        //for an error styled message
 
         var message = Session.get('displayMessage');
         //console.log('Got new session message');
@@ -333,6 +335,23 @@ if (Meteor.isClient) {
             if (typeof console !== 'undefined')
               console.log(message)
             Session.set('displayMessage', null);
+        }
+
+        var errormessage = Session.get('errorMessage');
+        if (errormessage) {
+            var stringArray = errormessage.split('&');
+            new PNotify({
+              title : stringArray[0],
+              text: stringArray[1],
+              type: 'error',
+              buttons:{
+                closer:true,
+                closer_hover:false
+              }
+            });
+            if (typeof console !== 'undefined')
+              console.log(errormessage)
+            Session.set('errorMessage', null);
         }
     });
 
