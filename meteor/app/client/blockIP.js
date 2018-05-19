@@ -16,7 +16,19 @@ if (Meteor.isClient) {
             event.preventDefault();
             formobj=formToObject("#blockIPform :input");
             formobj.push({userid:Meteor.user().profile.email});
-            Meteor.call('blockip', formobj);
+            Meteor.call('blockip',formobj,
+                onResultReceived = function(err,result){
+                    if (typeof err == 'undefined') {
+                        //console.log(result);
+                        if ( result == true){
+                            Session.set('displayMessage','blocked & successfully ');
+                        }else{
+                            Session.set('errorMessage','block failed, returned & ' + JSON.stringify(result) );
+                        }
+                    }else{
+                        Session.set('errorMessage','block failed & ' + JSON.stringify(err));
+                    }
+                });
             Router.go('/ipblocklist');
         }
     });
@@ -32,7 +44,19 @@ if (Meteor.isClient) {
             event.preventDefault();
             formobj=formToObject("#blockIPform :input");
             formobj.push({userid:Meteor.user().profile.email});
-            Meteor.call('blockip', formobj);
+            Meteor.call('blockip',formobj,
+                onResultReceived = function(err,result){
+                    if (typeof err == 'undefined') {
+                        //console.log(result);
+                        if ( result == true){
+                            Session.set('displayMessage','blocked & successfully ');
+                        }else{
+                            Session.set('errorMessage','block failed, returned & ' + JSON.stringify(result) );
+                        }
+                    }else{
+                        Session.set('errorMessage','block failed & ' + JSON.stringify(err));
+                    }
+                });
             $('#modalBlockIPWindow').modal('hide')
         }
     });
