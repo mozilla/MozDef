@@ -10,6 +10,26 @@ if (Meteor.isClient) {
     Template.attackerdetails.events({
         "change #attackerCategory": function(e,t){
             attackers.update(Session.get('attackerID'), {$set: {'category':$('#attackerCategory').val()}});
+        },
+        "click .ipmenu-whois": function(e,t){
+            Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalwhoiswindow').modal()
+        },
+        "click .ipmenu-dshield": function(e,t){
+            Session.set('ipdshieldipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modaldshieldwindow').modal()
+        },
+        "click .ipmenu-blockip": function(e,t){
+            Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalBlockIPWindow').modal()
+        },
+        "click .ipmenu-cif": function(e,t){
+            Session.set('ipcifipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalcifwindow').modal()
+        },
+        "click .ipmenu-intel": function(e,t){
+            Session.set('ipintelipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalintelwindow').modal()
         }
     });
 
@@ -21,8 +41,8 @@ if (Meteor.isClient) {
                               {fields:{
                                         events:0}
                                 });
-    };    
-    
+    };
+
     Template.attackerdetails.rendered = function() {
         Deps.autorun(function(comp) {
             //subscribe to the alerts data we need
@@ -36,7 +56,7 @@ if (Meteor.isClient) {
                 });
             });
 
-        }); //end deps.autorun    
+        }); //end deps.autorun
     };
 
 };

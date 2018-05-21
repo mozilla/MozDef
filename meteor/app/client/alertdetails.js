@@ -12,25 +12,25 @@ if (Meteor.isClient) {
         thisalertevents: function () {
             return alerts.findOne({'esmetadata.id': Session.get('alertID')}).events;
         },
-    
+
         kibanaurl: function () {
             var esmetadata = alerts.findOne({'esmetadata.id': Session.get('alertID')}).esmetadata;
             url=getSetting('kibanaURL') + '/doc/alerts-*/' + esmetadata.index + '/alert?id=' + esmetadata.id;
             return url;
         }
     });
-    
+
     Template.alertdetails.events({
         "click .makeinvestigation": function(event, template) {
             event.preventDefault();
             //ack the alert
             //acknowledge the alert
             alerts.update(this._id , {$set: {'acknowledged':new Date()}});
-            alerts.update(this._id, {$set: {'acknowledgedby':Meteor.user().profile.email}});            
+            alerts.update(this._id, {$set: {'acknowledgedby':Meteor.user().profile.email}});
             //make an investigation
             newInvestigation=models.investigation();
             newInvestigation.summary= template.data.summary,
-            newInvestigation.dateOpened=dateOrNull(template.data.utctimestamp),            
+            newInvestigation.dateOpened=dateOrNull(template.data.utctimestamp),
             newid=investigations.insert(newInvestigation);
             //add a link to this alert in the references
             investigations.update(newid, {
@@ -46,11 +46,11 @@ if (Meteor.isClient) {
             //ack the alert
             //acknowledge the alert
             alerts.update(this._id , {$set: {'acknowledged':new Date()}});
-            alerts.update(this._id, {$set: {'acknowledgedby':Meteor.user().profile.email}});            
+            alerts.update(this._id, {$set: {'acknowledgedby':Meteor.user().profile.email}});
             //make an incident
             newIncident=models.incident();
             newIncident.summary= template.data.summary,
-            newIncident.dateOpened=dateOrNull(template.data.utctimestamp),            
+            newIncident.dateOpened=dateOrNull(template.data.utctimestamp),
             newid=incidents.insert(newIncident);
             //add a link to this alert in the references
             incidents.update(newid, {
@@ -59,9 +59,26 @@ if (Meteor.isClient) {
             //debugLog(template.firstNode.baseURI);
             //reroute to full blown edit form after this minimal input is complete
             Router.go('/incident/' + newid + '/edit');
+        },
+        "click .ipmenu-whois": function(e,t){
+            Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalwhoiswindow').modal()
+        },
+        "click .ipmenu-dshield": function(e,t){
+            Session.set('ipdshieldipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modaldshieldwindow').modal()
+        },
+        "click .ipmenu-blockip": function(e,t){
+            Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalBlockIPWindow').modal()
+        },
+        "click .ipmenu-cif": function(e,t){
+            Session.set('ipcifipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalcifwindow').modal()
+        },
+        "click .ipmenu-intel": function(e,t){
+            Session.set('ipintelipaddress',($(e.target).attr('data-ipaddress')));
+            $('#modalintelwindow').modal()
         }
     });
-    
-    
-
 }
