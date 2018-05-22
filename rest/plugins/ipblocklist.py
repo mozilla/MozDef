@@ -101,12 +101,12 @@ class message(object):
         self.options.network_whitelist_file = getConfig('network_whitelist_file', '/dev/null', self.configfile)
 
     def blockIP(self,
-                  ipaddress = None,
-                  comment = None,
-                  duration = None,
-                  referenceID = None,
-                  userID=None
-                  ):
+                ipaddress = None,
+                comment = None,
+                duration = None,
+                referenceID = None,
+                userID=None
+                ):
         try:
             # DB connection/table
             mongoclient = MongoClient(self.options.mongohost, self.options.mongoport)
@@ -115,10 +115,6 @@ class message(object):
             # good data?
             if ( isIPv6(ipaddress) or isIPv4(ipaddress) ) and ( ipaddress not in netaddr.IPSet(['0.0.0.0']) ):
                 ipcidr = netaddr.IPNetwork(ipaddress)
-                # inspect/set the CIDR
-                # todo: lookup ipwhois for asn_cidr value
-                # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
-                # ipcidr.prefixlen = 32
 
                 # already in the table?
                 ipblock = ipblocklist.find_one({'ipaddress': str(ipcidr)})
@@ -171,8 +167,6 @@ class message(object):
         # Refresh the ip network list each time we get a message
         self.options.ipwhitelist = self.parse_network_whitelist(self.options.network_whitelist_file)
 
-        # debug
-        # print(request.json)
         ipaddress = None
         comment = None
         duration = None
@@ -214,11 +208,11 @@ class message(object):
                                 sys.stdout.write('{0} is whitelisted as part of {1}\n'.format(ipcidr, whitelist_network))
 
                         if not whitelisted:
-                            self.blockIP(  str(ipcidr),
-                                           comment,
-                                           duration,
-                                           referenceID,
-                                           userid)
+                            self.blockIP(str(ipcidr),
+                                         comment,
+                                         duration,
+                                         referenceID,
+                                         userid)
                             sys.stdout.write('added {0} to blocklist\n'.format(ipaddress))
                         else:
                             sys.stdout.write('not adding {0} to blocklist, it was found in whitelist\n'.format(ipaddress))
