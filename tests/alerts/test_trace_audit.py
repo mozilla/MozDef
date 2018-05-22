@@ -33,7 +33,7 @@ class TestTraceAudit(AlertTestSuite):
     default_alert = {
         "category": "trace",
         "severity": "WARNING",
-        "summary": "5 instances of Strace or Ptrace excuted on a system by randomjoe",
+        "summary": "5 instances of Strace or Ptrace executed on a system by randomjoe",
         "tags": ['audit'],
         "notify_mozdefbot": True,
     }
