@@ -32,7 +32,7 @@ class TraceAudit(AlertTask):
         severity = 'WARNING'
         tags = ['audit']
 
-        summary = ('{0} instances of Strace or Ptrace excuted on a system by {1}'.format(aggreg['count'], aggreg['value'], ))
+        summary = ('{0} instances of Strace or Ptrace executed on a system by {1}'.format(aggreg['count'], aggreg['value'], ))
         hostnames = self.mostCommon(aggreg['allevents'],'_source.hostname')
         #did they modify more than one host?
         #or just modify an existing configuration more than once?
