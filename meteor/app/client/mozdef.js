@@ -294,10 +294,9 @@ if (Meteor.isClient) {
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
-            cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
             blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
 
-            ipmenu.append(whoisitem,dshielditem,intelitem,cifitem,blockIPitem);
+            ipmenu.append(whoisitem,dshielditem,intelitem,blockIPitem);
 
             $(this).parent().parent().append(ipmenu);
         });
