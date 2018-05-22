@@ -24,7 +24,7 @@ def esConnect(conn):
 
 
 def isJVMMemoryHigh():
-    url = "http://{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
+    url = "{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
     r = requests.get(url)
     logger.debug(r)
     if r.status_code == 200:
