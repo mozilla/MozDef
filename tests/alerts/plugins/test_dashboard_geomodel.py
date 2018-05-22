@@ -89,3 +89,52 @@ class TestDashboardGeomodel(object):
         assert result_message == message_dict
         assert self.test_connect_called is True
         assert self.test_result_record is None
+
+    def test_unicode_location(self):
+        message_dict = {
+            "category": "geomodel",
+            "tags": ['geomodel'],
+            "summary": u"ttesterson@mozilla.com NEWCOUNTRY \u0107abcd, \xe4Spain access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
+            "details": {
+                "category": "NEWCOUNTRY",
+                "locality_details": {
+                    "city": u'\u0107abcd',
+                    "country": u'\xe4Spain'
+                },
+                'source_ip': '1.2.3.4',
+                "principal": "ttesterson@mozilla.com",
+            }
+        }
+
+        assert self.test_result_record is None
+        result_message = self.plugin.onMessage(message_dict)
+        assert result_message == message_dict
+        assert self.test_connect_called is True
+        assert self.test_result_record is not None
+        assert type(result_message['summary']) is unicode
+        assert type(result_message['details']['locality_details']['city']) is unicode
+        assert type(result_message['details']['locality_details']['country']) is unicode
+
+    def test_unicode_username(self):
+        message_dict = {
+            "category": "geomodel",
+            "tags": ['geomodel'],
+            "summary": u"\xfcttesterson@mozilla.com NEWCOUNTRY abcd, Spain access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
+            "details": {
+                "category": "NEWCOUNTRY",
+                "locality_details": {
+                    "city": 'abcd',
+                    "country": 'Spain'
+                },
+                'source_ip': '1.2.3.4',
+                "principal": u'\xfcttesterson@mozilla.com',
+            }
+        }
+
+        assert self.test_result_record is None
+        result_message = self.plugin.onMessage(message_dict)
+        assert result_message == message_dict
+        assert self.test_connect_called is True
+        assert self.test_result_record is not None
+        assert type(result_message['summary']) is unicode
+        assert type(result_message['details']['principal']) is unicode

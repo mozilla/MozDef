@@ -76,14 +76,26 @@ class TestAlertFeedbackEvents(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    default_event['_source']['details']['alert_information']['alert_code'] = '7891011'
+    event['_source']['details']['alert_information']['alert_code'] = '7891011'
     alert = AlertTestSuite.create_alert(default_alert)
     alert['tags'] = ['user_feedback', 'customtag2']
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good event",
-            events=[AlertTestSuite.create_event(default_event)],
+            events=[event],
             expected_alert=alert
+        )
+    )
+
+    unicode_event = AlertTestSuite.create_event(default_event)
+    unicode_event['_source']['details']['alert_information']['user_id'] = u'\xfctest'
+    unicode_alert = AlertTestSuite.create_alert(default_alert)
+    unicode_alert['summary'] = u'\xfctest escalated alert within single-sign on (SSO) dashboard. Event Date: 2012-06-15 Summary: "Did you recently login from Montana, Tonga (109.117.1.33)?"'
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with good unicode event",
+            events=[unicode_event],
+            expected_alert=unicode_alert
         )
     )
 

@@ -80,11 +80,11 @@ class message(object):
         country = message['details']['locality_details']['country']
         source_ip = message['details']['source_ip']
 
-        summary = 'Did you recently login from'
+        summary = u'Did you recently login from'
         if city.lower() == 'unknown':
-            summary += ' {0}'.format(country)
+            summary += u' {0}'.format(country)
         else:
-            summary += ' {0}, {1}'.format(city, country)
+            summary += u' {0}, {1}'.format(city, country)
         summary += ' ({0})?'.format(source_ip)
 
         alert_record = {
