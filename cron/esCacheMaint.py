@@ -55,7 +55,7 @@ def clearESCache():
     previousSuffix = date.strftime(dtNow - timedelta(days=1), '%Y%m%d')
     for targetindex in sorted(indexes):
         if indexSuffix not in targetindex and previousSuffix not in targetindex:
-            url = 'http://{0}/{1}/_stats'.format(random.choice(options.esservers), targetindex)
+            url = '{0}/{1}/_stats'.format(random.choice(options.esservers), targetindex)
             r = requests.get(url)
             if r.status_code == 200:
                 indexstats = json.loads(r.text)
@@ -63,7 +63,7 @@ def clearESCache():
                     fielddata = indexstats['_all']['total']['fielddata']['memory_size_in_bytes']
                     if fielddata > 0:
                         logger.info('target: {0}: field data {1}'.format(targetindex, indexstats['_all']['total']['fielddata']['memory_size_in_bytes']))
-                        clearurl = 'http://{0}/{1}/_cache/clear'.format(random.choice(options.esservers), targetindex)
+                        clearurl = '{0}/{1}/_cache/clear'.format(random.choice(options.esservers), targetindex)
                         clearRequest = requests.post(clearurl)
                         logger.info(clearRequest.text)
                         # stop at one?
