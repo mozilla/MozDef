@@ -8,7 +8,7 @@ Copyright (c) 2017 Mozilla Corporation
 //configuration settings
 
 mozdef = {
-  rootURL: "localhost",
+  rootURL: "http://localhost",
   port: "443",
   rootAPI: "https://localhost:8444",
   kibanaURL: "https://localhost:9443/app/kibana#",

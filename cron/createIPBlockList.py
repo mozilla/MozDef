@@ -9,6 +9,7 @@ import boto
 import boto.s3
 import logging
 import netaddr
+import random
 import sys
 from datetime import datetime
 from datetime import timedelta
@@ -27,7 +28,6 @@ logger = logging.getLogger(sys.argv[0])
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
 
-
 def initLogger():
     logger.level = logging.INFO
     formatter = logging.Formatter(
@@ -42,69 +42,132 @@ def initLogger():
         sh.setFormatter(formatter)
         logger.addHandler(sh)
 
+def genMeteorID():
+    return('%024x' % random.randrange(16**24))
 
-def aggregateIPs(attackers):
+def isIPv4(ip):
+    try:
+        # netaddr on it's own considers 1 and 0 to be valid_ipv4
+        # so a little sanity check prior to netaddr.
+        # Use IPNetwork instead of valid_ipv4 to allow CIDR
+        if '.' in ip and len(ip.split('.'))==4:
+            # some ips are quoted
+            netaddr.IPNetwork(ip.strip("'").strip('"'))
+            return True
+        else:
+            return False
+    except:
+        return False
+
+def isIPv6(ip):
+    try:
+        return netaddr.valid_ipv6(ip)
+    except:
+        return False
+
+def aggregateAttackerIPs(attackers):
     iplist = []
 
-    # We don't want to block ips forever,
-    # so only care about the ips the past 3 months
-    threshold_days = 30 * 3
-    timelimit = datetime.now() - timedelta(days=threshold_days)
+    # Set the attacker age timestamp
+    attackerage = datetime.now() - timedelta(days=options.attackerage)
 
     ips = attackers.aggregate([
         {"$sort": {"lastseentimestamp": -1}},
         {"$match": {"category": options.category}},
-        {"$match": {"lastseentimestamp": {"$gte": timelimit}}},
+        {"$match": {"lastseentimestamp": {"$gte": attackerage}}},
         {"$match": {"indicators.ipv4address": {"$exists": True}}},
         {"$group": {"_id": {"ipv4address": "$indicators.ipv4address"}}},
         {"$unwind": "$_id.ipv4address"},
         {"$limit": options.iplimit}
     ])
 
-    if 'result' in ips.keys():
-        for i in ips['result']:
-            whitelisted = False
-            logger.debug('working {0}'.format(i))
-            ip = i['_id']['ipv4address']
-            ipcidr=netaddr.IPNetwork(ip)
-            if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
-                for whitelist_range in options.ipwhitelist:
-                    whitelist_network = netaddr.IPNetwork(whitelist_range)
-                    if ipcidr in whitelist_network:
-                        logger.debug(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
-                        whitelisted = True
+    for i in ips:
+        whitelisted = False
+        logger.debug('working {0}'.format(i))
+        ip = i['_id']['ipv4address']
+        ipcidr=netaddr.IPNetwork(ip)
+        if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
+            for whitelist_range in options.ipwhitelist:
+                whitelist_network = netaddr.IPNetwork(whitelist_range)
+                if ipcidr in whitelist_network:
+                    logger.debug(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
+                    whitelisted = True
 
-                #strip any host bits 192.168.10/24 -> 192.168.0/24
-                ipcidrnet=str(ipcidr.cidr)
-                if ipcidrnet not in iplist and not whitelisted:
-                    iplist.append(ipcidrnet)
-            else:
-                logger.debug('invalid:' + ip)
+            #strip any host bits 192.168.10/24 -> 192.168.0/24
+            ipcidrnet=str(ipcidr.cidr)
+            if ipcidrnet not in iplist and not whitelisted:
+                iplist.append(ipcidrnet)
+        else:
+            logger.debug('invalid:' + ip)
     return iplist
 
-
-def parse_network_list(network_list_location):
+def parse_network_whitelist(network_whitelist_location):
     networks = []
-    with open(network_list_location, "r") as text_file:
-        networks = text_file.read().rstrip().split("\n")
+    with open(network_whitelist_location, "r") as text_file:
+        for line in text_file:
+            line=line.strip().strip("'").strip('"')
+            if isIPv4(line) or isIPv6(line):
+                networks.append(line)
     return networks
-
 
 def main():
     logger.debug('starting')
     logger.debug(options)
     try:
+        # connect to mongo
         client = MongoClient(options.mongohost, options.mongoport)
-        # use meteor db/attackers collection
         mozdefdb = client.meteor
+        ipblocklist = mozdefdb['ipblocklist']
         attackers=mozdefdb['attackers']
-        attackers.ensure_index([('lastseentimestamp',-1)])
-        attackers.ensure_index([('category',1)])
-        IPList = aggregateIPs(attackers)
+        # ensure indexes
+        ipblocklist.create_index([('dateExpiring',-1)])
+        attackers.create_index([('lastseentimestamp',-1)])
+        attackers.create_index([('category',1)])
+
+        # First, gather IP addresses from recent attackers and add to the block list
+        attackerIPList = aggregateAttackerIPs(attackers)
+
+        # add attacker IPs to the blocklist
+        # first delete ones we've created from an attacker
+        ipblocklist.delete_many({'creator': 'mozdef','reference':'attacker'})
+
+        # delete any that expired
+        ipblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(days=options.expireage)}})
+
+        # add the aggregations we've found recently
+        for ip in attackerIPList:
+            ipblocklist.insert_one(
+                {'_id': genMeteorID(),
+                 'address':ip,
+                 'reference': 'attacker',
+                 'creator':'mozdef',
+                 'dateAdded': datetime.utcnow()})
+
+        # Lastly, export the combined blocklist
+        ipCursor=mozdefdb['ipblocklist'].aggregate([
+                {"$sort": {"dateAdded": -1}},
+                {"$match": {"address": {"$exists": True}}},
+                {"$match":
+                    {"$or":[
+                        {"dateExpiring": {"$gte": datetime.utcnow()}},
+                        {"dateExpiring": {"$exists": False}},
+                    ]},
+                },
+                {"$project":{"address":1}},
+                {"$limit": options.iplimit}
+            ])
+        IPList=[]
+        for ip in ipCursor:
+            IPList.append(ip['address'])
+        # to text
         with open(options.outputfile, 'w') as outputfile:
             for ip in IPList:
                 outputfile.write("{0}\n".format(ip))
         outputfile.close()
+        # to s3?
+        if len(options.aws_bucket_name)>0:
+            s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
+
 
     except ValueError as e:
         logger.error("Exception %r generating IP block list" % e)
@@ -124,15 +187,21 @@ def initConfig():
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
-    # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
-    options.network_list_file = getConfig('network_list_file', '', options.configfile)
-    options.ipwhitelist = parse_network_list(options.network_list_file)
+    # CIDR whitelist as a line separted list of 8.8.8.0/24 style masks
+    options.network_list_file = getConfig('network_whitelist_file', '', options.configfile)
+    options.ipwhitelist = parse_network_whitelist(options.network_list_file)
 
     # Output File Name
     options.outputfile = getConfig('outputfile', 'ipblocklist.txt', options.configfile)
 
     # Category to choose
     options.category = getConfig('category', 'bruteforcer', options.configfile)
+
+    # Max days to look back for attackers
+    options.attackerage = getConfig('attackerage',90,options.configfile)
+
+    # Days after expiration that we purge an ipblocklist entry (from the ui, they don't end up in the export after expiring)
+    options.expireage = getConfig('expireage',1,options.configfile)
 
     # Max IPs to emit
     options.iplimit = getConfig('iplimit', 1000, options.configfile)
@@ -176,4 +245,3 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
-    s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)

@@ -148,14 +148,14 @@ def searchMongoAlerts(mozdefdb):
         {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort
         {"$limit": 10} # top 10
         ])
-    for ip in ipv4TopHits['result']:
+    for ip in ipv4TopHits:
         # sanity check ip['_id'] which should be the ipv4 address
         if isIPv4(ip['_id']) and ip['_id'] not in netaddr.IPSet(['0.0.0.0']):
             ipcidr = netaddr.IPNetwork(ip['_id'])
-            # expand it to a /24 CIDR
+            # set CIDR
             # todo: lookup ipwhois for asn_cidr value
             # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
-            ipcidr.prefixlen = 24
+            ipcidr.prefixlen = 32
 
             # append to or create attacker.
             # does this match an existing attacker's indicators

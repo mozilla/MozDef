@@ -50,8 +50,10 @@ if (Meteor.isServer) {
 
         if (blockIPRequest.statusCode==200) {
             console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
+            return true;
         } else {
             console.log("Could not send to "+ mozdef.rootAPI + '/blockip ' + JSON.stringify(formobj) );
+            return blockIPRequest;
         }
     }
 

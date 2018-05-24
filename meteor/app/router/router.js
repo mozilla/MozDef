@@ -42,6 +42,13 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
 
+    this.route('ipblocklist', {
+        path: '/ipblocklist',
+        template: 'ipblocklist',
+        layoutTemplate: 'layout'
+    });
+
+
     this.route('investigations', {
         path: '/investigations',
         template: 'investigations',
@@ -137,7 +144,7 @@ Router.map(function () {
     });
 
     this.route('blockip', {
-        path: '/incidents/blockip/:_ipaddr',
+        path: '/blockip/:_ipaddr',
         template: 'blockIPform',
         data: function() {
             Session.set('blockIPipaddress', this.params._ipaddr);
