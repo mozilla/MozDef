@@ -6,51 +6,56 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import json
-import logging
 import random
 import requests
 import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, date, timedelta
-from elasticsearch import Elasticsearch
+
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from elasticsearch_client import ElasticsearchClient
 from utilities.logger import logger
+
 
 def esConnect(conn):
     '''open or re-open a connection to elastic search'''
-    return Elasticsearch((options.esservers))
+    return ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+
 
 def isJVMMemoryHigh():
-    url = "http://{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
+    url = "{0}/_nodes/stats?pretty=true".format(random.choice(options.esservers))
     r = requests.get(url)
     logger.debug(r)
     if r.status_code == 200:
-        nodestats=r.json()
+        nodestats = r.json()
 
         for node in nodestats['nodes']:
-            loadaverage=nodestats['nodes'][node]['os']['cpu']['load_average']
-            cpuusage=nodestats['nodes'][node]['os']['cpu']['percent']
-            nodename=nodestats['nodes'][node]['name']
-            jvmused=nodestats['nodes'][node]['jvm']['mem']['heap_used_percent']
-            logger.debug('{0}: cpu {1}%  jvm {2}% load average: {3}'.format(nodename,cpuusage,jvmused,loadaverage))
-            if jvmused> options.jvmlimit:
-                logger.info('{0}: cpu {1}%  jvm {2}% load average: {3} recommending cache clear'.format(nodename,cpuusage,jvmused,loadaverage))
+            loadaverage = nodestats['nodes'][node]['os']['cpu']['load_average']
+            cpuusage = nodestats['nodes'][node]['os']['cpu']['percent']
+            nodename = nodestats['nodes'][node]['name']
+            jvmused = nodestats['nodes'][node]['jvm']['mem']['heap_used_percent']
+            logger.debug('{0}: cpu {1}%  jvm {2}% load average: {3}'.format(nodename, cpuusage, jvmused, loadaverage))
+            if jvmused > options.jvmlimit:
+                logger.info('{0}: cpu {1}%  jvm {2}% load average: {3} recommending cache clear'.format(nodename, cpuusage, jvmused, loadaverage))
                 return True
         return False
     else:
         logger.error(r)
         return False
 
+
 def clearESCache():
-    es=esConnect(None)
-    indexes=es.indices.stats()['indices']
+    es = esConnect(None)
+    indexes = es.get_indices()
     # assums index names  like events-YYYYMMDD etc.
     # used to avoid operating on current indexes
     dtNow = datetime.utcnow()
     indexSuffix = date.strftime(dtNow, '%Y%m%d')
     previousSuffix = date.strftime(dtNow - timedelta(days=1), '%Y%m%d')
-    for targetindex in sorted(indexes.keys()):
+    for targetindex in sorted(indexes):
         if indexSuffix not in targetindex and previousSuffix not in targetindex:
-            url = 'http://{0}/{1}/_stats'.format(random.choice(options.esservers), targetindex)
+            url = '{0}/{1}/_stats'.format(random.choice(options.esservers), targetindex)
             r = requests.get(url)
             if r.status_code == 200:
                 indexstats = json.loads(r.text)
@@ -58,7 +63,7 @@ def clearESCache():
                     fielddata = indexstats['_all']['total']['fielddata']['memory_size_in_bytes']
                     if fielddata > 0:
                         logger.info('target: {0}: field data {1}'.format(targetindex, indexstats['_all']['total']['fielddata']['memory_size_in_bytes']))
-                        clearurl = 'http://{0}/{1}/_cache/clear'.format(random.choice(options.esservers), targetindex)
+                        clearurl = '{0}/{1}/_cache/clear'.format(random.choice(options.esservers), targetindex)
                         clearRequest = requests.post(clearurl)
                         logger.info(clearRequest.text)
                         # stop at one?
@@ -69,6 +74,7 @@ def clearESCache():
             else:
                 logger.error('{0} returned {1}'.format(url, r.status_code))
 
+
 def main():
     if options.checkjvmmemory:
         if isJVMMemoryHigh():
@@ -76,6 +82,7 @@ def main():
             clearESCache()
     else:
         clearESCache()
+
 
 def initConfig():
     # elastic search servers
@@ -88,8 +95,9 @@ def initConfig():
     # if false, will continue to clear for any index not matching the date suffix.
     options.conservative = getConfig('conservative', True, options.configfile)
 
-    #check jvm memory first? or just clear cache
+    # check jvm memory first? or just clear cache
     options.checkjvmmemory = getConfig('checkjvmmemory', True, options.configfile)
+
 
 if __name__ == '__main__':
     # configure ourselves

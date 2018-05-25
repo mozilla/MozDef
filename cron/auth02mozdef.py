@@ -324,7 +324,7 @@ def process_msg(mozmsg, msg):
             # Session cookie check
             if i.get('name') == 'authenticate':
                 details['auth_type'] = 'Login succeeded due to a valid session cookie being supplied'
-            else if i.get('name') == 'lock-password-authenticate':
+            elif i.get('name') == 'lock-password-authenticate':
                 details['auth_type'] = 'Login succeeded due to a valid plaintext password being supplied'
     except KeyError:
         pass

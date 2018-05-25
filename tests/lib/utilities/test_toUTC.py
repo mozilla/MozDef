@@ -111,7 +111,10 @@ class TestToUTC():
         assert str(result) == '1970-01-01 00:00:00+00:00'
 
     def test_zero_string_float(self):
-        # import pdb; pdb.set_trace()
         result = toUTC("0.0000")
         self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_zero_float(self):
+        result = toUTC(0.000000)
         assert str(result) == '1970-01-01 00:00:00+00:00'

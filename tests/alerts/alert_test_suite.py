@@ -176,7 +176,7 @@ class AlertTestSuite(UnitTestSuite):
 
         # Verify that the alert properties are set correctly
         for key, value in test_case.expected_alert.iteritems():
-            assert found_alert['_source'][key] == value, '{0} does not match!\n\tgot: {1}\n\texpected: {2}'.format(key, found_alert['_source'][key], value)
+            assert found_alert['_source'][key] == value, u'{0} does not match!\n\tgot: {1}\n\texpected: {2}'.format(key, found_alert['_source'][key], value)
 
     def verify_alert_task(self, alert_task, test_case):
         assert alert_task.classname() == self.alert_classname, 'Alert classname did not match expected name'

@@ -294,10 +294,9 @@ if (Meteor.isClient) {
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
-            cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
             blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
 
-            ipmenu.append(whoisitem,dshielditem,intelitem,cifitem,blockIPitem);
+            ipmenu.append(whoisitem,dshielditem,intelitem,blockIPitem);
 
             $(this).parent().parent().append(ipmenu);
         });
@@ -413,4 +412,37 @@ if (Meteor.isClient) {
     Meteor.logoutViaAccounts = function(callback) {
         return Accounts.logout(callback);
     };
+    // Intercepts all XHRs and reload the main browser window on redirect or request error (such as CORS denying access)
+    // This is because, if you run MozDef behind an access-proxy, the requests maybe 302'd to an authentication
+    // provider, but Meteor does not know or handle this. Reloading the main browser window will send the user to the
+    // authentication provider correctly and follow the 302.
+    // Note that since they're 302's they will ALWAYS cause a CORS error, which we keep as this is the SAFE way to
+    // handle this situation.
+    (function(xhr) {
+        var authenticationType = mozdef.authenticationType.toLowerCase();
+        function intercept_xhr(xhrInstance) {
+            // Verify a user is actually logged in and Meteor is running
+            if ((Meteor.user() !== null) && (Meteor.status().connected)) {
+                // Status 0 means the request failed (CORS denies access)
+                if (xhrInstance.readyState == 4 && (xhrInstance.status == 302 || xhrInstance.status == 0)) {
+                        location.reload();
+                }
+            }
+        }
+        var send = xhr.send;
+        xhr.send = function(data) {
+            var origFunc = this.onreadystatechange;
+            if (origFunc) {
+                this.onreadystatechange = function() {
+                    // We only start hooking for oidc authentication, as this is the only method that is currently
+                    // REQUIRING an access proxy and thus likely to run into 302s
+                    if (authenticationType == 'oidc'){
+                        intercept_xhr(this);
+                    }
+                    return origFunc.apply(this, arguments);
+                };
+            }
+            return send.apply(this, arguments);
+        };
+    })(XMLHttpRequest.prototype);
 };

@@ -14,12 +14,15 @@ def toUTC(suspectedDate):
     if type(suspectedDate) == datetime:
         objDate = suspectedDate
     elif type(suspectedDate) == float:
-        # This breaks in the year 2286
-        EPOCH_MAGNITUDE = 9
-        magnitude = int(math.log10(int(suspectedDate)))
-        if magnitude > EPOCH_MAGNITUDE:
-            suspectedDate = suspectedDate / 10 ** (magnitude - EPOCH_MAGNITUDE)
-        objDate = datetime.fromtimestamp(suspectedDate, LOCAL_TIMEZONE)
+        if suspectedDate <= 0:
+            objDate = datetime(1970, 1, 1)
+        else:
+            # This breaks in the year 2286
+            EPOCH_MAGNITUDE = 9
+            magnitude = int(math.log10(int(suspectedDate)))
+            if magnitude > EPOCH_MAGNITUDE:
+                suspectedDate = suspectedDate / 10 ** (magnitude - EPOCH_MAGNITUDE)
+            objDate = datetime.fromtimestamp(suspectedDate, LOCAL_TIMEZONE)
     elif str(suspectedDate).isdigit():
         if int(str(suspectedDate)) <= 0:
             objDate = datetime(1970, 1, 1)
