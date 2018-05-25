@@ -28,31 +28,31 @@ Copyright (c) 2014 Mozilla Corporation
                 {{/each}}
                 </tbody>
             </table>
-            </div>
-            {{>whoismodal}}
-            {{>dshieldmodal}}
-            {{>cifmodal}}
-            {{>blockIPModal}}
-            {{>intelmodal}}
+        </div>
+        {{>whoismodal}}
+        {{>dshieldmodal}}
+        {{>cifmodal}}
+        {{>blockIPModal}}
+        {{>intelmodal}}
     </div>
 </template>
 
 <!--each individual ipblock -->
 <template name="each_ipblock">
 
-			<tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateAdded}}" data-toggle="tooltip">
-                <td></td>
-				<td>{{{ipDecorate address}}}</td>
-                <td>{{dateAdded}}</td>
-                <td>{{dateExpiring}}</td>
-                <td>{{comment}}</td>
-                <td>{{creator}}</td>
-                <td>{{reference}}</td>
-                <td><button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#delete{{_id}}">arm delete</button>
-                    <div id="delete{{_id}}" class="collapse">
-                        <button class="btn btn-xs btn-danger ipblockdelete" data-ipblockid={{_id}}>delete</button>
-                    </div>
-                </td>
-			</tr>
+    <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateAdded}}" data-toggle="tooltip">
+        <td></td>
+        <td>{{{ipDecorate address}}}</td>
+        <td>{{dateAdded}}</td>
+        <td>{{dateExpiring}}</td>
+        <td>{{comment}}</td>
+        <td>{{creator}}</td>
+        <td>{{reference}}</td>
+        <td><button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#delete{{_id}}">arm delete</button>
+            <div id="delete{{_id}}" class="collapse">
+                <button class="btn btn-xs btn-danger ipblockdelete" data-ipblockid={{_id}}>delete</button>
+            </div>
+        </td>
+    </tr>
 
 </template>
