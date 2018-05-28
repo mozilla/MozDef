@@ -98,6 +98,13 @@ if (Meteor.isClient) {
             //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
             sceneControls.enabled = true;
         },
+        "click .attackerssearch": function (e,t){
+            //console.log('attacker search clicked');
+            e.preventDefault();
+            Session.set('attackersearchIP',$('#attackersearchIP').val());
+            Session.set('attackerlimit', $('#attackerLimit').val());
+            filterCharacters();
+        },
         "mousedown": function(event,template){
         //if mouse is over a character
         //set the selected object
@@ -232,7 +239,8 @@ if (Meteor.isClient) {
             //default selection criteria
             //$and will be used by the charts
             basecriteria={$and: [
-                                {lastseentimestamp: {$exists: true}}
+                                {lastseentimestamp: {$exists: true}},
+                                {'indicators.ipv4address': {'$regex':Session.get("attackersearchIP")}}
                                 ]
                     }
             return basecriteria;
@@ -812,7 +820,7 @@ if (Meteor.isClient) {
             });
         };
 
-        var filterCharacters = function(chart,filter){
+        filterCharacters = function(chart,filter){
             clearCharacters();
             //walk the chartRegistry
             list = dc.chartRegistry.list('attackers')
