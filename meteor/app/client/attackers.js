@@ -90,6 +90,14 @@ if (Meteor.isClient) {
         "change #attackerLimit": function(e,t){
             Session.set('attackerlimit', $('#attackerLimit').val());
         },
+        "mouseenter #attackersearchIP": function(e,t){
+            //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
+            sceneControls.enabled = false;
+        },
+        "mouseleave #attackersearchIP": function(e,t){
+            //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
+            sceneControls.enabled = true;
+        },
         "mousedown": function(event,template){
         //if mouse is over a character
         //set the selected object
@@ -601,8 +609,6 @@ if (Meteor.isClient) {
                 //no background for renderer..let the gradient show
                 renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
                 renderer.shadowMapEnabled = false;
-                //renderer.shadowMapCascade = false;
-                //renderer.shadowMapType = THREE.BasicShadowMap;
                 //add plane for mapping mouse movements to 2D space
                 plane.visible = false;
                 scene.add( plane );
@@ -617,15 +623,6 @@ if (Meteor.isClient) {
                 var light = new THREE.DirectionalLight( 0xffffff, .2 );
                 light.position.set( 200, 450, 500 );
                 light.castShadow = false;
-                //light.shadowMapWidth = 100;
-                //light.shadowMapHeight = 100;
-                //light.shadowMapDarkness = 0.20;
-                //light.shadowCascade = true;
-                //light.shadowCascadeCount = 3;
-                //light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
-                //light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
-                //light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
-                //light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
                 scene.add( light );
 
                 sceneCamera.position.z = 50;
