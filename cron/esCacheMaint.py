@@ -9,6 +9,7 @@ import json
 import random
 import requests
 import sys
+import logging
 from configlib import getConfig, OptionParser
 from datetime import datetime, date, timedelta
 
@@ -105,6 +106,7 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
+    logger.level = logging.WARNING
     logger.debug('starting')
 
     main()
