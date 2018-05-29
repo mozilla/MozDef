@@ -82,22 +82,34 @@ sidenav
 </style>
 <!-- menu -->
 <sidenav>
-    <div class="row">
-        <ul>
-            <li>Last X Attackers:
-                <select id="attackerLimit" class="input-small" title="limit how many attackers are retrieved">
-                  <option value='5'>5</option>
-                  <option value='10'>10</option>
-                  <option value='15'>15</option>
-                  <option value='20'>20</option>
-                  <option value='25'>25</option>
-                  <option value='30'>30</option>
-                  <option value='35'>35</option>
-                  <option value='40'>40</option>
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label col-md-2" for="attackerLimit">Limit </label>
+            <div class="col-md-6">
+                <select name="attackerLimit" id="attackerLimit" class="form-control input-small" title="limit how many attackers are retrieved">
+                    <option value='5'>5</option>
+                    <option value='10'>10</option>
+                    <option value='15'>15</option>
+                    <option value='20'>20</option>
+                    <option value='25'>25</option>
+                    <option value='30'>30</option>
+                    <option value='35'>35</option>
+                    <option value='40'>40</option>
                 </select>
-            </li>
-        </ul>
-    </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2" for="attackersearchIP">IP</label>
+            <div class="col-md-8">
+                <input type="search" name="attackersearchIP" class="form-control" id="attackersearchIP" placeholder="ip address regex search">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-8 col-xs-offset-2">
+                <button class="btn btn-xs attackerssearch">search</button>
+            </div>
+        </div>
+    </form>
     <div class="row reset-filter">
         <button id="btnResetFilter" class="btn">Reset Filters</button>
     </div>
