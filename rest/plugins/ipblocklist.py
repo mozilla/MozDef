@@ -103,11 +103,11 @@ class message(object):
 
         # optional statuspage.io integration
         self.options.statuspage_api_key = getConfig(
-            'statuspage_apikey',
+            'statuspage_api_key',
             '',
             self.configfile)
         self.options.statuspage_page_id = getConfig(
-            'statuspage_pageid',
+            'statuspage_page_id',
             '',
             self.configfile)
         self.options.statuspage_url = 'https://api.statuspage.io/v1/pages/{0}/incidents.json'.format(
@@ -173,7 +173,7 @@ class message(object):
                     # send to statuspage.io?
                     if len(self.options.statuspage_api_key)>1:
                         try:
-                            headers = {'Authorization': 'Oauth {0}'.format(options.statuspage_api_key)}
+                            headers = {'Authorization': 'Oauth {0}'.format(self.options.statuspage_api_key)}
                             # send the data as a form post per:
                             # https://doers.statuspage.io/api/v1/incidents/#create-realtime
                             post_data={
@@ -184,15 +184,15 @@ class message(object):
                                 userID,
                                 str(ipcidr),
                                 end_date.isoformat()),
-                            'incident[component_ids][]' : options.statuspage_sub_component_id,
-                            'incident[components][{0}]'.format(options.statuspage_component_id) : "operational"}
+                            'incident[component_ids][]' : self.options.statuspage_sub_component_id,
+                            'incident[components][{0}]'.format(self.options.statuspage_component_id) : "operational"}
                             response = requests.post(self.options.statuspage_url,
                                                     headers=headers,
                                                     data=post_data)
                             if response.ok :
                                 sys.stdout.write('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
                             else:
-                                sys.stderr.write('%s: statuspage.io notification failed %s\n' % (str(ipcidr,response.json())))
+                                sys.stderr.write('%s: statuspage.io notification failed %s\n' % (str(ipcidr),response.json()))
                         except Exception as e:
                             sys.stderr.write('Error while notifying statuspage.io for %s: %s\n' %(str(ipcidr),e))
                 else:
