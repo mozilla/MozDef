@@ -3,10 +3,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+import netaddr
 import os
 import random
+import requests
 import sys
-import netaddr
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
