@@ -240,7 +240,7 @@ if (Meteor.isClient) {
             //$and will be used by the charts
             basecriteria={$and: [
                                 {lastseentimestamp: {$exists: true}},
-                                {'indicators.ipv4address': {'$regex':Session.get("attackersearchIP")}}
+                                {'indicators.ipv4address': {$regex: Session.get("attackersearchIP")}}
                                 ]
                     }
             return basecriteria;
