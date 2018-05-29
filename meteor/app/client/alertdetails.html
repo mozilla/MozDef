@@ -34,7 +34,7 @@ Copyright (c) 2014 Mozilla Corporation
                         </td>
                         <td>{{severity}}</td>
                         <td>{{category}}</td>
-                        <td class="alertsummary">{{summary}}</td>
+                        <td class="alertsummary">{{{ipDecorate summary}}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -47,7 +47,11 @@ Copyright (c) 2014 Mozilla Corporation
             {{/each}}
         </tbody>
     </table>
-
+    {{>whoismodal}}
+    {{>dshieldmodal}}
+    {{>cifmodal}}
+    {{>blockIPModal}}
+    {{>intelmodal}}
 
 </div>
 
@@ -61,7 +65,7 @@ Copyright (c) 2014 Mozilla Corporation
             <td>{{documentindex}}</td>
             <td>{{documentid}}</td>
             <td>{{documenttype}}</td>
-            <td>{{documentsource.summary}}</td>
+            <td>{{{ ipDecorate documentsource.summary}}}</td>
             <td>{{>eventdetails}}</td>
         </tr>
 

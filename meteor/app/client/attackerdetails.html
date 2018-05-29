@@ -36,7 +36,7 @@ Copyright (c) 2014 Mozilla Corporation
                         <option {{ isselected 'falsepositive' category }} value='falsepositive'>False Positive</option>
                     </select>
                 </td>
-                <td>{{summary}}</td>
+                <td>{{{ipDecorate summary}}}</td>
 			</tr>
                 </tbody>
             </table>
@@ -54,6 +54,11 @@ Copyright (c) 2014 Mozilla Corporation
             </tbody>
         </table>
     </div>
+    {{>whoismodal}}
+    {{>dshieldmodal}}
+    {{>cifmodal}}
+    {{>blockIPModal}}
+    {{>intelmodal}}
 </div>
 
 </template>
@@ -67,7 +72,7 @@ Copyright (c) 2014 Mozilla Corporation
             <td>{{utctimestamp}}</td>
             <td>{{severity}}</td>
             <td>{{category}}</td>
-            <td>{{summary}}</td>
+            <td>{{{ ipDecorate summary}}}</td>
         </tr>
 
 </template>

@@ -28,8 +28,12 @@ Copyright (c) 2014 Mozilla Corporation
                 {{/each}}
                 </tbody>
             </table>
-            </div>
-            {{>blockIPModal}}
+        </div>
+        {{>whoismodal}}
+        {{>dshieldmodal}}
+        {{>cifmodal}}
+        {{>blockIPModal}}
+        {{>intelmodal}}
     </div>
 </template>
 
@@ -38,7 +42,7 @@ Copyright (c) 2014 Mozilla Corporation
 
     <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateAdded}}" data-toggle="tooltip">
         <td></td>
-        <td>{{address}}</td>
+        <td>{{{ipDecorate address}}}</td>
         <td>{{dateAdded}}</td>
         <td>{{dateExpiring}}</td>
         <td>{{comment}}</td>
