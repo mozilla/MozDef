@@ -167,11 +167,36 @@ class message(object):
                     ipblock['creator'] = userID
                     ipblock['reference'] = referenceID
                     ref=ipblocklist.insert(ipblock)
-                    sys.stdout.write('{0} written to db'.format(ref))
-
+                    sys.stdout.write('{0} written to db\n'.format(ref))
                     sys.stdout.write('%s: added to the ipblocklist table\n' % (ipaddress))
+
+                    # send to statuspage.io?
+                    if len(self.options.statuspage_api_key)>1:
+                        try:
+                            headers = {'Authorization': 'Oauth {0}'.format(options.statuspage_api_key)}
+                            # send the data as a form post per:
+                            # https://doers.statuspage.io/api/v1/incidents/#create-realtime
+                            post_data={
+                            'incident[name]' : 'block IP {}'.format(str(ipcidr)),
+                            'incident[status]' : 'resolved',
+                            'incident[impact_override]' : 'none',
+                            'incident[body]' : '{} initiated a block of IP {} until {}'.format(
+                                userID,
+                                str(ipcidr),
+                                end_date.isoformat()),
+                            'incident[component_ids][]' : options.statuspage_sub_component_id,
+                            'incident[components][{0}]'.format(options.statuspage_component_id) : "operational"}
+                            response = requests.post(self.options.statuspage_url,
+                                                    headers=headers,
+                                                    data=post_data)
+                            if response.ok :
+                                sys.stdout.write('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
+                            else:
+                                sys.stderr.write('%s: statuspage.io notification failed %s\n' % (str(ipcidr,response.json())))
+                        except Exception as e:
+                            sys.stderr.write('Error while notifying statuspage.io for %s: %s\n' %(str(ipcidr),e))
                 else:
-                    sys.stderr.write('%s: is already present in the ipblocklist table\n' % (ipaddress))
+                    sys.stderr.write('%s: is already present in the ipblocklist table\n' % (str(ipcidr)))
             else:
                 sys.stderr.write('%s: is not a valid ip address\n' % (ipaddress))
         except Exception as e:
