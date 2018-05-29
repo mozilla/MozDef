@@ -101,6 +101,26 @@ class message(object):
         # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
         self.options.network_whitelist_file = getConfig('network_whitelist_file', '/dev/null', self.configfile)
 
+        # optional statuspage.io integration
+        self.options.statuspage_api_key = getConfig(
+            'statuspage_apikey',
+            '',
+            self.configfile)
+        self.options.statuspage_page_id = getConfig(
+            'statuspage_pageid',
+            '',
+            self.configfile)
+        self.options.statuspage_url = 'https://api.statuspage.io/v1/pages/{0}/incidents.json'.format(
+            self.options.statuspage_page_id)
+        self.options.statuspage_component_id = getConfig(
+            'statuspage_component_id',
+            '',
+            self.configfile)
+        self.options.statuspage_sub_component_id = getConfig(
+            'statuspage_sub_component_id',
+            '',
+            self.configfile)
+
     def blockIP(self,
                 ipaddress = None,
                 comment = None,
