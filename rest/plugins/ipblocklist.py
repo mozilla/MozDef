@@ -3,10 +3,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+import netaddr
 import os
 import random
+import requests
 import sys
-import netaddr
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
@@ -100,6 +101,26 @@ class message(object):
         # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
         self.options.network_whitelist_file = getConfig('network_whitelist_file', '/dev/null', self.configfile)
 
+        # optional statuspage.io integration
+        self.options.statuspage_api_key = getConfig(
+            'statuspage_api_key',
+            '',
+            self.configfile)
+        self.options.statuspage_page_id = getConfig(
+            'statuspage_page_id',
+            '',
+            self.configfile)
+        self.options.statuspage_url = 'https://api.statuspage.io/v1/pages/{0}/incidents.json'.format(
+            self.options.statuspage_page_id)
+        self.options.statuspage_component_id = getConfig(
+            'statuspage_component_id',
+            '',
+            self.configfile)
+        self.options.statuspage_sub_component_id = getConfig(
+            'statuspage_sub_component_id',
+            '',
+            self.configfile)
+
     def blockIP(self,
                 ipaddress = None,
                 comment = None,
@@ -146,11 +167,36 @@ class message(object):
                     ipblock['creator'] = userID
                     ipblock['reference'] = referenceID
                     ref=ipblocklist.insert(ipblock)
-                    sys.stdout.write('{0} written to db'.format(ref))
-
+                    sys.stdout.write('{0} written to db\n'.format(ref))
                     sys.stdout.write('%s: added to the ipblocklist table\n' % (ipaddress))
+
+                    # send to statuspage.io?
+                    if len(self.options.statuspage_api_key)>1:
+                        try:
+                            headers = {'Authorization': 'Oauth {0}'.format(self.options.statuspage_api_key)}
+                            # send the data as a form post per:
+                            # https://doers.statuspage.io/api/v1/incidents/#create-realtime
+                            post_data={
+                            'incident[name]' : 'block IP {}'.format(str(ipcidr)),
+                            'incident[status]' : 'resolved',
+                            'incident[impact_override]' : 'none',
+                            'incident[body]' : '{} initiated a block of IP {} until {}'.format(
+                                userID,
+                                str(ipcidr),
+                                end_date.isoformat()),
+                            'incident[component_ids][]' : self.options.statuspage_sub_component_id,
+                            'incident[components][{0}]'.format(self.options.statuspage_component_id) : "operational"}
+                            response = requests.post(self.options.statuspage_url,
+                                                    headers=headers,
+                                                    data=post_data)
+                            if response.ok :
+                                sys.stdout.write('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
+                            else:
+                                sys.stderr.write('%s: statuspage.io notification failed %s\n' % (str(ipcidr),response.json()))
+                        except Exception as e:
+                            sys.stderr.write('Error while notifying statuspage.io for %s: %s\n' %(str(ipcidr),e))
                 else:
-                    sys.stderr.write('%s: is already present in the ipblocklist table\n' % (ipaddress))
+                    sys.stderr.write('%s: is already present in the ipblocklist table\n' % (str(ipcidr)))
             else:
                 sys.stderr.write('%s: is not a valid ip address\n' % (ipaddress))
         except Exception as e:
