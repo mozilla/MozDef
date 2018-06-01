@@ -7,7 +7,7 @@ Copyright (c) 2014 Mozilla Corporation
 
 if (Meteor.isClient) {
     //events that could fire in any sub template
-    Template.menu.events({
+    Template.layout.events({
         "click .ipmenu-copy": function(e,t){
             var ipText=$(e.target).attr('data-ipaddress')
             var ipTextArea = document.createElement("textarea");
