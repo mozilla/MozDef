@@ -292,16 +292,17 @@ if (Meteor.isClient) {
 
             //add the drop down menu
             ipmenu=$("<ul class='sub_menu' />");
+            copyitem=$("<li><a class='ipmenu-copy' data-ipaddress='" + iptext + "'href='#'>copy</a></li>");
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
             blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
 
-            ipmenu.append(whoisitem,dshielditem,intelitem,blockIPitem);
+            ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,blockIPitem);
 
             $(this).parent().parent().append(ipmenu);
         });
-        //return raw html, consume as {{{ ipDecorate fieldname }} in a meteor template
+        //return raw html, consume as {{{ ipDecorate fieldname }}} in a meteor template
         return anelement.prop('outerHTML');
     });
 
