@@ -12,7 +12,7 @@ if (Meteor.isClient) {
             var ipText=$(e.target).attr('data-ipaddress')
             var ipTextArea = document.createElement("textarea");
             ipTextArea.value = ipText;
-            document.body.appendChild(ipTextArea);
+            e.target.appendChild(ipTextArea);
             ipTextArea.focus();
             ipTextArea.select();
             try {
@@ -22,7 +22,7 @@ if (Meteor.isClient) {
             } catch (err) {
                 Session.set('errorMessage','copy failed & ' + JSON.stringify(err));
             }
-            document.body.removeChild(ipTextArea);
+            e.target.removeChild(ipTextArea);
         },
         "click .ipmenu-whois": function(e,t){
             Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
