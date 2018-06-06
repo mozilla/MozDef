@@ -8,6 +8,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from utilities.key_exists import key_exists
 from utilities.toUTC import toUTC
+from utilities.dot_dict import DotDict
 
 class message(object):
     def __init__(self):
@@ -17,7 +18,7 @@ class message(object):
         self.registration = ['guardduty']
         self.priority = 10
 
-        # AWS sends dates as iso_8601 which ES doesn't appreciate
+        # AWS guard duty sends dates as iso_8601 which ES doesn't appreciate
         # here's a list of date fields we'll convert to isoformat
         self.date_keys = [
             'details.service.eventLastSeen',
@@ -25,6 +26,14 @@ class message(object):
             'details.resource.instanceDetails.launchTime',
             'details.createdAt',
             'details.updatedAt'
+        ]
+
+        # AWS guard duty can send IPs in a bunch of places
+        # Lets pick out some likely targets and format them
+        # so other mozdef plugins can rely on their location
+        self.ipaddress_keys =[
+            'details.service.action.networkConnectionAction.remoteIpDetails.ipAddressV4',
+            'details.service.action.awsApiCallAction.remoteIpDetails.ipAdrressV4'
         ]
 
     def convert_key_date_format(self, needle, haystack):
@@ -48,8 +57,19 @@ class message(object):
         if not message['source'] == 'guardduty':
             return (message, metadata)
 
+
+        # reformat the date fields to iosformat
         for date_key in self.date_keys:
             if key_exists(date_key, message):
                 message = self.convert_key_date_format(date_key, message)
 
-        return (message, metadata)
+        # convert the dict to a dot dict for saner deep key/value processing
+        message=DotDict(message)
+        # pull out the likely source IP address
+        for ipaddress_key in self.ipaddress_keys:
+            if 'sourceipaddress' not in message['details'].keys():
+                if key_exists(ipaddress_key,message):
+                    message.details.sourceipaddress = message.get(ipaddress_key)
+
+        # recovert the message back to a plain dict
+        return (dict(message), metadata)
