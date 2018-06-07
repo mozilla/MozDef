@@ -111,7 +111,7 @@ class taskConsumer(object):
                                 processid = processid.replace('[', '')
                                 processid = processid.replace(']', '')
                                 event['processid'] = processid
-                            elif inside_message_key in ('pname'):
+                            elif inside_message_key in ('processname','pname'):
                                 event['processname'] = inside_message_value
                             elif inside_message_key in ('hostname'):
                                 event['hostname'] = inside_message_value
@@ -120,8 +120,10 @@ class taskConsumer(object):
                                 event['utctimestamp'] = toUTC(event['timestamp']).astimezone(pytz.utc).isoformat()
                             elif inside_message_key in ('type', 'category'):
                                 event['category'] = inside_message_value
-                            elif inside_message_key in ('payload', 'message'):
+                            elif inside_message_key in ('summary','payload', 'message'):
                                 event['summary'] = inside_message_value
+                            elif inside_message_key in ('source'):
+                                event['source'] = inside_message_value
                             elif inside_message_key in ('fields', 'details'):
                                 if type(inside_message_value) is not dict:
                                     event[u'details'][u'message'] = inside_message_value
