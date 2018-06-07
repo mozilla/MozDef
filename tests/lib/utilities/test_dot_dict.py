@@ -42,3 +42,19 @@ class TestDotDict(UnitTestSuite):
         dct = DotDict(original_dct)
         assert dct.details == {'key1': 'value1'}
         assert dct.details.key1 == 'value1'
+
+    def test_complex_get(self):
+        original_dct = {
+            'details': {
+                'key1': 'value1',
+                'subkey': {
+                    'subkey' : 'subvalue'
+                }
+            }
+        }
+        dct = DotDict(original_dct)
+        assert dct.get('does.not.exist') == None
+        assert dct.get('details') == {'key1': 'value1','subkey': {'subkey' : 'subvalue'}}
+        assert dct.get('details.key1') == 'value1'
+        assert dct.get('details.subkey') == {'subkey':'subvalue'}
+        assert dct.get('details.subkey.subkey') == 'subvalue'
