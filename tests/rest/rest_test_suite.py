@@ -14,14 +14,12 @@ sample_config = DotDict()
 sample_config.configfile = os.path.join(os.path.dirname(__file__), '../../rest/index.conf')
 OptionParser.parse_args = mock.Mock(return_value=(sample_config, {}))
 
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../rest/"))
-import index
-reload(index)
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 
 
 class RestTestSuite(HTTPTestSuite):
 
     def setup(self):
+        from rest import index
         self.application = index.application
         super(RestTestSuite, self).setup()
