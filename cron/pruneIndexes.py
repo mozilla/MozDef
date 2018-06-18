@@ -4,10 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
-# Anthony Verez averez@mozilla.com
 
 # set this to run as a cronjob (after backup has completed)
 # to regularly remove indexes
@@ -16,16 +12,21 @@
 # Create a starter .conf file with backupDiscover.py
 
 import sys
-import pyes
 import logging
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.INFO
+logger.level=logging.WARNING
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -39,8 +40,8 @@ def esPruneIndexes():
 
     logger.debug('started')
     try:
-        es = pyes.ES((list('{0}'.format(s) for s in options.esservers)))
-        indices = es.indices.stats()['indices'].keys()
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+        indices = es.get_indices()
         # do the pruning
         for (index, dobackup, rotation, pruning) in zip(options.indices,
             options.dobackup, options.rotation, options.pruning):
@@ -48,15 +49,15 @@ def esPruneIndexes():
                 if pruning != '0':
                     index_to_prune = index
                     if rotation == 'daily':
-                        idate = date.strftime(datetime.utcnow()-timedelta(days=int(pruning)),'%Y%m%d')
+                        idate = date.strftime(toUTC(datetime.now()) - timedelta(days=int(pruning)),'%Y%m%d')
                         index_to_prune += '-%s' % idate
                     elif rotation == 'monthly':
-                        idate = date.strftime(datetime.utcnow()-timedelta(days=31*int(pruning)),'%Y%m')
+                        idate = date.strftime(datetime.utcnow() - timedelta(days=31*int(pruning)),'%Y%m')
                         index_to_prune += '-%s' % idate
 
                     if index_to_prune in indices:
-                        logger.info('Deleting index: %s' % index_to_prune)
-                        es.indices.delete_index(index_to_prune)
+                        logger.debug('Deleting index: %s' % index_to_prune)
+                        es.delete_index(index_to_prune, True)
                     else:
                         logger.error('Error deleting index %s, index missing' % index_to_prune)
             except Exception as e:
@@ -91,7 +92,7 @@ def initConfig():
         )
     options.indices = list(getConfig(
         'backup_indices',
-        'events,alerts,kibana-int',
+        'events,alerts,.kibana',
         options.configfile).split(',')
         )
     options.dobackup = list(getConfig(

@@ -1,0 +1,8 @@
+* * * * * /opt/mozdef/envs/mozdef/cron/healthAndStatus.sh
+* * * * * /opt/mozdef/envs/mozdef/cron/healthToMongo.sh
+* * * * * /opt/mozdef/envs/mozdef/cron/collectAttackers.sh
+* * * * * /opt/mozdef/envs/mozdef/cron/syncAlertsToMongo.sh
+* * * * * /opt/mozdef/envs/mozdef/cron/eventStats.sh
+0 0 * * * /opt/mozdef/envs/mozdef/cron/esMaint.sh
+0 8 * * * /opt/mozdef/envs/mozdef/cron/pruneES.sh
+0 0 * * * /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh

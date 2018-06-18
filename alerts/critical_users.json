@@ -1,0 +1,1 @@
+{"users": {"username1": "user1", "username2": "user2"}, "scan_expected": {"period1": {"start_minute": "05", "end_second": "00", "start_hour": "03", "end_hour": "04", "start_second": "00", "end_minute": "10"}}}

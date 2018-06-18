@@ -3,118 +3,162 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Contributors:
-# Yohann Lepage yohann@lepage.info
-# Anthony Verez averez@mozilla.com
 
-FROM debian:stable
+FROM centos:7
 
-MAINTAINER Jeff Bryner <jbryner@mozilla.com>
+LABEL maintainer="mozdef@mozilla.com"
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV NODE_VERSION 4.7.0
+ENV METEOR_VERSION 1.4.2.3
+ENV PYTHON_VERSION 2.7.11
+ENV KIBANA_VERSION 5.6.7
+ENV ES_VERSION 5.6.7
+ENV ES_JAVA_VERSION 1.8.0
+ENV RABBITMQ_VERSION 3.3.5
 
-# Locales
-RUN (apt-get clean \
-        && apt-key update \
-	&& apt-get -q -y update --fix-missing \
-        && apt-get -q -y update \
-	&& apt-get install -q -y apt-utils \
-	&& apt-get install -q -y locales)
+ENV MONGO_URL=mongodb://localhost:3002/meteor
+ENV ROOT_URL=http://localhost
+ENV PORT=3000
 
-ADD conf/locale.gen /etc/locale.gen
-RUN (locale-gen \
-	&& locale-gen en_US.UTF-8 \
-	&& dpkg-reconfigure locales)
+COPY docker/conf/mongodb.repo /etc/yum.repos.d/mongodb.repo
 
-ENV LANGUAGE en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
-ENV LC_CTYPE en_US.UTF-8
-ENV HOME /root
+# Install ES, RabbitMQ, nginx, Kibana, python, Node, Meteor
+RUN \
+  yum clean all && \
+  yum install -y epel-release && \
+  yum install -y \
+                    wget \
+                    java-$ES_JAVA_VERSION \
+                    glibc-devel \
+                    gcc \
+                    gcc-c++ \
+                    libstdc++ \
+                    supervisor \
+                    libffi-devel \
+                    zlib-devel \
+                    cronie && \
+  useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
+  mkdir /opt/mozdef/envs && \
+  curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
+  mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch && \
+  chown -R mozdef:mozdef /opt/mozdef/envs/elasticsearch && \
+  mkdir /var/log/elasticsearch && \
+  chown -R mozdef:mozdef /var/log/elasticsearch && \
+  mkdir /var/lib/elasticsearch && \
+  chown -R mozdef:mozdef /var/lib/elasticsearch && \
+  rpm --import https://www.rabbitmq.com/rabbitmq-release-signing-key.asc && \
+  yum install -y rabbitmq-server-$RABBITMQ_VERSION && \
+  yum install -y nginx && \
+  mkdir /var/log/mozdef/ && \
+  curl -s -L https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C /opt/mozdef/ -xz && \
+  mv /opt/mozdef/kibana-$KIBANA_VERSION-linux-x86_64 /opt/mozdef/envs/kibana && \
+  yum install -y mongodb-org && \
+  curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz && \
+  cd /opt/mozdef/Python-$PYTHON_VERSION && \
+  ./configure && \
+  make && \
+  make install && \
+  rm -r /opt/mozdef/Python-$PYTHON_VERSION && \
+  cd /opt/mozdef && \
+  yum install -y mysql-devel \
+                    python-devel \
+                    python-pip && \
+  chown -R mozdef:mozdef /opt/mozdef/ && \
+  pip install virtualenv && \
+  cd / && \
+  curl -sL -o /opt/mozdef/nodesource.rpm https://rpm.nodesource.com/pub_4.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm && \
+  rpm -i --nosignature --force /opt/mozdef/nodesource.rpm && \
+  yum install -y nodejs-$NODE_VERSION && \
+  mkdir /opt/mozdef/meteor && \
+  curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
+  tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
+  mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
+  rm -r /opt/mozdef/meteor && \
+  cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
-RUN apt-get install -q -y openjdk-7-jre
+USER mozdef
+COPY meteor /opt/mozdef/envs/mozdef/meteor
+USER root
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 
-# rabbit mq
-RUN apt-get install -q -y rabbitmq-server
-RUN rabbitmq-plugins enable rabbitmq_management
-# mongodb
-RUN apt-get install -q -y mongodb
-# nodejs
-RUN apt-get install -q -y nodejs npm git
-# nginx
-RUN (apt-get install -q -y nginx-full \
-	&& rm /etc/nginx/nginx.conf)
-ADD conf/nginx.conf /etc/nginx/
+COPY docker/conf/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
 
+USER mozdef
+RUN \
+  mkdir -p /opt/mozdef/envs/meteor/mozdef && \
+  cd /opt/mozdef/envs/mozdef/meteor && \
+  meteor npm install && \
+  meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/ && \
+  mv /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules
 
-#Mozdef
-RUN (apt-get install -q -y python2.7-dev python-pip curl supervisor wget libmysqlclient-dev\
-        && pip install -U pip \
-        && curl -L https://github.com/jeffbryner/MozDef/archive/master.tar.gz |tar -C /opt -xz \
-        && /bin/ln -s /opt/MozDef-master /opt/MozDef \
-	&& cd /opt/MozDef && /usr/bin/pip install --verbose --use-mirrors --timeout 30 -r requirements.txt \
-	&& /usr/bin/pip install --verbose --use-mirrors --timeout 30 uwsgi celery \
-	&& mkdir /var/log/mozdef \
-	&& mkdir -p /run/uwsgi/apps/ \
-	&& touch /run/uwsgi/apps/loginput.socket && chmod 666 /run/uwsgi/apps/loginput.socket \
-	&& touch /run/uwsgi/apps/rest.socket && chmod 666 /run/uwsgi/apps/rest.socket \
-        && mkdir -p /home/mozdef/envs/mozdef/bot/ && cd /home/mozdef/envs/mozdef/bot/ \
-        && wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && gzip -d GeoLiteCity.dat.gz)
-ADD conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
-ADD conf/settings.js /opt/MozDef/meteor/app/lib/settings.js
-ADD conf/config.py /opt/MozDef/alerts/lib/config.py
-ADD conf/sampleData2MozDef.conf /opt/MozDef/examples/demo/sampleData2MozDef.conf
-ADD conf/mozdef.localloginenabled.css /opt/MozDef/meteor/public/css/mozdef.css
-ADD conf/syncalerts.sh /opt/MozDef/examples/demo/syncalerts.sh
+# Create python virtual environment and install dependencies
+COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
+RUN \
+  virtualenv /opt/mozdef/envs/python && \
+  source /opt/mozdef/envs/python/bin/activate && \
+  pip install -r /opt/mozdef/envs/mozdef/requirements.txt
 
-# elasticsearch
-RUN (curl -L https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.2.tar.gz  | tar -C /opt -xz \
-	&& /bin/ln -s /opt/elasticsearch-1.3.2 /opt/elasticsearch \
-	&& rm /opt/elasticsearch/config/elasticsearch.yml)
-# ADD conf/elasticsearch/elasticsearch.yml /opt/elasticsearch/config/ # BUG https://github.com/dotcloud/docker/issues/2446
-ADD conf/elasticsearch.yml /opt/elasticsearch-1.3.2/config/
+USER root
+COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
+COPY docker/conf/jvm.options /opt/mozdef/envs/elasticsearch/config/
+COPY docker/conf/kibana.yml /opt/mozdef/envs/kibana/config/kibana.yml
+COPY docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
+COPY docker/conf/mongod.conf /etc/mongod.conf
+COPY docker/conf/rabbitmq.config /etc/rabbitmq/
+COPY docker/conf/enabled_plugins /etc/rabbitmq/
+COPY docker/conf/nginx.conf /etc/nginx/nginx.conf
 
+COPY static /opt/mozdef/envs/mozdef/static
+COPY rest /opt/mozdef/envs/mozdef/rest
+COPY loginput /opt/mozdef/envs/mozdef/loginput
+COPY bot /opt/mozdef/envs/mozdef/bot
+COPY lib /opt/mozdef/envs/mozdef/lib
+COPY cron /opt/mozdef/envs/mozdef/cron
+COPY alerts /opt/mozdef/envs/mozdef/alerts
+COPY mq /opt/mozdef/envs/mozdef/mq
 
-# Kibana
-RUN (curl -L https://download.elasticsearch.org/kibana/kibana/kibana-3.1.0.tar.gz |tar -C /opt -xz \
-       && /bin/ln -s /opt/kibana-3.1.0 /opt/kibana)
-#can't add from the local relative dir, so add from github
-ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
-ADD https://raw.githubusercontent.com/jeffbryner/MozDef/master/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
+COPY docker/conf/loginput_index.conf /opt/mozdef/envs/mozdef/loginput/index.conf
+COPY docker/conf/rest_index.conf /opt/mozdef/envs/mozdef/rest/index.conf
 
-# Meteor
-RUN (curl -L https://install.meteor.com/ | /bin/sh \
-	&& npm install -g meteorite \
-	&& ln -s /usr/bin/nodejs /usr/bin/node \
-	&& cd /opt/MozDef/meteor )
+COPY docker/conf/config.py /opt/mozdef/envs/mozdef/alerts/lib/config.py
+COPY docker/conf/cron_entries.txt /cron_entries.txt
 
+USER mozdef
+RUN crontab /cron_entries.txt
+
+USER root
+RUN \
+  mkdir /opt/mozdef/envs/mozdef/data && \
+  mkdir /opt/mozdef/envs/mozdef/config && \
+  mkdir -p /opt/mozdef/envs/mozdef/docker/conf
+
+COPY docker/conf/initial_setup.py /opt/mozdef/envs/mozdef/docker/conf/initial_setup.py
+
+# We have to replace the python virtualenv path until
+# https://github.com/mozilla/MozDef/issues/421 is fixed
+RUN sed -i 's|/opt/mozdef/envs/mozdef/bin/activate|/opt/mozdef/envs/python/bin/activate|g' /opt/mozdef/envs/mozdef/cron/*.sh
+
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef
 
 # VOLUMES
-#	Elasticsearch
-VOLUME ['/var/lib/elasticsearch','/var/log/elasticsearch']
-#	Mongodb
-VOLUME ['/var/lib/mongodb','/var/log/mongodb']
-#	Nginx
-VOLUME ['/var/log/nginx','/var/log/mozdef']
-#       Quick share resource
-VOLUME ['/tmp/share','/tmp/share']
+#  Elasticsearch
+VOLUME /var/lib/elasticsearch
+#  Mongodb
+VOLUME /var/lib/mongo
+# RabbitMQ
+VOLUME /var/lib/rabbitmq
+# MozDef data (geolite db for example)
+VOLUME /opt/mozdef/envs/mozdef/data
 
-# PORTS
-#       METEOR
-EXPOSE 3000
-#       Elasticsearch
-EXPOSE 9200
-# 	Kibana
-EXPOSE 9090
-# 	LOGINPUT
-EXPOSE 8080
-#	REST
-EXPOSE 8081
+# 80 = MozDef Web UI (meteor)
+# 3002 = Mongodb
+# 5672 = RabbitMQ
+# 15672 = RabbitMQ Management
+# 8080 = Loginput
+# 8081 = RestAPI
+# 9090 = Kibana Web UI "localhost:9090/app/kibana"
+# 9200 = Elasticsearch
+EXPOSE 80 3002 5672 15672 8080 8081 9090 9200
 
-# CLEAN
-RUN apt-get clean && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
-
-# Launch 
-ENTRYPOINT exec service supervisor start
-
-
+CMD supervisord -n -c /etc/supervisor/conf.d/supervisor.conf

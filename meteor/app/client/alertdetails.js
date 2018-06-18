@@ -3,10 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
@@ -16,24 +12,25 @@ if (Meteor.isClient) {
         thisalertevents: function () {
             return alerts.findOne({'esmetadata.id': Session.get('alertID')}).events;
         },
-    
+
         kibanaurl: function () {
-            url=getSetting('kibanaURL') + '#/dashboard/script/alert.js?id=' + Session.get('alertID');
+            var esmetadata = alerts.findOne({'esmetadata.id': Session.get('alertID')}).esmetadata;
+            url=getSetting('kibanaURL') + '/doc/alerts-*/' + esmetadata.index + '/alert?id=' + esmetadata.id;
             return url;
         }
     });
-    
+
     Template.alertdetails.events({
         "click .makeinvestigation": function(event, template) {
             event.preventDefault();
             //ack the alert
             //acknowledge the alert
             alerts.update(this._id , {$set: {'acknowledged':new Date()}});
-            alerts.update(this._id, {$set: {'acknowledgedby':Meteor.user().profile.email}});            
+            alerts.update(this._id, {$set: {'acknowledgedby':Meteor.user().profile.email}});
             //make an investigation
             newInvestigation=models.investigation();
             newInvestigation.summary= template.data.summary,
-            newInvestigation.dateOpened=dateOrNull(template.data.utctimestamp),            
+            newInvestigation.dateOpened=dateOrNull(template.data.utctimestamp),
             newid=investigations.insert(newInvestigation);
             //add a link to this alert in the references
             investigations.update(newid, {
@@ -49,11 +46,11 @@ if (Meteor.isClient) {
             //ack the alert
             //acknowledge the alert
             alerts.update(this._id , {$set: {'acknowledged':new Date()}});
-            alerts.update(this._id, {$set: {'acknowledgedby':Meteor.user().profile.email}});            
+            alerts.update(this._id, {$set: {'acknowledgedby':Meteor.user().profile.email}});
             //make an incident
             newIncident=models.incident();
             newIncident.summary= template.data.summary,
-            newIncident.dateOpened=dateOrNull(template.data.utctimestamp),            
+            newIncident.dateOpened=dateOrNull(template.data.utctimestamp),
             newid=incidents.insert(newIncident);
             //add a link to this alert in the references
             incidents.update(newid, {
@@ -64,7 +61,4 @@ if (Meteor.isClient) {
             Router.go('/incident/' + newid + '/edit');
         }
     });
-    
-    
-
 }

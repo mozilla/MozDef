@@ -3,10 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
 -->
 
 <!--a striped table of incidents-->
@@ -21,6 +17,7 @@ Anthony Verez averez@mozilla.com
                         <td>Summary</td>
                         <td>Phase</td>
                         <td>Opened</td>
+                        <td>By</td>
                         <td>Closed</td>
                         <td></td>
                     </tr>
@@ -42,7 +39,8 @@ Anthony Verez averez@mozilla.com
                 <td><button class="btn btn-xs btn-default incidentedit" data-incidentid={{_id}}>edit</button></td>
 				<td>{{summary}}</td>
                 <td>{{phase}}</td>
-				<td>{{dateOpened}}</td>
+                <td>{{dateOpened}}</td>
+                <td>{{creator}}</td>
 				<td>{{dateClosed}}</td>
                 <td><button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#delete{{_id}}">arm delete</button>
                     <div id="delete{{_id}}" class="collapse">

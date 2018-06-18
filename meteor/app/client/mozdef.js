@@ -3,51 +3,25 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
-Yash Mehrotra yashmehrotra95@gmail.com
-Avijit Gupta 526avijit@gmail.com
 */
 
 if (Meteor.isClient) {
-    //global myo (if we have one)
-    myMyo=null;
     //default session variables
     //and session init actions
     Meteor.startup(function () {
-        Session.set('verisfilter','  ');
+        Session.set('verisfilter','category');
         Session.set('alertssearchtext','');
         Session.set('alertssearchtime','tail');
         Session.set('alertsfiltertext','');
         Session.set('alertsrecordlimit',100);
         Session.set('attackerlimit','10');
+        Session.set('attackersearchIP','');
         getAllPlugins();
-        //see if we have a myo armband
-        try{
-            myMyo = Myo;
-            myMyo.onError=function(e){
-                if ( e.target instanceof WebSocket ){
-                    console.log('Could not connect to myo, is MyoConnect present and running? ')
-                }else{
-                    console.log('error',e)
-                }
-            };
-            if ( typeof mozdef.myoURL =='string' ){
-                // use a custom URL to contact Myo
-                // use this if you have the UI hosted using TLS
-                // to setup a local proxy on 127.0.0.1 that uses TLS
-                // to avoid browsers complaining about insecure websocket connections
-                // set to something like: wss://127.0.0.1:8444/myo
-                // and install a local nginx proxy with a valid TLS cert
 
-                myMyo.options.socket_url=mozdef.myoURL
-            }
-            myMyo.create(0,myMyo.options);
-        }catch(e){
-            debugLog(e,'No myo found..you really should get one.')
-        }
+        // Sends us to register our login handler
+        // and then to the login function of choice
+        // based on how enableClientAccountCreation was set at deployment.
+        Meteor.login();
     });
 
     //find plugins registered for a
@@ -318,17 +292,17 @@ if (Meteor.isClient) {
 
             //add the drop down menu
             ipmenu=$("<ul class='sub_menu' />");
+            copyitem=$("<li><a class='ipmenu-copy' data-ipaddress='" + iptext + "'href='#'>copy</a></li>");
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
-            cifitem=$("<li><a class='ipmenu-cif' data-ipaddress='" + iptext + "'href='#'>cif</a></li>");
             blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
 
-            ipmenu.append(whoisitem,dshielditem,intelitem,cifitem,blockIPitem);
+            ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,blockIPitem);
 
             $(this).parent().parent().append(ipmenu);
         });
-        //return raw html, consume as {{{ ipDecorate fieldname }} in a meteor template
+        //return raw html, consume as {{{ ipDecorate fieldname }}} in a meteor template
         return anelement.prop('outerHTML');
     });
 
@@ -340,8 +314,10 @@ if (Meteor.isClient) {
     //Notify messages for the UI
     Deps.autorun(function() {
         //set Session.set('displayMessage','title&text')
-        //to have a pnotify message
+        //to have a pnotify 'info' style message
         //created with that title/text
+        //set Session.set('errorMessage','title&text')
+        //for an error styled message
 
         var message = Session.get('displayMessage');
         //console.log('Got new session message');
@@ -361,8 +337,114 @@ if (Meteor.isClient) {
               console.log(message)
             Session.set('displayMessage', null);
         }
+
+        var errormessage = Session.get('errorMessage');
+        if (errormessage) {
+            var stringArray = errormessage.split('&');
+            new PNotify({
+              title : stringArray[0],
+              text: stringArray[1],
+              type: 'error',
+              buttons:{
+                closer:true,
+                closer_hover:false
+              }
+            });
+            if (typeof console !== 'undefined')
+              console.log(errormessage)
+            Session.set('errorMessage', null);
+        }
     });
 
+    // login abstraction
+    Meteor.login = function(callback) {
+        var authenticationType = mozdef.authenticationType.toLowerCase();
+        switch(authenticationType){
+            case 'meteor-password':
+                Meteor.loginViaPassword(callback);
+                break;
+            case 'oidc':
+                Meteor.loginViaHeader(callback);
+                break;
+            default:
+                // non-breaking default of header
+                // todo: evaluate defaulting to meteor-password
+                Meteor.loginViaHeader(callback);
+                break;
+        }
+    }
 
+    //assumes connection to an nginx/apache front end
+    //serving up an site handling authentication set via
+    //server side header
+    Meteor.loginViaHeader = function(callback) {
+      //create a login request to pass to loginHandler
+      var loginRequest = {};
+      //send the login request
+      Accounts.callLoginMethod({
+        methodArguments: [loginRequest],
+        userCallback: callback
+      });
+    };
 
+    Meteor.loginViaPassword = function(callback) {
+        // noop - allow meteor to pass through
+    };
+
+    Meteor.logout = function(callback) {
+        var authenticationType = mozdef.authenticationType.toLowerCase();
+        switch(authenticationType){
+            case 'meteor-password':
+                Meteor.logoutViaAccounts(callback);
+                break;
+            case 'oidc':
+                Meteor.logoutViaHeader(callback);
+                break;
+            default:
+                Meteor.logoutViaAccounts(callback);
+                break;
+        }
+    };
+
+    // Logout via custom URL
+    Meteor.logoutViaHeader = function(callback) {
+        window.location.href = mozdef.rootURL + '/logout';
+    };
+
+    Meteor.logoutViaAccounts = function(callback) {
+        return Accounts.logout(callback);
+    };
+    // Intercepts all XHRs and reload the main browser window on redirect or request error (such as CORS denying access)
+    // This is because, if you run MozDef behind an access-proxy, the requests maybe 302'd to an authentication
+    // provider, but Meteor does not know or handle this. Reloading the main browser window will send the user to the
+    // authentication provider correctly and follow the 302.
+    // Note that since they're 302's they will ALWAYS cause a CORS error, which we keep as this is the SAFE way to
+    // handle this situation.
+    (function(xhr) {
+        var authenticationType = mozdef.authenticationType.toLowerCase();
+        function intercept_xhr(xhrInstance) {
+            // Verify a user is actually logged in and Meteor is running
+            if ((Meteor.user() !== null) && (Meteor.status().connected)) {
+                // Status 0 means the request failed (CORS denies access)
+                if (xhrInstance.readyState == 4 && (xhrInstance.status == 302 || xhrInstance.status == 0)) {
+                        location.reload();
+                }
+            }
+        }
+        var send = xhr.send;
+        xhr.send = function(data) {
+            var origFunc = this.onreadystatechange;
+            if (origFunc) {
+                this.onreadystatechange = function() {
+                    // We only start hooking for oidc authentication, as this is the only method that is currently
+                    // REQUIRING an access proxy and thus likely to run into 302s
+                    if (authenticationType == 'oidc'){
+                        intercept_xhr(this);
+                    }
+                    return origFunc.apply(this, arguments);
+                };
+            }
+            return send.apply(this, arguments);
+        };
+    })(XMLHttpRequest.prototype);
 };

@@ -3,9 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
 */
 
 Router.configure({
@@ -44,6 +41,13 @@ Router.map(function () {
         },
         layoutTemplate: 'layout'
     });
+
+    this.route('ipblocklist', {
+        path: '/ipblocklist',
+        template: 'ipblocklist',
+        layoutTemplate: 'layout'
+    });
+
 
     this.route('investigations', {
         path: '/investigations',
@@ -140,7 +144,7 @@ Router.map(function () {
     });
 
     this.route('blockip', {
-        path: '/incidents/blockip/:_ipaddr',
+        path: '/blockip/:_ipaddr',
         template: 'blockIPform',
         data: function() {
             Session.set('blockIPipaddress', this.params._ipaddr);
@@ -161,14 +165,6 @@ Router.map(function () {
         template: 'ipdshield',
         data: function() {
             Session.set('ipdshieldipaddress', this.params._ipaddress);
-        }
-    });
-
-    this.route('ipcif', {
-        path: '/ipcif/:_ipaddress',
-        template: 'ipcif',
-        data: function() {
-            Session.set('ipcifipaddress', this.params._ipaddress);
         }
     });
 

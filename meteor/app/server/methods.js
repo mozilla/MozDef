@@ -3,10 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Avijit Gupta 526avijit@gmail.com
 */
 if (Meteor.isServer) {
 
@@ -16,7 +12,6 @@ if (Meteor.isServer) {
         'loadKibanaDashboards': loadKibanaDashboards,
         'blockip': blockIP,
         'ipwhois': ipwhois,
-        'ipcif': ipcif,
         'ipdshield': ipdshield,
         'ipintel': ipintel,
         'verisstats': verisstats,
@@ -55,8 +50,10 @@ if (Meteor.isServer) {
 
         if (blockIPRequest.statusCode==200) {
             console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
+            return true;
         } else {
             console.log("Could not send to "+ mozdef.rootAPI + '/blockip ' + JSON.stringify(formobj) );
+            return blockIPRequest;
         }
     }
 
@@ -83,19 +80,6 @@ if (Meteor.isServer) {
         } else {
             //console.log(ipdshieldResponse);
             return ipdshieldResponse;
-        }
-    }
-
-    function ipcif(ipaddress){
-        //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipcifquery/');
-        var ipcifResponse = HTTP.post(mozdef.rootAPI + '/ipcifquery/',{data: {'ipaddress':ipaddress}});
-
-        if ( typeof ipcifResponse == 'undefined') {
-            console.log("ipcif: no response from server")
-            return "";
-        } else {
-            //console.log(ipdshieldResponse);
-            return ipcifResponse;
         }
     }
 
@@ -142,7 +126,7 @@ if (Meteor.isServer) {
         //console.log('Looking up  plugins registered for ' + endpoint + ' from ' + mozdef.rootAPI + '/plugins/' + endpoint);
         if ( typeof endpoint == 'undefined') {
             var response = HTTP.get(mozdef.rootAPI + '/plugins/');
-            
+
         } else {
             var response = HTTP.get(mozdef.rootAPI + '/plugins/' + endpoint);
         }

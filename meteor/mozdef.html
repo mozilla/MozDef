@@ -3,40 +3,24 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
 -->
 
 <head>
     <meta name="viewport" content="width=1024">
+    <link rel="shortcut icon" type="image/svg" href="/images/favicon.ico"/>
     <link href="/css/bootstrap.css" rel="stylesheet" >
     <link href="/css/mozdef.css" rel="stylesheet" media="screen,projection,tv">
     <link href="/css/dropdowns.css" rel="stylesheet" media="screen,projection,tv">
-    
-    <!--persona login-->
-  <script>
-    (function() {
-      var t   = document.createElement('script');
-      t.type  = 'text/javascript';
-      t.async = true;
-      t.id    = 'persona-lib';
-      t.src = '//login.persona.org/include.js';
-      var s = document.getElementsByTagName('script')[0];
-      s.parentNode.insertBefore(t, s);
-    })();
-  </script>
 <title>mozdef::mozilla defense platform</title>
 </head>
 <body>
-  
-</body> 
+
+</body>
 <!--begin layout templates-->
 <!--the main, simple layout for the router to target-->
 <template name="layout">
     {{> menu}}
-      
+
         {{#if loggingIn}}
                 <div class="row center">
                     <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
@@ -44,7 +28,7 @@ Anthony Verez averez@mozilla.com
                        <strong>loading</strong>
                    </div>
                 </div>
-        {{else}}  
+        {{else}}
             {{#if currentUser}}
                 {{>yield}}
             {{else}}
@@ -57,7 +41,10 @@ Anthony Verez averez@mozilla.com
             {{/if}}
         {{/if}}
 
-       
+{{>whoismodal}}
+{{>dshieldmodal}}
+{{>blockIPModal}}
+{{>intelmodal}}
 
 </template>
 

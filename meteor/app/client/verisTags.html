@@ -3,13 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-    position: relative;
-    float: right;
-    margin: 5px;
-    padding: 2px 7px;
 -->
 
 <template name="veristags">
@@ -20,7 +13,7 @@ Jeff Bryner jbryner@mozilla.com
     padding-right: 20px;
     font-size: 95%;
     background: #999;
-    color: #fff;    
+    color: #fff;
 }
 .tag{
     cursor: pointer;
@@ -60,12 +53,12 @@ li {
                     <li>integrity</li>
                     <li>availability</li>
                 </ul>
-            </div>        
-    
+            </div>
+
             <div class="veristags">
                   {{#each veris}}
-                      <div class="tag" draggable="true">{{tag}}</div>
-                  {{/each}}    
+                      <div class="tag" draggable="true" data-toggle="tooltip" title="drag to the Tags area to add this tag">{{tag}}</div>
+                  {{/each}}
             </div>
 
     </div>

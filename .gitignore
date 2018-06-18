@@ -3,3 +3,12 @@ meteor/packages
 *.pyc
 celebeat-schedule.*
 results
+*.log
+.coverage
+.cache
+*.pyc
+cron/ipblocklist.txt
+alerts/generic_alerts
+/.project
+/data
+.vscode

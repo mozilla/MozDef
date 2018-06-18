@@ -1,0 +1,137 @@
+{
+    "order" : 0,
+    "template" : "*",
+    "settings" : { },
+    "mappings" : {
+      "_default_" : {
+        "dynamic_templates" : [ {
+          "string_fields" : {
+            "mapping" : {
+              "type" : "keyword"
+            },
+            "match" : "*",
+            "match_mapping_type" : "string"
+          }
+        }, {
+          "float_fields" : {
+            "mapping" : {
+              "type" : "keyword"
+            },
+            "match" : "*",
+            "match_mapping_type" : "float"
+          }
+        }, {
+          "double_fields" : {
+            "mapping" : {
+              "type" : "keyword"
+            },
+            "match" : "*",
+            "match_mapping_type" : "double"
+          }
+        }, {
+          "byte_fields" : {
+            "mapping" : {
+              "type" : "keyword"
+            },
+            "match" : "*",
+            "match_mapping_type" : "byte"
+          }
+        }, {
+          "short_fields" : {
+            "mapping" : {
+              "type" : "keyword"
+            },
+            "match" : "*",
+            "match_mapping_type" : "short"
+          }
+        }, {
+          "integer_fields" : {
+            "mapping" : {
+              "type" : "keyword"
+            },
+            "match" : "*",
+            "match_mapping_type" : "integer"
+          }
+        }, {
+          "long_fields" : {
+            "mapping" : {
+              "type" : "keyword"
+            },
+            "match" : "*",
+            "match_mapping_type" : "long"
+          }
+        } ],
+        "properties" : {
+          "category" : {
+            "type" : "keyword"
+          },
+          "hostname" : {
+            "type" : "keyword"
+          },
+          "processid" : {
+            "type" : "keyword"
+          },
+          "processname": {
+            "type" : "keyword"
+          },
+          "severity" : {
+            "type" : "keyword"
+          },
+          "source" : {
+            "type" : "keyword"
+          },
+          "summary" : {
+            "type" : "text"
+          },
+          "details" : {
+            "properties" : {
+              "destinationport" : {
+                "index" : "not_analyzed",
+                "type" : "long"
+              },
+              "hostname" : {
+                "type" : "keyword"
+              },
+              "sourceipaddress" : {
+                "type" : "ip"
+              },
+              "srcip" : {
+                "type" : "ip"
+              },
+              "sourceipv4address" : {
+                "type" : "keyword"
+              },
+              "destinationipaddress" : {
+                "type" : "ip"
+              },
+              "success" : {
+                "type" : "boolean"
+              },
+              "sourceport" : {
+                "index" : "not_analyzed",
+                "type" : "long"
+              },
+              "apiversion" : {
+                "type" : "keyword"
+              }
+            }
+          },
+          "receivedtimestamp" : {
+            "format" : "dateOptionalTime",
+            "type" : "date"
+          },
+          "utctimestamp" : {
+            "format" : "dateOptionalTime",
+            "type" : "date"
+          },
+          "version" : {
+            "type" : "keyword"
+          }
+        },
+        "_all" : {
+          "enabled" : true
+        }
+      }
+    },
+    "aliases" : { }
+}

@@ -4,21 +4,21 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Anthony Verez averez@mozilla.com
+
 
 import logging
-import pyes
-import pytz
 import requests
 import sys
 from datetime import datetime
-from datetime import timedelta
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
 from pymongo import MongoClient
+
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+from query_models import SearchQuery, TermMatch
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -43,38 +43,16 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone="UTC"):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def getFrontendStats(es):
-    begindateUTC = toUTC(datetime.now() - timedelta(minutes=15), options.defaulttimezone)
-    enddateUTC = toUTC(datetime.now(), options.defaulttimezone)
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-        from_value=begindateUTC, to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'mozdefhealth')
-    qMozdef = pyes.TermsFilter('category', ['mozdef'])
-    qLatest = pyes.TermsFilter('tags', ['latest'])
-    pyesresults = es.search(pyes.ConstantScoreQuery(pyes.BoolFilter(
-        must=[qDate, qType, qLatest, qMozdef])),
-        indices='events')
-    return pyesresults._search_raw()['hits']['hits']
+    search_query = SearchQuery(minutes=15)
+    search_query.add_must([
+        TermMatch('_type', 'mozdefhealth'),
+        TermMatch('category', 'mozdef'),
+        TermMatch('tags', 'latest'),
+    ])
+    results = search_query.execute(es, indices=['events'])
+
+    return results['hits']
 
 
 def writeFrontendStats(data, mongo):
@@ -88,11 +66,6 @@ def writeFrontendStats(data, mongo):
         mongo.healthfrontend.insert(host['_source'])
 
 
-def getEsClusterStats(es):
-    escluster = pyes.managers.Cluster(es)
-    return escluster.health()
-
-
 def writeEsClusterStats(data, mongo):
     # Empty everything before
     mongo.healthescluster.remove({})
@@ -100,18 +73,26 @@ def writeEsClusterStats(data, mongo):
 
 
 def getEsNodesStats():
-    # doesn't work with pyes
     r = requests.get(options.esservers[0] + '/_nodes/stats/os,jvm,fs')
     jsonobj = r.json()
     results = []
     for nodeid in jsonobj['nodes']:
+        # Skip non masters and non data nodes since it won't have full stats
+        if ('attributes' in jsonobj['nodes'][nodeid] and
+                jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
+                jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
+            continue
+
+        load_average = jsonobj['nodes'][nodeid]['os']['cpu']['load_average']
+        load_str = "{0},{1},{2}".format(load_average['1m'], load_average['5m'], load_average['15m'])
         results.append({
             'hostname': jsonobj['nodes'][nodeid]['host'],
             'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
             'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024),
             'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
-            'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu']['usage'],
-            'load': jsonobj['nodes'][nodeid]['os']['load_average']
+            'gc_old': jsonobj['nodes'][nodeid]['jvm']['gc']['collectors']['old']['collection_time_in_millis'] / 1000,
+            'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu']['percent'],
+            'load': load_str
         })
     return results
 
@@ -124,7 +105,6 @@ def writeEsNodesStats(data, mongo):
 
 
 def getEsHotThreads():
-    # doesn't work with pyes
     r = requests.get(options.esservers[0] + '/_nodes/hot_threads')
     results = []
     for line in r.text.split('\n'):
@@ -144,12 +124,12 @@ def main():
     logger.debug('starting')
     logger.debug(options)
     try:
-        es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         client = MongoClient(options.mongohost, options.mongoport)
         # use meteor db
         mongo = client.meteor
         writeFrontendStats(getFrontendStats(es), mongo)
-        writeEsClusterStats(getEsClusterStats(es), mongo)
+        writeEsClusterStats(es.get_cluster_health(), mongo)
         writeEsNodesStats(getEsNodesStats(), mongo)
         writeEsHotThreads(getEsHotThreads(), mongo)
     except Exception as e:
@@ -170,10 +150,6 @@ def initConfig():
         options.configfile).split(','))
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
-    # change this to your default zone for when it's not specified
-    options.defaulttimezone = getConfig('defaulttimezone',
-                                        'UTC',
-                                        options.configfile)
 
 
 if __name__ == '__main__':
@@ -187,4 +163,3 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
-

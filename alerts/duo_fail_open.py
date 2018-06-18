@@ -5,27 +5,24 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Contributors:
-# kang@mozilla.com
-#
 # This script alerts when openvpn's duo security failed to contact the duo server and let the user in.
 # This is a very serious warning that must be acted upon as it means MFA failed and only one factor was validated (in
 # this case a VPN certificate)
 
 from lib.alerttask import AlertTask
-import pyes
+from query_models import SearchQuery, PhraseMatch
+
 
 class AlertDuoFailOpen(AlertTask):
     def main(self):
-        # look for events in last 15 mins
-        date_timedelta = dict(minutes=15)
-        # Configure filters using pyes
-        must = [
-            pyes.QueryFilter(pyes.MatchQuery('summary','Failsafe Duo login','phrase'))
-        ]
-        self.filtersManual(date_timedelta, must=must)
+        search_query = SearchQuery(minutes=15)
 
-        # Search aggregations on field 'sourceipaddress', keep X samples of events at most
+        search_query.add_must(PhraseMatch('summary', 'Failsafe Duo login'))
+
+        self.filtersManual(search_query)
+
+        # Search aggregations on field 'sourceipaddress', keep X samples of
+        # events at most
         self.searchEventsAggregated('details.hostname', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         # in this case, always
@@ -44,4 +41,3 @@ class AlertDuoFailOpen(AlertTask):
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-

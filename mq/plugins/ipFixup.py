@@ -2,9 +2,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
 
 import netaddr
 
@@ -78,14 +75,12 @@ class message(object):
                     message['details']['sourceipv6address'] = ipText
                     message['details']['sourceipaddress'] = '0.0.0.0'
                     addError(message, 'plugin: {0} error: {1}'.format('ipFixUp.py', 'sourceipaddress is ipv6, moved'))
-                elif not isIPv4(ipText):
-                    if ipText == '-':
-                        message['details']['sourceipaddress'] = '0.0.0.0'
-                    else:
-                        message['details']['sourceipaddress'] = '0.0.0.0'
-                        addError(message, 'plugin: {0} error: {1}:{2}'.format('ipFixUp.py', 'sourceipaddress is invalid', ipText))
                 elif isIPv4(ipText):
                     message['details']['sourceipv4address'] = ipText
+                else:
+                    # Smells like a hostname, let's save it as source field
+                    message['details']['source'] = message['details']['sourceipaddress']
+                    message['details']['sourceipaddress'] = None
 
             if 'destinationipaddress' in message['details'].keys():
                 ipText = message['details']['destinationipaddress']
@@ -93,14 +88,12 @@ class message(object):
                     message['details']['destinationipv6address'] = ipText
                     message['details']['destinationipaddress'] = '0.0.0.0'
                     addError(message, 'plugin: {0} error: {1}'.format('ipFixUp.py', 'destinationipaddress is ipv6, moved'))
-                elif not isIPv4(ipText):
-                    if ipText == '-':
-                        message['details']['destinationipaddress'] = '0.0.0.0'
-                    else:
-                        message['details']['destinationipaddress'] = '0.0.0.0'
-                        addError(message, 'plugin: {0} error: {1}:{2}'.format('ipFixUp.py', 'destinationipaddress is invalid', ipText))
                 elif isIPv4(ipText):
                     message['details']['destinationipv4address'] = ipText
+                else:
+                    # Smells like a hostname, let's save it as destination field
+                    message['details']['destination'] = message['details']['destinationipaddress']
+                    message['details']['destinationipaddress'] = None
 
             if 'src' in message['details'].keys():
                 ipText = message['details']['src']
@@ -134,10 +127,8 @@ class message(object):
                     message['details']['destinationipv6address'] = ipText
 
             if 'cluster_client_ip' in message['details'].keys():
-		ipText = message['details']['cluster_client_ip']
-		if isIPv4(ipText) and 'sourceipaddress' not in message['details'].keys():
+                ipText = message['details']['cluster_client_ip']
+                if isIPv4(ipText) and 'sourceipaddress' not in message['details'].keys():
                     message['details']['sourceipaddress'] = ipText
 
         return (message, metadata)
-
-        

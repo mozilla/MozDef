@@ -4,16 +4,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
-# Anthony Verez averez@mozilla.com
 
 import json
 import logging
 import os
-import pyes
-import pytz
 import requests
 import sys
 from datetime import datetime
@@ -21,7 +15,13 @@ from hashlib import md5
 from requests.auth import HTTPBasicAuth
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
+
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -45,26 +45,6 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone='UTC'):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def getDocID(servername):
     # create a hash to use as the ES doc id
     # hostname plus salt as doctype.latest
@@ -81,7 +61,7 @@ def main():
     '''
     logger.debug('starting')
     logger.debug(options)
-    es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
     try:
         auth = HTTPBasicAuth(options.mquser, options.mqpassword)
 
@@ -95,13 +75,14 @@ def main():
             mq = r.json()
             # setup a log entry for health/status.
             healthlog = dict(
-                utctimestamp=toUTC(datetime.now(), options.defaulttimezone).isoformat(),
+                utctimestamp=toUTC(datetime.now()).isoformat(),
                 hostname=server,
                 processid=os.getpid(),
                 processname=sys.argv[0],
                 severity='INFO',
                 summary='mozdef health/status',
                 category='mozdef',
+                source='mozdef',
                 tags=[],
                 details=[])
 
@@ -125,10 +106,10 @@ def main():
                         munack = 0
                     queueinfo=dict(
                         queue=m['name'],
-                        vhost=m['vhost'], 
+                        vhost=m['vhost'],
                         messages_ready=mready,
                         messages_unacknowledged=munack)
-            
+
                     if 'deliver_details' in m['message_stats'].keys():
                         queueinfo['deliver_eps'] = round(m['message_stats']['deliver_details']['rate'], 2)
                         healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_details']['rate'], 2)
@@ -142,18 +123,11 @@ def main():
 
             # post to elastic search servers directly without going through
             # message queues in case there is an availability issue
-            es.index(index='events',
-                     doc_type='mozdefhealth',
-                     doc=json.dumps(healthlog),
-                     bulk=False)
+            es.save_event(doc_type='mozdefhealth', body=json.dumps(healthlog))
             # post another doc with a static docid and tag
             # for use when querying for the latest status
             healthlog['tags'] = ['mozdef', 'status', 'latest']
-            es.index(index='events',
-                     id=getDocID(server),
-                     doc_type='mozdefhealth',
-                     doc=json.dumps(healthlog),
-                     bulk=False)
+            es.save_event(doc_type='mozdefhealth', doc_id=getDocID(server), body=json.dumps(healthlog))
     except Exception as e:
         logger.error("Exception %r when gathering health and status " % e)
 
@@ -177,11 +151,6 @@ def initConfig():
     options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
     # port of the rabbitmq json management interface
     options.mqapiport = getConfig('mqapiport', 15672, options.configfile)
-
-    # change this to your default zone for when it's not specified
-    options.defaulttimezone = getConfig('defaulttimezone',
-                                        'UTC',
-                                        options.configfile)
 
     # elastic search server settings
     options.esservers = list(getConfig('esservers',

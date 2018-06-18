@@ -3,12 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
-Avijit Gupta 526avijit@gmail.com
-Yash Mehrotra yashmehrotra95@gmail.com
 */
 
 if (Meteor.isClient) {
@@ -95,6 +89,21 @@ if (Meteor.isClient) {
         },
         "change #attackerLimit": function(e,t){
             Session.set('attackerlimit', $('#attackerLimit').val());
+        },
+        "mouseenter #attackersearchIP": function(e,t){
+            //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
+            sceneControls.enabled = false;
+        },
+        "mouseleave #attackersearchIP": function(e,t){
+            //disable and hook to re-enable the scene controls so they don't grab the mouse and use it
+            sceneControls.enabled = true;
+        },
+        "click .attackerssearch": function (e,t){
+            //console.log('attacker search clicked');
+            e.preventDefault();
+            Session.set('attackersearchIP',$('#attackersearchIP').val());
+            Session.set('attackerlimit', $('#attackerLimit').val());
+            filterCharacters();
         },
         "mousedown": function(event,template){
         //if mouse is over a character
@@ -224,86 +233,14 @@ if (Meteor.isClient) {
         var chartsInitialized   =false;
         var currentSearch=null;
 
-        if (myMyo){
-            //set a default reference orientation
-            myMyo.orientation=new THREE.Quaternion(0,0,0,0);
-            myMyo.zero = new THREE.Quaternion(0,0,0,0);
-            myMyo.panZoom = false;
-            myMyo.rotate = false;
-
-            myMyo.on('fist', function(edge){
-                if(!edge) return;
-                    debugLog('Myo pan/zoom: ' + !myMyo.panZoom);
-                    this.vibrate('short');
-
-                    this.zeroOrientation();
-                    myMyo.panZoom=!myMyo.panZoom;
-                });
-            myMyo.on('wave_out', function(edge){
-                if(!edge) return;
-                    debugLog('Myo rotate: ' + !myMyo.rotate);
-                    this.vibrate('short');
-
-                    this.zeroOrientation();
-                    myMyo.rotate=!myMyo.rotate;
-                });
-            myMyo.on('orientation',function(data){
-
-                var newOrientation = new THREE.Quaternion(data.x,data.y,data.z,data.w);
-
-                //are we just initialized?
-                //accept our starting position as this data
-                if ( myMyo.orientation.equals(myMyo.zero) ){
-                    //console.log('setting orientation to',newOrientation)
-                    myMyo.orientation.copy(newOrientation);
-                }
-
-                //did we put it on backwards?
-                //logo should face elbow, 'on light' closes to wrist.
-                var inverse = (this.direction == 'toward_elbow') ? 1 : -1;
-
-                //what's the difference in this data vs our last
-                delta = myMyo.orientation.slerp(newOrientation,.5);
-
-                if (myMyo.rotate){
-                    //rotate
-                    var vector = sceneControls.target.clone();
-                    var up = sceneCamera.up.clone();
-                    var quaternion = new THREE.Quaternion();
-                    quaternion.setFromAxisAngle(up, delta.y/50);
-                    sceneCamera.position.applyQuaternion(quaternion);
-                    sceneCamera.lookAt(vector);
-                }
-
-                if (myMyo.panZoom){
-                    //pan/zoom
-                    //clone existing object.position and target
-                    //and move their X to pan
-                    panAmount=( inverse * delta.z)
-                    zoomAmount=(-1* inverse * delta.y)
-                    newTarget=sceneControls.object.position.clone();
-                    var v = new THREE.Vector3(panAmount,0,zoomAmount);
-                    newTarget.add(v)
-                    sceneControls.object.position.copy(newTarget);
-                    newTarget=sceneControls.target.clone();
-                    newTarget.add(v)
-                    sceneControls.target.copy(newTarget);
-                }
-
-                //save our new position for next diff
-                myMyo.orientation.copy(newOrientation);
-                sceneControls.update();
-                sceneCamera.updateProjectionMatrix();
-            });
-        };
-
         //faux crossfilter to retrieve it's data from meteor/mongo:
         var mongoCrossfilter = {}
         function getSearchCriteria(){
             //default selection criteria
             //$and will be used by the charts
             basecriteria={$and: [
-                                {lastseentimestamp: {$gte: moment(0)._d}}
+                                {lastseentimestamp: {$exists: true}},
+                                {'indicators.ipv4address': {$regex: Session.get("attackersearchIP")}}
                                 ]
                     }
             return basecriteria;
@@ -680,8 +617,6 @@ if (Meteor.isClient) {
                 //no background for renderer..let the gradient show
                 renderer.setClearColor(new THREE.Color("rgb(0,0,0)"),0.0);
                 renderer.shadowMapEnabled = false;
-                //renderer.shadowMapCascade = false;
-                //renderer.shadowMapType = THREE.BasicShadowMap;
                 //add plane for mapping mouse movements to 2D space
                 plane.visible = false;
                 scene.add( plane );
@@ -696,15 +631,6 @@ if (Meteor.isClient) {
                 var light = new THREE.DirectionalLight( 0xffffff, .2 );
                 light.position.set( 200, 450, 500 );
                 light.castShadow = false;
-                //light.shadowMapWidth = 100;
-                //light.shadowMapHeight = 100;
-                //light.shadowMapDarkness = 0.20;
-                //light.shadowCascade = true;
-                //light.shadowCascadeCount = 3;
-                //light.shadowCascadeNearZ = [ -1.000, 0.995, 0.998 ];
-                //light.shadowCascadeFarZ  = [  0.995, 0.998, 1.000 ];
-                //light.shadowCascadeWidth = [ 1024, 1024, 1024 ];
-                //light.shadowCascadeHeight = [ 1024, 1024, 1024 ];
                 scene.add( light );
 
                 sceneCamera.position.z = 50;
@@ -894,7 +820,7 @@ if (Meteor.isClient) {
             });
         };
 
-        var filterCharacters = function(chart,filter){
+        filterCharacters = function(chart,filter){
             clearCharacters();
             //walk the chartRegistry
             list = dc.chartRegistry.list('attackers')
@@ -1092,14 +1018,5 @@ if (Meteor.isClient) {
             cursorAttackers.stop();
         }
         cursorAttackers=null;
-
-        if (myMyo){
-            //remove our callback events
-            //since they are scene specific
-            myMyo.events=[]
-        }
-
     };//end template.attackers.destroyed
-
-
 }

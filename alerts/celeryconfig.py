@@ -1,8 +1,7 @@
 from celery import Celery
+from importlib import import_module
 from lib.config import ALERTS, LOGGING, RABBITMQ
 from logging.config import dictConfig
-
-print ALERTS
 
 # Alert files to include
 alerts_include = []
@@ -10,9 +9,7 @@ for alert in ALERTS.keys():
     alerts_include.append('.'.join((alert).split('.')[:-1]))
 alerts_include = list(set(alerts_include))
 
-print alerts_include
-
-BROKER_URL =  'amqp://{0}:{1}@{2}:{3}//'.format(
+BROKER_URL = 'amqp://{0}:{1}@{2}:{3}//'.format(
                 RABBITMQ['mquser'],
                 RABBITMQ['mqpassword'],
                 RABBITMQ['mqserver'],
@@ -57,6 +54,16 @@ dictConfig(LOGGING)
 app = Celery('alerts',
              include=alerts_include)
 app.config_from_object('celeryconfig', force=True)
+
+# As a result of celery 3 to celery 4, we need to dynamically
+# register all of the alert tasks specifically
+for alert_namespace in CELERYBEAT_SCHEDULE:
+    alert_tokens = alert_namespace.split('.')
+    alert_module_name = alert_tokens[0]
+    alert_classname = alert_tokens[1]
+    alert_module = import_module(alert_module_name)
+    alert_class = getattr(alert_module, alert_classname)
+    app.register_task(alert_class())
 
 if __name__ == '__main__':
     app.start()

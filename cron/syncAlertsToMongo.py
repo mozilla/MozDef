@@ -4,24 +4,22 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
 
 import calendar
 import logging
-import pyes
-import pytz
 import random
-import netaddr
 import sys
 from datetime import datetime
-from datetime import timedelta
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
-from dateutil.parser import parse
 from pymongo import MongoClient
-from pymongo import collection
+
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from elasticsearch_client import ElasticsearchClient
+from query_models import SearchQuery, TermMatch
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -45,44 +43,15 @@ def initLogger():
         logger.addHandler(sh)
 
 
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone=options.defaulttimezone    
-    if type(suspectedDate) in (str, unicode):
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
 
 
 def getESAlerts(es):
-    begindateUTC = toUTC(datetime.now() - timedelta(minutes=50))
-    enddateUTC = toUTC(datetime.now())
-    qDate = pyes.RangeQuery(qrange=pyes.ESRange('utctimestamp',
-                                                from_value=begindateUTC,
-                                                to_value=enddateUTC))
-    qType = pyes.TermFilter('_type', 'alert')
-    q = pyes.ConstantScoreQuery(pyes.MatchAllQuery())
-    q.filters.append(pyes.BoolFilter(must=[qDate, qType]))
-    results = es.search(q, size=10000, indices='alerts')
-    # return raw search to avoid pyes iteration bug
-    return results._search_raw()
+    search_query = SearchQuery(minutes=50)
+    search_query.add_must(TermMatch('_type', 'alert'))
+    results = search_query.execute(es, indices=['alerts'], size=10000)
+    return results
 
 
 def ensureIndexes(mozdefdb):
@@ -91,15 +60,16 @@ def ensureIndexes(mozdefdb):
     1) an index on the utcepoch field in descending order
        to make it easy on the alerts screen queries.
     2) an index on esmetadata.id for correlation to ES
-    
+
     '''
     alerts = mozdefdb['alerts']
     alerts.ensure_index([('utcepoch',-1)])
     alerts.ensure_index([('esmetadata.id',1)])
-    
+
+
 def updateMongo(mozdefdb, esAlerts):
     alerts = mozdefdb['alerts']
-    for a in esAlerts['hits']['hits']:
+    for a in esAlerts['hits']:
         # insert alert into mongo if we don't already have it
         alertrecord = alerts.find_one({'esmetadata.id': a['_id']})
         if alertrecord is None:
@@ -108,8 +78,8 @@ def updateMongo(mozdefdb, esAlerts):
             # generate a meteor-compatible ID
             mrecord['_id'] = genMeteorID()
             # capture the elastic search meta data (index/id/doctype)
-            # set the date back to a datetime from unicode, so mongo/meteor can properly sort, select. 
-            mrecord['utctimestamp']=toUTC(mrecord['utctimestamp'],'UTC')
+            # set the date back to a datetime from unicode, so mongo/meteor can properly sort, select.
+            mrecord['utctimestamp']=toUTC(mrecord['utctimestamp'])
             # also set an epoch time field so minimongo can sort
             mrecord['utcepoch'] = calendar.timegm(mrecord['utctimestamp'].utctimetuple())
             mrecord['esmetadata'] = dict()
@@ -123,7 +93,7 @@ def main():
     logger.debug('starting')
     logger.debug(options)
     try:
-        es = pyes.ES(server=(list('{0}'.format(s) for s in options.esservers)))
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         client = MongoClient(options.mongohost, options.mongoport)
         mozdefdb = client.meteor
         ensureIndexes(mozdefdb)
@@ -135,8 +105,6 @@ def main():
 
 
 def initConfig():
-    #change this to your default timezone
-    options.defaulttimezone=getConfig('defaulttimezone','UTC',options.configfile)    
     # output our log to stdout or syslog
     options.output = getConfig('output', 'stdout', options.configfile)
     # syslog hostname

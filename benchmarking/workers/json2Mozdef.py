@@ -4,9 +4,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
 
 import os
 import sys
@@ -78,7 +75,7 @@ if __name__ == '__main__':
         for i in range(0,10):
 
             print(i)
-            alog=dict(eventtime=pytz.timezone('US/Pacific').localize(datetime.now()).isoformat(),\
+            alog=dict(eventtime=pytz.timezone('UTC').localize(datetime.now()).isoformat(),\
                         hostname=socket.gethostname(),\
                         processid=os.getpid(),\
                         processname=sys.argv[0],\

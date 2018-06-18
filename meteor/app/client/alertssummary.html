@@ -3,10 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
 -->
 
 <template name="alertssummary">
@@ -21,8 +17,8 @@ Anthony Verez averez@mozilla.com
                         <div class="col-xs-8">
                             <input type="search" name="searchSummary" class="form-control search-query" id="alertssearchtext" placeholder="summary field regex search">
                         </div>
-                    </div>            
-                    
+                    </div>
+
                     <div class="form-group">
                         <label class="control-label col-xs-2" for="searchTime">Time Period</label>
                         <div class="col-xs-8">
@@ -38,22 +34,22 @@ Anthony Verez averez@mozilla.com
                                 <option value='none'>None</option>
                             </select>
                         </div>
-    
+
                     </div>
                     <div class="form-group">
                         <label class="control-label col-xs-2" for="recordLimit">Record Limit</label>
                         <div class="col-xs-8">
                             <input type="text" name="recordLimit" class="form-control" id="recordLimit" placeholder="# records">
                         </div>
-    
-                    </div>                
+
+                    </div>
                     <div class="form-group">
                         <div class="col-xs-8 col-xs-offset-2">
                             <button class="btn btn-xs alertssearch">search</button>
                         </div>
-    
+
                     </div>
-                    
+
                 </form>
             </div>
         </div>
@@ -88,15 +84,10 @@ Anthony Verez averez@mozilla.com
                     {{#each selectedalerts}}
                         {{>alertTableItem}}
                     {{/each}}
-                </tbody>            
+                </tbody>
             </table>
         </div>
     </div>
-    {{>whoismodal}}
-    {{>dshieldmodal}}
-    {{>cifmodal}}
-    {{>blockIPModal}}
-    {{>intelmodal}}
 </div>
 </template>
 
@@ -104,12 +95,12 @@ Anthony Verez averez@mozilla.com
     <tr class="alert-row">
         <td>{{utctimestamp}}</td>
         <td><a href="/alert/{{esmetadata.id}}">mozdef</a><br>
-            <a href="{{mozdef.kibanaURL}}/#dashboard/script.alert.js?id={{esmetadata.id}}" target="_blank">kibana</a>
+            <a href="{{mozdef.kibanaURL}}/doc/alerts-*/{{esmetadata.index}}/alert?id={{esmetadata.id}}" target="_blank">kibana</a>
             {{#if url}}
                 <br><a href="{{url}}" target ="_blank">docs</a>
             {{/if}}
         </td>
-        <td>{{severity}}</td>
+        <td class="alert alert-{{severity}}">{{severity}}</td>
         <td>{{category}}</td>
         <td>{{{ipDecorate summary}}}</td>
         <td>
@@ -119,7 +110,7 @@ Anthony Verez averez@mozilla.com
                 </span>
             {{else}}
                 <button class="btn btn-xs btn-warning btnAlertAck" data-target="{{_id}}">ack</button>
-            {{/if}}            
+            {{/if}}
         </td>
     </tr>
 </template>

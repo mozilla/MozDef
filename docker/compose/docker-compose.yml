@@ -1,0 +1,216 @@
+---
+version: '2.2'
+services:
+  nginx:
+    build: nginx/
+    restart: always
+    command: /usr/sbin/nginx
+    depends_on:
+      - kibana
+      - meteor
+    ports:
+      - 80:80
+      - 8080:8080
+      - 8081:8081
+      - 9090:9090
+    networks:
+      - default
+  mongodb:
+    build: mongodb/
+    restart: always
+    command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
+    volumes:
+      - mongodb:/var/lib/mongo
+    networks:
+      - default
+  kibana:
+    build:
+      context: ../../
+      dockerfile: docker/compose/kibana/Dockerfile
+    restart: always
+    command: bin/kibana --elasticsearch=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - default
+  elasticsearch:
+    build:
+      context: ../../
+      dockerfile: docker/compose/elasticsearch/Dockerfile
+    command: bin/elasticsearch
+    restart: always
+    volumes:
+      - elasticsearch:/var/lib/elasticsearch
+    # ports:
+    #   - 9200:9200
+    networks:
+      - default
+  rabbitmq:
+    build:
+      context: ../../
+      dockerfile: docker/compose/rabbitmq/Dockerfile
+    restart: always
+    command: rabbitmq-server
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    # ports:
+    #   - 5672:5672
+    #   - 15672:15672 # Admin interface
+    networks:
+      - default
+
+  # MozDef Specific Containers
+  base:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_base/Dockerfile
+    command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data
+  bootstrap:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
+    depends_on:
+      - base
+      - elasticsearch
+    networks:
+      - default
+  alertplugins:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_alertplugins/Dockerfile
+    restart: always
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python alert_worker.py -c alert_worker.conf'
+    depends_on:
+      - base
+      - elasticsearch
+      - rabbitmq
+      - alerts
+      - bootstrap
+    networks:
+      - default
+  alerts:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_alerts/Dockerfile
+    restart: always
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
+    depends_on:
+      - base
+      - elasticsearch
+      - rabbitmq
+      - bootstrap
+    networks:
+      - default
+  # bot:
+  #   build:
+  #     context: ../../
+  #     dockerfile: docker/compose/mozdef_bot/Dockerfile
+  #   restart: always
+  #   command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python mozdefbot.py -c mozdefbot.conf'
+  #   depends_on:
+  #     - base
+  #     - rabbitmq
+  #     - alerts
+  #     - bootstrap
+  #   networks:
+  #     - default
+  #   volumes:
+  #     - geolite_db:/opt/mozdef/envs/mozdef/data/
+  cron:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_cron/Dockerfile
+    restart: always
+    command: bash -c 'sleep 90 && crond -n'
+    volumes:
+      - cron:/opt/mozdef/envs/mozdef/cron
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
+    depends_on:
+      - base
+      - rabbitmq
+      - elasticsearch
+      - mongodb
+      - bootstrap
+    networks:
+      - default
+  loginput:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_loginput/Dockerfile
+    restart: always
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    depends_on:
+      - base
+      - elasticsearch
+      - rabbitmq
+      - bootstrap
+    networks:
+      - default
+  mq_eventtask:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_mq_eventtask/Dockerfile
+    restart: always
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
+    scale: 1
+    depends_on:
+      - base
+      - rabbitmq
+      - elasticsearch
+      - loginput
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
+  meteor:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_meteor/Dockerfile
+    restart: always
+    command: bash -c 'node bundle/main.js'
+    depends_on:
+      - mongodb
+      - rest
+    networks:
+      - default
+  rest:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_rest/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    depends_on:
+      - base
+      - elasticsearch
+      - mongodb
+      - bootstrap
+    networks:
+      - default
+  syslog:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_syslog/Dockerfile
+    restart: always
+    command: bash -c 'sleep 95 && /usr/sbin/syslog-ng --no-caps -F'
+    depends_on:
+      - loginput
+      - mq_eventtask
+    ports:
+      - 514:514/udp
+      - 514:514
+    networks:
+      - default
+
+volumes:
+  elasticsearch:
+  rabbitmq:
+  mongodb:
+  cron:
+  geolite_db:
+
+networks:
+  default:

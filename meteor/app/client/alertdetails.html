@@ -3,16 +3,12 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
 -->
 
 <template name="alertdetails">
 <div class="container">
     <div class="row">
-        
+
         <div class="row"><button class="btn btn-sm btn-warning col-xs-2 makeinvestigation" data-alertid={{esmetadata.id}}>Escalate To Investigation</button></div>
         <div class="row"><button class="btn btn-sm btn-danger  col-xs-2 makeincident" data-alertid={{esmetadata.id}}>Escalate To Incident</button></div>
         <div class="row" id="alert" >
@@ -29,7 +25,7 @@ Anthony Verez averez@mozilla.com
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="alerttimestamp">{{utctimestamp}}</td>
+                        <td>{{utctimestamp}}</td>
                         <td>
                             <a target="_blank" href="{{kibanaurl}}">open in kibana</a>
                             {{#if url}}
@@ -38,7 +34,7 @@ Anthony Verez averez@mozilla.com
                         </td>
                         <td>{{severity}}</td>
                         <td>{{category}}</td>
-                        <td class="alertsummary">{{summary}}</td>
+                        <td class="alertsummary">{{{ipDecorate summary}}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -51,8 +47,6 @@ Anthony Verez averez@mozilla.com
             {{/each}}
         </tbody>
     </table>
-    
-   
 </div>
 
 </template>
@@ -60,12 +54,12 @@ Anthony Verez averez@mozilla.com
 
 <!--each individual event -->
 <template name="alert_event">
-    
+
         <tr>
             <td>{{documentindex}}</td>
             <td>{{documentid}}</td>
             <td>{{documenttype}}</td>
-            <td>{{documentsource.summary}}</td>
+            <td>{{{ ipDecorate documentsource.summary}}}</td>
             <td>{{>eventdetails}}</td>
         </tr>
 

@@ -1,71 +1,45 @@
-import pytest
-import tempfile
-import os
-import ConfigParser
+#!/usr/bin/env python
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2017 Mozilla Corporation
+
+import time
 
 
-def getConfig(optionname,thedefault,section,configfile):
-    """read an option from a config file or set a default
-       send 'thedefault' as the data class you want to get a string back
-       i.e. 'True' will return a string
-       True will return a bool
-       1 will return an int       
-    """
-    #getConfig('something','adefaultvalue')
-    retvalue=thedefault
-    opttype=type(thedefault)
-    if os.path.isfile(configfile):
-        config = ConfigParser.ConfigParser()
-        config.readfp(open(configfile))
-        if config.has_option(section,optionname):
-            if opttype==bool:
-                retvalue=config.getboolean(section,optionname)
-            elif opttype==int:
-                retvalue=config.getint(section,optionname)
-            elif opttype==float:
-                retvalue=config.getfloat(section,optionname)
-            else:
-                retvalue=config.get(section,optionname)
-    return retvalue
+def pytest_addoption(parser):
+    parser.addoption(
+        "--delete_indexes",
+        action='store_true',
+        default=False,
+        help="A flag to indicate if we should delete all indexes in ES before each test. This could result in inconsistent tests if not specified."
+    )
+    parser.addoption(
+        "--delete_queues",
+        action='store_true',
+        default=False,
+        help="A flag to indicate if we should delete the contents of rabbitmq queues. This could result in inconsistent tests if not specified."
+    )
 
-@pytest.fixture
-def options():
-    options=dict()
-    configFile='setup.cfg'
-    if pytest.config.inifile:
-        configFile=str(pytest.config.inifile)
-        
-    options["esserver"]=getConfig('esserver','localhost:9200','mozdef',configFile)
-    options["loginput"]=getConfig('loginput','localhost:8080','mozdef',configFile)
-    options["webuiurl"]=getConfig('webuiurl','http://localhost/','mozdef',configFile)    
-    options["kibanaurl"]=getConfig('kibanaurl','http://localhost:9090/','mozdef',configFile)    
-    if pytest.config.option.verbose > 0:
-        options["verbose"]=True
-        print('Using options: \n\t%r' % options)
-        
+
+def pytest_configure(config):
+    warning_text = ""
+    if not config.option.delete_indexes:
+        warning_text += "\n** WARNING - Some unit tests will not pass unless the --delete_indexes is specified."
+        warning_text += "\nThis is due to the fact that some tests need a 'clean' ES environment **\n"
+        warning_text += "** DISCLAIMER - If you enable this flag, all indexes that MozDef uses will be deleted upon test execution **\n"
     else:
-        options["verbose"]=False
+        warning_text += "\n** WARNING - The --delete_indexes flag has been set. We will be deleting important indexes from ES before test execution**\n"
+        warning_text += "Continuing the unit test execution in 10 seconds...CANCEL ME IF YOU DO NOT WANT PREVIOUS INDEXES DELETED!!! **\n"
 
-    return options
+    if not config.option.delete_queues:
+        warning_text += "\n** WARNING - Some unit tests will not pass unless the --delete_queues is specified."
+        warning_text += "\nThis is due to the fact that some tests need a 'clean' RabbitMQ environment **\n"
+        warning_text += "** DISCLAIMER - If you enable this flag, the queues in rabbitmq that MozDef uses will be deleted upon test execution **\n"
+    else:
+        warning_text += "\n** WARNING - The --delete_queues flag has been set. We will be purging RabbitMQ queues before test execution**\n"
+        warning_text += "Continuing the unit test execution in 10 seconds...CANCEL ME IF YOU DO NOT WANT PREVIOUS QUEUES PURGED!!! **\n"
 
-
-@pytest.fixture()
-def cleandir():
-    newpath = tempfile.mkdtemp()
-    os.chdir(newpath)
-
-def pytest_report_header(config):
-    if config.option.verbose > 0:
-        return ["reporting verbose test output"]
-
-
-#def pytest_addoption(parser):
-    #parser.addoption("--esserver", 
-        #action="store", 
-        #default="localhost:9200",
-        #help="elastic search servers to use for testing")
-
-    #parser.addoption("--mozdefserver", 
-        #action="store", 
-        #default="localhost:8080",
-        #help="mozdef server to use for testing")
+    print warning_text
+    time.sleep(10)

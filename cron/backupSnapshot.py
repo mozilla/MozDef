@@ -4,20 +4,16 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Anthony Verez averez@mozilla.com
-# Jeff Bryner jbryner@mozilla.com
 
 # Snapshot configured backups
 # Meant to be run once/day
 # Each run creates a snapshot of indexname-epochtimestamp
 # .conf file will determine what indexes are operated on
 # Create a starter .conf file with backupDiscover.py
-# You must create the s3 bucket "mozdefesbackups" first paying attention to
+# You must create the s3 bucket (options.aws_bucket) first paying attention to
 # the region assigned to the bucket.
 # Snapshots will be placed in:
-# mozdefesbackups/elasticsearch/YYYY-MM/servername/indices/indexname
+# options.aws_bucket/elasticsearch/YYYY-MM/servername/indices/indexname
 
 import sys
 import os
@@ -26,7 +22,7 @@ from logging.handlers import SysLogHandler
 from datetime import datetime
 from datetime import timedelta
 from datetime import date
-from configlib import getConfig, OptionParser, setConfig
+from configlib import getConfig, OptionParser
 import calendar
 import socket
 import boto
@@ -36,7 +32,6 @@ import json
 from os.path import expanduser
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.DEBUG
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -64,7 +59,7 @@ def main():
         snapshot_config = {
             "type": "s3",
             "settings": {
-                "bucket": "mozdefesbackups",
+                "bucket": options.aws_bucket,
                 "base_path": "elasticsearch/{0}/{1}".format(bucketdate, hostname),
                 "region": "{0}".format(options.aws_region)
             }
@@ -113,7 +108,7 @@ echo "DONE!"
                     """ % (esserver, index_to_snapshot, epoch))
 
                 # upload the restore script
-                bucket = s3.get_bucket('mozdefesbackups')
+                bucket = s3.get_bucket(options.aws_bucket)
                 key = bucket.new_key('elasticsearch/%s/%s/%s-%s-%s-restore.sh' % (
                     bucketdate, hostname, index, idate, epoch))
                 key.set_contents_from_filename(localpath)
@@ -151,7 +146,7 @@ def initConfig():
         )
     options.indices = list(getConfig(
         'backup_indices',
-        'events,alerts,kibana-int',
+        'events,alerts,.kibana',
         options.configfile).split(',')
         )
     options.dobackup = list(getConfig(
@@ -182,7 +177,13 @@ def initConfig():
         )
     options.aws_region = getConfig(
         'aws_region',
-        'us-east',
+        'us-west-1',
+        options.configfile
+        )
+
+    options.aws_bucket = getConfig(
+        'aws_bucket',
+        '',
         options.configfile
         )
 

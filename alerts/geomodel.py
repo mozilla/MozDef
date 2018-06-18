@@ -4,25 +4,29 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2015 Mozilla Corporation
-#
-# Contributors:
-# Aaron Meihm <ameihm@mozilla.com>
 
 from lib.alerttask import AlertTask
-import pyes
+from query_models import SearchQuery, TermMatch
+
 
 class AlertGeomodel(AlertTask):
     # The minimum event severity we will create an alert for
     MINSEVERITY = 2
 
     def main(self):
-        date_timedelta = dict(minutes=30)
+        self.parse_config('geomodel.conf', ['exclusions', 'url'])
 
-        must = [
-            pyes.TermFilter('_type', 'event'),
-            pyes.TermFilter('category', 'geomodelnotice'),
-        ]
-        self.filtersManual(date_timedelta, must=must, must_not=[])
+        search_query = SearchQuery(minutes=30)
+
+        search_query.add_must([
+            TermMatch('category', 'geomodelnotice')
+        ])
+
+        # Allow the ability to ignore certain users
+        for exclusion in self.config.exclusions.split(','):
+            search_query.add_must_not(TermMatch('summary', exclusion))
+
+        self.filtersManual(search_query)
         self.searchEventsSimple()
         self.walkEvents()
 
@@ -30,7 +34,7 @@ class AlertGeomodel(AlertTask):
     def onEvent(self, event):
         category = 'geomodel'
         tags = ['geomodel']
-        severity = 'WARNING'
+        severity = 'NOTICE'
 
         ev = event['_source']
 
@@ -41,5 +45,21 @@ class AlertGeomodel(AlertTask):
         if ev['details']['severity'] < self.MINSEVERITY:
             return None
 
+        # By default we assign a MozDef severity of NOTICE, but up this if the
+        # geomodel alert is sev 3
+        if ev['details']['severity'] == 3:
+            severity = 'WARNING'
+
         summary = ev['summary']
-        return self.createAlertDict(summary, category, tags, [event], severity)
+        alert_dict = self.createAlertDict(summary, category, tags, [event], severity, self.config.url)
+
+        if 'category' in ev['details'] and ev['details']['category'].lower() == 'newcountry':
+            alert_dict['details'] = {
+                'previous_locality_details': ev['details']['prev_locality_details'],
+                'locality_details': ev['details']['locality_details'],
+                'category': ev['details']['category'],
+                'principal': ev['details']['principal'],
+                'source_ip': ev['details']['source_ipv4']
+            }
+
+        return alert_dict

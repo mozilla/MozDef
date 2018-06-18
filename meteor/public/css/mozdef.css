@@ -3,13 +3,11 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Avijit Gupta 526avijit@gmail.com
 */
 
 /*base css */
+@import url('https://fonts.googleapis.com/css?family=Zilla+Slab+Highlight');
+@import url('https://fonts.googleapis.com/css?family=Zilla+Slab');
 html{
 	background: none;
 	min-height: 100%;
@@ -17,21 +15,17 @@ html{
 
 body{
 	/*gradient*/
-    
+
     background: rgb(32,87,153); /* Old browsers */
     background: -moz-linear-gradient(top, rgba(30,87,153,1) 0%, rgba(32,124,202,1) 43%, rgba(41,137,216,1) 62%, rgba(41,150,217,1) 100%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(43%,rgba(32,124,202,1)), color-stop(62%,rgba(41,137,216,1)), color-stop(100%,rgba(41,150,217,1))); /* Chrome,Safari4+ */
     background: -webkit-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* Chrome10+,Safari5.1+ */
     background: -o-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* Opera 11.10+ */
     background: -ms-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* IE10+ */
-    background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */*/
     background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
-    /*font-family: Georgia, serif;*/
-    /*font-family: "Trebuchet MS", sans-serif;*/
-    /*font-family: monospace;*/
-    /*font-family: sans-serif;*/
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: small;
+    background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
+    font-family: "Zilla Slab",sans-serif;
+    font-size: 14px;
     /*margin: 0;*/
     /*min-width: 990px;*/
     padding: 0;
@@ -60,6 +54,12 @@ caption, legend {
   font-style: normal;
   font-weight: normal;
 
+}
+
+.headercontainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #header a.mozilla {
@@ -122,7 +122,7 @@ caption, legend {
     border: 1px solid rgba(127,255,255,0.25);
     text-align: center;
     cursor: default;
-    z-index: 99;    
+    z-index: 99;
 }
 
 .attackercallout .id {
@@ -147,7 +147,7 @@ caption, legend {
     float: left;
     left: auto;
     margin: 0px;
-    padding: 0px;  
+    padding: 0px;
 }
 
 .attackercallout .indicator{
@@ -165,11 +165,45 @@ caption, legend {
     background-color: rgba(245,245,245,.7)
 }
 
+/*alerts screen alert color scheme*/
+.alert.alert-NOTICE {
+    --alert-bg-color: #4a6785;
+    --alert-color: white;
+  }
+.alert.alert-WARNING {
+    --alert-bg-color: #ffd351;
+    --alert-color: black;
+  }
+.alert.alert-CRITICAL {
+    --alert-bg-color: #d04437;
+    --alert-color: white;
+  }
+.alert.alert-INFO {
+    --alert-bg-color: #cccccc;
+    --alert-color: black;
+  }
+.alert.alert-ERROR {
+    --alert-bg-color: #d04437;
+    --alert-color: white;
+  }
+
+.alert  {
+    color: var(--alert-color);
+    background-color: var(--alert-bg-color);
+    text-transform: uppercase;
+    display: table-cell;
+    font-weight: bold;
+  }
+
+.alert-row a{
+    color: wheat;
+}
+
 /*bootstrap overrides*/
 
 .btn {
   border: 1px outset;
-  border-radius: 4px;    
+  border-radius: 4px;
 }
 
 
@@ -205,14 +239,14 @@ td{
 
 .welcome {
     text-align: center;
-}    
+}
 
 .tabcontent{
     margin-top: 20px;
 }
 
 
-/* uncomment this login ui css to hide the local account/password signup options 
+/* uncomment this login ui css to hide the local account/password signup options
 .logins-wrapper .svgtextlabel {
   font-size: 20px;
   color: white;
@@ -240,7 +274,7 @@ td{
 .successcircle{
     /*
     fill: rgb(217,206,178);
-    
+
     fill: rgb(60,179,113);
     */
     /*fill: rgba(0,150,221,.8);*/
@@ -275,22 +309,16 @@ circle:hover{
     display: none;
 }
 
-#header h2 {
-    font: 30px sans-serif;
-    background-image: url(/images/fx-usage-logo.png);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: 0px,0px;
-    float: left;
-    margin: 0;
-    padding: 2px 10px;
-    text-align: left;
-    text-indent: 30px;
+#header a.mozdef{
+    color:white;
     text-shadow: #000 5px 3px 3px;
+    text-align: center;
+    font-size: large;
+    margin-top: -.25em;
 }
 
-#header a.mozdef{
-	color:white;
+.mozillalogo{
+    width: 90px;
 }
 
 #header label{
@@ -334,7 +362,7 @@ circle:hover{
     border-color: #3a3c46;
     color: #fff;
     padding: 8px 10px 10px 10px;
-    height: 10px;
+    height: 25px;
     display: block;
     border-style: solid;
     -moz-border-top-colors: none;
@@ -457,7 +485,7 @@ circle:hover{
     border: 0px none;
     position: relative;
     background: none repeat scroll 0% 0% transparent;
-    box-shadow: none;    
+    box-shadow: none;
 }
 
 #nav-main ul ul a:hover,

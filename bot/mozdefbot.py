@@ -3,9 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# Jeff Bryner jbryner@mozilla.com
 
 """mozdef bot using KitnIRC."""
 import json
@@ -15,7 +12,6 @@ import kombu
 import logging
 import netaddr
 import os
-import pygeoip
 import pytz
 import random
 import select
@@ -27,6 +23,14 @@ from datetime import datetime
 from dateutil.parser import parse
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
+from ipwhois import IPWhois
+
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+from geo_ip import GeoIP
+
 
 logger = logging.getLogger()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -104,28 +108,6 @@ def run_async(func):
     return async_func
 
 
-def toUTC(suspectedDate, localTimeZone=None):
-    '''make a UTC date out of almost anything'''
-    utc = pytz.UTC
-    objDate = None
-    if localTimeZone is None:
-        localTimeZone = options.defaultTimeZone    
-    if type(suspectedDate) == str:
-        objDate = parse(suspectedDate, fuzzy=True)
-    elif type(suspectedDate) == datetime:
-        objDate = suspectedDate
-
-    if objDate.tzinfo is None:
-        objDate = pytz.timezone(localTimeZone).localize(objDate)
-        objDate = utc.normalize(objDate)
-    else:
-        objDate = utc.normalize(objDate)
-    if objDate is not None:
-        objDate = utc.normalize(objDate)
-
-    return objDate
-
-
 def getQuote():
     aquote = '{0} --Mos Def'.format(
         quotes[random.randint(0, len(quotes) - 1)].strip())
@@ -143,9 +125,11 @@ def isIP(ip):
 def ipLocation(ip):
     location = ""
     try:
-        gi = pygeoip.GeoIP('GeoLiteCity.dat', pygeoip.MEMORY_CACHE)
-        geoDict = gi.record_by_addr(str(netaddr.IPNetwork(ip)[0]))
+        geoip = GeoIP()
+        geoDict = geoip.lookup_ip(ip)
         if geoDict is not None:
+            if 'error' in geoDict:
+                return geoDict['error']
             location = geoDict['country_name']
             if geoDict['country_code'] in ('US'):
                 if geoDict['metro_code']:
@@ -238,12 +222,27 @@ class mozdefBot():
                     self.client.msg(recipient, "!panic  --panic (or not )")
                     self.client.msg(
                         recipient, "!ipinfo --do a geoip lookup on an ip address")
+                    self.client.msg(
+                        recipient, "!ipwhois --do a whois lookup on an ip address")
 
                 if "!quote" in message:
                     self.client.msg(recipient, getQuote())
 
                 if "!panic" in message:
                     self.client.msg(recipient, random.choice(panics))
+
+                if '!ipwhois' in message:
+                    for field in message.split():
+                        if isIP(field):
+                            ip = netaddr.IPNetwork(field)[0]
+                            if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
+                                whois = IPWhois(ip).lookup_whois()
+                                description = whois['nets'][0]['description'].encode('string_escape')
+                                self.client.msg(
+                                    recipient, "{0} description: {1}".format(field, description))
+                            else:
+                                self.client.msg(
+                                    recipient, "{0}: hrm..loopback? private ip?".format(field))
 
                 if "!ipinfo" in message:
                     for i in message.split():
@@ -273,6 +272,7 @@ class mozdefBot():
                     pass
 
         except Exception as e:
+            sys.stdout.write('stdout - bot error, quitting {0}'.format(e))
             self.client.root_logger.error('bot error..quitting {0}'.format(e))
             self.client.disconnect()
             if self.mqConsumer:
@@ -323,6 +323,12 @@ class alertConsumer(ConsumerMixin):
                 logger.exception(
                     "alertworker exception: unknown body type received %r" % body)
                 return
+
+            if 'notify_mozdefbot' in bodyDict and bodyDict['notify_mozdefbot'] is False:
+                # If the alert tells us to not notify, then don't post to IRC
+                message.ack()
+                return
+
             # process valid message
             # see where we send this alert
             ircchannel = options.alertircchannel
@@ -342,6 +348,7 @@ class alertConsumer(ConsumerMixin):
             if len(bodyDict['summary']) > 450:
                 sys.stdout.write('alert is more than 450 bytes, truncating\n')
                 bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
+
             self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
 
             message.ack()
@@ -382,13 +389,7 @@ def consumeAlerts(ircBot):
 def initConfig():
     # initialize config options
     # sets defaults or overrides from config file.
-    
-    # change this to your default zone for when it's not specified
-    # in time strings
-    options.defaultTimeZone = getConfig('defaulttimezone',
-                                        'US/Pacific',
-                                        options.configfile)
-    
+
     # irc options
     options.host = getConfig('host', 'irc.somewhere.com', options.configfile)
     options.nick = getConfig('nick', 'mozdefnick', options.configfile)
@@ -447,7 +448,7 @@ if __name__ == "__main__":
     sh = logging.StreamHandler(sys.stderr)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
-    
+
     parser = OptionParser()
     parser.add_option(
         "-c", dest='configfile',

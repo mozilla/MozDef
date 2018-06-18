@@ -3,10 +3,6 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
-
-Contributors:
-Jeff Bryner jbryner@mozilla.com
-Anthony Verez averez@mozilla.com
  */
 
 if (Meteor.isClient) {
@@ -17,13 +13,13 @@ if (Meteor.isClient) {
     Template.alertssummary.helpers({
         selectedalerts: function () {
             //console.log(moment().format(),Session.get('alertsSearch'));
-            
+
             Session.set('alertsDisplayed',
                         alerts.find(Session.get('alertsSearch'),
                                 {limit: Session.get('alertsrecordlimit'),
                                 reactive:false}).count()
                         );
-            
+
             //return just what's needed for the summary table
             return alerts.find(Session.get('alertsSearch'),
                                 {fields:{
@@ -42,7 +38,7 @@ if (Meteor.isClient) {
                                 limit: Session.get('alertsrecordlimit'),
                                 reactive:true})
         }
-    });    
+    });
 
     Template.alertssummary.events({
         "click .reset": function(e,t){
@@ -51,31 +47,8 @@ if (Meteor.isClient) {
             dc.filterAll("alertssummary");
             refreshAlertsData();
             dc.renderAll("alertssummary");
-            },           
-        "click .ipmenu-whois": function(e,t){
-            Session.set('ipwhoisipaddress',($(e.target).attr('data-ipaddress')));
-            $('#modalwhoiswindow').modal()
-        },
-        "click .ipmenu-dshield": function(e,t){
-            Session.set('ipdshieldipaddress',($(e.target).attr('data-ipaddress')));
-            $('#modaldshieldwindow').modal()
-        },        
-        "click .ipmenu-blockip": function(e,t){
-            Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
-            $('#modalBlockIPWindow').modal()
-        },
-        "click .ipmenu-cif": function(e,t){
-            Session.set('ipcifipaddress',($(e.target).attr('data-ipaddress')));
-            $('#modalcifwindow').modal()
-        },
-        "click .ipmenu-intel": function(e,t){
-            Session.set('ipintelipaddress',($(e.target).attr('data-ipaddress')));
-            $('#modalintelwindow').modal()
-        }, 
-        "click .dropdown": function(e,t){
-            $(e.target).addClass("hover");
-            $('ul:first',$(e.target)).css('visibility', 'visible');
-        },
+            },
+
         "click .btnAlertAck": function(e,t){
             id = $(e.target).attr('data-target');
             //acknowledge the alert
@@ -104,16 +77,16 @@ if (Meteor.isClient) {
             }
             refreshAlertsData();
         }
-        
+
     });
-    
+
     //UI template helpers
     Template.alertssummary.helpers({
         totalAlerts : function () {
             //how many alerts in the database?
             //return alertsCount.findOne().count;
             if (alertsCount && alertsCount.findOne()){
-                return alertsCount.findOne().count;   
+                return alertsCount.findOne().count;
             }else{
                 return 0;
             }
@@ -123,7 +96,7 @@ if (Meteor.isClient) {
             return Session.get('alertsDisplayed');
         }
     });
-     
+
     Template.alertssummary.rendered = function() {
         var ringChartCategory   = dc.pieChart("#ringChart-category","alertssummary");
         var ringChartSeverity   = dc.pieChart("#ringChart-severity","alertssummary");
@@ -144,7 +117,7 @@ if (Meteor.isClient) {
                 beginningtime=moment().utc();
                 //expect timeperiod like '1 days'
                 timevalue=Number(timeperiod.split(" ")[0]);
-                timeunits=timeperiod.split(" ")[1];       
+                timeunits=timeperiod.split(" ")[1];
                 beginningtime.subtract(timevalue,timeunits);
             }
 
@@ -157,7 +130,7 @@ if (Meteor.isClient) {
                     }
             return basecriteria;
         }
-    
+
         function _getFilters() {
             //build a list of what charts are selecting what.
             //expects chart.mongoField to specify
@@ -180,7 +153,7 @@ if (Meteor.isClient) {
             //console.log('getfilters result is', result);
             return result;
         }
-    
+
         function _fetchDataFor(filters) {
             results = {};
 
@@ -282,10 +255,10 @@ if (Meteor.isClient) {
                 }
             }
         }
-                
+
         //helper functions to make
         //mongo look like crossfilter
-        mongoCrossfilter._dataChanged = true;        
+        mongoCrossfilter._dataChanged = true;
         mongoCrossfilter._fetchData =  _fetchData;
         mongoCrossfilter._fetchDataFor = _fetchDataFor;
         mongoCrossfilter._getFilters = _getFilters;
@@ -303,7 +276,7 @@ if (Meteor.isClient) {
                 //orderNatural: orderNatural,
                 //size: size,
                 //dispose: dispose,
-                //remove: dispose // for backwards-compatibility                
+                //remove: dispose // for backwards-compatibility
             }
             group.values=[];
             group.mongoField=mongoFilterField;
@@ -312,7 +285,7 @@ if (Meteor.isClient) {
             function setValues(values){
                 if (group.fieldFunction){
                     values.forEach(group.fieldFunction);
-                }                
+                }
                 group.values=values;
             }
             function top(){
@@ -322,12 +295,12 @@ if (Meteor.isClient) {
                 chartResults=_.map(chartCounts,
                     function(count,field){
                       return {'key':field,'value':count}
-                    });              
+                    });
                 return chartResults;
             }
             function all(){
                 //console.log('group.all called for ',group.chart.anchorName());
-                mongoCrossfilter._fetchData();             
+                mongoCrossfilter._fetchData();
                 chartCounts=_.countBy(group.values, function(d){ return d[group.mongoField]; });
                 //console.log(chartCounts);
                 chartResults=_.map(chartCounts,
@@ -375,7 +348,7 @@ if (Meteor.isClient) {
             function setValues(values){
                 if (dimension.fieldFunction){
                     values.forEach(dimension.fieldFunction);
-                }                 
+                }
                 dimension.values=values;
             }
             function filter(){
@@ -422,7 +395,7 @@ if (Meteor.isClient) {
                 return dimension.values;
             }
             function dispose(){
-                
+
             }
             function remove(){
             }
@@ -438,12 +411,12 @@ if (Meteor.isClient) {
         var jdateDim =mongoCrossfilter.dimension('utcepoch',
                                                  volumeChart,
                                                  function(d) {d.utcepoch=new Date(Date.parse(d.utctimestamp))})
-        
+
         //utility functions
         function descNumbers(a, b) {
             return b-a;
         }
-    
+
         refreshVolumeChartXAxis=function(){
             //re-read the dimension max/min dates
             //and set the x attribute accordingly.
@@ -497,7 +470,7 @@ if (Meteor.isClient) {
             chartsInitialized=true;
 
         };
-        
+
         refreshAlertsData=function(){
             //walk the chartRegistry
             list = dc.chartRegistry.list('alertssummary')
@@ -511,7 +484,7 @@ if (Meteor.isClient) {
             refreshVolumeChartXAxis();
             //re-render
             dc.renderAll("alertssummary");
-           
+
         }
 
         hookAlertsCount = function(){
@@ -530,13 +503,13 @@ if (Meteor.isClient) {
                                         .observe(
                                                 {addedAt: function(document,atIndex,before){
                                                     if (before !== null && atIndex==0){
-                                                        //console.log('document added' + moment().format(), atIndex,before);                                                        
+                                                        //console.log('document added' + moment().format(), atIndex,before);
                                                         //actual insert into the index, not an initial collection subscribe fill.
                                                         //refresh the charts:
                                                         refreshAlertsData();
                                                     }
                                                 }
-                                        });            
+                                        });
         };
 
         Tracker.autorun(function(comp) {
@@ -556,9 +529,9 @@ if (Meteor.isClient) {
         }); //end deps.autorun
 
     };
- 
+
     Template.alertssummary.destroyed = function () {
-        dc.deregisterAllCharts('alertssummary');    
+        dc.deregisterAllCharts('alertssummary');
     };
 
 };

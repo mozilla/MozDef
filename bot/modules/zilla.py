@@ -5,10 +5,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-#
-# Contributors:
-# kang@mozilla.com
-#
 
 import logging
 from kitnirc.client import Channel
@@ -66,13 +62,17 @@ class Zilla(Module):
             except AttributeError:
                 _log.warning("zilla could not load search terms")
                 return
-            try:
-                res = self._bugzilla.search_bugs(terms)
-            except:
-                return
-            for bug in res['bugs']:
-                self.controller.client.msg(self.channel, "\x037\x02WARNING\x03\x02 \x032\x02NEW\x03\x02 bug: {url}{bugid} {summary}".format(summary=bug['summary'],
-                    url=self.url, bugid=bug['id']))
+
+            for search_group in terms:
+                try:
+                    res = self._bugzilla.search_bugs(search_group)
+                except Exception as e:
+                    _log.error('Error querying bugzilla' + str(e))
+                    return
+                for bug in res['bugs']:
+                    bugsummary = bug['summary'].encode('utf-8', 'replace')
+                    self.controller.client.msg(self.channel, "\x037\x02WARNING\x03\x02 \x032\x02NEW\x03\x02 bug: {url}{bugid} {summary}".format(summary=bugsummary,
+                        url=self.url, bugid=bug['id']))
 
     def start(self, *args, **kwargs):
         super(Zilla, self).start(*args, **kwargs)

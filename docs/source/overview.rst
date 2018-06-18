@@ -1,12 +1,16 @@
 Overview
 ========
+What?
+----
+Easiest to describe The Mozilla Defense Platform (MozDef) as a set of micro-services you can use as an open source Security Informaition and Event Management (SIEM) overlay on top of Elasticsearch.
 
 Why?
 ----
 
 The inspiration for MozDef comes from the large arsenal of tools available to attackers.
-Suites like metasploit, armitage, lair, dradis and others are readily available to help attackers coordinate, share intelligence and finely tune their attacks in real time.
-Defenders are usually limited to wikis, ticketing systems and manual tracking databases attached to the end of a Security Information Event Management (SIEM) system.
+Open source suites like metasploit, armitage, lair, dradis and others are readily available to help attackers coordinate, share intelligence and finely tune their attacks in real time.
+
+Open source options for defenders are usually limited to wikis, ticketing systems and manual tracking databases attached to the end of a commercial SIEM.
 
 The Mozilla Defense Platform (MozDef) seeks to automate the security incident handling process and facilitate the real-time activities of incident handlers.
 
@@ -17,7 +21,7 @@ High level
 **********
 
 * Provide a platform for use by defenders to rapidly discover and respond to security incidents.
-* Automate interfaces to other systems like MIG, flowspec, load balancers, etc
+* Automate interfaces to other systems like firewalls, cloud protections and anything that has an API
 * Provide metrics for security events and incidents
 * Facilitate real-time collaboration amongst incident handlers
 * Facilitate repeatable, predictable processes for incident handling
@@ -26,7 +30,7 @@ High level
 Technical
 *********
 
-* Replace a Security Information and Event Management (SIEM)
+* Offer micro services that make up an Open Source Security Information and Event Management (SIEM)
 * Scalable, should be able to handle thousands of events per second, provide fast searching, alerting, correlation and handle interactions between teams of incident handlers.
 
 MozDef aims to provide traditional SIEM functionality including:
@@ -41,8 +45,10 @@ It is non-traditional in that it:
 
 * Accepts only JSON input
 * Provides you open access to your data
-* Integrates with a variety of log shippers including  heka, logstash, beaver, nxlog and any shipper that can send JSON to either rabbit-mq or an HTTP endpoint.
+* Integrates with a variety of log shippers including logstash, beaver, nxlog, syslog-ng and any shipper that can send JSON to either rabbit-mq or an HTTP(s) endpoint.
+* Provides easy integration to Cloud-based data sources such as cloudtrail or guard duty
 * Provides easy python plugins to manipulate your data in transit
+* Provides extensive plug-in opportunities to customize your event enrichment stream, your alert workflow, etc
 * Provides realtime access to teams of incident responders to allow each other to see their work simultaneously
 
 
@@ -66,7 +72,7 @@ MozDef is based on open source technologies including:
 Frontend processing
 *******************
 
-Frontend processing for MozDef consists of receiving an event/log (in json) over HTTP(S) or AMQP(S),
+Frontend processing for MozDef consists of receiving an event/log (in json) over HTTP(S), AMQP(S), or SQS
 doing data transformation including normalization, adding metadata, etc. and pushing
 the data to elasticsearch.
 
@@ -79,7 +85,7 @@ the RabbitMQ exchanges and elasticsearch indices.
 Status
 ------
 
-MozDef is in production at Mozilla where we are using it to process over 300 million events per day.
+MozDef has been in production at Mozilla since 2014 where we are using it to process over 300 million events per day.
 
 Roadmap
 -------
@@ -90,22 +96,20 @@ Initial Release:
 * Enhance the incident workflow UI to enable realtime collaboration
 * Enable basic plug-ins to the event input stream for meta data, additional parsing, categorization and basic machine learning
 * Support as many common event/log shippers as possible with repeatable recipies
-* 3D visualizations of threat actors
-
-Mid term:
-
-* Repeatable installation guides
-* Ready-made AMIs/downloadable ISOs
-* Correlation through machine learning, AI
 * Base integration into Mozilla's defense mechanisms for automation
+* 3D visualizations of threat actors
 * Fine tuning of interactions between meteor, mongo, dc.js
-* Support a variety of authentication/authorization schemes/technologies
-* Plain text version of attackers
+
+Recently implemented:
+
+* Support for OIDC authentication/authorization
+* Docker containers for each service
+* Updates to support recent (breaking) versions of Elasticsearch
+
+Future (join us!): 
+
+* Correlation through machine learning, AI
 * Enhanced search for alerts, events, attackers within the MozDef UI
-
-Long term:
-
 * Integration into common defense mechanisms used outside Mozilla
-* Enhanced visualizations and interactions including alternative interfaces (myo, omnidirectional treadmills, oculus rift)
 
 

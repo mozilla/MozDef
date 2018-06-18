@@ -6,11 +6,10 @@ Web Interface
 -------------
 
 MozDef uses the `Meteor framework`_ for the web interface and bottle.py for the REST API.
-For authentication, MozDef ships with native support for `Persona`_.
-Meteor (the underlying UI framework) also supports `many authentication options`_ including google, github, twitter, facebook, oath, native accounts, etc.
+For authentication, MozDef supports local account creation.
+Meteor (the underlying UI framework) supports `many authentication options`_ including google, github, twitter, facebook, oath, native accounts, etc.
 
 .. _Meteor framework: https://www.meteor.com/
-.. _Persona: https://login.persona.org/about
 .. _many authentication options: http://docs.meteor.com/#accounts_api
 
 Events visualizations
@@ -50,7 +49,7 @@ We have `some configuration snippets`_
 .. _logstash: http://logstash.net/
 .. _native python code: https://github.com/gdestuynder/mozdef_lib
 .. _AWS cloudtrail: https://aws.amazon.com/cloudtrail/
-.. _some configuration snippets: https://github.com/jeffbryner/MozDef/tree/master/examples
+.. _some configuration snippets: https://github.com/mozilla/MozDef/tree/master/examples
 
 What should I log?
 ******************
@@ -150,50 +149,59 @@ MozDef will perform some translation of fields to a common schema but this is in
 Mandatory Fields
 ****************
 
-+------------+-------------------------------------+-----------------------------------+
-|    Field   |             Purpose                 |            Sample Value           |
-+============+=====================================+===================================+
-| category   | General category/type of event      | Authentication, Authorization,    |
-|            | matching the 'what should I log'    | Account Creation, Shutdown,       |
-|            | section below                       | Startup, Account Deletion,        |
-|            |                                     | Account Unlock, brointel,         |
-|            |                                     | bronotice                         |
-+------------+-------------------------------------+-----------------------------------+
-| details    | Additional, event-specific fields   | "dn": "john@example.com,o=com,    |
-|            | that you would like included with   | dc=example", "facility": "daemon" |
-|            | the event. Please completely spell  |                                   |
-|            | out a field rather an abbreviate:   |                                   |
-|            | i.e. sourceipaddress instead of     |                                   |
-|            | srcip.                              |                                   |
-+------------+-------------------------------------+-----------------------------------+
-| hostname   | The fully qualified domain name of  | server1.example.com               |
-|            | the host sending the message        |                                   |
-+------------+-------------------------------------+-----------------------------------+
-| processid  | The PID of the process sending the  | 1234                              |
-|            | log                                 |                                   |
-+------------+-------------------------------------+-----------------------------------+
-|processname | The name of the process sending the | myprogram.py                      |
-|            | log                                 |                                   |
-+------------+-------------------------------------+-----------------------------------+
-| severity   | RFC5424 severity level of the event | INFO                              |
-|            | in all caps: DEBUG, INFO, NOTICE,   |                                   |
-|            | WARNING, ERROR, CRITICAL, ALERT,    |                                   |
-|            | EMERGENCY                           |                                   |
-+------------+-------------------------------------+-----------------------------------+
-| source     | Source of the event (file name,     | /var/log/syslog/2014.01.02.log    |
-|            | system name, component name)        |                                   |
-+------------+-------------------------------------+-----------------------------------+
-| summary    | Short human-readable version of the | john login attempts over          |
-|            | event suitable for IRC, SMS, etc.   | threshold, account locked         |
-+------------+-------------------------------------+-----------------------------------+
-| tags       | An array or list of any tags you    | vpn, audit                        |
-|            | would like applied to the event     |                                   |
-|            |                                     | nsm,bro,intel                     |
-+------------+-------------------------------------+-----------------------------------+
-| timestamp  | Full date plus time timestamp of    | 2014-01-30T19:24:43+00:00         |
-|            | the event in ISO format including   |                                   |
-|            | the timezone offset                 |                                   |
-+------------+-------------------------------------+-----------------------------------+
++-----------------+-------------------------------------+-----------------------------------+
+|    Field        |             Purpose                 |            Sample Value           |
++=================+=====================================+===================================+
+| category        | General category/type of event      | Authentication, Authorization,    |
+|                 | matching the 'what should I log'    | Account Creation, Shutdown,       |
+|                 | section below                       | Startup, Account Deletion,        |
+|                 |                                     | Account Unlock, brointel,         |
+|                 |                                     | bronotice                         |
++-----------------+-------------------------------------+-----------------------------------+
+| details         | Additional, event-specific fields   | "dn": "john@example.com,o=com,    |
+|                 | that you would like included with   | dc=example", "facility": "daemon" |
+|                 | the event. Please completely spell  |                                   |
+|                 | out a field rather an abbreviate:   |                                   |
+|                 | i.e. sourceipaddress instead of     |                                   |
+|                 | srcip.                              |                                   |
++-----------------+-------------------------------------+-----------------------------------+
+| hostname        | The fully qualified domain name of  | server1.example.com               |
+|                 | the host sending the message        |                                   |
++-----------------+-------------------------------------+-----------------------------------+
+| processid       | The PID of the process sending the  | 1234                              |
+|                 | log                                 |                                   |
++-----------------+-------------------------------------+-----------------------------------+
+|processname      | The name of the process sending the | myprogram.py                      |
+|                 | log                                 |                                   |
++-----------------+-------------------------------------+-----------------------------------+
+| severity        | RFC5424 severity level of the event | INFO                              |
+|                 | in all caps: DEBUG, INFO, NOTICE,   |                                   |
+|                 | WARNING, ERROR, CRITICAL, ALERT,    |                                   |
+|                 | EMERGENCY                           |                                   |
++-----------------+-------------------------------------+-----------------------------------+
+| source          | Source of the event (file name,     | /var/log/syslog/2014.01.02.log    |
+|                 | system name, component name)        |                                   |
++-----------------+-------------------------------------+-----------------------------------+
+| summary         | Short human-readable version of the | john login attempts over          |
+|                 | event suitable for IRC, SMS, etc.   | threshold, account locked         |
++-----------------+-------------------------------------+-----------------------------------+
+| tags            | An array or list of any tags you    | vpn, audit                        |
+|                 | would like applied to the event     |                                   |
+|                 |                                     | nsm,bro,intel                     |
++-----------------+-------------------------------------+-----------------------------------+
+| timestamp       | Full date plus time timestamp of    | 2014-01-30T19:24:43+06:00         |
+|                 | the event in ISO format including   |                                   |
+|                 | the timezone offset                 |                                   |
++-----------------+-------------------------------------+-----------------------------------+
+|utctimestamp     | Full UTC date plus time timestamp of| 2014-01-30T13:24:43+00:00         |
+|                 | the event in ISO format including   |                                   |
+|                 | the timezone offset                 |                                   |
++-----------------+-------------------------------------+-----------------------------------+
+|receivedtimestamp| Full UTC date plus time timestamp in| 2014-01-30T13:24:43+00:00         |
+|                 | ISO format when mozdef parses the   |                                   |
+|                 | event. This is set by mozdef upon   |                                   |
+|                 | receipt of the event                |                                   |
++-----------------+-------------------------------------+-----------------------------------+
 
 Details substructure (mandatory if such data is sent, otherwise optional)
 *************************************************************************
@@ -269,8 +277,6 @@ There are two types of alerts:
 * simple alerts that consider events on at a time. For example you may want to get an alert everytime a single LDAP modification is detected.
 * aggregation alerts allow you to aggregate events on the field of your choice. For example you may want to alert when more than 3 login attempts failed for the same username.
 
-To narrow the events your alert sees, you need to specify filters. You can either use `pyes`_ to do that or load them from a Kibana dashboard.
-
 You'll find documented examples in the `alerts`_ folder.
 
 Once you've written your alert, you need to configure it in celery to be launched periodically.
@@ -280,5 +286,5 @@ If you have a ``AlertBruteforceSsh`` class in a ``alerts/bruteforce_ssh.py`` fil
 		'bruteforce_ssh.AlertBruteforceSsh': crontab(minute='*/1'),
 	}
 
-.. _alerts: https://github.com/jeffbryner/MozDef/tree/master/alerts
-.. _pyes: http://pyes.readthedocs.org/
+.. _alerts: https://github.com/mozilla/MozDef/tree/master/alerts
+.. _query_models: https://github.com/mozilla/MozDef/tree/master/lib/query_models
