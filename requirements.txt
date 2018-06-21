@@ -59,4 +59,5 @@ supervisor==3.3.1
 tzlocal==1.4
 uritemplate==0.6
 urllib3==1.22
+uwsgi==2.0.12
 virtualenv==1.11.4
