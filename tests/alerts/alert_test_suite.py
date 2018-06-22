@@ -20,7 +20,11 @@ import json
 
 
 class AlertTestSuite(UnitTestSuite):
+    def teardown(self):
+        os.chdir(self.orig_path)
+
     def setup(self):
+        self.orig_path = os.getcwd()
         super(AlertTestSuite, self).setup()
 
         alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")

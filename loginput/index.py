@@ -23,7 +23,7 @@ def status():
         request.body.close()
     response.status = 200
     response.content_type = "application/json"
-    response.body = json.dumps(dict(status='ok'))
+    response.body = json.dumps(dict(status='ok', service='loginput'))
     return response
 
 @route('/test')
