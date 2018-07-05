@@ -5,7 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 -->
 
-<!--a striped table of our ip blocks-->
+<!--a striped table of our fqdn blocks-->
 <template name="fqdnblocklist">
     <div class="fqdnblocklist container">
         <div class="fluid center">
@@ -32,8 +32,8 @@ Copyright (c) 2014 Mozilla Corporation
     </div>
 </template>
 
-<!--each individual ipblock -->
-<template name="each_ipblock">
+<!--each individual fqdnblock -->
+<template name="each_fqdnblock">
 
     <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateAdded}}" data-toggle="tooltip">
         <td></td>
@@ -46,7 +46,7 @@ Copyright (c) 2014 Mozilla Corporation
         <td>
             <button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#delete{{_id}}">arm delete</button>
             <div id="delete{{_id}}" class="collapse">
-                <button class="btn btn-xs btn-danger fqdnblockdelete" data-ipblockid={{_id}}>delete</button>
+                <button class="btn btn-xs btn-danger fqdnblockdelete" data-fqdnblockid={{_id}}>delete</button>
             </div>
         </td>
     </tr>
