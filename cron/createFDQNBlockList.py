@@ -78,7 +78,6 @@ def main():
         client = MongoClient(options.mongohost, options.mongoport)
         mozdefdb = client.meteor
         fqdnblocklist = mozdefdb['fqdnblocklist']
-        attackers=mozdefdb['attackers']
         # ensure indexes
         fqdnblocklist.create_index([('dateExpiring',-1)])
 
@@ -148,9 +147,6 @@ def initConfig():
 
     # Category to choose
     options.category = getConfig('category', 'bruteforcer', options.configfile)
-
-    # Max days to look back for attackers
-    #options.attackerage = getConfig('attackerage',90,options.configfile)
 
     # Days after expiration that we purge an fqdnblocklist entry (from the ui, they don't end up in the export after expiring)
     options.expireage = getConfig('expireage',1,options.configfile)
