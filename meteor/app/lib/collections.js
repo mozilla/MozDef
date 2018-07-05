@@ -22,6 +22,8 @@ Copyright (c) 2014 Mozilla Corporation
     actions = new Meteor.Collection("actions");
     userActivity = new Meteor.Collection("userActivity");
     ipblocklist = new Meteor.Collection("ipblocklist");
+    fqdnblocklist = new Meteor.Collection("fqdnblocklist");
+
 
 if (Meteor.isServer) {
     //Publishing setups
@@ -272,6 +274,10 @@ if (Meteor.isServer) {
         return ipblocklist.find({},{limit:0});
     })
 
+    Meteor.publish("fqdnblocklist", function () {
+        return fqdnblocklist.find({},{limit:0});
+    })
+
    //access rules from clients
    //barebones to allow you to specify rules
 
@@ -333,20 +339,37 @@ if (Meteor.isServer) {
     });
 
     ipblocklist.allow({
-        insert: function (userId, doc) {
-          // the user must be logged in
-          return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-          // the user must be logged in
-          return (userId);
-        },
-        remove: function (userId, doc) {
-          // the user must be logged in
-          return (userId);
-        },
-        fetch: ['creator']
-      });
+      insert: function (userId, doc) {
+        // the user must be logged in
+        return (userId);
+      },
+      update: function (userId, doc, fields, modifier) {
+        // the user must be logged in
+        return (userId);
+      },
+      remove: function (userId, doc) {
+        // the user must be logged in
+        return (userId);
+      },
+      fetch: ['creator']
+    });
+
+    fqdnblocklist.allow({
+      insert: function (userId, doc) {
+        // the user must be logged in
+        return (userId);
+      },
+      update: function (userId, doc, fields, modifier) {
+        // the user must be logged in
+        return (userId);
+      },
+      remove: function (userId, doc) {
+        // the user must be logged in
+        return (userId);
+      },
+      fetch: ['creator']
+    });
+
 };
 
 if (Meteor.isClient) {

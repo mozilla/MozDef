@@ -48,6 +48,11 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
 
+    this.route('fqdnblocklist', {
+        path: '/fqdnblocklist',
+        template: 'fqdnblocklist',
+        layoutTemplate: 'layout'
+    });
 
     this.route('investigations', {
         path: '/investigations',
@@ -151,6 +156,16 @@ Router.map(function () {
         },
         layoutTemplate: 'layout'
     });
+
+    this.route('blockfqdn', {
+        path: '/blockfqdn/:_fqdn',
+        template: 'blockFQDNform',
+        data: function() {
+            Session.set('blockFQDN', this.params._fqdn);
+        },
+        layoutTemplate: 'layout'
+    });
+
 
     this.route('ipwhois', {
         path: '/ipwhois/:_ipaddress',

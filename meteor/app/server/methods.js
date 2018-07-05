@@ -57,6 +57,18 @@ if (Meteor.isServer) {
         }
     }
 
+    function blockFQDN(formobj) {
+        var blockFQDNRequest = HTTP.post(mozdef.rootAPI + '/blockfqdn', {data: formobj});
+
+        if (blockFQDNRequest.statusCode==200) {
+            console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
+            return true;
+        } else {
+            console.log("Could not send to "+ mozdef.rootAPI + '/blockfqdn ' + JSON.stringify(formobj) );
+            return blockFQDNRequest;
+        }
+    }
+
     function ipwhois(ipaddress){
         //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipwhois/');
         var ipwhoisResponse = HTTP.post(mozdef.rootAPI + '/ipwhois/',{data: {'ipaddress':ipaddress}});
