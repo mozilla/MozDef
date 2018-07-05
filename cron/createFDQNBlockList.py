@@ -1,0 +1,248 @@
+#!/usr/bin/env python
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# Copyright (c) 2014 Mozilla Corporation
+
+import boto
+import boto.s3
+import logging
+import netaddr
+import random
+import sys
+from datetime import datetime
+from datetime import timedelta
+from configlib import getConfig, OptionParser
+from logging.handlers import SysLogHandler
+from pymongo import MongoClient
+
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
+from utilities.toUTC import toUTC
+
+
+logger = logging.getLogger(sys.argv[0])
+
+
+def loggerTimeStamp(self, record, datefmt=None):
+    return toUTC(datetime.now()).isoformat()
+
+def initLogger():
+    logger.level = logging.INFO
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter.formatTime = loggerTimeStamp
+    if options.output == 'syslog':
+        logger.addHandler(
+            SysLogHandler(
+                address=(options.sysloghostname, options.syslogport)))
+    else:
+        sh = logging.StreamHandler(sys.stderr)
+        sh.setFormatter(formatter)
+        logger.addHandler(sh)
+
+def genMeteorID():
+    return('%024x' % random.randrange(16**24))
+
+def isFQDN(fqdn):
+    try:
+        # We could resolve FQDNs here, but that could tip our hand and it's 
+        # possible us investigating could trigger other alerts.  As such,
+        # validation will consist of making sure we have a dot noted string
+        #with two or more tokens
+        # Positive Example: example.com (2 tokens, 'example' and 'com' == valid)
+        # Positive Example: foo.example.com (3 tokens, 'example' and 'com' == valid)
+        # Negative Example: com (1 token, 'com' == invalid)
+        if '.' in fqdn and len(ip.split('.'))>=2:
+            return True
+        else:
+            return False
+    except:
+        return False
+
+# pretty sure this isn't relevant in an FDQN context
+# TODO: be sure of this before removing fully
+# def aggregateAttackerIPs(attackers):
+#     iplist = []
+
+#     # Set the attacker age timestamp
+#     attackerage = datetime.now() - timedelta(days=options.attackerage)
+
+#     ips = attackers.aggregate([
+#         {"$sort": {"lastseentimestamp": -1}},
+#         {"$match": {"category": options.category}},
+#         {"$match": {"lastseentimestamp": {"$gte": attackerage}}},
+#         {"$match": {"indicators.ipv4address": {"$exists": True}}},
+#         {"$group": {"_id": {"ipv4address": "$indicators.ipv4address"}}},
+#         {"$unwind": "$_id.ipv4address"},
+#         {"$limit": options.iplimit}
+#     ])
+
+#     for i in ips:
+#         whitelisted = False
+#         logger.debug('working {0}'.format(i))
+#         ip = i['_id']['ipv4address']
+#         ipcidr=netaddr.IPNetwork(ip)
+#         if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
+#             for whitelist_range in options.ipwhitelist:
+#                 whitelist_network = netaddr.IPNetwork(whitelist_range)
+#                 if ipcidr in whitelist_network:
+#                     logger.debug(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
+#                     whitelisted = True
+
+#             #strip any host bits 192.168.10/24 -> 192.168.0/24
+#             ipcidrnet=str(ipcidr.cidr)
+#             if ipcidrnet not in iplist and not whitelisted:
+#                 iplist.append(ipcidrnet)
+#         else:
+#             logger.debug('invalid:' + ip)
+#     return iplist
+
+def parse_fqdn_whitelist(fqdn_whitelist_location):
+    fqdns = []
+    with open(fqdn_whitelist_location, "r") as text_file:
+        for line in text_file:
+            line=line.strip().strip("'").strip('"')
+            if isFQDN(line):
+                fqdns.append(line)
+    return fqdns
+
+def main():
+    logger.debug('starting')
+    logger.debug(options)
+    try:
+        # connect to mongo
+        client = MongoClient(options.mongohost, options.mongoport)
+        mozdefdb = client.meteor
+        fqdnblocklist = mozdefdb['fqdnblocklist']
+        attackers=mozdefdb['attackers']
+        # ensure indexes
+        fqdnblocklist.create_index([('dateExpiring',-1)])
+
+        # TODO: determine if this is relevant in this context
+        # attackers.create_index([('lastseentimestamp',-1)])
+        # attackers.create_index([('category',1)])
+
+        # First, gather IP addresses from recent attackers and add to the block list
+        # attackerIPList = aggregateAttackerIPs(attackers)
+
+        # add attacker IPs to the blocklist
+        # first delete ones we've created from an attacker
+        # ipblocklist.delete_many({'creator': 'mozdef','reference':'attacker'})
+
+        # delete any that expired
+        fqdnblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(days=options.expireage)}})
+
+        # add the aggregations we've found recently
+        # for ip in attackerIPList:
+        #     ipblocklist.insert_one(
+        #         {'_id': genMeteorID(),
+        #          'address':ip,
+        #          'reference': 'attacker',
+        #          'creator':'mozdef',
+        #          'dateAdded': datetime.utcnow()})
+
+        # Lastly, export the combined blocklist
+        fqdnCursor=mozdefdb['fqdnblocklist'].aggregate([
+                {"$sort": {"dateAdded": -1}},
+                {"$match": {"address": {"$exists": True}}},
+                {"$match":
+                    {"$or":[
+                        {"dateExpiring": {"$gte": datetime.utcnow()}},
+                        {"dateExpiring": {"$exists": False}},
+                    ]},
+                },
+                {"$project":{"address":1}},
+                {"$limit": options.iplimit}
+            ])
+        FQDNList=[]
+        for fqdn in fqdnCursor:
+            # TODO: figure out what to do here
+            FQDNList.append(ip['address'])
+        # to text
+        with open(options.outputfile, 'w') as outputfile:
+            for fqdn in FQDNList:
+                outputfile.write("{0}\n".format(fqdn))
+        outputfile.close()
+        # to s3?
+        if len(options.aws_bucket_name)>0:
+            s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
+
+
+    except ValueError as e:
+        logger.error("Exception %r generating IP block list" % e)
+
+
+def initConfig():
+    # output our log to stdout or syslog
+    options.output = getConfig('output', 'stdout', options.configfile)
+    # syslog hostname
+    options.sysloghostname = getConfig('sysloghostname',
+                                       'localhost',
+                                       options.configfile)
+    # syslog port
+    options.syslogport = getConfig('syslogport', 514, options.configfile)
+
+    # mongo instance
+    options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
+    options.mongoport = getConfig('mongoport', 3001, options.configfile)
+
+    # CIDR whitelist as a line separted list of 8.8.8.0/24 style masks
+    options.fqdn_list_file = getConfig('fqdn_whitelist_file', '', options.configfile)
+    options.ipwhitelist = parse_network_whitelist(options.network_list_file)
+
+    # Output File Name
+    options.outputfile = getConfig('outputfile', 'fqdnblocklist.txt', options.configfile)
+
+    # Category to choose
+    options.category = getConfig('category', 'bruteforcer', options.configfile)
+
+    # Max days to look back for attackers
+    #options.attackerage = getConfig('attackerage',90,options.configfile)
+
+    # Days after expiration that we purge an fqdnblocklist entry (from the ui, they don't end up in the export after expiring)
+    options.expireage = getConfig('expireage',1,options.configfile)
+
+    # Max FQDNs to emit
+    options.iplimit = getConfig('fqdnlimit', 1000, options.configfile)
+
+    # AWS creds
+    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to mozilla_infosec_blocklist
+    options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
+    options.aws_bucket_name=getConfig('aws_bucket_name','',options.configfile)
+    options.aws_document_key_name=getConfig('aws_document_key_name','',options.configfile)
+
+
+def s3_upload_file(file_path, bucket_name, key_name):
+    """
+    Upload a file to the given s3 bucket and return a template url.
+    """
+    conn = boto.connect_s3(aws_access_key_id=options.aws_access_key_id,aws_secret_access_key=options.aws_secret_access_key)
+    try:
+        bucket = conn.get_bucket(bucket_name, validate=False)
+    except boto.exception.S3ResponseError as e:
+        conn.create_bucket(bucket_name)
+        bucket = conn.get_bucket(bucket_name, validate=False)
+
+
+    key = boto.s3.key.Key(bucket)
+    key.key = key_name
+    key.set_contents_from_filename(file_path)
+
+    key.set_acl('public-read')
+    url = "https://s3.amazonaws.com/{}/{}".format(bucket.name, key.name)
+    print( "URL: {}".format(url))
+    return url
+
+if __name__ == '__main__':
+    parser = OptionParser()
+    parser.add_option(
+        "-c",
+        dest='configfile',
+        default=sys.argv[0].replace('.py', '.conf'),
+        help="configuration file to use")
+    (options, args) = parser.parse_args()
+    initConfig()
+    initLogger()
+    main()
