@@ -7,7 +7,7 @@ Copyright (c) 2014 Mozilla Corporation
 
 if (Meteor.isClient) {
 
-    Template.blockIPform.rendered = function() {
+    Template.blockFQDNform.rendered = function() {
         $('#fqdn')[0].value = Session.get('blockFQDN');
     };
 

@@ -104,12 +104,12 @@ def main():
                     ]},
                 },
                 {"$project":{"address":1}},
-                {"$limit": options.iplimit}
+                {"$limit": options.fqdnlimit}
             ])
         FQDNList=[]
         for fqdn in fqdnCursor:
             # TODO: figure out what to do here
-            FQDNList.append(ip['address'])
+            FQDNList.append(fqdn['address'])
         # to text
         with open(options.outputfile, 'w') as outputfile:
             for fqdn in FQDNList:
@@ -121,7 +121,7 @@ def main():
 
 
     except ValueError as e:
-        logger.error("Exception %r generating IP block list" % e)
+        logger.error("Exception %r generating FQDN block list" % e)
 
 
 def initConfig():
@@ -152,7 +152,7 @@ def initConfig():
     options.expireage = getConfig('expireage',1,options.configfile)
 
     # Max FQDNs to emit
-    options.iplimit = getConfig('fqdnlimit', 1000, options.configfile)
+    options.fqdnlimit = getConfig('fqdnlimit', 1000, options.configfile)
 
     # AWS creds
     options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to mozilla_infosec_blocklist
