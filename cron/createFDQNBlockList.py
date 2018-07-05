@@ -61,44 +61,6 @@ def isFQDN(fqdn):
     except:
         return False
 
-# pretty sure this isn't relevant in an FDQN context
-# TODO: be sure of this before removing fully
-# def aggregateAttackerIPs(attackers):
-#     iplist = []
-
-#     # Set the attacker age timestamp
-#     attackerage = datetime.now() - timedelta(days=options.attackerage)
-
-#     ips = attackers.aggregate([
-#         {"$sort": {"lastseentimestamp": -1}},
-#         {"$match": {"category": options.category}},
-#         {"$match": {"lastseentimestamp": {"$gte": attackerage}}},
-#         {"$match": {"indicators.ipv4address": {"$exists": True}}},
-#         {"$group": {"_id": {"ipv4address": "$indicators.ipv4address"}}},
-#         {"$unwind": "$_id.ipv4address"},
-#         {"$limit": options.iplimit}
-#     ])
-
-#     for i in ips:
-#         whitelisted = False
-#         logger.debug('working {0}'.format(i))
-#         ip = i['_id']['ipv4address']
-#         ipcidr=netaddr.IPNetwork(ip)
-#         if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
-#             for whitelist_range in options.ipwhitelist:
-#                 whitelist_network = netaddr.IPNetwork(whitelist_range)
-#                 if ipcidr in whitelist_network:
-#                     logger.debug(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
-#                     whitelisted = True
-
-#             #strip any host bits 192.168.10/24 -> 192.168.0/24
-#             ipcidrnet=str(ipcidr.cidr)
-#             if ipcidrnet not in iplist and not whitelisted:
-#                 iplist.append(ipcidrnet)
-#         else:
-#             logger.debug('invalid:' + ip)
-#     return iplist
-
 def parse_fqdn_whitelist(fqdn_whitelist_location):
     fqdns = []
     with open(fqdn_whitelist_location, "r") as text_file:
@@ -119,17 +81,6 @@ def main():
         attackers=mozdefdb['attackers']
         # ensure indexes
         fqdnblocklist.create_index([('dateExpiring',-1)])
-
-        # TODO: determine if this is relevant in this context
-        # attackers.create_index([('lastseentimestamp',-1)])
-        # attackers.create_index([('category',1)])
-
-        # First, gather IP addresses from recent attackers and add to the block list
-        # attackerIPList = aggregateAttackerIPs(attackers)
-
-        # add attacker IPs to the blocklist
-        # first delete ones we've created from an attacker
-        # ipblocklist.delete_many({'creator': 'mozdef','reference':'attacker'})
 
         # delete any that expired
         fqdnblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(days=options.expireage)}})
