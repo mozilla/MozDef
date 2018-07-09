@@ -16,7 +16,6 @@ if (Meteor.isClient) {
         }
     });
 
-    //select an incident for editing
     Template.fqdnblocklist.events({
         "click .fqdnblockadd": function(e,t){
             //clear any leftover fqdn session val
