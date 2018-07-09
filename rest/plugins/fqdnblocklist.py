@@ -14,14 +14,14 @@ from pymongo import MongoClient
 
 def isFQDN(fqdn):
     try:
-        # We could resolve FQDNs here, but that could tip our hand and it's 
+        # We could resolve FQDNs here, but that could tip our hand and it's
         # possible us investigating could trigger other alerts.  As such,
         # validation will consist of making sure we have a dot noted string
         #with two or more tokens
         # Positive Example: example.com (2 tokens, 'example' and 'com' == valid)
         # Positive Example: foo.example.com (3 tokens, 'example' and 'com' == valid)
         # Negative Example: com (1 token, 'com' == invalid)
-        if '.' in fqdn and len(ip.split('.'))>=2:
+        if '.' in fqdn and len(fqdn.split('.'))>=2:
             return True
         else:
             return False
@@ -65,7 +65,7 @@ class message(object):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
         self.initConfiguration()
 
-    def parse_fqdn_whitelist(self, network_whitelist_location):
+    def parse_fqdn_whitelist(self, fqdn_whitelist_location):
         fqdns = []
         with open(fqdn_whitelist_location, "r") as text_file:
             for line in text_file:
@@ -95,7 +95,7 @@ class message(object):
             self.configfile)
 
         # FQDN whitelist as a comma separted list of example.com or foo.bar.com style names
-        self.options.network_whitelist_file = getConfig('network_whitelist_file', '/dev/null', self.configfile)
+        self.options.fqdn_whitelist_file = getConfig('fqdn_whitelist_file', '/dev/null', self.configfile)
 
         # optional statuspage.io integration
         self.options.statuspage_api_key = getConfig(
@@ -133,7 +133,7 @@ class message(object):
             if isFQDN(fqdn):
 
                 # already in the table?
-                fqdnblock = fqdnblocklist.find_one({'ipaddress': fqdn})
+                fqdnblock = fqdnblocklist.find_one({'fqdn': fqdn})
                 if fqdnblock is None:
                     # insert
                     fqdnblock= dict()
@@ -203,8 +203,8 @@ class message(object):
         '''
         response.headers['X-PLUGIN'] = self.description
 
-        # Refresh the ip network list each time we get a message
-        self.options.ipwhitelist = self.parse_fqdn_whitelist(self.options.fqdn_whitelist_file)
+        # Refresh the whitelist each time we get a message
+        self.options.fqdnwhitelist = self.parse_fqdn_whitelist(self.options.fqdn_whitelist_file)
 
         fqdn = None
         comment = None
@@ -232,7 +232,6 @@ class message(object):
                     userid = i.values()[0]
 
             if blockfqdn and fqdn is not None:
-                # figure out the CIDR mask
                 if isFQDN(fqdn):
                         whitelisted = False
                         for whitelist_fqdn in self.options.fqdnwhitelist:
