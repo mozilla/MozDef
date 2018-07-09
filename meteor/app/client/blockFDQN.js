@@ -35,7 +35,7 @@ if (Meteor.isClient) {
 
     Template.blockFQDNModal.rendered = function(){
         Deps.autorun(function() {
-            $('#fdqn')[0].value = Session.get('blockFQDN');
+            $('#fqdn')[0].value = Session.get('blockFQDN');
         }); //end deps.autorun
     };
 
