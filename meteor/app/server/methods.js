@@ -59,14 +59,23 @@ if (Meteor.isServer) {
     }
 
     function blockFQDN(formobj) {
-        var blockFQDNRequest = HTTP.post(mozdef.rootAPI + '/blockfqdn', {data: formobj});
+        try{
+            var blockFQDNRequest = HTTP.post(mozdef.rootAPI + '/blockfqdn', {data: formobj});
 
-        if (blockFQDNRequest.statusCode==200) {
-            console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
-            return true;
-        } else {
-            console.log("Could not send to "+ mozdef.rootAPI + '/blockfqdn ' + JSON.stringify(formobj) );
-            return blockFQDNRequest;
+            if (blockFQDNRequest.statusCode==200) {
+                console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
+                return true;
+            }
+        }catch (e) {
+            console.log("Error posting to "+ mozdef.rootAPI + '/blockfqdn ' + JSON.stringify(formobj) );
+            console.log(e)
+            if ( e.response.statusCode == 400 ){
+                // rest API set a reason in content
+                console.log(e.response.content);
+                return e.response.content;
+            }else{
+                return e;
+            }
         }
     }
 

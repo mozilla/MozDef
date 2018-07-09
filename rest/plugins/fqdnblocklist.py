@@ -247,7 +247,12 @@ class message(object):
                             sys.stdout.write('added {0} to blocklist\n'.format(fqdn))
                         else:
                             sys.stdout.write('not adding {0} to blocklist, it was found in whitelist\n'.format(fqdn))
+                else:
+                    sys.stdout.write('not adding {0} to blocklist, invalid fqdn\n'.format(fqdn))
+                    response.status = "400 invalid FQDN"
+                    response.body = "invalid FQDN"
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
+            response.status = "500"
 
         return (request, response)
