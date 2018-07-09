@@ -11,7 +11,7 @@ if (Meteor.isClient) {
         $('#fqdn')[0].value = Session.get('blockFQDN');
     };
 
-    Template.blockFQDN.events({
+    Template.blockFQDNform.events({
         "submit form": function(event, template) {
             event.preventDefault();
             formobj=formToObject("#blockFQDN :input");
