@@ -7,6 +7,7 @@ import netaddr
 import os
 import random
 import requests
+import re
 import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
@@ -21,10 +22,8 @@ def isFQDN(fqdn):
         # Positive Example: example.com (2 tokens, 'example' and 'com' == valid)
         # Positive Example: foo.example.com (3 tokens, 'example' and 'com' == valid)
         # Negative Example: com (1 token, 'com' == invalid)
-        if '.' in fqdn and len(fqdn.split('.'))>=2:
-            return True
-        else:
-            return False
+        fqdn_re = re.compile('(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', re.I | re.S | re.M)
+        return bool(re.match(fqdn_re,fqdn))
     except:
         return False
 
