@@ -593,8 +593,8 @@ def verisSummary(verisRegex=None):
                                                    "_id": 0
                                                    } }
                                    ])
-        if 'ok' in iveris.keys() and 'result' in iveris.keys():
-            return json.dumps(iveris['result'], default=json_util.default)
+        if iveris:
+            return json.dumps(list(iveris), default=json_util.default)
         else:
             return json.dumps(list())
     except Exception as e:
