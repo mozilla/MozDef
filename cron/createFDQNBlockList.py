@@ -10,6 +10,7 @@ import boto.s3
 import logging
 import netaddr
 import random
+import re
 import sys
 from datetime import datetime
 from datetime import timedelta
@@ -47,17 +48,15 @@ def genMeteorID():
 
 def isFQDN(fqdn):
     try:
-        # We could resolve FQDNs here, but that could tip our hand and it's 
+        # We could resolve FQDNs here, but that could tip our hand and it's
         # possible us investigating could trigger other alerts.  As such,
         # validation will consist of making sure we have a dot noted string
         #with two or more tokens
         # Positive Example: example.com (2 tokens, 'example' and 'com' == valid)
         # Positive Example: foo.example.com (3 tokens, 'example' and 'com' == valid)
         # Negative Example: com (1 token, 'com' == invalid)
-        if '.' in fqdn and len(ip.split('.'))>=2:
-            return True
-        else:
-            return False
+        fqdn_re = re.compile('(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', re.I | re.S | re.M)
+        return bool(re.match(fqdn_re,fqdn))
     except:
         return False
 
@@ -84,15 +83,6 @@ def main():
         # delete any that expired
         fqdnblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(days=options.expireage)}})
 
-        # add the aggregations we've found recently
-        # for ip in attackerIPList:
-        #     ipblocklist.insert_one(
-        #         {'_id': genMeteorID(),
-        #          'address':ip,
-        #          'reference': 'attacker',
-        #          'creator':'mozdef',
-        #          'dateAdded': datetime.utcnow()})
-
         # Lastly, export the combined blocklist
         fqdnCursor=mozdefdb['fqdnblocklist'].aggregate([
                 {"$sort": {"dateAdded": -1}},
@@ -108,8 +98,8 @@ def main():
             ])
         FQDNList=[]
         for fqdn in fqdnCursor:
-            # TODO: figure out what to do here
-            FQDNList.append(fqdn['address'])
+            if fqdn not in options.fqdnwhitelist:
+                FQDNList.append(fqdn['address'])
         # to text
         with open(options.outputfile, 'w') as outputfile:
             for fqdn in FQDNList:
@@ -138,15 +128,12 @@ def initConfig():
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
-    # CIDR whitelist as a line separted list of 8.8.8.0/24 style masks
-    options.fqdn_list_file = getConfig('fqdn_whitelist_file', '', options.configfile)
-    options.ipwhitelist = parse_network_whitelist(options.network_list_file)
+    # FQDN whitelist as a \n separted file of example.com or foo.bar.com style names
+    self.options.fqdn_whitelist_file = getConfig('fqdn_whitelist_file', '/dev/null', self.configfile)
+    options.fqdnwhitelist = parse_fqdn_whitelist(options.fqdn_whitelist_file)
 
     # Output File Name
     options.outputfile = getConfig('outputfile', 'fqdnblocklist.txt', options.configfile)
-
-    # Category to choose
-    options.category = getConfig('category', 'bruteforcer', options.configfile)
 
     # Days after expiration that we purge an fqdnblocklist entry (from the ui, they don't end up in the export after expiring)
     options.expireage = getConfig('expireage',1,options.configfile)
