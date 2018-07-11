@@ -268,10 +268,37 @@ class message(object):
                         newmessage['details'][u'from'] = from_decoded
                     else:
                         newmessage['details'][u'from'] = u''
-                    if 'to' not in newmessage['details']:
+                    if 'to' in newmessage['details']:
+                        to_decoded = newmessage['details'][u'to'].decode('unicode-escape')
+                        newmessage['details'][u'to'] = to_decoded
+                    else:
                         newmessage['details'][u'to'] = [u'']
-                    if 'msg_id' not in newmessage['details']:
+                    if 'msg_id' in newmessage['details']:
+                        msg_id_decoded = newmessage['details'][u'from'].decode('unicode-escape')
+                        newmessage['details'][u'msg_id'] = msg_id_decoded
+                    else:
                         newmessage['details'][u'msg_id'] = u''
+                    if 'first_received' in newmessage['details']:
+                        first_received_decoded = newmessage['details'][u'first_received'].decode('unicode-escape')
+                        newmessage['details'][u'first_received'] = first_received_decoded
+                    if 'hello' in newmessage['details']:
+                        hello_decoded = newmessage['details'][u'hello'].decode('unicode-escape')
+                        newmessage['details'][u'hello'] = hello_decoded
+                    if 'last_reply' in newmessage['details']:
+                        last_reply_decoded = newmessage['details'][u'last_reply'].decode('unicode-escape')
+                        newmessage['details'][u'last_reply'] = last_reply_decoded
+                    if 'mailfrom' in newmessage['details']:
+                        mailfrom_decoded = newmessage['details'][u'mailfrom'].decode('unicode-escape')
+                        newmessage['details'][u'hello'] = mailfrom_decoded
+                    if 'rcptto' in newmessage['details']:
+                        rcptto_decoded = newmessage['details'][u'rcptto'].decode('unicode-escape')
+                        newmessage['details'][u'rcptto'] = rcptto_decoded
+                    if 'second_received' in newmessage['details']:
+                        second_received_decoded = newmessage['details'][u'second_received'].decode('unicode-escape')
+                        newmessage['details'][u'second_received'] = second_received_decoded
+                    if 'subject' in newmessage['details']:
+                        subject_decoded = newmessage['details'][u'subject'].decode('unicode-escape')
+                        newmessage['details'][u'subject'] = subject_decoded
                     newmessage[u'summary'] = (
                         u'SMTP: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
