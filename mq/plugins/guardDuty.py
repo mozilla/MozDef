@@ -21,8 +21,8 @@ class message(object):
         # AWS guard duty sends dates as iso_8601 which ES doesn't appreciate
         # here's a list of date fields we'll convert to isoformat
         self.date_keys = [
-            'details.service.eventLastSeen',
-            'details.service.eventFirstSeen',
+            'details.finding.eventLastSeen',
+            'details.finding.eventFirstSeen',
             'details.resource.instanceDetails.launchTime',
             'details.createdAt',
             'details.updatedAt'
@@ -32,8 +32,8 @@ class message(object):
         # Lets pick out some likely targets and format them
         # so other mozdef plugins can rely on their location
         self.ipaddress_keys =[
-            'details.service.action.networkConnectionAction.remoteIpDetails.ipAddressV4',
-            'details.service.action.awsApiCallAction.remoteIpDetails.ipAdrressV4'
+            'details.finding.action.networkConnectionAction.remoteIpDetails.ipAddressV4',
+            'details.finding.action.awsApiCallAction.remoteIpDetails.ipAdrressV4'
         ]
 
     def convert_key_date_format(self, needle, haystack):
