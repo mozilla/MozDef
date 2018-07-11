@@ -839,6 +839,8 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'ssh_auth_success' in result['details']
+        assert 'auth_success' not in result['details']
         for key in MESSAGE.keys():
             if not key.startswith('id.'):
                 assert key in result['details']
@@ -877,7 +879,8 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
-        assert 'auth_success' in result['details']
+        assert 'ssh_auth_success' in result['details']
+        assert 'auth_success' not in result['details']
         for key in MESSAGE.keys():
             if not key.startswith('id.'):
                 assert key in result['details']
