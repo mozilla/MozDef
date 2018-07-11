@@ -280,13 +280,16 @@ class message(object):
                     return (newmessage, metadata)
                
                 if logtype == 'ssh':
-                    if 'auth_success' not in newmessage['details']:
-                        newmessage['details'][u'auth_success'] = u'unknown'
+                    if 'auth_success' in newmessage['details']:
+                        newmessage['details'][u'ssh_auth_success'] = newmessage['details'][u'auth_success']
+                        del(newmessage['details'][u'auth_success'])
+                    else:
+                        newmessage['details'][u'ssh_auth_success'] = u'unknown'
                     newmessage[u'summary'] = (
                         u'SSH: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
                         u'{destinationport} '
-                        u'success {auth_success}'
+                        u'success {ssh_auth_success}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
                 
