@@ -1,0 +1,278 @@
+{
+    "order": 0,
+    "template": "mozdefstate",
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "mozdefstats": {
+            "_all": {
+                "enabled": true
+            },
+            "dynamic_templates": [
+                {
+                    "string_fields": {
+                        "match": "*",
+                        "match_mapping_type": "string",
+                        "mapping": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                {
+                    "double_fields": {
+                        "match": "*",
+                        "match_mapping_type": "double",
+                        "mapping": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                {
+                    "long_fields": {
+                        "match": "*",
+                        "match_mapping_type": "long",
+                        "mapping": {
+                            "type": "keyword"
+                        }
+                    }
+                }
+            ],
+            "properties": {
+                "category": {
+                    "type": "keyword"
+                },
+                "details": {
+                    "properties": {
+                        "counts": {
+                            "properties": {
+                                "AUDIT_FAILURE": {
+                                    "type": "keyword"
+                                },
+                                "AUDIT_SUCCESS": {
+                                    "type": "keyword"
+                                },
+                                "AwsApiCall": {
+                                    "type": "keyword"
+                                },
+                                "AwsServiceEvent": {
+                                    "type": "keyword"
+                                },
+                                "ERROR": {
+                                    "type": "keyword"
+                                },
+                                "General": {
+                                    "type": "keyword"
+                                },
+                                "INFO": {
+                                    "type": "keyword"
+                                },
+                                "Provider Lifecycle": {
+                                    "type": "keyword"
+                                },
+                                "UNKNOWN": {
+                                    "type": "keyword"
+                                },
+                                "VERBOSE": {
+                                    "type": "keyword"
+                                },
+                                "WARNING": {
+                                    "type": "keyword"
+                                },
+                                "allowedEmailDomains": {
+                                    "properties": {
+                                        "refresh": {
+                                            "type": "keyword"
+                                        }
+                                    }
+                                },
+                                "allowedIPs": {
+                                    "properties": {
+                                        "refresh": {
+                                            "type": "keyword"
+                                        },
+                                        "validate": {
+                                            "properties": {
+                                                "err": {
+                                                    "type": "keyword"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "allowedPhoneNumbers": {
+                                    "properties": {
+                                        "refresh": {
+                                            "type": "keyword"
+                                        }
+                                    }
+                                },
+                                "auditd": {
+                                    "type": "keyword"
+                                },
+                                "bro": {
+                                    "type": "keyword"
+                                },
+                                "event": {
+                                    "type": "keyword"
+                                },
+                                "execve": {
+                                    "type": "keyword"
+                                },
+                                "fxa": {
+                                    "properties": {
+                                        "customs": {
+                                            "properties": {
+                                                "blocklist": {
+                                                    "properties": {
+                                                        "check": {
+                                                            "type": "keyword"
+                                                        },
+                                                        "hit": {
+                                                            "type": "keyword"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "fxa:request": {
+                                    "properties": {
+                                        "check": {
+                                            "properties": {
+                                                "block": {
+                                                    "properties": {
+                                                        "accountCreate": {
+                                                            "properties": {
+                                                                "sendViolation": {
+                                                                    "type": "keyword"
+                                                                }
+                                                            }
+                                                        },
+                                                        "accountLogin": {
+                                                            "properties": {
+                                                                "sendViolation": {
+                                                                    "type": "keyword"
+                                                                }
+                                                            }
+                                                        },
+                                                        "passwordForgotSendCode": {
+                                                            "properties": {
+                                                                "sendViolation": {
+                                                                    "type": "keyword"
+                                                                }
+                                                            }
+                                                        },
+                                                        "sendUnblockCode": {
+                                                            "properties": {
+                                                                "sendViolation": {
+                                                                    "type": "keyword"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "limits": {
+                                    "properties": {
+                                        "refresh": {
+                                            "type": "keyword"
+                                        },
+                                        "validate": {
+                                            "properties": {
+                                                "err": {
+                                                    "type": "keyword"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "mozdef": {
+                                    "type": "keyword"
+                                },
+                                "request": {
+                                    "properties": {
+                                        "check": {
+                                            "type": "keyword"
+                                        },
+                                        "checkAuthenticated": {
+                                            "type": "keyword"
+                                        },
+                                        "checkIpOnly": {
+                                            "type": "keyword"
+                                        },
+                                        "failedLoginAttempt": {
+                                            "type": "keyword"
+                                        },
+                                        "passwordReset": {
+                                            "type": "keyword"
+                                        }
+                                    }
+                                },
+                                "requestChecks": {
+                                    "properties": {
+                                        "refresh": {
+                                            "type": "keyword"
+                                        }
+                                    }
+                                },
+                                "suricata_event_log": {
+                                    "type": "keyword"
+                                },
+                                "syslog": {
+                                    "type": "keyword"
+                                },
+                                "write": {
+                                    "type": "keyword"
+                                }
+                            }
+                        }
+                    }
+                },
+                "hostname": {
+                    "type": "keyword"
+                },
+                "mozdefhostname": {
+                    "type": "keyword"
+                },
+                "processid": {
+                    "type": "keyword"
+                },
+                "processname": {
+                    "type": "keyword"
+                },
+                "receivedtimestamp": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
+                },
+                "severity": {
+                    "type": "keyword"
+                },
+                "source": {
+                    "type": "keyword"
+                },
+                "summary": {
+                    "type": "text"
+                },
+                "tags": {
+                    "type": "keyword"
+                },
+                "timestamp": {
+                    "type": "date"
+                },
+                "utctimestamp": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
+                },
+                "version": {
+                    "type": "keyword"
+                }
+            }
+        }
+    }
+}

@@ -52,6 +52,15 @@ def getDocID(servername):
     hash.update('{0}.mozdefhealth.latest'.format(servername))
     return hash.hexdigest()
 
+def esIndexExists():
+    try:
+        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+
+        if not es.indices.exists(index=options.mozdefindex):
+            try:
+                logger.debug('Creating %s index' % options.mozdefindex)
+                es.create_index(options.mozdefindex, default_mapping_contents)
+
 
 def main():
     '''
@@ -156,6 +165,10 @@ def initConfig():
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
+    # configure the index to save events to
+    options.mozdefindex = getConfig('mozdefindex', 'mozdefstate', options.configfile)
+    # point to mapping json for the index
+    default_mapping_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mozdefStateMappingTemplate.json')
 
 if __name__ == '__main__':
     parser = OptionParser()
