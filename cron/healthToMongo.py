@@ -50,7 +50,7 @@ def getFrontendStats(es):
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'latest'),
     ])
-    results = search_query.execute(es, indices=['events'])
+    results = search_query.execute(es, indices=['mozdefstate'])
 
     return results['hits']
 
