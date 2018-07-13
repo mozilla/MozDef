@@ -365,6 +365,20 @@ class TestGetIndices(ElasticsearchClientTest):
         indices.sort()
         assert indices == [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
 
+class TestIndexExists(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestIndexExists, self).teardown()
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('test_index')
+
+    def test_index_exists(self):
+        if pytest.config.option.delete_indexes:
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        indices = self.es_client.index_exists('test_index')
+        assert indices == [self.event_index_name, 'test_index']
+
 
 class TestClusterHealth(ElasticsearchClientTest):
 
