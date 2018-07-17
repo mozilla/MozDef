@@ -15,12 +15,8 @@ from pymongo import MongoClient
 def isFQDN(fqdn):
     try:
         # We could resolve FQDNs here, but that could tip our hand and it's
-        # possible us investigating could trigger other alerts.  As such,
-        # validation will consist of making sure we have a dot noted string
-        #with two or more tokens
-        # Positive Example: example.com (2 tokens, 'example' and 'com' == valid)
-        # Positive Example: foo.example.com (3 tokens, 'example' and 'com' == valid)
-        # Negative Example: com (1 token, 'com' == invalid)
+        # possible us investigating could trigger other alerts.
+        # validate using the regex from https://github.com/yolothreat/utilitybelt
         fqdn_re = re.compile('(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', re.I | re.S | re.M)
         return bool(re.match(fqdn_re,fqdn))
     except:
