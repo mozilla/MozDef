@@ -124,7 +124,7 @@ def initConfig():
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
     # FQDN whitelist as a \n separted file of example.com or foo.bar.com style names
-    self.options.fqdn_whitelist_file = getConfig('fqdn_whitelist_file', '/dev/null', self.configfile)
+    options.fqdn_whitelist_file = getConfig('fqdn_whitelist_file', '/dev/null', options.configfile)
     options.fqdnwhitelist = parse_fqdn_whitelist(options.fqdn_whitelist_file)
 
     # Output File Name
