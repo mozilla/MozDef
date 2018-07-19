@@ -801,10 +801,37 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
-        assert 'from' in result['details']
-        assert 'to' in result['details']
-        assert 'msg_id' in result['details']
+        assert 'from' not in result['details']
+        assert 'to' not in result['details']
+        assert 'msg_id' not in result['details']
         assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
+
+    def test_smtp_unicode(self):
+        event = {
+            'category': 'bro',
+            'SOURCE': 'bro_smtp',
+            'customendpoint': 'bro'
+        }
+
+        message = {
+            u'from': u'"Test from field\xe2\x80\x99s here" <Contact@1234.com>',
+            u'id.orig_h': u'1.2.3.4',
+            u'id.orig_p': 47311,
+            u'id.resp_h': u'5.6.7.8',
+            u'id.resp_p': 25,
+            u'subject': u'Example subject of email\xe2\x80\x99s',
+            u'ts': 1531818582.216429,
+        }
+
+        event['MESSAGE'] = json.dumps(message)
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(message['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(message['ts']).isoformat() == result['timestamp']
+        assert result['details']['from'] == u'"Test from field\xe2\x80\x99s here" <Contact@1234.com>'
+        assert result['details']['subject'] == u'Example subject of email\xe2\x80\x99s'
 
     def test_ssh_log(self):
         event = {
