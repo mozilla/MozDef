@@ -11,6 +11,7 @@ if (Meteor.isServer) {
         'saySomething': saySomething,
         'loadKibanaDashboards': loadKibanaDashboards,
         'blockip': blockIP,
+        'blockfqdn': blockFQDN,
         'ipwhois': ipwhois,
         'ipdshield': ipdshield,
         'ipintel': ipintel,
@@ -54,6 +55,27 @@ if (Meteor.isServer) {
         } else {
             console.log("Could not send to "+ mozdef.rootAPI + '/blockip ' + JSON.stringify(formobj) );
             return blockIPRequest;
+        }
+    }
+
+    function blockFQDN(formobj) {
+        try{
+            var blockFQDNRequest = HTTP.post(mozdef.rootAPI + '/blockfqdn', {data: formobj});
+
+            if (blockFQDNRequest.statusCode==200) {
+                console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
+                return true;
+            }
+        }catch (e) {
+            console.log("Error posting to "+ mozdef.rootAPI + '/blockfqdn ' + JSON.stringify(formobj) );
+            console.log(e)
+            if ( e.response.statusCode == 400 ){
+                // rest API set a reason in content
+                console.log(e.response.content);
+                return e.response.content;
+            }else{
+                return e;
+            }
         }
     }
 

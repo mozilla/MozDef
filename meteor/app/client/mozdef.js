@@ -16,6 +16,8 @@ if (Meteor.isClient) {
         Session.set('alertsrecordlimit',100);
         Session.set('attackerlimit','10');
         Session.set('attackersearchIP','');
+        Session.set('blockIPipaddress','');
+        Session.set('blockFQDN','');
         getAllPlugins();
 
         // Sends us to register our login handler

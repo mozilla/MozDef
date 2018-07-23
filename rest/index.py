@@ -123,6 +123,13 @@ def index():
     sendMessgeToPlugins(request, response, 'blockip')
     return response
 
+@post('/blockfqdn', methods=['POST'])
+@post('/blockfqdn/', methods=['POST'])
+@enable_cors
+def index():
+    '''will receive a call to block an ip address'''
+    sendMessgeToPlugins(request, response, 'blockfqdn')
+    return response
 
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
