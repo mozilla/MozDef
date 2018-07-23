@@ -362,6 +362,30 @@ class TestCloudtrailPlugin():
         assert retmessage == expected_message
         assert retmeta == {}
 
+    def test_responseelements_lastModified(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'lastModified': 'astringvalue'
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'lastModified': {
+                        'raw_value': 'astringvalue'
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
     def test_unusual(self):
         msg = {
             'source': 'cloudtrail',

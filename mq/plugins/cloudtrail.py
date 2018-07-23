@@ -32,6 +32,7 @@ class message(object):
             'details.responseelements.subnets',
             'details.responseelements.endpoint',
             'details.responseelements.securityGroups',
+            'details.responseelements.lastModified',
             'details.additionaleventdata',
             'details.serviceeventdetails',
             'details.requestparameters.disableApiTermination',
