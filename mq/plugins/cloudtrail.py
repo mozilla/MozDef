@@ -23,6 +23,7 @@ class message(object):
         # into a dict with a raw_value key as the string value
         self.modify_keys = [
             'details.requestparameters.iamInstanceProfile',
+            'details.requestparameters.instanceType',
             'details.requestparameters.attribute',
             'details.requestparameters.description',
             'details.requestparameters.filter',
