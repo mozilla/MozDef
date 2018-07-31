@@ -31,14 +31,26 @@ from utilities.is_cef import isCEF
 from utilities.logger import logger, initLogger
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
+def getDocID(account):
+    # create a hash to use as the ES doc id
+    # hostname plus salt as doctype.latest
+    hash = md5()
+    hash.update('{0}.mozdefhealth.latest'.format(account))
+    return hash.hexdigest()
+
+sqslist = {}
+
 def getQueueSizes():
     logger.debug('starting')
     logger.debug(options)
     es = ElasticsearchClient(options.esservers)
     sqslist = {}
+    sqslist['queue_stats'] = {}
+    qcount = len(options.taskexchange)
+    qcounter = qcount - 1
     try:
         # meant only to talk to SQS using boto
-        # and return queue attributes.
+        # and return queue attributes.a
 
         mqConn = boto.sqs.connect_to_region(
             options.region,
@@ -46,47 +58,63 @@ def getQueueSizes():
             aws_secret_access_key=options.secretkey
         )
 
-        for exchange in options.taskexchange:
-            logger.debug('Looking for message quantities in queues' + exchange)
-            eventTaskQueue = mqConn.get_queue(exchange)
-            # get queue count
-            taskQueueAttributes = eventTaskQueue.count()
-            taskQueueNotVisible = eventTaskQueue.get_attributes('ApproximateNumberOfMessagesNotVisible')
-            # Build up our dict
-            if exchange not in sqslist:
-                sqslist[exchange] = {}
-                sqslist[exchange]['messages'] = taskQueueAttributes
-                sqslist[exchange]['inflight'] = int(taskQueueNotVisible['ApproximateNumberOfMessagesNotVisible'])
-
-
-        # setup a log entry for health/status.
-        healthlog = dict(
-            utctimestamp=toUTC(datetime.now()).isoformat(),
-            hostname='server',
-            processid=os.getpid(),
-            processname=sys.argv[0],
-            severity='INFO',
-            summary='mozdef health/status',
-            category='mozdef',
-            source='aws-sqs',
-            tags=[],
-            details=[])
-
-        healthlog['details'] = dict(username='mozdef')
-        healthlog['details']['queues']= sqslist
-        healthlog['details']['total_messages_ready'] = 0
-        healthlog['details']['total_feeds'] = 0
-        healthlog['tags'] = ['mozdef', 'status', 'sqs']
-        feeds = len(sqslist.keys())
-        healthlog['details']['total_feeds'] = feeds
-        ready = 0
-        for exchange in options.taskexchange:
-            ready1 = sqslist[exchange]['messages']
-            ready = ready1 + ready
-        healthlog['details']['total_messages_ready'] = ready
-        es.save_event(index=options.index, doc_type='mozdefhealth', body=json.dumps(healthlog))
+        while qcounter >= 0:
+            for exchange in options.taskexchange:
+                logger.debug('Looking for sqs queue stats in queue' + exchange)
+                eventTaskQueue = mqConn.get_queue(exchange)
+                # get queue stats
+                taskQueueStats = eventTaskQueue.get_attributes('All')
+                sqslist['queue_stats'][qcounter] = taskQueueStats
+                sqslist['queue_stats'][qcounter]['name'] = exchange
+                qcounter -= 1
     except Exception as e:
         logger.error("Exception %r when gathering health and status " % e)
+
+
+    # setup a log entry for health/status.
+    healthlog = dict(
+        utctimestamp=toUTC(datetime.now()).isoformat(),
+        hostname='server',
+        processid=os.getpid(),
+        processname=sys.argv[0],
+        severity='INFO',
+        summary='mozdef health/status',
+        category='mozdef',
+        source='aws-sqs',
+        tags=[],
+        details=[])
+    healthlog['details'] = dict(username='mozdef')
+    healthlog['details']['queues']= list()
+    healthlog['details']['total_messages_ready'] = 0
+    healthlog['details']['total_feeds'] = qcount
+    healthlog['tags'] = ['mozdef', 'status', 'sqs']
+    ready = 0
+    qcounter = qcount - 1
+    for q in sqslist['queue_stats'].keys():
+        queuelist = sqslist['queue_stats'][qcounter]
+        if 'ApproximateNumberOfMessages' in queuelist:
+            ready1 = int(queuelist['ApproximateNumberOfMessages'])
+            ready = ready1 + ready
+            healthlog['details']['total_messages_ready'] = ready
+        if 'ApproximateNumberOfMessages' in queuelist:
+            messages = int(queuelist['ApproximateNumberOfMessages'])
+        if 'ApproximateNumberOfMessagesNotVisible' in queuelist:
+            inflight = int(queuelist['ApproximateNumberOfMessagesNotVisible'])
+        if 'ApproximateNumberOfMessagesDelayed' in queuelist:
+            delayed = int(queuelist['ApproximateNumberOfMessagesDelayed'])
+        if 'name' in queuelist:
+            name = queuelist['name']
+        queueinfo=dict(
+            queue=name,
+            messages_delayed=delayed,
+            messages_ready=messages,
+            messages_inflight=inflight)
+        print queueinfo
+        healthlog['details']['queues'].append(queueinfo)
+        qcounter -= 1
+    es.save_event(index=options.index, doc_type='mozdefhealth', body=json.dumps(healthlog))
+#    except Exception as e:
+#        logger.error("Exception %r when gathering health and status " % e)
 
 def main():
     logger.debug('Starting')
@@ -98,12 +126,14 @@ def initConfig():
     options.accesskey = getConfig('accesskey', '', options.configfile)
     options.secretkey = getConfig('secretkey', '', options.configfile)
     options.region = getConfig('region', 'us-west-1', options.configfile)
-    options.taskexchange = getConfig('taskexchange', 'nsmglobalsqs', options.configfile).split(',')
+    options.taskexchange = getConfig('taskexchange', 'nsmglobalssqslists', options.configfile).split(',')
     options.output = getConfig('output', 'stdout', options.configfile)
+    # mozdef options
     options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)
     options.syslogport = getConfig('syslogport', 514, options.configfile)
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
     options.index = getConfig('index', 'mozdefstate', options.configfile)
+    options.account = getConfig('account', '', options.configfile)
 
 if __name__ == '__main__':
     # configure ourselves
@@ -112,5 +142,4 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     initConfig()
     initLogger(options)
-    getQueueSizes()
-    
+    main()
