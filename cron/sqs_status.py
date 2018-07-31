@@ -18,6 +18,7 @@ import socket
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
+from hashlib import md5
 import boto.sqs
 from boto.sqs.message import RawMessage
 import base64
@@ -37,8 +38,6 @@ def getDocID(account):
     hash = md5()
     hash.update('{0}.mozdefhealth.latest'.format(account))
     return hash.hexdigest()
-
-sqslist = {}
 
 def getQueueSizes():
     logger.debug('starting')
