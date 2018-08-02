@@ -29,6 +29,7 @@ class message(object):
             'details.requestparameters.filter',
             'details.requestparameters.rule',
             'details.requestparameters.ebsOptimized',
+            'details.requestparameters.source',
             'details.responseelements.role',
             'details.responseelements.subnets',
             'details.responseelements.endpoint',
