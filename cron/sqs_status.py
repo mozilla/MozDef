@@ -32,12 +32,14 @@ from utilities.is_cef import isCEF
 from utilities.logger import logger, initLogger
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-def getDocID(account):
+def getDocID(sqsregionidentifier):
     # create a hash to use as the ES doc id
     # hostname plus salt as doctype.latest
     hash = md5()
-    hash.update('{0}.mozdefhealth.latest'.format(account))
+    hash.update('{0}.mozdefhealth.latest'.format(sqsregionidentifier))
     return hash.hexdigest()
+
+sqslist = {}
 
 def getQueueSizes():
     logger.debug('starting')
@@ -71,9 +73,10 @@ def getQueueSizes():
 
 
     # setup a log entry for health/status.
+    sqsid = '{0}-{1}'.format(options.account, options.region)
     healthlog = dict(
         utctimestamp=toUTC(datetime.now()).isoformat(),
-        hostname='server',
+        hostname=sqsid,
         processid=os.getpid(),
         processname=sys.argv[0],
         severity='INFO',
@@ -111,7 +114,13 @@ def getQueueSizes():
         print queueinfo
         healthlog['details']['queues'].append(queueinfo)
         qcounter -= 1
+    # post to elasticsearch servers directly without going through
+    # message queues in case there is an availability issue
     es.save_event(index=options.index, doc_type='mozdefhealth', body=json.dumps(healthlog))
+    # post another doc with a static docid and tag
+    # for use when querying for the latest sqs status
+    healthlog['tags'] = ['mozdef', 'status', 'sqs-latest']
+    es.save_event(index=options.index, doc_id=getDocID(sqsid), body=json.dumps(healthlog))
 #    except Exception as e:
 #        logger.error("Exception %r when gathering health and status " % e)
 
