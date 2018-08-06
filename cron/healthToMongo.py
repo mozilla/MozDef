@@ -68,7 +68,7 @@ def writeFrontendStats(data, mongo):
 def getSqsStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
-        TermMatch('_type', 'event'),
+        TermMatch('_type', 'mozdefhealth'),
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'sqs-latest'),
     ])
