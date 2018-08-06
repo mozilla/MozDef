@@ -15,6 +15,7 @@ Copyright (c) 2014 Mozilla Corporation
     kibanadashboards = new Meteor.Collection("kibanadashboards");
     mozdefsettings = new Meteor.Collection("mozdefsettings");
     healthfrontend = new Meteor.Collection("healthfrontend");
+    sqsstats = new Meteor.Collection("sqsstats");
     healthescluster = new Meteor.Collection("healthescluster");
     healthesnodes = new Meteor.Collection("healthesnodes");
     healtheshotthreads = new Meteor.Collection("healtheshotthreads");
@@ -248,6 +249,10 @@ if (Meteor.isServer) {
 
     Meteor.publish("healthfrontend", function () {
         return healthfrontend.find({}, {limit:0});
+    });
+
+    Meteor.publish("sqsstats", function() {
+        return sqsstats.find({}, {limit:0});
     });
 
     Meteor.publish("healthescluster", function () {
