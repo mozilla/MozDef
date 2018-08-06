@@ -117,7 +117,7 @@ def getQueueSizes():
     # post another doc with a static docid and tag
     # for use when querying for the latest sqs status
     healthlog['tags'] = ['mozdef', 'status', 'sqs-latest']
-    es.save_event(index=options.index, doc_id=getDocID(sqsid), body=json.dumps(healthlog))
+    es.save_event(index=options.index, doc_type='mozdefhealth', doc_id=getDocID(sqsid), body=json.dumps(healthlog))
 #    except Exception as e:
 #        logger.error("Exception %r when gathering health and status " % e)
 
