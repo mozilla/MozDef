@@ -221,7 +221,6 @@ class taskConsumer(object):
             except ValueError as e:
                 logger.exception('Exception while handling message: %r' % e)
                 self.taskQueue.delete_message(msg)
-                # sys.exit(1)
 
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
