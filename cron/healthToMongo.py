@@ -50,7 +50,7 @@ def getFrontendStats(es):
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'latest'),
     ])
-    results = search_query.execute(es, indices=['events'])
+    results = search_query.execute(es, indices=['mozdefstate'])
 
     return results['hits']
 
@@ -64,6 +64,28 @@ def writeFrontendStats(data, mongo):
             if '.' in key:
                 del host['_source']['details'][key]
         mongo.healthfrontend.insert(host['_source'])
+
+def getSqsStats(es):
+    search_query = SearchQuery(minutes=15)
+    search_query.add_must([
+        TermMatch('_type', 'event'),
+        TermMatch('category', 'mozdef'),
+        TermMatch('tags', 'sqs-latest'),
+    ])
+    results = search_query.execute(es, indices=['mozdefstate'])
+
+    return results['hits']
+
+
+def writeSqsStats(data, mongo):
+    # Empty everything before
+    mongo.sqsstats.remove({})
+    for host in data:
+        for key in host['_source']['details'].keys():
+            # remove unwanted data
+            if '.' in key:
+                del host['_source']['details'][key]
+        mongo.sqsstats.insert(host['_source'])
 
 
 def writeEsClusterStats(data, mongo):
@@ -129,6 +151,7 @@ def main():
         # use meteor db
         mongo = client.meteor
         writeFrontendStats(getFrontendStats(es), mongo)
+        writeSqsStats(getSqsStats(es), mongo)
         writeEsClusterStats(es.get_cluster_health(), mongo)
         writeEsNodesStats(getEsNodesStats(), mongo)
         writeEsHotThreads(getEsHotThreads(), mongo)
