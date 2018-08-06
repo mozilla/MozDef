@@ -30,6 +30,8 @@ class message(object):
             'details.requestparameters.rule',
             'details.requestparameters.ebsOptimized',
             'details.requestparameters.source',
+            'details.requestparameters.callerReference',
+            'details.requestparameters.domainNames',
             'details.responseelements.role',
             'details.responseelements.subnets',
             'details.responseelements.endpoint',
