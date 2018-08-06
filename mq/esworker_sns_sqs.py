@@ -61,24 +61,20 @@ class taskConsumer(object):
         self.taskQueue.set_message_class(RawMessage)
 
         while True:
-            try:
-                records = self.taskQueue.get_messages(self.options.prefetch)
-                for msg in records:
-                    msg_body = msg.get_body()
-                    try:
-                        # get_body() should be json
-                        message_json = json.loads(msg_body)
-                        self.on_message(message_json)
-                        # delete message from queue
-                        self.taskQueue.delete_message(msg)
-                    except ValueError:
-                        logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
-                        self.taskQueue.delete_message(msg)
-                        continue
-                time.sleep(.1)
-            except Exception as e:
-                logger.exception(e)
-                sys.exit(1)
+            records = self.taskQueue.get_messages(self.options.prefetch)
+            for msg in records:
+                msg_body = msg.get_body()
+                try:
+                    # get_body() should be json
+                    message_json = json.loads(msg_body)
+                    self.on_message(message_json)
+                    # delete message from queue
+                    self.taskQueue.delete_message(msg)
+                except ValueError:
+                    logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
+                    self.taskQueue.delete_message(msg)
+                    continue
+            time.sleep(.1)
 
     def on_message(self, message):
         try:
@@ -241,4 +237,10 @@ if __name__ == '__main__':
 
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
-    main()
+
+    try:
+        main()
+    except Exception as e:
+        if options.esbulksize != 0:
+            es.finish_bulk()
+        raise

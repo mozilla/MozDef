@@ -362,4 +362,9 @@ if __name__ == '__main__':
 
     pluginList = registerPlugins()
 
-    main()
+    try:
+        main()
+    except Exception as e:
+        if options.esbulksize != 0:
+            es.finish_bulk()
+        raise

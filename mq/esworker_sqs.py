@@ -218,11 +218,10 @@ class taskConsumer(object):
                     self.taskQueue.delete_message(msg)
                 time.sleep(.1)
 
-            except KeyboardInterrupt:
-                sys.exit(1)
             except ValueError as e:
                 logger.exception('Exception while handling message: %r' % e)
-                sys.exit(1)
+                self.taskQueue.delete_message(msg)
+                # sys.exit(1)
 
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -399,4 +398,9 @@ if __name__ == '__main__':
 
     pluginList = registerPlugins()
 
-    main()
+    try:
+        main()
+    except Exception as e:
+        if options.esbulksize != 0:
+            es.finish_bulk()
+        raise
