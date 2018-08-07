@@ -284,6 +284,9 @@
               "loadaverage": {
                 "type": "float"
               },
+              "username": {
+                "type": "keyword"
+              },
               "queues": {
                 "properties": {
                   "deliver_eps": {
@@ -297,6 +300,12 @@
                   },
                   "publish_eps": {
                     "type": "float"
+                  },
+                  "messages_inflight": {
+                    "type": "long"
+                  },
+                  "messages_delayed": {
+                    "type": "long"
                   },
                   "queue": {
                     "type": "text",
@@ -329,15 +338,6 @@
               },
               "total_publish_eps": {
                 "type": "float"
-              },
-              "username": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
               }
             }
           },
