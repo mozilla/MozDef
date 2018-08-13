@@ -136,7 +136,6 @@ class TestBroFixup(object):
                 "details": {
                     "processid": "21233",
                     "Random": 2,
-                    "sourceipv4address": "10.22.74.208",
                     "hostname": "hostname1.subdomain.domain.com",
                     "program": "sshd",
                     "sourceipaddress": "10.22.74.208"
@@ -1245,12 +1244,8 @@ class TestBroFixup(object):
         assert MESSAGE['msg'] == result['details']['msg']
         assert 'src' not in result['details']
         assert 'dst' not in result['details']
-        assert 'sourceipv4address' in result['details']
-        assert MESSAGE['src'] == result['details']['sourceipv4address']
         assert 'sourceipaddress' in result['details']
         assert MESSAGE['src'] == result['details']['sourceipaddress']
-        assert 'destinationipv4address' in result['details']
-        assert MESSAGE['dst'] == result['details']['destinationipv4address']
         assert 'destinationipaddress' in result['details']
         assert MESSAGE['dst'] == result['details']['destinationipaddress']
         assert 'p' in result['details']
@@ -1294,8 +1289,6 @@ class TestBroFixup(object):
         assert 'msg' in result['details']
         assert MESSAGE['msg'] == result['details']['msg']
         assert 'src' not in result['details']
-        assert 'sourceipv4address' in result['details']
-        assert MESSAGE['src'] == result['details']['sourceipv4address']
         assert 'sourceipaddress' in result['details']
         assert MESSAGE['src'] == result['details']['sourceipaddress']
         assert 'p' in result['details']
@@ -1338,9 +1331,9 @@ class TestBroFixup(object):
         assert MESSAGE['note'] == result['details']['note']
         assert 'msg' in result['details']
         assert MESSAGE['msg'] == result['details']['msg']
+        assert 'sourceipaddress' in result['details']
+        assert MESSAGE['src'] == result['details']['sourceipaddress']
         assert 'src' not in result['details']
-        assert 'sourceipv6address' in result['details']
-        assert MESSAGE['src'] == result['details']['sourceipv6address']
         assert 'p' in result['details']
         assert MESSAGE['p'] == result['details']['p']
         assert result['details']['indicators']
