@@ -261,16 +261,8 @@ class message(object):
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
+
                 if logtype == 'smtp':
-                    if 'from' in newmessage['details']:
-                        from_decoded = newmessage['details'][u'from'].decode('unicode-escape')
-                        newmessage['details'][u'from'] = from_decoded
-                    else:
-                        newmessage['details'][u'from'] = u''
-                    if 'to' not in newmessage['details']:
-                        newmessage['details'][u'to'] = [u'']
-                    if 'msg_id' not in newmessage['details']:
-                        newmessage['details'][u'msg_id'] = u''
                     newmessage[u'summary'] = (
                         u'SMTP: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
