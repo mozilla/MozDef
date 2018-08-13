@@ -261,7 +261,6 @@ class message(object):
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
-
                 if logtype == 'smtp':
                     newmessage[u'summary'] = (
                         u'SMTP: {sourceipaddress} -> '
