@@ -1295,7 +1295,7 @@ class TestBroFixup(object):
         assert MESSAGE['p'] == result['details']['p']
         assert result['details']['indicators']
         assert MESSAGE['src'] in result['details']['indicators']
-        assert result['summary'] == "Scan::Address_Scan source 10.252.55.230 destination unknown port 3283"
+        assert result['summary'] == "Scan::Address_Scan source 10.252.55.230 destination 0.0.0.0 port 3283"
 
     def test_notice_log3(self):
         event = {
@@ -1338,7 +1338,7 @@ class TestBroFixup(object):
         assert MESSAGE['p'] == result['details']['p']
         assert result['details']['indicators']
         assert MESSAGE['src'] in result['details']['indicators']
-        assert result['summary'] == "Scan::Address_Scan source 2620:101:80fc:232:b5a9:5071:1dc1:1499 destination unknown port 445"
+        assert result['summary'] == "Scan::Address_Scan source 2620:101:80fc:232:b5a9:5071:1dc1:1499 destination 0.0.0.0 port 445"
 
     def test_snmp_log(self):
         event = {
