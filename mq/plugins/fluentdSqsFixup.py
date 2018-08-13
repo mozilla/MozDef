@@ -77,11 +77,8 @@ class message(object):
                 if isIPv4(ipText):
                     if 'destinationipaddress' not in message.keys():
                         message['details']['destinationipaddress'] = ipText
-                    if 'destinationipv4address' not in message.keys():
-                        message['details']['destinationipv4address'] = ipText
                 else:
                     message['details']['destinationipaddress'] = '0.0.0.0'
-                    message['details']['destinationipv4address'] = '0.0.0.0'
                     addError(message,
                              'plugin: {0} error: {1}:{2}'.format(
                                  'fluentSqsFixUp.py',

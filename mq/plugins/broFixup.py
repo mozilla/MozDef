@@ -262,6 +262,15 @@ class message(object):
                     return (newmessage, metadata)
 
                 if logtype == 'smtp':
+                    if 'from' in newmessage['details']:
+                        from_decoded = newmessage['details'][u'from'].decode('unicode-escape')
+                        newmessage['details'][u'from'] = from_decoded
+                    else:
+                        newmessage['details'][u'from'] = u''
+                    if 'to' not in newmessage['details']:
+                        newmessage['details'][u'to'] = [u'']
+                    if 'msg_id' not in newmessage['details']:
+                        newmessage['details'][u'msg_id'] = u''
                     newmessage[u'summary'] = (
                         u'SMTP: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
@@ -389,31 +398,26 @@ class message(object):
                             newmessage[u'details'][u'indicators'].append(newmessage[u'details'][u'src'])
                             # If details.src is present overwrite the source IP address with it
                             newmessage[u'details'][u'sourceipaddress'] = newmessage[u'details'][u'src']
-                            newmessage[u'details'][u'sourceipv4address'] = newmessage[u'details'][u'src']
                         if isIPv6(newmessage[u'details'][u'src']):
                             newmessage[u'details'][u'indicators'].append(newmessage[u'details'][u'src'])
                             # If details.src is present overwrite the source IP address with it
-                            newmessage[u'details'][u'sourceipv6address'] = newmessage[u'details'][u'src']
+                            newmessage[u'details'][u'sourceipaddress'] = newmessage[u'details'][u'src']
                         del newmessage[u'details'][u'src']
                     sumstruct = {}
                     sumstruct['note'] = newmessage['details'][u'note']
-                    if 'sourceipv6address' in newmessage['details']:
-                        sumstruct['src'] = newmessage['details']['sourceipv6address']
+                    if 'sourceipaddress' in newmessage['details']:
+                        sumstruct['src'] = newmessage['details']['sourceipaddress']
                     else:
-                        if 'sourceipv4address' in newmessage['details']:
-                            sumstruct['src'] = newmessage['details']['sourceipv4address']
-                        else:
-                            sumstruct['src'] = u'unknown'
+                        sumstruct['src'] = u'0.0.0.0'
                     if 'dst' in newmessage['details']:
                         sumstruct['dst'] = newmessage['details']['dst']
                         del(newmessage[u'details'][u'dst'])
                         if isIPv4(sumstruct[u'dst']):
                             newmessage['details'][u'destinationipaddress'] = sumstruct['dst']
-                            newmessage['details'][u'destinationipv4address'] = sumstruct['dst']
                         if isIPv6(sumstruct[u'dst']):
-                            newmessage['details'][u'destinationipv6address'] = sumstruct['dst']
+                            newmessage['details'][u'destinationipaddress'] = sumstruct['dst']
                     else:
-                        sumstruct['dst'] = u'unknown'
+                        sumstruct['dst'] = u'0.0.0.0'
                     if 'p' in newmessage['details']:
                         sumstruct['p'] = newmessage['details']['p']
                     else:
