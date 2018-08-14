@@ -284,6 +284,9 @@
               "loadaverage": {
                 "type": "float"
               },
+              "username": {
+                "type": "keyword"
+              },
               "queues": {
                 "properties": {
                   "deliver_eps": {
@@ -335,15 +338,6 @@
               },
               "total_publish_eps": {
                 "type": "float"
-              },
-              "username": {
-                "type": "text",
-                "fields": {
-                  "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                  }
-                }
               }
             }
           },
