@@ -324,62 +324,62 @@
                                         }
                                     }
                                 }
-                            },
-                            "total_deliver_eps": {
-                                "type": "float"
-                            },
-                            "total_feeds": {
-                                "type": "long"
-                            },
-                            "total_messages_ready": {
-                                "type": "long"
-                            },
-                            "total_publish_eps": {
-                                "type": "float"
                             }
+                        },
+                        "total_deliver_eps": {
+                            "type": "float"
+                        },
+                        "total_feeds": {
+                            "type": "long"
+                        },
+                        "total_messages_ready": {
+                            "type": "long"
+                        },
+                        "total_publish_eps": {
+                            "type": "float"
                         }
-                    },
-                    "hostname": {
-                        "type": "keyword"
-                    },
-                    "mozdefhostname": {
-                        "type": "keyword"
-                    },
-                    "processid": {
-                        "type": "keyword"
-                    },
-                    "processname": {
-                        "type": "keyword"
-                    },
-                    "receivedtimestamp": {
-                        "type": "date",
-                        "format": "dateOptionalTime"
-                    },
-                    "severity": {
-                        "type": "keyword"
-                    },
-                    "source": {
-                        "type": "keyword"
-                    },
-                    "summary": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    },
-                    "tags": {
-                        "type": "keyword"
-                    },
-                    "timestamp": {
-                        "type": "date"
-                    },
-                    "utctimestamp": {
-                        "type": "date",
-                        "format": "dateOptionalTime"
                     }
+                },
+                "hostname": {
+                    "type": "keyword"
+                },
+                "mozdefhostname": {
+                    "type": "keyword"
+                },
+                "processid": {
+                    "type": "keyword"
+                },
+                "processname": {
+                    "type": "keyword"
+                },
+                "receivedtimestamp": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
+                },
+                "severity": {
+                    "type": "keyword"
+                },
+                "source": {
+                    "type": "keyword"
+                },
+                "summary": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "tags": {
+                    "type": "keyword"
+                },
+                "timestamp": {
+                    "type": "date"
+                },
+                "utctimestamp": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
                 }
             }
         }
