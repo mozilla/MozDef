@@ -90,12 +90,15 @@ class message(object):
         except Exception:
             source_ip_whois = "Unknown"
 
-        summary = u'Did you recently login from'
         new_location_str = u""
         if city.lower() == 'unknown':
             new_location_str += u'{0}'.format(country)
         else:
             new_location_str += u'{0}, {1}'.format(city, country)
+
+        event_timestamp = toUTC(message['events'][0]['documentsource']['details']['event_time'])
+        event_day = event_timestamp.strftime('%B %d, %Y')
+        summary = u'On {0} (UTC), did you login from {1} ({2})?'.format(event_day, new_location_str, source_ip)
 
         previous_city = message['details']['previous_locality_details']['city']
         previous_country = message['details']['previous_locality_details']['country']
@@ -103,9 +106,6 @@ class message(object):
             previous_location_str = u'{0}'.format(previous_country)
         else:
             previous_location_str = u'{0}, {1}'.format(previous_city, previous_country)
-
-        event_timestamp = toUTC(message['events'][0]['documentsource']['details']['event_time'])
-        summary += u" {0} ({1})?".format(new_location_str, source_ip)
 
         alert_record = {
             'alert_id': b2a_hex(os.urandom(15)),

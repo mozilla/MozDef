@@ -65,7 +65,7 @@ class TestDashboardGeomodel(object):
         assert result_db_entry['description'] == 'This alert is created based on geo ip information about the last login of a user.'
         assert result_db_entry['duplicate'] is True
         assert result_db_entry['risk'] == 'high'
-        assert result_db_entry['summary'] == 'Did you recently login from Diamond Bar, United States (1.2.3.4)?'
+        assert result_db_entry['summary'] == 'On August 08, 2018 (UTC), did you login from Diamond Bar, United States (1.2.3.4)?'
         assert result_db_entry['url'] == 'https://www.mozilla.org'
         assert result_db_entry['url_title'] == 'Get Help'
         assert result_db_entry['user_id'] == 'ttesterson'
@@ -80,7 +80,7 @@ class TestDashboardGeomodel(object):
         assert self.test_connect_called is True
         result_db_entry = self.test_result_record
         assert type(result_db_entry['alert_code']) is str
-        assert result_db_entry['summary'] == 'Did you recently login from United States (1.2.3.4)?'
+        assert result_db_entry['summary'] == 'On August 08, 2018 (UTC), did you login from United States (1.2.3.4)?'
 
     def test_malformed_message_bad(self):
         message_dict = {
