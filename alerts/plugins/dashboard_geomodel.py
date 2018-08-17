@@ -82,13 +82,14 @@ class message(object):
         country = message['details']['locality_details']['country']
         source_ip = message['details']['source_ip']
 
-        source_ip_whois = ""
+        new_ip_info = ""
         try:
             whois = IPWhois(source_ip).lookup_whois()
             whois_str = whois['nets'][0]['description']
-            source_ip_whois = whois_str.replace('\n', ' ').replace('\r', '')
+            source_ip_isp = whois_str.replace('\n', ', ').replace('\r', '')
+            new_ip_info = u'{} ({})'.format(source_ip, source_ip_isp)
         except Exception:
-            source_ip_whois = "Unknown"
+            new_ip_info = u'{}'.format(source_ip)
 
         new_location_str = u""
         if city.lower() == 'unknown':
@@ -122,7 +123,7 @@ class message(object):
             'details': {
                 'Timestamp': event_timestamp.strftime('%A, %B %d %Y %H:%M UTC'),
                 'New Location': new_location_str,
-                'New IP': u'{} ({})'.format(source_ip, source_ip_whois),
+                'New IP': new_ip_info,
                 'Previous Location': previous_location_str
             }
         }
