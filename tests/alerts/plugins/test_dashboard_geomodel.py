@@ -134,7 +134,7 @@ class TestDashboardGeomodel(object):
         assert self.test_result_record is not None
         result_db_entry = self.test_result_record
         assert result_db_entry['details'] == {
-            'New IP': u'1.2.3.4 (APNIC Debogon Project APNIC Pty Ltd)',
+            'New IP': u'1.2.3.4 (APNIC Debogon Project, APNIC Pty Ltd)',
             'New Location': u'Diamond Bar, United States',
             'Previous Location': u'Oakland, United States',
             'Timestamp': 'Wednesday, August 08 2018 02:11 UTC'
