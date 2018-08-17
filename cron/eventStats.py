@@ -85,13 +85,13 @@ def main():
     logger.debug(json.dumps(stats))
     sleepcycles = 0
     try:
-        while es.index_exists(index) == False:
+        while not es.index_exists(index):
             sleep(3)
             if sleepcycles == 3:
                 logger.debug("The index is not created. Terminating eventStats.py cron job.")
                 exit(1)
             sleepcycles += 1
-            if es.index_exists(index) == True:
+            if es.index_exists(index):
                 # post to elastic search servers directly without going through
                 # message queues in case there is an availability issue
                 es.save_event(index=index, body=json.dumps(stats), doc_type='mozdefstats')
