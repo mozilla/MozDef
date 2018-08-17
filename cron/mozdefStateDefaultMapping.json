@@ -19,24 +19,6 @@
                             "type": "keyword"
                         }
                     }
-                },
-                {
-                    "double_fields": {
-                        "match": "*",
-                        "match_mapping_type": "double",
-                        "mapping": {
-                            "type": "keyword"
-                        }
-                    }
-                },
-                {
-                    "long_fields": {
-                        "match": "*",
-                        "match_mapping_type": "long",
-                        "mapping": {
-                            "type": "keyword"
-                        }
-                    }
                 }
             ],
             "properties": {
@@ -108,16 +90,31 @@
                                         }
                                     }
                                 },
+                                "audit": {
+                                    "type": "keyword"
+                                },
                                 "auditd": {
                                     "type": "keyword"
                                 },
                                 "bro": {
                                     "type": "keyword"
                                 },
+                                "chmod": {
+                                    "type": "keyword"
+                                },
                                 "event": {
                                     "type": "keyword"
                                 },
                                 "execve": {
+                                    "type": "keyword"
+                                },
+                                "squid": {
+                                    "type": "keyword"
+                                },
+                                "fetchIPReputation": {
+                                    "type": "keyword"
+                                },
+                                "Guest Library API": {
                                     "type": "keyword"
                                 },
                                 "fxa": {
@@ -192,9 +189,6 @@
                                         }
                                     }
                                 },
-                                "mozdef": {
-                                    "type": "keyword"
-                                },
                                 "request": {
                                     "properties": {
                                         "check": {
@@ -268,9 +262,6 @@
                 "utctimestamp": {
                     "type": "date",
                     "format": "dateOptionalTime"
-                },
-                "version": {
-                    "type": "keyword"
                 }
             }
         },
