@@ -7,7 +7,6 @@
     "file": "networklogs",
     "details": {
       "protocol": "6",
-      "sourceipv4address": "10.2.2.59",
       "payload": "",
       "sourceipaddress": "10.2.2.59",
       "service": "junos-https",
@@ -17,8 +16,7 @@
       "policy": "any--any",
       "destinationnatrule": "None",
       "destinationipaddress": "63.245.215.25",
-      "destinationzone": "external",
-      "destinationipv4address": "63.245.215.25"
+      "destinationzone": "external"
     }
 },
 {

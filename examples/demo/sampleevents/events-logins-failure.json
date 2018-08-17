@@ -9,7 +9,6 @@
     "details": {
       "dn": "john@example.com,o=com,dc=example",
       "success": false,
-      "sourceipv4address": "10.20.70.200",
       "result": "LDAP_INVALID_CREDENTIALS",
       "srcip": "10.20.0.200",
       "sourceipaddress": "10.20.0.200"
@@ -25,7 +24,6 @@
     "details": {
       "dn": "bob@example.com,o=com,dc=example",    
       "success": false,
-      "sourceipv4address": "10.20.70.200",
       "result": "LDAP_INVALID_CREDENTIALS",
       "srcip": "10.20.0.200",
       "sourceipaddress": "10.20.0.200"
@@ -41,7 +39,6 @@
     "details": {
       "dn": "mary@example.com,o=com,dc=example",
       "success": false,
-      "sourceipv4address": "10.20.70.200",
       "result": "LDAP_INVALID_CREDENTIALS",
       "srcip": "10.20.0.200",
       "sourceipaddress": "10.20.0.200"
@@ -57,7 +54,6 @@
     "details": {
       "dn": "sue@example.com,o=com,dc=example",
       "success": false,
-      "sourceipv4address": "10.20.70.200",
       "result": "LDAP_INVALID_CREDENTIALS",
       "srcip": "10.20.0.200",
       "sourceipaddress": "10.20.0.200"

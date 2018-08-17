@@ -132,7 +132,6 @@ def makeEvents():
                     if 'details' not in event.keys():
                         event['details'] = dict()
                     event['details']['sourceipaddress'] = randomIP
-                    event['details']['sourceipv4address'] = randomIP
 
                 #print(event['timestamp'], event['tags'], event['summary'])
 
@@ -197,7 +196,6 @@ def makeAlerts():
                     if 'details' not in event.keys():
                         event['details'] = dict()
                     event['details']['sourceipaddress'] = randomIP
-                    event['details']['sourceipv4address'] = randomIP
 
                 if 'duplicate' in event.keys():
                     # send this event multiple times to trigger an alert
@@ -267,7 +265,6 @@ def makeAttackers():
                     if 'details' not in event.keys():
                         event['details'] = dict()
                     event['details']['sourceipaddress'] = randomIP
-                    event['details']['sourceipv4address'] = randomIP
 
                 if 'duplicate' in event.keys():
                     # send this event multiple times to trigger an alert

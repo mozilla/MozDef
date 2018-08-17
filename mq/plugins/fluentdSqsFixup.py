@@ -67,9 +67,9 @@ class message(object):
 
         # host is used to store dns-style-ip entries in AWS, for ex
         # ip-10-162-8-26 is 10.162.8.26. obviously there is no strong guarantee
-        # that this is always trusted. It's better than nothing though. At the
-        # time of writing, there is  no ipv6 support AWS-side for this kind of
-        # field. It may be overridden later by a better field, if any exists
+        # that this is always trusted. It's better than nothing though. As of
+        # 2018, AWS does not provide ipv6 DNS style hostnames for ipv6 instances.
+        # It may be overridden later by a better field, if this changes.
         if 'host' in message.keys():
             tmp = message['host']
             if tmp.startswith('ip-'):

@@ -18,12 +18,10 @@
       "ts": "1405546326.853474",
       "seenindicator": "0.0.139.213",
       "sources": "CIF - need-to-know",
-      "sourceipv4address": "0.0.82.208",
       "seenindicatortype": "HTTP::IN_X_FORWARDED_FOR_HEADER",
       "destinationport": 443,
       "sourceport": 58969,
       "sourceipaddress": "0.0.82.208",
-      "destinationipv4address": "0.0.82.27",
       "severity": "NOTICE"
     }
   },
@@ -46,12 +44,10 @@
       "seenindicator": "0.0.139.213",
       "ts": "1405546326.853474",
       "sources": "CIF - need-to-know",
-      "sourceipv4address": "0.0.82.208",
       "seenindicatortype": "HTTP::IN_X_FORWARDED_FOR_HEADER",
       "destinationport": 443,
       "sourceport": 13711,
       "sourceipaddress": "0.0.82.208",
-      "destinationipv4address": "0.0.82.28",
       "severity": "NOTICE"
     }
   },
@@ -74,12 +70,10 @@
       "seenindicator": "0.0.139.213",
       "ts": "1405546326.853474",
       "sources": "CIF - need-to-know",
-      "sourceipv4address": "0.0.82.208",
       "seenindicatortype": "HTTP::IN_X_FORWARDED_FOR_HEADER",
       "destinationport": 443,
       "sourceport": 13711,
       "sourceipaddress": "0.0.82.208",
-      "destinationipv4address": "0.0.82.28",
       "severity": "NOTICE"
     }
   },
@@ -102,12 +96,10 @@
       "seenindicator": "0.0.139.213",
       "ts": "1405546326.853474",
       "sources": "CIF - need-to-know",
-      "sourceipv4address": "0.0.82.208",
       "seenindicatortype": "HTTP::IN_X_FORWARDED_FOR_HEADER",
       "destinationport": 443,
       "sourceport": 13711,
       "sourceipaddress": "0.0.82.208",
-      "destinationipv4address": "0.0.82.28",
       "severity": "NOTICE"
     }
   },
@@ -130,12 +122,10 @@
       "seenindicator": "0.0.139.213",
       "ts": "1405546326.853474",
       "sources": "CIF - need-to-know",
-      "sourceipv4address": "0.0.82.208",
       "seenindicatortype": "HTTP::IN_X_FORWARDED_FOR_HEADER",
       "destinationport": 443,
       "sourceport": 13711,
       "sourceipaddress": "0.0.82.208",
-      "destinationipv4address": "0.0.82.28",
       "severity": "NOTICE"
     }
   },
@@ -158,12 +148,10 @@
       "seenindicator": "0.0.139.213",
       "ts": "1405546326.853474",
       "sources": "CIF - need-to-know",
-      "sourceipv4address": "0.0.82.208",
       "seenindicatortype": "HTTP::IN_X_FORWARDED_FOR_HEADER",
       "destinationport": 443,
       "sourceport": 13711,
       "sourceipaddress": "0.0.82.208",
-      "destinationipv4address": "0.0.82.28",
       "severity": "NOTICE"
     }
   }

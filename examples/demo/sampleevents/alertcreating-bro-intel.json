@@ -18,7 +18,6 @@
       "seenindicatortype": "HTTP::IN_X_FORWARDED_FOR_HEADER",
       "destinationport": 443,
       "sourceport": 58969,
-      "destinationipv4address": "0.0.82.27",
       "severity": "NOTICE"
     }
   }
