@@ -10,9 +10,11 @@ from binascii import b2a_hex
 import boto3
 import datetime
 import json
+from ipwhois import IPWhois
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
 from utilities.logger import logger
+from utilities.toUTC import toUTC
 
 
 class message(object):
@@ -80,12 +82,30 @@ class message(object):
         country = message['details']['locality_details']['country']
         source_ip = message['details']['source_ip']
 
-        summary = u'Did you recently login from'
+        source_ip_whois = ""
+        try:
+            whois = IPWhois(source_ip).lookup_whois()
+            whois_str = whois['nets'][0]['description']
+            source_ip_whois = whois_str.replace('\n', ' ').replace('\r', '')
+        except Exception:
+            source_ip_whois = "Unknown"
+
+        new_location_str = u""
         if city.lower() == 'unknown':
-            summary += u' {0}'.format(country)
+            new_location_str += u'{0}'.format(country)
         else:
-            summary += u' {0}, {1}'.format(city, country)
-        summary += ' ({0})?'.format(source_ip)
+            new_location_str += u'{0}, {1}'.format(city, country)
+
+        event_timestamp = toUTC(message['events'][0]['documentsource']['details']['event_time'])
+        event_day = event_timestamp.strftime('%B %d, %Y')
+        summary = u'On {0} (UTC), did you login from {1} ({2})?'.format(event_day, new_location_str, source_ip)
+
+        previous_city = message['details']['previous_locality_details']['city']
+        previous_country = message['details']['previous_locality_details']['country']
+        if previous_city.lower() == 'unknown':
+            previous_location_str = u'{0}'.format(previous_country)
+        else:
+            previous_location_str = u'{0}, {1}'.format(previous_city, previous_country)
 
         alert_record = {
             'alert_id': b2a_hex(os.urandom(15)),
@@ -99,6 +119,12 @@ class message(object):
             'url_title': self.config['url_title'],
             'duplicate': self.config['duplicate'],
             'alert_str_json': json.dumps(message),
+            'details': {
+                'Timestamp': event_timestamp.strftime('%A, %B %d %Y %H:%M UTC'),
+                'New Location': new_location_str,
+                'New IP': u'{} ({})'.format(source_ip, source_ip_whois),
+                'Previous Location': previous_location_str
+            }
         }
         self.write_db_entry(alert_record)
         return message
