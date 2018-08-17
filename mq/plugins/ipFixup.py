@@ -58,6 +58,8 @@ class message(object):
                 ipText = message['details']['http_x_forwarded_for'].split(',')[0]
                 if isIPv4(ipText) and 'sourceipaddress' not in message['details'].keys():
                     message['details']['sourceipaddress'] = ipText
+                if isIPv6(ipText) and 'sourceipaddress' not in message['details'].keys():
+                    message['details']['sourceipaddress'] = ipText
 
             if 'sourceipaddress' in message['details'].keys():
                 ipText = message['details']['sourceipaddress']
