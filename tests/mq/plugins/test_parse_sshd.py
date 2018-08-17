@@ -25,7 +25,6 @@ accept_message['eventsource'] = 'systemlogs'
 accept_message['details'] = {}
 accept_message['details']['processid'] = '5413'
 accept_message['details']['Random'] = '9'
-accept_message['details']['sourceipv4address'] = '10.22.74.208'
 accept_message['details']['hostname'] = 'mysuperhost.somewhere.com'
 accept_message['details']['program'] = 'sshd'
 accept_message['details']['sourceipaddress'] = '10.22.74.208'
