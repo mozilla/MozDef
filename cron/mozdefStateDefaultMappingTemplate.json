@@ -1,17 +1,16 @@
 {
     "order": 0,
     "template": "mozdefstate",
-      "settings" : {
-        "number_of_shards" : 1,
-        "number_of_replicas" : 0
-      },
-      "mappings": {
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
         "mozdefstats": {
             "_all": {
                 "enabled": true
             },
-            "dynamic_templates": [
-                {
+            "dynamic_templates": [{
                     "string_fields": {
                         "match": "*",
                         "match_mapping_type": "string",
@@ -265,115 +264,115 @@
                 }
             }
         },
-      "mozdefhealth": {
-        "properties": {
-          "category": {
-            "type": "keyword"
-          },
-          "details": {
+        "mozdefhealth": {
             "properties": {
-              "loadaverage": {
-                "type": "float"
-              },
-              "username": {
-                "type": "keyword"
-              },
-              "queues": {
-                "properties": {
-                  "deliver_eps": {
-                    "type": "float"
-                  },
-                  "messages_ready": {
-                    "type": "long"
-                  },
-                  "messages_unacknowledged": {
-                    "type": "long"
-                  },
-                  "publish_eps": {
-                    "type": "float"
-                  },
-                  "messages_inflight": {
-                    "type": "long"
-                  },
-                  "messages_delayed": {
-                    "type": "long"
-                  },
-                  "queue": {
+                "category": {
+                    "type": "keyword"
+                },
+                "details": {
+                    "properties": {
+                        "loadaverage": {
+                            "type": "float"
+                        },
+                        "username": {
+                            "type": "keyword"
+                        },
+                        "queues": {
+                            "properties": {
+                                "deliver_eps": {
+                                    "type": "float"
+                                },
+                                "messages_ready": {
+                                    "type": "long"
+                                },
+                                "messages_unacknowledged": {
+                                    "type": "long"
+                                },
+                                "publish_eps": {
+                                    "type": "float"
+                                },
+                                "messages_inflight": {
+                                    "type": "long"
+                                },
+                                "messages_delayed": {
+                                    "type": "long"
+                                },
+                                "queue": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                },
+                                "vhost": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "total_deliver_eps": {
+                            "type": "float"
+                        },
+                        "total_feeds": {
+                            "type": "long"
+                        },
+                        "total_messages_ready": {
+                            "type": "long"
+                        },
+                        "total_publish_eps": {
+                            "type": "float"
+                        }
+                    }
+                },
+                "hostname": {
+                    "type": "keyword"
+                },
+                "mozdefhostname": {
+                    "type": "keyword"
+                },
+                "processid": {
+                    "type": "keyword"
+                },
+                "processname": {
+                    "type": "keyword"
+                },
+                "receivedtimestamp": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
+                },
+                "severity": {
+                    "type": "keyword"
+                },
+                "source": {
+                    "type": "keyword"
+                },
+                "summary": {
                     "type": "text",
                     "fields": {
-                      "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                      }
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
                     }
-                  },
-                  "vhost": {
-                    "type": "text",
-                    "fields": {
-                      "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256
-                      }
-                    }
-                  }
+                },
+                "tags": {
+                    "type": "keyword"
+                },
+                "timestamp": {
+                    "type": "date"
+                },
+                "utctimestamp": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
                 }
-              },
-              "total_deliver_eps": {
-                "type": "float"
-              },
-              "total_feeds": {
-                "type": "long"
-              },
-              "total_messages_ready": {
-                "type": "long"
-              },
-              "total_publish_eps": {
-                "type": "float"
-              }
             }
-          },
-          "hostname": {
-            "type": "keyword"
-          },
-          "mozdefhostname": {
-            "type": "keyword"
-          },
-          "processid": {
-            "type": "keyword"
-          },
-          "processname": {
-            "type": "keyword"
-          },
-          "receivedtimestamp": {
-            "type": "date",
-            "format": "dateOptionalTime"
-          },
-          "severity": {
-            "type": "keyword"
-          },
-          "source": {
-            "type": "keyword"
-          },
-          "summary": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          },
-          "tags": {
-            "type": "keyword"
-          },
-          "timestamp": {
-            "type": "date"
-          },
-          "utctimestamp": {
-            "type": "date",
-            "format": "dateOptionalTime"
-          }
         }
-      }
     }
 }
