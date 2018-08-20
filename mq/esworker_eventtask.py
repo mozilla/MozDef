@@ -58,7 +58,7 @@ def keyMapping(aDict):
             k = removeAt(k).lower()
 
             if k == 'sourceip':
-                returndict[u'details']['sourceipaddress'] = v
+                returndict[u'details']['eventsourceipaddress'] = v
 
             if k == 'facility':
                 returndict[u'source'] = v
