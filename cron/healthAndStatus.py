@@ -52,7 +52,6 @@ def getDocID(servername):
     hash.update('{0}.mozdefhealth.latest'.format(servername))
     return hash.hexdigest()
 
-
 def main():
     '''
     Get health and status stats and post to ES
@@ -62,7 +61,19 @@ def main():
     logger.debug('starting')
     logger.debug(options)
     es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+    index = options.index
+
+    with open(options.default_mapping_file, 'r') as mapping_file:
+        default_mapping_contents = json.loads(mapping_file.read())
+
     try:
+        if not es.index_exists(index):
+            try:
+                logger.debug('Creating %s index' % index)
+                es.create_index(index, default_mapping_contents)
+            except Exception as e:
+                logger.error("Unhandled exception, terminating: %r"%e)
+
         auth = HTTPBasicAuth(options.mquser, options.mqpassword)
 
         for server in options.mqservers:
@@ -123,11 +134,11 @@ def main():
 
             # post to elastic search servers directly without going through
             # message queues in case there is an availability issue
-            es.save_event(doc_type='mozdefhealth', body=json.dumps(healthlog))
+            es.save_event(index=index, doc_type='mozdefhealth', body=json.dumps(healthlog))
             # post another doc with a static docid and tag
             # for use when querying for the latest status
             healthlog['tags'] = ['mozdef', 'status', 'latest']
-            es.save_event(doc_type='mozdefhealth', doc_id=getDocID(server), body=json.dumps(healthlog))
+            es.save_event(index=index, doc_type='mozdefhealth', doc_id=getDocID(server), body=json.dumps(healthlog))
     except Exception as e:
         logger.error("Exception %r when gathering health and status " % e)
 
@@ -156,6 +167,11 @@ def initConfig():
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
+    # configure the index to save events to
+    options.index = getConfig('index', 'mozdefstate', options.configfile)
+    # point to mapping json for the index
+    default_mapping_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mozdefStateDefaultMappingTemplate.json')
+    options.default_mapping_file = getConfig('default_mapping_file', default_mapping_location, options.configfile)
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -168,3 +184,4 @@ if __name__ == '__main__':
     initConfig()
     initLogger()
     main()
+

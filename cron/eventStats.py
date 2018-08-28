@@ -12,6 +12,7 @@ import sys
 from datetime import datetime
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
+from time import sleep
 import socket
 
 import sys
@@ -79,12 +80,21 @@ def main():
     logger.debug('starting')
     logger.debug(options)
     es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+    index = options.index
     stats = esSearch(es)
     logger.debug(json.dumps(stats))
+    sleepcycles = 0
     try:
-        # post to elastic search servers directly without going through
-        # message queues in case there is an availability issue
-        es.save_event(body=json.dumps(stats), doc_type='mozdefstats')
+        while not es.index_exists(index):
+            sleep(3)
+            if sleepcycles == 3:
+                logger.debug("The index is not created. Terminating eventStats.py cron job.")
+                exit(1)
+            sleepcycles += 1
+            if es.index_exists(index):
+                # post to elastic search servers directly without going through
+                # message queues in case there is an availability issue
+                es.save_event(index=index, body=json.dumps(stats), doc_type='mozdefstats')
 
     except Exception as e:
         logger.error("Exception %r when gathering statistics " % e)
@@ -117,6 +127,8 @@ def initConfig():
     options.aggregationminutes = getConfig('aggregationminutes',
                                          15,
                                          options.configfile)
+    # configure the index to save events to
+    options.index = getConfig('index', 'mozdefstate', options.configfile)
 
 
 
