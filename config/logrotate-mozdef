@@ -8,6 +8,7 @@
  delaycompress
  sharedscripts
  postrotate
+  mv /var/log/mozdef/*.gz /var/logarchive/mozdef/
   service rsyslog reload-or-restart > /dev/null
  endscript
 }

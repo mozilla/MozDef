@@ -1,5 +1,6 @@
 /var/log/mozdef/mongo/*.log
 {
+ su mozdef mozdef
  rotate 4
  weekly
  missingok
@@ -8,6 +9,7 @@
  delaycompress
  sharedscripts
  postrotate
+  mv /var/log/mozdef/mongo/*.gz /var/logarchive/mozdef/
   service rsyslog reload-or-restart > /dev/null
  endscript
 }
