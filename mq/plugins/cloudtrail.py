@@ -40,7 +40,8 @@ class message(object):
             'details.additionaleventdata',
             'details.serviceeventdetails',
             'details.requestparameters.disableApiTermination',
-            'details.responseelements.findings.service.additionalInfo.unusual'
+            'details.responseelements.findings.service.additionalInfo.unusual',
+            'details.responseelements.distribution.distributionConfig.callerReference'
         ]
 
     def convert_key_raw_str(self, needle, haystack):
