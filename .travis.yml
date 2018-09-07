@@ -1,17 +1,21 @@
-language: python
-python:
-  - '2.7.11'
-before_install:
-  - ES_VERSION=5.6.7; curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.deb && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
-  - sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime
-  - sudo dpkg-reconfigure --frontend noninteractive tzdata
+sudo: required
 services:
-  - rabbitmq
+  - docker
+branches:
+  # Restrict push builds to only master
+  only:
+  - master
+before_install:
+  # Fail immediately on any error
+  - set -e
 install:
-  - "pip install -r requirements.txt"
-  - "pip install -r tests/requirements_tests.txt"
+  # Build containers
+  - docker-compose -f tests/docker-compose.yml -p mozdef build
 before_script:
-  - sleep 5
-  - export BOTO_CONFIG=/dev/null
+  # Start up resources needed for tests
+  - docker-compose -f tests/docker-compose.yml -p mozdef up -d
+  # Give some time for Elasticsearch to start up
+  - sleep 10
 script:
-  - py.test --delete_indexes --delete_queues tests
+  # Run unit tests
+  - docker run -it --network=mozdef_default mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
