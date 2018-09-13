@@ -11,8 +11,8 @@ services:
     ports:
       - 80:80
       - 8080:8080
-      - 8081:8081
       - 9090:9090
+      # - 8081:8081
     networks:
       - default
   mongodb:
