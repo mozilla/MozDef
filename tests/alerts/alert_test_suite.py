@@ -18,6 +18,9 @@ import copy
 import re
 import json
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
+from lib import alerttask
+
 
 class AlertTestSuite(UnitTestSuite):
     def teardown(self):
@@ -26,6 +29,21 @@ class AlertTestSuite(UnitTestSuite):
     def setup(self):
         self.orig_path = os.getcwd()
         super(AlertTestSuite, self).setup()
+
+        # Overwrite the ES and RABBITMQ configs for alerts
+        # since it pulls it from alerts/lib/config.py
+        alerttask.ES = {
+            'servers': list('{0}'.format(s) for s in self.options.esservers)
+        }
+        alerttask.RABBITMQ = {
+            'mquser': self.options.mquser,
+            'alertexchange': self.options.alertExchange,
+            'alertqueue': self.options.alertqueue,
+            'mqport': self.options.mqport,
+            'mqserver': self.options.mqserver,
+            'mqpassword': self.options.mqpassword,
+            'mqalertserver': self.options.mqalertserver
+        }
 
         alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)

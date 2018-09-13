@@ -11,9 +11,6 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
-from config import ES
-
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
 
@@ -27,7 +24,7 @@ import pytest
 class ElasticsearchClientTest(UnitTestSuite):
     def setup(self):
         super(ElasticsearchClientTest, self).setup()
-        self.es_client = ElasticsearchClient(ES['servers'], bulk_refresh_time=3)
+        self.es_client = ElasticsearchClient(self.options.esservers, bulk_refresh_time=3)
 
     def get_num_events(self):
         self.flush('events')
