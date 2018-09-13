@@ -23,9 +23,9 @@ class message(object):
                     msg_unparsed = message['summary']
                     search = re.search(self.regex, msg_unparsed)
                     if search:
+                        message['hostname'] = search.group('source_host')
                         message['details']['alert_type'] = search.group('alert_type')
                         message['details']['entity_type'] = search.group('entity_type')
-                        message['details']['hostname'] = search.group('source_host')
                         message['details']['entity'] = search.group('entity')
                         message['details']['alert_message'] = search.group('alert_message')
                         # tag the message
