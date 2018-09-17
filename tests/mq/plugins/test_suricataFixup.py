@@ -34,7 +34,7 @@ class TestSuricataFixup(object):
         # in = out - plugin didn't touch it
         assert result == event
         assert metadata['doc_type'] is not 'nsm'
-#
+
     ## Should never match and be modified by the plugin
     def test_notsuri_log2(self):
         metadata = {
@@ -49,7 +49,7 @@ class TestSuricataFixup(object):
         # in = out - plugin didn't touch it
         assert result == event
         assert metadata['doc_type'] is not 'nsm'
-#
+
     ## Should never match and be modified by the plugin
     def test_suricata_nocustomendpoint_log(self):
         metadata = {
@@ -168,32 +168,6 @@ class TestSuricataFixup(object):
         assert result['category'] == 'suricata'
         assert result['source'] == 'alamakota'
         assert metadata['doc_type'] is 'nsm'
-
-    #@mock.patch('suricataFixup.node')
-    #def test_mozdefhostname_mock_string(self, mock_path):
-    #    mock_path.return_value = 'samplehostname'
-    #    event = {
-    #       'customendpoint': 'suricata',
-    #       'category': 'suricata',
-    #       'SOURCE': 'eve-log',
-    #       'event_type': 'alert'
-    #    }
-    #    plugin = message()
-    #    result, metadata = plugin.onMessage(event, self.metadata)
-    #    assert result['mozdefhostname'] == 'samplehostname'
-#
-    #@mock.patch('suricataFixup.node')
-    #def test_mozdefhostname_mock_exception(self, mock_path):
-    #    mock_path.side_effect = ValueError
-    #    event = {
-    #       'customendpoint': 'alamakota',
-    #       'category': 'suricata',
-    #       'SOURCE': 'eve-log',
-    #       'event_type': 'alert'
-    #    }
-    #    plugin = message()
-    #    result, metadata = plugin.onMessage(event, self.metadata)
-    #    assert result['mozdefhostname'] == 'failed to fetch mozdefhostname'
 
     def verify_metadata(self, metadata):
         assert metadata['doc_type'] == 'nsm'
