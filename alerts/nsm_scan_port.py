@@ -37,14 +37,12 @@ class NSMScanPort(AlertTask):
         tags = ['nsm', "bro", 'portscan']
 
         indicators = 'unknown'
-        #port = 'unknown'
+        # port = 'unknown'
         # Maybe iterate through it?
         x = aggreg['events'][0]['_source']
         if 'details' in x:
             if 'indicators' in x['details']:
                 indicators = x['details']['sourceipaddress']
-        #    if 'p' in x['details']:
-        #        port = x['details']['p']
 
         summary = 'Port scan from {}'.format(indicators)
 
