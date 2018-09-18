@@ -16,6 +16,7 @@ class AlertProxyDropExecutable(AlertTask):
 
         search_query.add_must([
             TermMatch('category', 'squid'),
+            TermMatch('details.proxyaction', 'TCP_DENIED/-'),
             ExistsMatch('details.proxyaction'),
             QueryStringMatch('details.destination: /\.(exe|bin|sh|py|rb)$/')
 
