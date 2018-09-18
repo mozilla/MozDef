@@ -63,16 +63,6 @@ class TestPromiscKernel(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['details']['program'] = "badprogram"
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with bad program name",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
         event['_source']['summary'] = "Promisc: Interface eth0 set promiscuous off"
     test_cases.append(
         NegativeAlertTestCase(
