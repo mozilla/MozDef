@@ -16,7 +16,7 @@ class TestPromiscKernel(AlertTestSuite):
             "summary": "device eth0 entered promiscuous mode",
             "hostname": "logging.server.com",
             "details": {
-                "hostname": "random.hacked.server.yours",
+                "program": "kernel",
             }
         }
     }
@@ -25,7 +25,7 @@ class TestPromiscKernel(AlertTestSuite):
     default_alert = {
         "category": "promisc",
         "severity": "WARNING",
-        "summary": "Promiscuous mode enabled on random.hacked.server.yours [10]",
+        "summary": "Promiscuous mode enabled on logging.server.com [10]",
         "tags": ['promisc', 'kernel'],
     }
 
@@ -57,6 +57,16 @@ class TestPromiscKernel(AlertTestSuite):
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad eventName",
+            events=events,
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['details']['program'] = "badprogram"
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with bad program name",
             events=events,
         )
     )
