@@ -45,7 +45,10 @@ class AlertHoneycomb(AlertTask):
         for event in aggreg['allevents']:
             offendingIPs.append(re.search(pattern, aggreg['allevents'][event]['_source']['summary']))
 
-        summary = 'Honeypot activity on {0} from IP(s): {1}'.format(aggreg['value'], ",".join(set(offendingIPs)))
+        if(len(offendingIPs)):
+            summary = 'Honeypot activity on {0} from IP(s): {1}'.format(aggreg['value'], ", ".join(set(offendingIPs)))
+        else:
+            summary = 'Unrecognized honeypot activity on {0}'.format(aggreg['value'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
