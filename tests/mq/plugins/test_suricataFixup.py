@@ -537,3 +537,61 @@ class TestSuricataFixup(object):
         assert 'flowbits' in result['details']['vars']
         assert result['details']['vars']['flowbits']['ET.http.javaclient.vulnerable'] == "True"
         assert result['details']['vars']['flowbits']['ET.JavaNotJar'] == "true"
+
+    def test_eve_log_alert_rename(self):
+        event = {
+            'customendpoint': '',
+            'category': 'suricata',
+            'SOURCE': 'eve-log',
+            'event_type': 'alert'
+        }            
+        MESSAGE = {
+            "timestamp":"2018-09-12T22:24:09.546736+0000",
+            "flow_id":1484802709084080,
+            "in_iface":"enp216s0f0",
+            "event_type":"alert",
+            "vlan":75,
+            "src_ip":"10.48.240.19",
+            "src_port":44741,
+            "dest_ip":"10.48.75.120",
+            "dest_port":53,
+            "proto":"017",
+            "alert":{
+                "action":"allowed",
+                "gid":1,
+                "signature_id":2500003,
+                "rev":1,
+                "signature":"SURICATA DNS Query to a Suspicious *.ws Domain",
+                "category":"",
+                "severity":3
+            },
+            "app_proto":"dns",
+            "flow":{
+                "pkts_toserver":2,
+                "pkts_toclient":0,
+                "bytes_toserver":150,
+                "bytes_toclient":0,
+                "start":"2018-09-12T22:24:09.546736+0000"
+            },
+            "payload":"qFEBAAABAAAAAAAAA3d3dwhpbnNlY3VyZQJ3cwAAHAAB",
+            "payload_printable":".Q...........www.insecure.ws.....",
+            "stream":0,
+            "packet":"AABeAAEKtAwl4EAQCABFAAA9M+5AAD4RuNYKMPATCjBLeK7FADUAKZFMqFEBAAABAAAAAAAAA3d3dwhpbnNlY3VyZQJ3cwAAHAAB",
+            "packet_info":{
+                "linktype":1
+            }
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert 'suricata_alert' in result['details']
+        assert 'alert' not in result['details']
+        assert result['details'][u'suricata_alert'][u'action'] == MESSAGE['alert']['action']
+        assert result['details'][u'suricata_alert'][u'gid'] == MESSAGE['alert']['gid']
+        assert result['details'][u'suricata_alert'][u'rev'] == MESSAGE['alert']['rev']
+        assert result['details'][u'suricata_alert'][u'signature_id'] == MESSAGE['alert']['signature_id']
+        assert result['details'][u'suricata_alert'][u'signature'] == MESSAGE['alert']['signature']
+        assert result['details'][u'suricata_alert'][u'category'] == MESSAGE['alert']['category']
+        assert result['details'][u'suricata_alert'][u'severity'] == MESSAGE['alert']['severity']

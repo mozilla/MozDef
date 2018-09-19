@@ -92,6 +92,9 @@ class message(object):
             newmessage[u'details'][u'destinationipaddress'] = "0.0.0.0"
             newmessage[u'details'][u'sourceport'] = 0
             newmessage[u'details'][u'destinationport'] = 0
+            if 'alert' in newmessage[u'details']:
+                newmessage[u'details'][u'suricata_alert'] = newmessage[u'details'][u'alert']
+                del(newmessage[u'details'][u'alert'])
             if 'src_ip' in newmessage['details']:
                 newmessage[u'details'][u'sourceipaddress'] = newmessage['details']['src_ip']
                 del(newmessage['details']['src_ip'])
