@@ -43,7 +43,10 @@ class AlertHoneycomb(AlertTask):
         offendingIPs = []
 
         for event in aggreg['allevents']:
-            offendingIPs.append(re.search(pattern, aggreg['allevents'][event]['_source']['summary']))
+            sourceIP = re.search(pattern, aggreg['allevents'][event]['_source']['summary'])
+            if sourceIP is None:
+                pass
+            offendingIPs.append(sourceIP)
 
         if(len(offendingIPs)):
             summary = 'Honeypot activity on {0} from IP(s): {1}'.format(aggreg['value'], ", ".join(set(offendingIPs)))
