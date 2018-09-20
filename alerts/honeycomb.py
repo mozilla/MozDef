@@ -16,7 +16,6 @@ class AlertHoneycomb(AlertTask):
         search_query = SearchQuery(minutes=10)
 
         search_query.add_must([
-            TermMatch('_type', 'event'),
             TermMatch('category', 'syslog'),
             TermMatch('processname', 'Honeycomb'),
             TermMatch('severity', 'CRIT')
