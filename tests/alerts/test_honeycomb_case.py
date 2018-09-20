@@ -18,9 +18,8 @@ class TestAlertHoneycomb(AlertTestSuite):
         "_type": "event",
         "_source": {
             "category": "syslog",
-            "details": {
-                "processname": "Honeycomb"
-            },
+            "severity": "CRIT",
+            "processname": "Honeycomb",
             "hostname": "foo.bar.com",
             "summary": ('id="1a6c32ec-e900-464b-b517-da8845a9e735"'
                         ' status="2" timestamp="2018-09-20 13:10:3'
@@ -98,7 +97,17 @@ class TestAlertHoneycomb(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['details']['processname'] = 'bad processname example'
+        event['_source']['severity'] = 'bad severity example'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with incorrect severity",
+            events=events,
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['processname'] = 'bad processname example'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with incorrect processname",
