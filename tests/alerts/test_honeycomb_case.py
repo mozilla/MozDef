@@ -31,16 +31,6 @@ class TestAlertHoneycomb(AlertTestSuite):
         }
     }
 
-    # Generating another event to simulate multiple hostile source IPs
-    default_event2 = default_event.copy()
-    default_event2['_source']['summary'] = ('id="1a6c32ec-e900-464b-b517-da8845a9e735"'
-                                            ' status="2" timestamp="2018-09-20 13:10:3'
-                                            '7.889056" event_type="simple_http" event_'
-                                            'description="HTTP Server Interaction" req'
-                                            'uest="GET /" originating_ip="1.2.3.5'
-                                            '" originating_port="60104" decoy_os="Linu'
-                                            'x" __weakref__="None"')
-
     # This alert is the expected result from running this task
     default_alert = {
         "category": "honeypot",
@@ -48,11 +38,6 @@ class TestAlertHoneycomb(AlertTestSuite):
         "severity": "WARNING",
         "summary": 'Honeypot activity on foo.bar.com from IP(s): 1.2.3.4',
     }
-
-    # This alert is the expected result from running this task
-    default_multi_ip_alert = default_alert.copy()
-    default_multi_ip_alert[
-        'summary'] = 'Honeypot activity on foo.bar.com from IP(s): 1.2.3.4, 1.2.3.5'
 
     test_cases = []
 
@@ -64,26 +49,39 @@ class TestAlertHoneycomb(AlertTestSuite):
         )
     )
 
+    # Generating another event to simulate multiple hostile source IPs
+    default_event2 = AlertTestSuite.copy(default_event)
+    default_event2['_source']['summary'] = ('id="1a6c32ec-e900-464b-b517-da8845a9e735"'
+                                            ' status="2" timestamp="2018-09-20 13:10:3'
+                                            '7.889056" event_type="simple_http" event_'
+                                            'description="HTTP Server Interaction" req'
+                                            'uest="GET /" originating_ip="1.2.3.5'
+                                            '" originating_port="60104" decoy_os="Linu'
+                                            'x" __weakref__="None"')
+
+    # This alert is the expected result from running this task
+    default_multi_ip_alert = AlertTestSuite.copy(default_alert)
+    default_multi_ip_alert['summary'] = 'Honeypot activity on foo.bar.com from IP(s): 1.2.3.4, 1.2.3.5'
+
     events1 = AlertTestSuite.create_events(default_event, 5)
     events2 = AlertTestSuite.create_events(default_event2, 5)
-    events = events1 + events2
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with events with multiple IPs and default alert with a multi-IP summary",
-            events=events,
+            events=events1 + events2,
             expected_alert=default_multi_ip_alert
         )
     )
 
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
-        event['_type'] = 'bad'
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with events with incorrect _type",
-            events=events,
-        )
-    )
+    # events = AlertTestSuite.create_events(default_event, 10)
+    # for event in events:
+    #     event['_type'] = 'bad'
+    # test_cases.append(
+    #     NegativeAlertTestCase(
+    #         description="Negative test case with events with incorrect _type",
+    #         events=events,
+    #     )
+    # )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:

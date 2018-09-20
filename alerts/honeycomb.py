@@ -16,6 +16,7 @@ class AlertHoneycomb(AlertTask):
         search_query = SearchQuery(minutes=10)
 
         search_query.add_must([
+            TermMatch('_type', 'event'),
             TermMatch('category', 'syslog'),
             TermMatch('processname', 'Honeycomb'),
             TermMatch('severity', 'CRIT')
@@ -40,22 +41,17 @@ class AlertHoneycomb(AlertTask):
         severity = 'WARNING'
 
         # This is required in order to extract and display the source IP accessing the honeypot
-        pattern = '/originating_ip="(\d+\.\d+\.\d+\.\d+)"/'
+        pattern = r'originating_ip=\"((?:\d{1,3}\.)+(?:\d{1,3}))\"'
         offendingIPs = []
 
         for event in aggreg['allevents']:
-            sourceIP = re.search(
-                pattern, aggreg['allevents'][event]['_source']['summary'])
-            if sourceIP is None:
+            ip_match = re.search(pattern, event['_source']['summary'])
+            if ip_match is None:
                 continue
-            offendingIPs.append(sourceIP)
+            offendingIPs.append(ip_match.group(1))
 
-        if(len(offendingIPs)):
-            summary = 'Honeypot activity on {0} from IP(s): {1}'.format(
-                aggreg['value'], ", ".join(set(offendingIPs)))
-        else:
-            summary = 'Unrecognized honeypot activity on {0}'.format(
-                aggreg['value'])
+        summary = 'Honeypot activity on {0} from IP(s): {1}'.format(
+                aggreg['value'], ", ".join(sorted(set(offendingIPs))))
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
