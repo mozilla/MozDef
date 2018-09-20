@@ -17,7 +17,8 @@ class AlertHoneycomb(AlertTask):
 
         search_query.add_must([
             TermMatch('category', 'syslog'),
-            TermMatch('processname', 'Honeycomb')
+            TermMatch('processname', 'Honeycomb'),
+            TermMatch('severity', 'CRIT')
         ])
 
         self.filtersManual(search_query)
