@@ -52,7 +52,7 @@ class TestAlertHoneycomb(AlertTestSuite):
     # This alert is the expected result from running this task
     default_multi_ip_alert = default_alert.copy()
     default_multi_ip_alert[
-        'summary'] = 'Honeypot activity on foo.bar.com from IP(s): 1.2.3.4,1.2.3.5'
+        'summary'] = 'Honeypot activity on foo.bar.com from IP(s): 1.2.3.4, 1.2.3.5'
 
     test_cases = []
 
