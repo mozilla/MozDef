@@ -7,7 +7,7 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestAlertSSHPasswordAuthViolation(AlertTestSuite):
+class TestAlertProxyDropExecutable(AlertTestSuite):
     alert_filename = "proxy_drop_non_standard_port"
     # This event is the default positive event that will cause the
     # alert to trigger

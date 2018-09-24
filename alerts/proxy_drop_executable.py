@@ -49,7 +49,7 @@ class AlertProxyDropExecutable(AlertTask):
             dropped_url_destinations.append(
                 aggreg['allevents'][event]['_source']['details.destination'])
 
-        summary = 'Multiple Proxy DROP events detected on {0} to the following executable file destinations: {1}'.format(
+        summary = 'Multiple Proxy DROP events detected from {0} to the following executable file destinations: {1}'.format(
             aggreg['value'], ",".join(set(dropped_url_destinations)))
 
         # Create the alert object based on these properties
