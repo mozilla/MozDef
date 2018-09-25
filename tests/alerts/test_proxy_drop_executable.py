@@ -17,9 +17,9 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
             "category": "squid",
             "tags": ["squid"],
             "details": {
-                "details.sourceipaddress": "1.2.3.4",
-                "details.destination": "http://evil.com/evil.exe",
-                "details.proxyaction": "TCP_DENIED/-",
+                "sourceipaddress": "1.2.3.4",
+                "destination": "http://evil.com/evil.exe",
+                "proxyaction": "TCP_DENIED/-",
             }
         }
     }

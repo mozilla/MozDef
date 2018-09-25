@@ -16,6 +16,7 @@ class AlertProxyDropExecutable(AlertTask):
 
         search_query.add_must([
             TermMatch('category', 'squid'),
+            TermMatch('tags', 'squid'),
             TermMatch('details.proxyaction', 'TCP_DENIED/-'),
             QueryStringMatch('details.destination: /\.(exe|bin|sh|py|rb)$/')
         ])
@@ -42,6 +43,8 @@ class AlertProxyDropExecutable(AlertTask):
         category = 'squid'
         tags = ['squid', 'proxy']
         severity = 'WARNING'
+
+        #summary = 'Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destinations: http://evil.com/evil.exe'
 
         dropped_url_destinations = []
 
