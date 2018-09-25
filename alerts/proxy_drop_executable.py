@@ -14,17 +14,21 @@ class AlertProxyDropExecutable(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=5)
 
+        self.parse_config('proxy_drop_executable.conf', [
+                          'destinationfilter'])
+
         search_query.add_must([
             TermMatch('category', 'squid'),
             TermMatch('tags', 'squid'),
             TermMatch('details.proxyaction', 'TCP_DENIED/-'),
-            QueryStringMatch('details.destination: /\.(exe|bin|sh|py|rb)$/')
+            QueryStringMatch(
+                'details.destination: /{}/').format('.*\.(exe|bin|sh|py|rb)$')
         ])
 
-        search_query.add_must_not([
-            QueryStringMatch(
-                'details.destination: /{}/'.format(self.config.destinatationfilter)),
-        ])
+        # search_query.add_must_not([
+        #     QueryStringMatch(
+        #         'details.destination: /{}/'.format(self.config.destinationfilter)),
+        # ])
 
         self.filtersManual(search_query)
 
@@ -44,16 +48,16 @@ class AlertProxyDropExecutable(AlertTask):
         tags = ['squid', 'proxy']
         severity = 'WARNING'
 
-        #summary = 'Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destinations: http://evil.com/evil.exe'
+        summary = "Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destinations: http://evil.com/evil.exe"
 
-        dropped_url_destinations = []
+        # dropped_url_destinations = []
 
-        for event in aggreg['allevents']:
-            dropped_url_destinations.append(
-                aggreg['allevents'][event]['_source']['details.destination'])
+        # for event in aggreg['allevents']:
+        #     dropped_url_destinations.append(
+        #         aggreg['allevents'][event]['_source']['details.destination'])
 
-        summary = 'Multiple Proxy DROP events detected from {0} to the following executable file destinations: {1}'.format(
-            aggreg['value'], ",".join(set(dropped_url_destinations)))
+        # summary = 'Multiple Proxy DROP events detected from {0} to the following executable file destinations: {1}'.format(
+        #     aggreg['value'], ",".join(set(dropped_url_destinations)))
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
