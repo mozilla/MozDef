@@ -8,7 +8,7 @@ from alert_test_suite import AlertTestSuite
 
 
 class TestAlertProxyDropExecutable(AlertTestSuite):
-    alert_filename = "proxy_drop_non_standard_port"
+    alert_filename = "proxy_drop_executable"
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
