@@ -18,10 +18,10 @@ import socket
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
-import boto.sqs
 from boto.sqs.message import RawMessage
 import base64
 import kombu
+from ssl import SSLEOFError, SSLError
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
@@ -32,6 +32,7 @@ from utilities.logger import logger, initLogger
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 # running under uwsgi?
@@ -221,6 +222,16 @@ class taskConsumer(object):
             except ValueError as e:
                 logger.exception('Exception while handling message: %r' % e)
                 self.taskQueue.delete_message(msg)
+            except (SSLEOFError, SSLError, socket.error):
+                logger.info('Received network related error...reconnecting')
+                time.sleep(5)
+                self.connection, self.taskQueue = connect_sqs(
+                    options.region,
+                    options.accesskey,
+                    options.secretkey,
+                    options.taskexchange
+                )
+                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -328,14 +339,12 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    mqConn = boto.sqs.connect_to_region(
+    mqConn, eventTaskQueue = connect_sqs(
         options.region,
-        aws_access_key_id=options.accesskey,
-        aws_secret_access_key=options.secretkey
+        options.accesskey,
+        options.secretkey,
+        options.taskexchange
     )
-
-    # attach to the queue
-    eventTaskQueue = mqConn.get_queue(options.taskexchange)
 
     # consume our queue
     taskConsumer(mqConn, eventTaskQueue, es).run()

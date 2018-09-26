@@ -12,7 +12,6 @@ import sys
 import socket
 from configlib import getConfig, OptionParser
 from datetime import datetime
-import boto.sqs
 import boto.sts
 import boto.s3
 from boto.sqs.message import RawMessage
@@ -21,6 +20,7 @@ from StringIO import StringIO
 from threading import Timer
 import re
 import time
+from ssl import SSLEOFError, SSLError
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
@@ -30,6 +30,7 @@ from utilities.to_unicode import toUnicode
 from utilities.remove_at import removeAt
 
 from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 CLOUDTRAIL_VERB_REGEX = re.compile(r'^([A-Z][^A-Z]*)')
@@ -351,8 +352,16 @@ class taskConsumer(object):
             except Exception as e:
                 logger.exception(e)
                 time.sleep(3)
-
-            time.sleep(.1)
+            except (SSLEOFError, SSLError, socket.error) as e:
+                logger.info('Received network related error...reconnecting')
+                time.sleep(5)
+                self.connection, self.taskQueue = connect_sqs(
+                    options.region,
+                    options.accesskey,
+                    options.secretkey,
+                    options.taskexchange
+                )
+                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, body):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -446,9 +455,12 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    sqs_conn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
-    # attach to the queue
-    eventTaskQueue = sqs_conn.get_queue(options.taskexchange)
+    sqs_conn, eventTaskQueue = connect_sqs(
+        options.region,
+        options.accesskey,
+        options.secretkey,
+        options.taskexchange
+    )
 
     # consume our queue
     taskConsumer(sqs_conn, eventTaskQueue, es).run()

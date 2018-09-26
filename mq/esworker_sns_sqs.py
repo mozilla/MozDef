@@ -16,9 +16,9 @@ from configlib import getConfig, OptionParser
 from datetime import datetime
 import pytz
 
-import boto.sqs
 from boto.sqs.message import RawMessage
 import kombu
+from ssl import SSLEOFError, SSLError
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
 from utilities.toUTC import toUTC
@@ -26,6 +26,7 @@ from utilities.logger import logger, initLogger
 from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 # running under uwsgi?
@@ -61,20 +62,31 @@ class taskConsumer(object):
         self.taskQueue.set_message_class(RawMessage)
 
         while True:
-            records = self.taskQueue.get_messages(self.options.prefetch)
-            for msg in records:
-                msg_body = msg.get_body()
-                try:
-                    # get_body() should be json
-                    message_json = json.loads(msg_body)
-                    self.on_message(message_json)
-                    # delete message from queue
-                    self.taskQueue.delete_message(msg)
-                except ValueError:
-                    logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
-                    self.taskQueue.delete_message(msg)
-                    continue
-            time.sleep(.1)
+            try:
+                records = self.taskQueue.get_messages(self.options.prefetch)
+                for msg in records:
+                    msg_body = msg.get_body()
+                    try:
+                        # get_body() should be json
+                        message_json = json.loads(msg_body)
+                        self.on_message(message_json)
+                        # delete message from queue
+                        self.taskQueue.delete_message(msg)
+                    except ValueError:
+                        logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
+                        self.taskQueue.delete_message(msg)
+                        continue
+                time.sleep(.1)
+            except (SSLEOFError, SSLError, socket.error):
+                logger.info('Received network related error...reconnecting')
+                time.sleep(5)
+                self.connection, self.taskQueue = connect_sqs(
+                    options.region,
+                    options.accesskey,
+                    options.secretkey,
+                    options.taskexchange
+                )
+                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, message):
         try:
@@ -189,9 +201,12 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    mqConn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
-    # attach to the queue
-    eventTaskQueue = mqConn.get_queue(options.taskexchange)
+    mqConn, eventTaskQueue = connect_sqs(
+        options.region,
+        options.accesskey,
+        options.secretkey,
+        options.taskexchange
+    )
 
     # consume our queue
     taskConsumer(mqConn, eventTaskQueue, es, options).run()
