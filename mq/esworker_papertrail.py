@@ -416,6 +416,10 @@ if __name__ == '__main__':
 
     try:
         main()
+    except KeyboardInterrupt as e:
+        logger.info("Exiting worker")
+        if options.esbulksize != 0:
+            es.finish_bulk()
     except Exception as e:
         if options.esbulksize != 0:
             es.finish_bulk()
