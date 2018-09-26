@@ -31,7 +31,7 @@ class AlertUnauthSSH(AlertTask):
         search_query.add_must([
             TermMatch('category', 'syslog'),
             TermMatch('details.program', 'sshd'),
-            QueryStringMatch('details.hostname: /{}/'.format(self.config.hostfilter)),
+            QueryStringMatch('hostname: /{}/'.format(self.config.hostfilter)),
             PhraseMatch('summary', 'Accepted publickey for {}'.format(self.config.user))
         ])
 
@@ -58,9 +58,9 @@ class AlertUnauthSSH(AlertTask):
         targethost = 'unknown'
         sourceipaddress = 'unknown'
         x = event['_source']
+        if 'hostname' in x:
+            targethost = x['hostname']
         if 'details' in x:
-            if 'hostname' in x['details']:
-                targethost = x['details']['hostname']
             if 'sourceipaddress' in x['details']:
                 sourceipaddress = x['details']['sourceipaddress']
 
