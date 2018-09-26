@@ -88,18 +88,18 @@ class ElasticsearchClient():
     def flush(self, index_name):
         self.es_connection.indices.flush(index=index_name)
 
-    def search(self, search_query, indices, size):
+    def search(self, search_query, indices, size, request_timeout):
         results = []
         try:
-            results = Search(using=self.es_connection, index=indices).params(size=size).filter(search_query).execute()
+            results = Search(using=self.es_connection, index=indices).params(size=size, request_timeout=request_timeout).filter(search_query).execute()
         except NotFoundError:
             raise ElasticsearchInvalidIndex(indices)
 
         result_set = SimpleResults(results)
         return result_set
 
-    def aggregated_search(self, search_query, indices, aggregations, size):
-        search_obj = Search(using=self.es_connection, index=indices).params(size=size)
+    def aggregated_search(self, search_query, indices, aggregations, size, request_timeout):
+        search_obj = Search(using=self.es_connection, index=indices).params(size=size, request_timeout=request_timeout)
         query_obj = search_obj.filter(search_query)
         for aggregation in aggregations:
             query_obj.aggs.bucket(name=aggregation.to_dict()['terms']['field'], agg_type=aggregation)
