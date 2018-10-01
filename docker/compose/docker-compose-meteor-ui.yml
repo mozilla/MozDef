@@ -1,0 +1,18 @@
+---
+version: '2.2'
+services:
+  meteor:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_meteor/Dockerfile
+    restart: 'no'
+    command: bash -c 'node -i'    
+    depends_on:
+      - mongodb
+      - rest
+    networks:
+      - default
+    volumes:
+      - /Users/jbryner/development/mozdef/deployments/mozillagit/meteor:/opt/mozdef/envs/mozdef/meteor
+    stdin_open: true
+    tty: true

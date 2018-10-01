@@ -9,7 +9,7 @@ RUN \
   yum install -y mongodb-org && \
   yum clean all
 
-COPY files/mongod.conf /etc/mongod.conf
+COPY docker/compose/mongodb/files/mongod.conf /etc/mongod.conf
 
 VOLUME /var/lib/mongo
 

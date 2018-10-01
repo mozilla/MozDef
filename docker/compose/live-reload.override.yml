@@ -1,0 +1,33 @@
+---
+version: '2.2'
+services:
+  meteor:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_meteor/Dockerfile
+    restart: always
+    command: bash -c 'cd /opt/mozdef/envs/mozdef/meteor && meteor npm install --save-dev && rm -rf .meteor/local && /usr/bin/meteor'
+    depends_on:
+      - mongodb
+      - rest
+    networks:
+      - default
+    volumes:
+        - ../../meteor/app:/opt/mozdef/envs/mozdef/meteor/app
+        - ../../meteor/private:/opt/mozdef/envs/mozdef/meteor/private
+        - ../../meteor/public:/opt/mozdef/envs/mozdef/meteor/public
+  sampledata:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_sampledata/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && /opt/mozdef/envs/mozdef/examples/demo/sampleevents.sh'
+    links:
+      - elasticsearch
+    depends_on:
+      - loginput
+      - elasticsearch
+      - mongodb
+      - bootstrap
+    networks:
+      - default
