@@ -6,16 +6,19 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_meteor/Dockerfile
     restart: always
-    command: bash -c 'cd /opt/mozdef/envs/mozdef/meteor && meteor npm install --save-dev && rm -rf .meteor/local && /usr/bin/meteor'
+    # command: bash -c 'cd /opt/mozdef/envs/mozdef/meteor && meteor npm install --save-dev && rm -rf .meteor/local && /usr/bin/meteor'
+    command: bash -c 'node -i'
     depends_on:
       - mongodb
       - rest
     networks:
       - default
     volumes:
-        - ../../meteor/app:/opt/mozdef/envs/mozdef/meteor/app
-        - ../../meteor/private:/opt/mozdef/envs/mozdef/meteor/private
-        - ../../meteor/public:/opt/mozdef/envs/mozdef/meteor/public
+        - ../../meteor:/opt/mozdef/envs/mozdef/meteor
+#        - ../../meteor/private:/opt/mozdef/envs/mozdef/meteor/private
+#        - ../../meteor/public:/opt/mozdef/envs/mozdef/meteor/public
+    stdin_open: true
+    tty: true
   sampledata:
     build:
       context: ../../
