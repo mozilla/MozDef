@@ -1,5 +1,6 @@
 .DS_Store
 meteor/packages
+meteor/node_modules
 *.pyc
 celebeat-schedule.*
 results
