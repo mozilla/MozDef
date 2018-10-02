@@ -4,6 +4,15 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
  */
+import { Meteor } from 'meteor/meteor'
+import { Template } from 'meteor/templating';
+import { Session } from 'meteor/session';
+import { Tracker } from 'meteor/tracker';
+import { moment} from 'meteor/momentjs:moment';
+import crossfilter from 'crossfilter2';
+import dc from 'dc';
+import d3 from 'd3';
+import { tooltip } from 'meteor/twbs:bootstrap';
 
 if (Meteor.isClient) {
     var currentSearch=null;
@@ -427,8 +436,8 @@ if (Meteor.isClient) {
                 //console.log(minDate[0].utcepoch);
                 //console.log(maxDate[0].utcepoch);
                 volumeChart.x(d3.time.scale().domain([
-                                                      moment(minDate[0].utcepoch).subtract('minutes', 5)._d,
-                                                      moment(maxDate[0].utcepoch).add('minutes', 5)._d
+                                                      moment(minDate[0].utcepoch).subtract(5,'minutes')._d,
+                                                      moment(maxDate[0].utcepoch).add(5, 'minutes')._d
                                                       ]))
             }
         }
@@ -512,9 +521,10 @@ if (Meteor.isClient) {
                                         });
         };
 
-        Tracker.autorun(function(comp) {
+        this.autorun(function() {
             //subscribe to the number of alerts
             //and to the summary of alerts
+            console.log('running autorun from alertsummary.js');
             Meteor.subscribe("alerts-summary", Session.get('alertssearchtext'), Session.get('alertssearchtime'),Session.get('alertsrecordlimit'), onReady=function(){
                 //console.log('alerts-summary ready');
                 drawAlertsCharts();

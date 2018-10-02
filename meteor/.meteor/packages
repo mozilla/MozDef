@@ -28,3 +28,5 @@ meteor
 iron:router
 http
 accounts-password
+twbs:bootstrap
+momentjs:moment

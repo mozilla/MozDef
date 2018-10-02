@@ -4,9 +4,11 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
+import { moment} from 'meteor/momentjs:moment';
+import uuid from "uuid";
 
 //collections shared by client/server
-
+Meteor.startup(() => {
     events = new Meteor.Collection("events");
     alerts = new Meteor.Collection("alerts");
     investigations = new Meteor.Collection("investigations");
@@ -117,7 +119,7 @@ if (Meteor.isServer) {
       var self = this;
       var count = 0;
       var initializing = true;
-      var recordID=Meteor.uuid();
+      var recordID=uuid();
 
       //get a count by watching for only 1 new entry sorted in reverse date order.
       //use that hook to return a find().count rather than iterating the entire result set over and over
@@ -377,14 +379,18 @@ if (Meteor.isServer) {
 
 };
 
-if (Meteor.isClient) {
-    //client side collections:
-    alertsCount = new Meteor.Collection("alerts-count");
-    //client-side subscriptions to low volume collections
-    Meteor.subscribe("mozdefsettings");
-    Meteor.subscribe("veris");
-    Meteor.subscribe("kibanadashboards");
-    Meteor.subscribe("userActivity");
 
-};
+    if (Meteor.isClient) {
+        //client side collections:
+        options={
+            _suppressSameNameError : true
+        };
+        alertsCount = new Meteor.Collection("alerts-count",options);
+        //client-side subscriptions to low volume collections
+        Meteor.subscribe("mozdefsettings");
+        Meteor.subscribe("veris");
+        Meteor.subscribe("kibanadashboards");
+        Meteor.subscribe("userActivity");
 
+    };
+});

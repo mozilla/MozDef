@@ -6,8 +6,6 @@ import { Session } from 'meteor/session';
 import { _ } from 'meteor/underscore';
 import { Blaze } from 'meteor/blaze';
 import '/imports/collections.js';
-import './router.js';
-import './mozdef.js';
 import '/imports/settings.js';
 import '/client/about.html';
 import '/client/alertdetails.html';
@@ -30,15 +28,10 @@ import '/client/ipBlocklistTable.html';
 import '/client/ipdshield.html';
 import '/client/ipintel.html';
 import '/client/ipwhois.html';
+import '/client/logincounts.html';
+import '/client/logincounts.js';
 import '/client/mozdefhealth.html';
-
-if (Meteor.isClient) {
-    //client side collections:
-    alertsCount = new Mongo.Collection("alerts-count");
-    //client-side subscriptions to low volume collections
-    Meteor.subscribe("mozdefsettings");
-    Meteor.subscribe("veris");
-    Meteor.subscribe("kibanadashboards");
-    Meteor.subscribe("userActivity");
-
-};
+import '/client/mozdefhealth.js';
+import '/client/nameplate.html';
+import '/client/router.js';
+import '/client/mozdef.js';

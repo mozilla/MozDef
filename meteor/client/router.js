@@ -26,7 +26,11 @@ Router.map(function () {
     this.route('alertssummary', {
         path: '/alerts',
         template: 'alertssummary',
-        layoutTemplate: 'layout'
+        layoutTemplate: 'layout',
+        action: function () {
+            import('/client/alertsummary.js');
+            this.render();
+            }
     });
 
     this.route('alertdetails', {
