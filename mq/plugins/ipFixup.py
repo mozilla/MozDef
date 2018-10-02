@@ -128,7 +128,5 @@ class message(object):
 
             if 'cluster_client_ip' in message['details'].keys():
                 ipText = message['details']['cluster_client_ip']
-                if isIPv4(ipText) and 'sourceipaddress' not in message['details'].keys():
-                    message['details']['sourceipaddress'] = ipText
 
         return (message, metadata)
