@@ -12,6 +12,19 @@ from query_models import SearchQuery, TermMatch, ExistsMatch
 
 class AlertProxyDropExecutable(AlertTask):
     def main(self):
+
+        superquery = None
+        run = 0
+
+        for extension in self.config.extensions.split(','):
+            if run == 0:
+                superquery = QueryStringMatch(
+                    'details.destination', '/{0}/'.format(extension))
+            else:
+                superquery |= QueryStringMatch(
+                    'details.destination', '/{0}/'.format(extension))
+            run += 1
+
         search_query = SearchQuery(minutes=5)
 
         self.parse_config('proxy_drop_executable.conf', [
@@ -20,19 +33,19 @@ class AlertProxyDropExecutable(AlertTask):
         search_query.add_must([
             TermMatch('category', 'squid'),
             TermMatch('tags', 'squid'),
-            TermMatch('details.proxyaction', 'TCP_DENIED/-'),
-            QueryStringMatch(
-                'details.destination: /{}/').format('.*\.(exe|bin|sh|py|rb)$')
+            TermMatch('details.proxyaction', 'TCP_DENIED/-')
         ])
 
-        # search_query.add_must_not([
-        #     QueryStringMatch(
-        #         'details.destination: /{}/'.format(self.config.destinationfilter)),
-        # ])
+        search_query.add_must_not([
+            QueryStringMatch(
+                'details.destination: /{}/'.format(self.config.destinationfilter)),
+        ])
+
+        search_query.add_must(superquery)
 
         self.filtersManual(search_query)
 
-       # Search aggregations on field 'hostname', keep X samples of
+        # Search aggregations on field 'hostname', keep X samples of
         # events at most
         self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
         # alert when >= X matching events in an aggregation
@@ -50,11 +63,11 @@ class AlertProxyDropExecutable(AlertTask):
 
         summary = "Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destinations: http://evil.com/evil.exe"
 
-        # dropped_url_destinations = []
+        dropped_url_destinations = []
 
-        # for event in aggreg['allevents']:
-        #     dropped_url_destinations.append(
-        #         aggreg['allevents'][event]['_source']['details.destination'])
+        for event in aggreg['allevents']:
+            dropped_url_destinations.append(
+                event['_source']['details.destination'])
 
         # summary = 'Multiple Proxy DROP events detected from {0} to the following executable file destinations: {1}'.format(
         #     aggreg['value'], ",".join(set(dropped_url_destinations)))
