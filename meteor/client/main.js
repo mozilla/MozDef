@@ -30,6 +30,7 @@ import '/client/ipBlocklistTable.html';
 import '/client/ipdshield.html';
 import '/client/ipintel.html';
 import '/client/ipwhois.html';
+import '/client/mozdefhealth.html';
 
 if (Meteor.isClient) {
     //client side collections:
