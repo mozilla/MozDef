@@ -54,7 +54,7 @@ MozDef manual installation process on RedHat systems
 Summary
 *******
 This section explains the manual installation process for the MozDef system.
-  git clone https://github.com/mozilla/MozDef.git
+  git clone https://github.com/mozilla/MozDef.git mozdef
 
 
 
@@ -117,7 +117,7 @@ Then::
   wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
   tar xvzf Python-2.7.11.tgz
   cd Python-2.7.11
-  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared
+  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared LDFLAGS="-W1,--rpath=/opt/mozdef/python.2.7/lib"
   make
   make install
 
@@ -131,11 +131,11 @@ Then::
   cd ~/envs
   ~/python2.7/bin/virtualenv mozdef
   source mozdef/bin/activate
-  pip install -r MozDef/requirements.txt
+  pip install -r ../requirements.txt
 
-At this point when you launch python, It should tell you that you're using Python 2.7.11.
+At this point when you launch python from within your virtual environment, It should tell you that you're using Python 2.7.11.
 
-Whenever you launch a python script from now on, you should have your mozdef virtualenv actived and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/
+Whenever you launch a python script from now on, you should have your mozdef virtualenv active and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/
 
 RabbitMQ
 ********
@@ -168,6 +168,10 @@ On APT-based systems ::
   sudo apt-get install rabbitmq-server
   sudo invoke-rc.d rabbitmq-server start
 
+We do advise using rabbitmq and erlang's latest versions if you plan on using TLS protected connections with Rabbitmq.
+A simple way of doing this would be to use Bintray's repo located at: https://www.rabbitmq.com/install-rpm.html#bintray
+to download both the latest versions of rabbitmq and erlang.
+
 .. _RabbitMQ: https://www.rabbitmq.com/
 .. _EPEL repos: http://fedoraproject.org/wiki/EPEL/FAQ#howtouse
 
@@ -198,7 +202,7 @@ On APT-based systems::
 
 For meteor, in a terminal::
 
-  curl https://install.meteor.com/ | sh
+  curl https://install.meteor.com/?release=1.4.2.3 | sh
 
   wget https://nodejs.org/dist/v4.7.0/node-v4.7.0.tar.gz
   tar xvzf node-v4.7.0.tar.gz
@@ -207,7 +211,7 @@ For meteor, in a terminal::
   make
   sudo make install
 
-Then from the meteor subdirectory of this git repository (/opt/mozdef/MozDef/meteor) run::
+Then from the meteor subdirectory of this git repository (/opt/mozdef/meteor) run::
 
   meteor add iron-router
 
@@ -287,7 +291,7 @@ the fibers node module::
   rm -rf fibers
   sudo npm install fibers@1.0.1
 
-There are systemd unit files available in the systemd directory of the public repo you can use to start meteor using node.
+There are systemd unit files available in the systemd directory of the public repo you can use to start mongo, meteor (mozdefweb), and the restapi (mozdefrestapi).
 If you aren't using systemd, then run the mozdef UI via node manually::
 
   export MONGO_URL=mongodb://mongoservername:3002/meteor
@@ -322,7 +326,7 @@ If you don't have this package in your repos, before installing create `/etc/yum
 UWSGI
 *****
 
-We use `uwsgi`_ to interface python and nginx::
+We use `uwsgi`_ to interface python and nginx, in your venv execute the following::
 
   wget https://projects.unbit.it/downloads/uwsgi-2.0.12.tar.gz
   tar zxvf uwsgi-2.0.12.tar.gz
@@ -332,25 +336,25 @@ We use `uwsgi`_ to interface python and nginx::
   cp python_plugin.so ~/envs/mozdef/bin/
   cp uwsgi ~/envs/mozdef/bin/
 
-  cp -r ~/MozDef/rest   ~/envs/mozdef/
-  cp -r ~/MozDef/loginput   ~/envs/mozdef/
-  mkdir ~/envs/mozdef/logs
+  cd ..
+  cp -r ~/mozdef/rest   ~/envs/mozdef/
+  cp -r ~/mozdef/loginput   ~/envs/mozdef/
 
   cd ~/envs/mozdef/rest
   # modify config file
   vim index.conf
-  # modify uwsgi.ini
-  vim uwsgi.ini
-  uwsgi --ini uwsgi.ini
+  # modify restapi.ini
+  vim restapi.ini
 
   cd ../loginput
-  # modify uwsgi.ini
-  vim uwsgi.ini
-  uwsgi --ini uwsgi.ini
+  # modify loginput.ini
+  vim loginput.ini
 
   sudo cp nginx.conf /etc/nginx
   # modify /etc/nginx/nginx.conf
   sudo vim /etc/nginx/nginx.conf
+  # move uwsgi_params file into venv.
+  cp /etc/nginx/uwsgi_params /opt/mozdef/envs/mozdef/bin/
   sudo service nginx restart
 
 .. _uwsgi: https://uwsgi-docs.readthedocs.io/en/latest/
