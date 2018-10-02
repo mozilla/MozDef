@@ -192,6 +192,13 @@ class taskConsumer(object):
                             self.taskQueue.delete_message(msg)
                             continue
 
+                    # If this is still not a dict,
+                    # let's just drop the message and move on
+                    if type(msgbody) is not dict:
+                        logger.debug("Message is not a dictionary, dropping message.")
+                        self.taskQueue.delete_message(msg)
+                        continue
+
                     event = dict()
                     event = msgbody
 
