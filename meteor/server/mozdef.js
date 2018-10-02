@@ -10,6 +10,8 @@ if (Meteor.isServer) {
     Meteor.startup(function () {
         // Since we only connect to localhost or to ourselves, adding a hack to bypass cert validation
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        // We don't use websockets, turn 'em off to make for a faster startup
+        process.env.DISABLE_WEBSOCKETS = "1";
         console.log("MozDef starting")
 
         //important to set this so persona can validate the source request
@@ -49,7 +51,7 @@ if (Meteor.isServer) {
             value: enableClientAccountCreation
         });
 
-        // newer meteor uses a key of forbidClientAccountCreation, so 
+        // newer meteor uses a key of forbidClientAccountCreation, so
         // we negate the enableClientAccountCreation mozdef setting
         Accounts._options.forbidClientAccountCreation = !enableClientAccountCreation;
         mozdefsettings.insert({
