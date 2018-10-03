@@ -12,6 +12,7 @@
     "dc": "^2.1.10",
     "jquery-ui": "^1.12.1",
     "meteor-node-stubs": "^0.4.1",
+    "three-full": "^11.3.2",
     "uuid": "^3.3.2"
   },
   "meteor": {
