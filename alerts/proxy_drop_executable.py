@@ -7,19 +7,14 @@
 
 
 from lib.alerttask import AlertTask
-from query_models import QueryStringMatch, SearchQuery, TermMatch, ExistsMatch
+from query_models import QueryStringMatch, SearchQuery, TermMatch
 
 
 class AlertProxyDropExecutable(AlertTask):
     def main(self):
+        self.parse_config('proxy_drop_executable.conf', ['extensions'])
 
-        superquery = None
-        run = 0
-
-        self.parse_config('proxy_drop_executable.conf', [
-                          'destinationfilter', 'extensions'])
-
-        search_query = SearchQuery(minutes=5)
+        search_query = SearchQuery(minutes=20)
 
         search_query.add_must([
             TermMatch('category', 'squid'),
@@ -27,22 +22,11 @@ class AlertProxyDropExecutable(AlertTask):
             TermMatch('details.proxyaction', 'TCP_DENIED/-')
         ])
 
-        search_query.add_must_not([
-            QueryStringMatch(
-                'details.destination: /{}/'.format(self.config.destinationfilter)),
+        # Only notify on certain file extensions from config
+        filename_regex = "/.*\.({0})/".format(self.config.extensions.replace(',', '|'))
+        search_query.add_must([
+            QueryStringMatch('details.destination: {}'.format(filename_regex))
         ])
-
-        # TODO: remove HACK in onAggregation once this works as expected
-        # for extension in self.config.extensions.split(','):
-        #     if run == 0:
-        #         superquery = QueryStringMatch(
-        #             'details.destination: /{0}/'.format(extension))
-        #     else:
-        #         superquery |= QueryStringMatch(
-        #             'details.destination: /{0}/'.format(extension))
-        #     run += 1
-        #
-        # search_query.add_must(superquery)
 
         self.filtersManual(search_query)
 
@@ -62,22 +46,14 @@ class AlertProxyDropExecutable(AlertTask):
         tags = ['squid', 'proxy']
         severity = 'WARNING'
 
-        dropped_url_destinations = []
-
-        # START HACK - The conditionals here are to account for an inability to endwith
-        # in lucene search, which we are hacking in as python
+        dropped_urls = set()
         for event in aggreg['allevents']:
-            for extension in self.config.extensions.split(','):
-                if event['_source']['details']['destination'].endswith(extension):
-                    dropped_url_destinations.append(
-                        event['_source']['details']['destination'])
-
-        if len(dropped_url_destinations) == 0:
-            return
-        # END HACK
+            dropped_urls.add(event['_source']['details']['destination'])
 
         summary = 'Multiple Proxy DROP events detected from {0} to the following executable file destinations: {1}'.format(
-            aggreg['value'], ",".join(set(dropped_url_destinations)))
+            aggreg['value'],
+            ",".join(dropped_urls)
+        )
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

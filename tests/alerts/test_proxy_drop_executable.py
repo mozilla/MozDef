@@ -30,7 +30,9 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
         "severity": "WARNING",
         "summary": 'Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destinations: http://evil.com/evil.exe',
     }
+
     test_cases = []
+
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
@@ -38,6 +40,7 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
             expected_alert=default_alert
         )
     )
+
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['category'] = 'bad'
@@ -47,6 +50,7 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
             events=events,
         )
     )
+
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['tags'] = 'bad tag example'
@@ -58,13 +62,21 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
     )
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({
-                                                                                         'minutes': 241})
-        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({
-                                                                                              'minutes': 241})
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 241})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 241})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
+            events=events,
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['details']['destination'] = 'http://evil.com/evil.pdf'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with non blacklisted extension",
             events=events,
         )
     )
