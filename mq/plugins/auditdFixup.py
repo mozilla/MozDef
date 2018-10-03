@@ -101,13 +101,6 @@ class message(object):
                 message['details']['gidstring'] = message['details']['gid']
                 del message['details']['gid']
 
-       # fix details.dhost to be hostname
-       if 'details' in message.keys() and isinstance(message['details'], dict):
-           if 'dhost' in message['details'].keys():
-               # details.dhost is the host that the auditd event is happening on.
-               message['hostname'] = message['details']['dhost']
-               del message['details']['dhost']
-
         # add category
         if 'category' not in message.keys():
             message['category'] = 'auditd'
