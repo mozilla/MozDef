@@ -7,6 +7,7 @@ import { _ } from 'meteor/underscore';
 import { Blaze } from 'meteor/blaze';
 import '/imports/collections.js';
 import '/imports/settings.js';
+import '/imports/helpers.js';
 import '/imports/models.js';
 import '/client/about.html';
 import '/client/alertdetails.html';
