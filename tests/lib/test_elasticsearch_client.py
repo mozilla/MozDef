@@ -5,20 +5,21 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
+import time
+import json
+
+import pytest
+from elasticsearch.exceptions import ConnectionTimeout
+
 import os
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
+from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
-
-import time
-import json
-
-from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
-import pytest
 
 
 class ElasticsearchClientTest(UnitTestSuite):
@@ -276,6 +277,35 @@ class TestBulkWrites(BulkTest):
         assert self.mock_class.request_counts <= 25 and self.mock_class.request_counts >= 15
         num_events = self.get_num_events()
         assert num_events == 2000
+
+
+class TestReadTimeoutThreshold(ElasticsearchClientTest):
+    def test_modifying_readtimeout(self):
+        events_length = 5000
+        events = []
+        # Just populate some larger events
+        # so ES will take a few seconds
+        # to return the query, thus hitting
+        # the read timeout
+        for num in range(events_length):
+            base_event = {}
+            for key_num in range(50):
+                base_event['key' + str(key_num)] = 'a' * 1000
+            events.append(base_event)
+
+        for event in events:
+            self.es_client.save_object(index='events', doc_type='event', body=event)
+
+        self.flush(self.event_index_name)
+        search_query = SearchQuery()
+        search_query.add_must(TermMatch('_type', 'event'))
+        search_query.add_aggregation(Aggregation('_type'))
+        with pytest.raises(ConnectionTimeout):
+            search_query.execute(self.es_client, size=10000, request_timeout=1)
+        # We sleep a bit to give the connection pool time to
+        # recover, if we didn't, the next couple of tests
+        # would fail, which seems weird but it is what it is
+        time.sleep(10)
 
 
 class TestBulkWritesWithMoreThanThreshold(BulkTest):
