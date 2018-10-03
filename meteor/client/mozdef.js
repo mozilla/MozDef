@@ -9,6 +9,8 @@ import { Template } from 'meteor/templating';
 import '/imports/settings.js';
 import '/imports/helpers.js';
 import '/client/js/jquery.highlight.js';
+import PNotify from 'pnotify';
+import 'pnotify/dist/pnotify.css';
 import './mozdef.html';
 import './menu.html';
 import '/client/layout.js';
