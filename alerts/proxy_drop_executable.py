@@ -76,8 +76,8 @@ class AlertProxyDropExecutable(AlertTask):
             return
         # END HACK
 
-        summary = 'Multiple Proxy DROP events detected from {0} to the following executable file destinations: {1}'.format(
-            aggreg['value'], ",".join(set(dropped_url_destinations)))
+        summary = 'Multiple Proxy DROP events detected from {0} to the following executable file destination(s): {1}'.format(
+            aggreg['value'], ",".join(sorted(set(dropped_url_destinations))))
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

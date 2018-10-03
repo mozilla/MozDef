@@ -23,13 +23,29 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
             }
         }
     }
+
+    # This event is an alternate destination that we'd want to aggregate
+    default_event2 = AlertTestSuite.copy(default_event)
+    default_event2["_source"]["details"]["destination"] = "http://evil.com/evil.sh"
+
+    # This event is the default negative event that will not cause the
+    # alert to trigger
+    default_negative_event = AlertTestSuite.copy(default_event)
+    default_negative_event["_source"]["details"]["destination"] = "http://foo.mozilla.com/index.html"
+
     # This alert is the expected result from running this task
     default_alert = {
         "category": "squid",
         "tags": ['squid', 'proxy'],
         "severity": "WARNING",
-        "summary": 'Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destinations: http://evil.com/evil.exe',
+        "summary": 'Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destination(s): http://evil.com/evil.exe',
     }
+
+    # This alert is the expected result from this task against multiple matching events
+    default_alert_aggregated = AlertTestSuite.copy(default_alert)
+    default_alert_aggregated[
+        "summary"] = 'Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destination(s): http://evil.com/evil.exe,http://evil.com/evil.sh'
+
     test_cases = []
     test_cases.append(
         PositiveAlertTestCase(
@@ -38,6 +54,32 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
             expected_alert=default_alert
         )
     )
+
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with default events and default alert expected",
+            events=AlertTestSuite.create_events(default_event, 2),
+            expected_alert=default_alert
+        )
+    )
+
+    events1 = AlertTestSuite.create_events(default_event, 1)
+    events2 = AlertTestSuite.create_events(default_event2, 1)
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with default events and default alert expected",
+            events=events1 + events2,
+            expected_alert=default_alert_aggregated
+        )
+    )
+
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test with default negative event",
+            events=AlertTestSuite.create_events(default_negative_event, 1),
+        )
+    )
+
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['category'] = 'bad'
