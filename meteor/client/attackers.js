@@ -129,9 +129,11 @@ if (Meteor.isClient) {
             if ( intersects.length > 0 ) {
                 sceneControls.enabled = false;
                 selectedObject = intersects[ 0 ].object.parent;
-                var intersects = raycaster.intersectObject( plane );
-                offset.copy( intersects[ 0 ].point ).sub( plane.position );
-                container.style.cursor = 'move';
+                var planeintersects = raycaster.intersectObject( plane );
+                if (planeintersects.length>0){
+                    offset.copy( planeintersects[ 0 ].point ).sub( plane.position );
+                    container.style.cursor = 'move';
+                }
             }
         },
         "mousemove": function(event,template){
@@ -156,7 +158,9 @@ if (Meteor.isClient) {
 
                 if ( selectedObject ){
                     var intersects = raycaster.intersectObject( plane );
-                    selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
+                    if (intersects.length>0){
+                        selectedObject.position.copy( intersects[ 0 ].point.sub( offset ) );
+                    }
                     //console.log(selectedObject.parent.dbid);
                     if (selectedObject.parent){
                         nameplate=selectedObject.parent.getObjectByName('nameplate:' + selectedObject.dbid,true)
