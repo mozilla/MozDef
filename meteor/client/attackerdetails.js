@@ -4,6 +4,11 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
  */
+import { Meteor } from 'meteor/meteor'
+import { Template } from 'meteor/templating';
+import { Session } from 'meteor/session';
+import { Tracker } from 'meteor/tracker';
+import { tooltip } from 'meteor/twbs:bootstrap';
 
 if (Meteor.isClient) {
 
