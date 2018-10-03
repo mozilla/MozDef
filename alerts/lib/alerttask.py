@@ -29,7 +29,7 @@ from query_models import TermMatch, ExistsMatch
 # in a list of dicts
 def keypaths(nested):
     ''' return a list of nested dict key paths
-        like: [u'_source', u'details', u'hostname']
+        like: [u'_source', u'details', u'program']
     '''
     for key, value in nested.iteritems():
         if isinstance(value, collections.Mapping):

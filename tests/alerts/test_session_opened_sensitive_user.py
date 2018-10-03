@@ -19,10 +19,10 @@ class TestSessionOpenedUser(AlertTestSuite):
         "_type": "event",
         "_source": {
             "category": "syslog",
+            "hostname": "exhostname",
             "summary": 'pam_unix(sshd:session): session opened for user user1 by (uid=0)',
             "details": {
                 "program": "sshd",
-                "hostname": "exhostname",
             }
         }
     }
@@ -84,7 +84,7 @@ class TestSessionOpenedUser(AlertTestSuite):
     randomhostsalert['summary'] = "Session opened by a sensitive user outside of the expected window - sample hosts:"
     for event in events:
         randomhostname = 'host' + str(events.index(event))
-        event['_source']['details']['hostname'] = randomhostname
+        event['_source']['hostname'] = randomhostname
         randomhostsalert['summary'] += ' {0}'.format(randomhostname)
     randomhostsalert['summary'] += " [total 10 hosts]"
     test_cases.append(
