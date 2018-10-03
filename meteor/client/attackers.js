@@ -4,6 +4,17 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
+import { Meteor } from 'meteor/meteor'
+import { Template } from 'meteor/templating';
+import { Session } from 'meteor/session';
+import { Tracker } from 'meteor/tracker';
+import { moment} from 'meteor/momentjs:moment';
+import crossfilter from 'crossfilter2';
+import dc from 'dc';
+import d3 from 'd3';
+import THREE , { MorphBlendMesh } from 'three-full';
+import '/imports/settings.js';
+import '/imports/helpers.js';
 
 if (Meteor.isClient) {
     Session.set('attackersSearch',null);
@@ -573,12 +584,12 @@ if (Meteor.isClient) {
         //categories and skins should match the skin you want for a particular category
         var configOgro = {
             baseUrl: "/other/ogro/",
-            body: "ogro-light.js",
+            body: "ogro.md2",
             skins: [ "ogrobase.png", "grok.jpg", "arboshak.png", "ctf_r.png", "ctf_b.png", "darkam.png", "freedom.png",
                      "gib.png", "gordogh.png", "igdosh.png", "khorne.png", "nabogro.png",
                      "sharokh.png" ],
             categories: ["unknown","falsepositive","skiddie","apt", "bountyhunter", "bruteforcer"],
-            weapons:  [ [ "weapon-light.js", "weapon.jpg" ] ],
+            weapons:  [ [ "weapon.md2", "weapon.jpg" ] ],
             animations: {
                 move: "run",
                 idle: "stand",
