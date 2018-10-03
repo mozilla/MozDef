@@ -47,6 +47,7 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
         "summary"] = 'Multiple Proxy DROP events detected from 1.2.3.4 to the following executable file destination(s): http://evil.com/evil.exe,http://evil.com/evil.sh'
 
     test_cases = []
+
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
@@ -57,7 +58,7 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
 
     test_cases.append(
         PositiveAlertTestCase(
-            description="Positive test with default events and default alert expected",
+            description="Positive test with default events and default alert expected - dedup",
             events=AlertTestSuite.create_events(default_event, 2),
             expected_alert=default_alert
         )
@@ -67,7 +68,7 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
     events2 = AlertTestSuite.create_events(default_event2, 1)
     test_cases.append(
         PositiveAlertTestCase(
-            description="Positive test with default events and default alert expected",
+            description="Positive test with default events and default alert expected - different dests",
             events=events1 + events2,
             expected_alert=default_alert_aggregated
         )
@@ -89,6 +90,7 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
             events=events,
         )
     )
+
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event['_source']['tags'] = 'bad tag example'
@@ -107,6 +109,16 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",
+            events=events,
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event['_source']['details']['destination'] = 'http://evil.com/evil.pdf'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with non blacklisted extension",
             events=events,
         )
     )
