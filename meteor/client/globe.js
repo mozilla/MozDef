@@ -4,6 +4,7 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
+import THREE from 'three-full';
 
 if (Meteor.isClient) {
 
@@ -103,7 +104,7 @@ if (Meteor.isClient) {
       shader = Shaders['earth'];
       uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-      uniforms['texture'].value = THREE.ImageUtils.loadTexture(imgDir+'globe-world.jpg');
+      uniforms['texture'].value = THREE.TextureLoader(imgDir+'globe-world.jpg');
 
       material = new THREE.ShaderMaterial({
 
@@ -479,7 +480,9 @@ if (Meteor.isClient) {
       mouse.y = - ((event.clientY - 52) / window.innerHeight) * 2 + 1;
 
       var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
-      projector.unprojectVector(vector, camera);
+      //projector.unprojectVector(vector, camera);
+      vector.unproject(camera);
+
 
       var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
       var intersections;
@@ -601,8 +604,8 @@ if (Meteor.isClient) {
     Deps.autorun(function() {
         Meteor.subscribe("attackers-summary", onReady=function() {
             waitForGlobe();
-        });      
-      
+        });
+
     });
   }
 
