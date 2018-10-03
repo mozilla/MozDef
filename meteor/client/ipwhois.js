@@ -9,7 +9,7 @@ if (Meteor.isClient) {
     var whoisresult = new Object;
     var whoisDep = new Deps.Dependency;
     whoisresult.status='running';
-    
+
     getWhois= function() {
             whoisresult.status='running';
             whoisresult.result = null;
@@ -21,7 +21,7 @@ if (Meteor.isClient) {
                 Meteor.apply('ipwhois',
                     [Session.get('ipwhoisipaddress')],
                     onResultReceived = function(err,result){
-                       
+
                        if (typeof err == 'undefined') {
                            //console.log(err,result);
                            whoisresult.status='completed';
@@ -39,17 +39,17 @@ if (Meteor.isClient) {
 
     Template.ipwhois.events({
         "click .showmodal": function(event, template) {
-            $("#modalwhoiswindow").modal()
+            $("#modalwhoiswindow").modal();
         }
         });
-            
+
     Template.ipwhois.helpers({
         whois: function() {
             whoisDep.depend();
             return whoisresult;
         }
     });
-    
+
     Template.whoismodal.helpers({
         whois: function() {
             whoisDep.depend();
@@ -61,7 +61,7 @@ if (Meteor.isClient) {
         //console.log(Session.get('ipwhoisipaddress'));
         Deps.autorun(getWhois); //end deps.autorun
     };
-    
+
     Template.ipwhois.rendered = function () {
         //console.log(Session.get('ipwhoisipaddress'));
         Deps.autorun(getWhois); //end deps.autorun
