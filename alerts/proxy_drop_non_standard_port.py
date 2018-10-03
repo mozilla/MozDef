@@ -7,44 +7,50 @@
 
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch
+from query_models import QueryStringMatch, SearchQuery, TermMatch
 
 
 class AlertProxyDropNonStandardPort(AlertTask):
     def main(self):
-        search_query = SearchQuery(minutes=5)
+        search_query = SearchQuery(minutes=20)
 
         search_query.add_must([
             TermMatch('category', 'squid'),
+            TermMatch('tags', 'squid'),
             TermMatch('details.proxyaction', 'TCP_DENIED/-'),
-            TermMatch('details.tcpaction', 'CONNECT'),
+            TermMatch('details.tcpaction', 'CONNECT')
         ])
 
         search_query.add_must_not([
-            PhraseMatch('details.destination', ':443')
+            QueryStringMatch('details.destination: /.*:443/')
         ])
 
         self.filtersManual(search_query)
 
-        # Search aggregations on field 'ip', keep X samples of events at most
+        # Search aggregations on field 'hostname', keep X samples of
+        # events at most
         self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
         # alert when >= X matching events in an aggregation
+        # I think it makes sense to alert every time here
         self.walkAggregations(threshold=1)
 
-    # Set alert properties
+        # Set alert properties
     def onAggregation(self, aggreg):
-        # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
-        # aggreg['value']: value of the aggregation field, ex: toto@example.com
-        # aggreg['events']: list of events in the aggregation
+         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
+         # aggreg['value']: value of the aggregation field, ex: toto@example.com
+         # aggreg['events']: list of events in the aggregation
         category = 'squid'
         tags = ['squid', 'proxy']
         severity = 'WARNING'
 
-        destinations = []
-
+        destinations = set()
         for event in aggreg['allevents']:
-           destinations.append(event['_source']['details.destination'])
+            destinations.add(event['_source']['details']['destination'])
 
-        summary = ('Suspicious proxy activity from {0} attempting to reach non-std services: {1}'.format(aggreg['value'], join(", ", destinations))
+        summary = 'Suspicious Proxy DROP events detected from {0} to the following non-std port(s): {1}'.format(
+            aggreg['value'],
+            ",".join(sorted(destinations))
+        )
 
+        # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

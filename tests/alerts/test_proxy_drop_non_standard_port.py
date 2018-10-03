@@ -9,7 +9,7 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestAlertSSHPasswordAuthViolation(AlertTestSuite):
+class TestAlertProxyDropNonStandardPort(AlertTestSuite):
     alert_filename = "proxy_drop_non_standard_port"
 
     # This event is the default positive event that will cause the
@@ -20,10 +20,29 @@ class TestAlertSSHPasswordAuthViolation(AlertTestSuite):
             "category": "squid",
             "tags": ["squid"],
             "details": {
-                "details.sourceipaddress": "1.2.3.4",
-                "details.destination": "evil.com:6667",
-                "details.proxyaction": "TCP_DENIED/-",
-                "details.tcpaction": "CONNECT",
+                "sourceipaddress": "1.2.3.4",
+                "destination": "evil.com:6667",
+                "proxyaction": "TCP_DENIED/-",
+                "tcpaction": "CONNECT"
+            }
+        }
+    }
+
+    default_event2 = AlertTestSuite.copy(default_event)
+    default_event2["_source"]["details"]["destination"] = "evil.com:1337"
+
+    # This event is the default negative event that will cause the
+    # alert to trigger
+    default_negative_event = {
+        "_type": "event",
+        "_source": {
+            "category": "squid",
+            "tags": ["squid"],
+            "details": {
+                "sourceipaddress": "1.2.3.4",
+                "destination": "example.com:443",
+                "proxyaction": "TCP_DENIED/-",
+                "tcpaction": "CONNECT"
             }
         }
     }
@@ -33,8 +52,12 @@ class TestAlertSSHPasswordAuthViolation(AlertTestSuite):
         "category": "squid",
         "tags": ['squid', 'proxy'],
         "severity": "WARNING",
-        "summary": 'Suspicious proxy activity from 1.2.3.4 attempting to reach non-std services: evil.com:6667',
+        "summary": 'Suspicious Proxy DROP events detected from 1.2.3.4 to the following non-std port(s): evil.com:6667'
     }
+
+    default_alert_aggregated = AlertTestSuite.copy(default_alert)
+    default_alert_aggregated[
+        "summary"] = 'Suspicious Proxy DROP events detected from 1.2.3.4 to the following non-std port(s): evil.com:1337,evil.com:6667'
 
     test_cases = []
 
@@ -43,6 +66,23 @@ class TestAlertSSHPasswordAuthViolation(AlertTestSuite):
             description="Positive test with default events and default alert expected",
             events=AlertTestSuite.create_events(default_event, 1),
             expected_alert=default_alert
+        )
+    )
+
+    events1 = AlertTestSuite.create_events(default_event, 1)
+    events2 = AlertTestSuite.create_events(default_event2, 1)
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with default events and default alert expected",
+            events=events1 + events2,
+            expected_alert=default_alert_aggregated
+        )
+    )
+
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Positive test with default events and default alert expected",
+            events=AlertTestSuite.create_events(default_negative_event, 1),
         )
     )
 
