@@ -10,8 +10,10 @@
   "dependencies": {
     "@babel/runtime": "7.0.0-beta.55",
     "dc": "^2.1.10",
+    "jquery": "^1.12.1",
     "jquery-ui": "^1.12.1",
     "meteor-node-stubs": "^0.4.1",
+    "pnotify": "^3.0.0",
     "three-full": "^11.3.2",
     "uuid": "^3.3.2"
   },
@@ -20,5 +22,6 @@
       "client": "client/main.js",
       "server": "server/main.js"
     }
-  }
+  },
+  "devDependencies": {}
 }
