@@ -4,14 +4,15 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
-
+import { tooltip } from 'meteor/twbs:bootstrap';
+import '/client/verisTags.html';
 if (Meteor.isClient) {
     var note = null;
     var theory = null;
     var mitigation = null;
     var lesson = null;
     var timestamp = null;
-    
+
 
     Template.veristags.helpers({
         veris: function() {
@@ -31,7 +32,7 @@ if (Meteor.isClient) {
             template.find("#tagfilter").value=e.target.textContent;
         }
     });
-    
+
 
     //return all incidents
     Template.incidents.helpers({
@@ -67,19 +68,19 @@ if (Meteor.isClient) {
         Deps.autorun(function() {
             Meteor.subscribe("incidents-summary");
         });
-        
+
     };
 
     //edit events
     Template.editincidentform.events({
         "dragover .tags": function(e){
-            e.preventDefault();   //allow the drag  
+            e.preventDefault();   //allow the drag
         },
         "keyup .tagfilter":function(e,template){
             //var letter_pressed = String.fromCharCode(e.keyCode);
             //console.log(template.find("#tagfilter").value);
             Session.set('verisfilter',template.find("#tagfilter").value);
-            
+
         },
         "drop .tags": function(e){
             e.preventDefault();
@@ -90,7 +91,7 @@ if (Meteor.isClient) {
                 $addToSet: {tags:tagtext}
             });
         },
-        
+
         "click .tagdelete": function(e){
             tagtext = e.target.parentNode.firstChild.wholeText;
             incidents.update(Session.get('incidentID'), {
@@ -136,7 +137,7 @@ if (Meteor.isClient) {
             if ( tValue.length > 0 ) {
                 incidents.update(Session.get('incidentID'), {
                     $addToSet: {references:tValue}
-                });                
+                });
             }
             $('#newReference').val('');
         },
@@ -153,7 +154,7 @@ if (Meteor.isClient) {
                 $pull: {references:reftext}
             });
         },
-        
+
         "click #saveTheory": function(e,template){
             if (! theory) {
                 theory=models.theory();
@@ -199,7 +200,7 @@ if (Meteor.isClient) {
                 $('#theoryStatus').val(theory.status);
             }
             e.preventDefault();
-        },        
+        },
 
         "click .theorydelete": function(e){
             id = $(e.target).attr('data-theoryid');
@@ -234,7 +235,7 @@ if (Meteor.isClient) {
                 timestamp=null;
                 e.preventDefault();
             }
-            
+
         },
 
         "click .timestampedit": function(e){
@@ -252,7 +253,7 @@ if (Meteor.isClient) {
                 $('#timestampDescription').val(timestamp.description);
             }
             e.preventDefault();
-        }, 
+        },
 
         "click .timestampdelete": function(e){
             id = $(e.target).attr('data-timestampid');
@@ -307,7 +308,7 @@ if (Meteor.isClient) {
                 $('#mitigationTemporary').prop('checked', mitigation.temporary);
             }
             e.preventDefault();
-        },         
+        },
 
         "click .mitigationdelete": function(e){
             id = $(e.target).attr('data-mitigationid');
@@ -378,7 +379,7 @@ if (Meteor.isClient) {
                 //limited support for modify a set, so pull/add
                 incidents.update(Session.get('incidentID'), {
                     $pull: {notes: {"_id": note._id}}
-                });                
+                });
                 incidents.update(Session.get('incidentID'), {
                     $addToSet: {notes:note}
                 });
@@ -419,7 +420,7 @@ if (Meteor.isClient) {
               console.log('readystatechange')
               console.log(e)
             }
-            
+
         },
         "mouseenter .info-row": function(e,t){
             //toggle the bootstrap tooltip
@@ -429,7 +430,7 @@ if (Meteor.isClient) {
         }
     });
 
-    Template.editincidentform.rendered = function() {        
+    Template.editincidentform.rendered = function() {
         initDatePickers=function(){
             //init the date pickers.
             $('#dateClosed').daterangepicker({
@@ -485,21 +486,21 @@ if (Meteor.isClient) {
 
         this.$('[data-toggle="tooltip"]').tooltip({
             'placement': 'top'
-        }); 
+        });
 
         //log the user entering the template
         activity=models.userAction();
         activity.path='incident';
         activity.itemId=Session.get('incidentID');
         Template.instance.uaId=userActivity.insert(activity);
-        
-        
-        //set up reactive data 
+
+
+        //set up reactive data
         Deps.autorun(function() {
             Meteor.subscribe("incident-details",Session.get('incidentID'), onReady=function(){
                 initDatePickers();
             });
-            
+
             Meteor.subscribe("userActivity",onReady=function(){
             //register a callback for new user activity
             //to show a notify when someone enters
@@ -516,9 +517,9 @@ if (Meteor.isClient) {
                                                     console.log(fields);
                                                     Session.set('displayMessage',fields.userId + '& is viewing this incident')
                                                 }
-                                        }); 
+                                        });
             });
-            
+
         }); //end deps.autorun
 
         //code to save the main tab data
@@ -535,7 +536,7 @@ if (Meteor.isClient) {
               dateMitigated: dateOrNull(template.find("#dateMitigated").value),
               dateContained: dateOrNull(template.find("#dateContained").value)
             }
-            
+
             incidents.update(
                 Session.get('incidentID'),
                 {$set: incidentobj},
@@ -558,32 +559,32 @@ if (Meteor.isClient) {
 
         incidentSaveTimer = function() {
           var timer;
-    
+
           this.set = function(saveFormCB) {
             timer = Meteor.setTimeout(function() {
               saveFormCB();
             }, 3000);
           };
-    
+
           this.clear = function() {
             if ( timer != undefined ){
                 Meteor.clearTimeout(timer);
             }
           };
-    
+
           this.run = function(e, t) {
             // Save user input after X seconds of not typing
             this.clear();
-     
+
             this.set(function() {
               saveIncident(e, t);
             });
           };
-    
-          return this;    
+
+          return this;
         }();
     };
-    
+
     Template.editincidentform.destroyed = function () {
         //remove the record of the user entering the template
         userActivity.remove(Template.instance.uaId);
@@ -596,7 +597,7 @@ if (Meteor.isClient) {
                                             timePickerIncrement:1,
                                             format: 'MM/DD/YYYY hh:mm:ss A',
                                             startDate: moment()
-                                            });        
+                                            });
     };
 
     //add incident events
@@ -606,7 +607,7 @@ if (Meteor.isClient) {
             newIncident=models.incident();
             newIncident.summary= template.find("#summary").value,
             newIncident.dateOpened=dateOrNull(template.find("#dateOpened").value),
-            newIncident.phase=template.find("#phase").value            
+            newIncident.phase=template.find("#phase").value
             newid=incidents.insert(newIncident);
             //reroute to full blown edit form after this minimal input is complete
             Router.go('/incident/' + newid + '/edit');

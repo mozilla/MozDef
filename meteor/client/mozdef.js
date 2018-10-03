@@ -9,8 +9,8 @@ import '/imports/settings.js';
 import '/client/js/jquery.highlight.js';
 import './mozdef.html';
 import './menu.html';
-//const  d3 =require('d3');
-//import d3 from 'd3';
+import '/client/layout.js';
+
 
 if (Meteor.isClient) {
     //default session variables

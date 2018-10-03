@@ -4,6 +4,7 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
+import { tooltip } from 'meteor/twbs:bootstrap';
 
 if (Meteor.isClient) {
     var note = null;
@@ -31,7 +32,7 @@ if (Meteor.isClient) {
                 Router.go('/investigation/' + this._id + '/edit');
             }
         },
-        
+
         "click .investigationdelete": function(e){
             investigations.remove(this._id);
         },
@@ -44,7 +45,7 @@ if (Meteor.isClient) {
         }
     });
 
-    
+
     Template.investigations.rendered = function(){
         Deps.autorun(function() {
             Meteor.subscribe("investigations-summary");
@@ -55,14 +56,14 @@ if (Meteor.isClient) {
     //edit events
     Template.editinvestigationform.events({
         "dragover .tags": function(e){
-            e.preventDefault();   //allow the drag  
+            e.preventDefault();   //allow the drag
         },
 
         "keyup .tagfilter":function(e,template){
             //var letter_pressed = String.fromCharCode(e.keyCode);
             //console.log(template.find("#tagfilter").value);
             Session.set('verisfilter',template.find("#tagfilter").value);
-            
+
         },
 
         "drop .tags": function(e){
@@ -74,7 +75,7 @@ if (Meteor.isClient) {
               $addToSet: {tags:tagtext}
             });
         },
-        
+
         "click .tagdelete": function(e){
             tagtext = e.target.parentNode.firstChild.wholeText;
             investigations.update(Session.get('investigationID'), {
@@ -85,7 +86,7 @@ if (Meteor.isClient) {
         "blur .description, blur .summary, blur .contact": function(e, t) {
             e.stopImmediatePropagation();
             saveInvestigation(e,t);
-        },        
+        },
 
         "keyup": function(e, t) {
            // Save user input after 3 seconds of not typing
@@ -116,13 +117,13 @@ if (Meteor.isClient) {
             $(e.target.hash).addClass('active').siblings().removeClass('active');
             $(e.target.hash).fadeIn(400);
         },
-        
+
         "click #saveReference": function(e,template){
             tValue=$('#newReference').val();
             if ( tValue.length > 0 ) {
                 investigations.update(Session.get('investigationID'), {
                     $addToSet: {references:tValue}
-                });                
+                });
             }
             $('#newReference').val('');
         },
@@ -139,7 +140,7 @@ if (Meteor.isClient) {
                 $pull: {references:reftext}
             });
         },
-        
+
         "click #saveTheory": function(e,template){
             if (! theory) {
                 theory=models.theory();
@@ -185,7 +186,7 @@ if (Meteor.isClient) {
                 $('#theoryStatus').val(theory.status);
             }
             e.preventDefault();
-        },        
+        },
 
         "click .theorydelete": function(e){
             id = $(e.target).attr('data-theoryid');
@@ -237,7 +238,7 @@ if (Meteor.isClient) {
                 $('#timestampDescription').val(timestamp.description);
             }
             e.preventDefault();
-        }, 
+        },
 
         "click .timestampdelete": function(e){
             id = $(e.target).attr('data-timestampid');
@@ -292,7 +293,7 @@ if (Meteor.isClient) {
                 $('#mitigationTemporary').prop('checked', mitigation.temporary);
             }
             e.preventDefault();
-        },         
+        },
 
         "click .mitigationdelete": function(e){
             id = $(e.target).attr('data-mitigationid');
@@ -364,7 +365,7 @@ if (Meteor.isClient) {
                 //limited support for modify a set, so pull/add
                 investigations.update(Session.get('investigationID'), {
                     $pull: {notes: {"_id": note._id}}
-                });                
+                });
                 investigations.update(Session.get('investigationID'), {
                     $addToSet: {notes:note}
                 });
@@ -413,7 +414,7 @@ if (Meteor.isClient) {
                 //limited support for modify a set, so pull/add
                 investigations.update(Session.get('investigationID'), {
                     $pull: {indicators: {"_id": indicator._id}}
-                });                
+                });
                 investigations.update(Session.get('investigationID'), {
                     $addToSet: {indicators:indicator}
                 });
@@ -462,7 +463,7 @@ if (Meteor.isClient) {
                 //limited support for modify a set, so pull/add
                 investigations.update(Session.get('investigationID'), {
                     $pull: {evidence: {"_id": evidence._id}}
-                });                
+                });
                 investigations.update(Session.get('investigationID'), {
                     $addToSet: {evidence:evidence}
                 });
@@ -512,7 +513,7 @@ if (Meteor.isClient) {
         }
     });
 
-    Template.editinvestigationform.rendered = function() {        
+    Template.editinvestigationform.rendered = function() {
         initDatePickers=function(){
             //init the date pickers.
             $('#dateClosed').daterangepicker({
@@ -562,7 +563,7 @@ if (Meteor.isClient) {
         activity.itemId=Session.get('investigationID');
         Template.instance.uaId=userActivity.insert(activity);
 
-        //set up reactive data 
+        //set up reactive data
         Deps.autorun(function() {
             Meteor.subscribe("investigation-details",Session.get('investigationID'), onReady=function(){
                 initDatePickers();
@@ -583,18 +584,18 @@ if (Meteor.isClient) {
                                                     console.log(fields);
                                                     Session.set('displayMessage',fields.userId + '& is viewing this investigation')
                                                 }
-                                        }); 
+                                        });
             });
         }); //end deps.autorun
 
         saveInvestigation = function(e, template) {
             // Stop the timer if it was running
             investigationSaveTimer.clear();
-    
+
           // tags are saved in real realtime (without timer)
           // other tabs are saved as they are changed
           // this is only for the main tab
-    
+
             var investigationobj = {
                 summary: template.find("#summary").value,
                 description: template.find("#description").value,
@@ -605,7 +606,7 @@ if (Meteor.isClient) {
                 dateBegin: dateOrNull(template.find("#dateBegin").value),
                 dateEnd: dateOrNull(template.find("#dateEnd").value)
             }
-    
+
             investigations.update(Session.get('investigationID'),
                 {$set: investigationobj},
                 {},
@@ -618,7 +619,7 @@ if (Meteor.isClient) {
                   }
                 }
             );
-    
+
             //clear the info message after a bit
             Meteor.setTimeout(function() {
                     $('#saveMessage').text('');
@@ -629,29 +630,29 @@ if (Meteor.isClient) {
 
         investigationSaveTimer = function() {
           var timer;
-    
+
           this.set = function(saveFormCB) {
             timer = Meteor.setTimeout(function() {
               saveFormCB();
             }, 3000);
           };
-    
+
           this.clear = function() {
             if ( timer != undefined ){
                 Meteor.clearTimeout(timer);
             }
           };
-    
+
           this.run = function(e, t) {
             // Save user input after X seconds of not typing
             this.clear();
-     
+
             this.set(function() {
               saveInvestigation(e, t);
             });
           };
-    
-          return this;    
+
+          return this;
         }();
     };
 
@@ -659,7 +660,7 @@ if (Meteor.isClient) {
         //remove the record of the user entering the template
         userActivity.remove(Template.instance.uaId);
     }
-    
+
     Template.addinvestigationform.rendered = function() {
         $('#dateOpened').daterangepicker({
                                             singleDatePicker: true,
@@ -667,7 +668,7 @@ if (Meteor.isClient) {
                                             timePickerIncrement:1,
                                             format: 'MM/DD/YYYY hh:mm:ss A',
                                             startDate: moment()
-                                            });        
+                                            });
     };
 
     //add investigation events
@@ -677,7 +678,7 @@ if (Meteor.isClient) {
             newinvestigation=models.investigation();
             newinvestigation.summary= template.find("#summary").value,
             newinvestigation.dateOpened=dateOrNull(template.find("#dateOpened").value),
-            newinvestigation.phase=template.find("#phase").value            
+            newinvestigation.phase=template.find("#phase").value
             newid=investigations.insert(newinvestigation);
             //reroute to full blown edit form after this minimal input is complete
             Router.go('/investigation/' + newid + '/edit');
