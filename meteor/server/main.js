@@ -1,4 +1,5 @@
 import { Meteor } from 'meteor/meteor';
+import uuid from "uuid";
 import '/imports/settings.js';
 import '/imports/collections.js'
 import './methods.js';
@@ -99,7 +100,7 @@ if (Meteor.isServer) {
       var self = this;
       var count = 0;
       var initializing = true;
-      var recordID=Meteor.uuid();
+      var recordID=uuid();
 
       //get a count by watching for only 1 new entry sorted in reverse date order.
       //use that hook to return a find().count rather than iterating the entire result set over and over

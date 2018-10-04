@@ -4,6 +4,8 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
+import { Meteor } from 'meteor/meteor'
+import uuid from "uuid";
 
 //data models
 //and creation functions
@@ -59,7 +61,7 @@ models={
 
     theory: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'dateCreated': today,
             'summary': '',
             'description': '',
@@ -72,18 +74,18 @@ models={
 
     timestamp: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'dateCreated': today,
             'timestamp': today,
             'description': '',
             'creator': '',
             'lastModifier': ''
         };
-    },    
+    },
 
     mitigation: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'dateCreated': today,
             'summary': '',
             'description': '',
@@ -96,7 +98,7 @@ models={
 
     lesson: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'dateCreated': today,
             'summary': '',
             'description': '',
@@ -107,7 +109,7 @@ models={
 
     note: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'summary': '',
             'description': '',
             'dateCreated': today,
@@ -117,7 +119,7 @@ models={
     },
     indicator: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'summary': '',
             'description': '',
             'dateCreated': today,
@@ -127,7 +129,7 @@ models={
     },
     evidence: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'summary': '',
             'description': '',
             'dateCreated': today,
@@ -137,7 +139,7 @@ models={
     },
     attacker: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'lastseentimestamp': today,
             'firstseentimestamp': '',
             'events':[],
@@ -155,20 +157,20 @@ models={
             'creator': '',
             'lastModifier': ''
         };
-    },    
+    },
 
     credential: function() {
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'username': '',
             'password': '',
             'hash': ''
         };
     },
-    
+
     userAction: function(){
         return {
-            '_id': Meteor.uuid(),
+            '_id': uuid(),
             'userId':Meteor.user().profile.email,
             'path':'',
             'itemId':'',
