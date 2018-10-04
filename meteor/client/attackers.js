@@ -31,7 +31,6 @@ if (Meteor.isClient) {
     var characters = [];
     var mouse = null;
     var offset = null;
-    var projector = null;
     var renderer = null;
     var baseCharacter = null;
     var cssRenderer = null;
@@ -123,7 +122,7 @@ if (Meteor.isClient) {
         //set the cursor
             //event.preventDefault();
             var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-            projector.unprojectVector( vector, sceneCamera );
+            vector.unproject(sceneCamera);
             var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
             var intersects = raycaster.intersectObjects( sceneObjects ,true);
             if ( intersects.length > 0 ) {
@@ -153,7 +152,7 @@ if (Meteor.isClient) {
                 mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
                 mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
                 var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-                projector.unprojectVector( vector, sceneCamera );
+                vector.unproject(sceneCamera);
                 var raycaster = new THREE.Raycaster( sceneCamera.position, vector.sub( sceneCamera.position ).normalize() );
 
                 if ( selectedObject ){
@@ -227,7 +226,6 @@ if (Meteor.isClient) {
         plane = new THREE.Mesh( new THREE.PlaneGeometry( window.innerWidth-scenePadding, window.innerHeight-scenePadding, 10, 10 ), new THREE.MeshBasicMaterial( { color: 0x000000, opacity: 0.25, transparent: true, wireframe: true } ) );
         mouse = new THREE.Vector2();
         offset = new THREE.Vector3();
-        projector = new THREE.Projector();
         renderer = new THREE.WebGLRenderer( { alpha: true ,
                                                   precision: 'lowp',
                                                   premultipliedAlpha: false
