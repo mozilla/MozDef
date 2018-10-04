@@ -9,6 +9,7 @@ import '/client/router.js';
 import '/client/mozdef.js';
 import crossfilter from 'crossfilter2';
 import dc from 'dc';
+import 'dc/dc.css';
 import { tooltip } from 'meteor/twbs:bootstrap';
 
 if (Meteor.isClient) {

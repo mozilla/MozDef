@@ -11,6 +11,7 @@ import { Tracker } from 'meteor/tracker';
 import { moment} from 'meteor/momentjs:moment';
 import crossfilter from 'crossfilter2';
 import dc from 'dc';
+import 'dc/dc.css';
 import d3 from 'd3';
 import THREE , { MorphBlendMesh } from 'three-full';
 import '/imports/settings.js';
@@ -227,7 +228,7 @@ if (Meteor.isClient) {
         mouse = new THREE.Vector2();
         offset = new THREE.Vector3();
         renderer = new THREE.WebGLRenderer( { alpha: true ,
-                                                  precision: 'lowp',
+                                                  precision: 'mediump',
                                                   premultipliedAlpha: false
                                                   });
         baseCharacter = new THREE.MD2CharacterComplex();

@@ -11,6 +11,7 @@ import { Tracker } from 'meteor/tracker';
 import { moment} from 'meteor/momentjs:moment';
 import crossfilter from 'crossfilter2';
 import dc from 'dc';
+import 'dc/dc.css';
 import d3 from 'd3';
 import { tooltip } from 'meteor/twbs:bootstrap';
 
