@@ -524,7 +524,6 @@ if (Meteor.isClient) {
         this.autorun(function() {
             //subscribe to the number of alerts
             //and to the summary of alerts
-            console.log('running autorun from alertsummary.js');
             Meteor.subscribe("alerts-summary", Session.get('alertssearchtext'), Session.get('alertssearchtime'),Session.get('alertsrecordlimit'), onReady=function(){
                 //console.log('alerts-summary ready');
                 drawAlertsCharts();
