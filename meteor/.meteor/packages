@@ -30,3 +30,4 @@ http
 accounts-password
 twbs:bootstrap
 momentjs:moment
+dangrossman:bootstrap-daterangepicker
