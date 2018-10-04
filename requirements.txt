@@ -46,7 +46,6 @@ pynsive==0.2.6
 pyOpenSSL==16.2.0
 pyparsing==2.1.10
 python-dateutil==2.6.1
-pytx==0.5.6
 pytz==2017.3
 requests==2.18.4
 requests-futures==0.9.7
