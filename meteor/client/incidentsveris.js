@@ -51,7 +51,6 @@ if (Meteor.isClient) {
 
         container.style.cursor='auto';
         function startPivotTable(tableData){
-            console.log(tableData);
             $("#veris-wrapper").pivotUI(
                 tableData,
                 {
