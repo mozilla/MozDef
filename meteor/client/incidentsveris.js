@@ -4,6 +4,18 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
  */
+import { Meteor } from 'meteor/meteor'
+import { Template } from 'meteor/templating';
+import { moment} from 'meteor/momentjs:moment';
+import d3 from 'd3';
+import 'jquery-ui/ui/data';
+import 'jquery-ui/ui/widget';
+import 'jquery-ui/ui/scroll-parent';
+import 'jquery-ui/ui/widgets/mouse';
+import 'jquery-ui/ui/widgets/sortable';
+import pivotUI from 'pivottable';
+
+import 'pivottable/dist/pivot.css';
 
 if (Meteor.isClient) {
     var verisstatsResult = new Object;
@@ -39,18 +51,18 @@ if (Meteor.isClient) {
 
         container.style.cursor='auto';
         function startPivotTable(tableData){
-        $("#veris-wrapper").pivotUI(
-                        tableData,
-                        {
-                            cols: ["phase"],
-                            rows: ["tags"],
-                            menuLimit: 500,
-                        }
-                    );
+            console.log(tableData);
+            $("#veris-wrapper").pivotUI(
+                tableData,
+                {
+                    cols: ["phase"],
+                    rows: ["tags"],
+                    menuLimit: 500
+                });
         }
     };
 
     Template.incidentsveris.destroyed = function () {
         debugLog('destroyed');
-    };   
+    };
 }

@@ -13,6 +13,7 @@
     "jquery": "^1.12.1",
     "jquery-ui": "^1.12.1",
     "meteor-node-stubs": "^0.4.1",
+    "pivottable": "^2.22.0",
     "pnotify": "^3.2.1",
     "three-full": "^11.3.2",
     "uuid": "^3.3.2"
