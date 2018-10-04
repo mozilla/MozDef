@@ -67,7 +67,7 @@ if (Meteor.isClient) {
     //helper functions for UI templates
     //and other client javascript routines
     dateOrNull=function(maybeDate){
-        adate=moment(maybeDate);
+        adate=moment(Date.parse(maybeDate));
         if (adate.isValid()) {
             return adate.toDate();
         }else{
@@ -76,7 +76,7 @@ if (Meteor.isClient) {
     };
 
     dateFormat=function(adate){
-        mdate=moment(adate || null);
+        mdate=moment(Date.parse(adate));
         if (mdate.isValid()) {
             dformat='MM/DD/YYYY hh:mm:ss A';
             return mdate.format(dformat);

@@ -4,7 +4,14 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
+import { Meteor } from 'meteor/meteor'
+import { Template } from 'meteor/templating';
+import { Session } from 'meteor/session';
+import { Tracker } from 'meteor/tracker';
+import { moment} from 'meteor/momentjs:moment';
 import { tooltip } from 'meteor/twbs:bootstrap';
+import { daterangepicker } from 'meteor/dangrossman:bootstrap-daterangepicker';
+import '/client/verisTags.html';
 
 if (Meteor.isClient) {
     var note = null;
@@ -520,37 +527,69 @@ if (Meteor.isClient) {
                                                 singleDatePicker: true,
                                                 timePicker:true,
                                                 timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
+                                                autoUpdateInput: false,
+                                                locale:{
+                                                    format: 'MM/DD/YYYY hh:mm:ss A',
+                                                },
                                                 startDate: dateOrNull($('#dateClosed').val() ) || moment()
                                                 });
+            $('#dateClosed').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY hh:mm:ss A'));
+            });
             $('#dateOpened').daterangepicker({
                                                 singleDatePicker: true,
                                                 timePicker:true,
                                                 timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
+                                                autoUpdateInput: false,
+                                                locale:{
+                                                    format: 'MM/DD/YYYY hh:mm:ss A',
+                                                },
                                                 startDate: dateOrNull($('#dateOpened').val() ) || moment()
                                                 });
+            $('#dateOpened').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY hh:mm:ss A'));
+            });
+
             $('#dateBegin').daterangepicker({
                                                 singleDatePicker: true,
                                                 timePicker:true,
                                                 timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
+                                                autoUpdateInput: false,
+                                                locale:{
+                                                    format: 'MM/DD/YYYY hh:mm:ss A',
+                                                },
                                                 startDate: dateOrNull($('#dateBegin').val() ) || moment()
                                                 });
+            $('#dateBegin').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY hh:mm:ss A'));
+            });
             $('#dateEnd').daterangepicker({
                                                 singleDatePicker: true,
                                                 timePicker:true,
                                                 timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
+                                                autoUpdateInput: false,
+                                                locale:{
+                                                    format: 'MM/DD/YYYY hh:mm:ss A',
+                                                },
                                                 startDate: dateOrNull($('#dateEnd').val() ) || moment()
                                                 });
+            $('#dateEnd').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY hh:mm:ss A'));
+            });
+
             $('#timestampText').daterangepicker({
                                                 singleDatePicker: true,
                                                 timePicker:true,
                                                 timePickerIncrement:1,
-                                                format: 'MM/DD/YYYY hh:mm:ss A',
+                                                autoUpdateInput: false,
+                                                locale:{
+                                                    format: 'MM/DD/YYYY hh:mm:ss A',
+                                                },
                                                 startDate: dateOrNull($('#timestampText').val() ) || moment()
                                                 });
+            $('#timestampText').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('MM/DD/YYYY hh:mm:ss A'));
+            });
         };
 
         this.$('[data-toggle="tooltip"]').tooltip({
@@ -581,7 +620,7 @@ if (Meteor.isClient) {
                                         reactive:true})
                                         .observeChanges(
                                                 {added: function(id,fields){
-                                                    console.log(fields);
+                                                    //console.log(fields);
                                                     Session.set('displayMessage',fields.userId + '& is viewing this investigation')
                                                 }
                                         });
@@ -663,12 +702,18 @@ if (Meteor.isClient) {
 
     Template.addinvestigationform.rendered = function() {
         $('#dateOpened').daterangepicker({
-                                            singleDatePicker: true,
-                                            timePicker:true,
-                                            timePickerIncrement:1,
-                                            format: 'MM/DD/YYYY hh:mm:ss A',
-                                            startDate: moment()
-                                            });
+            singleDatePicker: true,
+            timePicker:true,
+            timePickerIncrement:1,
+            autoUpdateInput: false,
+            locale:{
+                format: 'MM/DD/YYYY hh:mm:ss A',
+            },
+            startDate: moment()
+            });
+        $('#dateOpened').on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('MM/DD/YYYY hh:mm:ss A'));
+        });
     };
 
     //add investigation events
