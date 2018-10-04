@@ -341,6 +341,7 @@ if (Meteor.isClient) {
               text: stringArray[1],
               type: 'info',
               delay: 2000,
+              styling: 'bootstrap3',
               buttons:{
                 closer:true,
                 closer_hover:false
@@ -358,6 +359,7 @@ if (Meteor.isClient) {
               title : stringArray[0],
               text: stringArray[1],
               type: 'error',
+              styling: 'bootstrap3',
               buttons:{
                 closer:true,
                 closer_hover:false
