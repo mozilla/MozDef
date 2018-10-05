@@ -92,4 +92,3 @@ class message(object):
         self.options.cymonapikey = getConfig('cymonapikey',
                                         '',
                                         self.configfile)
-

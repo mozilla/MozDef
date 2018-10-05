@@ -160,4 +160,3 @@ class SshLateral(AlertTask):
         summary = 'SSH lateral movement outside policy: access to {} from {} as {}'.format(srchost, sampleip, sampleuser)
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-
