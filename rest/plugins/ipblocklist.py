@@ -122,10 +122,10 @@ class message(object):
             self.configfile)
 
     def blockIP(self,
-                ipaddress = None,
-                comment = None,
-                duration = None,
-                referenceID = None,
+                ipaddress=None,
+                comment=None,
+                duration=None,
+                referenceID=None,
                 userID=None
                 ):
         try:

@@ -112,10 +112,10 @@ class message(object):
             self.configfile)
 
     def blockFQDN(self,
-                fqdn = None,
-                comment = None,
-                duration = None,
-                referenceID = None,
+                fqdn=None,
+                comment=None,
+                duration=None,
+                referenceID=None,
                 userID=None
                 ):
         try:

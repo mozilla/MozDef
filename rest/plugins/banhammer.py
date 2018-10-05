@@ -105,11 +105,11 @@ class message(object):
         self.options.network_list_file = getConfig('network_list_file', '', self.configfile)
 
     def banhammer(self,
-                  ipaddress = None,
-                  CIDR = None,
-                  comment = None,
-                  duration = None,
-                  referenceID = None,
+                  ipaddress=None,
+                  CIDR=None,
+                  comment=None,
+                  duration=None,
+                  referenceID=None,
                   userID=None
                   ):
         try:
