@@ -168,7 +168,6 @@ def main():
         if len(options.aws_bucket_name)>0:
             s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
 
-
     except ValueError as e:
         logger.error("Exception %r generating IP block list" % e)
 
@@ -223,7 +222,6 @@ def s3_upload_file(file_path, bucket_name, key_name):
     except boto.exception.S3ResponseError as e:
         conn.create_bucket(bucket_name)
         bucket = conn.get_bucket(bucket_name, validate=False)
-
 
     key = boto.s3.key.Key(bucket)
     key.key = key_name

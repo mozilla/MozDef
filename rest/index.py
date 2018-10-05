@@ -358,7 +358,6 @@ def createIncident():
                                               'use yyyy-mm-dd hh:mm am/pm'))
         return response
 
-
     incident['tags'] = body.get('tags')
 
     if incident['tags'] and type(incident['tags']) is not list:

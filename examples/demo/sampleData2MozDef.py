@@ -42,7 +42,6 @@ httpsession.trust_env=False #turns of needless .netrc check for creds
 #httpsession.mount('http://', a)
 
 
-
 logger = logging.getLogger(sys.argv[0])
 logger.level=logging.INFO
 
@@ -149,7 +148,6 @@ def makeEvents():
                     else:
                         logger.error('%r'%e)
 
-
     except KeyboardInterrupt as e:
         sys.exit(1)
 
@@ -218,7 +216,6 @@ def makeAlerts():
                         pass
                     else:
                         logger.error('%r'%e)
-
 
     except KeyboardInterrupt as e:
         sys.exit(1)
@@ -289,10 +286,8 @@ def makeAttackers():
                     else:
                         logger.error('%r'%e)
 
-
     except KeyboardInterrupt as e:
         sys.exit(1)
-
 
 
 def initConfig():
@@ -329,7 +324,6 @@ if __name__ == '__main__':
     makeEvents()
     makeAlerts()
     makeAttackers()
-
 
     while not logcache.empty():
         try:

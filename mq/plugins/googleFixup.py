@@ -30,5 +30,4 @@ class message(object):
 
             metadata['doc_type']= 'google'
 
-
         return (message, metadata)

@@ -21,7 +21,6 @@ class message(object):
         self.registration = ['sshd']
         self.priority = 5
 
-
     def onMessage(self, message, metadata):
 
         self.accepted_regex = re.compile('^(?P<authstatus>\w+) (?P<authmethod>\w+) for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5}) ssh2(\:\sRSA\s)?(?:(?P<rsakeyfingerprint>(\S+)))?$')

@@ -69,7 +69,6 @@ def getQueueSizes():
     except Exception as e:
         logger.error("Exception %r when gathering health and status " % e)
 
-
     # setup a log entry for health/status.
     sqsid = '{0}-{1}'.format(options.account, options.region)
     healthlog = dict(

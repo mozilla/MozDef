@@ -80,7 +80,6 @@ class message(object):
         or message['details']['command'].startswith('sh -c /usr/lib64/nagios/plugins')):
             return(None, metadata)
 
-
         # fix auid from long to int
         if 'details' in message.keys() and isinstance(message['details'], dict):
             if 'auid' in message['details'].keys() and message['details']['auid'] == "4294967295":

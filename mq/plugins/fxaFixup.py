@@ -78,7 +78,6 @@ class message(object):
                 if message['category'] == 'logfile':
                     message['category'] = 'weblog'
 
-
             if 'remoteAddressChain' in message['details'].keys():
                 if isinstance(message['details']['remoteAddressChain'], list):
                     sourceIP = message['details']['remoteAddressChain'][0]
@@ -99,11 +98,9 @@ class message(object):
                         if isIP(sourceIP):
                             message['details']['sourceipaddress'] = sourceIP
 
-
             #fxacustoms sends source ip as just 'ip'
             if 'ip' in message['details'].keys():
                 if isIP(message['details']['ip']):
                     message['details']['sourceipaddress'] = message['details']['ip']
-
 
         return (message, metadata)

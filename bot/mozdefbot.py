@@ -183,7 +183,6 @@ class mozdefBot():
         )
         self.mqConsumer = None
 
-
     def run(self):
         try:
             @self.client.handle('WELCOME')
@@ -198,7 +197,6 @@ class mozdefBot():
                 # start the mq consumer
                 consumeAlerts(self)
 
-
             @self.client.handle('LINE')
             def line_handler(client, *params):
                 try:
@@ -207,7 +205,6 @@ class mozdefBot():
                     # catch error in kitnrc : chan.remove(actor) where channel
                     # object has no attribute remove
                     pass
-
 
             @self.client.handle('PRIVMSG')
             def priv_handler(client, actor, recipient, message):
@@ -255,7 +252,6 @@ class mozdefBot():
                                 self.client.msg(
                                     recipient, "{0}: hrm..loopback? private ip?".format(i))
 
-
             @self.client.handle('JOIN')
             def join_handler(client, user, channel, *params):
                 self.root_logger.debug('%r' % channel)
@@ -296,7 +292,6 @@ class alertConsumer(ConsumerMixin):
         self.lastalert = None
         ircBot.mqConsumer = self
 
-
     def get_consumers(self, Consumer, channel):
         consumer = Consumer(
             self.alertQueue,
@@ -304,7 +299,6 @@ class alertConsumer(ConsumerMixin):
             accept=['json'])
         consumer.qos(prefetch_count=options.prefetch)
         return [consumer]
-
 
     def on_message(self, body, message):
         try:

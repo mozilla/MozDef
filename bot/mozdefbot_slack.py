@@ -26,7 +26,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib
 from utilities.toUTC import toUTC
 
 
-
 logger = logging.getLogger()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 

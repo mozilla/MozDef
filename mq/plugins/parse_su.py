@@ -20,7 +20,6 @@ class message(object):
         self.registration = ['sshd']
         self.priority = 5
 
-
     def onMessage(self, message, metadata):
 
         self.session_regexp = re.compile('^pam_unix\(su(?:-l)?\:session\)\: session (?P<status>\w+) for user (?P<username>\w+)(?: (?:by (?:(?P<originuser>\w+))?\(uid\=(?P<uid>[0-9]+)\)?)?)?$')

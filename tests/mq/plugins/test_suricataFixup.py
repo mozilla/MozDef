@@ -477,7 +477,6 @@ class TestSuricataFixup(object):
         assert len(result['details']['http_response_body']) == 4095
         assert len(result['details']['http_response_body_printable']) == 4095
 
-
     def test_eve_log_alert_flowbits(self):
         event = {
             'customendpoint': '',

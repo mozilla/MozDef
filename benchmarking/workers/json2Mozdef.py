@@ -29,7 +29,6 @@ httpsession.trust_env=False #turns of needless .netrc check for creds
 #httpsession.mount('http://', a)
 
 
-
 logger = logging.getLogger(sys.argv[0])
 logger.level=logging.DEBUG
 

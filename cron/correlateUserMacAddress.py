@@ -158,12 +158,10 @@ def initConfig():
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
-
 
     # default time period in minutes to look back in time for the aggregation
     options.correlationminutes = getConfig('correlationminutes',
@@ -176,7 +174,6 @@ def initConfig():
     options.ouifilename = getConfig('ouifilename',
                                 'oui.txt',
                                 options.configfile)
-
 
 
 if __name__ == '__main__':

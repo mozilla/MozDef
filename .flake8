@@ -32,7 +32,6 @@ ignore =
   E271 # multiple spaces after keyword
   E301 # expected 1 blank line
   E302 # expected 2 blank lines, found 1
-  E303 # too many blank lines (3)
   E305 # expected 2 blank lines after class or function definition
   E402 # module level import not at top of file
   E501 # line too long

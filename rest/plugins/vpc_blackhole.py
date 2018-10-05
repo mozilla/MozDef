@@ -153,7 +153,6 @@ class message(object):
         except Exception as e:
             sys.stderr.write('Error while creating a blackhole entry %s: %r\n' % (ipaddress, e))
 
-
     def onMessage(self, request, response):
         '''
         request: http://bottlepy.org/docs/dev/api.html#the-request-object
