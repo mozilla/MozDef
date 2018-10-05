@@ -17,5 +17,7 @@ before_script:
   # Give some time for Elasticsearch to start up
   - sleep 10
 script:
+  # Verify pep8
+  - docker run -it mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
   # Run unit tests
   - docker run -it --network=mozdef_default mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
