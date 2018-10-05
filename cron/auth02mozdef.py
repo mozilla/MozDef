@@ -181,11 +181,11 @@ log_types=DotDict({
                 },
         'sapi': {
                 "event": 'API Operation',
-                "level": 1 #Info
+                "level": 1  # Info
                 },
         'fapi': {
                 "event": 'Failed API Operation',
-                "level": 3 #Error
+                "level": 3  # Error
                 },
         'limit_wc': {
                 "event": 'Blocked Account',
@@ -197,7 +197,7 @@ log_types=DotDict({
                 },
         'api_limit': {
                 "event": 'Rate Limit On API',
-                "level": 4 #Critical
+                "level": 4  # Critical
                 },
         'sdu': {
                 "event": 'Successful User Deletion',

@@ -41,7 +41,7 @@ def bulkindex():
         bulkpost=request.body.read()
         #bottlelog('request:{0}\n'.format(bulkpost))
         request.body.close()
-        if len(bulkpost)>10: #TODO Check for bulk format.
+        if len(bulkpost)>10:  # TODO Check for bulk format.
             #iterate on messages and post to event message queue
 
             eventlist=[]
@@ -56,7 +56,7 @@ def bulkindex():
                     except ValueError as e:
                         response.status=500
                         return
-                    if not 'index' in json.loads(i).keys(): #don't post the items telling us where to post things..
+                    if not 'index' in json.loads(i).keys():  # don't post the items telling us where to post things..
                         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
                         ensurePublish(eventDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
                 except ValueError:

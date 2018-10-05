@@ -592,7 +592,7 @@ def verisSummary(verisRegex=None):
 
                                    {"$match":{"tags":{"$exists":True}}},
                                    {"$unwind": "$tags"},
-                                   {"$match":{"tags":{"$regex":''}}}, #regex for tag querying
+                                   {"$match":{"tags":{"$regex":''}}},  # regex for tag querying
                                    {"$project": {"dateOpened": 1,
                                                    "tags": 1,
                                                    "phase": 1,

@@ -143,14 +143,14 @@ def main():
 
 
 def initConfig():
-    options.output=getConfig('output','stdout',options.configfile)                              #output our log to stdout or syslog
-    options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
-    options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
-    options.apikey=getConfig('apikey','',options.configfile)                                    #okta api key to use
-    options.oktadomain = getConfig('oktadomain', 'yourdomain.okta.com', options.configfile)     #okta domain: something.okta.com
+    options.output=getConfig('output','stdout',options.configfile)  # output our log to stdout or syslog
+    options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)  # syslog hostname
+    options.syslogport=getConfig('syslogport',514,options.configfile)  # syslog port
+    options.apikey=getConfig('apikey','',options.configfile)  # okta api key to use
+    options.oktadomain = getConfig('oktadomain', 'yourdomain.okta.com', options.configfile)  # okta domain: something.okta.com
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     options.state_file=getConfig('state_file','{0}.json'.format(sys.argv[0]),options.configfile)
-    options.recordlimit = getConfig('recordlimit', 10000, options.configfile)                    #max number of records to request
+    options.recordlimit = getConfig('recordlimit', 10000, options.configfile)  # max number of records to request
 
 
 if __name__ == '__main__':

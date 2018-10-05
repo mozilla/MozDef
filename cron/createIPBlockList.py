@@ -206,7 +206,7 @@ def initConfig():
     options.iplimit = getConfig('iplimit', 1000, options.configfile)
 
     # AWS creds
-    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to mozilla_infosec_blocklist
+    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)  # aws credentials to use to connect to mozilla_infosec_blocklist
     options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
     options.aws_bucket_name=getConfig('aws_bucket_name','',options.configfile)
     options.aws_document_key_name=getConfig('aws_document_key_name','',options.configfile)

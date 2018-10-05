@@ -24,7 +24,7 @@ import requests
 import time
 
 httpsession = FuturesSession(max_workers=5)
-httpsession.trust_env=False #turns of needless .netrc check for creds
+httpsession.trust_env=False  # turns of needless .netrc check for creds
 #a = requests.adapters.HTTPAdapter(max_retries=2)
 #httpsession.mount('http://', a)
 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
@@ -104,7 +104,7 @@ if __name__ == '__main__':
                 postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
                 postingProcess.start()
             except OSError as e:
-                if e.errno==35: #resource temporarily unavailable.
+                if e.errno==35:  # resource temporarily unavailable.
                     print(e)
                     pass
                 else:

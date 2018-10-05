@@ -37,7 +37,7 @@ from utilities.toUTC import toUTC
 #use futures to run in the background
 #httpsession = FuturesSession(max_workers=5)
 httpsession = requests.session()
-httpsession.trust_env=False #turns of needless .netrc check for creds
+httpsession.trust_env=False  # turns of needless .netrc check for creds
 #a = requests.adapters.HTTPAdapter(max_retries=2)
 #httpsession.mount('http://', a)
 
@@ -142,7 +142,7 @@ def makeEvents():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
@@ -211,7 +211,7 @@ def makeAlerts():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
@@ -280,7 +280,7 @@ def makeAttackers():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
@@ -330,7 +330,7 @@ if __name__ == '__main__':
             postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
             postingProcess.start()
         except OSError as e:
-            if e.errno==35: #resource temporarily unavailable.
+            if e.errno==35:  # resource temporarily unavailable.
                 print(e)
                 pass
             else:
