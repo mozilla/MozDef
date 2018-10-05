@@ -348,7 +348,7 @@ def createIncident():
               incident['dateReported'],
               incident['dateVerified'],
               incident['dateMitigated'],
-              incident['dateContained'] ]
+              incident['dateContained']]
 
     # Validating all the dates for the format
     if False in dates:
@@ -592,13 +592,13 @@ def verisSummary(verisRegex=None):
         iveris=incidents.aggregate([
 
                                    {"$match":{"tags":{"$exists":True}}},
-                                   {"$unwind" : "$tags" },
+                                   {"$unwind" : "$tags"},
                                    {"$match":{"tags":{"$regex":''}}}, #regex for tag querying
                                    {"$project" : {"dateOpened" : 1 ,
                                                    "tags" : 1 ,
                                                    "phase": 1,
                                                    "_id": 0
-                                                   } }
+                                                   }}
                                    ])
         if iveris:
             return json.dumps(list(iveris), default=json_util.default)

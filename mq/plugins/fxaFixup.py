@@ -89,7 +89,7 @@ class message(object):
                 # "remoteAddressChain": "[\"1.2.3.4\",\"5.6.7.8\",\"127.0.0.1\"]"
                 if (isinstance(message['details']['remoteAddressChain'], unicode) and
                      message['details']['remoteAddressChain'][0]=='[' and
-                     message['details']['remoteAddressChain'][-1]==']' ):
+                     message['details']['remoteAddressChain'][-1]==']'):
                     # remove the brackets and double quotes
                     for i in ['[',']','"']:
                         message['details']['remoteAddressChain']=message['details']['remoteAddressChain'].replace(i,'')

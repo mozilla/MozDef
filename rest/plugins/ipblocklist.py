@@ -134,7 +134,7 @@ class message(object):
             ipblocklist = mongoclient.meteor['ipblocklist']
 
             # good data?
-            if (isIPv6(ipaddress) or isIPv4(ipaddress) ) and (ipaddress not in netaddr.IPSet(['0.0.0.0']) ):
+            if (isIPv6(ipaddress) or isIPv4(ipaddress)) and (ipaddress not in netaddr.IPSet(['0.0.0.0'])):
                 ipcidr = netaddr.IPNetwork(ipaddress)
 
                 # already in the table?
