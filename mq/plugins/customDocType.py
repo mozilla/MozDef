@@ -10,10 +10,10 @@ class message(object):
         takes an incoming custom endpoint message
         and sets the doc_type
         '''
-    
+
         self.registration = ['customendpoint']
         self.priority = 2
- 
+
     def onMessage(self, message, metadata):
         # set the doc type
         # to avoid data type conflicts with other doc types

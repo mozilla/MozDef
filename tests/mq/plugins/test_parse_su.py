@@ -29,11 +29,11 @@ session_su['details']['hostname'] = 'irc1.dmz.scl3.mozilla.com'
 
 class TestSuSessionOpenedMessageV1():
     def setup(self):
-        
+
         self.msgobj = message()
         self.msg = copy.deepcopy(session_su)
         self.msg['summary'] = 'pam_unix(su:session): session opened for user user1 by (uid=0)'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -51,11 +51,11 @@ class TestSuSessionOpenedMessageV1():
 #
 class TestSuSessionOpenedMessageV2():
     def setup(self):
-        
+
         self.msgobj = message()
         self.msg = copy.deepcopy(session_su)
         self.msg['summary'] = 'pam_unix(su:session): session opened for user user2 by user3(uid=0)'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -73,11 +73,11 @@ class TestSuSessionOpenedMessageV2():
 #
 class TestSuSessionOpenedMessageV3():
     def setup(self):
-        
+
         self.msgobj = message()
         self.msg = copy.deepcopy(session_su)
         self.msg['summary'] = 'pam_unix(su-l:session): session opened for user user4 by (uid=0)'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -95,11 +95,11 @@ class TestSuSessionOpenedMessageV3():
 #
 class TestSuSessionOpenedMessageV4():
     def setup(self):
-        
+
         self.msgobj = message()
         self.msg = copy.deepcopy(session_su)
         self.msg['summary'] = 'pam_unix(su-l:session): session opened for user user5 by user6(uid=0)'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -117,11 +117,11 @@ class TestSuSessionOpenedMessageV4():
 #
 class TestSuSessionClosedMessageV1():
     def setup(self):
-        
+
         self.msgobj = message()
         self.msg = copy.deepcopy(session_su)
         self.msg['summary'] = 'pam_unix(su:session): session closed for user user7'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'

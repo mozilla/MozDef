@@ -45,7 +45,6 @@ ignore =
   F811 # redefinition of unused 'datetime' from line 10
   F821 # undefined name 'SysLogHandler'
   F841 # local variable 'CIDR' is assigned to but never used
-  W293 # blank line contains whitespace
   W391 # blank line at end of file
   W503 # line break before binary operator
   W601 # .has_key() is deprecated, use 'in'

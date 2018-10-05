@@ -11,7 +11,7 @@ from utilities.toUTC import toUTC
 
 
 class message(object):
-    
+
     def __init__(self):
         '''
         takes an incoming sshd message
@@ -57,5 +57,5 @@ class message(object):
                             message['details']['sourceipaddress'] = starting_session_search.group('sourceipaddress')
                             message['details']['sourceport'] = starting_session_search.group('sourceport')
                             message['details']['device'] = starting_session_search.group('device')
-        
+
         return (message, metadata)

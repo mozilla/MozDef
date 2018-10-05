@@ -125,11 +125,11 @@ def main():
     #connect to mysql
     db=MySQLdb.connect(host=options.hostname, user=options.username,passwd=options.password,db=options.database)
     c=db.cursor(MySQLdb.cursors.DictCursor)
-    
+
     c.execute("select * from ConferenceCall2 where JoinTime between NOW() - INTERVAL 30 MINUTE and NOW() or LeaveTime between NOW() - INTERVAL 30 MINUTE and NOW()")
     rows=c.fetchall()
     c.close()
-    
+
     # Build dictionary of calls in order to consolidate multiple rows for a single call
     calls = {}
     for row in rows:
@@ -154,7 +154,7 @@ def main():
             if isinstance(call[k],str):
                 # db has unicode stored as string, so decode, then encode
                 call[k] = call[k].decode('utf-8','ignore').encode('ascii','ignore')
-        
+
         mdEvent.send(timestamp=call['JoinTime'],
                      summary='Vidyo call status for '+call['UniqueCallID'].encode('ascii', 'ignore'),
                      tags=['vidyo'],
