@@ -592,10 +592,10 @@ def verisSummary(verisRegex=None):
         iveris=incidents.aggregate([
 
                                    {"$match":{"tags":{"$exists":True}}},
-                                   {"$unwind" : "$tags"},
+                                   {"$unwind": "$tags"},
                                    {"$match":{"tags":{"$regex":''}}}, #regex for tag querying
-                                   {"$project" : {"dateOpened" : 1 ,
-                                                   "tags" : 1 ,
+                                   {"$project": {"dateOpened": 1,
+                                                   "tags": 1,
                                                    "phase": 1,
                                                    "_id": 0
                                                    }}

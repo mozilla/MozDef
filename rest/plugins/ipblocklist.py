@@ -177,19 +177,19 @@ class message(object):
                             # send the data as a form post per:
                             # https://doers.statuspage.io/api/v1/incidents/#create-realtime
                             post_data={
-                            'incident[name]' : 'block IP {}'.format(str(ipcidr)),
-                            'incident[status]' : 'resolved',
-                            'incident[impact_override]' : 'none',
-                            'incident[body]' : '{} initiated a block of IP {} until {}'.format(
+                            'incident[name]': 'block IP {}'.format(str(ipcidr)),
+                            'incident[status]': 'resolved',
+                            'incident[impact_override]': 'none',
+                            'incident[body]': '{} initiated a block of IP {} until {}'.format(
                                 userID,
                                 str(ipcidr),
                                 end_date.isoformat()),
-                            'incident[component_ids][]' : self.options.statuspage_sub_component_id,
-                            'incident[components][{0}]'.format(self.options.statuspage_component_id) : "operational"}
+                            'incident[component_ids][]': self.options.statuspage_sub_component_id,
+                            'incident[components][{0}]'.format(self.options.statuspage_component_id): "operational"}
                             response = requests.post(self.options.statuspage_url,
                                                     headers=headers,
                                                     data=post_data)
-                            if response.ok :
+                            if response.ok:
                                 sys.stdout.write('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
                             else:
                                 sys.stderr.write('%s: statuspage.io notification failed %s\n' % (str(ipcidr),response.json()))

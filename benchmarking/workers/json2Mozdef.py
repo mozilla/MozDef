@@ -64,7 +64,7 @@ def postLogs(logcache):
 
 if __name__ == '__main__':
     parser=OptionParser()
-    parser.add_option("-u", dest='url' , default='http://localhost:8080/events/', help="mozdef events URL to use when posting events")
+    parser.add_option("-u", dest='url', default='http://localhost:8080/events/', help="mozdef events URL to use when posting events")
     (options,args) = parser.parse_args()
     sh=logging.StreamHandler(sys.stdout)
     sh.setFormatter(formatter)
