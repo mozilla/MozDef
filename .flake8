@@ -4,7 +4,6 @@ exclude =
   .git
   *__init__.py
 ignore =
-  E111 # indentation is not a multiple of four
   E114 # indentation is not a multiple of four (comment)
   E116 # unexpected indentation (comment)
   E121 # continuation line under-indented for hanging indent
