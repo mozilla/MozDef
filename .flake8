@@ -33,7 +33,6 @@ ignore =
   E262 # inline comment should start with '# '
   E265 # block comment should start with '# '
   E266 # too many leading '#' for block comment
-  E271 # multiple spaces after keyword
   E301 # expected 1 blank line
   E302 # expected 2 blank lines, found 1
   E303 # too many blank lines (3)
