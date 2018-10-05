@@ -75,7 +75,7 @@ class message(object):
             if cur_section is not None:
                 cur_options = myparser.options(cur_section)
                 if cur_options is not None:
-                    self.multioptions.append({ 'region': myparser.get(cur_section, 'region'), 'aws_access_key_id': myparser.get(cur_section, 'aws_access_key_id'), 'aws_secret_access_key': myparser.get(cur_section, 'aws_secret_access_key') } )
+                    self.multioptions.append({'region': myparser.get(cur_section, 'region'), 'aws_access_key_id': myparser.get(cur_section, 'aws_access_key_id'), 'aws_secret_access_key': myparser.get(cur_section, 'aws_secret_access_key') } )
 
     def addBlackholeEntry(self,
                           ipaddress=None):

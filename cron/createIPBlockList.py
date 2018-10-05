@@ -231,7 +231,7 @@ def s3_upload_file(file_path, bucket_name, key_name):
 
     key.set_acl('public-read')
     url = "https://s3.amazonaws.com/{}/{}".format(bucket.name, key.name)
-    print( "URL: {}".format(url))
+    print("URL: {}".format(url))
     return url
 
 if __name__ == '__main__':

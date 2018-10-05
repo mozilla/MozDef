@@ -87,7 +87,7 @@ class message(object):
 
                 # handle the case of an escaped list:
                 # "remoteAddressChain": "[\"1.2.3.4\",\"5.6.7.8\",\"127.0.0.1\"]"
-                if ( isinstance(message['details']['remoteAddressChain'], unicode) and
+                if (isinstance(message['details']['remoteAddressChain'], unicode) and
                      message['details']['remoteAddressChain'][0]=='[' and
                      message['details']['remoteAddressChain'][-1]==']' ):
                     # remove the brackets and double quotes

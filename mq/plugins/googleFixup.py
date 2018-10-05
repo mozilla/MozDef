@@ -20,7 +20,7 @@ class message(object):
         # and do any clean up
 
         # check for details.kind like 'admin#reports#activity'
-        if ( 'details' in message.keys() and
+        if ('details' in message.keys() and
              'kind' in message['details'].keys() and
              'activity' in message['details']['kind']):
 
