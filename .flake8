@@ -21,7 +21,6 @@ ignore =
   E202 # whitespace before ')'
   E203 # whitespace before '
   E211 # whitespace before '('
-  E221 # multiple spaces before operator
   E222 # multiple spaces after operator
   E225 # missing whitespace around operator
   E226 # missing whitespace around arithmetic operator
