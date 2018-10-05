@@ -189,7 +189,7 @@ class message(object):
                        and not ipcidr.ip.is_reserved():
                         ipaddress =  str(ipcidr.cidr)
                         self.addBlackholeEntry(ipaddress)
-                        sys.stdout.write ('Blackholed {0}\n'.format(ipaddress))
+                        sys.stdout.write('Blackholed {0}\n'.format(ipaddress))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
