@@ -315,7 +315,7 @@ def createIncident():
     except KeyError:
         response.status = 500
         response.body = json.dumps(dict(status='failed',
-                                        error='Missing required keys'\
+                                        error='Missing required keys'
                                               '(summary, phase, creator)'))
         return response
 
@@ -354,7 +354,7 @@ def createIncident():
     if False in dates:
         response.status = 500
         response.body = json.dumps(dict(status='failed',
-                                        error='Wrong format of date. Please '\
+                                        error='Wrong format of date. Please '
                                               'use yyyy-mm-dd hh:mm am/pm'))
         return response
 

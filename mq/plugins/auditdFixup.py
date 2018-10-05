@@ -35,16 +35,16 @@ class message(object):
             return(None, metadata)
 
         # rabbitmq
-        if ('details' in message \
-        and 'parentprocess' in message['details'] \
-        and message['details']['parentprocess'] == 'beam.smp' \
-        and 'duser' in message['details'] \
-        and message['details']['duser'] == 'rabbitmq' \
+        if ('details' in message
+        and 'parentprocess' in message['details']
+        and message['details']['parentprocess'] == 'beam.smp'
+        and 'duser' in message['details']
+        and message['details']['duser'] == 'rabbitmq'
         and 'command' in message['details']) \
-        and (message['details']['command'] == '/usr/lib64/erlang/erts-5.8.5/bin/epmd -daemon' \
-        or message['details']['command'].startswith('inet_gethost 4') \
-        or message['details']['command'].startswith('sh -c exec inet_gethost 4') \
-        or message['details']['command'].startswith('/bin/sh -s unix:cmd') \
+        and (message['details']['command'] == '/usr/lib64/erlang/erts-5.8.5/bin/epmd -daemon'
+        or message['details']['command'].startswith('inet_gethost 4')
+        or message['details']['command'].startswith('sh -c exec inet_gethost 4')
+        or message['details']['command'].startswith('/bin/sh -s unix:cmd')
         or message['details']['command'].startswith('sh -c exec /bin/sh -s unix:cmd')):
             return(None, metadata)
 
@@ -59,24 +59,24 @@ class message(object):
             return(None, metadata)
 
         # chkconfig
-        if ('details' in message \
-        and 'parentprocess' in message['details'] \
-        and message['details']['parentprocess'] == 'chkconfig' \
-        and 'suser' in message['details'] \
-        and message['details']['suser'] == 'root' \
+        if ('details' in message
+        and 'parentprocess' in message['details']
+        and message['details']['parentprocess'] == 'chkconfig'
+        and 'suser' in message['details']
+        and message['details']['suser'] == 'root'
         and 'command' in message['details']) \
-        and (message['details']['command'].startswith('/sbin/runlevel') \
+        and (message['details']['command'].startswith('/sbin/runlevel')
         or message['details']['command'].startswith('sh -c /sbin/runlevel')):
             return(None, metadata)
 
         # nagios
-        if ('details' in message \
-        and 'duser' in message['details'] \
-        and message['details']['duser'] == 'nagios' \
-        and 'suser' in message['details'] \
-        and message['details']['suser'] == 'root' \
+        if ('details' in message
+        and 'duser' in message['details']
+        and message['details']['duser'] == 'nagios'
+        and 'suser' in message['details']
+        and message['details']['suser'] == 'root'
         and 'command' in message['details']) \
-        and (message['details']['command'].startswith('/usr/lib64/nagios/plugins') \
+        and (message['details']['command'].startswith('/usr/lib64/nagios/plugins')
         or message['details']['command'].startswith('sh -c /usr/lib64/nagios/plugins')):
             return(None, metadata)
 

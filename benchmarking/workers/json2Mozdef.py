@@ -74,14 +74,14 @@ if __name__ == '__main__':
         for i in range(0,10):
 
             print(i)
-            alog=dict(eventtime=pytz.timezone('UTC').localize(datetime.now()).isoformat(),\
-                        hostname=socket.gethostname(),\
-                        processid=os.getpid(),\
-                        processname=sys.argv[0],\
-                        severity='INFO',\
-                        summary='joe login failed',\
-                        category='authentication',\
-                        tags=[],\
+            alog=dict(eventtime=pytz.timezone('UTC').localize(datetime.now()).isoformat(),
+                        hostname=socket.gethostname(),
+                        processid=os.getpid(),
+                        processname=sys.argv[0],
+                        severity='INFO',
+                        summary='joe login failed',
+                        category='authentication',
+                        tags=[],
                         details=[])
             alog['details']=dict(success=True,username='mozdef')
             alog['tags']=['mozdef','stresstest']
