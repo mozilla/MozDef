@@ -128,7 +128,7 @@ class message(object):
                     if 'flow' in newmessage[u'details']:
                         if 'bytes_toserver' in newmessage[u'details'][u'flow']:
                             newmessage[u'details'][u'originipbytes'] = newmessage['details']['flow']['bytes_toserver']
-                            del(newmessage['details']['flow']['bytes_toserver'])                            
+                            del(newmessage['details']['flow']['bytes_toserver'])
                         if 'bytes_toclient' in newmessage[u'details'][u'flow']:
                             newmessage[u'details'][u'responseipbytes'] = newmessage['details']['flow']['bytes_toclient']
                             del(newmessage['details']['flow']['bytes_toclient'])

@@ -31,6 +31,6 @@ class message(object):
                         if 'tags' in message.keys() and isinstance(message['tags'], list):
                             message['tags'].append('alert')
                         else:
-                            message['tags'] = ['alert']   
+                            message['tags'] = ['alert']
 
         return (message, metadata)

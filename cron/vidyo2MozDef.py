@@ -150,7 +150,7 @@ def main():
             # convert datetime objects to isoformat for json serialization
             if isinstance(call[k], datetime):
                 call[k] = call[k].isoformat()
-            # make sure it's a string, not unicode forced into a string            
+            # make sure it's a string, not unicode forced into a string
             if isinstance(call[k],str):
                 # db has unicode stored as string, so decode, then encode
                 call[k] = call[k].decode('utf-8','ignore').encode('ascii','ignore')

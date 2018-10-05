@@ -56,6 +56,6 @@ class message(object):
                             message['details']['username'] = starting_session_search.group('username')
                             message['details']['sourceipaddress'] = starting_session_search.group('sourceipaddress')
                             message['details']['sourceport'] = starting_session_search.group('sourceport')
-                            message['details']['device'] = starting_session_search.group('device')    
+                            message['details']['device'] = starting_session_search.group('device')
         
         return (message, metadata)

@@ -48,7 +48,7 @@ class TestSuSessionOpenedMessageV1():
         assert retmessage['details']['username'] == 'user1'
 
 
-# 
+#
 class TestSuSessionOpenedMessageV2():
     def setup(self):
         
@@ -70,7 +70,7 @@ class TestSuSessionOpenedMessageV2():
         assert retmessage['details']['username'] == 'user2'
 
 
-# 
+#
 class TestSuSessionOpenedMessageV3():
     def setup(self):
         
@@ -92,7 +92,7 @@ class TestSuSessionOpenedMessageV3():
         assert retmessage['details']['username'] == 'user4'
 
 
-# 
+#
 class TestSuSessionOpenedMessageV4():
     def setup(self):
         
@@ -114,7 +114,7 @@ class TestSuSessionOpenedMessageV4():
         assert retmessage['details']['username'] == 'user5'
 
 
-# 
+#
 class TestSuSessionClosedMessageV1():
     def setup(self):
         

@@ -33,7 +33,7 @@ class message(object):
         
     def onMessage(self, message, metadata):
         # if we don't have a source IP address
-        # look for words that are IP addresses, 
+        # look for words that are IP addresses,
         # move to details.sourceipaddress
         doSearch = False
         detailsExists = True

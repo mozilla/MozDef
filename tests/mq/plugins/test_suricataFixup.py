@@ -278,7 +278,7 @@ class TestSuricataFixup(object):
             'category': 'suricata',
             'SOURCE': 'eve-log',
             'event_type': 'alert'
-        }            
+        }
         MESSAGE = {
             "timestamp":"2018-09-12T22:24:09.546736+0000",
             "flow_id":1484802709084080,
@@ -340,7 +340,7 @@ class TestSuricataFixup(object):
             'category': 'suricata',
             'SOURCE': 'eve-log',
             'event_type': 'alert'
-        }            
+        }
         MESSAGE = {
             "timestamp":"2018-09-12T22:24:09.546736+0000",
             "flow_id":1484802709084080,
@@ -385,7 +385,7 @@ class TestSuricataFixup(object):
                 "status":200,
                 "length":0,
                 "redirect":"afakedestination"
-            },            
+            },
         }
         event['MESSAGE'] = json.dumps(MESSAGE)
 
@@ -408,7 +408,7 @@ class TestSuricataFixup(object):
             'category': 'suricata',
             'SOURCE': 'eve-log',
             'event_type': 'alert'
-        }            
+        }
         MESSAGE = {
             "timestamp":"2018-09-12T22:24:09.546736+0000",
             "flow_id":1484802709084080,
@@ -450,7 +450,7 @@ class TestSuricataFixup(object):
                 "status":200,
                 "length":5000,
                 "redirect":"afakedestination"
-            },            
+            },
         }
         # Note - do not copy to other apps. This is INSECURE.
         large_pseudorandom_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5000))
@@ -483,7 +483,7 @@ class TestSuricataFixup(object):
             'category': 'suricata',
             'SOURCE': 'eve-log',
             'event_type': 'alert'
-        }            
+        }
         MESSAGE = {
             "timestamp":"2018-09-12T22:24:09.546736+0000",
             "flow_id":1484802709084080,
@@ -525,7 +525,7 @@ class TestSuricataFixup(object):
                     "ET.JavaNotJar":"true",
                     "ET.http.javaclient":"true"
                 }
-            }   
+            }
         }
         event['MESSAGE'] = json.dumps(MESSAGE)
 
@@ -543,7 +543,7 @@ class TestSuricataFixup(object):
             'category': 'suricata',
             'SOURCE': 'eve-log',
             'event_type': 'alert'
-        }            
+        }
         MESSAGE = {
             "timestamp":"2018-09-12T22:24:09.546736+0000",
             "flow_id":1484802709084080,

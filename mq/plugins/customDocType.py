@@ -16,7 +16,7 @@ class message(object):
  
     def onMessage(self, message, metadata):
         # set the doc type
-        # to avoid data type conflicts with other doc types 
+        # to avoid data type conflicts with other doc types
         # (int vs string, etc)
         if 'endpoint' in message.keys() and 'customendpoint' in message.keys():
             if message['customendpoint']:
