@@ -347,7 +347,7 @@ def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
       #"continent": "EU"
     #logger.debug(eventDictionary)
     if 'details' in eventDictionary.keys():
-        if  'sourceipgeolocation' in eventDictionary['details']:
+        if 'sourceipgeolocation' in eventDictionary['details']:
             attackers=mozdefdb['attackers']
             attacker = attackers.find_one({'_id': attackerID})
             if attacker is not None:

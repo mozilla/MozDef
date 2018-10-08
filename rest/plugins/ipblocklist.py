@@ -84,11 +84,6 @@ class message(object):
         (self.options, args) = myparser.parse_args([])
 
         # fill self.options with plugin-specific options
-
-        # options for your custom/internal ip blocking service
-        # mozilla's is called banhammer
-        # and uses an intermediary mysql DB
-        # here we set credentials
         self.options.mongohost = getConfig(
             'mongohost',
             'localhost',

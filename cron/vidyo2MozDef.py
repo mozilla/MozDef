@@ -135,7 +135,7 @@ def main():
     for row in rows:
         id = row['UniqueCallID']
         # Copy the row's info if we don't already have the final completed call state
-        if id not in calls or (id in calls and  calls[id]['CallState'] != 'COMPLETED'):
+        if id not in calls or (id in calls and calls[id]['CallState'] != 'COMPLETED'):
             calls[id] = row
 
     # Massage call data and send to MozDef

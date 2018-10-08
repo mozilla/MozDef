@@ -135,7 +135,7 @@ html_static_path = ['_static']
 # overrides to fix wide table scrolling.
 # https://github.com/snide/sphinx_rtd_theme/issues/117
 def setup(app):
-   app.add_stylesheet("theme_overrides.css")
+    app.add_stylesheet("theme_overrides.css")
 
 
 # Add any extra paths that contain custom files (such as robots.txt or
@@ -205,8 +205,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'MozDef.tex', u'MozDef Documentation',
-   u'Mozilla', 'manual'),
+    ('index', 'MozDef.tex', u'MozDef Documentation', u'Mozilla', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -235,8 +234,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'mozdef', u'MozDef Documentation',
-     [u'Mozilla'], 1)
+    ('index', 'mozdef', u'MozDef Documentation', [u'Mozilla'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -249,9 +247,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'MozDef', u'MozDef Documentation',
-   u'Mozilla', 'MozDef', 'MozDef: The Mozilla Defense Platform.',
-   'Miscellaneous'),
+    ('index', 'MozDef', u'MozDef Documentation', u'Mozilla', 'MozDef', 'MozDef: The Mozilla Defense Platform.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.

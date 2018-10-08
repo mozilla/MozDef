@@ -4,7 +4,6 @@ exclude =
   .git
   *__init__.py
 ignore =
-  E111 # indentation is not a multiple of four
   E114 # indentation is not a multiple of four (comment)
   E116 # unexpected indentation (comment)
   E121 # continuation line under-indented for hanging indent
@@ -17,7 +16,6 @@ ignore =
   E128 # continuation line under-indented for visual indent
   E129 # visually indented line with same indent as next logical line
   E131 # continuation line unaligned for hanging indent
-  E221 # multiple spaces before operator
   E222 # multiple spaces after operator
   E225 # missing whitespace around operator
   E226 # missing whitespace around arithmetic operator
@@ -27,7 +25,6 @@ ignore =
   E261 # at least two spaces before inline comment
   E265 # block comment should start with '# '
   E266 # too many leading '#' for block comment
-  E271 # multiple spaces after keyword
   E301 # expected 1 blank line
   E302 # expected 2 blank lines, found 1
   E305 # expected 2 blank lines after class or function definition
@@ -43,4 +40,3 @@ ignore =
   F821 # undefined name 'SysLogHandler'
   F841 # local variable 'CIDR' is assigned to but never used
   W503 # line break before binary operator
-  W601 # .has_key() is deprecated, use 'in'
