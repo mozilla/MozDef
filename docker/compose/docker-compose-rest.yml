@@ -15,6 +15,6 @@ services:
     networks:
       - default
     volumes:
-      - /Users/jbryner/development/mozdef/deployments/mozillagit/rest:/opt/mozdef/envs/mozdef/rest
+      - ../../rest:/opt/mozdef/envs/mozdef/rest
     stdin_open: true
     tty: true
