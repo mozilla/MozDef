@@ -6,7 +6,6 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_meteor/Dockerfile
     restart: always
-    # command: bash -c 'cd /opt/mozdef/envs/mozdef/meteor && meteor npm install --save-dev && rm -rf .meteor/local && /usr/bin/meteor'
     command: bash -c 'node -i'
     depends_on:
       - mongodb
