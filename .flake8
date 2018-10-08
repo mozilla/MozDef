@@ -55,4 +55,3 @@ ignore =
   W293 # blank line contains whitespace
   W391 # blank line at end of file
   W503 # line break before binary operator
-  W601 # .has_key() is deprecated, use 'in'
