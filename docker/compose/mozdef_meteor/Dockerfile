@@ -23,10 +23,7 @@ RUN \
                 libstdc++ \
                 libffi-devel \
                 zlib-devel
-# RUN \
-#   curl -sL -o /opt/mozdef/nodesource.rpm https://rpm.nodesource.com/pub_4.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm && \
-#   rpm -i --nosignature --force /opt/mozdef/nodesource.rpm && \
-#   yum install -y nodejs-$NODE_VERSION
+
 RUN \
     curl -sL https://rpm.nodesource.com/setup_8.x | bash - && \
     yum -y install nodejs
