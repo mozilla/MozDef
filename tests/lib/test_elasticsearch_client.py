@@ -279,35 +279,6 @@ class TestBulkWrites(BulkTest):
         assert num_events == 2000
 
 
-class TestReadTimeoutThreshold(ElasticsearchClientTest):
-    def test_modifying_readtimeout(self):
-        events_length = 5000
-        events = []
-        # Just populate some larger events
-        # so ES will take a few seconds
-        # to return the query, thus hitting
-        # the read timeout
-        for num in range(events_length):
-            base_event = {}
-            for key_num in range(50):
-                base_event['key' + str(key_num)] = 'a' * 1000
-            events.append(base_event)
-
-        for event in events:
-            self.es_client.save_object(index='events', doc_type='event', body=event)
-
-        self.flush(self.event_index_name)
-        search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', 'event'))
-        search_query.add_aggregation(Aggregation('_type'))
-        with pytest.raises(ConnectionTimeout):
-            search_query.execute(self.es_client, size=10000, request_timeout=1)
-        # We sleep a bit to give the connection pool time to
-        # recover, if we didn't, the next couple of tests
-        # would fail, which seems weird but it is what it is
-        time.sleep(10)
-
-
 class TestBulkWritesWithMoreThanThreshold(BulkTest):
 
     def test_bulk_writing_more_threshold(self):
