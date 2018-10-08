@@ -170,7 +170,7 @@ class mozdefBot():
         self.root_logger.setLevel(logging.INFO)
 
         self.client = kitnirc.client.Client(options.host, options.port)
-        self.controller  = kitnirc.modular.Controller(self.client, options.configfile)
+        self.controller = kitnirc.modular.Controller(self.client, options.configfile)
         self.controller.load_config()
         self.controller.start()
         self.client.root_logger = self.root_logger
