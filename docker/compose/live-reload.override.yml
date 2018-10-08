@@ -15,8 +15,6 @@ services:
       - default
     volumes:
         - ../../meteor:/opt/mozdef/envs/mozdef/meteor
-#        - ../../meteor/private:/opt/mozdef/envs/mozdef/meteor/private
-#        - ../../meteor/public:/opt/mozdef/envs/mozdef/meteor/public
     stdin_open: true
     tty: true
   sampledata:
