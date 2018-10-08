@@ -68,7 +68,7 @@ def process_events(mozmsg, duo_events, etype, state):
                 continue
 
     # Duo client doesn't translate inner dicts to dicts for some reason - its just a string, so we have to process and parse it
-            if e[i] != None and type(e[i]) == str and  e[i].startswith('{'):
+            if e[i] != None and type(e[i]) == str and e[i].startswith('{'):
                 j = json.loads(e[i])
                 for x in j:
                     details[x] = j[x]

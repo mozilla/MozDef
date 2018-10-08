@@ -18,7 +18,7 @@ import random
 import logging
 from logging.handlers import SysLogHandler
 from Queue import Empty
-from  requests.packages.urllib3.exceptions import ClosedPoolError
+from requests.packages.urllib3.exceptions import ClosedPoolError
 import requests
 import time
 from configlib import getConfig, OptionParser, setConfig
