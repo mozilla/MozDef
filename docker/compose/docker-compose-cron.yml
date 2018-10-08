@@ -8,7 +8,7 @@ services:
     restart: always
     command: bash -c 'sleep 90 && crond -n'
     volumes:
-      - /Users/jbryner/development/mozdef/deployments/mozillagit/cron:/opt/mozdef/envs/mozdef/cron
+      - ../../cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
     depends_on:
       - base
