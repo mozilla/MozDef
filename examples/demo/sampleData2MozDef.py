@@ -37,10 +37,9 @@ from utilities.toUTC import toUTC
 #use futures to run in the background
 #httpsession = FuturesSession(max_workers=5)
 httpsession = requests.session()
-httpsession.trust_env=False #turns of needless .netrc check for creds
+httpsession.trust_env=False  # turns of needless .netrc check for creds
 #a = requests.adapters.HTTPAdapter(max_retries=2)
 #httpsession.mount('http://', a)
-
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -143,12 +142,11 @@ def makeEvents():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
                         logger.error('%r'%e)
-
 
     except KeyboardInterrupt as e:
         sys.exit(1)
@@ -213,12 +211,11 @@ def makeAlerts():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
                         logger.error('%r'%e)
-
 
     except KeyboardInterrupt as e:
         sys.exit(1)
@@ -283,16 +280,14 @@ def makeAttackers():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
                         logger.error('%r'%e)
 
-
     except KeyboardInterrupt as e:
         sys.exit(1)
-
 
 
 def initConfig():
@@ -330,13 +325,12 @@ if __name__ == '__main__':
     makeAlerts()
     makeAttackers()
 
-
     while not logcache.empty():
         try:
             postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
             postingProcess.start()
         except OSError as e:
-            if e.errno==35: #resource temporarily unavailable.
+            if e.errno==35:  # resource temporarily unavailable.
                 print(e)
                 pass
             else:

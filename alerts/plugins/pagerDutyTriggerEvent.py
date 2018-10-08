@@ -47,7 +47,7 @@ class message(object):
         doclink = 'unknown'
         if message['category'] in self.options.docs.keys():
             doclink = self.options.docs[message['category']]
-        if 'summary' in message.keys() :
+        if 'summary' in message.keys():
             headers = {
                 'Content-type': 'application/json',
             }

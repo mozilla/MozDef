@@ -16,28 +16,20 @@ ignore =
   E128 # continuation line under-indented for visual indent
   E129 # visually indented line with same indent as next logical line
   E131 # continuation line unaligned for hanging indent
-  E201 # whitespace after '('
-  E202 # whitespace before ')'
-  E203 # whitespace before '
-  E211 # whitespace before '('
   E222 # multiple spaces after operator
   E225 # missing whitespace around operator
   E226 # missing whitespace around arithmetic operator
   E228 # missing whitespace around modulo operator
   E231 # missing whitespace after ','
   E241 # multiple spaces after ','
-  E251 # unexpected spaces around keyword / parameter equals
   E261 # at least two spaces before inline comment
-  E262 # inline comment should start with '# '
   E265 # block comment should start with '# '
   E266 # too many leading '#' for block comment
   E301 # expected 1 blank line
   E302 # expected 2 blank lines, found 1
-  E303 # too many blank lines (3)
   E305 # expected 2 blank lines after class or function definition
   E402 # module level import not at top of file
   E501 # line too long
-  E502 # the backslash is redundant between brackets
   E711 # comparison to None should be 'if cond is not None
   E712 # comparison to True should be 'if cond is True
   E713 # test for membership should be 'not in'
@@ -47,8 +39,4 @@ ignore =
   F811 # redefinition of unused 'datetime' from line 10
   F821 # undefined name 'SysLogHandler'
   F841 # local variable 'CIDR' is assigned to but never used
-  W291 # trailing whitespace
-  W292 # no newline at end of file
-  W293 # blank line contains whitespace
-  W391 # blank line at end of file
   W503 # line break before binary operator
