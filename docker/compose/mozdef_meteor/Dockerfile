@@ -9,6 +9,8 @@ ENV MONGO_URL=mongodb://mongodb:3002/meteor
 ENV ROOT_URL=http://localhost
 ENV PORT=3000
 
+ARG METEOR_BUILD='YES'
+
 RUN \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir -p /opt/mozdef/envs/mozdef && \
@@ -42,10 +44,13 @@ RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 USER mozdef
 RUN \
   mkdir -p /opt/mozdef/envs/meteor/mozdef
-  #cd /opt/mozdef/envs/mozdef/meteor && \
-  #meteor npm install && \
-  #meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \
-  #mv /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules
+# build meteor runtime if asked, if set to NO, only create the dir created above to mount to do live development
+RUN if   [ "${METEOR_BUILD}" = "YES" ]; then \
+        cd /opt/mozdef/envs/mozdef/meteor && \
+        meteor npm install && \
+        meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \
+        mv /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules ;\
+  fi
 
 WORKDIR /opt/mozdef/envs/mozdef/meteor
 

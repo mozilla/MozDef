@@ -5,6 +5,8 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_meteor/Dockerfile
+      args:
+        METEOR_BUILD: 'NO'
     restart: always
     command: bash -c 'node -i'
     depends_on:
