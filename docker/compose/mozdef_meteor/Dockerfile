@@ -49,7 +49,9 @@ RUN if   [ "${METEOR_BUILD}" = "YES" ]; then \
         cd /opt/mozdef/envs/mozdef/meteor && \
         meteor npm install && \
         meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \
-        mv /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules ;\
+        cp -r /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules &&\
+        cd /opt/mozdef/envs/meteor/mozdef/bundle/programs/server && \
+        npm install ;\
   fi
 
 WORKDIR /opt/mozdef/envs/meteor/mozdef
