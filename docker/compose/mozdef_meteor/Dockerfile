@@ -52,6 +52,6 @@ RUN if   [ "${METEOR_BUILD}" = "YES" ]; then \
         mv /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules ;\
   fi
 
-WORKDIR /opt/mozdef/envs/mozdef/meteor
+WORKDIR /opt/mozdef/envs/meteor/mozdef
 
 EXPOSE 3000
