@@ -346,12 +346,6 @@ class taskConsumer(object):
                             self.on_message(event)
 
                     self.taskQueue.delete_message(msg)
-
-            except KeyboardInterrupt:
-                sys.exit(1)
-            except Exception as e:
-                logger.exception(e)
-                time.sleep(3)
             except (SSLEOFError, SSLError, socket.error) as e:
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
