@@ -5,64 +5,114 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 -->
 
+
 <template name="menu">
-    <div class="container headercontainer">
-        <div id="header"  class="row center">
-            <span id="nav-main">
-            <ul>
-                <li><img class="mozillalogo" src="/images/mozilla.svg" ></li>
-                <li><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></li>
-                <li> <a target="_blank" href={{mozdef.kibanaURL}}>Kibana</a>
-                    <ul>
-                        <li class="first">
-                            {{#each kibanadashboards as item}}
-                                {{>kibanaDashboardItem}}
-                            {{/each}}
-                        </li>
-                    </ul>
-                </li>
-                <li><a href="/alerts/">Alerts</a>
-                    <ul>
-                        <li class="first"><a href="/ipblocklist">ip blocklist</a></li>
-                        <li class="first"><a href="/fqdnblocklist">fqdn blocklist</a></li>
-                    </ul>
-                </li>
-                <li><a href="/investigations">Investigations</a>
-                    <ul>
-                        <li class="first"><a href="/investigation/new/">new investigation</a></li>
-                    </ul>
-                </li>
-                <li><a href="/incidents">Incidents</a>
-                    <ul>
-                        <li class="first"><a href="/incident/new/">new incident</a></li>
-                        <li class="last"><a href="/incidents/veris/">veris stats</a></li>
-                    </ul>
-                </li>
-                <li class="first"><a href="#">Visualizations</a>
-                    <ul>
-                        <li class="first"><a href="/logincounts/">logincounts</a></li>
-                        <li><a href="/attackers">attackers</a></li>
-                        <li class="last"><a href="/globe">globe</a></li>
-                    </ul>
-                </li>
-                <li><a href="/about">About</a></li>
-            </ul>
-            <label>
-                {{#if loggingIn}}
-                        loading
-                {{/if}}
-                {{> loginButtons align="right"}}
-            </label>
-
+    <div class="area"></div>
+    <nav class="main-menu">
+      <ul>
+        <li>
+          <a href="https://mozilla.org">
+            <span class="moz">
+            <img src="/images/moz-logo.png" width="30" height="30">
             </span>
-
-        </div>
-    </div>
-</template>
-
-<template name="kibanaDashboardItem">
+            <span class="nav-text">
+              Mozilla
+            </span>
+          </a>
+        </li>
+        <li>
+          <a target="_blank" href={{mozdef.kibanaURL}}>
+            <i class="fa fa-home fa-2x"></i>
+            <span class="nav-text">
+              Kibana
+            </span>
+          </a>
+          <ul>
+            <li class="has-subnav">
+                {{#each kibanadashboards as item}}
+                    {{>kibanaDashboardItem}}
+                {{/each}}
+            </li>
+          </ul>
+        </li>
+        <li class="has-subnav">
+          <a href="/alerts/">
+            <i class="fa fa-list fa-2x"></i>
+            <span class="nav-text">
+              Alerts
+            </span>
+          </a>
+        </li>
+        <li class="has-subnav">
+          <a href="/investigations">
+            <i class="fa fa-crosshairs fa-2x"></i>
+            <span class="nav-text">
+              Investigations
+            </span>
+          </a>
+        </li>
+        <li class="has-subnav">
+          <a href="/incidents">
+            <i class="fa fa-exclamation-circle fa-2x"></i>
+            <span class="nav-text">
+              Incidents
+            </span>
+          </a>
+        </li>
+        <li class="has-subnav">
+          <a href="#">
+            <i class="fa fa-eye fa-2x"></i>
+            <span class="nav-text">
+              Visualizations
+            </span>
+          </a>
+          <div class="sub-nav-content">
+            <ul>
+                <li class="first"><a href="/logincounts/">logincounts</a></li>
+                <li><a href="/attackers">attackers</a></li>
+                <li class="last"><a href="/globe">globe</a></li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <a href="https://mozdef.readthedocs.io/en/latest/"  target="_blank">
+            <i class="fa fa-info fa-2x"></i>
+            <span class="nav-text">
+              Documentation
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="/about">
+            <i class="fa fa-font fa-2x"></i>
+            <span class="nav-text">
+              About
+            </span>
+          </a>
+        </li>
+      </ul>
+      <ul class="logout">
+        <li>
+          <a href="#">
+            <i class="fa fa-power-off fa-2x"></i>
+            <span class="nav-text">
+              <span class="login">
+                <label>
+                  {{#if loggingIn}}
+                          loading
+                  {{/if}}
+                  {{> loginButtons align="left"}}
+              </label>
+              </span>
+            </span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </template>
+  
+  <template name="kibanaDashboardItem">
     <li>
         <a target=" _blank" href="{{url}}">{{name}}</a>
     </li>
-</template>
-
+  </template>

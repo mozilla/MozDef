@@ -8,6 +8,8 @@ Copyright (c) 2014 Mozilla Corporation
 /*base css */
 @import url('https://fonts.googleapis.com/css?family=Zilla+Slab+Highlight');
 @import url('https://fonts.googleapis.com/css?family=Zilla+Slab');
+@import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+
 html{
 	background: none;
 	min-height: 100%;
@@ -16,14 +18,14 @@ html{
 body{
 	/*gradient*/
 
-    background: rgb(32,87,153); /* Old browsers */
-    background: -moz-linear-gradient(top, rgba(30,87,153,1) 0%, rgba(32,124,202,1) 43%, rgba(41,137,216,1) 62%, rgba(41,150,217,1) 100%); /* FF3.6+ */
+    background: rgb(51, 61, 73); /* Old browsers */
+    background: -moz-linear-gradient(top, rgb(149, 149, 149) 0%, rgb(231, 229, 226) 43%, rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(43%,rgba(32,124,202,1)), color-stop(62%,rgba(41,137,216,1)), color-stop(100%,rgba(41,150,217,1))); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* IE10+ */
-    background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
-    background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
+    background: -webkit-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* IE10+ */
+    background: linear-gradient(to bottom, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* W3C */
+    background: linear-gradient(to bottom, rgb(149, 149, 149) 0%,rgb(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* W3C */
     font-family: "Zilla Slab",sans-serif;
     font-size: 14px;
     /*margin: 0;*/
@@ -327,7 +329,7 @@ circle:hover{
     margin:.5em;
 }
 
-/*menu styling*/
+/*menu styling
 #nav-main {
     text-align: left;
     font-weight: bolder;
@@ -415,7 +417,7 @@ circle:hover{
     outline: 0px none;
 }
 
-/* Second-level Menu Items */
+/* Second-level Menu Items 
 
 #nav-main li:hover ul,
 .js #nav-main li.hover ul {
@@ -510,7 +512,7 @@ circle:hover{
 }
 
 
-/* Currently active menu items */
+/* Currently active menu items
 #nav-main ul li.current span,
 #nav-main ul li.current a,
 #nav-main ul li.current a:link,
@@ -564,7 +566,191 @@ circle:hover{
     -moz-box-shadow: none;
     padding: 8px 10px;
 }
+*/
 
 .mousepointer {
     cursor: pointer;
+}
+
+
+.fa-2x {
+  font-size: 2em;
+}
+
+.fa {
+  position: relative;
+  display: table-cell;
+  width: 60px;
+  height: 36px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 20px;
+}
+
+.moz {
+  position: relative;
+  display: table-cell;
+  width: 60px;
+  height: 36px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 20px;
+}
+
+.main-menu:hover,
+nav.main-menu.expanded {
+  width: 250px;
+  overflow: visible;
+}
+
+.main-menu {
+  background: #959595;
+  border-right: 1px solid #e5e5e5;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  left: 0;
+  width: 60px;
+  overflow: hidden;
+  -webkit-transition: width .05s linear;
+  transition: width .05s linear;
+  -webkit-transform: translateZ(0) scale(1, 1);
+  z-index: 1000;
+}
+
+.main-menu>ul {
+  margin: 7px 0;
+}
+
+.main-menu li {
+  position: relative;
+  display: block;
+  width: 250px;
+}
+
+.main-menu li>a {
+  position: relative;
+  display: table;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: rgb(255, 255, 255);
+  font-family: arial;
+  font-size: 14px;
+  text-decoration: none;
+  -webkit-transform: translateZ(0) scale(1, 1);
+  -webkit-transition: all .1s linear;
+  transition: all .1s linear;
+}
+
+.main-menu .nav-icon {
+  position: relative;
+  display: table-cell;
+  width: 60px;
+  height: 36px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 20px;
+}
+
+.main-menu .nav-text {
+  position: relative;
+  display: table-cell;
+  vertical-align: middle;
+  width: 190px;
+  font-family: 'Zilla Slab', serif;
+}
+
+.main-menu>ul.logout {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.no-touch .scrollable.hover {
+  overflow-y: hidden;
+}
+
+.no-touch .scrollable.hover:hover {
+  overflow-y: auto;
+  overflow: visible;
+}
+
+a:hover,
+a:focus {
+  text-decoration: none;
+}
+
+nav {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+nav ul,
+nav li {
+  outline: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.main-menu li:hover>a,
+nav.main-menu li.active>a,
+.dropdown-menu>li>a:hover,
+.dropdown-menu>li>a:focus,
+.dropdown-menu>.active>a,
+.dropdown-menu>.active>a:hover,
+.dropdown-menu>.active>a:focus,
+.no-touch .dashboard-page nav.dashboard-menu ul li:hover a,
+.dashboard-page nav.dashboard-menu ul li.active a {
+  color: #fff;
+  background-color: #ff694f;
+}
+
+.sub-nav-content {
+    cursor:auto;
+    color:#000;
+    background-color:#fff;
+    display:none;
+    position:absolute;
+    min-width:160px;
+    margin:0;
+    padding:0;
+    z-index:1
+}
+
+.area {
+  float: left;
+  background: #e2e2e2;
+  width: 100%;
+  height: 100%;
+}
+
+@font-face {
+  font-family: 'Zilla Slab';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Zilla Slab'), local('ZillaSlab-Regular'), url(https://fonts.gstatic.com/s/zillaslab/v3/dFa6ZfeM_74wlPZtksIFajQ6_UyI.woff2) format('woff2');
+}
+
+.Heading {
+  margin-left: 100px;
+  margin-top: 0px;
+  color: #fff;
+  align-self: center;
+  font-family: 'Zilla Slab', serif;
+}
+
+h1 {
+  max-width: 600px;
+  color: #fff;
+  min-height: 100%;
+  background: rgb(0, 0, 0);
+  font-family: 'Zilla Slab', serif;
+}
+
+.container {
+  margin-left: 200px;
 }
