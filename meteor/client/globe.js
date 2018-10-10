@@ -64,10 +64,10 @@ if (Meteor.isClient) {
       mesh.rotation.y = Math.PI;
       scene.add(mesh);
 
-        // lighting
-        // blue on black, yields a greenish sea with black continents
-        const light = new THREE.HemisphereLight(0x006699,0x000000,  25 );
-        scene.add(light);
+      // lighting
+      // blue on black, yields a greenish sea with black continents
+      const light = new THREE.HemisphereLight(0x006699,0x000000,  25 );
+      scene.add(light);
 
       geometry = new THREE.BoxGeometry(0.75, 0.75, 1);
       geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.5));
