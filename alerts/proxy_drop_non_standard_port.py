@@ -24,7 +24,7 @@ class AlertProxyDropNonStandardPort(AlertTask):
             TermMatch('details.tcpaction', 'CONNECT')
         ])
 
-        # Only notify on certain file extensions from config
+        # Only notify on certain ports from config
         filename_regex = "/.*:({0})/".format(
             self.config.excludedports.replace(',', '|'))
         search_query.add_must_not([
