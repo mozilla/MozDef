@@ -52,12 +52,12 @@ class TestAlertProxyDropNonStandardPort(AlertTestSuite):
         "category": "squid",
         "tags": ['squid', 'proxy'],
         "severity": "WARNING",
-        "summary": 'Suspicious Proxy DROP events detected from 1.2.3.4 to the following non-std port(s): evil.com:6667'
+        "summary": 'Suspicious Proxy DROP events detected from 1.2.3.4 to the following non-std port destination(s): evil.com:6667'
     }
 
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
-        "summary"] = 'Suspicious Proxy DROP events detected from 1.2.3.4 to the following non-std port(s): evil.com:1337,evil.com:6667'
+        "summary"] = 'Suspicious Proxy DROP events detected from 1.2.3.4 to the following non-std port destination(s): evil.com:1337,evil.com:6667'
 
     test_cases = []
 
