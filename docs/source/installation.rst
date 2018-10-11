@@ -492,6 +492,23 @@ you can start the restapi and loginput processes from within your venv via:
 .. _uwsgi: https://uwsgi-docs.readthedocs.io/en/latest/
 
 
+Supervisord
+***********
+
+We use supervisord to run the alerts and alertplugins. If you plan on starting services manually, you can skip this step.
+
+To install supervisord perform the following as the user mozdef:
+
+    cd /opt/mozdef/envs/mozdef
+    source bin/activate
+    cd bin
+    pip install supervisor
+
+Within the alerts directory there is a supervisord_alerts.ini which is preconfigured. 
+If you've changed any directory paths for this installation then modify it to reflect your pathing changes.
+There are systemd files in the systemdfiles directory that you can use to start the mozdefalerts and mozdefalertplugins processes which we cover near the end of this tutorial.
+
+
 ElasticSearch
 *************
 
@@ -608,22 +625,24 @@ Now you can start your services:
   systemctl start mozdefalertplugins
 
 
-Alternatively you can start the following services manually in this way:
+Alternatively you can start the following services manually in this way from inside the venv as mozdef:
 
+  # Eventtask worker
   cd ~/MozDef/mq
-  ./esworker.py
+  (mozdef) [mozdef@mozdev mq]$ uwsgi --ini eventtask.ini
 
-  cd ~/MozDef/alerts
-  celery -A celeryconfig worker --loglevel=info --beat
+  # alert worker
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/alerts
+  (mozdef) [mozdef@mozdev alerts]$ celery -A celeryconfig worker --loglevel=info --beat
 
 To initialize elasticsearch indices and load some sample data::
 
-  cd examples/es-docs/
-  python inject.py
+  (mozdef) [mozdef@mozdev mozdef]$ cd examples/es-docs/
+  (mozdef) [mozdef@mozdev es-docs]$ python inject.py
 
 To add more sample data you can run the following from inside the venv:
 
-  cd ~/MozDef/examples/demo
-  ./syncalerts.sh
-  ./sampleevents.sh
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/examples/demo
+  (mozdef) [mozdef@mozdev demo]$ ./syncalerts.sh
+  (mozdef) [mozdef@mozdev demo]$ ./sampleevents.sh
 
