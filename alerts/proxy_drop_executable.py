@@ -51,7 +51,7 @@ class AlertProxyDropExecutable(AlertTask):
         for event in aggreg['allevents']:
             dropped_urls.add(event['_source']['details']['destination'])
 
-        summary = 'Multiple Proxy DROP events detected from {0} to the following executable file destination(s): {1}'.format(
+        summary = 'Suspicious Proxy DROP events detected from {0} to the following executable file destination(s): {1}'.format(
             aggreg['value'],
             ",".join(sorted(dropped_urls))
         )
