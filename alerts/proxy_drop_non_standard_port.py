@@ -12,6 +12,9 @@ from query_models import QueryStringMatch, SearchQuery, TermMatch
 
 class AlertProxyDropNonStandardPort(AlertTask):
     def main(self):
+        self.parse_config(
+            'proxy_drop_non_standard_port.conf', ['excludedports'])
+
         search_query = SearchQuery(minutes=20)
 
         search_query.add_must([
@@ -21,8 +24,11 @@ class AlertProxyDropNonStandardPort(AlertTask):
             TermMatch('details.tcpaction', 'CONNECT')
         ])
 
+        # Only notify on certain file extensions from config
+        filename_regex = "/.*:({0})/".format(
+            self.config.excludedports.replace(',', '|'))
         search_query.add_must_not([
-            QueryStringMatch('details.destination: /.*:443/')
+            QueryStringMatch('details.destination: {}'.format(filename_regex))
         ])
 
         self.filtersManual(search_query)
