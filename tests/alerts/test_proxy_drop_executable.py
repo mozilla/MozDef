@@ -38,13 +38,13 @@ class TestAlertProxyDropExecutable(AlertTestSuite):
         "category": "squid",
         "tags": ['squid', 'proxy'],
         "severity": "WARNING",
-        "summary": 'Suspicious Proxy DROP events detected from 1.2.3.4 to the following executable file destination(s): http://evil.com/evil.exe',
+        "summary": 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following executable file destination(s): http://evil.com/evil.exe',
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
-        "summary"] = 'Suspicious Proxy DROP events detected from 1.2.3.4 to the following executable file destination(s): http://evil.com/evil.exe,http://evil.com/evil.sh'
+        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following executable file destination(s): http://evil.com/evil.exe,http://evil.com/evil.sh'
 
     test_cases = []
 

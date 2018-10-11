@@ -53,7 +53,7 @@ class AlertProxyDropNonStandardPort(AlertTask):
         for event in aggreg['allevents']:
             destinations.add(event['_source']['details']['destination'])
 
-        summary = 'Suspicious Proxy DROP events detected from {0} to the following non-std port destination(s): {1}'.format(
+        summary = 'Suspicious Proxy DROP event(s) detected from {0} to the following non-std port destination(s): {1}'.format(
             aggreg['value'],
             ",".join(sorted(destinations))
         )
