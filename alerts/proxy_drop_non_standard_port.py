@@ -25,10 +25,10 @@ class AlertProxyDropNonStandardPort(AlertTask):
         ])
 
         # Only notify on certain ports from config
-        filename_regex = "/.*:({0})/".format(
+        port_regex = "/.*:({0})/".format(
             self.config.excludedports.replace(',', '|'))
         search_query.add_must_not([
-            QueryStringMatch('details.destination: {}'.format(filename_regex))
+            QueryStringMatch('details.destination: {}'.format(port_regex))
         ])
 
         self.filtersManual(search_query)
