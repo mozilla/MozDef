@@ -18,7 +18,7 @@ class TestAlertProxyDropIP(AlertTestSuite):
             "tags": ["squid"],
             "details": {
                 "sourceipaddress": "1.2.3.4",
-                "destination": "http://1.2.3.5",
+                "destination": "http://1.2.3.5/",
                 "proxyaction": "TCP_DENIED/-",
             }
         }
@@ -38,13 +38,13 @@ class TestAlertProxyDropIP(AlertTestSuite):
         "category": "squid",
         "tags": ['squid', 'proxy'],
         "severity": "WARNING",
-        "summary": 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following executable file destination(s): http://1.2.3.5',
+        "summary": 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following IP-based destination(s): http://1.2.3.5/',
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
-        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following executable file destination(s): http://1.2.3.5,1.2.3.5:1337'
+        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following IP-based destination(s): 1.2.3.5:1337,http://1.2.3.5/'
 
     test_cases = []
 
