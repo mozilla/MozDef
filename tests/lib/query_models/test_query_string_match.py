@@ -9,7 +9,9 @@ from query_models import QueryStringMatch
 
 hostname_test_regex = 'hostname: /(.*\.)*(groupa|groupb)\.(.*\.)*subdomain\.(.*\.)*.*/'
 filename_matcher = 'summary: /.*\.(exe|sh)/'
-ip_matcher = 'destination: /(http:\/\/|https:\/\/)?\d+\.\d+\.\d+\.\d+.*/'
+
+# Note that this has potential for over-matching on foo.bar.baz.com, which needs further validation in alerts
+ip_matcher = 'destination: /.*\..{1,3}\..{1,3}\..{1,3}(:.*|\/.*)/'
 
 
 class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
@@ -48,10 +50,14 @@ class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
             QueryStringMatch(ip_matcher): [
                 {'destination': 'http://1.2.3.4/somepath'},
                 {'destination': 'https://1.2.3.4/somepath'},
+                {'destination': '1.2.3.4/somepath'},
+                {'destination': '1.2.3.4/somepath'},
                 {'destination': '1.2.3.4:443'},
                 {'destination': '1.2.3.4:80'},
-
-            ],
+                # Over-match examples (which need to be validated further in alerts)
+                {'destination': 'https://foo.bar.baz.com/somepath'},
+                {'destination': 'foo.bar.baz.com:80'},
+            ]
         }
         return tests
 
@@ -94,11 +100,10 @@ class TestQueryStringMatchNegativeTestSuite(NegativeTestSuite):
             ],
 
             QueryStringMatch(ip_matcher): [
+                {'destination': 'https://foo.bar.mozilla.com/somepath'},
+                {'destination': 'foo.bar.mozilla.com:80'},
                 {'destination': 'http://example.com/somepath'},
-                {'destination': 'https://foo.bar.example.com/somepath'},
-                {'destination': 'example.com:443'},
-                {'destination': 'foo.bar.example.com:80'},
-
+                {'destination': 'example.com:443'}
             ],
         }
         return tests
