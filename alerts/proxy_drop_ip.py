@@ -12,8 +12,6 @@ from query_models import QueryStringMatch, SearchQuery, TermMatch
 
 class AlertProxyDropIP(AlertTask):
     def main(self):
-        self.parse_config('proxy_drop_executable.conf', ['extensions'])
-
         search_query = SearchQuery(minutes=20)
 
         search_query.add_must([
@@ -23,7 +21,7 @@ class AlertProxyDropIP(AlertTask):
         ])
 
         # Match on 1.1.1.1, http://1.1.1.1, or https://1.1.1.1
-        ip_regex = "/^(http:\/\/|https:\/\/)?\d+\.\d+\.\d+\.\d+.*/"
+        ip_regex = "/(http:\/\/|https:\/\/)?\d+\.\d+\.\d+\.\d+.*/"
         search_query.add_must([
             QueryStringMatch('details.destination: {}'.format(ip_regex))
         ])
