@@ -51,7 +51,7 @@ class AlertProxyDropIP(AlertTask):
 
         summary = 'Suspicious Proxy DROP event(s) detected from {0} to the following IP destination(s): {1}'.format(
             aggreg['value'],
-            ",".join(sorted(dropped_urls))
+            ",".join(sorted(dropped_destinations))
         )
 
         # Create the alert object based on these properties
