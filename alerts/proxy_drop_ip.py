@@ -48,7 +48,7 @@ class AlertProxyDropIP(AlertTask):
 
         # Lucene search has a slight potential for overmatches, so we'd double-check
         # with this pattern to ensure it's truely an IP before we add dest to our dropped list
-        pattern = r'(http:\/\/|https:\/\/|)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+        pattern = r'^(http:\/\/|https:\/\/|)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
 
         dropped_destinations = set()
 
