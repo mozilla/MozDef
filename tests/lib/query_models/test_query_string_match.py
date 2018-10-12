@@ -9,7 +9,7 @@ from query_models import QueryStringMatch
 
 hostname_test_regex = 'hostname: /(.*\.)*(groupa|groupb)\.(.*\.)*subdomain\.(.*\.)*.*/'
 filename_matcher = 'summary: /.*\.(exe|sh)/'
-ip_matcher = 'destination: /^(http:\/\/|https:\/\/)?\d+\.\d+\.\d+\.\d+.*/'
+ip_matcher = 'destination: /(http:\/\/|https:\/\/)?\d+\.\d+\.\d+\.\d+.*/'
 
 
 class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
