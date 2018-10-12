@@ -9,6 +9,7 @@ from query_models import QueryStringMatch
 
 hostname_test_regex = 'hostname: /(.*\.)*(groupa|groupb)\.(.*\.)*subdomain\.(.*\.)*.*/'
 filename_matcher = 'summary: /.*\.(exe|sh)/'
+ip_matcher = 'destination: /^(http:\/\/|https:\/\/)?\d+\.\d+\.\d+\.\d+.*/'
 
 
 class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
@@ -42,6 +43,14 @@ class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
             QueryStringMatch(filename_matcher): [
                 {'summary': 'test.exe'},
                 {'summary': 'test.sh'},
+            ],
+
+            QueryStringMatch(ip_matcher): [
+                {'destination': 'http://1.2.3.4/somepath'},
+                {'destination': 'https://1.2.3.4/somepath'},
+                {'destination': '1.2.3.4:443'},
+                {'destination': '1.2.3.4:80'},
+
             ],
         }
         return tests
@@ -84,5 +93,12 @@ class TestQueryStringMatchNegativeTestSuite(NegativeTestSuite):
                 {'summary': '.exe.test'},
             ],
 
+            QueryStringMatch(ip_matcher): [
+                {'destination': 'http://example.com/somepath'},
+                {'destination': 'https://foo.bar.example.com/somepath'},
+                {'destination': 'example.com:443'},
+                {'destination': 'foo.bar.example.com:80'},
+
+            ],
         }
         return tests
