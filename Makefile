@@ -19,42 +19,47 @@
 # make multiple-rebuild-tests - build, stop/rm and run new mozdef environment for tests in multiple containers
 # make multiple-rebuild-tests-new - build, stop/rm and run new mozdef environment for tests in multiple containers
 
+ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 NAME=mozdef
 VERSION=0.1
 
-multiple-run:
+all:
+	@echo 'Available make targets:'
+	@grep '^[^#[:space:]].*:' Makefile
+
+run: build
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
-multiple-run-tests:
+run-tests: build-tests
 	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) up -d --remove-orphans
 
-multiple-build:
+build:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build
 
-multiple-build-tests:
+build-tests:
 	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) build
 
-multiple-build-no-cache:
+build-no-cache:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build --no-cache
 
-multiple-stop:
+stop:
+down:
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
 
-multiple-stop-tests:
+stop-tests:
+down-tests:
 	-docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) stop
 
-multiple-rm:
+rm:
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
 
-multiple-rm-tests:
+rm-tests:
 	-docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) down -v --remove-orphans
 
-multiple-rebuild: multiple-build multiple-stop multiple-run
+# Shorthands
+rebuild: multiple-build multiple-stop multiple-run
 
-multiple-rebuild-new: multiple-build multiple-rm multiple-run
+rebuild-tests: multiple-build-tests multiple-stop-tests multiple-run-tests
 
-multiple-rebuild-tests: multiple-build-tests multiple-stop-tests multiple-run-tests
 
-multiple-rebuild-tests-new: multiple-build-tests multiple-rm-tests multiple-run-tests
-
-.PHONY: multiple-build multiple-run multiple-stop multiple-rebuild
+.PHONY: build build-tests rebuild rebuild-tests run run-tests stop down clean
