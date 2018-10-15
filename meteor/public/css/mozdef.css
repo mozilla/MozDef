@@ -565,51 +565,6 @@ circle:hover{
     padding: 8px 10px;
 }
 
-.vr-sidenav {
-    color: white;
-}
-
-.vr-sidenav .filter-radios label:nth-child(1) {
-    margin-top: 5px;
-}
-
-.vr-sidenav .filter-radios label {
-    display: block;
-    text-align: left;
-    padding-left: 33%;
-}
-
-.vr-sidenav #specific-attack-details {
-    display: none;
-}
-
-.vr-sidenav .back-button {
-    position: absolute;
-    left: 5px;
-    top: 5px;
-    color: white;
-    font-size: 18px;
-}
-
-.vr-sidenav .back-button:hover {
-    cursor: pointer;
-}
-
-.vr-sidenav #attacks-list {
-    list-style: none;
-    color: white;
-    margin-left: -40px;
-}
-
-.vr-sidenav #attacks-list .attacks-list-item {
-    padding: 5px;
-}
-
-.vr-sidenav #attacks-list .attacks-list-item:hover {
-    cursor: pointer;
-    text-decoration: underline;
-}
-
 .mousepointer {
     cursor: pointer;
 }

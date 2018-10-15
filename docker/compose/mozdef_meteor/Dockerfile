@@ -2,12 +2,14 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV NODE_VERSION 4.7.0
-ENV METEOR_VERSION 1.4.2.3
+ENV NODE_VERSION 8.11.4
+ENV METEOR_VERSION 1.7.0.5
 
 ENV MONGO_URL=mongodb://mongodb:3002/meteor
 ENV ROOT_URL=http://localhost
 ENV PORT=3000
+
+ARG METEOR_BUILD='YES'
 
 RUN \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
@@ -22,10 +24,12 @@ RUN \
                 gcc-c++ \
                 libstdc++ \
                 libffi-devel \
-                zlib-devel && \
-  curl -sL -o /opt/mozdef/nodesource.rpm https://rpm.nodesource.com/pub_4.x/el/7/x86_64/nodesource-release-el7-1.noarch.rpm && \
-  rpm -i --nosignature --force /opt/mozdef/nodesource.rpm && \
-  yum install -y nodejs-$NODE_VERSION && \
+                zlib-devel
+
+RUN \
+    curl -sL https://rpm.nodesource.com/setup_8.x | bash - && \
+    yum -y install nodejs
+RUN \
   mkdir /opt/mozdef/meteor && \
   curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
   tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
@@ -39,11 +43,16 @@ RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 
 USER mozdef
 RUN \
-  mkdir -p /opt/mozdef/envs/meteor/mozdef && \
-  cd /opt/mozdef/envs/mozdef/meteor && \
-  meteor npm install && \
-  meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \
-  mv /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules
+  mkdir -p /opt/mozdef/envs/meteor/mozdef
+# build meteor runtime if asked, if set to NO, only create the dir created above to mount to do live development
+RUN if   [ "${METEOR_BUILD}" = "YES" ]; then \
+        cd /opt/mozdef/envs/mozdef/meteor && \
+        meteor npm install && \
+        meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \
+        cp -r /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules &&\
+        cd /opt/mozdef/envs/meteor/mozdef/bundle/programs/server && \
+        npm install ;\
+  fi
 
 WORKDIR /opt/mozdef/envs/meteor/mozdef
 
