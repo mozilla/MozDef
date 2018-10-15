@@ -1,5 +1,4 @@
 FROM amazonlinux:2
-LABEL maintainer="akrug@mozilla.com"
 
 # Base dependencies
 RUN yum install @development wget -y
