@@ -1,0 +1,4 @@
+ansible
+credstash
+faker
+awscli
