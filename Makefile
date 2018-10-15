@@ -19,42 +19,51 @@
 # make multiple-rebuild-tests - build, stop/rm and run new mozdef environment for tests in multiple containers
 # make multiple-rebuild-tests-new - build, stop/rm and run new mozdef environment for tests in multiple containers
 
-NAME=mozdef
-VERSION=0.1
+ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+NAME		:= mozdef
+VERSION		:= 0.1
+NO_CACHE	:= #--no-cache
 
-multiple-run:
+.PHONY:all
+all:
+	@echo 'Available make targets:'
+	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
+
+.PHONY: build
+run: build
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
-multiple-run-tests:
-	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) up -d --remove-orphans
+# TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
+# The docker files are still in docker/compose/docker*test*
+.PHONY: test tests run-tests
+test: run-tests
+tests: run-tests
+run-tests: build-tests
+	docker-compose -f tests/docker-compose.yml -p $(NAME) up -d
+	@echo "Waiting for the instance to come up..."
+	sleep 10
+	@echo "Running flake8.."
+	docker run -it mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
+	@echo "Running py.test..."
+	docker run -it --network=mozdef_default mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
 
-multiple-build:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build
+.PHONY: build
+build:
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
-multiple-build-tests:
-	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) build
+.PHONY: build-tests
+build-tests:
+	docker-compose -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
-multiple-build-no-cache:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build --no-cache
+.PHONY: stop down
+stop: down
+down:
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
 
-multiple-stop:
-	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
-
-multiple-stop-tests:
-	-docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) stop
-
-multiple-rm:
+.PHONY: clean
+clean:
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
 
-multiple-rm-tests:
-	-docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) down -v --remove-orphans
-
-multiple-rebuild: multiple-build multiple-stop multiple-run
-
-multiple-rebuild-new: multiple-build multiple-rm multiple-run
-
-multiple-rebuild-tests: multiple-build-tests multiple-stop-tests multiple-run-tests
-
-multiple-rebuild-tests-new: multiple-build-tests multiple-rm-tests multiple-run-tests
-
-.PHONY: multiple-build multiple-run multiple-stop multiple-rebuild
+# Shorthands
+.PHONY: rebuild
+rebuild: rm build
