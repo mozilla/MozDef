@@ -17,14 +17,9 @@ RUN \
                   make && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
-  curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz && \
-  cd /opt/mozdef/Python-$PYTHON_VERSION && \
-  ./configure && \
-  make && \
-  make install && \
-  rm -r /opt/mozdef/Python-$PYTHON_VERSION && \
   cd /opt/mozdef && \
   yum install -y mysql-devel \
+                    python \
                     python-devel \
                     python-pip && \
   chown -R mozdef:mozdef /opt/mozdef/ && \

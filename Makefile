@@ -5,12 +5,6 @@
 #
 
 # usage:
-# make single-build - build new single image from Dockerfile
-# make single-build-no-cache - build new single image from Dockerfile from scratch
-# make single-debug - debug run already created image by tag
-# make single-run - run a single instance of MozDef
-# make single-stop - stop a single instance of MozDef
-# make single-rebuild - build, stop and run a new single instance of MozDef
 # make multiple-build - build new mozdef environment in multiple containers
 # make multiple-build-tests - build new mozdef environment for tests in multiple containers
 # make multiple-build-no-cache - build new mozdef environment in multiple containers from scratch
@@ -27,52 +21,6 @@
 
 NAME=mozdef
 VERSION=0.1
-
-
-single-build:
-	docker build -f docker/Dockerfile -t $(NAME):$(VERSION) .
-
-single-build-no-cache:
-	docker build -f docker/Dockerfile --no-cache -t $(NAME):$(VERSION) .
-
-single-run:
-	docker run \
-		-e TZ=UTC \
-		-p 80:80 \
-		-p 9090:9090 \
-		-p 8080:8080 \
-		-p 8081:8081 \
-		-p 9200:9200 \
-		-p 5672:5672 \
-		-v mozdef-elasticsearch:/var/lib/elasticsearch \
-		-v mozdef-mongodb:/var/lib/mongo \
-		-v mozdef-rabbitmq:/var/lib/rabbitmq \
-		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
-		-h $(NAME) --name $(NAME) -d $(NAME):$(VERSION)
-
-single-debug:build
-	docker run \
-		-e TZ=UTC \
-		-p 80:80 \
-		-p 9090:9090 \
-		-p 8080:8080 \
-		-p 8081:8081 \
-		-p 3002:3002 \
-		-p 5672:5672 \
-		-p 15672:15672 \
-		-p 9200:9200 \
-		-v mozdef-elasticsearch:/var/lib/elasticsearch \
-		-v mozdef-mongodb:/var/lib/mongo \
-		-v mozdef-rabbitmq:/var/lib/rabbitmq \
-		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
-		-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
-
-single-stop:
-	-docker rm -f $(NAME)
-
-single-rebuild: single-build single-stop single-run
-
-.PHONY: single-build single-build-no-cache single-run single-debug single-stop single-rebuild
 
 multiple-run:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d

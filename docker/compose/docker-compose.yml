@@ -2,7 +2,9 @@
 version: '2.2'
 services:
   nginx:
-    build: nginx/
+    build:
+      context: ../../
+      dockerfile: docker/compose/nginx/Dockerfile
     restart: always
     command: /usr/sbin/nginx
     depends_on:
@@ -16,7 +18,9 @@ services:
     networks:
       - default
   mongodb:
-    build: mongodb/
+    build:
+      context: ../../
+      dockerfile: docker/compose/mongodb/Dockerfile
     restart: always
     command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
     volumes:

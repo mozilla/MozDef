@@ -1,0 +1,20 @@
+---
+version: '2.2'
+services:
+  rest:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_rest/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    depends_on:
+      - base
+      - elasticsearch
+      - mongodb
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - ../../rest:/opt/mozdef/envs/mozdef/rest
+    stdin_open: true
+    tty: true
