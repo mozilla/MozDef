@@ -1,22 +1,15 @@
 Installation
 ============
 
-The installation process has been tested on CentOS 6, RHEL 6 and Ubuntu 14.
+The installation process has been tested on CentOS 7.
 
-Docker
-------
+Build and run MozDef
+--------------------
 
-You can quickly install MozDef with an automated build generation using `docker`_.
+You can quickly install MozDef with an automated build generation using `docker`:
 
-
-Single Container
-****************
-
-MozDef can run in a single docker container, which uses supervisord to handle executing all of the MozDef processes. In order to run a single container::
-
-  make single-build
-  make single-run
-  make single-stop # When you want to stop the container
+  make build
+  make run
 
 You're done! Now go to:
 
@@ -26,26 +19,26 @@ You're done! Now go to:
  * http://localhost:8080 < loginput
  * http://localhost:8081 < rest api
 
-
-Multiple Containers
-*******************
-
-Since MozDef consists of many processes running at once, we also support running MozDef with each process given it's own container. This can be useful during development, since you can turn off a single process to debug/troubleshoot while maintaining a functioning MozDef environment.
-In order to run in multiple containers::
-
-  make multiple-build
-  make multiple-run
-  make multiple-stop # When you want to stop the containers
-
-You're done! Now go to:
-
- * http://localhost < meteor (main web interface)
- * http://localhost:9090/app/kibana < kibana
- * http://localhost:9200 < elasticsearch
- * http://localhost:8080 < loginput
- * http://localhost:8081 < rest api
 
 .. _docker: https://www.docker.io/
+.. note:: The build system has changed
+   `make` targets for `multiple-*` and `single-*` have been replaced by the above commands (`make run`, etc.)
+   Just type `make` to get a list of available targets.
+
+Run tests
+---------
+
+Simply run:
+
+  make test
+
+
+Note, if you end up with a clobbered ES index, or anything like that which might end up in failing tests, you can clean
+the environment with:
+
+  make clean
+
+Then run the tests again.
 
 
 MozDef manual installation process on RedHat systems
