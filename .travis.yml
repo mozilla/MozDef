@@ -10,14 +10,6 @@ before_install:
   - set -e
 install:
   # Build containers
-  - docker-compose -f tests/docker-compose.yml -p mozdef build
-before_script:
-  # Start up resources needed for tests
-  - docker-compose -f tests/docker-compose.yml -p mozdef up -d
-  # Give some time for Elasticsearch to start up
-  - sleep 10
+  - make build-tests
 script:
-  # Verify pep8
-  - docker run -it mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
-  # Run unit tests
-  - docker run -it --network=mozdef_default mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
+  - make test
