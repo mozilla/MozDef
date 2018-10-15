@@ -12,7 +12,7 @@ RUN unzip packer_1.3.1_linux_amd64.zip
 RUN mv packer /usr/local/bin/packer
 RUN chmod u+x /usr/local/bin/packer
 
-RUN echo -n "PS1=\"(deploy-shell)$\"" >> /root/.bashrc
+RUN echo -n "PS1=\"[deploy-shell][\u@\h \W]\$ \"" >> /root/.bashrc
 
 # Setup a home for deployment
 RUN mkdir -p /opt/mozdef
