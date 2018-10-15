@@ -2,3 +2,4 @@ ansible
 credstash
 faker
 awscli
+yamllint
