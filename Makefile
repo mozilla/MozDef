@@ -7,7 +7,7 @@
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
 		   mozdef_mq_eventtask mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
-		   mozdef_syslog mozdef_nginx mozdef_tester
+		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq
 NAME		:= mozdef
 VERSION		:= 0.1
 NO_CACHE	:= #--no-cache
