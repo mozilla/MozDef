@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Deploy MozDef autoscaled ec2 instance group and ALB into AWS
+Parameters:
+  VpcId:
+    Type: "AWS::EC2::VPC::Id"
+    Description: "The VPC ID of the VPC to deploy in"
+    Default: "vpc-dc8eacb4"
+  InstanceType:
+    Type: "String"
+    Default: "m5.large"
+    Description: "EC2 instance type, e.g. m1.small, m1.large, etc."
+  KeyName:
+    Type: "AWS::EC2::KeyPair::KeyName"
+    Description: "Name of an existing EC2 KeyPair to enable SSH access to the web server"
+    Default: "gene-keys"
+  IamInstanceProfile:
+    Type: "String"
+    Description: "The ARN of the IAM Instance Profile"
+    Default: "arn:aws:iam::656532927350:instance-profile/netsecdevbastion-BastionInstanceProfile-12CM3TOELV20R"
+  AutoScaleGroupSubnetIds:
+    Type: "List<AWS::EC2::Subnet::Id>"
+    Description: "A comma delimited list of private subnet IDs"
+    Default: "subnet-8931f7ee,subnet-de322aa8,subnet-2582cd7d"
+  AMIImageId:
+    Type: "String"
+    Description: "The AMI Image ID to use of the EC2 instance"
+    Default: "ami-09c6e771"
+Resources:
+  MozDefElasticLoadBalancingV2TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 443
+      Protocol: HTTP
+      Tags:
+        - Key: application
+          Value: mozdef
+      VpcId: !Ref VpcId
+  MozDefLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      IamInstanceProfile: !Ref IamInstanceProfile
+      ImageId: !Ref AMIImageId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+  MozDefAutoScaleGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: 1
+      LaunchConfigurationName: !Ref MozDefLaunchConfiguration
+      MaxSize: 1
+      MinSize: 1
+      TargetGroupARNs: !GetAtt MozDefElasticLoadBalancingV2TargetGroup.LoadBalancerArns
+      VPCZoneIdentifier: !Ref AutoScaleGroupSubnetIds
+  MozDefLoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group of the MozDef ALB
+      SecurityGroupEgress:
+        - Description: Allow all egress traffic
+          IpProtocol: -1
+          CidrIp: "0.0.0.0/0"
+      SecurityGroupIngress:
+        - Description: Allow 443 inbound from everywhere
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+      VpcId: !Ref VpcId
+  MozDefElasticLoadBalancingV2LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      SecurityGroups:
+        - !Ref MozDefLoadBalancerSecurityGroup
+      Subnets: !Ref AutoScaleGroupSubnetIds
+      Tags:
+        - Key: application
+          Value: mozdef
