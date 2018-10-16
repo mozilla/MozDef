@@ -2,6 +2,7 @@ ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 IMAGE_NAME	:= mozdef-deployment
 S3_INFOSEC_URI	:= s3://mozdef.infosec.mozilla.org/cf
 S3_STACK_URI	:= https://s3-us-west-2.amazonaws.com/cf/nested-stack.yml
+PARENTDIR   := $(realpath ../)
 
 all:
 	@echo 'Available make targets:'
@@ -11,7 +12,7 @@ docker-build:
 	docker build -t $(IMAGE_NAME):latest .
 
 deploy-shell:
-	docker run -ti -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef $(IMAGE_NAME):latest /bin/bash
+	docker run -ti -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef -v $(PARENTDIR):/opt/gitrepo $(IMAGE_NAME):latest /bin/bash
 
 packer-build:
 	docker run -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef $(IMAGE_NAME):latest bash -c "cd packer && packer build packer.json"
