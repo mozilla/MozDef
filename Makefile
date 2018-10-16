@@ -69,7 +69,7 @@ hub:
 
 .PHONY: clean
 clean:
-	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
+	-docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
 # Shorthands
 .PHONY: rebuild
 rebuild: rm build
