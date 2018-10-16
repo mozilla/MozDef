@@ -12,16 +12,23 @@ Parameters:
   KeyName:
     Type: "AWS::EC2::KeyPair::KeyName"
     Description: "Name of an existing EC2 KeyPair to enable SSH access to the web server"
-    Default: "gene-keys"
+    Default: "infosec-pdx-workweek-2018"
   PublicSubnetIds:
     Type: "List<AWS::EC2::Subnet::Id>"
     Description: "A comma delimited list of public subnet IDs"
-    Default: "subnet-8931f7ee,subnet-de322aa8,subnet-2582cd7d"
+    Default: "subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6"
   AMIImageId:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
     Default: "ami-09c6e771"
 Resources:
+  MozDefSecurityGroups:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-security-group.yml
   MozDefIAMRoleAndInstanceProfile:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -39,6 +46,8 @@ Resources:
         IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
         AutoScaleGroupSubnetIds: !Join [ ",", !Ref PublicSubnetIds ]
         AMIImageId: !Ref AMIImageId
+        MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+        MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
       Tags:
         - Key: application
           Value: mozdef
