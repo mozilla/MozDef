@@ -12,7 +12,7 @@ Parameters:
   KeyName:
     Type: "AWS::EC2::KeyPair::KeyName"
     Description: "Name of an existing EC2 KeyPair to enable SSH access to the web server"
-    Default: "gene-keys"
+    Default: "infosec-pdx-workweek-2018"
   IamInstanceProfile:
     Type: "String"
     Description: "The ARN of the IAM Instance Profile"
