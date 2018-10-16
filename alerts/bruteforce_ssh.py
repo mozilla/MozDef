@@ -6,7 +6,7 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
 
 
 class AlertBruteforceSsh(AlertTask):

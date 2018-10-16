@@ -23,8 +23,6 @@ def utc_timezone():
 
 tzlocal.get_localzone = utc_timezone
 
-
-
 class TestToUTC():
 
     def result_is_datetime(self, result):
