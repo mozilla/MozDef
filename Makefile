@@ -58,7 +58,7 @@ stop: down
 down:
 	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) stop
 
-.PHONY: docker-push hub
+.PHONY: docker-push docker-get hub hub-get
 docker-push: hub
 hub:
 	docker login
@@ -66,6 +66,10 @@ hub:
 	$(foreach var,$(DKR_IMAGES),docker tag $(var):latest mozdef/$(var):$(GITHASH);)
 	@echo "Uploading images to docker..."
 	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
+
+docker-get: hub-get
+hub-get:
+	$(foreach var,$(DKR_IMAGES),docker pull mozdef/$(var):$(GITHASH);)
 
 .PHONY: clean
 clean:

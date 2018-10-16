@@ -2,32 +2,32 @@
 version: '2.2'
 services:
   nginx:
-    image: mozdef/mozdef_nginx:latest
+    image: mozdef/mozdef_nginx
   kibana:
-    image: mozdef/mozdef_kibana:latest
+    image: mozdef/mozdef_kibana
   mongodb:
-    image: mozdef/mozdef_mongodb:latest
+    image: mozdef/mozdef_mongodb
   elasticsearch:
-    image: mozdef/mozdef_elasticsearch:latest
+    image: mozdef/mozdef_elasticsearch
   rabbitmq:
-    image: mozdef/mozdef_rabbitmq:latest
+    image: mozdef/mozdef_rabbitmq
   base:
-    image: mozdef/mozdef_base:latest
+    image: mozdef/mozdef_base
   bootstrap:
-    image: mozdef/mozdef_bootstrap:latest
+    image: mozdef/mozdef_bootstrap
   alertplugins:
-    image: mozdef/mozdef_alertplugins:latest
+    image: mozdef/mozdef_alertplugins
   alerts:
-    image: mozdef/mozdef_alerts:latest
+    image: mozdef/mozdef_alerts
   cron:
-    image: mozdef/mozdef_cron:latest
+    image: mozdef/mozdef_cron
   loginput:
-    image: mozdef/mozdef_loginput:latest
+    image: mozdef/mozdef_loginput
   mq_eventtask:
-    image: mozdef/mozdef_mq_eventtask:latest
+    image: mozdef/mozdef_mq_eventtask
   meteor:
-    image: mozdef/mozdef_meteor:latest
+    image: mozdef/mozdef_meteor
   rest:
-    image: mozdef/mozdef_rest:latest
+    image: mozdef/mozdef_rest
   syslog:
-    image: mozdef/mozdef_syslog:latest
+    image: mozdef/mozdef_syslog
