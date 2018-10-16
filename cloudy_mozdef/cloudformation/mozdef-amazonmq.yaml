@@ -1,0 +1,54 @@
+  AWSTemplateFormatVersion: "2010-09-09"
+  Description: Deploy MozDef AmazonMQ instance.
+  Parameters:
+    MQUserParameter:
+      Type: String
+      Default: mozdef
+      Description: The username for the AmazonMQ user.
+    MQPasswordParameter:
+      Type: String
+      Default: mozdefaiufhkiwjjfdhhkfghh284776662551djhsdggf
+      Description: The password for the AmazonMQ user.
+    MQInstanceType:
+      Type: String
+      Default: mq.t2.micro
+      Description: The instance type for the AmazonMQ instance.
+    MQVpcId:
+      Type: "AWS::EC2::VPC::Id"
+      Description: "The VPC ID of the VPC within which the AmazonMQ instance will be provisioned."
+    MQSubnetIds:
+      Type: "List<AWS::EC2::Subnet::Id>"
+      Description: "Comma-delimited list of subnet IDs of the VPCs within which the AmazonMQ instance will be provisioned."
+    MozDefSecurityGroup:
+      Type: AWS::EC2::SecurityGroup::Id
+      Description: "The security group of the Mozdef endpoint that is accessing AmazonMQ"
+  Resources:
+    AmazonMQSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Limits security group ingress and egress traffic for the Amazon MQ instance
+        VpcId: !Ref 'MQVpcId'
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: '8162'
+            ToPort: '8162'
+            SourceSecurityGroupId: !Ref 'MozDefSecurityGroup'
+        Tags:
+          - Key: application
+            Value: mozdef
+    MozDefAmazonMQ:
+      Type: AWS::AmazonMQ::Broker
+      Properties:
+        AutoMinorVersionUpgrade: false
+        BrokerName: mozDefAmazonMQBroker
+        Users:
+          - Username: !Ref 'MQUserParameter'
+            Password: !Ref 'MQPasswordParameter'
+        DeploymentMode: ACTIVE_STANDBY_MULTI_AZ
+        EngineType: ACTIVEMQ
+        EngineVersion: 5.15.0
+        HostInstanceType: !Ref 'MQInstanceType'
+        PubliclyAccessible: false
+        SecurityGroups:
+          - !Ref 'AmazonMQSecurityGroup'
+        SubnetIds: !Join [ ",", [ !Select [ 0, !Ref 'MQSubnetIds' ], !Select [ 1, !Ref 'MQSubnetIds' ] ] ]
