@@ -17,7 +17,8 @@
     "pivottable": "^2.22.0",
     "pnotify": "^3.2.1",
     "three-full": "^11.3.2",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "validator": "^10.8.0"
   },
   "meteor": {
     "mainModule": {
