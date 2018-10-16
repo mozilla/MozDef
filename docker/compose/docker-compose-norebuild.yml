@@ -1,0 +1,33 @@
+---
+version: '2.2'
+services:
+  nginx:
+    image: mozdef/mozdef_nginx:latest
+  kibana:
+    image: mozdef/mozdef_kibana:latest
+  mongodb:
+    image: mozdef/mozdef_mongodb:latest
+  elasticsearch:
+    image: mozdef/mozdef_elasticsearch:latest
+  rabbitmq:
+    image: mozdef/mozdef_rabbitmq:latest
+  base:
+    image: mozdef/mozdef_base:latest
+  bootstrap:
+    image: mozdef/mozdef_bootstrap:latest
+  alertplugins:
+    image: mozdef/mozdef_alertplugins:latest
+  alerts:
+    image: mozdef/mozdef_alerts:latest
+  cron:
+    image: mozdef/mozdef_cron:latest
+  loginput:
+    image: mozdef/mozdef_loginput:latest
+  mq_eventtask:
+    image: mozdef/mozdef_mq_eventtask:latest
+  meteor:
+    image: mozdef/mozdef_meteor:latest
+  rest:
+    image: mozdef/mozdef_rest:latest
+  syslog:
+    image: mozdef/mozdef_syslog:latest
