@@ -80,3 +80,17 @@ Resources:
         - Key: application
           Value: mozdef
       TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-es.yml
+  MozDefMQ:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        MQUserParameter: mozdef
+        # MQPasswordParameter: we can leave this empty and it will autogenerate a password
+        MQInstanceType: mq.t2.micro
+        MQVpcId: !Ref VpcId
+        MQSubnetIds: !Join [ ",", !Ref PublicSubnetIds ]
+        MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-mq.yml
