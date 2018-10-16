@@ -4,25 +4,14 @@
 # Copyright (c) 2014 Mozilla Corporation
 #
 
-# usage:
-# make multiple-build - build new mozdef environment in multiple containers
-# make multiple-build-tests - build new mozdef environment for tests in multiple containers
-# make multiple-build-no-cache - build new mozdef environment in multiple containers from scratch
-# make multiple-run - run new mozdef environment in multiple containers
-# make multiple-run-tests - run new mozdef environment for tests in multiple containers
-# make multiple-stop - stop new mozdef environment in multiple containers
-# make multiple-stop-tests - stop new mozdef environment for tests in multiple containers
-# make multiple-rm - stop new mozdef environment in multiple containers and deattach volumes
-# make multiple-rm-tests - stop new mozdef tests environment in multiple containers and deattach volumes
-# make multiple-rebuild - build, stop and run new mozdef environment in multiple containers
-# make multiple-rebuild-new - build, stop/rm and run new mozdef environment in multiple containers
-# make multiple-rebuild-tests - build, stop/rm and run new mozdef environment for tests in multiple containers
-# make multiple-rebuild-tests-new - build, stop/rm and run new mozdef environment for tests in multiple containers
-
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
+		   mozdef_mq_eventtask mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
+		   mozdef_syslog mozdef_nginx
 NAME		:= mozdef
 VERSION		:= 0.1
 NO_CACHE	:= #--no-cache
+GITHASH		:= $(shell git rev-parse --short HEAD)
 
 .PHONY:all
 all:
@@ -60,10 +49,16 @@ stop: down
 down:
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
 
+.PHONY: docker-push hub
+docker-push: hub
+hub:
+	docker login
+	$(foreach var,$(DKR_IMAGES),docker tag $(var):latest mozdef/$(var):$(GITHASH);)
+	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
+
 .PHONY: clean
 clean:
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
-
 # Shorthands
 .PHONY: rebuild
 rebuild: rm build
