@@ -8,11 +8,11 @@ Copyright (c) 2014 Mozilla Corporation
 <!--edit incident form -->
 <template name="editincidentform">
 <style>
-    
+
     .daterangepicker td{
         color:black;
     }
- 
+
     .tabcontent {
         display:none;
     }
@@ -22,9 +22,9 @@ Copyright (c) 2014 Mozilla Corporation
     }
 
     textarea {
-        overflow: auto; 
+        overflow: auto;
         vertical-align: top; /* Improves readability, alignment */
-    }    
+    }
 
 </style>
 <div class="container">
@@ -59,7 +59,7 @@ Copyright (c) 2014 Mozilla Corporation
                         <input id="summary" name="summary" placeholder="Short description if Incident" class="summary form-control" required type="text" value="{{summary}}">
                     </div>
                 </div>
-    
+
                 <div class="form-group">
                     <label class="col-xs-2 control-label" for="description">Description:
                         <i class="fa fa-info-circle" data-toggle="tooltip" title="Enter a detailed description of the incident, citing the cause and what was affected."></i>
@@ -85,7 +85,7 @@ Copyright (c) 2014 Mozilla Corporation
                     </div>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="col-xs-2 control-label" for="dateClosed">Date Closed:</label>
                     <div class="col-xs-10">
@@ -94,7 +94,7 @@ Copyright (c) 2014 Mozilla Corporation
                         <input class="form-control dateClosed calendarfield form-control" name="dateClosed" id="dateClosed" type="text" placeholder="Your Local Time" value="{{uiDateFormat dateClosed}}">
                     </div>
                     </div>
-                </div>                
+                </div>
                 <!-- Phase -->
                 <div class="form-group">
                     <label class="col-xs-2 control-label" for="phase">Phase:</label>
@@ -112,17 +112,16 @@ Copyright (c) 2014 Mozilla Corporation
                 <div class="form-group">
                     <label class="col-xs-2 control-label" for="tags">Tags:
                         <i class="fa fa-info-circle" data-toggle="tooltip" title="Drag and Drop the veris tags from the upper right to the area below"></i>
-                    </label>                
+                    </label>
                     <div class="tags col-xs-10">
-                        <span class="form-control alert alert-info">drag here to add a tag
-                            <ul class="pull-left list-unstyled">
-                            {{#each tags}}
-                                <li class="list-unstyled pull-left">
-                                    <div class="form-control">{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
-                                </li>
-                            {{/each}}
-                            </ul>
-                        </span>
+                        <div class="form-control">drag here to add a tag</div>
+                        <ul class="pull-left list-unstyled">
+                        {{#each tags}}
+                            <li class="list-unstyled pull-left">
+                                <div class="form-control">{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
+                            </li>
+                        {{/each}}
+                        </ul>
                     </div>
                 </div>
                 <div class="form-group">
@@ -141,12 +140,12 @@ Copyright (c) 2014 Mozilla Corporation
                         <div class="input-prepend input-group input-append">
                             <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
                             <input class="form-control dateMitigated calendarfield form-control" name="dateMitigated" id="dateMitigated" type="text" placeholder="Date Mitigated (your local time)" value="{{uiDateFormat dateMitigated}}">
-                            <span class="input-group-addon" style="padding-right:10px">Mitigated</span> 
-                        </div>                            
+                            <span class="input-group-addon" style="padding-right:10px">Mitigated</span>
+                        </div>
                         <div class="input-prepend input-group input-append">
                             <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
                             <input class="form-control dateContained calendarfield form-control" name="dateContained" id="dateContained" type="text" placeholder="Date of Permananent Resolution (your local time)" value="{{uiDateFormat dateContained}}">
-                            <span class="input-group-addon" style="padding-right:4px">Contained</span> 
+                            <span class="input-group-addon" style="padding-right:4px">Contained</span>
                         </div>
                     </div>
                 </div>
@@ -157,7 +156,7 @@ Copyright (c) 2014 Mozilla Corporation
             </div>
         </div>
     </div>
-    
+
     <div id="referencestab" class="tabcontent">
         <div class="row col-xs-8">
             <form id="referencesform" class="form-horizontal col-xs-12 col-xs-offset-3" >
@@ -177,9 +176,9 @@ Copyright (c) 2014 Mozilla Corporation
                             <li>
                                 {{#if isURL . }}
                                     <div class="col-xs-12"><a href="{{.}}" class="brightURL" target="_blank">{{.}}</a><button type="button" class="referencedelete close btn btn-danger pull-left" aria-hidden="false">&times;</button></div>
-                                
+
                                 {{else}}
-                                    <div class="col-xs-12">{{.}}<button type="btn" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>    
+                                    <div class="col-xs-12">{{.}}<button type="btn" class="referencedelete close pull-left" aria-hidden="false">&times;</button></div>
                                 {{/if}}
                             </li>
                             {{/each}}
@@ -189,7 +188,7 @@ Copyright (c) 2014 Mozilla Corporation
             </form>
         </div>
     </div>
-    
+
     <div id="theoriestab" class="row tabcontent">
         <div class="row col-xs-8">
         <form id="theoriesform" class="form-horizontal col-xs-12 col-xs-offset-3" >
@@ -210,7 +209,7 @@ Copyright (c) 2014 Mozilla Corporation
                     <div class="col-xs-5">
                         <input id="theoryStatus" placeholder="Confirmed/Unconfirmed" class="form-control" type="text">
                     </div>
-                </div>                
+                </div>
                 <div class="form-group">
                     <div class="col-xs-2 col-xs-offset-2">
                         <button id="saveTheory" type="submit" class="btn btn-primary submit">Save</button>
@@ -290,7 +289,7 @@ Copyright (c) 2014 Mozilla Corporation
                 </div>
             </form>
         </div>
-    </div>    
+    </div>
 
     <div id="mitigationstab" class="row tabcontent">
         <div class="row col-xs-8">
@@ -357,7 +356,7 @@ Copyright (c) 2014 Mozilla Corporation
             </form>
         </div>
     </div>
-    
+
     <div id="lessonstab" class="row tabcontent">
         <div class="row col-xs-8">
             <form id="lessonsform" class="form-horizontal col-xs-12 col-xs-offset-3" >
@@ -366,7 +365,7 @@ Copyright (c) 2014 Mozilla Corporation
                     <div class="col-xs-9">
                         <input id="lessonSummary" class="form-control" type="text" value="" placeholder="Method/Technique that did or didn't work" required>
                     </div>
-                </div>              
+                </div>
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="lessonDescription">Description:</label>
                     <div class="col-xs-10">
@@ -415,7 +414,7 @@ Copyright (c) 2014 Mozilla Corporation
                     <div class="col-xs-9">
                         <input id="noteSummary" class="form-=control" type="text" value="" placeholder="Subject of info" required>
                     </div>
-                </div>              
+                </div>
                 <div class="form-group">
                     <label class="control-label col-xs-2" for="noteDescription">Description:</label>
                     <div class="col-xs-10">
