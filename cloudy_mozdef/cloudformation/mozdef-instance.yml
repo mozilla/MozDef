@@ -20,11 +20,17 @@ Parameters:
   AutoScaleGroupSubnetIds:
     Type: "List<AWS::EC2::Subnet::Id>"
     Description: "A comma delimited list of subnet IDs"
-    Default: "subnet-8931f7ee,subnet-de322aa8,subnet-2582cd7d"
+    Default: "subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6"
   AMIImageId:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
     Default: "ami-0e7bda6769c8b3854"
+  MozDefSecurityGroupId:
+    Type: "String"
+    Description: "The security group to apply to the EC2 instance"
+  MozDefLoadBalancerSecurityGroupId:
+    Type: "String"
+    Description: "The security group to apply to the EC2 instance"
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -38,10 +44,14 @@ Resources:
   MozDefLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
+      AssociatePublicIpAddress: true
       IamInstanceProfile: !Ref IamInstanceProfile
       ImageId: !Ref AMIImageId
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyName
+      SecurityGroups:
+        - !Ref MozDefSecurityGroupId
+      # UserData: xxx
   MozDefAutoScaleGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -49,28 +59,20 @@ Resources:
       LaunchConfigurationName: !Ref MozDefLaunchConfiguration
       MaxSize: 1
       MinSize: 1
+      Tags:
+        - Key: Name
+          Value: mozdef
+          PropagateAtLaunch: true
+        - Key: application
+          Value: mozdef
+          PropagateAtLaunch: true
       TargetGroupARNs: !GetAtt MozDefElasticLoadBalancingV2TargetGroup.LoadBalancerArns
       VPCZoneIdentifier: !Ref AutoScaleGroupSubnetIds
-  MozDefLoadBalancerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Security Group of the MozDef ALB
-      SecurityGroupEgress:
-        - Description: Allow all egress traffic
-          IpProtocol: -1
-          CidrIp: "0.0.0.0/0"
-      SecurityGroupIngress:
-        - Description: Allow 443 inbound from everywhere
-          IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: "0.0.0.0/0"
-      VpcId: !Ref VpcId
   MozDefElasticLoadBalancingV2LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       SecurityGroups:
-        - !Ref MozDefLoadBalancerSecurityGroup
+        - !Ref MozDefLoadBalancerSecurityGroupId
       Subnets: !Ref AutoScaleGroupSubnetIds
       Tags:
         - Key: application

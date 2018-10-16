@@ -22,7 +22,6 @@ RUN \
                     python \
                     python-devel \
                     python-pip && \
-  chown -R mozdef:mozdef /opt/mozdef/ && \
   pip install virtualenv && \
   mkdir /opt/mozdef/envs/mozdef && \
   mkdir /opt/mozdef/envs/mozdef/cron
@@ -34,16 +33,21 @@ COPY cron/update_geolite_db.py /opt/mozdef/envs/mozdef/cron/update_geolite_db.py
 COPY cron/update_geolite_db.conf /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
 COPY cron/update_geolite_db.sh /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
 
+RUN chown -R mozdef:mozdef /opt/mozdef/
 USER mozdef
 RUN \
   virtualenv /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
   pip install -r /opt/mozdef/envs/mozdef/requirements.txt
 
-COPY lib /opt/mozdef/envs/mozdef/lib
-
+# Local copy for dev
+COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
 USER root
-RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef
+RUN \
+  source /opt/mozdef/envs/python/bin/activate && \
+  cd /opt/mozdef/envs/mozdef/mozdef_util && \
+  pip install -e .
+RUN chown -R mozdef:mozdef /opt/mozdef/
 
 USER mozdef
 # We have to replace the python virtualenv path until

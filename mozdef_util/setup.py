@@ -28,10 +28,6 @@ requirements = [
     'tzlocal>=1.4',
 ]
 
-setup_requirements = [ ]
-
-test_requirements = [ ]
-
 setup(
     author="Mozilla Infosec",
     author_email='infosec@mozilla.com',
@@ -55,10 +51,10 @@ setup(
     include_package_data=True,
     keywords='mozdef_util',
     name='mozdef_util',
-    packages=find_packages(include=['mozdef_util']),
-    setup_requires=setup_requirements,
+    packages=find_packages(),
+    setup_requires=[],
     test_suite='tests',
-    tests_require=test_requirements,
+    tests_require=[],
     url='https://github.com/mozilla/MozDef/tree/master/lib',
     version='1.0.0',
     zip_safe=False,
