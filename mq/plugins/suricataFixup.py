@@ -5,9 +5,9 @@
 
 import netaddr
 import json
-from utilities.toUTC import toUTC
 from datetime import datetime
 from platform import node
+from mozdef_util.utilities.toUTC import toUTC
 
 
 class message(object):

@@ -5,10 +5,9 @@
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from utilities.key_exists import key_exists
-from utilities.toUTC import toUTC
-from utilities.dot_dict import DotDict
+from mozdef_util.utilities.key_exists import key_exists
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.dot_dict import DotDict
 
 class message(object):
     def __init__(self):

@@ -12,10 +12,9 @@ from kombu import Connection, Queue, Exchange
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
 from elasticsearch_client import ElasticsearchClient
 
-from utilities.dot_dict import DotDict
+from mozdef_util.utilities.dot_dict import DotDict
 
 
 # The following functions before the UnitTest class definition

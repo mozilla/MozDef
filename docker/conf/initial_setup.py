@@ -16,8 +16,7 @@ from elasticsearch.exceptions import ConnectionError
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
-from elasticsearch_client import ElasticsearchClient
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')

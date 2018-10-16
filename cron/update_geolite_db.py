@@ -13,9 +13,8 @@ import urllib2
 import tempfile
 import tarfile
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from geo_ip import GeoIP
-from utilities.logger import logger, initLogger
+from mozdef_util.geo_ip import GeoIP
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 def fetch_db_data(db_download_location):

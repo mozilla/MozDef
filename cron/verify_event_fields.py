@@ -9,10 +9,9 @@ import sys
 import os
 from configlib import getConfig, OptionParser
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from elasticsearch_client import ElasticsearchClient
-from query_models import SearchQuery, ExistsMatch, Aggregation, TermMatch
-from utilities.logger import logger, initLogger
+from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.query_models import SearchQuery, ExistsMatch, Aggregation, TermMatch
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 def verify_events(options):
