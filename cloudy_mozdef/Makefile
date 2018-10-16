@@ -41,7 +41,7 @@ test-nested-stack:
 # Cloud formation linter
 .PHONY: cflint
 cflint:
-	$(DOCKER_BASH_RUN) "yamllint -d \"{extends: relaxed, rules: {line-length: {max: 120}}}\" cloudformation/*.yml"
+	$(DOCKER_BASH_RUN) "cfn-lint cloudformation/*.yml"
 
 .PHONY: stack-status
 stack-status:

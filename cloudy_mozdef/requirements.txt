@@ -3,4 +3,4 @@ credstash
 faker
 awscli
 awsudo
-yamllint
+cfn-lint
