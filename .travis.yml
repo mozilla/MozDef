@@ -10,6 +10,9 @@ before_install:
   - set -e
 install:
   # Build containers
-  - make nobuild-tests
+  # Choose nobuild if you prefer pulling existing images
+  - make build-tests
+  #- make nobuild-tests
 script:
-  - make test-fast
+  - make test
+  #  - make test-fast

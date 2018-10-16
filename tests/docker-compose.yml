@@ -16,7 +16,6 @@ services:
     networks:
       - default
   base:
-    image: base:latest
   tester:
     depends_on:
       - base
