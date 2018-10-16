@@ -2,8 +2,5 @@ ansible
 credstash
 faker
 awscli
-<<<<<<< HEAD
 awsudo
-=======
 yamllint
->>>>>>> 7a4a0ccf9620c58eb05b04f8971839970b1667ae
