@@ -18,27 +18,11 @@ Resources:
   # Attach the instance profile here for cleanlieness.
   InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
-    DependsOn: WebRole
     Properties:
       Roles:
         -
           Ref: WebRole
-  # Add an SSM parameter for easy discovery.
-  WebArnParameter:
-    Type: "AWS::SSM::Parameter"
-    DependsOn: [WebRole]
-    Properties:
-      Description: 'MozDef Web Role'
-      Name: '/MozDef/instance_role_arn'
-      Type: String
-      Value: !GetAtt WebRole.Arn
 Outputs:
-  WebRoleArn:
-    Description: The arn of the delivery server role.
-    Value: !GetAtt WebRole.Arn
-  WebRoleName:
-    Description: The name of the delivery server role.
-    Value: !Ref WebRole
   InstanceProfileArn:
     Description: The arn of the instanceprofile.
     Value: !GetAtt InstanceProfile.Arn

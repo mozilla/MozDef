@@ -1,10 +1,28 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Deploy MozDef into AWS
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+    - Label:
+        default: 'VPC Settings'
+      Parameters:
+      - VpcId
+      - PublicSubnetIds
+    - Label:
+        default: 'EC2 Instance'
+      Parameters:
+      - InstanceType
+      - KeyName
+      - AMIImageId
 Parameters:
   VpcId:
     Type: "AWS::EC2::VPC::Id"
     Description: "The VPC ID of the VPC to deploy in"
     Default: "vpc-dc8eacb4"
+  PublicSubnetIds:
+    Type: "List<AWS::EC2::Subnet::Id>"
+    Description: "A comma delimited list of public subnet IDs"
+    Default: "subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6"
   InstanceType:
     Type: "String"
     Default: "m5.large"
@@ -13,14 +31,10 @@ Parameters:
     Type: "AWS::EC2::KeyPair::KeyName"
     Description: "Name of an existing EC2 KeyPair to enable SSH access to the web server"
     Default: "infosec-pdx-workweek-2018"
-  PublicSubnetIds:
-    Type: "List<AWS::EC2::Subnet::Id>"
-    Description: "A comma delimited list of public subnet IDs"
-    Default: "subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6"
   AMIImageId:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
-    Default: "ami-09c6e771"
+    Default: "ami-0e7bda6769c8b3854"
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
@@ -38,6 +52,7 @@ Resources:
       TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/base-iam.yml
   MozDefInstance:
     Type: AWS::CloudFormation::Stack
+    DependsOn: [MozDefES]  # The user_data provisioning needs to wait until the ES index creation process completes
     Properties:
       Parameters:
         VpcId: !Ref VpcId
@@ -52,3 +67,16 @@ Resources:
         - Key: application
           Value: mozdef
       TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-instance.yml
+  MozDefES:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        SubnetIds: !Join [ ",", !Ref PublicSubnetIds ]
+        BlockStoreSizeGB: 100
+        VpcId: !Ref VpcId
+        MozDefInstanceSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+        ESInstanceCount: 1
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-es.yml
