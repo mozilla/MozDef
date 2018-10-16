@@ -7,7 +7,7 @@
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
 		   mozdef_mq_eventtask mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
-		   mozdef_syslog mozdef_nginx
+		   mozdef_syslog mozdef_nginx mozdef_tester
 NAME		:= mozdef
 VERSION		:= 0.1
 NO_CACHE	:= #--no-cache
@@ -24,11 +24,13 @@ run: build
 
 # TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
 # The docker files are still in docker/compose/docker*test*
-.PHONY: test tests run-tests
-test: run-tests
-tests: run-tests
-run-tests: build-tests
-	docker-compose -f tests/docker-compose.yml -p $(NAME) up -d
+.PHONY: test tests run-tests run-fast-tests test-fast
+test: build-tests run-tests
+tests: build-tests run-tests
+test-fast: run-fast-tests
+run-fast-tests: nobuild-tests run-tests
+run-tests:
+	docker-compose -f tests/docker-compose-norebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
 	@echo "Waiting for the instance to come up..."
 	sleep 10
 	@echo "Running flake8.."
@@ -38,11 +40,18 @@ run-tests: build-tests
 
 .PHONY: build
 build:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
+	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
-.PHONY: build-tests
+.PHONY: nobuild
+nobuild:
+	docker-compose -f docker/compose/docker-compose-norebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
+
+.PHONY: build-tests nobuild-tests
 build-tests:
-	docker-compose -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build
+	docker-compose -f tests/docker-compose-rebuild.yml -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build
+
+nobuild-tests:
+	docker-compose -f tests/docker-compose-norebuild.yml -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
 .PHONY: stop down
 stop: down
@@ -53,7 +62,9 @@ down:
 docker-push: hub
 hub:
 	docker login
+	@echo "Tagging current docker images with git HEAD shorthash..."
 	$(foreach var,$(DKR_IMAGES),docker tag $(var):latest mozdef/$(var):$(GITHASH);)
+	@echo "Uploading images to docker..."
 	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
 
 .PHONY: clean

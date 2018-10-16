@@ -1,0 +1,19 @@
+---
+version: '3'
+services:
+  elasticsearch:
+    build:
+      context: ../
+      dockerfile: docker/compose/elasticsearch/Dockerfile
+  rabbitmq:
+    build:
+      context: ../
+      dockerfile: docker/compose/rabbitmq/Dockerfile
+  base:
+    build:
+      context: ../
+      dockerfile: ./docker/compose/mozdef_base/Dockerfile
+  tester:
+    build:
+      context: ../
+      dockerfile: ./docker/compose/tester/Dockerfile
