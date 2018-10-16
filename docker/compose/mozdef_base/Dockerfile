@@ -40,12 +40,14 @@ RUN \
   source /opt/mozdef/envs/python/bin/activate && \
   pip install -r /opt/mozdef/envs/mozdef/requirements.txt
 
-USER root
+# Local copy for dev
 COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
+USER root
 RUN \
-  chown -R mozdef:mozdef /opt/mozdef/envs/mozdef && \
+  source /opt/mozdef/envs/python/bin/activate && \
   cd /opt/mozdef/envs/mozdef/mozdef_util && \
   pip install -e .
+RUN chown -R mozdef:mozdef /opt/mozdef/
 
 USER mozdef
 # We have to replace the python virtualenv path until
