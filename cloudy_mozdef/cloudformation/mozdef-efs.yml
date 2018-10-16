@@ -1,0 +1,32 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Amazon Elastic File System
+Parameters:
+  VPCID0:
+    Type: AWS::EC2::VPC::Id
+    Description: VpcId of your existing Virtual Private Cloud (VPC)
+    ConstraintDescription: Must be the VPC Id of an existing Virtual Private Cloud.
+    Default: "vpc-dc8eacb4"
+  Subnet:
+    Description: Select existing subnets.
+    Type: List<AWS::EC2::Subnet::Id>
+    Default: "subnet-8931f7ee,subnet-de322aa8,subnet-2582cd7d"
+
+Resources:
+  MountTarget:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        !Ref ElasticFileSystem
+      SubnetID:
+        !Ref Subnet
+      SecurityGroups:
+        !Ref MozDefSecurityGroup
+  ElasticFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      Parameters:
+        Subnet:
+          !Join [",", !Ref Subnet ]
+        VpcId:
+          !Ref "VPCID0"

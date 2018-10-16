@@ -8,7 +8,7 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer"
   },
   "dependencies": {
-    "@babel/runtime": "7.0.0-beta.55",
+    "@babel/runtime": "^7.1.2",
     "bcrypt": "^3.0.1",
     "dc": "^2.1.10",
     "jquery": "^1.12.3",
@@ -17,7 +17,8 @@
     "pivottable": "^2.22.0",
     "pnotify": "^3.2.1",
     "three-full": "^11.3.2",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "validator": "^10.8.0"
   },
   "meteor": {
     "mainModule": {

@@ -1,33 +1,102 @@
+---
 AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   SubnetIds:
     Type: "List<AWS::EC2::Subnet::Id>"
     Description: "Comma-delimited list of subnet IDs within which the ElasticSearch instance will be provisioned."
+    Default: "subnet-8931f7ee"
   BlockStoreSizeGB:
     Type: Number
     Default: 100
     Description: "The size of the Elastic Block Store to have back ElasticSearch, in GigaBytes."
+  VpcId:
+    Type: "AWS::EC2::VPC::Id"
+    Description: "The VPC ID of the VPC to deploy in"
+    Default: "vpc-dc8eacb4"
+  MozDefInstanceSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup::Id"
+    Description: "The MozDef EC2 Instance security group that accesses ES"
+    Default: "sg-8f38dae0"
+  ESInstanceCount:
+    Type: Number
+    Default: 1
+    Description: "The number of ElasticSearch nodes in the cluster"
 Resources:
-   # Not currently supported by cloudformation.
+## Not currently supported by cloudformation.
 #  ESServiceLinkedRole:
 #    Type: "AWS::IAM::ServiceLinkedRole"
 #    Properties:
 #      AWSServiceName: "es.amazonaws.com"
 #      Description: "Role to enable Amazon ES to manage your cluster."
+  ElasticSearchMozDefWaitConditionHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+  ElasticSearchMozDefWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    DependsOn: "MozDefElasticSearch"
+    Properties:
+      Handle:
+        Ref: "ElasticSearchMozDefWaitConditionHandle"
+      Timeout: "1200"
+      Count: !Ref ESInstanceCount
   MozDefElasticSearch:
     Type: "AWS::Elasticsearch::Domain"
     Properties:
       VPCOptions:
-        SubnetIds: !Ref SubnetIds 
+        SubnetIds: !Ref SubnetIds
       EBSOptions:
         EBSEnabled: true
         VolumeType: "gp2"
         VolumeSize: !Ref BlockStoreSizeGB
       ElasticsearchVersion: "5.6"
+      ElasticsearchClusterConfig:
+        InstanceCount: !Ref ESInstanceCount
+      AccessPolicies:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              AWS: "*"
+            Action: "es:*"
       Tags:
         -
           Key: "application"
           Value: "mozdef"
+  MozDefElasticSearchSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "ES Security Group"
+      SecurityGroupEgress:
+        -
+          Description: "Allow all egress traffic"
+          IpProtocol: -1
+          CidrIp: "0.0.0.0/0"
+      SecurityGroupIngress:
+        -
+          Description: "Allow 443 inbound from the MozDef EC2 SG"
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref MozDefInstanceSecurityGroup
+      Tags:
+        -
+          Key: "application"
+          Value: "mozdef"
+      VpcId: !Ref VpcId
+  ElasticsearchDomainEndpointParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "MozDef ES Cluster Endpoint"
+      Name: "/MozDef/es_cluster_endpoint"
+      Type: String
+      Value: !GetAtt MozDefElasticSearch.DomainEndpoint
+  ElasticsearchKibanaURLParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: "MozDef ES Kibana URL"
+      Name: "/MozDef/es_kibana_url"
+      Type: String
+      Value: !Join [ '', [ 'https://', !GetAtt MozDefElasticSearch.DomainEndpoint, "/_plugin/kibana/" ] ]
 Outputs:
   ElasticsearchDomainArn:
     Description: "ARN of the provisioned ElasticSearch Cluster"
@@ -39,4 +108,13 @@ Outputs:
     Value: !GetAtt MozDefElasticSearch.DomainEndpoint
     Export:
       Name: "ElasticsearchDomainEndpoint"
-
+  ElasticsearchKibanaURL:
+    Description: "URL for the Kibana UI"
+    Value: !Join [ '', [ 'https://', !GetAtt MozDefElasticSearch.DomainEndpoint, "/_plugin/kibana/" ] ]
+    Export:
+      Name: "ElasticsearchKibanaURL"
+  ElasticsearchWaitHandle:
+    Description: "A wait handle that waits until the Elastic Search instances are up"
+    Value: !GetAtt ElasticSearchMozDefWaitCondition.Data
+    Export:
+      Name: "ElasticseachWaitHandle"

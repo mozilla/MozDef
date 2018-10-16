@@ -6,6 +6,7 @@ Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor'
 import { Template } from 'meteor/templating';
+import validator from 'validator';
 import '/imports/settings.js';
 import '/imports/helpers.js';
 import '/client/js/jquery.highlight.js';
