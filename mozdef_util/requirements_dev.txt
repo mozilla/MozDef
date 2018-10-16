@@ -7,5 +7,8 @@ tox==3.5.2
 coverage==4.5.1
 Sphinx==1.8.1
 twine==1.12.1
-
-
+elasticsearch==5.5.2
+elasticsearch-dsl==5.4.0
+geoip2==2.5.0
+pytz==2017.3
+tzlocal==1.4
