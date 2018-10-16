@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Deploy MozDef into AWS
+Parameters:
+  VpcId:
+    Type: "AWS::EC2::VPC::Id"
+    Description: "The VPC ID of the VPC to deploy in"
+    Default: "vpc-dc8eacb4"
+  InstanceType:
+    Type: "String"
+    Default: "m5.large"
+    Description: "EC2 instance type, e.g. m1.small, m1.large, etc."
+  KeyName:
+    Type: "AWS::EC2::KeyPair::KeyName"
+    Description: "Name of an existing EC2 KeyPair to enable SSH access to the web server"
+    Default: "gene-keys"
+  PublicSubnetIds:
+    Type: "List<AWS::EC2::Subnet::Id>"
+    Description: "A comma delimited list of public subnet IDs"
+    Default: "subnet-8931f7ee,subnet-de322aa8,subnet-2582cd7d"
+  AMIImageId:
+    Type: "String"
+    Description: "The AMI Image ID to use of the EC2 instance"
+    Default: "ami-09c6e771"
+Resources:
+  MozDefIAMRoleAndInstanceProfile:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/base-iam.yml
+  MozDefInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !Ref VpcId
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyName
+        IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
+        AutoScaleGroupSubnetIds: !Join [ ",", !Ref PublicSubnetIds ]
+        AMIImageId: !Ref AMIImageId
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-instance.yml

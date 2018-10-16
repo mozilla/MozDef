@@ -19,12 +19,12 @@ Parameters:
     Default: "arn:aws:iam::656532927350:instance-profile/netsecdevbastion-BastionInstanceProfile-12CM3TOELV20R"
   AutoScaleGroupSubnetIds:
     Type: "List<AWS::EC2::Subnet::Id>"
-    Description: "A comma delimited list of private subnet IDs"
+    Description: "A comma delimited list of subnet IDs"
     Default: "subnet-8931f7ee,subnet-de322aa8,subnet-2582cd7d"
   AMIImageId:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
-    Default: "ami-09c6e771"
+    Default: "ami-0e7bda6769c8b3854"
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
