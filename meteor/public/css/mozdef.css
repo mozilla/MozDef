@@ -303,6 +303,10 @@ circle:hover{
     stroke: black;
 }
 
+.vtagholders {
+    padding-left: 1px;
+    padding-right: 0px;
+}
 
 #header:after {
     content: "";
