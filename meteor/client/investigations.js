@@ -90,25 +90,13 @@ if (Meteor.isClient) {
             });
         },
 
-        "blur .description, blur .summary, blur .contact": function(e, t) {
-            e.stopImmediatePropagation();
+        'input #editinvestigationform': _.debounce(function(e,t){
             saveInvestigation(e,t);
-        },
+            } , 500),
 
-        "keyup": function(e, t) {
-           // Save user input after 3 seconds of not typing
-           investigationSaveTimer.run(e, t);
-        },
-
-        "blur .calendarfield": function(e, t) {
-           // Save user input after 3 seconds of not typing
-           investigationSaveTimer.run(e, t);
-        },
-
-        "change #phase": function(e, t) {
-            // Save user input after 3 seconds of not typing
-            investigationSaveTimer.run(e, t);
-         },
+        "blur .calendarfield": _.debounce(function(e,t){
+            saveInvestigation(e,t);
+            } , 500),
 
         "click #saveInvestigation": function(e, template) {
             saveInvestigation(e,template);
@@ -456,7 +444,7 @@ if (Meteor.isClient) {
             });
             e.preventDefault();
         },
-//
+
         "click #saveEvidence": function(e,template){
             if (! evidence){
                 evidence=models.evidence();
@@ -505,7 +493,7 @@ if (Meteor.isClient) {
             });
             e.preventDefault();
         },
-//
+
         "readystatechange":function(e){
             if (typeof console !== 'undefined') {
               console.log('readystatechange')
@@ -641,10 +629,8 @@ if (Meteor.isClient) {
         }); //end deps.autorun
 
         saveInvestigation = function(e, template) {
-            // Stop the timer if it was running
-            investigationSaveTimer.clear();
 
-          // tags are saved in real realtime (without timer)
+          // tags are saved in real realtime
           // other tabs are saved as they are changed
           // this is only for the main tab
 
@@ -678,34 +664,6 @@ if (Meteor.isClient) {
                 },3000);
         }
 
-
-
-        investigationSaveTimer = function() {
-          var timer;
-
-          this.set = function(saveFormCB) {
-            timer = Meteor.setTimeout(function() {
-              saveFormCB();
-            }, 3000);
-          };
-
-          this.clear = function() {
-            if ( timer != undefined ){
-                Meteor.clearTimeout(timer);
-            }
-          };
-
-          this.run = function(e, t) {
-            // Save user input after X seconds of not typing
-            this.clear();
-
-            this.set(function() {
-              saveInvestigation(e, t);
-            });
-          };
-
-          return this;
-        }();
     };
 
     Template.editinvestigationform.destroyed = function () {

@@ -106,23 +106,13 @@ if (Meteor.isClient) {
             });
         },
 
-        "keypress .description, keypress .summary, keypress .contact": function (e,t){
-            e.stopImmediatePropagation();
-            incidentSaveTimer.run(e, t);
-        },
-
-        "blur .description, blur .summary, blur .contact": function(e, t) {
-            e.stopImmediatePropagation();
+        'input #editincidentform': _.debounce(function(e,t){
             saveIncident(e,t);
-        },
+            } , 500),
 
-        "blur .calendarfield": function(e, t) {
+        "blur .calendarfield": _.debounce(function(e,t){
             saveIncident(e,t);
-        },
-
-        "change #phase": function(e, t) {
-            saveIncident(e,t);
-         },
+            } , 500),
 
         "click #saveIncident": function(e, template) {
             saveIncident(e,template);
@@ -606,32 +596,6 @@ if (Meteor.isClient) {
 
         };
 
-        incidentSaveTimer = function() {
-          var timer;
-
-          this.set = function(saveFormCB) {
-            timer = Meteor.setTimeout(function() {
-              saveFormCB();
-            }, 3000);
-          };
-
-          this.clear = function() {
-            if ( timer != undefined ){
-                Meteor.clearTimeout(timer);
-            }
-          };
-
-          this.run = function(e, t) {
-            // Save user input after X seconds of not typing
-            this.clear();
-
-            this.set(function() {
-              saveIncident(e, t);
-            });
-          };
-
-          return this;
-        }();
     };
 
     Template.editincidentform.destroyed = function () {
