@@ -51,4 +51,6 @@
         PubliclyAccessible: false
         SecurityGroups:
           - !Ref 'AmazonMQSecurityGroup'
-        SubnetIds: !Join [ ",", [ !Select [ 0, !Ref 'MQSubnetIds' ], !Select [ 1, !Ref 'MQSubnetIds' ] ] ]
+        SubnetIds:
+          - !Select [ 0, !Ref 'MQSubnetIds' ]
+          - !Select [ 1, !Ref 'MQSubnetIds' ]
