@@ -4,8 +4,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from http_test_suite import HTTPTestSuite
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from utilities.dot_dict import DotDict
+from mozdef_util.utilities.dot_dict import DotDict
 
 import mock
 from configlib import OptionParser

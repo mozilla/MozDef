@@ -1,8 +1,7 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from event import Event
-from utilities.toUTC import toUTC
+from mozdef_util.event import Event
+from mozdef_util.utilities.toUTC import toUTC
 import socket
 
 
