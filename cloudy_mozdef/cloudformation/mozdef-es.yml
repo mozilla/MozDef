@@ -37,7 +37,6 @@ Resources:
       Handle:
         Ref: "ElasticSearchMozDefWaitConditionHandle"
       Timeout: "1200"
-      Count: !Ref ESInstanceCount
   MozDefElasticSearch:
     Type: "AWS::Elasticsearch::Domain"
     Properties:
