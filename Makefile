@@ -25,12 +25,20 @@ run: build
 # TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
 # The docker files are still in docker/compose/docker*test*
 .PHONY: test tests run-tests run-fast-tests test-fast
-test: build-tests run-tests
-tests: build-tests run-tests
+test: run-tests
+tests: run-tests
 test-fast: run-fast-tests
-run-fast-tests: nobuild-tests run-tests
-run-tests:
+run-fast-tests: nobuild-tests
 	docker-compose -f tests/docker-compose-norebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
+	@echo "Waiting for the instance to come up..."
+	sleep 10
+	@echo "Running flake8.."
+	docker run -it mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
+	@echo "Running py.test..."
+	docker run -it --network=mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
+
+run-tests: build-tests
+	docker-compose -f tests/docker-compose-rebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
 	@echo "Waiting for the instance to come up..."
 	sleep 10
 	@echo "Running flake8.."
