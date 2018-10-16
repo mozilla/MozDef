@@ -517,6 +517,19 @@ if (Meteor.isClient) {
             $('[data-toggle="tooltip"]').tooltip({
                 'placement': 'top'
             });
+        },
+        "click .makeincident": function(event, template) {
+            event.preventDefault();
+            // make an incident from this investigation
+            newIncident=investigations.findOne({_id:Session.get('investigationID')});
+            delete newIncident._id;
+            newid=incidents.insert(newIncident);
+            // add a link to this in the incident references
+            incidents.update(newid, {
+                 $addToSet: {references:template.firstNode.baseURI}
+            });
+            //reroute to full blown edit form after this minimal input is complete
+            Router.go('/incident/' + newid + '/edit');
         }
     });
 

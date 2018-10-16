@@ -1,0 +1,71 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  SubnetIds:
+    Type: "List<AWS::EC2::Subnet::Id>"
+    Description: "Comma-delimited list of subnet IDs within which the ElasticSearch instance will be provisioned."
+  BlockStoreSizeGB:
+    Type: Number
+    Default: 100
+    Description: "The size of the Elastic Block Store to have back ElasticSearch, in GigaBytes."
+Resources:
+## Not currently supported by cloudformation.
+#  ESServiceLinkedRole:
+#    Type: "AWS::IAM::ServiceLinkedRole"
+#    Properties:
+#      AWSServiceName: "es.amazonaws.com"
+#      Description: "Role to enable Amazon ES to manage your cluster."
+  MozDefElasticSearch:
+    Type: "AWS::Elasticsearch::Domain"
+    Properties:
+      VPCOptions:
+        SubnetIds: !Ref SubnetIds
+      EBSOptions:
+        EBSEnabled: true
+        VolumeType: "gp2"
+        VolumeSize: !Ref BlockStoreSizeGB
+      ElasticsearchVersion: "5.6"
+      AccessPolicies:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              AWS: "*"
+            Action: "es:*"
+      Tags:
+        -
+          Key: "application"
+          Value: "mozdef"
+  ElasticsearchDomainEndpointParameter:
+    Type: "AWS::SSM::Parameter"
+    DependsOn: [MozDefElasticSearch]
+    Properties:
+      Description: "MozDef ES Cluster Endpoint"
+      Name: "/MozDef/es_cluster_endpoint"
+      Type: String
+      Value: !GetAtt MozDefElasticSearch.DomainEndpoint
+  ElasticsearchKibanaURLParameter:
+    Type: "AWS::SSM::Parameter"
+    DependsOn: [MozDefElasticSearch]
+    Properties:
+      Description: "MozDef ES Kibana URL"
+      Name: "/MozDef/es_kibana_url"
+      Type: String
+      Value: !Join [ '', [ 'https://', !GetAtt MozDefElasticSearch.DomainEndpoint, "/_plugin/kibana/" ] ]
+Outputs:
+  ElasticsearchDomainArn:
+    Description: "ARN of the provisioned ElasticSearch Cluster"
+    Value: !GetAtt MozDefElasticSearch.DomainArn
+    Export:
+      Name: "ElasticsearchDomainArn"
+  ElasticsearchDomainEndpoint:
+    Description: "Endpoint of the provisioned ElasticSearch Cluster"
+    Value: !GetAtt MozDefElasticSearch.DomainEndpoint
+    Export:
+      Name: "ElasticsearchDomainEndpoint"
+  ElasticsearchKibanaURL:
+    Description: "URL for the Kibana UI"
+    Value: !Join [ '', [ 'https://', !GetAtt MozDefElasticSearch.DomainEndpoint, "/_plugin/kibana/" ] ]
+    Export:
+      Name: "ElasticsearchKibanaURL"

@@ -6,7 +6,7 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 from datetime import datetime
 from datetime import timedelta
