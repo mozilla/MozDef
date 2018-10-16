@@ -37,6 +37,22 @@ Resources:
         -
           Key: "application"
           Value: "mozdef"
+  ElasticsearchDomainEndpointParameter:
+    Type: "AWS::SSM::Parameter"
+    DependsOn: [MozDefElasticSearch]
+    Properties:
+      Description: "MozDef ES Cluster Endpoint"
+      Name: "/MozDef/es_cluster_endpoint"
+      Type: String
+      Value: !GetAtt MozDefElasticSearch.DomainEndpoint
+  ElasticsearchKibanaURLParameter:
+    Type: "AWS::SSM::Parameter"
+    DependsOn: [MozDefElasticSearch]
+    Properties:
+      Description: "MozDef ES Kibana URL"
+      Name: "/MozDef/es_kibana_url"
+      Type: String
+      Value: !Join [ '', [ 'https://', !GetAtt MozDefElasticSearch.DomainEndpoint, "/_plugin/kibana/" ] ]
 Outputs:
   ElasticsearchDomainArn:
     Description: "ARN of the provisioned ElasticSearch Cluster"
@@ -48,3 +64,8 @@ Outputs:
     Value: !GetAtt MozDefElasticSearch.DomainEndpoint
     Export:
       Name: "ElasticsearchDomainEndpoint"
+  ElasticsearchKibanaURL:
+    Description: "URL for the Kibana UI"
+    Value: !Join [ '', [ 'https://', !GetAtt MozDefElasticSearch.DomainEndpoint, "/_plugin/kibana/" ] ]
+    Export:
+      Name: "ElasticsearchKibanaURL"
