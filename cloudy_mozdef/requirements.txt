@@ -2,4 +2,5 @@ ansible
 credstash
 faker
 awscli
+awsudo
 yamllint

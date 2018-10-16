@@ -1,4 +1,5 @@
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+PARENTDIR       := $(realpath ../)
 IMAGE_NAME	:= mozdef-deployment
 S3_INFOSEC_URI	:= s3://mozdef.infosec.mozilla.org/cf
 S3_STACK_URI	:= https://s3-us-west-2.amazonaws.com/cf/nested-stack.yml
@@ -14,8 +15,8 @@ docker-build:
 	docker build -t $(IMAGE_NAME):latest .
 
 .PHONY: docker-shell
-docker-shell:
-	docker run -ti -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef $(IMAGE_NAME):latest /bin/bash
+deploy-shell:
+	docker run -ti -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef -v $(PARENTDIR):/opt/gitrepo $(IMAGE_NAME):latest /bin/bash
 
 # Note: This requires AWS access
 .PHONY: packer-build
