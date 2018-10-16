@@ -56,7 +56,7 @@ nobuild-tests:
 .PHONY: stop down
 stop: down
 down:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
+	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) stop
 
 .PHONY: docker-push hub
 docker-push: hub
