@@ -16,7 +16,7 @@ services:
     networks:
       - default
   base:
-    image: base:latest
+    image: mozdef_base:latest
   tester:
     depends_on:
       - base
