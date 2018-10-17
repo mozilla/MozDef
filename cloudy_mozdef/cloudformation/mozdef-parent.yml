@@ -79,6 +79,9 @@ Resources:
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
         MozDefACMCertArn: !Ref ACMCertArn
+        OIDCClientId: !Ref OIDCClientId
+        OIDCClientSecret: !Ref OIDCClientSecret
+        IDPurl: !Ref IDPurl
       Tags:
         - Key: application
           Value: mozdef
