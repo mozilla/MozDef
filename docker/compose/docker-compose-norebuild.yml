@@ -31,3 +31,5 @@ services:
     image: mozdef/mozdef_rest
   syslog:
     image: mozdef/mozdef_syslog
+  tester:
+    image: mozdef/mozdef-tester
