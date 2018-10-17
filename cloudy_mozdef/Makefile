@@ -20,7 +20,7 @@ deploy-shell: ## Spawn a shell for hacking into the docker image
 
 # Note: This requires AWS access
 .PHONY: packer-build
-packer-build: ## Build the base AMI with packer
+packer-build: docker-build ## Build the base AMI with packer
 	$(DOCKER_BASH_RUN) "cd packer && packer build packer.json"
 
 .PHONY: deploy-nested-cloudformation

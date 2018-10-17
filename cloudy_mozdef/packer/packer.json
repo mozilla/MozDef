@@ -23,9 +23,13 @@
         "sudo yum makecache fast",
         "sudo yum install -y glibc-devel gcc libstdc++ libffi-devel zlib-devel make ",
         "sudo yum install -y mysql-devel python python-devel python-pip",
+        "sudo yum install -y git",
+        "sudo yum install -y docker",
         "sudo pip install virtualenv ",
-        "sudo yum install docker -y",
-        "sudo systemctl enable docker"
+        "sudo systemctl enable docker",
+        "sudo mkdir -p /opt/mozdef/",
+        "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
+        "cd /opt/mozdef && sudo git checkout origin/infosec_workweek"
     ]}
  ]
 }
