@@ -15,6 +15,10 @@ Metadata:
       - KeyName
       - AMIImageId
 Parameters:
+  S3TemplateLocation:
+    Type: String
+    Description: "The URL to the S3 bucket used to fetch the nested stack templates"
+    Default: "https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/"
   VpcId:
     Type: "AWS::EC2::VPC::Id"
     Description: "The VPC ID of the VPC to deploy in"
@@ -57,14 +61,14 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-security-group.yml
+      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-security-group.yml" ] ]
   MozDefIAMRoleAndInstanceProfile:
     Type: AWS::CloudFormation::Stack
     Properties:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/base-iam.yml
+      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "base-iam.yml" ] ]
   MozDefInstance:
     Type: AWS::CloudFormation::Stack
     DependsOn: [MozDefES]  # The user_data provisioning needs to wait until the ES index creation process completes
@@ -90,7 +94,7 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-instance.yml
+      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-instance.yml" ] ]
   MozDefES:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -103,7 +107,7 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-es.yml
+      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-es.yml" ] ]
   MozDefMQ:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -117,7 +121,7 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-mq.yml
+      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-mq.yml" ] ]
   MozDefEFS:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -128,4 +132,4 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-efs.yml
+      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-efs.yml" ] ]
