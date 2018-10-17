@@ -114,4 +114,3 @@ class TestSSHKey(AlertTestSuite):
             expected_alert=specific_alert
         )
     )
-

@@ -192,12 +192,12 @@ def main():
 
 
 def initConfig():
-    options.output=getConfig('output','stdout',options.configfile)                              #output our log to stdout or syslog
-    options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
-    options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
-    options.url = getConfig('url', 'http://localhost:8080/events', options.configfile)                  #mozdef event input url to post to
+    options.output=getConfig('output','stdout',options.configfile)  # output our log to stdout or syslog
+    options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)  # syslog hostname
+    options.syslogport=getConfig('syslogport',514,options.configfile)  # syslog port
+    options.url = getConfig('url', 'http://localhost:8080/events', options.configfile)  # mozdef event input url to post to
     options.state_file_name = getConfig('state_file_name','{0}.state'.format(sys.argv[0]),options.configfile)
-    options.recordlimit = getConfig('recordlimit', 1000, options.configfile)                    #max number of records to request
+    options.recordlimit = getConfig('recordlimit', 1000, options.configfile)  # max number of records to request
     #
     # See
     # https://developers.google.com/admin-sdk/reports/v1/guides/delegation
@@ -213,7 +213,7 @@ def initConfig():
 
 if __name__ == '__main__':
     parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
+    parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
     main()

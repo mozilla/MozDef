@@ -315,7 +315,7 @@ def createIncident():
     except KeyError:
         response.status = 500
         response.body = json.dumps(dict(status='failed',
-                                        error='Missing required keys'\
+                                        error='Missing required keys'
                                               '(summary, phase, creator)'))
         return response
 
@@ -343,21 +343,20 @@ def createIncident():
     incident['dateMitigated'] = validateDate(body.get('dateMitigated'))
     incident['dateContained'] = validateDate(body.get('dateContained'))
 
-    dates = [ incident['dateOpened'],
+    dates = [incident['dateOpened'],
               incident['dateClosed'],
               incident['dateReported'],
               incident['dateVerified'],
               incident['dateMitigated'],
-              incident['dateContained'] ]
+              incident['dateContained']]
 
     # Validating all the dates for the format
     if False in dates:
         response.status = 500
         response.body = json.dumps(dict(status='failed',
-                                        error='Wrong format of date. Please '\
+                                        error='Wrong format of date. Please '
                                               'use yyyy-mm-dd hh:mm am/pm'))
         return response
-
 
     incident['tags'] = body.get('tags')
 
@@ -592,13 +591,13 @@ def verisSummary(verisRegex=None):
         iveris=incidents.aggregate([
 
                                    {"$match":{"tags":{"$exists":True}}},
-                                   {"$unwind" : "$tags" },
-                                   {"$match":{"tags":{"$regex":''}}}, #regex for tag querying
-                                   { "$project" : { "dateOpened" : 1 ,
-                                                   "tags" : 1 ,
+                                   {"$unwind": "$tags"},
+                                   {"$match":{"tags":{"$regex":''}}},  # regex for tag querying
+                                   {"$project": {"dateOpened": 1,
+                                                   "tags": 1,
                                                    "phase": 1,
                                                    "_id": 0
-                                                   } }
+                                                   }}
                                    ])
         if iveris:
             return json.dumps(list(iveris), default=json_util.default)

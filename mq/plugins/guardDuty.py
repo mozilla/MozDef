@@ -57,7 +57,6 @@ class message(object):
         if not message['source'] == 'guardduty':
             return (message, metadata)
 
-
         # reformat the date fields to iosformat
         for date_key in self.date_keys:
             if key_exists(date_key, message):

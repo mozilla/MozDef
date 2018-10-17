@@ -38,4 +38,3 @@ class PromiscKernel(AlertTask):
         summary = 'Promiscuous mode enabled on {1} [{0}]'.format(aggreg['count'], aggreg['value'])
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-

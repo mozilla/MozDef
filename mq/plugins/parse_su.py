@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 
 
 class message(object):
-    
+
     def __init__(self):
         '''
         takes an incoming sshd message
@@ -20,11 +20,10 @@ class message(object):
         self.registration = ['sshd']
         self.priority = 5
 
-
     def onMessage(self, message, metadata):
 
         self.session_regexp = re.compile('^pam_unix\(su(?:-l)?\:session\)\: session (?P<status>\w+) for user (?P<username>\w+)(?: (?:by (?:(?P<originuser>\w+))?\(uid\=(?P<uid>[0-9]+)\)?)?)?$')
- 
+
         if 'details' in message:
             if 'program' in message['details']:
                 if message['details']['program'] == 'su':
@@ -36,5 +35,5 @@ class message(object):
                             message['details']['status'] = session_search.group('status')
                             message['details']['uid'] = session_search.group('uid')
                             message['details']['username'] = session_search.group('username')
-                            
+
         return (message, metadata)

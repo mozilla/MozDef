@@ -35,4 +35,3 @@ def dict2List(inObj):
                 yield v
     else:
         yield ''
-

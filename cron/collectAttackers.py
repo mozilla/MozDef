@@ -137,12 +137,12 @@ def searchMongoAlerts(mozdefdb):
     # to find common attackers.
     ipv4TopHits = alerts.aggregate([
         {"$sort": {"utcepoch":-1}}, # reverse sort the current alerts
-        {"$limit": 100}, #most recent 100
+        {"$limit": 100},  # most recent 100
         {"$match": {"events.documentsource.details.sourceipaddress":{"$exists": True}}}, # must have an ip address
         {"$match": {"attackerid":{"$exists": False}}}, # must not be already related to an attacker
-        {"$unwind":"$events"}, #make each event into it's own doc
+        {"$unwind":"$events"},  # make each event into it's own doc
         {"$project":{"_id":0,
-                     "sourceip":"$events.documentsource.details.sourceipaddress"}}, #emit the source ip only
+                     "sourceip":"$events.documentsource.details.sourceipaddress"}},  # emit the source ip only
         {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}}, # count by ip
         {"$match":{"hitcount":{"$gt":5}}}, # limit to those with X observances
         {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort
@@ -347,7 +347,7 @@ def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
       #"continent": "EU"
     #logger.debug(eventDictionary)
     if 'details' in eventDictionary.keys():
-        if  'sourceipgeolocation' in eventDictionary['details']:
+        if 'sourceipgeolocation' in eventDictionary['details']:
             attackers=mozdefdb['attackers']
             attacker = attackers.find_one({'_id': attackerID})
             if attacker is not None:

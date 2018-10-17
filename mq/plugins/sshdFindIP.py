@@ -30,10 +30,10 @@ class message(object):
         # get events that may include an unparsed IP in the summary
         self.registration = ['sshd', 'fail2ban']
         self.priority = 5
-        
+
     def onMessage(self, message, metadata):
         # if we don't have a source IP address
-        # look for words that are IP addresses, 
+        # look for words that are IP addresses,
         # move to details.sourceipaddress
         doSearch = False
         detailsExists = True
@@ -45,7 +45,7 @@ class message(object):
             else:
                 doSearch = True
                 detailsExists = False
-            
+
             if doSearch:
                 for word in message['summary'].strip().split():
                     # strip any surrounding quotes, commas, etc.

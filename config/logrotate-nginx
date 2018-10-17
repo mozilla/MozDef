@@ -5,7 +5,6 @@
     missingok
     rotate 4
     compress
-    delaycompress
     notifempty
     create 644 mozdef mozdef
     sharedscripts

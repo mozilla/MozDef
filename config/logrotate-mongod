@@ -6,7 +6,6 @@
  missingok
  notifempty
  compress
- delaycompress
  sharedscripts
  postrotate
   mv /var/log/mozdef/mongo/*.gz /var/logarchive/mozdef/

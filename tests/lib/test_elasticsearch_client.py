@@ -5,20 +5,21 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
+import time
+import json
+
+import pytest
+from elasticsearch.exceptions import ConnectionTimeout
+
 import os
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
+from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
-
-import time
-import json
-
-from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
-import pytest
 
 
 class ElasticsearchClientTest(UnitTestSuite):

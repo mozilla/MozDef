@@ -38,4 +38,3 @@ class AlertSSLBlacklistHit(AlertTask):
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, [event], severity)
-

@@ -112,7 +112,6 @@ def initConfig():
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
@@ -129,7 +128,6 @@ def initConfig():
                                          options.configfile)
     # configure the index to save events to
     options.index = getConfig('index', 'mozdefstate', options.configfile)
-
 
 
 if __name__ == '__main__':

@@ -21,7 +21,7 @@ class TraceAudit(AlertTask):
         ])
 
         for host in self.config.hostfilter.split():
-            search_query.add_must_not(PhraseMatch('hostname', host ))
+            search_query.add_must_not(PhraseMatch('hostname', host))
 
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.originaluser', samplesLimit=10)

@@ -25,7 +25,6 @@ class message(object):
             self.mozdefhostname = 'failed to fetch mozdefhostname'
             pass
 
-
     def onMessage(self, message, metadata):
 
         # make sure I really wanted to see this message
@@ -36,7 +35,6 @@ class message(object):
             return message, metadata
         if message['category'] != 'suricata':
             return message, metadata
-
 
         # set the doc type to nsm
         # to avoid data type conflicts with other doc types
@@ -70,7 +68,6 @@ class message(object):
             newmessage[u'event_type'] = message['event_type']
         eventtype = newmessage['event_type']
 
-
         # add mandatory fields
         if 'flow' in newmessage['details']:
             if 'start' in newmessage['details']['flow']:
@@ -85,7 +82,6 @@ class message(object):
         newmessage[u'eventsource'] = u'nsm'
         newmessage[u'severity'] = u'INFO'
         newmessage[u'mozdefhostname'] = self.mozdefhostname
-
 
         if 'details' in newmessage:
             newmessage[u'details'][u'sourceipaddress'] = "0.0.0.0"
@@ -115,7 +111,6 @@ class message(object):
             if 'SOURCE' in newmessage['details']:
                 del(newmessage['details']['SOURCE'])
 
-
             if logtype == 'eve-log':
                 if eventtype == 'alert':
                     # Truncate packet, payload and payload_printable to reasonable sizes
@@ -133,7 +128,7 @@ class message(object):
                     if 'flow' in newmessage[u'details']:
                         if 'bytes_toserver' in newmessage[u'details'][u'flow']:
                             newmessage[u'details'][u'originipbytes'] = newmessage['details']['flow']['bytes_toserver']
-                            del(newmessage['details']['flow']['bytes_toserver'])                            
+                            del(newmessage['details']['flow']['bytes_toserver'])
                         if 'bytes_toclient' in newmessage[u'details'][u'flow']:
                             newmessage[u'details'][u'responseipbytes'] = newmessage['details']['flow']['bytes_toclient']
                             del(newmessage['details']['flow']['bytes_toclient'])
@@ -188,6 +183,5 @@ class message(object):
                         u'{destinationport}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
-
 
         return (newmessage, metadata)
