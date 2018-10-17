@@ -1,7 +1,7 @@
 import os
 import sys
-from plugin_set import PluginSet
 
+from mozdef_util.plugin_set import PluginSet
 from mozdef_util.utilities.logger import logger
 
 
