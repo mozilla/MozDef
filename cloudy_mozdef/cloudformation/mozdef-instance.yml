@@ -82,11 +82,11 @@ Resources:
 
           write_files:
           - content: |
-              ES_URL=${ESURL}
-              KIBANA_URL=${KibanaURL}
-              AMAZON_MQ_URL=${AmazonMQURL}
-              AMAZON_MQ_USERNAME=${AmazonMQUsername}
-              AMAZON_MQ_PASSWORD=${AmazonMQPassword}
+              OPTIONS_ES_URL=${ESURL}
+              OPTIONS_KIBANA_URL=${KibanaURL}
+              OPTIONS_AMAZON_MQ_URL=${AmazonMQURL}
+              OPTIONS_AMAZON_MQ_USERNAME=${AmazonMQUsername}
+              OPTIONS_AMAZON_MQ_PASSWORD=${AmazonMQPassword}
             path: /opt/mozdef/docker/compose/cloudy_mozdef.env
           runcmd:
             - chmod 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
