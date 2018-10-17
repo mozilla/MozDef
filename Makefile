@@ -28,7 +28,7 @@ run-only:
 
 .PHONY: run-cloudy-mozdef
 run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy-mozdef`). This is used by the CloudFormation-initiated setup.
-	docker-compose -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) up -d
+	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) up -d
 
 # TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
 # The docker files are still in docker/compose/docker*test*
