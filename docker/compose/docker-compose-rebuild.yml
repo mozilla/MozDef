@@ -61,3 +61,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_syslog/Dockerfile
+  tester:
+    build:
+      context: ../../
+      dockerfile: docker/compose/tester/Dockerfile

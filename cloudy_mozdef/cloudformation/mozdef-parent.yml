@@ -34,7 +34,7 @@ Parameters:
   AMIImageId:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
-    Default: "ami-045bf265756c69192"
+    Default: "ami-0d0972c49920135f3"
   ACMCertArn:
     Description: The ARN of your pre-issued ACM cert.
     Default : "arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583"
@@ -79,6 +79,14 @@ Resources:
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
         MozDefACMCertArn: !Ref ACMCertArn
+        ESURL: !GetAtt MozDefES.Outputs.ElasticsearchURL
+        KibanaURL: !GetAtt MozDefES.Outputs.ElasticsearchKibanaURL
+        AmazonMQURL: !GetAtt MozDefMQ.Outputs.MQURL
+        AmazonMQUsername: !GetAtt MozDefMQ.Outputs.MQUser
+        AmazonMQPassword: !GetAtt MozDefMQ.Outputs.MQPassword
+        OIDCClientId: !Ref OIDCClientId
+        OIDCClientSecret: !Ref OIDCClientSecret
+        IDPurl: !Ref IDPurl
       Tags:
         - Key: application
           Value: mozdef
