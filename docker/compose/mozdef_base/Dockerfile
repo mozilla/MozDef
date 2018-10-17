@@ -14,6 +14,7 @@ RUN \
                   libstdc++ \
                   libffi-devel \
                   zlib-devel \
+                  git \
                   make && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
