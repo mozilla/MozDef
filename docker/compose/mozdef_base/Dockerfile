@@ -39,8 +39,8 @@ USER mozdef
 RUN \
   virtualenv /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
-  pip install -r /opt/mozdef/envs/mozdef/requirements.txt && \
-  pip install git+https://github.com/andrewkrug/configlib
+  pip install -r /opt/mozdef/envs/mozdef/requirements.txt
+
 # Local copy for dev
 COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
 USER root
