@@ -84,6 +84,9 @@ Resources:
         AmazonMQURL: !GetAtt MozDefMQ.Outputs.MQURL
         AmazonMQUsername: !GetAtt MozDefMQ.Outputs.MQUser
         AmazonMQPassword: !GetAtt MozDefMQ.Outputs.MQPassword
+        OIDCClientId: !Ref OIDCClientId
+        OIDCClientSecret: !Ref OIDCClientSecret
+        IDPurl: !Ref IDPurl
       Tags:
         - Key: application
           Value: mozdef
