@@ -34,7 +34,7 @@ setup(
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Mozilla Public License 2.0',
+        'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
@@ -46,7 +46,7 @@ setup(
     ],
     description="Utilities shared throughout the MozDef codebase",
     install_requires=requirements,
-    license="Mozilla Public License 2.0",
+    license='MPL-2.0',
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='mozdef_util',
@@ -56,6 +56,6 @@ setup(
     test_suite='tests',
     tests_require=[],
     url='https://github.com/mozilla/MozDef/tree/master/lib',
-    version='1.0.0',
+    version='1.0.1',
     zip_safe=False,
 )
