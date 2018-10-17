@@ -15,7 +15,7 @@ from configlib import getConfig, OptionParser
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 
-from mozdef_util.alert_plugin_set import AlertPluginSet
+from lib.alert_plugin_set import AlertPluginSet
 from lib.config import ALERT_PLUGINS
 
 from mozdef_util.utilities.logger import logger, initLogger
