@@ -24,41 +24,8 @@
         "sudo yum install -y glibc-devel gcc libstdc++ libffi-devel zlib-devel make ",
         "sudo yum install -y mysql-devel python python-devel python-pip",
         "sudo pip install virtualenv ",
-        "sudo mkdir -p /opt/mozdef/envs",
-        "sudo mkdir -p /opt/mozdef/envs/mozdef",
-        "sudo mkdir -p /opt/mozdef/envs/mozdef/cron",
-        "sudo mkdir -p /opt/mozdef/envs/mozdef/data",
-        "sudo useradd -ms /bin/bash -d /opt/mozdef -m mozdef",
-        "sudo chown -R ec2-user:ec2-user /opt/mozdef/"
-    ]},
-    { "type": "file",
-      "source": "/opt/gitrepo/requirements.txt",
-      "destination": "/opt/mozdef/envs/mozdef/requirements.txt"
-      },
-    { "type": "file",
-      "source": "/opt/gitrepo/cron/update_geolite_db.py",
-      "destination": "/opt/mozdef/envs/mozdef/cron/update_geolite_db.py"
-    },
-    { "type": "file",
-      "source": "/opt/gitrepo/cron/update_geolite_db.conf",
-      "destination": "/opt/mozdef/envs/mozdef/cron/update_geolite_db.conf"
-    },
-    { "type": "file",
-      "source": "/opt/gitrepo/cron/update_geolite_db.sh",
-      "destination": "/opt/mozdef/envs/mozdef/cron/update_geolite_db.sh"
-    },
-    { "type": "file",
-      "source": "/opt/gitrepo/lib",
-      "destination": "/opt/mozdef/envs/mozdef/"
-    },
-    {  "type": "shell",
-        "inline": [
-            "virtualenv /opt/mozdef/envs/python",
-            "source /opt/mozdef/envs/python/bin/activate",
-            "pip install -r /opt/mozdef/envs/mozdef/requirements.txt ",
-            "sudo chown -R ec2-user:ec2-user /opt/mozdef/",
-            "sed -i 's|/opt/mozdef/envs/mozdef/bin/activate|/opt/mozdef/envs/python/bin/activate|g' /opt/mozdef/envs/mozdef/cron/*.sh"
-        ]
-    }
+        "sudo yum install docker -y",
+        "sudo systemctl enable docker"
+    ]}
  ]
 }

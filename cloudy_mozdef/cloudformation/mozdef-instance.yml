@@ -31,6 +31,9 @@ Parameters:
   MozDefLoadBalancerSecurityGroupId:
     Type: "String"
     Description: "The security group to apply to the EC2 instance"
+  MozDefACMCertArn:
+    Type: "String"
+    Description: "The arn of your pre-issued certificate for ssl termination."
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -77,3 +80,30 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+  MozDefElasticLoadBalancingV2ListenerHttps:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    DependsOn: ApplicationLoadBalancer
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroup
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+  MozDefElasticLoadBalancingV2ListenerHttp:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    DependsOn: ApplicationLoadBalancer
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroup
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 80
+      Protocol: HTTP
