@@ -14,6 +14,7 @@ RUN \
                   libstdc++ \
                   libffi-devel \
                   zlib-devel \
+                  git \
                   make && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
@@ -38,7 +39,7 @@ USER mozdef
 RUN \
   virtualenv /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
-  pip install -r /opt/mozdef/envs/mozdef/requirements.txt
+  pip install -r /opt/mozdef/envs/mozdef/requirements.txt && \
   pip install git+https://github.com/andrewkrug/configlib
 # Local copy for dev
 COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
