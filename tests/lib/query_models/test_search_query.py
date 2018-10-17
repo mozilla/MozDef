@@ -4,8 +4,7 @@ from datetime import datetime
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
-from query_models import SearchQuery, ExistsMatch, TermMatch, Aggregation
+from mozdef_util.query_models import SearchQuery, ExistsMatch, TermMatch, Aggregation
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite

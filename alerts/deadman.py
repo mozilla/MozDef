@@ -9,7 +9,7 @@
 # to alert on a dead input source.
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class broNSM(AlertTask):
