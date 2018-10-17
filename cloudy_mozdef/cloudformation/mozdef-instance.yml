@@ -56,6 +56,16 @@ Parameters:
     NoEcho: true
     Description: "The AWS AmazonMQ User Password"
     Default: example-password
+  OIDCClientId:
+    Description: "The client ID that your OIDC provider issues you for your Mozdef instance."
+    Type: String
+  OIDCClientSecret:
+    Description: "The secret that your OIDC provider issues you for your Mozdef instance."
+    NoEcho: true
+    Type: String
+  IDPurl:
+    Description: "The url of your OIDC provider"
+    Type: String
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
