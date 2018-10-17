@@ -82,7 +82,6 @@ Resources:
           Value: mozdef
   MozDefElasticLoadBalancingV2ListenerHttps:
     Type : AWS::ElasticLoadBalancingV2::Listener
-    DependsOn: ApplicationLoadBalancer
     Properties:
       Certificates:
         - CertificateArn: !Ref MozDefACMCertArn
@@ -97,7 +96,6 @@ Resources:
       SslPolicy: ELBSecurityPolicy-2016-08
   MozDefElasticLoadBalancingV2ListenerHttp:
     Type : AWS::ElasticLoadBalancingV2::Listener
-    DependsOn: ApplicationLoadBalancer
     Properties:
       DefaultActions:
       - Type: forward
