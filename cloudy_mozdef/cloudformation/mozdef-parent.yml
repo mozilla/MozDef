@@ -40,6 +40,16 @@ Parameters:
     Default : "arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583"
     Type: String
     MinLength: "1"
+  OIDCClientId:
+    Description: "The client ID that your OIDC provider issues you for your Mozdef instance."
+    Type: String
+  OIDCClientSecret:
+    Description: "The secret that your OIDC provider issues you for your Mozdef instance."
+    NoEcho: true
+    Type: String
+  IDPurl:
+    Description: "The url of your OIDC provider"
+    Type: String
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
@@ -105,3 +115,14 @@ Resources:
         - Key: application
           Value: mozdef
       TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-mq.yml
+  MozDefEFS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VPCID0: !Ref VpcId
+        Subnet: !Join [ ",", !Ref PublicSubnetIds ]
+        MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-efs.yml
