@@ -2,9 +2,7 @@
 version: '2.2'
 services:
   nginx:
-    build:
-      context: ../../
-      dockerfile: docker/compose/nginx/Dockerfile
+    image: mozdef/mozdef_nginx
     restart: always
     command: /usr/sbin/nginx
     depends_on:
@@ -17,9 +15,7 @@ services:
     networks:
       - default
   mongodb:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mongodb/Dockerfile
+    image: mozdef/mozdef_mongodb
     restart: always
     command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
     volumes:
@@ -27,9 +23,7 @@ services:
     networks:
       - default
   bootstrap:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
+    image: mozdef/mozdef_bootstrap
     env_file:
       - cloudy_mozdef.env
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py ${ES_URL} cron/defaultMappingTemplate.json cron/backup.conf'
@@ -39,18 +33,14 @@ services:
       - default
   # MozDef Specific Containers
   base:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_base/Dockerfile
+    image: mozdef/mozdef_base
     env_file:
       - cloudy_mozdef.env
     command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data
   alertplugins:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_alertplugins/Dockerfile
+    image: mozdef/mozdef_alertplugins
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -62,9 +52,7 @@ services:
     networks:
       - default
   alerts:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_alerts/Dockerfile
+    image: mozdef/mozdef_alerts
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -75,9 +63,7 @@ services:
     networks:
       - default
   cron:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_cron/Dockerfile
+    image: mozdef/mozdef_cron
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -91,9 +77,7 @@ services:
     networks:
       - default
   loginput:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_loginput/Dockerfile
+    image: mozdef/mozdef_loginput
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -104,9 +88,7 @@ services:
     networks:
       - default
   meteor:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_meteor/Dockerfile
+    image: mozdef/mozdef_meteor
     restart: always
     command: bash -c 'node bundle/main.js'
     depends_on:
@@ -116,9 +98,7 @@ services:
     networks:
       - default
   rest:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_rest/Dockerfile
+    image: mozdef/mozdef_rest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -130,9 +110,7 @@ services:
     networks:
       - default
   syslog:
-    build:
-      context: ../../
-      dockerfile: docker/compose/mozdef_syslog/Dockerfile
+    image: mozdef/mozdef_syslog
     env_file:
       - cloudy_mozdef.env
     restart: always
