@@ -122,6 +122,15 @@ services:
       - 514:514
     networks:
       - default
+  accessproxy:
+    image: mozillaiam/mozilla.oidc.accessproxy
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    ports:
+      - 8888
+    networks:
+      - default
 
 volumes:
   mongodb:
