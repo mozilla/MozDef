@@ -8,6 +8,7 @@ bottle==0.12.4
 bugzilla==1.0.0
 celery==4.1.0
 cffi==1.9.1
+configlib==2.0.1
 configparser==3.5.0b2
 cryptography==2.3.1
 dnspython==1.15.0
