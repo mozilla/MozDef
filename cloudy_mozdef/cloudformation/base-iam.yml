@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Creates the base instance profile and delivery server roles."
+Description: "Creates the MozDef base instance profile and delivery server IAM role"
 Resources:
   WebRole:
     Type: "AWS::IAM::Role"

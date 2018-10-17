@@ -1,5 +1,5 @@
----
 AWSTemplateFormatVersion: "2010-09-09"
+Description: Create MozDef Amazon ES
 Parameters:
   SubnetIds:
     Type: "List<AWS::EC2::Subnet::Id>"

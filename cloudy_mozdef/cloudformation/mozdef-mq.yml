@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Deploy MozDef AmazonMQ instance.
+Description: Creates MozDef Amazon MQ
 Parameters:
   MQUserParameter:
     Type: String
