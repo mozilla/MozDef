@@ -20,7 +20,7 @@ all:
 
 .PHONY: run
 run: build ## Run all MozDef containers
-	docker-compose -f docker/composer/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
+	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
 .PHONY: run-norebuild
 run-norebuild: nobuild ## Run all MozDef containers
