@@ -24,7 +24,8 @@ RUN \
                     python-pip && \
   pip install virtualenv && \
   mkdir /opt/mozdef/envs/mozdef && \
-  mkdir /opt/mozdef/envs/mozdef/cron
+  mkdir /opt/mozdef/envs/mozdef/cron && \
+  yum install -y git
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
