@@ -18,12 +18,15 @@ all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
 
-.PHONY: run
+.PHONY: run runbonly
 run: build ## Run all MozDef containers
 	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
+runonly:
+	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
+
 .PHONY: run-norebuild
-run-norebuild: nobuild ## Run all MozDef containers
+run-norebuild: nobuild ## Run all MozDef containers from pre-built images
 	docker-compose -f docker/compose/docker-compose-norebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
 .PHONY: run-cloudy-mozdef
@@ -33,10 +36,10 @@ run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy
 # TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
 # The docker files are still in docker/compose/docker*test*
 .PHONY: test tests run-tests run-fast-tests test-fast
-test: run-tests
-tests: run-tests
-test-fast: run-fast-tests
-run-fast-tests: nobuild-tests ## Running tests from pre-built images (hub.docker.com/mozdef)
+test: build-tests run-tests ## Running tests from locally-built images
+tests: build-tests run-tests
+test-fast: nobuild-tests run-fast-tests ## Running tests from pre-built images (hub.docker.com/mozdef
+run-fast-tests:
 	docker-compose -f tests/docker-compose-norebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
 	@echo "Waiting for the instance to come up..."
 	sleep 10
@@ -45,7 +48,7 @@ run-fast-tests: nobuild-tests ## Running tests from pre-built images (hub.docker
 	@echo "Running py.test..."
 	docker run -it --network=mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
 
-run-tests: build-tests ## Running tests from locally-built images
+run-tests:
 	docker-compose -f tests/docker-compose-rebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
 	@echo "Waiting for the instance to come up..."
 	sleep 10
