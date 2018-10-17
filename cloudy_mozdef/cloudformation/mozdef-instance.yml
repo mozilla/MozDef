@@ -24,7 +24,7 @@ Parameters:
   AMIImageId:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
-    Default: "ami-0e7bda6769c8b3854"
+    Default: "ami-0d0972c49920135f3"
   MozDefSecurityGroupId:
     Type: "String"
     Description: "The security group to apply to the EC2 instance"
