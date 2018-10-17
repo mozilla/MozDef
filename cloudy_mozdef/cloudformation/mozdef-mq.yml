@@ -123,10 +123,12 @@ Resources:
         ZipFile: |
           import cfnresponse
           import boto3
+          from urllib.parse import urlparse
           def handler(event, context):
             response = boto3.client('mq').describe_broker(BrokerId=event['ResourceProperties']['BrokerID'])
-            amqp_url = next(x for x in response['BrokerInstances'][0]['Endpoints'] if x.startswith('amqp+ssl://'))
-            cfnresponse.send(event, context, cfnresponse.SUCCESS, {'BrokerURL': amqp_url}, "CustomResourcePhysicalID")
+            url = urlparse(next(x for x in response['BrokerInstances'][0]['Endpoints'] if x.startswith('amqp+ssl://')))
+            response = {'URL': url.geturl(), 'HostName': url.hostname, 'Scheme': url.scheme, 'Port': url.port}
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, response, "CustomResourcePhysicalID")
       Handler: index.handler
       Runtime: python3.6
       Role: !GetAtt CloudFormationLambdaIAMRole.Arn
@@ -149,6 +151,12 @@ Outputs:
   MQPassword:
     Description: "Password of the MQ user"
     Value: !If [ PasswordIsSet, !Ref 'MQPasswordParameter', !GetAtt DefaultPassword.Password ]
-  MQURL:
-    Description: "AMQP broker URL of the MQ broker"
-    Value: !GetAtt MQBrokerURL.BrokerURL
+  MQHostName:
+    Description: "Hostname of the AMQP broker"
+    Value: !GetAtt MQBrokerURL.HostName
+  MQScheme:
+    Description: "Scheme of the AMQP broker"
+    Value: !GetAtt MQBrokerURL.Scheme
+  MQPort:
+    Description: "Port of the AMQP broker"
+    Value: !GetAtt MQBrokerURL.Port

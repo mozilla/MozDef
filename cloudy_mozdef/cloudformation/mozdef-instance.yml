@@ -24,7 +24,7 @@ Parameters:
   AMIImageId:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
-    Default: "ami-0d0972c49920135f3"
+    Default: "ami-0e6f50fa0c8c241af"
   MozDefSecurityGroupId:
     Type: "String"
     Description: "The security group to apply to the EC2 instance"
@@ -43,10 +43,18 @@ Parameters:
     Type: "String"
     Description: "The AWS ES Kibana URL"
     Default: https://kibana.example.com/
-  AmazonMQURL:
+  AmazonMQHostName:
     Type: "String"
-    Description: "The AWS AmazonMQ URL"
-    Default: amqp+ssl://b-ea1aefe8-b194-4be5-91c3-0e8b2e664151-1.mq.us-west-2.amazonaws.com:5671
+    Description: "The AWS AmazonMQ HostName"
+    Default: b-ea1aefe8-b194-4be5-91c3-0e8b2e664151-1.mq.us-west-2.amazonaws.com
+  AmazonMQScheme:
+    Type: "String"
+    Description: "The AWS AmazonMQ Scheme"
+    Default: amqp+ssl
+  AmazonMQPort:
+    Type: "String"
+    Description: "The AWS AmazonMQ Port"
+    Default: 5671
   AmazonMQUsername:
     Type: "String"
     Description: "The AWS AmazonMQ Username"
@@ -59,13 +67,15 @@ Parameters:
   OIDCClientId:
     Description: "The client ID that your OIDC provider issues you for your Mozdef instance."
     Type: String
+    Default: "lGsSlYNdiV6f5tF05pWN3EbQoDPHx44k"
   OIDCClientSecret:
+    Type: String
     Description: "The secret that your OIDC provider issues you for your Mozdef instance."
     NoEcho: true
+  OIDCDiscoveryURL:
     Type: String
-  IDPurl:
-    Description: "The url of your OIDC provider"
-    Type: String
+    Default: "https://auth.mozilla.auth0.com/.well-known/openid-configuration"
+    Description: "The URL of your OIDC provider's well-known discovery URL"
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -92,11 +102,19 @@ Resources:
 
           write_files:
           - content: |
-              OPTIONS_ES_URL=${ESURL}
-              OPTIONS_KIBANA_URL=${KibanaURL}
-              OPTIONS_AMAZON_MQ_URL=${AmazonMQURL}
-              OPTIONS_AMAZON_MQ_USERNAME=${AmazonMQUsername}
-              OPTIONS_AMAZON_MQ_PASSWORD=${AmazonMQPassword}
+              OPTIONS_ESSERVERS=${ESURL}
+              OPTIONS_KIBANAURL=${KibanaURL}
+              OPTIONS_MQSERVER=${AmazonMQHostName}
+              OPTIONS_MQPROTOCOL=${AmazonMQScheme}
+              OPTIONS_MQPORT=${AmazonMQPort}
+              OPTIONS_MQUSER=${AmazonMQUsername}
+              OPTIONS_MQPASSWORD=${AmazonMQPassword}
+              # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
+              client_id=${OIDCClientId}
+              client_secret=${OIDCClientSecret}
+              discovery_url=${OIDCDiscoveryURL}
+              backend=http://nginx
+              redirect_uri_path=/redirect_uri
             path: /opt/mozdef/docker/compose/cloudy_mozdef.env
           runcmd:
             - chmod 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
@@ -117,6 +135,8 @@ Resources:
           Value: mozdef
           PropagateAtLaunch: true
       TargetGroupARNs: !GetAtt MozDefElasticLoadBalancingV2TargetGroup.LoadBalancerArns
+      TerminationPolicies:
+        - OldestLaunchConfiguration
       VPCZoneIdentifier: !Ref AutoScaleGroupSubnetIds
   MozDefElasticLoadBalancingV2LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer

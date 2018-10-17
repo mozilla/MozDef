@@ -28,7 +28,7 @@ Parameters:
     Description: "A comma delimited list of public subnet IDs"
     Default: "subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6"
   InstanceType:
-    Type: "String"
+    Type: String
     Default: "m5.large"
     Description: "EC2 instance type, e.g. m1.small, m1.large, etc."
   KeyName:
@@ -36,9 +36,9 @@ Parameters:
     Description: "Name of an existing EC2 KeyPair to enable SSH access to the web server"
     Default: "infosec-pdx-workweek-2018"
   AMIImageId:
-    Type: "String"
+    Type: String
     Description: "The AMI Image ID to use of the EC2 instance"
-    Default: "ami-0d0972c49920135f3"
+    Default: "ami-0e6f50fa0c8c241af"
   ACMCertArn:
     Description: The ARN of your pre-issued ACM cert.
     Default : "arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583"
@@ -47,13 +47,15 @@ Parameters:
   OIDCClientId:
     Description: "The client ID that your OIDC provider issues you for your Mozdef instance."
     Type: String
+    Default: "lGsSlYNdiV6f5tF05pWN3EbQoDPHx44k"
   OIDCClientSecret:
+    Type: String
     Description: "The secret that your OIDC provider issues you for your Mozdef instance."
     NoEcho: true
+  OIDCDiscoveryURL:
     Type: String
-  IDPurl:
-    Description: "The url of your OIDC provider"
-    Type: String
+    Default: "https://auth.mozilla.auth0.com/.well-known/openid-configuration"
+    Description: "The URL of your OIDC provider's well-known discovery URL"
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
@@ -85,12 +87,14 @@ Resources:
         MozDefACMCertArn: !Ref ACMCertArn
         ESURL: !GetAtt MozDefES.Outputs.ElasticsearchURL
         KibanaURL: !GetAtt MozDefES.Outputs.ElasticsearchKibanaURL
-        AmazonMQURL: !GetAtt MozDefMQ.Outputs.MQURL
+        AmazonMQHostName: !GetAtt MozDefMQ.Outputs.MQHostName
+        AmazonMQScheme: !GetAtt MozDefMQ.Outputs.MQScheme
+        AmazonMQPort: !GetAtt MozDefMQ.Outputs.MQPort
         AmazonMQUsername: !GetAtt MozDefMQ.Outputs.MQUser
         AmazonMQPassword: !GetAtt MozDefMQ.Outputs.MQPassword
         OIDCClientId: !Ref OIDCClientId
         OIDCClientSecret: !Ref OIDCClientSecret
-        IDPurl: !Ref IDPurl
+        OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
       Tags:
         - Key: application
           Value: mozdef
