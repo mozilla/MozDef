@@ -47,10 +47,7 @@ Resources:
     Type: AWS::AmazonMQ::Broker
     Properties:
       AutoMinorVersionUpgrade: false
-      BrokerName: !Join
-        - ''
-        - - !Ref "AWS::StackName"
-          - '-AMQBroker'
+      BrokerName: !Join [ "-", [ "Broker", !Select [ 2, !Split [ "/", !Ref "AWS::StackId" ] ] ] ]
       Users:
         - Username: !Ref 'MQUserParameter'
           Password: !If [ PasswordIsSet, !Ref 'MQPasswordParameter', !GetAtt DefaultPassword.Password ]
