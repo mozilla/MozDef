@@ -28,7 +28,7 @@ run: build
 test: run-tests
 tests: run-tests
 test-fast: run-fast-tests
-run-fast-tests: nobuild-tests
+run-fast-tests: nobuild-tests ## Running tests from pre-built images (hub.docker.com/mozdef)
 	docker-compose -f tests/docker-compose-norebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
 	@echo "Waiting for the instance to come up..."
 	sleep 10
@@ -37,7 +37,7 @@ run-fast-tests: nobuild-tests
 	@echo "Running py.test..."
 	docker run -it --network=mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
 
-run-tests: build-tests
+run-tests: build-tests ## Running tests from locally-built images
 	docker-compose -f tests/docker-compose-rebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
 	@echo "Waiting for the instance to come up..."
 	sleep 10
@@ -47,7 +47,7 @@ run-tests: build-tests
 	docker run -it --network=mozdef_default mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
 
 .PHONY: build
-build:
+build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
 	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
 .PHONY: nobuild
@@ -63,7 +63,7 @@ nobuild-tests:
 
 .PHONY: stop down
 stop: down
-down:
+down: ## Shutdown all services we started with docker-compose
 	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) stop
 
 .PHONY: docker-push docker-get hub hub-get
@@ -76,12 +76,12 @@ hub:
 	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
 
 docker-get: hub-get
-hub-get:
+hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
 	$(foreach var,$(DKR_IMAGES),docker pull mozdef/$(var):$(GITHASH);)
 
 .PHONY: clean
-clean:
+clean: ## Cleanup all docker volumes and shutdown all related services
 	-docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
 # Shorthands
 .PHONY: rebuild
-rebuild: rm build
+rebuild: clean build
