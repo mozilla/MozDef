@@ -118,7 +118,7 @@ services:
   rest:
     build:
       context: ../../
-      dockerfile: docker/compose/mozdef_rest/Dockerfil
+      dockerfile: docker/compose/mozdef_rest/Dockerfile
     env_file:
       - cloudy_mozdef.env
     restart: always
