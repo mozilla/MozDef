@@ -11,20 +11,20 @@ all:
 
 .PHONY: build docker-build
 build: docker-build packer-build
-docker-build:
+docker-build: ## Build the docker image that is used for deployment of CloudFormation templates
 	docker build -t $(IMAGE_NAME):latest .
 
 .PHONY: docker-shell
-deploy-shell:
+deploy-shell: ## Spawn a shell for hacking into the docker image
 	docker run -ti -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef -v $(PARENTDIR):/opt/gitrepo $(IMAGE_NAME):latest /bin/bash
 
 # Note: This requires AWS access
 .PHONY: packer-build
-packer-build:
+packer-build: ## Build the base AMI with packer
 	$(DOCKER_BASH_RUN) "cd packer && packer build packer.json"
 
 .PHONY: deploy-nested-cloudformation
-deploy-nested-cloudformation: cflint
+deploy-nested-cloudformation: cflint ## Deploy our nested ClouFormation stack
 	$(DOCKER_BASH_RUN) "ansible-playbook -c local ansible/update-ami-metadata.yml"
 	$(DOCKER_BASH_RUN) "aws s3 sync /opt/mozdef/ansible/files/stacks/ $(S3_INFOSEC_URI) --acl public-read"
 
@@ -38,11 +38,10 @@ test-nested-stack:
 	$(DOCKER_BASH_RUN) "aws s3 cp /opt/mozdef/cloudformation/nested-stack.yml $(S3_INFOSEC_URI)/nested-stack.yml --acl public-read"
 	$(DOCKER_BASH_RUN) "aws cloudformation update-stack --stack-name mozdef-nested --template-url $(S3_STACK_URI)"
 
-# Cloud formation linter
 .PHONY: cflint
-cflint:
+cflint: ## Verify the CloudFormation template pass linting tests
 	$(DOCKER_BASH_RUN) "cfn-lint cloudformation/*.yml"
 
 .PHONY: stack-status
-stack-status:
+stack-status: ## Output current CloudFormation stack status
 	$(DOCKER_BASH_RUN) "aws cloudformation describe-stacks --stack-name mozdef-nested"
