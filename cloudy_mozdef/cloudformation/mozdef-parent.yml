@@ -79,6 +79,11 @@ Resources:
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
         MozDefACMCertArn: !Ref ACMCertArn
+        ESURL: !GetAtt MozDefES.Outputs.ElasticsearchURL
+        KibanaURL: !GetAtt MozDefES.Outputs.ElasticsearchKibanaURL
+        AmazonMQURL: !GetAtt MozDefMQ.Outputs.MQURL
+        AmazonMQUsername: !GetAtt MozDefMQ.Outputs.MQUser
+        AmazonMQPassword: !GetAtt MozDefMQ.Outputs.MQPassword
         OIDCClientId: !Ref OIDCClientId
         OIDCClientSecret: !Ref OIDCClientSecret
         IDPurl: !Ref IDPurl

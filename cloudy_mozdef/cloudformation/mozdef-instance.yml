@@ -34,6 +34,28 @@ Parameters:
   MozDefACMCertArn:
     Type: "String"
     Description: "The arn of your pre-issued certificate for ssl termination."
+    Default: "arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583"
+  ESURL:
+    Type: "String"
+    Description: "The AWS ES endpoint URL"
+    Default: http://elasticsearch.example.com/
+  KibanaURL:
+    Type: "String"
+    Description: "The AWS ES Kibana URL"
+    Default: https://kibana.example.com/
+  AmazonMQURL:
+    Type: "String"
+    Description: "The AWS AmazonMQ URL"
+    Default: amqp+ssl://b-ea1aefe8-b194-4be5-91c3-0e8b2e664151-1.mq.us-west-2.amazonaws.com:5671
+  AmazonMQUsername:
+    Type: "String"
+    Description: "The AWS AmazonMQ Username"
+    Default: mozdef
+  AmazonMQPassword:
+    Type: "String"
+    NoEcho: true
+    Description: "The AWS AmazonMQ User Password"
+    Default: example-password
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -54,7 +76,21 @@ Resources:
       KeyName: !Ref KeyName
       SecurityGroups:
         - !Ref MozDefSecurityGroupId
-      # UserData: xxx
+      UserData:
+        Fn::Base64: !Sub |
+          #cloud-config
+
+          write_files:
+          - content: |
+              ES_URL=${ESURL}
+              KIBANA_URL=${KibanaURL}
+              AMAZON_MQ_URL=${AmazonMQURL}
+              AMAZON_MQ_USERNAME=${AmazonMQUsername}
+              AMAZON_MQ_PASSWORD=${AmazonMQPassword}
+            path: /opt/mozdef/docker/compose/cloudy_mozdef.env
+          runcmd:
+            - chmod 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
+            - make -C /opt/mozdef -f /opt/mozdef/Makefile  # run-cloudy-mozdef
   MozDefAutoScaleGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -82,7 +118,6 @@ Resources:
           Value: mozdef
   MozDefElasticLoadBalancingV2ListenerHttps:
     Type : AWS::ElasticLoadBalancingV2::Listener
-    DependsOn: ApplicationLoadBalancer
     Properties:
       Certificates:
         - CertificateArn: !Ref MozDefACMCertArn
@@ -97,7 +132,6 @@ Resources:
       SslPolicy: ELBSecurityPolicy-2016-08
   MozDefElasticLoadBalancingV2ListenerHttp:
     Type : AWS::ElasticLoadBalancingV2::Listener
-    DependsOn: ApplicationLoadBalancer
     Properties:
       DefaultActions:
       - Type: forward
