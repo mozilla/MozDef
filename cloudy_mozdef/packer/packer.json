@@ -26,6 +26,7 @@
         "sudo yum install -y git",
         "sudo yum install -y docker",
         "sudo pip install virtualenv ",
+        "sudo pip install docker-compose",
         "sudo systemctl enable docker",
         "sudo mkdir -p /opt/mozdef/",
         "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
