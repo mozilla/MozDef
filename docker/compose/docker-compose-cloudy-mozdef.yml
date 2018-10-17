@@ -1,0 +1,154 @@
+---
+version: '2.2'
+services:
+  nginx:
+    build:
+      context: ../../
+      dockerfile: docker/compose/nginx/Dockerfile
+    restart: always
+    command: /usr/sbin/nginx
+    depends_on:
+      - meteor
+    ports:
+      - 80:80
+      - 8080:8080
+      - 9090:9090
+      # - 8081:8081
+    networks:
+      - default
+  mongodb:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mongodb/Dockerfile
+    restart: always
+    command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
+    volumes:
+      - mongodb:/var/lib/mongo
+    networks:
+      - default
+  bootstrap:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_bootstrap/Dockerfile
+    env_file:
+      - cloudy_mozdef.env
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py ${MOZDEF_ELASTICSEARCH_URL} cron/defaultMappingTemplate.json cron/backup.conf'
+    depends_on:
+      - base
+    networks:
+      - default
+  # MozDef Specific Containers
+  base:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_base/Dockerfile
+    env_file:
+      - cloudy_mozdef.env
+    command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data
+  alertplugins:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_alertplugins/Dockerfile
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python alert_worker.py -c alert_worker.conf'
+    depends_on:
+      - base
+      - alerts
+      - bootstrap
+    networks:
+      - default
+  alerts:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_alerts/Dockerfile
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
+    depends_on:
+      - base
+      - bootstrap
+    networks:
+      - default
+  cron:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_cron/Dockerfile
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'crond -n'
+    volumes:
+      - cron:/opt/mozdef/envs/mozdef/cron
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
+    depends_on:
+      - base
+      - mongodb
+    networks:
+      - default
+  loginput:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_loginput/Dockerfile
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    depends_on:
+      - base
+      - bootstrap
+    networks:
+      - default
+  meteor:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_meteor/Dockerfile
+    restart: always
+    command: bash -c 'node bundle/main.js'
+    depends_on:
+      - mongodb
+      - rest
+      - bootstrap
+    networks:
+      - default
+  rest:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_rest/Dockerfil
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    depends_on:
+      - base
+      - mongodb
+      - bootstrap
+    networks:
+      - default
+  syslog:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_syslog/Dockerfile
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c '/usr/sbin/syslog-ng --no-caps -F'
+    depends_on:
+      - loginput
+    ports:
+      - 514:514/udp
+      - 514:514
+    networks:
+      - default
+
+volumes:
+  mongodb:
+  cron:
+  geolite_db:
+
+networks:
+  default:

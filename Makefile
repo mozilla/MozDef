@@ -7,7 +7,7 @@
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
 		   mozdef_mq_eventtask mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
-		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq
+		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq mozdef_kibana
 NAME		:= mozdef
 VERSION		:= 0.1
 NO_CACHE	:= #--no-cache
@@ -18,9 +18,17 @@ all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
 
-.PHONY: build
-run: build
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
+.PHONY: run
+run: build ## Run all MozDef containers
+	docker-compose -f docker/composer/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
+
+.PHONY: run-norebuild
+run-norebuild: nobuild ## Run all MozDef containers
+	docker-compose -f docker/compose/docker-compose-norebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
+
+.PHONY: run-cloudy-mozdef
+run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy-mozdef`). This is used by the CloudFormation-initiated setup.
+	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) up -d
 
 # TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
 # The docker files are still in docker/compose/docker*test*
@@ -68,7 +76,7 @@ down: ## Shutdown all services we started with docker-compose
 
 .PHONY: docker-push docker-get hub hub-get
 docker-push: hub
-hub:
+hub: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef). Use make GITHASH=latest to tag latest.
 	docker login
 	@echo "Tagging current docker images with git HEAD shorthash..."
 	$(foreach var,$(DKR_IMAGES),docker tag $(var):latest mozdef/$(var):$(GITHASH);)
