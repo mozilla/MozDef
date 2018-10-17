@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Deploy MozDef AmazonMQ instance.
+Parameters:
+  MQUserParameter:
+    Type: String
+    Default: mozdef
+    Description: The username for the AmazonMQ user.
+  MQPasswordParameter:
+    Type: String
+    NoEcho: true
+    Default: ''
+    Description: The password for the AmazonMQ user. Leave this blank if you want an auto-generated password.
+  MQInstanceType:
+    Type: String
+    Default: mq.t2.micro
+    Description: The instance type for the AmazonMQ instance.
+  MQVpcId:
+    Type: "AWS::EC2::VPC::Id"
+    Default: vpc-dc8eacb4
+    Description: "The VPC ID of the VPC within which the AmazonMQ instance will be provisioned."
+  MQSubnetIds:
+    Type: "List<AWS::EC2::Subnet::Id>"
+    Default: "subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6"
+    Description: "Comma-delimited list of subnet IDs of the VPCs within which the AmazonMQ instance will be provisioned."
+  MozDefSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    Default: sg-02d7fe9627ea068e2
+    Description: "The security group of the Mozdef endpoint that is accessing AmazonMQ"
+Conditions:
+  PasswordIsSet: !Not [ !Equals [ !Ref MQPasswordParameter, "" ]]
+  PasswordIsNotSet: !Equals [ !Ref MQPasswordParameter, "" ]
+Resources:
+  AmazonMQSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Limits security group ingress and egress traffic for the Amazon MQ instance
+      VpcId: !Ref 'MQVpcId'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '8162'
+          ToPort: '8162'
+          SourceSecurityGroupId: !Ref 'MozDefSecurityGroup'
+      Tags:
+        - Key: application
+          Value: mozdef
+  MozDefAmazonMQ:
+    Type: AWS::AmazonMQ::Broker
+    Properties:
+      AutoMinorVersionUpgrade: false
+      BrokerName: !Join
+        - ''
+        - - !Ref "AWS::StackName"
+          - '-AMQBroker'
+      Users:
+        - Username: !Ref 'MQUserParameter'
+          Password: !If [ PasswordIsSet, !Ref 'MQPasswordParameter', !GetAtt DefaultPassword.Password ]
+      DeploymentMode: ACTIVE_STANDBY_MULTI_AZ
+      EngineType: ACTIVEMQ
+      EngineVersion: 5.15.0
+      HostInstanceType: !Ref 'MQInstanceType'
+      PubliclyAccessible: false
+      SecurityGroups:
+        - !Ref 'AmazonMQSecurityGroup'
+      SubnetIds:
+        - !Select
+          - 0
+          - !Ref 'MQSubnetIds'
+        - !Select
+          - 1
+          - !Ref 'MQSubnetIds'
+  DefaultPasswordGeneratorLambdaIAMRole:
+    Type: AWS::IAM::Role
+    Condition: PasswordIsNotSet
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        -
+          PolicyName: allowLambdaLogging
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:*"
+                Resource: "*"
+  DefaultPasswordGeneratorLambdaFunction:
+    Type: AWS::Lambda::Function
+    Condition: PasswordIsNotSet
+    Properties:
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import secrets, string
+          def handler(event, context):
+            alphabet = string.ascii_letters + string.digits
+            password = ''.join(secrets.choice(alphabet) for i in range(int(event['ResourceProperties']['Length'])))
+            response_data = {'Password': password}
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, "CustomResourcePhysicalID")
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt DefaultPasswordGeneratorLambdaIAMRole.Arn
+      Timeout: 20
+  DefaultPassword:
+    Type: AWS::CloudFormation::CustomResource
+    Condition: PasswordIsNotSet
+    Properties:
+      Length: 16
+      ServiceToken: !GetAtt DefaultPasswordGeneratorLambdaFunction.Arn
+Outputs:
+  MQUser:
+    Description: "Username of the MQ user"
+    Value: !Ref MQUserParameter
+  MQPassword:
+    Description: "Password of the MQ user"
+    Value: !If [ PasswordIsSet, !Ref 'MQPasswordParameter', !GetAtt DefaultPassword.Password ]

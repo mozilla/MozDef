@@ -7,7 +7,7 @@
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
 		   mozdef_mq_eventtask mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
-		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq
+		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq mozdef_kibana
 NAME		:= mozdef
 VERSION		:= 0.1
 NO_CACHE	:= #--no-cache
@@ -18,9 +18,17 @@ all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
 
-.PHONY: build
-run: build
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
+.PHONY: run
+run: build ## Run all MozDef containers
+	docker-compose -f docker/composer/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
+
+.PHONY: run-norebuild
+run-norebuild: nobuild ## Run all MozDef containers
+	docker-compose -f docker/compose/docker-compose-norebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) up -d
+
+.PHONY: run-cloudy-mozdef
+run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy-mozdef`). This is used by the CloudFormation-initiated setup.
+	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) up -d
 
 # TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
 # The docker files are still in docker/compose/docker*test*
@@ -28,7 +36,7 @@ run: build
 test: run-tests
 tests: run-tests
 test-fast: run-fast-tests
-run-fast-tests: nobuild-tests
+run-fast-tests: nobuild-tests ## Running tests from pre-built images (hub.docker.com/mozdef)
 	docker-compose -f tests/docker-compose-norebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
 	@echo "Waiting for the instance to come up..."
 	sleep 10
@@ -37,7 +45,7 @@ run-fast-tests: nobuild-tests
 	@echo "Running py.test..."
 	docker run -it --network=mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
 
-run-tests: build-tests
+run-tests: build-tests ## Running tests from locally-built images
 	docker-compose -f tests/docker-compose-rebuild.yml -f tests/docker-compose.yml -p $(NAME) up -d
 	@echo "Waiting for the instance to come up..."
 	sleep 10
@@ -47,7 +55,7 @@ run-tests: build-tests
 	docker run -it --network=mozdef_default mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
 
 .PHONY: build
-build:
+build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
 	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
 .PHONY: nobuild
@@ -63,12 +71,12 @@ nobuild-tests:
 
 .PHONY: stop down
 stop: down
-down:
+down: ## Shutdown all services we started with docker-compose
 	docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) stop
 
 .PHONY: docker-push docker-get hub hub-get
 docker-push: hub
-hub:
+hub: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef). Use make GITHASH=latest to tag latest.
 	docker login
 	@echo "Tagging current docker images with git HEAD shorthash..."
 	$(foreach var,$(DKR_IMAGES),docker tag $(var):latest mozdef/$(var):$(GITHASH);)
@@ -76,12 +84,12 @@ hub:
 	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
 
 docker-get: hub-get
-hub-get:
+hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
 	$(foreach var,$(DKR_IMAGES),docker pull mozdef/$(var):$(GITHASH);)
 
 .PHONY: clean
-clean:
+clean: ## Cleanup all docker volumes and shutdown all related services
 	-docker-compose -f docker/compose/docker-compose-rebuild.yml -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
 # Shorthands
 .PHONY: rebuild
-rebuild: rm build
+rebuild: clean build

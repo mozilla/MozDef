@@ -34,7 +34,12 @@ Parameters:
   AMIImageId:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
-    Default: "ami-0e7bda6769c8b3854"
+    Default: "ami-045bf265756c69192"
+  ACMCertArn:
+    Description: The ARN of your pre-issued ACM cert.
+    Default : "arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583"
+    Type: String
+    MinLength: "1"
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
@@ -63,6 +68,7 @@ Resources:
         AMIImageId: !Ref AMIImageId
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
+        MozDefACMCertArn: !Ref ACMCertArn
       Tags:
         - Key: application
           Value: mozdef
@@ -80,3 +86,17 @@ Resources:
         - Key: application
           Value: mozdef
       TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-es.yml
+  MozDefMQ:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        MQUserParameter: mozdef
+        # MQPasswordParameter: we can leave this empty and it will autogenerate a password
+        MQInstanceType: mq.t2.micro
+        MQVpcId: !Ref VpcId
+        MQSubnetIds: !Join [ ",", !Ref PublicSubnetIds ]
+        MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-mq.yml
