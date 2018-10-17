@@ -11,22 +11,19 @@ Parameters:
     Description: Select existing subnets.
     Type: List<AWS::EC2::Subnet::Id>
     Default: "subnet-8931f7ee,subnet-de322aa8,subnet-2582cd7d"
-
+  MozDefSecurityGroup:
+    Description: "The security group of the Mozdef endpoint that is accessing EFS"
+    Type: AWS::EC2::SecurityGroup::Id
+    Default: "sg-02d7fe9627ea068e2"
 Resources:
   MountTarget:
     Type: AWS::EFS::MountTarget
     Properties:
       FileSystemId:
         !Ref ElasticFileSystem
-      SubnetID:
-        !Ref Subnet
+      SubnetId:
+        !Select [ 0, !Ref 'Subnet' ]
       SecurityGroups:
-        !Ref MozDefSecurityGroup
+        [ !Ref MozDefSecurityGroup ]
   ElasticFileSystem:
     Type: AWS::EFS::FileSystem
-    Properties:
-      Parameters:
-        Subnet:
-          !Join [",", !Ref Subnet ]
-        VpcId:
-          !Ref "VPCID0"
