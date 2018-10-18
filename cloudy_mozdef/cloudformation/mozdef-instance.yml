@@ -137,7 +137,7 @@ Resources:
     Properties:
       DesiredCapacity: 1
       LaunchConfigurationName: !Ref MozDefLaunchConfiguration
-      MaxSize: 1
+      MaxSize: 2
       MinSize: 1
       Tags:
         - Key: Name
