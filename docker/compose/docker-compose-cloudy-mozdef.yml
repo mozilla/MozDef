@@ -8,6 +8,8 @@ services:
     restart: always
     depends_on:
       - meteor
+    links:
+      - "meteor"
     ports:
       - 80:80
       - 443:80
