@@ -5,6 +5,7 @@ services:
     image: mozillaiam/mozilla.oidc.accessproxy
     env_file:
       - cloudy_mozdef.env
+      - cloudy_mozdef_local.env
     restart: always
     depends_on:
       - meteor
