@@ -2,16 +2,14 @@
 version: '2.2'
 services:
   nginx:
-    image: mozdef/mozdef_nginx
+    image: mozillaiam/mozilla.oidc.accessproxy
     restart: always
-    command: /usr/sbin/nginx
     depends_on:
       - meteor
     ports:
       - 80:80
-      - 8080:8080
-      - 9090:9090
-      # - 8081:8081
+        #      - 8080:8080
+        #      - 9090:9090
     networks:
       - default
   mongodb:
@@ -120,15 +118,6 @@ services:
     ports:
       - 514:514/udp
       - 514:514
-    networks:
-      - default
-  accessproxy:
-    image: mozillaiam/mozilla.oidc.accessproxy
-    env_file:
-      - cloudy_mozdef.env
-    restart: always
-    ports:
-      - 8888
     networks:
       - default
 
