@@ -374,7 +374,7 @@ if (Meteor.isClient) {
 
     // login abstraction
     Meteor.login = function(callback) {
-        var authenticationType = mozdef.authenticationType.toLowerCase();
+        var authenticationType = getSetting('authenticationType').toLowerCase();
         switch(authenticationType){
             case 'meteor-password':
                 Meteor.loginViaPassword(callback);
@@ -408,7 +408,7 @@ if (Meteor.isClient) {
     };
 
     Meteor.logout = function(callback) {
-        var authenticationType = mozdef.authenticationType.toLowerCase();
+        var authenticationType = getSetting('authenticationType').toLowerCase();
         switch(authenticationType){
             case 'meteor-password':
                 Meteor.logoutViaAccounts(callback);
@@ -424,7 +424,7 @@ if (Meteor.isClient) {
 
     // Logout via custom URL
     Meteor.logoutViaHeader = function(callback) {
-        window.location.href = mozdef.rootURL + '/logout';
+        window.location.href = getSetting('rootURL').toLowerCase() + '/logout';
     };
 
     Meteor.logoutViaAccounts = function(callback) {
@@ -437,7 +437,7 @@ if (Meteor.isClient) {
     // Note that since they're 302's they will ALWAYS cause a CORS error, which we keep as this is the SAFE way to
     // handle this situation.
     (function(xhr) {
-        var authenticationType = mozdef.authenticationType.toLowerCase();
+        var authenticationType = getSetting('authenticationType').toLowerCase();
         function intercept_xhr(xhrInstance) {
             // Verify a user is actually logged in and Meteor is running
             if ((Meteor.user() !== null) && (Meteor.status().connected)) {

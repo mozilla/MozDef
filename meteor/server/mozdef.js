@@ -43,6 +43,10 @@ if (Meteor.isServer) {
             key: 'enableBlockIP',
             value: mozdef.enableBlockIP
         });
+        mozdefsettings.insert({
+            key: 'authenticationType',
+            value: mozdef.authenticationType
+        })
 
         //allow local account creation?
         //http://docs.meteor.com/#/full/accounts_config
