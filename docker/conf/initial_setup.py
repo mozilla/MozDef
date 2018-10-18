@@ -30,6 +30,7 @@ args = parser.parse_args()
 esserver = os.environ.get('OPTIONS_ESSERVERS')
 if esserver is None:
     esserver = args.esserver
+esserver = esserver.strip('/')
 print "Connecting to " + esserver
 client = ElasticsearchClient(esserver)
 
