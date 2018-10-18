@@ -38,7 +38,6 @@ services:
     image: mozdef/mozdef_bootstrap
     env_file:
       - cloudy_mozdef.env
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py ${ES_URL} cron/defaultMappingTemplate.json cron/backup.conf'
     depends_on:
       - base
     networks:
