@@ -142,7 +142,7 @@ Resources:
               client_id=${OIDCClientId}
               client_secret=${OIDCClientSecret}
               discovery_url=${OIDCDiscoveryURL}
-              backend=${KibanaURL}
+              backend=${KibanaURLShort}
               redirect_uri_path=/redirect_uri
               httpsredir=no
             path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
