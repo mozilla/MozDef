@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Deploy MozDef autoscaled ec2 instance group and ALB into AWS
+Description: Deploy MozDef autoscaled EC2 instance group and ALB into AWS
 Parameters:
   VpcId:
     Type: "AWS::EC2::VPC::Id"
@@ -130,14 +130,14 @@ Resources:
             path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
           runcmd:
             - chmod 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
-            - cd /opt/mozdef && git pull infosec_workweek
+            - cd /opt/mozdef && git pull origin infosec_workweek
             - make -C /opt/mozdef -f /opt/mozdef/Makefile  # USE_DKR_IMAGES=docker/compose/docker-compose-norebuild.yml run-cloudy-mozdef
   MozDefAutoScaleGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       DesiredCapacity: 1
       LaunchConfigurationName: !Ref MozDefLaunchConfiguration
-      MaxSize: 1
+      MaxSize: 2
       MinSize: 1
       Tags:
         - Key: Name
@@ -158,7 +158,7 @@ Resources:
      AutoScalingRollingUpdate:
        MinInstancesInService: '1'
        MaxBatchSize: '1'
-       PauseTime: PT12M5S
+       PauseTime: PT5S
   MozDefElasticLoadBalancingV2LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
