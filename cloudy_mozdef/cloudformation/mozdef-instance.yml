@@ -118,6 +118,7 @@ Resources:
               discovery_url=${OIDCDiscoveryURL}
               backend=http://nginx
               redirect_uri_path=/redirect_uri
+              httpsredir=no
             path: /opt/mozdef/docker/compose/cloudy_mozdef.env
           runcmd:
             - chmod 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
