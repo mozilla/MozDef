@@ -23,7 +23,7 @@ services:
       - cloudy_mozdef_kibana.env
     restart: always
     ports:
-      - 9090:9090
+      - 9090:80
     networks:
       - default
   mongodb:
