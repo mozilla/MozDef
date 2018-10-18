@@ -8,6 +8,8 @@ services:
     restart: always
     depends_on:
       - meteor
+    links:
+      - "meteor"
     ports:
       - 80:80
       - 443:80
@@ -21,7 +23,7 @@ services:
       - cloudy_mozdef_kibana.env
     restart: always
     ports:
-      - 9090:9090
+      - 9090:80
     networks:
       - default
   mongodb:
@@ -140,11 +142,36 @@ services:
       - 514:514
     networks:
       - default
-
+  rabbitmq:
+    image: mozdef/mozdef_rabbitmq
+    restart: always
+    command: rabbitmq-server
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    # ports:
+    #   - 5672:5672
+    #   - 15672:15672 # Admin interface
+    networks:
+      - default
+  mq_eventtask:
+    image: mozdef/mozdef_mq_eventtask
+    restart: always
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
+    scale: 1
+    depends_on:
+      - base
+      - rabbitmq
+      - loginput
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
 volumes:
   mongodb:
   cron:
   geolite_db:
+  rabbitmq:
 
 networks:
   default:
