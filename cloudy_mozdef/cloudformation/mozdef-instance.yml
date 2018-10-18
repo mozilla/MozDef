@@ -119,6 +119,11 @@ Resources:
               backend=http://meteor:3000
               redirect_uri_path=/redirect_uri
               httpsredir=no
+              # Meteor settings
+              MONGO_URL=mongodb://mongodb:3002/meteor
+              ROOT_URL=http://localhost
+              OPTIONS_METEOR_PORT=3000
+              OPTIONS_METEOR_AUTHENTICATIONTYPE=oidc
             path: /opt/mozdef/docker/compose/cloudy_mozdef.env
           - content: |
               client_id=${OIDCClientId}
