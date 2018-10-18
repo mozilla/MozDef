@@ -58,6 +58,8 @@ services:
     depends_on:
       - base
       - elasticsearch
+    environment:
+      - ES_URL=http://localhost:9200
     networks:
       - default
   alertplugins:

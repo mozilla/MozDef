@@ -63,3 +63,5 @@ WORKDIR /opt/mozdef/envs/mozdef
 VOLUME /opt/mozdef/envs/mozdef/data
 
 USER root
+
+CMD ["source", "/opt/mozdef/envs/python/bin/activate", "python", "docker/conf/initial_setup.py", "${ES_URL}", "cron/defaultMappingTemplate.json", "cron/backup.conf"]
