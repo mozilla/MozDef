@@ -50,9 +50,10 @@ Resources:
               AWS: "*"
             Action: "es:*"
       Tags:
-        -
-          Key: "application"
+        - Key: "application"
           Value: "mozdef"
+        - Key: stack
+          Value: !Ref "AWS::StackName"
   MozDefElasticSearchSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -70,9 +71,10 @@ Resources:
           ToPort: 443
           SourceSecurityGroupId: !Ref MozDefInstanceSecurityGroup
       Tags:
-        -
-          Key: "application"
+        - Key: "application"
           Value: "mozdef"
+        - Key: stack
+          Value: !Ref "AWS::StackName"
       VpcId: !Ref VpcId
 Outputs:
   ElasticsearchDomainArn:

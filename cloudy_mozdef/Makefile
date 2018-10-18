@@ -45,3 +45,7 @@ cflint: ## Verify the CloudFormation template pass linting tests
 .PHONY: stack-status
 stack-status: ## Output current CloudFormation stack status
 	$(DOCKER_BASH_RUN) "aws cloudformation describe-stacks --stack-name mozdef-nested"
+
+.PHONY: upload-templates
+upload-templates: ## Upload all AWS CloudFormation templates in the cloudformation/ directory to S3
+	aws s3 sync cloudformation/ $(S3_INFOSEC_URI) --acl public-read
