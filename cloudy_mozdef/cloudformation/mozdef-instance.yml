@@ -158,7 +158,7 @@ Resources:
      AutoScalingRollingUpdate:
        MinInstancesInService: '1'
        MaxBatchSize: '1'
-       PauseTime: PT12M5S
+       PauseTime: PT5S
   MozDefElasticLoadBalancingV2LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
