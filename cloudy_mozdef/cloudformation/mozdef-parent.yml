@@ -38,7 +38,7 @@ Parameters:
   AMIImageId:
     Type: String
     Description: "The AMI Image ID to use of the EC2 instance"
-    Default: "ami-0e6f50fa0c8c241af"
+    Default: "ami-0ff5b922fb3ae2332"
   ACMCertArn:
     Description: The ARN of your pre-issued ACM cert.
     Default : "arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583"
