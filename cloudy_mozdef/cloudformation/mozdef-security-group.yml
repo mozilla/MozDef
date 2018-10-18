@@ -22,6 +22,11 @@ Resources:
         FromPort: 80
         ToPort: 80
         SourceSecurityGroupId: !Ref MozDefLoadBalancerSecurityGroup
+      - Description: Allow 9090 inbound from everywhere
+        IpProtocol: tcp
+        FromPort: 9090
+        ToPort: 9090
+        CidrIp: "0.0.0.0/0"
       Tags:
         - Key: application
           Value: mozdef
