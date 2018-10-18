@@ -141,6 +141,7 @@ services:
     networks:
       - default
   rabbitmq:
+    image: mozdef/mozdef_rabbitmq
     restart: always
     command: rabbitmq-server
     volumes:
@@ -151,6 +152,7 @@ services:
     networks:
       - default
   mq_eventtask:
+    image: mozdef/mozdef_mq_eventtask
     restart: always
     command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
     scale: 1
