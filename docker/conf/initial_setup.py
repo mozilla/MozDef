@@ -26,8 +26,12 @@ parser.add_argument('backup_conf_file', help='The relative path to backup.conf f
 args = parser.parse_args()
 
 
-print "Connecting to " + args.esserver
-client = ElasticsearchClient(args.esserver)
+
+esserver = os.environ.get('ES_URL')
+if esserver is None:
+    esserver = args.esserver
+print "Connecting to " + esserver
+client = ElasticsearchClient(esserver)
 
 
 current_date = datetime.now()
