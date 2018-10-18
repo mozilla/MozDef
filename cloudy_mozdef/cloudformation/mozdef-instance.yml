@@ -120,6 +120,14 @@ Resources:
               redirect_uri_path=/redirect_uri
               httpsredir=no
             path: /opt/mozdef/docker/compose/cloudy_mozdef.env
+          - content: |
+              client_id=${OIDCClientId}
+              client_secret=${OIDCClientSecret}
+              discovery_url=${OIDCDiscoveryURL}
+              backend=${KibanaURL}
+              redirect_uri_path=/redirect_uri
+              httpsredir=no
+            path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
           runcmd:
             - chmod 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - cd /opt/mozdef && git pull infosec_workweek

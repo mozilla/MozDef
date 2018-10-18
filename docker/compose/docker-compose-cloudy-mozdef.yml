@@ -5,19 +5,29 @@ services:
     image: mozillaiam/mozilla.oidc.accessproxy
     env_file:
       - cloudy_mozdef.env
-      - cloudy_mozdef_local.env
     restart: always
     depends_on:
       - meteor
     ports:
       - 80:80
       - 443:80
-        #      - 8080:8080
-        #      - 9090:9090
+        #      - 8080:8080 is loginput
+        #      - 9090:9090 is kibana
+    networks:
+      - default
+  nginxkibana:
+    image: mozillaiam/mozilla.oidc.accessproxy
+    env_file:
+      - cloudy_mozdef_kibana.env
+    restart: always
+    ports:
+      - 9090:9090
     networks:
       - default
   mongodb:
     image: mozdef/mozdef_mongodb
+    env_file:
+      - cloudy_mozdef.env
     restart: always
     command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
     volumes:
@@ -87,16 +97,22 @@ services:
     depends_on:
       - base
       - bootstrap
+    ports:
+      - 8080:8080
     networks:
       - default
   meteor:
     image: mozdef/mozdef_meteor
+    env_file:
+      - cloudy_mozdef.env
     restart: always
     command: bash -c 'node bundle/main.js'
     depends_on:
       - mongodb
       - rest
       - bootstrap
+    ports:
+      - 3000:3000
     networks:
       - default
   rest:
