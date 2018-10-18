@@ -19,13 +19,13 @@ body{
 	/*gradient*/
 
     background: rgb(51, 61, 73); /* Old browsers */
-    background: -moz-linear-gradient(top, rgb(149, 149, 149) 0%, rgb(231, 229, 226) 43%, rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* FF3.6+ */
+    background: -moz-linear-gradient(top, rgb(149, 149, 149) 0%, rgb(231, 229, 226) 43%, rgb(74, 74, 79) 100%, rgba(56, 56, 61) 62%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(43%,rgba(32,124,202,1)), color-stop(62%,rgba(41,137,216,1)), color-stop(100%,rgba(41,150,217,1))); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* IE10+ */
-    background: linear-gradient(to bottom, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* W3C */
-    background: linear-gradient(to bottom, rgb(149, 149, 149) 0%,rgb(231, 229, 226) 43%,rgba(0, 94, 94) 100%, rgba(0, 94, 94) 62%); /* W3C */
+    background: -webkit-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(74, 74, 79) 100%, rgba(56, 56, 61) 62%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(74, 74, 79) 100%, rgba(56, 56, 61) 62%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(74, 74, 79) 100%, rgba(56, 56, 61) 62%); /* IE10+ */
+    background: linear-gradient(to bottom, rgba(149, 149, 149) 0%,rgba(231, 229, 226) 43%,rgba(74, 74, 79) 100%, rgba(56, 56, 61) 62%); /* W3C */
+    background: linear-gradient(to bottom, rgb(149, 149, 149) 0%,rgb(231, 229, 226) 43%,rgba(74, 74, 79) 100%, rgba(56, 56, 61) 62%); /* W3C */
     font-family: "Zilla Slab",sans-serif;
     font-size: 14px;
     /*margin: 0;*/
@@ -604,7 +604,7 @@ nav.main-menu.expanded {
 }
 
 .main-menu {
-  background: #959595;
+  background: #b1b1b3;
   border-right: 1px solid #e5e5e5;
   position: absolute;
   top: 0;
@@ -753,4 +753,9 @@ h1 {
 
 .container {
   margin-left: 200px;
+}
+
+div#login-dropdown-list.accounts-dialog {
+    bottom: -16px;
+    top: unset;
 }
