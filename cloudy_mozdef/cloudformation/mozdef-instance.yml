@@ -85,6 +85,8 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
       VpcId: !Ref VpcId
   MozDefLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -134,6 +136,9 @@ Resources:
         - Key: application
           Value: mozdef
           PropagateAtLaunch: true
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+          PropagateAtLaunch: true
       TargetGroupARNs: !GetAtt MozDefElasticLoadBalancingV2TargetGroup.LoadBalancerArns
       TerminationPolicies:
         - OldestLaunchConfiguration
@@ -147,6 +152,8 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
   MozDefElasticLoadBalancingV2ListenerHttps:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Properties:

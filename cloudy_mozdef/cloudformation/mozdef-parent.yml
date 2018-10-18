@@ -98,6 +98,8 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
       TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-instance.yml" ] ]
   MozDefES:
     Type: AWS::CloudFormation::Stack
@@ -111,6 +113,8 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
       TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-es.yml" ] ]
   MozDefMQ:
     Type: AWS::CloudFormation::Stack
@@ -125,6 +129,8 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
       TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-mq.yml" ] ]
   MozDefEFS:
     Type: AWS::CloudFormation::Stack
@@ -136,4 +142,6 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
       TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-efs.yml" ] ]

@@ -25,6 +25,8 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
       VpcId: !Ref VpcId
   MozDefLoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -43,6 +45,8 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
       VpcId: !Ref VpcId
 Outputs:
   MozDefSecurityGroupId:
