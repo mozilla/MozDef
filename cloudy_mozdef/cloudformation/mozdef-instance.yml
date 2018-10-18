@@ -77,18 +77,6 @@ Parameters:
     Default: "https://auth.mozilla.auth0.com/.well-known/openid-configuration"
     Description: "The URL of your OIDC provider's well-known discovery URL"
 Resources:
-  MozDefElasticLoadBalancingV2TargetGroup2:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      HealthCheckPath: "/health"
-      Port: 9090
-      Protocol: HTTP
-      Tags:
-        - Key: application
-          Value: mozdef
-        - Key: stack
-          Value: !Ref "AWS::StackName"
-      VpcId: !Ref VpcId
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -227,20 +215,6 @@ Resources:
       LoadBalancerArn:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
       Port: 443
-      Protocol: HTTPS
-      SslPolicy: ELBSecurityPolicy-2016-08
-  MozDefElasticLoadBalancingV2ListenerHttpsAlt:
-    Type : AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
-      DefaultActions:
-      - Type: forward
-        TargetGroupArn:
-          Ref: MozDefElasticLoadBalancingV2TargetGroup2
-      LoadBalancerArn:
-        Ref: MozDefElasticLoadBalancingV2LoadBalancer
-      Port: 9090
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
   MozDefElasticLoadBalancingV2ListenerHttp:
