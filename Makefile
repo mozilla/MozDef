@@ -64,7 +64,7 @@ docker-push: hub
 hub: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef).
 	docker login
 	@echo "Tagging current docker images with git HEAD shorthash..."
-	$(foreach var,$(DKR_IMAGES),docker tag $(var):latest mozdef/$(var):$(GITHASH);)
+	$(foreach var,$(DKR_IMAGES),docker tag $(var) mozdef/$(var):$(GITHASH);)
 	@echo "Uploading images to docker..."
 	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
 

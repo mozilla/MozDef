@@ -3,11 +3,14 @@ version: '2.2'
 services:
   nginx:
     image: mozillaiam/mozilla.oidc.accessproxy
+    env_file:
+      - cloudy_mozdef.env
     restart: always
     depends_on:
       - meteor
     ports:
       - 80:80
+      - 443:80
         #      - 8080:8080
         #      - 9090:9090
     networks:

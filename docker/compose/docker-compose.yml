@@ -160,6 +160,9 @@ services:
       - 514:514
     networks:
       - default
+  tester:
+    networks:
+      - default
 
 volumes:
   elasticsearch:

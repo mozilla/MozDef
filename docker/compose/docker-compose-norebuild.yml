@@ -32,4 +32,4 @@ services:
   syslog:
     image: mozdef/mozdef_syslog
   tester:
-    image: mozdef/mozdef-tester
+    image: mozdef/mozdef_tester
