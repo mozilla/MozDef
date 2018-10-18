@@ -140,7 +140,30 @@ services:
       - 514:514
     networks:
       - default
-
+  rabbitmq:
+    restart: always
+    command: rabbitmq-server
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    # ports:
+    #   - 5672:5672
+    #   - 15672:15672 # Admin interface
+    networks:
+      - default
+  mq_eventtask:
+    restart: always
+    command: bash -c 'sleep 90 && source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
+    scale: 1
+    depends_on:
+      - base
+      - rabbitmq
+      - elasticsearch
+      - loginput
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
 volumes:
   mongodb:
   cron:
