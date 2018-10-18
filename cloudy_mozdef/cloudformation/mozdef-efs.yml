@@ -11,19 +11,197 @@ Parameters:
     Description: Select existing subnets.
     Type: List<AWS::EC2::Subnet::Id>
     Default: "subnet-8931f7ee,subnet-de322aa8,subnet-2582cd7d"
+  NumberOfSubnets:
+    Description: Number of subnets in the Subnet parameter
+    Type: String
+    Default: 3
   MozDefSecurityGroup:
     Description: "The security group of the Mozdef endpoint that is accessing EFS"
     Type: AWS::EC2::SecurityGroup::Id
     Default: "sg-02d7fe9627ea068e2"
+Conditions:
+  Has1Subnets: !Equals [ !Ref NumberOfSubnets, 1 ]
+  Has2Subnets: !Equals [ !Ref NumberOfSubnets, 2 ]
+  Has3Subnets: !Equals [ !Ref NumberOfSubnets, 3 ]
+  Has4Subnets: !Equals [ !Ref NumberOfSubnets, 4 ]
+  Has5Subnets: !Equals [ !Ref NumberOfSubnets, 5 ]
+  Has6Subnets: !Equals [ !Ref NumberOfSubnets, 6 ]
+  Has7Subnets: !Equals [ !Ref NumberOfSubnets, 7 ]
+  Has8Subnets: !Equals [ !Ref NumberOfSubnets, 8 ]
+  Has9Subnets: !Equals [ !Ref NumberOfSubnets, 9 ]
+  Has10Subnets: !Equals [ !Ref NumberOfSubnets, 10 ]
+  Has11Subnets: !Equals [ !Ref NumberOfSubnets, 11 ]
+  Has12Subnets: !Equals [ !Ref NumberOfSubnets, 12 ]
+  Has13Subnets: !Equals [ !Ref NumberOfSubnets, 13 ]
+  Has14Subnets: !Equals [ !Ref NumberOfSubnets, 14 ]
+  Has15Subnets: !Equals [ !Ref NumberOfSubnets, 15 ]
+  Has16Subnets: !Equals [ !Ref NumberOfSubnets, 16 ]
+  Has17Subnets: !Equals [ !Ref NumberOfSubnets, 17 ]
+  Has18Subnets: !Equals [ !Ref NumberOfSubnets, 18 ]
+  Has19Subnets: !Equals [ !Ref NumberOfSubnets, 19 ]
+  Has20Subnets: !Equals [ !Ref NumberOfSubnets, 20 ]
 Resources:
-  MountTarget:
-    Type: AWS::EFS::MountTarget
+  MountTargetSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      FileSystemId:
-        !Ref ElasticFileSystem
-      SubnetId:
-        !Select [ 0, !Ref 'Subnet' ]
-      SecurityGroups:
-        [ !Ref MozDefSecurityGroup ]
+      GroupDescription: Security Group of the MozDef EFS Mount Target
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 2049
+        ToPort: 2049
+        SourceSecurityGroupId: !Ref MozDefSecurityGroup
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+      VpcId: !Ref VPCID0
   ElasticFileSystem:
     Type: AWS::EFS::FileSystem
+  MountTarget1:
+    Type: AWS::EFS::MountTarget
+    Condition: Has1Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 0, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget2:
+    Type: AWS::EFS::MountTarget
+    Condition: Has2Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 1, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget3:
+    Type: AWS::EFS::MountTarget
+    Condition: Has3Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 2, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget4:
+    Type: AWS::EFS::MountTarget
+    Condition: Has4Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 3, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget5:
+    Type: AWS::EFS::MountTarget
+    Condition: Has5Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 4, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget6:
+    Type: AWS::EFS::MountTarget
+    Condition: Has6Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 5, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget7:
+    Type: AWS::EFS::MountTarget
+    Condition: Has7Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 6, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget8:
+    Type: AWS::EFS::MountTarget
+    Condition: Has8Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 7, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget9:
+    Type: AWS::EFS::MountTarget
+    Condition: Has9Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 8, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget10:
+    Type: AWS::EFS::MountTarget
+    Condition: Has10Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 9, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget11:
+    Type: AWS::EFS::MountTarget
+    Condition: Has11Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 10, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget12:
+    Type: AWS::EFS::MountTarget
+    Condition: Has12Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 11, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget13:
+    Type: AWS::EFS::MountTarget
+    Condition: Has13Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 12, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget14:
+    Type: AWS::EFS::MountTarget
+    Condition: Has14Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 13, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget15:
+    Type: AWS::EFS::MountTarget
+    Condition: Has15Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 14, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget16:
+    Type: AWS::EFS::MountTarget
+    Condition: Has16Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 15, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget17:
+    Type: AWS::EFS::MountTarget
+    Condition: Has17Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 16, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget18:
+    Type: AWS::EFS::MountTarget
+    Condition: Has18Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 17, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget19:
+    Type: AWS::EFS::MountTarget
+    Condition: Has19Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 18, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+  MountTarget20:
+    Type: AWS::EFS::MountTarget
+    Condition: Has20Subnets
+    Properties:
+      FileSystemId: !Ref ElasticFileSystem
+      SubnetId: !Select [ 19, !Ref 'Subnet' ]
+      SecurityGroups: [ !Ref MountTargetSecurityGroup ]
+Outputs:
+  EFSID:
+    Description: "Logical ID of the EFS Filesystem"
+    Value: !Ref ElasticFileSystem

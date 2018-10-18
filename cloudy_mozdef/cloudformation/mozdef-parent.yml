@@ -82,6 +82,7 @@ Resources:
         IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
         AutoScaleGroupSubnetIds: !Join [ ",", !Ref PublicSubnetIds ]
         AMIImageId: !Ref AMIImageId
+        # EFSID: !GetAtt MozDefEFS.Outputs.EFSID
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
         MozDefACMCertArn: !Ref ACMCertArn
@@ -138,6 +139,7 @@ Resources:
       Parameters:
         VPCID0: !Ref VpcId
         Subnet: !Join [ ",", !Ref PublicSubnetIds ]
+        NumberOfSubnets: !GetAtt NumberOfSubnets.Length
         MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
       Tags:
         - Key: application
@@ -145,3 +147,49 @@ Resources:
         - Key: stack
           Value: !Ref "AWS::StackName"
       TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-efs.yml" ] ]
+  CloudFormationLambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        -
+          PolicyName: AllowLambdaLogging
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:*"
+                Resource: "*"
+  GetArrayLengthLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import cfnresponse
+          def handler(event, context):
+            length = len(event['ResourceProperties']['Array'])
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, {'Length': length}, "CustomResourcePhysicalID")
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+      Timeout: 20
+  NumberOfSubnets:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      Array: !Ref 'PublicSubnetIds'
+      ServiceToken: !GetAtt GetArrayLengthLambdaFunction.Arn
