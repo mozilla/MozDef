@@ -80,7 +80,8 @@ Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Port: 443
+      HealthCheckPath: "/health"
+      Port: 80
       Protocol: HTTP
       Tags:
         - Key: application
@@ -139,10 +140,16 @@ Resources:
         - Key: stack
           Value: !Ref "AWS::StackName"
           PropagateAtLaunch: true
-      TargetGroupARNs: !GetAtt MozDefElasticLoadBalancingV2TargetGroup.LoadBalancerArns
+      TargetGroupARNs:
+        - !Ref MozDefElasticLoadBalancingV2TargetGroup
       TerminationPolicies:
         - OldestLaunchConfiguration
       VPCZoneIdentifier: !Ref AutoScaleGroupSubnetIds
+    UpdatePolicy:
+     AutoScalingRollingUpdate:
+       MinInstancesInService: '1'
+       MaxBatchSize: '1'
+       PauseTime: PT12M5S
   MozDefElasticLoadBalancingV2LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
