@@ -159,7 +159,6 @@ services:
     depends_on:
       - base
       - rabbitmq
-      - elasticsearch
       - loginput
       - bootstrap
     networks:
