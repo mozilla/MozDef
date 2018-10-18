@@ -89,6 +89,18 @@ Resources:
         - Key: stack
           Value: !Ref "AWS::StackName"
       VpcId: !Ref VpcId
+  MozDefElasticLoadBalancingV2TargetGroupKibana:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckPath: "/health"
+      Port: 9090
+      Protocol: HTTP
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+      VpcId: !Ref VpcId
   MozDefLaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -157,6 +169,7 @@ Resources:
           PropagateAtLaunch: true
       TargetGroupARNs:
         - !Ref MozDefElasticLoadBalancingV2TargetGroup
+        - !Ref MozDefElasticLoadBalancingV2TargetGroupKibana
       TerminationPolicies:
         - OldestLaunchConfiguration
       VPCZoneIdentifier: !Ref AutoScaleGroupSubnetIds
@@ -176,6 +189,20 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref "AWS::StackName"
+  MozDefElasticLoadBalancingV2ListenerKibanaHttps:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 9090
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
   MozDefElasticLoadBalancingV2ListenerHttps:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Properties:
