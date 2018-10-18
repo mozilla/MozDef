@@ -169,6 +169,7 @@ volumes:
   mongodb:
   cron:
   geolite_db:
+  rabbitmq:
 
 networks:
   default:
