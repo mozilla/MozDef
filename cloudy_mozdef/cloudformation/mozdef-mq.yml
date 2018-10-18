@@ -37,8 +37,8 @@ Resources:
       VpcId: !Ref 'MQVpcId'
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '8162'
-          ToPort: '8162'
+          FromPort: '5671'
+          ToPort: '5671'
           SourceSecurityGroupId: !Ref 'MozDefSecurityGroup'
       Tags:
         - Key: application
