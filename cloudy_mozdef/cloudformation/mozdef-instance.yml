@@ -41,7 +41,11 @@ Parameters:
     Default: http://elasticsearch.example.com/
   KibanaURL:
     Type: "String"
-    Description: "The AWS ES Kibana URL"
+    Description: "The AWS ES Kibana complete URL"
+    Default: https://kibana.example.com/_plugin/kibana
+  KibanaDomainOnlyURL:
+    Type: "String"
+    Description: "The AWS ES Kibana URL with domain only"
     Default: https://kibana.example.com/
   AmazonMQHostName:
     Type: "String"
@@ -142,7 +146,7 @@ Resources:
               client_id=${OIDCClientId}
               client_secret=${OIDCClientSecret}
               discovery_url=${OIDCDiscoveryURL}
-              backend=${KibanaURL}
+              backend=${KibanaDomainOnlyURL}
               redirect_uri_path=/redirect_uri
               httpsredir=no
             path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env

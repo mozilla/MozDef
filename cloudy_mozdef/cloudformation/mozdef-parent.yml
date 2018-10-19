@@ -88,6 +88,7 @@ Resources:
         MozDefACMCertArn: !Ref ACMCertArn
         ESURL: !GetAtt MozDefES.Outputs.ElasticsearchURL
         KibanaURL: !GetAtt MozDefES.Outputs.ElasticsearchKibanaURL
+        KibanaDomainOnlyURL: !GetAtt MozDefES.Outputs.ElasticsearchDomainOnlyURL
         AmazonMQHostName: !GetAtt MozDefMQ.Outputs.MQHostName
         AmazonMQScheme: !GetAtt MozDefMQ.Outputs.MQScheme
         AmazonMQPort: !GetAtt MozDefMQ.Outputs.MQPort
