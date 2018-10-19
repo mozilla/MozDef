@@ -142,6 +142,9 @@ Resources:
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
             - mkdir --verbose --parents ${EFSMountPoint}
+            - echo '*.* @@127.0.0.1:514' >> /etc/rsyslog/rsyslog.conf
+            - systemctl enable rsyslog
+            - systemctl start rsyslog
             - grep "${EFSID}" /etc/fstab >/dev/null || echo "${EFSID}:/ ${EFSMountPoint} efs tls,_netdev" >> /etc/fstab
             - for i in 1 2 3 4 5 6; do mount --verbose --all --types efs defaults && break || sleep 15; done
             - cd /opt/mozdef && git pull origin infosec_workweek
