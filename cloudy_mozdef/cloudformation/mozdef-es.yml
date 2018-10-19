@@ -86,9 +86,6 @@ Outputs:
   ElasticsearchKibanaURL:
     Description: "URL for the Kibana UI"
     Value: !Join [ '', [ 'https://', !GetAtt MozDefElasticSearch.DomainEndpoint, "/_plugin/kibana/" ] ]
-  ElasticsearchKibanaURLShort:
-    Description: "URL for the Kibana UI"
-    Value: !Join [ '', [ 'https://', !GetAtt MozDefElasticSearch.DomainEndpoint ] ]
   ElasticsearchURL:
     Description: "URL for the Kibana UI"
     Value: !Join [ '', [ 'http://', !GetAtt MozDefElasticSearch.DomainEndpoint, ":80" ] ]
