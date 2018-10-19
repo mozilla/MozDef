@@ -82,7 +82,7 @@ Resources:
         IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
         AutoScaleGroupSubnetIds: !Join [ ",", !Ref PublicSubnetIds ]
         AMIImageId: !Ref AMIImageId
-        # EFSID: !GetAtt MozDefEFS.Outputs.EFSID
+        EFSID: !GetAtt MozDefEFS.Outputs.EFSID
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
         MozDefACMCertArn: !Ref ACMCertArn
