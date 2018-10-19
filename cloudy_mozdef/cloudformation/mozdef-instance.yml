@@ -25,6 +25,13 @@ Parameters:
     Type: "String"
     Description: "The AMI Image ID to use of the EC2 instance"
     Default: "ami-0ff5b922fb3ae2332"
+  EFSID:
+    Type: "String"
+    Description: "Logical ID of the EFS Filesystem"
+  EFSMountPoint:
+    Type: "String"
+    Description: "Directory to mount EFS to"
+    Default: "/var/lib/mongodb"
   MozDefSecurityGroupId:
     Type: "String"
     Description: "The security group to apply to the EC2 instance"
@@ -119,40 +126,45 @@ Resources:
         Fn::Base64: !Sub |
           #cloud-config
 
+          packages:
+            - amazon-efs-utils
           write_files:
-          - content: |
-              OPTIONS_ESSERVERS=${ESURL}
-              OPTIONS_KIBANAURL=${KibanaURL}
-              OPTIONS_MQSERVER=${AmazonMQHostName}
-              OPTIONS_MQPROTOCOL=${AmazonMQScheme}
-              OPTIONS_MQPORT=${AmazonMQPort}
-              OPTIONS_MQUSER=${AmazonMQUsername}
-              OPTIONS_MQPASSWORD=${AmazonMQPassword}
-              # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
-              client_id=${OIDCClientId}
-              client_secret=${OIDCClientSecret}
-              discovery_url=${OIDCDiscoveryURL}
-              backend=http://meteor:3000
-              redirect_uri_path=/redirect_uri
-              httpsredir=no
-              # Meteor settings
-              MONGO_URL=mongodb://mongodb:3002/meteor
-              ROOT_URL=http://localhost
-              OPTIONS_METEOR_PORT=3000
-              OPTIONS_METEOR_AUTHENTICATIONTYPE=oidc
-              ES={"servers": [${ESURL}]}
-            path: /opt/mozdef/docker/compose/cloudy_mozdef.env
-          - content: |
-              client_id=${OIDCClientId}
-              client_secret=${OIDCClientSecret}
-              discovery_url=${OIDCDiscoveryURL}
-              backend=${KibanaDomainOnlyURL}
-              redirect_uri_path=/redirect_uri
-              httpsredir=no
-            path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
+            - content: |
+                OPTIONS_ESSERVERS=${ESURL}
+                OPTIONS_KIBANAURL=${KibanaURL}
+                OPTIONS_MQSERVER=${AmazonMQHostName}
+                OPTIONS_MQPROTOCOL=${AmazonMQScheme}
+                OPTIONS_MQPORT=${AmazonMQPort}
+                OPTIONS_MQUSER=${AmazonMQUsername}
+                OPTIONS_MQPASSWORD=${AmazonMQPassword}
+                # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
+                client_id=${OIDCClientId}
+                client_secret=${OIDCClientSecret}
+                discovery_url=${OIDCDiscoveryURL}
+                backend=http://meteor:3000
+                redirect_uri_path=/redirect_uri
+                httpsredir=no
+                # Meteor settings
+                MONGO_URL=mongodb://mongodb:3002/meteor
+                ROOT_URL=http://localhost
+                OPTIONS_METEOR_PORT=3000
+                OPTIONS_METEOR_AUTHENTICATIONTYPE=oidc
+                ES={"servers": [${ESURL}]}
+              path: /opt/mozdef/docker/compose/cloudy_mozdef.env
+            - content: |
+                client_id=${OIDCClientId}
+                client_secret=${OIDCClientSecret}
+                discovery_url=${OIDCDiscoveryURL}
+                backend=${KibanaDomainOnlyURL}
+                redirect_uri_path=/redirect_uri
+                httpsredir=no
+              path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
           runcmd:
-            - chmod 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
-            - chmod 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
+            - mkdir --verbose --parents ${EFSMountPoint}
+            - grep "${EFSID}" /etc/fstab >/dev/null || echo "${EFSID}:/ ${EFSMountPoint} efs tls,_netdev" >> /etc/fstab
+            - for i in 1 2 3 4 5 6; do mount --verbose --all --types efs defaults && break || sleep 15; done
             - cd /opt/mozdef && git pull origin infosec_workweek
             - make -C /opt/mozdef -f /opt/mozdef/Makefile  run-cloudy-mozdef
   MozDefAutoScaleGroup:
