@@ -177,9 +177,11 @@ Resources:
       Code:
         ZipFile: |
           import cfnresponse
+          import secrets, string
           def handler(event, context):
             length = len(event['ResourceProperties']['Array'])
-            cfnresponse.send(event, context, cfnresponse.SUCCESS, {'Length': length}, "CustomResourcePhysicalID")
+            physical_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(13))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, {'Length': length}, "GetArrayLength-%s" % physical_id)
       Handler: index.handler
       Runtime: python3.6
       Role: !GetAtt CloudFormationLambdaIAMRole.Arn
