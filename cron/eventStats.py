@@ -46,29 +46,24 @@ def initLogger():
 def esSearch(es):
     search_query = SearchQuery(minutes=options.aggregationminutes)
     search_query.add_aggregation(Aggregation('category'))
+    results = search_query.execute(es)
 
-    try:
-        results = search_query.execute(es)
-
-        mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
-        mozdefstats['category'] = 'stats'
-        mozdefstats['hostname'] = socket.gethostname()
-        mozdefstats['mozdefhostname'] = mozdefstats['hostname']
-        mozdefstats['severity'] = 'INFO'
-        mozdefstats['source'] = 'mozdef'
-        mozdefstats['tags'] = ['mozdef', 'stats']
-        mozdefstats['summary'] = 'Aggregated category counts'
-        mozdefstats['processid'] = os.getpid()
-        mozdefstats['processname'] = sys.argv[0]
-        mozdefstats['details'] = dict(counts=list())
-        for bucket in results['aggregations']['category']['terms']:
-            entry = dict()
-            entry[bucket['key']] = bucket['count']
-            mozdefstats['details']['counts'].append(entry)
-        return mozdefstats
-
-    except ElasticsearchBadServer:
-        logger.error('Elastic Search server could not be reached, check network connectivity')
+    mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
+    mozdefstats['category'] = 'stats'
+    mozdefstats['hostname'] = socket.gethostname()
+    mozdefstats['mozdefhostname'] = mozdefstats['hostname']
+    mozdefstats['severity'] = 'INFO'
+    mozdefstats['source'] = 'mozdef'
+    mozdefstats['tags'] = ['mozdef', 'stats']
+    mozdefstats['summary'] = 'Aggregated category counts'
+    mozdefstats['processid'] = os.getpid()
+    mozdefstats['processname'] = sys.argv[0]
+    mozdefstats['details'] = dict(counts=list())
+    for bucket in results['aggregations']['category']['terms']:
+        entry = dict()
+        entry[bucket['key']] = bucket['count']
+        mozdefstats['details']['counts'].append(entry)
+    return mozdefstats
 
 
 def main():

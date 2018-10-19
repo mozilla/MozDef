@@ -51,6 +51,7 @@ def getDocID(servername):
     hash.update('{0}.mozdefhealth.latest'.format(servername))
     return hash.hexdigest()
 
+
 def main():
     '''
     Get health and status stats and post to ES
@@ -65,81 +66,78 @@ def main():
     with open(options.default_mapping_file, 'r') as mapping_file:
         default_mapping_contents = json.loads(mapping_file.read())
 
-    try:
-        if not es.index_exists(index):
-            try:
-                logger.debug('Creating %s index' % index)
-                es.create_index(index, default_mapping_contents)
-            except Exception as e:
-                logger.error("Unhandled exception, terminating: %r"%e)
+    if not es.index_exists(index):
+        try:
+            logger.debug('Creating %s index' % index)
+            es.create_index(index, default_mapping_contents)
+        except Exception as e:
+            logger.error("Unhandled exception, terminating: %r"%e)
 
-        auth = HTTPBasicAuth(options.mquser, options.mqpassword)
+    auth = HTTPBasicAuth(options.mquser, options.mqpassword)
 
-        for server in options.mqservers:
-            logger.debug('checking message queues on {0}'.format(server))
-            r = requests.get(
-                'http://{0}:{1}/api/queues'.format(server,
-                                                   options.mqapiport),
-                auth=auth)
+    for server in options.mqservers:
+        logger.debug('checking message queues on {0}'.format(server))
+        r = requests.get(
+            'http://{0}:{1}/api/queues'.format(server,
+                                               options.mqapiport),
+            auth=auth)
 
-            mq = r.json()
-            # setup a log entry for health/status.
-            healthlog = dict(
-                utctimestamp=toUTC(datetime.now()).isoformat(),
-                hostname=server,
-                processid=os.getpid(),
-                processname=sys.argv[0],
-                severity='INFO',
-                summary='mozdef health/status',
-                category='mozdef',
-                source='mozdef',
-                tags=[],
-                details=[])
+        mq = r.json()
+        # setup a log entry for health/status.
+        healthlog = dict(
+            utctimestamp=toUTC(datetime.now()).isoformat(),
+            hostname=server,
+            processid=os.getpid(),
+            processname=sys.argv[0],
+            severity='INFO',
+            summary='mozdef health/status',
+            category='mozdef',
+            source='mozdef',
+            tags=[],
+            details=[])
 
-            healthlog['details'] = dict(username='mozdef')
-            healthlog['details']['loadaverage'] = list(os.getloadavg())
-            healthlog['details']['queues']=list()
-            healthlog['details']['total_deliver_eps'] = 0
-            healthlog['details']['total_publish_eps'] = 0
-            healthlog['details']['total_messages_ready'] = 0
-            healthlog['tags'] = ['mozdef', 'status']
-            for m in mq:
-                if 'message_stats' in m.keys() and isinstance(m['message_stats'], dict):
-                    if 'messages_ready' in m.keys():
-                        mready = m['messages_ready']
-                        healthlog['details']['total_messages_ready'] += m['messages_ready']
-                    else:
-                        mready = 0
-                    if 'messages_unacknowledged' in m.keys():
-                        munack = m['messages_unacknowledged']
-                    else:
-                        munack = 0
-                    queueinfo=dict(
-                        queue=m['name'],
-                        vhost=m['vhost'],
-                        messages_ready=mready,
-                        messages_unacknowledged=munack)
+        healthlog['details'] = dict(username='mozdef')
+        healthlog['details']['loadaverage'] = list(os.getloadavg())
+        healthlog['details']['queues']=list()
+        healthlog['details']['total_deliver_eps'] = 0
+        healthlog['details']['total_publish_eps'] = 0
+        healthlog['details']['total_messages_ready'] = 0
+        healthlog['tags'] = ['mozdef', 'status']
+        for m in mq:
+            if 'message_stats' in m.keys() and isinstance(m['message_stats'], dict):
+                if 'messages_ready' in m.keys():
+                    mready = m['messages_ready']
+                    healthlog['details']['total_messages_ready'] += m['messages_ready']
+                else:
+                    mready = 0
+                if 'messages_unacknowledged' in m.keys():
+                    munack = m['messages_unacknowledged']
+                else:
+                    munack = 0
+                queueinfo=dict(
+                    queue=m['name'],
+                    vhost=m['vhost'],
+                    messages_ready=mready,
+                    messages_unacknowledged=munack)
 
-                    if 'deliver_details' in m['message_stats'].keys():
-                        queueinfo['deliver_eps'] = round(m['message_stats']['deliver_details']['rate'], 2)
-                        healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_details']['rate'], 2)
-                    if 'deliver_no_ack_details' in m['message_stats'].keys():
-                        queueinfo['deliver_eps'] = round(m['message_stats']['deliver_no_ack_details']['rate'], 2)
-                        healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_no_ack_details']['rate'], 2)
-                    if 'publish_details' in m['message_stats'].keys():
-                        queueinfo['publish_eps'] = round(m['message_stats']['publish_details']['rate'], 2)
-                        healthlog['details']['total_publish_eps'] += round(m['message_stats']['publish_details']['rate'], 2)
-                    healthlog['details']['queues'].append(queueinfo)
+                if 'deliver_details' in m['message_stats'].keys():
+                    queueinfo['deliver_eps'] = round(m['message_stats']['deliver_details']['rate'], 2)
+                    healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_details']['rate'], 2)
+                if 'deliver_no_ack_details' in m['message_stats'].keys():
+                    queueinfo['deliver_eps'] = round(m['message_stats']['deliver_no_ack_details']['rate'], 2)
+                    healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_no_ack_details']['rate'], 2)
+                if 'publish_details' in m['message_stats'].keys():
+                    queueinfo['publish_eps'] = round(m['message_stats']['publish_details']['rate'], 2)
+                    healthlog['details']['total_publish_eps'] += round(m['message_stats']['publish_details']['rate'], 2)
+                healthlog['details']['queues'].append(queueinfo)
 
-            # post to elastic search servers directly without going through
-            # message queues in case there is an availability issue
-            es.save_event(index=index, doc_type='mozdefhealth', body=json.dumps(healthlog))
-            # post another doc with a static docid and tag
-            # for use when querying for the latest status
-            healthlog['tags'] = ['mozdef', 'status', 'latest']
-            es.save_event(index=index, doc_type='mozdefhealth', doc_id=getDocID(server), body=json.dumps(healthlog))
-    except Exception as e:
-        logger.error("Exception %r when gathering health and status " % e)
+        # post to elastic search servers directly without going through
+        # message queues in case there is an availability issue
+        es.save_event(index=index, doc_type='mozdefhealth', body=json.dumps(healthlog))
+        # post another doc with a static docid and tag
+        # for use when querying for the latest status
+        healthlog['tags'] = ['mozdef', 'status', 'latest']
+        es.save_event(index=index, doc_type='mozdefhealth', doc_id=getDocID(server), body=json.dumps(healthlog))
 
 
 def initConfig():

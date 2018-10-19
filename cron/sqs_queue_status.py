@@ -46,27 +46,22 @@ def getQueueSizes():
     sqslist['queue_stats'] = {}
     qcount = len(options.taskexchange)
     qcounter = qcount - 1
-    try:
-        # meant only to talk to SQS using boto
-        # and return queue attributes.a
 
-        mqConn = boto.sqs.connect_to_region(
-            options.region,
-            aws_access_key_id=options.accesskey,
-            aws_secret_access_key=options.secretkey
-        )
+    mqConn = boto.sqs.connect_to_region(
+        options.region,
+        aws_access_key_id=options.accesskey,
+        aws_secret_access_key=options.secretkey
+    )
 
-        while qcounter >= 0:
-            for exchange in options.taskexchange:
-                logger.debug('Looking for sqs queue stats in queue' + exchange)
-                eventTaskQueue = mqConn.get_queue(exchange)
-                # get queue stats
-                taskQueueStats = eventTaskQueue.get_attributes('All')
-                sqslist['queue_stats'][qcounter] = taskQueueStats
-                sqslist['queue_stats'][qcounter]['name'] = exchange
-                qcounter -= 1
-    except Exception as e:
-        logger.error("Exception %r when gathering health and status " % e)
+    while qcounter >= 0:
+        for exchange in options.taskexchange:
+            logger.debug('Looking for sqs queue stats in queue' + exchange)
+            eventTaskQueue = mqConn.get_queue(exchange)
+            # get queue stats
+            taskQueueStats = eventTaskQueue.get_attributes('All')
+            sqslist['queue_stats'][qcounter] = taskQueueStats
+            sqslist['queue_stats'][qcounter]['name'] = exchange
+            qcounter -= 1
 
     # setup a log entry for health/status.
     sqsid = '{0}-{1}'.format(options.account, options.region)
