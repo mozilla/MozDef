@@ -54,27 +54,6 @@ Parameters:
     Type: "String"
     Description: "The AWS ES Kibana URL with domain only"
     Default: https://kibana.example.com/
-  AmazonMQHostName:
-    Type: "String"
-    Description: "The AWS AmazonMQ HostName"
-    Default: b-ea1aefe8-b194-4be5-91c3-0e8b2e664151-1.mq.us-west-2.amazonaws.com
-  AmazonMQScheme:
-    Type: "String"
-    Description: "The AWS AmazonMQ Scheme"
-    Default: amqp+ssl
-  AmazonMQPort:
-    Type: "String"
-    Description: "The AWS AmazonMQ Port"
-    Default: 5671
-  AmazonMQUsername:
-    Type: "String"
-    Description: "The AWS AmazonMQ Username"
-    Default: mozdef
-  AmazonMQPassword:
-    Type: "String"
-    NoEcho: true
-    Description: "The AWS AmazonMQ User Password"
-    Default: example-password
   OIDCClientId:
     Description: "The client ID that your OIDC provider issues you for your Mozdef instance."
     Type: String
@@ -132,11 +111,6 @@ Resources:
             - content: |
                 OPTIONS_ESSERVERS=${ESURL}
                 OPTIONS_KIBANAURL=${KibanaURL}
-                OPTIONS_MQSERVER=${AmazonMQHostName}
-                OPTIONS_MQPROTOCOL=${AmazonMQScheme}
-                OPTIONS_MQPORT=${AmazonMQPort}
-                OPTIONS_MQUSER=${AmazonMQUsername}
-                OPTIONS_MQPASSWORD=${AmazonMQPassword}
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
