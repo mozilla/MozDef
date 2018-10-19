@@ -1,8 +1,10 @@
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PARENTDIR       := $(realpath ../)
 IMAGE_NAME	:= mozdef-deployment
-S3_INFOSEC_URI	:= s3://mozdef.infosec.mozilla.org/cf
-S3_STACK_URI	:= https://s3-us-west-2.amazonaws.com/cf/nested-stack.yml
+STACK_NAME	:= mozdef-aws-nested
+# MozDef uses a nested CF stack, the mozdef-parent.yml will tie all child stacks together and load them from S3
+S3_BUCKET_URI	:= s3://mozdef.infosec.mozilla.org/cf
+S3_STACK_URI	:= https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-parent.yml
 DOCKER_BASH_RUN	:= docker run -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef $(IMAGE_NAME):latest /bin/bash -c
 
 all:
@@ -23,29 +25,25 @@ deploy-shell: ## Spawn a shell for hacking into the docker image
 packer-build: docker-build ## Build the base AMI with packer
 	$(DOCKER_BASH_RUN) "cd packer && packer build packer.json"
 
-.PHONY: deploy-nested-cloudformation
-deploy-nested-cloudformation: cflint ## Deploy our nested ClouFormation stack
-	$(DOCKER_BASH_RUN) "ansible-playbook -c local ansible/update-ami-metadata.yml"
-	$(DOCKER_BASH_RUN) "aws s3 sync /opt/mozdef/ansible/files/stacks/ $(S3_INFOSEC_URI) --acl public-read"
+.PHONY: create-nested-stack create-s3-bucket
+create-nested-stack: upload-templates test ## Create everything you need for a fresh new stack!
+	$(DOCKER_BASH_RUN) "aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI)"
+create-s3-bucket:
+	$(DOCKER_BASH_RUN) "aws s3api create-bucket --bucket $(S3_BUCKET_URI) --acl public-read"
 
-.PHONY: test
-test: cflint test-nested-stack
+.PHONY: updated-nested-stack
+update-nested-stack: upload-templates test ## Updates the nested stack on AWS
+	$(DOCKER_BASH_RUN) "aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI)"
 
-.PHONY: test-nested-stack cflint
-test-nested-stack:
-	$(DOCKER_BASH_RUN) "ansible-playbook -c local ansible/update-ami-metadata.yml"
-	$(DOCKER_BASH_RUN) "aws s3 sync /opt/mozdef/ansible/files/stacks/ $(S3_INFOSEC_URI) --acl public-read"
-	$(DOCKER_BASH_RUN) "aws s3 cp /opt/mozdef/cloudformation/nested-stack.yml $(S3_INFOSEC_URI)/nested-stack.yml --acl public-read"
-	$(DOCKER_BASH_RUN) "aws cloudformation update-stack --stack-name mozdef-nested --template-url $(S3_STACK_URI)"
-
-.PHONY: cflint
+.PHONY: cflint test
+test: cflint
 cflint: ## Verify the CloudFormation template pass linting tests
-	$(DOCKER_BASH_RUN) "cfn-lint cloudformation/*.yml"
+	-$(DOCKER_BASH_RUN) "cfn-lint /opt/mozdef/cloudformation/*.yml"
 
 .PHONY: stack-status
 stack-status: ## Output current CloudFormation stack status
-	$(DOCKER_BASH_RUN) "aws cloudformation describe-stacks --stack-name mozdef-nested"
+	$(DOCKER_BASH_RUN) "aws cloudformation describe-stacks --stack-name $(STACK_NAME)"
 
 .PHONY: upload-templates
 upload-templates:
-	aws s3 sync cloudformation/ $(S3_INFOSEC_URI) --acl public-read
+	$(DOCKER_BASH_RUN) "aws s3 sync /opt/mozdef/cloudformation/ $(S3_BUCKET_URI) --acl public-read"
