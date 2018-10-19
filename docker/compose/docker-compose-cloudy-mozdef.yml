@@ -155,6 +155,8 @@ services:
       - default
   mq_eventtask:
     image: mozdef/mozdef_mq_eventtask
+    env_file:
+      - cloudy_mozdef.env
     restart: always
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
     scale: 1
