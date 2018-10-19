@@ -1,0 +1,4 @@
+awscli
+awsudo
+cfn-lint
+docker-compose
