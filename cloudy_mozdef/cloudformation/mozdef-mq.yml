@@ -57,7 +57,7 @@ Resources:
       EngineType: ACTIVEMQ
       EngineVersion: 5.15.0
       HostInstanceType: !Ref 'MQInstanceType'
-      PubliclyAccessible: false
+      PubliclyAccessible: true
       SecurityGroups:
         - !Ref 'AmazonMQSecurityGroup'
       SubnetIds:
