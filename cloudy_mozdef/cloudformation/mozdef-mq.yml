@@ -112,8 +112,8 @@ Resources:
           def handler(event, context):
             alphabet = string.ascii_letters + string.digits
             password = ''.join(secrets.choice(alphabet) for i in range(int(event['ResourceProperties']['Length'])))
-            response_data = {'Password': password}
-            cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, "CustomResourcePhysicalID")
+            physical_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(13))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, {'Password': password}, "DefaultPasswordGenerator-%s" % physical_id)
       Handler: index.handler
       Runtime: python3.6
       Role: !GetAtt CloudFormationLambdaIAMRole.Arn
@@ -129,13 +129,14 @@ Resources:
       Code:
         ZipFile: |
           import cfnresponse
-          import boto3
+          import boto3, secrets, string
           from urllib.parse import urlparse
           def handler(event, context):
             response = boto3.client('mq').describe_broker(BrokerId=event['ResourceProperties']['BrokerID'])
             url = urlparse(next(x for x in response['BrokerInstances'][0]['Endpoints'] if x.startswith('amqp+ssl://')))
             response = {'URL': url.geturl(), 'HostName': url.hostname, 'Scheme': url.scheme, 'Port': url.port}
-            cfnresponse.send(event, context, cfnresponse.SUCCESS, response, "CustomResourcePhysicalID")
+            physical_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(13))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, response, "MQBrokerURLLookup-%s" % physical_id)
       Handler: index.handler
       Runtime: python3.6
       Role: !GetAtt CloudFormationLambdaIAMRole.Arn
