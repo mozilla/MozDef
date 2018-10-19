@@ -150,6 +150,7 @@ Resources:
                 OPTIONS_METEOR_PORT=3000
                 OPTIONS_METEOR_AUTHENTICATIONTYPE=oidc
                 ES={"servers": [${ESURL}]}
+                cookiename=sesmeteor
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
             - content: |
                 client_id=${OIDCClientId}
@@ -158,6 +159,7 @@ Resources:
                 backend=${KibanaDomainOnlyURL}
                 redirect_uri_path=/redirect_uri
                 httpsredir=no
+                cookiename=seskibana
               path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
           runcmd:
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
