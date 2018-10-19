@@ -1,6 +1,0 @@
-ansible
-credstash
-faker
-awscli
-awsudo
-cfn-lint

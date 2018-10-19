@@ -1,0 +1,40 @@
+#!/bin/bash
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# @gdestuynder
+
+# Use this script to run the makefile within a docker container
+
+AWS_CREDS_DIR="$HOME/.aws"
+DOCKER_PROJECT_DIR="/opt/mozdef"
+IMG_NAME="mozdef_builder"
+HUB="mozdef"
+CONTAINER_NAME="$IMG_NAME-container"
+
+function usage() {
+  echo "Build make targets in a container (${IMG_NAME})"
+  echo "$0 make <make target>"
+  exit 127
+}
+
+function check_img() {
+  docker image ls ${IMG_NAME} 2>&1 > /dev/null && return 0
+  echo "Cannot find docker image ${IMG_NAME}."
+  echo "Please run \`make dkrbuild\` to build it, or \`docker pull ${HUB}/${IMG_NAME}\`".
+  return 1
+}
+
+[[ $# -eq 0 ]] && usage
+
+check_img || exit 127
+
+exec docker run --rm --name ${CONTAINER_NAME} \
+  -u $(id -u) \
+  -v ${AWS_CREDS_DIR}:/root/.aws \
+  -v $(pwd):${DOCKER_PROJECT_DIR} \
+  -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" \
+  -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" \
+  -e "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}" \
+  -e "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}" \
+  ${HUB}/${IMG_NAME}:latest make $@
