@@ -89,11 +89,6 @@ Resources:
         ESURL: !GetAtt MozDefES.Outputs.ElasticsearchURL
         KibanaURL: !GetAtt MozDefES.Outputs.ElasticsearchKibanaURL
         KibanaDomainOnlyURL: !GetAtt MozDefES.Outputs.ElasticsearchDomainOnlyURL
-        AmazonMQHostName: !GetAtt MozDefMQ.Outputs.MQHostName
-        AmazonMQScheme: !GetAtt MozDefMQ.Outputs.MQScheme
-        AmazonMQPort: !GetAtt MozDefMQ.Outputs.MQPort
-        AmazonMQUsername: !GetAtt MozDefMQ.Outputs.MQUser
-        AmazonMQPassword: !GetAtt MozDefMQ.Outputs.MQPassword
         OIDCClientId: !Ref OIDCClientId
         OIDCClientSecret: !Ref OIDCClientSecret
         OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
@@ -118,22 +113,6 @@ Resources:
         - Key: stack
           Value: !Ref "AWS::StackName"
       TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-es.yml" ] ]
-  MozDefMQ:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        MQUserParameter: mozdef
-        # MQPasswordParameter: we can leave this empty and it will autogenerate a password
-        MQInstanceType: mq.t2.micro
-        MQVpcId: !Ref VpcId
-        MQSubnetIds: !Join [ ",", !Ref PublicSubnetIds ]
-        MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
-      Tags:
-        - Key: application
-          Value: mozdef
-        - Key: stack
-          Value: !Ref "AWS::StackName"
-      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-mq.yml" ] ]
   MozDefEFS:
     Type: AWS::CloudFormation::Stack
     Properties:
