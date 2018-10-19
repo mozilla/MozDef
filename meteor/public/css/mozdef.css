@@ -193,6 +193,13 @@ caption, legend {
     color: wheat;
 }
 
+.row {
+    color: white;
+}
+
+.modal-body .row {
+    color: black;
+}
 /*bootstrap overrides*/
 
 .btn {

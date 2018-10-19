@@ -11,11 +11,6 @@ modal: for  Session.set('ipdshieldipaddress','1,2.3.4') then
 -->
 
 <template name="ipdshield">
-<style>
-    .row {
-        color: white;
-    }
-</style>
 <body>
 
 
@@ -33,7 +28,7 @@ modal: for  Session.set('ipdshieldipaddress','1,2.3.4') then
                 {{#with value}}
                     {{#each objKeyValue this}}
                         <li>{{key}}:
-                        {{value}}</li>                    
+                        {{value}}</li>
                     {{/each}}
                 {{/with}}
                 </ul></li>
@@ -41,7 +36,7 @@ modal: for  Session.set('ipdshieldipaddress','1,2.3.4') then
                 <li>
                     {{key}}:
                     {{value}}
-                </li>            
+                </li>
             {{/if}}
         {{/each}}
         </ul>
@@ -58,13 +53,9 @@ modal: for  Session.set('ipdshieldipaddress','1,2.3.4') then
 </template>
 
 <template name="dshieldmodal">
-    <style>
-    .modal-body .row { color: black;
-    }
-    </style>
     <div class="modal fade" id="modaldshieldwindow">
         <div class="modal-dialog">
-            <div class="modal-content">    
+            <div class="modal-content">
                 <div class="modal-header">
                    <button type="button" class="close" data-dismiss="modal">&times;</button>
                    <h4>DShield Results</h4>
@@ -78,13 +69,13 @@ modal: for  Session.set('ipdshieldipaddress','1,2.3.4') then
                     <div class="row  center">
                         <ul class="list-unstyled">
                         {{#each objKeyValue dshield.data}}
-                
+
                             {{#if isAnObject value}}
                                 <li><ul class="list-unstyled">{{key}}
                                 {{#with value}}
                                     {{#each objKeyValue this}}
                                         <li>{{key}}:
-                                        {{value}}</li>                    
+                                        {{value}}</li>
                                     {{/each}}
                                 {{/with}}
                                 </ul></li>
@@ -92,7 +83,7 @@ modal: for  Session.set('ipdshieldipaddress','1,2.3.4') then
                                 <li>
                                     {{key}}:
                                     {{value}}
-                                </li>            
+                                </li>
                             {{/if}}
                         {{/each}}
                         </ul>
@@ -102,7 +93,7 @@ modal: for  Session.set('ipdshieldipaddress','1,2.3.4') then
                         <div id='rawdshieldjson' class="collapse">
                             <pre>{{dshield.content}}</pre>
                         </div>
-                    </div>           
+                    </div>
               </div>
               <div class="modal-footer">
                 <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
