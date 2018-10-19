@@ -33,7 +33,7 @@ services:
     restart: always
     command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
     volumes:
-      - mongodb:/var/lib/mongo
+      - /var/lib/mongodb:/var/lib/mongo
     networks:
       - default
   bootstrap:
@@ -165,7 +165,6 @@ services:
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data/
 volumes:
-  mongodb:
   cron:
   geolite_db:
   rabbitmq:
