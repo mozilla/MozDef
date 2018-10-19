@@ -146,12 +146,17 @@ services:
     image: mozdef/mozdef_rabbitmq
     restart: always
     command: rabbitmq-server
+    ports:
+       - 5672:5672
+       - 15672:15672 # Admin interface
     volumes:
       - rabbitmq:/var/lib/rabbitmq
     networks:
       - default
   mq_eventtask:
     image: mozdef/mozdef_mq_eventtask
+    env_file:
+      - cloudy_mozdef.env
     restart: always
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
     scale: 1
