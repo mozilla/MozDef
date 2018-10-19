@@ -5,6 +5,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
  */
 import { Template } from 'meteor/templating';
+import '/imports/collections.js';
+import '/imports/settings.js';
+import '/imports/helpers.js';
 import '/client/router.js';
 import '/client/mozdef.js';
 import crossfilter from 'crossfilter2';

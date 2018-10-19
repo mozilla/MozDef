@@ -16,6 +16,8 @@ if (Meteor.isServer) {
     enableClientAccountCreation: process.env.OPTIONS_METEOR_ENABLECLIENTACCOUNTCREATION || true,
     authenticationType: process.env.OPTIONS_METEOR_AUTHENTICATIONTYPE || "meteor-password"
     }
+
+    Meteor.settings.public=mozdef;
 }
 
 if (Meteor.isClient) {
