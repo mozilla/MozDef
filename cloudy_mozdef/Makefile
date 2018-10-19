@@ -46,4 +46,4 @@ stack-status: ## Output current CloudFormation stack status
 
 .PHONY: upload-templates
 upload-templates:
-	$(DOCKER_BASH_RUN) "aws s3 sync /opt/mozdef/cloudformation/ $(S3_BUCKET_URI) --acl public-read"
+	aws s3 sync cloudformation/ $(S3_BUCKET_URI) --acl public-read
