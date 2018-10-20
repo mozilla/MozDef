@@ -67,6 +67,11 @@ Resources:
   MozDefIAMRoleAndInstanceProfile:
     Type: AWS::CloudFormation::Stack
     Properties:
+      Parameters:
+        CloudTrailS3BucketName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailS3BucketName
+        CloudTrailSQSQueueArn: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueArn
+        MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
+        # CloudTrailS3BucketIAMRoleArn we leave empty as we will consume CloudTrail logs from our own account
       Tags:
         - Key: application
           Value: mozdef
@@ -127,6 +132,24 @@ Resources:
         - Key: stack
           Value: !Ref "AWS::StackName"
       TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-efs.yml" ] ]
+  MozDefSQS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref "AWS::StackName"
+      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-sqs.yml" ] ]
+  MozDefCloudTrail:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref "AWS::StackName"
+      TemplateURL: !Join [ "", [ !Ref S3TemplateLocation, "mozdef-cloudtrail.yml" ] ]
   CloudFormationLambdaIAMRole:
     Type: AWS::IAM::Role
     Properties:
