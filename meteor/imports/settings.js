@@ -17,11 +17,17 @@ if (Meteor.isServer) {
         authenticationType: process.env.OPTIONS_METEOR_AUTHENTICATIONTYPE || "meteor-password"
     }
 
-    Meteor.settings.public=mozdef;
+    // send these settings to the client via the Meteor.settings.public
+    // reactive object
+    // Note that:
+    // Meteor.settings.public=mozdef;
+    // doesn't work as you can't override the root 'public'
+    // but you can set public.mozdef, so we do that.
+    Meteor.settings.public.mozdef=mozdef;
+    console.log(Meteor.settings);
 
 }
 
 if (Meteor.isClient) {
-    // client should use getSetting instead to get settings from the server
-    mozdef={}
+    mozdef=Meteor.settings.public.mozdef;
 }
