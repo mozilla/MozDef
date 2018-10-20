@@ -10,10 +10,10 @@ import { _ } from 'meteor/underscore';
 // helper functions
 getSetting=function (settingKey){
 
-    // prefer Meteor.settings.public
+    // prefer Meteor.settings.public.mozdef
     // then the subscribed collection
-    if ( _.has(Meteor.settings.public,settingKey) ){
-        return Meteor.settings.public.settingKey;
+    if ( _.has(Meteor.settings.public.mozdef,settingKey) ){
+        return Meteor.settings.public.mozdef[settingKey];
     }else{
         if ( mozdefsettings.findOne({ key : settingKey }) ){
             return mozdefsettings.findOne({ key : settingKey }).value;
