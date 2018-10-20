@@ -370,16 +370,22 @@ Meteor.startup(() => {
 
     };
 
-
     if (Meteor.isClient) {
         //client side collections:
         options={
             _suppressSameNameError : true
         };
-        Meteor.subscribe("mozdefsettings");
+        Meteor.subscribe("mozdefsettings",
+                onReady=function(){
+                    // Now that we have subscribed to our settings collection
+                    // register our login handler
+                    // and the login function of choice
+                    // based on how enableClientAccountCreation was set at deployment.
+                    Meteor.login();
+        });
+
         alertsCount = new Meteor.Collection("alerts-count",options);
         //client-side subscriptions to low volume collections
-
         Meteor.subscribe("veris");
         Meteor.subscribe("kibanadashboards");
         Meteor.subscribe("userActivity");

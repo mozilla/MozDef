@@ -10,6 +10,16 @@ Router.configure({
     layoutTemplate: 'layout'
 });
 
+Router.onBeforeAction(function () {
+    // before we go anywhere, make sure we have settings
+    this.subscribe('mozdefsettings').wait();
+    if (this.ready()) {
+        this.next();
+      } else {
+        this.render('Loading settings...');
+    }
+});
+
 Router.map(function () {
     this.route('home', {
         path: '/',

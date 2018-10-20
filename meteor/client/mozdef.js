@@ -33,10 +33,6 @@ if (Meteor.isClient) {
         Session.set('blockFQDN','');
         getAllPlugins();
 
-        // Sends us to register our login handler
-        // and then to the login function of choice
-        // based on how enableClientAccountCreation was set at deployment.
-        Meteor.login();
     });
 
     //find plugins registered for a
