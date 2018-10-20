@@ -1,49 +1,56 @@
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PARENTDIR       := $(realpath ../)
-IMAGE_NAME	:= mozdef-deployment
+AWS_REGION	:= us-west-2
 STACK_NAME	:= mozdef-aws-nested
+STACK_PARAMS	:= file://aws_parameters.json
 # MozDef uses a nested CF stack, the mozdef-parent.yml will tie all child stacks together and load them from S3
-S3_BUCKET_URI	:= s3://mozdef.infosec.mozilla.org/cf
-S3_STACK_URI	:= https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/mozdef-parent.yml
-DOCKER_BASH_RUN	:= docker run -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef $(IMAGE_NAME):latest /bin/bash -c
+# See also mozdef.infosec.mozilla.org bucket
+S3_BUCKET_NAME  := mozdef.infosec.allizom.org
+S3_BUCKET_PATH	:= cf
+S3_BUCKET_URI	:= s3://$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)
+S3_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)/mozdef-parent.yml
 
 all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]\.PHONY.*].*:' Makefile
-
-.PHONY: build docker-build
-build: docker-build packer-build
-docker-build: ## Build the docker image that is used for deployment of CloudFormation templates
-	docker build -t $(IMAGE_NAME):latest .
-
-.PHONY: docker-shell
-deploy-shell: ## Spawn a shell for hacking into the docker image
-	docker run -ti -v ~/.aws:/root/.aws -v `pwd`:/opt/mozdef -v $(PARENTDIR):/opt/gitrepo $(IMAGE_NAME):latest /bin/bash
+	@echo 'Run ./dmake <target> in order to run the Makefile targets in Docker'
 
 # Note: This requires AWS access
 .PHONY: packer-build
-packer-build: docker-build ## Build the base AMI with packer
-	$(DOCKER_BASH_RUN) "cd packer && packer build packer.json"
+packer-build: ## Build the base AMI with packer
+	cd packer && packer build packer.json
 
-.PHONY: create-nested-stack create-s3-bucket
-create-nested-stack: upload-templates test ## Create everything you need for a fresh new stack!
-	$(DOCKER_BASH_RUN) "aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI)"
+.PHONY: create-stack
+create-stack: test ## Create everything you need for a fresh new stack!
+	@export AWS_REGION=$(AWS_REGION)
+	@echo "Make sure you have a param file ($(STACK_PARAMS)) with OIDCClientSecret set."
+	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI) \
+	  --capabilities CAPABILITY_IAM \
+	  --parameters $(STACK_PARAMS)
+
+.PHONY: create-s3-bucket
 create-s3-bucket:
-	$(DOCKER_BASH_RUN) "aws s3api create-bucket --bucket $(S3_BUCKET_URI) --acl public-read"
+	@export AWS_REGION=$(AWS_REGION)
+	aws s3api create-bucket --bucket $(S3_BUCKET_NAME) --acl public-read --create-bucket-configuration LocationConstraint=$(AWS_REGION)
 
 .PHONY: updated-nested-stack
-update-nested-stack: upload-templates test ## Updates the nested stack on AWS
-	$(DOCKER_BASH_RUN) "aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI)"
+update-stack: test ## Updates the nested stack on AWS
+	@export AWS_REGION=$(AWS_REGION)
+	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI) \
+	  --capabilities CAPABILITY_IAM \
+	  --parameters $(STACK_PARAMS)
 
 .PHONY: cflint test
 test: cflint
 cflint: ## Verify the CloudFormation template pass linting tests
-	-$(DOCKER_BASH_RUN) "cfn-lint /opt/mozdef/cloudformation/*.yml"
+	-cfn-lint /opt/mozdef/cloudformation/*.yml
 
 .PHONY: stack-status
 stack-status: ## Output current CloudFormation stack status
-	$(DOCKER_BASH_RUN) "aws cloudformation describe-stacks --stack-name $(STACK_NAME)"
+	@export AWS_REGION=$(AWS_REGION)
+	watch -g aws cloudformation describe-stacks --stack-name $(STACK_NAME)
 
 .PHONY: upload-templates
 upload-templates:
+	@export AWS_REGION=$(AWS_REGION)
 	aws s3 sync cloudformation/ $(S3_BUCKET_URI) --acl public-read

@@ -1,6 +1,7 @@
 FROM amazonlinux:2
 
 # Base dependencies
+RUN yum update -y
 RUN yum install @development wget -y
 RUN yum install python python-dev python-pip -y
 ADD requirements.txt /tmp/
@@ -19,6 +20,3 @@ RUN mkdir -p /opt/mozdef
 
 # Force this as the entrypoint
 WORKDIR /opt/mozdef
-
-# Add the deploytools for dev previews to the home
-ADD . /opt/mozdef/

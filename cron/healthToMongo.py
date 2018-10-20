@@ -106,8 +106,11 @@ def getEsNodesStats():
 
         load_average = jsonobj['nodes'][nodeid]['os']['cpu']['load_average']
         load_str = "{0},{1},{2}".format(load_average['1m'], load_average['5m'], load_average['15m'])
+        hostname = nodeid
+        if 'host' in jsonobj['nodes'][nodeid]:
+            hostname=jsonobj['nodes'][nodeid]['host']
         results.append({
-            'hostname': jsonobj['nodes'][nodeid]['host'],
+            'hostname': hostname,
             'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
             'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024),
             'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
@@ -144,18 +147,16 @@ def writeEsHotThreads(data, mongo):
 def main():
     logger.debug('starting')
     logger.debug(options)
-    try:
-        es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
-        client = MongoClient(options.mongohost, options.mongoport)
-        # use meteor db
-        mongo = client.meteor
-        writeFrontendStats(getFrontendStats(es), mongo)
-        writeSqsStats(getSqsStats(es), mongo)
-        writeEsClusterStats(es.get_cluster_health(), mongo)
-        writeEsNodesStats(getEsNodesStats(), mongo)
-        writeEsHotThreads(getEsHotThreads(), mongo)
-    except Exception as e:
-        logger.error("Exception %r sending health to mongo" % e)
+
+    es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+    client = MongoClient(options.mongohost, options.mongoport)
+    # use meteor db
+    mongo = client.meteor
+    writeFrontendStats(getFrontendStats(es), mongo)
+    writeSqsStats(getSqsStats(es), mongo)
+    writeEsClusterStats(es.get_cluster_health(), mongo)
+    writeEsNodesStats(getEsNodesStats(), mongo)
+    writeEsHotThreads(getEsHotThreads(), mongo)
 
 
 def initConfig():

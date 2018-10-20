@@ -10,7 +10,8 @@ import { _ } from 'meteor/underscore';
 // helper functions
 getSetting=function (settingKey){
 
-    //prefer Meteor.settings.public
+    // prefer Meteor.settings.public
+    // then the subscribed collection
     if ( _.has(Meteor.settings.public,settingKey) ){
         return Meteor.settings.public.settingKey;
     }else{
@@ -20,5 +21,5 @@ getSetting=function (settingKey){
             return '';
         }
     }
-	};
+};
 
