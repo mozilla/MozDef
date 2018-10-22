@@ -53,10 +53,12 @@ run-tests:
 
 .PHONY: build
 build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
+	docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build base
 	docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
 .PHONY: build-tests nobuild-tests
 build-tests:
+	docker-compose  -f $(USE_DKR_IMAGES) -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build base
 	docker-compose  -f $(USE_DKR_IMAGES) -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
 .PHONY: stop down
