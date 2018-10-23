@@ -32,20 +32,21 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/jeffbryner/mozdef_util
+    $ git clone git://github.com/mozilla/mozdef
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/jeffbryner/mozdef_util/tarball/master
+    $ curl  -OL https://github.com/mozilla/mozdef/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
 .. code-block:: console
 
+    $ cd mozdef_util
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/jeffbryner/mozdef_util
-.. _tarball: https://github.com/jeffbryner/mozdef_util/tarball/master
+.. _Github repo: https://github.com/mozilla/mozdef
+.. _tarball: https://github.com/mozilla/mozdef/tarball/master

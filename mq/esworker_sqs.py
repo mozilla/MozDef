@@ -156,7 +156,7 @@ def esConnect():
 
 class taskConsumer(object):
 
-    def __init__(self, mqConnection, taskQueue, esConnection, options):
+    def __init__(self, mqConnection, taskQueue, esConnection):
         self.connection = mqConnection
         self.esConnection = esConnection
         self.taskQueue = taskQueue
