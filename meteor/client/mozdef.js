@@ -30,6 +30,7 @@ if (Meteor.isClient) {
         Session.set('attackerlimit','10');
         Session.set('attackersearchIP','');
         Session.set('blockIPipaddress','');
+        Session.set('watchItemwatchcontent','');
         Session.set('blockFQDN','');
         getAllPlugins();
 
