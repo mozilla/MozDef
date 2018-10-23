@@ -14,6 +14,7 @@ if (Meteor.isServer) {
         'loadKibanaDashboards': loadKibanaDashboards,
         'blockip': blockIP,
         'blockfqdn': blockFQDN,
+        'watchitem': watchitem,
         'ipwhois': ipwhois,
         'ipdshield': ipdshield,
         'ipintel': ipintel,
@@ -44,6 +45,17 @@ if (Meteor.isServer) {
             console.log(mozdef.rootAPI + '/kibanadashboards');
             console.log("returned a " + dashboardsRequest.statusCode);
             console.log(dashboardsRequest.data);
+        }
+    }
+    function watchitem(formobj) {
+        var watchitemRequest = HTTP.post(mozdef.rootAPI + '/watchitem', {data: formobj});
+
+        if (watchitemRequest.statusCode==200) {
+            console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
+            return true;
+        } else {
+            console.log("Could not send to "+ mozdef.rootAPI + '/watchitem ' + JSON.stringify(formobj) );
+            return watchitemRequest;
         }
     }
 
