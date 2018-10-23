@@ -8,28 +8,25 @@
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch
 import re
-import json
 
 
 class AlertAuthSignRelengSSH(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=15)
 
-        self.parse_config('ssh_access_signreleng.conf', ['hostfilter', 'ircchannel', 'exclusions'])
+        self.config = self.parse_json_alert_config('ssh_access_signreleng.json')
 
-        if self.config.ircchannel == '':
-            self.config.ircchannel = None
-
-        exclusions = json.loads(self.config.exclusions)
+        if self.config['ircchannel'] == '':
+            self.config['ircchannel'] = None
 
         search_query.add_must([
             TermMatch('tags', 'releng'),
             TermMatch('details.program', 'sshd'),
-            QueryStringMatch('hostname: /{}/'.format(self.config.hostfilter)),
+            QueryStringMatch('hostname: /{}/'.format(self.config['hostfilter'])),
             PhraseMatch('summary', 'Accepted publickey for ')
         ])
 
-        for exclusion in exclusions:
+        for exclusion in self.config['exclusions']:
             exclusion_query = None
             for key, value in exclusion.iteritems():
                 phrase_exclusion = PhraseMatch(key, value)
@@ -67,4 +64,4 @@ class AlertAuthSignRelengSSH(AlertTask):
             targetuser = groups[0]
 
         summary = 'SSH login from {0} on {1} as user {2}'.format(sourceipaddress, targethost, targetuser)
-        return self.createAlertDict(summary, category, tags, [event], severity, ircchannel=self.config.ircchannel)
+        return self.createAlertDict(summary, category, tags, [event], severity, ircchannel=self.config['ircchannel'])
