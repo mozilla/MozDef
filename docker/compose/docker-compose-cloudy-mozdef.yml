@@ -169,6 +169,23 @@ services:
       - default
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data/
+  mq_cloudtrail:
+    image: mozdef/mozdef_mq_eventtask
+    env_file:
+      - cloudy_mozdef.env
+      - cloudy_mozdef_mq_cloudtrail.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_cloudtrail.py -c esworker_cloudtrail.conf'
+    scale: 1
+    depends_on:
+      - base
+      - rabbitmq
+      - loginput
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
 volumes:
   cron:
   geolite_db:
