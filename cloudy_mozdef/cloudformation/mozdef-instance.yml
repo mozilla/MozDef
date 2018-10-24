@@ -68,7 +68,6 @@ Parameters:
     Description: "The URL of your OIDC provider's well-known discovery URL"
   CloudTrailSQSNotificationQueueName:
     Type: String
-    Default: "https://auth.mozilla.auth0.com/.well-known/openid-configuration"
     Description: "The URL of your OIDC provider's well-known discovery URL"
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
