@@ -5,5 +5,5 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-source  /opt/mozdef/envs/mozdef/bin/activate
+source  /opt/mozdef/envs/python/bin/activate
 /opt/mozdef/envs/mozdef/cron/esCacheMaint.py -c /opt/mozdef/envs/mozdef/cron/esCacheMaint.conf

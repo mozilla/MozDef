@@ -15,10 +15,6 @@ COPY docker/compose/mozdef_cron/files/healthAndStatus.conf /opt/mozdef/envs/mozd
 COPY docker/compose/mozdef_cron/files/healthToMongo.conf /opt/mozdef/envs/mozdef/cron/healthToMongo.conf
 COPY docker/compose/mozdef_cron/files/syncAlertsToMongo.conf /opt/mozdef/envs/mozdef/cron/syncAlertsToMongo.conf
 
-# We have to replace the python virtualenv path until
-# https://github.com/mozilla/MozDef/issues/421 is fixed
-RUN sed -i 's|/opt/mozdef/envs/mozdef/bin/activate|/opt/mozdef/envs/python/bin/activate|g' /opt/mozdef/envs/mozdef/cron/*.sh
-
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/cron
 
 USER mozdef
