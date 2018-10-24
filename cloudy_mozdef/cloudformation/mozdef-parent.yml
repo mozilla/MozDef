@@ -18,7 +18,7 @@ Parameters:
   S3TemplateLocation:
     Type: String
     Description: "The URL to the S3 bucket used to fetch the nested stack templates"
-    Default: "https://s3-us-west-2.amazonaws.com/mozdef.infosec.mozilla.org/cf/"
+    Default: "https://s3-us-west-2.amazonaws.com/mozdef.infosec.allizom.org/cf/"
   VpcId:
     Type: "AWS::EC2::VPC::Id"
     Description: "The VPC ID of the VPC to deploy in"
