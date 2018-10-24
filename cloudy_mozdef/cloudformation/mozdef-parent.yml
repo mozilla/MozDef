@@ -97,6 +97,7 @@ Resources:
         OIDCClientId: !Ref OIDCClientId
         OIDCClientSecret: !Ref OIDCClientSecret
         OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
+        CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
       Tags:
         - Key: application
           Value: mozdef

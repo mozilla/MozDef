@@ -66,6 +66,10 @@ Parameters:
     Type: String
     Default: "https://auth.mozilla.auth0.com/.well-known/openid-configuration"
     Description: "The URL of your OIDC provider's well-known discovery URL"
+  CloudTrailSQSNotificationQueueName:
+    Type: String
+    Default: "https://auth.mozilla.auth0.com/.well-known/openid-configuration"
+    Description: "The URL of your OIDC provider's well-known discovery URL"
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -138,6 +142,9 @@ Resources:
                 httpsredir=no
                 cookiename=seskibana
               path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
+            - content: |
+                OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
+              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
           runcmd:
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
