@@ -130,6 +130,14 @@ def index():
     sendMessgeToPlugins(request, response, 'blockfqdn')
     return response
 
+@post('/watchitem', methods=['POST'])
+@post('/watchitem/', methods=['POST'])
+@enable_cors
+def index():
+    '''will receive a call to watchlist a specific term'''
+    sendMessgeToPlugins(request, response, 'watchitem')
+    return response
+
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
 @enable_cors
