@@ -54,7 +54,7 @@ services:
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data
   bootstrap:
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python docker/conf/initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
     depends_on:
       - base
       - elasticsearch

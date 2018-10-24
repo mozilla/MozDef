@@ -5,7 +5,7 @@ LABEL maintainer="mozdef@mozilla.com"
 RUN yum install -y cronie
 
 COPY cron /opt/mozdef/envs/mozdef/cron
-COPY docker/conf/cron_entries.txt /cron_entries.txt
+COPY docker/compose/mozdef_cron/files/cron_entries.txt /cron_entries.txt
 
 # Copy config files for crons
 COPY docker/compose/mozdef_cron/files/backup.conf /opt/mozdef/envs/mozdef/cron/backup.conf
