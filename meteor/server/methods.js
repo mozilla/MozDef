@@ -47,17 +47,17 @@ if (Meteor.isServer) {
             console.log(dashboardsRequest.data);
         }
     }
-    function watchitem(formobj) {
-        var watchitemRequest = HTTP.post(mozdef.rootAPI + '/watchitem', {data: formobj});
+    function watchItem(formobj) {
+        var watchItemRequest = HTTP.post(mozdef.rootAPI + '/watchitem', {data: formobj});
 
-        if (watchitemRequest.statusCode==200) {
+        if (watchItemRequest.statusCode==200) {
             console.log(JSON.stringify(formobj) + ' successfully sent to ' + mozdef.rootAPI);
             return true;
         } else {
             console.log("Could not send to "+ mozdef.rootAPI + '/watchitem ' + JSON.stringify(formobj) );
-            return watchitemRequest;
+            return watchItemRequest;
         }
-    }
+}
 
     function blockIP(formobj) {
         var blockIPRequest = HTTP.post(mozdef.rootAPI + '/blockip', {data: formobj});

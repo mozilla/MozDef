@@ -13,8 +13,8 @@ Copyright (c) 2014 Mozilla Corporation
                 <caption><p class="lead">Watch List</p></caption>
                 <thead>
                     <tr>
-                        <td><button class="btn btn-xs btn-default watchadd">add</button></td>
-                        <td>Watched Content</td>
+                        <td><button class="btn btn-xs btn-default watchitemadd">add</button></td>
+                        <td>Content</td>
                         <td>Added</td>
                         <td>Expiring</td>
                         <td>Comment</td>
@@ -23,8 +23,8 @@ Copyright (c) 2014 Mozilla Corporation
                     </tr>
                 </thead>
                 <tbody>
-                {{#each watch}}
-                    {{>each_watch}}
+                {{#each watched}}
+                    {{>each_watched}}
                 {{/each}}
                 </tbody>
             </table>
@@ -32,8 +32,8 @@ Copyright (c) 2014 Mozilla Corporation
     </div>
 </template>
 
-<!--each individual watch -->
-<template name="each_watch">
+<!--each individual watchitem -->
+<template name="each_watched">
 
     <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateAdded}}" data-toggle="tooltip">
         <td></td>
@@ -46,7 +46,7 @@ Copyright (c) 2014 Mozilla Corporation
         <td>
             <button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#delete{{_id}}">arm delete</button>
             <div id="delete{{_id}}" class="collapse">
-                <button class="btn btn-xs btn-danger watchdelete" data-watchid={{_id}}>delete</button>
+                <button class="btn btn-xs btn-danger watchitemdelete" data-watchitemid={{_id}}>delete</button>
             </div>
         </td>
     </tr>
