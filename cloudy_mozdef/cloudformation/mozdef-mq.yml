@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: 2010-09-09
 Description: Creates MozDef Amazon MQ
 Parameters:
   MQUserParameter:
@@ -15,64 +15,64 @@ Parameters:
     Default: mq.t2.micro
     Description: The instance type for the AmazonMQ instance.
   MQVpcId:
-    Type: "AWS::EC2::VPC::Id"
+    Type: AWS::EC2::VPC::Id
     Default: vpc-dc8eacb4
-    Description: "The VPC ID of the VPC within which the AmazonMQ instance will be provisioned."
+    Description: The VPC ID of the VPC within which the AmazonMQ instance will be provisioned.
   MQSubnetIds:
-    Type: "List<AWS::EC2::Subnet::Id>"
-    Default: "subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6"
-    Description: "Comma-delimited list of subnet IDs of the VPCs within which the AmazonMQ instance will be provisioned."
+    Type: List<AWS::EC2::Subnet::Id>
+    Default: subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6
+    Description: Comma-delimited list of subnet IDs of the VPCs within which the AmazonMQ instance will be provisioned.
   MozDefSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
     Default: sg-02d7fe9627ea068e2
-    Description: "The security group of the Mozdef endpoint that is accessing AmazonMQ"
+    Description: The security group of the Mozdef endpoint that is accessing AmazonMQ
 Conditions:
-  PasswordIsSet: !Not [ !Equals [ !Ref MQPasswordParameter, "" ]]
-  PasswordIsNotSet: !Equals [ !Ref MQPasswordParameter, "" ]
+  PasswordIsSet: !Not [ !Equals [ !Ref MQPasswordParameter, '' ]]
+  PasswordIsNotSet: !Equals [ !Ref MQPasswordParameter, '' ]
 Resources:
   AmazonMQSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Limits security group ingress and egress traffic for the Amazon MQ instance
-      VpcId: !Ref 'MQVpcId'
+      VpcId: !Ref MQVpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '5671'
-          ToPort: '5671'
-          SourceSecurityGroupId: !Ref 'MozDefSecurityGroup'
+          FromPort: 5671
+          ToPort: 5671
+          SourceSecurityGroupId: !Ref MozDefSecurityGroup
       Tags:
         - Key: application
           Value: mozdef
         - Key: stack
-          Value: !Ref "AWS::StackName"
+          Value: !Ref AWS::StackName
   MozDefAmazonMQ:
     Type: AWS::AmazonMQ::Broker
     Properties:
       AutoMinorVersionUpgrade: false
-      BrokerName: !Join [ "-", [ "Broker", !Select [ 2, !Split [ "/", !Ref "AWS::StackId" ] ] ] ]
+      BrokerName: !Join [ '-', [ Broker, !Select [ 2, !Split [ '/', !Ref 'AWS::StackId' ] ] ] ]
       Users:
-        - Username: !Ref 'MQUserParameter'
-          Password: !If [ PasswordIsSet, !Ref 'MQPasswordParameter', !GetAtt DefaultPassword.Password ]
+        - Username: !Ref MQUserParameter
+          Password: !If [ PasswordIsSet, !Ref MQPasswordParameter, !GetAtt DefaultPassword.Password ]
       DeploymentMode: ACTIVE_STANDBY_MULTI_AZ
       EngineType: ACTIVEMQ
       EngineVersion: 5.15.0
-      HostInstanceType: !Ref 'MQInstanceType'
+      HostInstanceType: !Ref MQInstanceType
       PubliclyAccessible: true
       SecurityGroups:
-        - !Ref 'AmazonMQSecurityGroup'
+        - !Ref AmazonMQSecurityGroup
       SubnetIds:
         - !Select
           - 0
-          - !Ref 'MQSubnetIds'
+          - !Ref MQSubnetIds
         - !Select
           - 1
-          - !Ref 'MQSubnetIds'
+          - !Ref MQSubnetIds
   CloudFormationLambdaIAMRole:
     Type: AWS::IAM::Role
     Condition: PasswordIsNotSet
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
         - Effect: Allow
           Principal:
@@ -84,23 +84,23 @@ Resources:
         -
           PolicyName: AllowLambdaLogging
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: 2012-10-17
             Statement:
               -
-                Effect: "Allow"
+                Effect: Allow
                 Action:
-                  - "logs:*"
-                Resource: "*"
+                  - logs:*
+                Resource: '*'
         -
           PolicyName: AllowMQDescribeBroker
           PolicyDocument:
-            Version: "2012-10-17"
+            Version: 2012-10-17
             Statement:
               -
-                Effect: "Allow"
+                Effect: Allow
                 Action:
-                  - "mq:DescribeBroker"
-                Resource: "*"
+                  - mq:DescribeBroker
+                Resource: '*'
   DefaultPasswordGeneratorLambdaFunction:
     Type: AWS::Lambda::Function
     Condition: PasswordIsNotSet
@@ -121,7 +121,7 @@ Resources:
         - Key: application
           Value: mozdef
         - Key: stack
-          Value: !Ref "AWS::StackName"
+          Value: !Ref AWS::StackName
       Timeout: 20
   MQBrokerURLLookupLambdaFunction:
     Type: AWS::Lambda::Function
@@ -144,7 +144,7 @@ Resources:
         - Key: application
           Value: mozdef
         - Key: stack
-          Value: !Ref "AWS::StackName"
+          Value: !Ref AWS::StackName
       Timeout: 20
   DefaultPassword:
     Type: AWS::CloudFormation::CustomResource
@@ -159,17 +159,17 @@ Resources:
       ServiceToken: !GetAtt MQBrokerURLLookupLambdaFunction.Arn
 Outputs:
   MQUser:
-    Description: "Username of the MQ user"
+    Description: Username of the MQ user
     Value: !Ref MQUserParameter
   MQPassword:
-    Description: "Password of the MQ user"
-    Value: !If [ PasswordIsSet, !Ref 'MQPasswordParameter', !GetAtt DefaultPassword.Password ]
+    Description: Password of the MQ user
+    Value: !If [ PasswordIsSet, !Ref MQPasswordParameter, !GetAtt DefaultPassword.Password ]
   MQHostName:
-    Description: "Hostname of the AMQP broker"
+    Description: Hostname of the AMQP broker
     Value: !GetAtt MQBrokerURL.HostName
   MQScheme:
-    Description: "Scheme of the AMQP broker"
+    Description: Scheme of the AMQP broker
     Value: !GetAtt MQBrokerURL.Scheme
   MQPort:
-    Description: "Port of the AMQP broker"
+    Description: Port of the AMQP broker
     Value: !GetAtt MQBrokerURL.Port
