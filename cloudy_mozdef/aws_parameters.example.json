@@ -1,0 +1,7 @@
+[
+  {
+    "ParameterKey": "OIDCClientSecret",
+    "ParameterValue": "secret-goes-here",
+    "UsePreviousValue": false
+  }
+]

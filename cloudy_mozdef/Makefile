@@ -43,7 +43,7 @@ update-stack: test ## Updates the nested stack on AWS
 .PHONY: cflint test
 test: cflint
 cflint: ## Verify the CloudFormation template pass linting tests
-	-cfn-lint /opt/mozdef/cloudformation/*.yml
+	-cfn-lint cloudformation/*.yml
 
 .PHONY: stack-status
 stack-status: ## Output current CloudFormation stack status
