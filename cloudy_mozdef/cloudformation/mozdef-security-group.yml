@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create MozDef EC2 security groups
+Parameters:
+  VpcId:
+    Type: "AWS::EC2::VPC::Id"
+    Description: "The VPC ID of the VPC to deploy in"
+    Default: "vpc-dc8eacb4"
+Resources:
+  MozDefSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group of the MozDef EC2 instance
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !Ref MozDefLoadBalancerSecurityGroup
+      - Description: Allow 9090 inbound from everywhere
+        IpProtocol: tcp
+        FromPort: 9090
+        ToPort: 9090
+        CidrIp: "0.0.0.0/0"
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+      VpcId: !Ref VpcId
+  MozDefLoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group of the MozDef ALB
+      SecurityGroupEgress:
+        - Description: Allow all egress traffic
+          IpProtocol: -1
+          CidrIp: "0.0.0.0/0"
+      SecurityGroupIngress:
+        - Description: Allow 443 inbound from everywhere
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+        - Description: Allow 9090 inbound from everywhere
+          IpProtocol: tcp
+          FromPort: 9090
+          ToPort: 9090
+          CidrIp: "0.0.0.0/0"
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+      VpcId: !Ref VpcId
+Outputs:
+  MozDefSecurityGroupId:
+    Description: The security group ID of the MozDef EC2 instance security group
+    Value: !GetAtt MozDefSecurityGroup.GroupId
+  MozDefLoadBalancerSecurityGroupId:
+    Description: The security group ID of the MozDef load balancer security group
+    Value: !GetAtt MozDefLoadBalancerSecurityGroup.GroupId

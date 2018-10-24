@@ -1,0 +1,145 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+-->
+
+<template name="attackers">
+<style>
+/* http://www.sitepoint.com/css3-sliding-menu/ */
+sidenav
+{
+    position: fixed;
+    left: -25em;
+    top: 0;
+    bottom: 0;
+    /*background-color: #654;*/
+    background-color: #444444;
+    border-right: 15px solid #765;
+    box-shadow: 4px 0 5px rgba(0,0,0,0.2);
+    z-index: 1;
+
+
+    text-align: left;
+    font-weight: bolder;
+    display: inline-block;
+    height: 100%;
+    margin: 0em;
+    line-height: normal;
+}
+
+/*pull out triangle*/
+sidenav:after
+{
+    position: absolute;
+    content: ' ';
+    width: 0;
+    height: 0;
+    right: -75px;
+    top: 50%;
+    border-width: 30px 30px;
+    border-style: solid;
+    border-color: transparent transparent transparent #765;
+}
+
+sidenav ul
+{
+    width: 14em;
+    list-style-type: none;
+    margin: auto;
+    padding: 1em;
+}
+
+sidenav div{
+    margin:auto;
+}
+
+sidenav:hover
+{
+    left: 0;
+}
+
+sidenav .filters-col .row {
+    margin-top: 45px;
+    padding: 0 0.5em;
+}
+
+sidenav .reset-filter {
+    text-align: center;
+    margin-top: 20px;
+}
+
+sidenav
+{
+    -webkit-transition: all 400ms ease;
+    -moz-transition: all 400ms ease;
+    -ms-transition: all 400ms ease;
+    -o-transition: all 400ms ease;
+    transition: all 400ms ease;
+}
+
+</style>
+<!-- menu -->
+<sidenav>
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label col-md-2" for="attackerLimit">Limit </label>
+            <div class="col-md-6">
+                <select name="attackerLimit" id="attackerLimit" class="form-control input-small" title="limit how many attackers are retrieved">
+                    <option value='5'>5</option>
+                    <option value='10'>10</option>
+                    <option value='15'>15</option>
+                    <option value='20'>20</option>
+                    <option value='25'>25</option>
+                    <option value='30'>30</option>
+                    <option value='35'>35</option>
+                    <option value='40'>40</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2" for="attackersearchIP">IP</label>
+            <div class="col-md-8">
+                <input type="search" name="attackersearchIP" class="form-control" id="attackersearchIP" placeholder="ip address regex search">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-8 col-xs-offset-2">
+                <button class="btn btn-xs attackerssearch">search</button>
+            </div>
+        </div>
+    </form>
+    <div class="row reset-filter">
+        <button id="btnResetFilter" class="btn">Reset Filters</button>
+    </div>
+    <div class="col-md-6 filters-col">
+          <div class="row">
+            <div id="ringChart-category" class="text-center"><h5 class="upperwhite" id="Categories">Categories:</h5></div>
+        </div>
+        <div class="row">
+            <div id="ringChart-lastseen" class="text-center"><h5 class="upperwhite" id="LastSeen">Last Seen:</h5></div>
+        </div>
+    </div>
+    <div class="col-md-6 filters-col">
+        <div class="row">
+            <div id="ringChart-country" class="text-center"><h5 class="upperwhite" id="Countries">Country:</h5></div>
+        </div>
+        <div class="row">
+            <div id="ringChart-ip" class="text-center"><h5 class="upperwhite" id="IPs">IP Address:</h5></div>
+        </div>
+    </div>
+</sidenav>
+<div class="attackers-wrapper" id="attackers-wrapper">
+
+    <div id="bottom-toolbar">
+        <center>
+        <ul class="list-inline">
+            <li><button id="btnReset" class="btn btn-primary">Reset Layout</button></li>
+            <li><button id="btnWireFrame" class="btn btn-primary">WireFrame</button></li>
+        </ul>
+        </center>
+    </div>
+    {{>blockIPModal}}
+</div>
+</template>

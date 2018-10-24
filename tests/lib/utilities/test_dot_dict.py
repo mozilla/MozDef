@@ -10,8 +10,7 @@ import pytest
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
-from utilities.dot_dict import DotDict
+from mozdef_util.utilities.dot_dict import DotDict
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
@@ -42,3 +41,19 @@ class TestDotDict(UnitTestSuite):
         dct = DotDict(original_dct)
         assert dct.details == {'key1': 'value1'}
         assert dct.details.key1 == 'value1'
+
+    def test_complex_get(self):
+        original_dct = {
+            'details': {
+                'key1': 'value1',
+                'subkey': {
+                    'subkey': 'subvalue'
+                }
+            }
+        }
+        dct = DotDict(original_dct)
+        assert dct.get('does.not.exist') == None
+        assert dct.get('details') == {'key1': 'value1','subkey': {'subkey': 'subvalue'}}
+        assert dct.get('details.key1') == 'value1'
+        assert dct.get('details.subkey') == {'subkey':'subvalue'}
+        assert dct.get('details.subkey.subkey') == 'subvalue'

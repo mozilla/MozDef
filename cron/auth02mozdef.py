@@ -181,11 +181,11 @@ log_types=DotDict({
                 },
         'sapi': {
                 "event": 'API Operation',
-                "level": 1 #Info
+                "level": 1  # Info
                 },
         'fapi': {
                 "event": 'Failed API Operation',
-                "level": 3 #Error
+                "level": 3  # Error
                 },
         'limit_wc': {
                 "event": 'Blocked Account',
@@ -197,7 +197,7 @@ log_types=DotDict({
                 },
         'api_limit': {
                 "event": 'Rate Limit On API',
-                "level": 4 #Critical
+                "level": 4  # Critical
                 },
         'sdu': {
                 "event": 'Successful User Deletion',
@@ -316,6 +316,18 @@ def process_msg(mozmsg, msg):
             details['username'] = msg.user_name
         except KeyError:
             pass
+
+    # Differenciate auto login (session cookie check validated) from logged in and had password verified
+
+    try:
+        for i in msg.details.prompt:
+            # Session cookie check
+            if i.get('name') == 'authenticate':
+                details['auth_type'] = 'Login succeeded due to a valid session cookie being supplied'
+            elif i.get('name') == 'lock-password-authenticate':
+                details['auth_type'] = 'Login succeeded due to a valid plaintext password being supplied'
+    except KeyError:
+        pass
 
     mozmsg.summary = "{mtype} {desc}".format(
         mtype=details.type,

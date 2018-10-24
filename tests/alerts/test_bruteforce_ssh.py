@@ -18,9 +18,9 @@ class TestAlertBruteforceSsh(AlertTestSuite):
         "_type": "event",
         "_source": {
             "summary": 'login invalid ldap_count_entries failed by 1.2.3.4',
+            "hostname": "exhostname",
             "details": {
                 "program": "sshd",
-                "hostname": "exhostname",
                 "sourceipaddress": "1.2.3.4",
             }
         }

@@ -13,8 +13,8 @@ import pytest
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from utilities.toUTC import toUTC
+
+from mozdef_util.utilities import toUTC
 
 from suite_helper import parse_config_file, parse_mapping_file, setup_es_client, setup_rabbitmq_client
 
@@ -106,7 +106,7 @@ class UnitTestSuite(object):
     def verify_event(self, event, expected_event):
         assert sorted(event.keys()) == sorted(expected_event.keys())
         for key, value in expected_event.iteritems():
-            if key == 'receivedtimestamp':
+            if key in ('receivedtimestamp', 'timestamp', 'utctimestamp'):
                 assert type(event[key]) == unicode
             else:
                 assert event[key] == value, 'Incorrect match for {0}, expected: {1}'.format(key, value)

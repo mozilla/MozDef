@@ -20,8 +20,7 @@ from datetime import datetime, timedelta
 import calendar
 import requests
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from utilities.toUTC import toUTC
 from utilities.to_unicode import toUnicode
@@ -69,9 +68,25 @@ class PTRequestor(object):
         if maxid is not None:
             payload['max_id'] = maxid
         hdrs = {'X-Papertrail-Token': self._apikey}
-        resp = requests.get(self._papertrail_api, headers=hdrs, params=payload)
-        if resp.status_code != 200:
-            logger.error("Received invalid status code: {0}: {1}".format(resp.status_code, resp.text))
+
+        max_retries = 3
+        total_retries = 0
+        while True:
+            logger.debug("Sending request to papertrail API")
+            resp = requests.get(self._papertrail_api, headers=hdrs, params=payload)
+            if resp.status_code == 200:
+                break
+            else:
+                logger.debug("Received invalid status code: {0}: {1}".format(resp.status_code, resp.text))
+                total_retries += 1
+                if total_retries < max_retries:
+                    logger.debug("Sleeping a bit then retrying")
+                    time.sleep(2)
+                else:
+                    logger.error("Received too many error messages...exiting")
+                    logger.error("Last malformed response: {0}: {1}".format(resp.status_code, resp.text))
+                    sys.exit(1)
+
         return self.parse_events(resp.json())
 
     def request(self, query, stime, etime):
@@ -251,11 +266,8 @@ class taskConsumer(object):
 
                 time.sleep(options.ptinterval)
 
-            except KeyboardInterrupt:
-                sys.exit(1)
             except ValueError as e:
                 logger.exception('Exception while handling message: %r' % e)
-                sys.exit(1)
 
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -401,4 +413,13 @@ if __name__ == '__main__':
 
     pluginList = registerPlugins()
 
-    main()
+    try:
+        main()
+    except KeyboardInterrupt as e:
+        logger.info("Exiting worker")
+        if options.esbulksize != 0:
+            es.finish_bulk()
+    except Exception as e:
+        if options.esbulksize != 0:
+            es.finish_bulk()
+        raise

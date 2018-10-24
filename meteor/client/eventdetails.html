@@ -1,0 +1,20 @@
+<template name="eventdetails">
+        <div><span>{{this.documentsource.utctimestamp}}</span></div>
+        {{#each objKeyValue this.documentsource.details}}
+            {{#if isAnObject value}}
+                <div><span>{{key}}</span>
+                {{#with value}}
+                    {{#each objKeyValue this}}
+                        <span>{{key}}:</span>
+                        <span>{{value}}</span>
+                    {{/each}}
+                {{/with}}
+                </div>
+            {{else}}
+                <div>
+                    <span>{{key}}:</span>
+                    <span>{{{ ipDecorate value }}}</span>
+                </div>
+            {{/if}}
+        {{/each}}
+</template>

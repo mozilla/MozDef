@@ -6,7 +6,7 @@
 # Copyright (c) 2015 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch
 
 
 class AlertGeomodel(AlertTask):
@@ -55,6 +55,7 @@ class AlertGeomodel(AlertTask):
 
         if 'category' in ev['details'] and ev['details']['category'].lower() == 'newcountry':
             alert_dict['details'] = {
+                'previous_locality_details': ev['details']['prev_locality_details'],
                 'locality_details': ev['details']['locality_details'],
                 'category': ev['details']['category'],
                 'principal': ev['details']['principal'],

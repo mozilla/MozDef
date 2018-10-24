@@ -16,16 +16,16 @@ from configlib import getConfig, OptionParser
 from datetime import datetime
 import pytz
 
-import boto.sqs
 from boto.sqs.message import RawMessage
 import kombu
+from ssl import SSLEOFError, SSLError
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from utilities.logger import logger, initLogger
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 # running under uwsgi?
@@ -76,9 +76,16 @@ class taskConsumer(object):
                         self.taskQueue.delete_message(msg)
                         continue
                 time.sleep(.1)
-            except Exception as e:
-                logger.exception(e)
-                sys.exit(1)
+            except (SSLEOFError, SSLError, socket.error):
+                logger.info('Received network related error...reconnecting')
+                time.sleep(5)
+                self.connection, self.taskQueue = connect_sqs(
+                    options.region,
+                    options.accesskey,
+                    options.secretkey,
+                    options.taskexchange
+                )
+                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, message):
         try:
@@ -99,11 +106,7 @@ class taskConsumer(object):
                 event['tags'] = [self.options.taskexchange]
 
             event['severity'] = 'INFO'
-
-            # Set defaults
-            event['processid'] = ''
-            event['processname'] = ''
-            event['category'] = 'syslog'
+            event['details'] = {}
 
             for message_key, message_value in message.iteritems():
                 if 'Message' == message_key:
@@ -115,20 +118,27 @@ class taskConsumer(object):
                                 processid = processid.replace('[', '')
                                 processid = processid.replace(']', '')
                                 event['processid'] = processid
-                            elif inside_message_key in ('pname'):
+                            elif inside_message_key in ('processname','pname'):
                                 event['processname'] = inside_message_value
                             elif inside_message_key in ('hostname'):
                                 event['hostname'] = inside_message_value
                             elif inside_message_key in ('time', 'timestamp'):
                                 event['timestamp'] = toUTC(inside_message_value).isoformat()
                                 event['utctimestamp'] = toUTC(event['timestamp']).astimezone(pytz.utc).isoformat()
-                            elif inside_message_key in ('type'):
+                            elif inside_message_key in ('type', 'category'):
                                 event['category'] = inside_message_value
-                            elif inside_message_key in ('payload', 'message'):
+                            elif inside_message_key in ('summary','payload', 'message'):
                                 event['summary'] = inside_message_value
+                            elif inside_message_key in ('source'):
+                                event['source'] = inside_message_value
+                            elif inside_message_key in ('fields', 'details'):
+                                if type(inside_message_value) is not dict:
+                                    event[u'details'][u'message'] = inside_message_value
+                                else:
+                                    if len(inside_message_value) > 0:
+                                        for details_key, details_value in inside_message_value.iteritems():
+                                            event[u'details'][details_key] = details_value
                             else:
-                                if 'details' not in event:
-                                    event['details'] = {}
                                 event['details'][inside_message_key] = inside_message_value
                     except ValueError:
                         event['summary'] = message_value
@@ -190,9 +200,12 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    mqConn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
-    # attach to the queue
-    eventTaskQueue = mqConn.get_queue(options.taskexchange)
+    mqConn, eventTaskQueue = connect_sqs(
+        options.region,
+        options.accesskey,
+        options.secretkey,
+        options.taskexchange
+    )
 
     # consume our queue
     taskConsumer(mqConn, eventTaskQueue, es, options).run()
@@ -238,4 +251,14 @@ if __name__ == '__main__':
 
     # open ES connection globally so we don't waste time opening it per message
     es = esConnect()
-    main()
+
+    try:
+        main()
+    except KeyboardInterrupt as e:
+        logger.info("Exiting worker")
+        if options.esbulksize != 0:
+            es.finish_bulk()
+    except Exception as e:
+        if options.esbulksize != 0:
+            es.finish_bulk()
+        raise

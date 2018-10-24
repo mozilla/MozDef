@@ -5,29 +5,26 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import os
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
-from config import ES
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-from unit_test_suite import UnitTestSuite
-
 import time
 import json
 
-from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 import pytest
+from elasticsearch.exceptions import ConnectionTimeout
+
+import os
+import sys
+
+from mozdef_util.query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
+from unit_test_suite import UnitTestSuite
 
 
 class ElasticsearchClientTest(UnitTestSuite):
     def setup(self):
         super(ElasticsearchClientTest, self).setup()
-        self.es_client = ElasticsearchClient(ES['servers'], bulk_refresh_time=3)
+        self.es_client = ElasticsearchClient(self.options.esservers, bulk_refresh_time=3)
 
     def get_num_events(self):
         self.flush('events')
@@ -364,6 +361,20 @@ class TestGetIndices(ElasticsearchClientTest):
         indices = self.es_client.get_indices()
         indices.sort()
         assert indices == [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
+
+class TestIndexExists(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestIndexExists, self).teardown()
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('test_index')
+
+    def test_index_exists(self):
+        if pytest.config.option.delete_indexes:
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        indices = self.es_client.index_exists('test_index')
+        assert indices == True
 
 
 class TestClusterHealth(ElasticsearchClientTest):

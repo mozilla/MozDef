@@ -1,0 +1,66 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+-->
+
+<template name="alertdetails">
+<div class="container">
+    <div class="row">
+
+        <div class="row"><button class="btn btn-sm btn-warning col-xs-2 makeinvestigation" data-alertid={{esmetadata.id}}>Escalate To Investigation</button></div>
+        <div class="row"><button class="btn btn-sm btn-danger  col-xs-2 makeincident" data-alertid={{esmetadata.id}}>Escalate To Incident</button></div>
+        <div class="row" id="alert" >
+
+            <table class="table table-reactive table-hover table-condensed" id="alert-table">
+                <thead>
+                    <tr>
+                        <td class="upperwhite">Timestamp</td>
+                        <td class="upperwhite">Links</td>
+                        <td class="upperwhite">Severity</td>
+                        <td class="upperwhite">Category</td>
+                        <td class="upperwhite">Summary</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{utctimestamp}}</td>
+                        <td>
+                            <a target="_blank" href="{{kibanaurl}}">open in kibana</a>
+                            {{#if url}}
+                                <br><a href="{{url}}" target ="_blank">docs</a>
+                            {{/if}}
+                        </td>
+                        <td>{{severity}}</td>
+                        <td>{{category}}</td>
+                        <td class="alertsummary">{{{ipDecorate summary}}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <table class="table table-reactive table-hover table-condensed" id="alert-events-table">
+        <tbody class="table-striped">
+            {{#each this.events}}
+                {{>alert_event}}
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+</template>
+
+
+<!--each individual event -->
+<template name="alert_event">
+
+        <tr>
+            <td>{{documentindex}}</td>
+            <td>{{documentid}}</td>
+            <td>{{documenttype}}</td>
+            <td>{{{ ipDecorate documentsource.summary}}}</td>
+            <td>{{>eventdetails}}</td>
+        </tr>
+
+</template>

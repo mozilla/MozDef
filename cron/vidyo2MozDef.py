@@ -125,17 +125,17 @@ def main():
     #connect to mysql
     db=MySQLdb.connect(host=options.hostname, user=options.username,passwd=options.password,db=options.database)
     c=db.cursor(MySQLdb.cursors.DictCursor)
-    
+
     c.execute("select * from ConferenceCall2 where JoinTime between NOW() - INTERVAL 30 MINUTE and NOW() or LeaveTime between NOW() - INTERVAL 30 MINUTE and NOW()")
     rows=c.fetchall()
     c.close()
-    
+
     # Build dictionary of calls in order to consolidate multiple rows for a single call
     calls = {}
     for row in rows:
         id = row['UniqueCallID']
         # Copy the row's info if we don't already have the final completed call state
-        if id not in calls or ( id in calls and  calls[id]['CallState'] != 'COMPLETED' ):
+        if id not in calls or (id in calls and calls[id]['CallState'] != 'COMPLETED'):
             calls[id] = row
 
     # Massage call data and send to MozDef
@@ -150,11 +150,11 @@ def main():
             # convert datetime objects to isoformat for json serialization
             if isinstance(call[k], datetime):
                 call[k] = call[k].isoformat()
-            # make sure it's a string, not unicode forced into a string            
+            # make sure it's a string, not unicode forced into a string
             if isinstance(call[k],str):
                 # db has unicode stored as string, so decode, then encode
                 call[k] = call[k].decode('utf-8','ignore').encode('ascii','ignore')
-        
+
         mdEvent.send(timestamp=call['JoinTime'],
                      summary='Vidyo call status for '+call['UniqueCallID'].encode('ascii', 'ignore'),
                      tags=['vidyo'],

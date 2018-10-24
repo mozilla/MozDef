@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: SQS Queue that MozDef consumes events from
+Resources:
+  MozDefSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref "AWS::StackName"
+Outputs:
+  SQSQueueArn:
+    Description: "ARN of the SQS Queue that MozDef will consume events from"
+    Value: !GetAtt MozDefSQSQueue.Arn
+  SQSQueueName:
+    Description: "Name of the SQS Queue that MozDef will consume events from"
+    Value: !GetAtt MozDefSQSQueue.QueueName

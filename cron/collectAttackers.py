@@ -21,10 +21,9 @@ from kombu import Connection, Exchange
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
-from query_models import SearchQuery, PhraseMatch
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.query_models import SearchQuery, PhraseMatch
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -137,25 +136,25 @@ def searchMongoAlerts(mozdefdb):
     # to find common attackers.
     ipv4TopHits = alerts.aggregate([
         {"$sort": {"utcepoch":-1}}, # reverse sort the current alerts
-        {"$limit": 100}, #most recent 100
+        {"$limit": 100},  # most recent 100
         {"$match": {"events.documentsource.details.sourceipaddress":{"$exists": True}}}, # must have an ip address
         {"$match": {"attackerid":{"$exists": False}}}, # must not be already related to an attacker
-        {"$unwind":"$events"}, #make each event into it's own doc
+        {"$unwind":"$events"},  # make each event into it's own doc
         {"$project":{"_id":0,
-                     "sourceip":"$events.documentsource.details.sourceipaddress"}}, #emit the source ip only
+                     "sourceip":"$events.documentsource.details.sourceipaddress"}},  # emit the source ip only
         {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}}, # count by ip
         {"$match":{"hitcount":{"$gt":5}}}, # limit to those with X observances
         {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort
         {"$limit": 10} # top 10
         ])
-    for ip in ipv4TopHits['result']:
+    for ip in ipv4TopHits:
         # sanity check ip['_id'] which should be the ipv4 address
         if isIPv4(ip['_id']) and ip['_id'] not in netaddr.IPSet(['0.0.0.0']):
             ipcidr = netaddr.IPNetwork(ip['_id'])
-            # expand it to a /24 CIDR
+            # set CIDR
             # todo: lookup ipwhois for asn_cidr value
             # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
-            ipcidr.prefixlen = 24
+            ipcidr.prefixlen = 32
 
             # append to or create attacker.
             # does this match an existing attacker's indicators
@@ -347,7 +346,7 @@ def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
       #"continent": "EU"
     #logger.debug(eventDictionary)
     if 'details' in eventDictionary.keys():
-        if  'sourceipgeolocation' in eventDictionary['details']:
+        if 'sourceipgeolocation' in eventDictionary['details']:
             attackers=mozdefdb['attackers']
             attacker = attackers.find_one({'_id': attackerID})
             if attacker is not None:

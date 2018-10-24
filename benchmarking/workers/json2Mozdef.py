@@ -19,15 +19,14 @@ import random
 import logging
 from logging.handlers import SysLogHandler
 from Queue import Empty
-from  requests.packages.urllib3.exceptions import ClosedPoolError
+from requests.packages.urllib3.exceptions import ClosedPoolError
 import requests
 import time
 
 httpsession = FuturesSession(max_workers=5)
-httpsession.trust_env=False #turns of needless .netrc check for creds
+httpsession.trust_env=False  # turns of needless .netrc check for creds
 #a = requests.adapters.HTTPAdapter(max_retries=2)
 #httpsession.mount('http://', a)
-
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -64,7 +63,7 @@ def postLogs(logcache):
 
 if __name__ == '__main__':
     parser=OptionParser()
-    parser.add_option("-u", dest='url' , default='http://localhost:8080/events/', help="mozdef events URL to use when posting events")
+    parser.add_option("-u", dest='url', default='http://localhost:8080/events/', help="mozdef events URL to use when posting events")
     (options,args) = parser.parse_args()
     sh=logging.StreamHandler(sys.stdout)
     sh.setFormatter(formatter)
@@ -75,14 +74,14 @@ if __name__ == '__main__':
         for i in range(0,10):
 
             print(i)
-            alog=dict(eventtime=pytz.timezone('UTC').localize(datetime.now()).isoformat(),\
-                        hostname=socket.gethostname(),\
-                        processid=os.getpid(),\
-                        processname=sys.argv[0],\
-                        severity='INFO',\
-                        summary='joe login failed',\
-                        category='authentication',\
-                        tags=[],\
+            alog=dict(eventtime=pytz.timezone('UTC').localize(datetime.now()).isoformat(),
+                        hostname=socket.gethostname(),
+                        processid=os.getpid(),
+                        processname=sys.argv[0],
+                        severity='INFO',
+                        summary='joe login failed',
+                        category='authentication',
+                        tags=[],
                         details=[])
             alog['details']=dict(success=True,username='mozdef')
             alog['tags']=['mozdef','stresstest']
@@ -94,7 +93,7 @@ if __name__ == '__main__':
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
@@ -105,7 +104,7 @@ if __name__ == '__main__':
                 postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
                 postingProcess.start()
             except OSError as e:
-                if e.errno==35: #resource temporarily unavailable.
+                if e.errno==35:  # resource temporarily unavailable.
                     print(e)
                     pass
                 else:

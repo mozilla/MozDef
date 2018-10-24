@@ -17,10 +17,9 @@ from hashlib import md5
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
-from query_models import SearchQuery, TermMatch, PhraseMatch
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -158,12 +157,10 @@ def initConfig():
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
-
 
     # default time period in minutes to look back in time for the aggregation
     options.correlationminutes = getConfig('correlationminutes',
@@ -176,7 +173,6 @@ def initConfig():
     options.ouifilename = getConfig('ouifilename',
                                 'oui.txt',
                                 options.configfile)
-
 
 
 if __name__ == '__main__':

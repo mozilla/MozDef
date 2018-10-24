@@ -18,10 +18,32 @@ import copy
 import re
 import json
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
+from lib import alerttask
+
 
 class AlertTestSuite(UnitTestSuite):
+    def teardown(self):
+        os.chdir(self.orig_path)
+
     def setup(self):
+        self.orig_path = os.getcwd()
         super(AlertTestSuite, self).setup()
+
+        # Overwrite the ES and RABBITMQ configs for alerts
+        # since it pulls it from alerts/lib/config.py
+        alerttask.ES = {
+            'servers': list('{0}'.format(s) for s in self.options.esservers)
+        }
+        alerttask.RABBITMQ = {
+            'mquser': self.options.mquser,
+            'alertexchange': self.options.alertExchange,
+            'alertqueue': self.options.alertqueue,
+            'mqport': self.options.mqport,
+            'mqserver': self.options.mqserver,
+            'mqpassword': self.options.mqpassword,
+            'mqalertserver': self.options.mqalertserver
+        }
 
         alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)
@@ -176,7 +198,7 @@ class AlertTestSuite(UnitTestSuite):
 
         # Verify that the alert properties are set correctly
         for key, value in test_case.expected_alert.iteritems():
-            assert found_alert['_source'][key] == value, '{0} does not match!\n\tgot: {1}\n\texpected: {2}'.format(key, found_alert['_source'][key], value)
+            assert found_alert['_source'][key] == value, u'{0} does not match!\n\tgot: {1}\n\texpected: {2}'.format(key, found_alert['_source'][key], value)
 
     def verify_alert_task(self, alert_task, test_case):
         assert alert_task.classname() == self.alert_classname, 'Alert classname did not match expected name'

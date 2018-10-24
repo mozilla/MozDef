@@ -1,0 +1,235 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Deploy MozDef autoscaled EC2 instance group and ALB into AWS
+Parameters:
+  VpcId:
+    Type: "AWS::EC2::VPC::Id"
+    Description: "The VPC ID of the VPC to deploy in"
+    Default: "vpc-dc8eacb4"
+  InstanceType:
+    Type: "String"
+    Default: "m5.large"
+    Description: "EC2 instance type, e.g. m1.small, m1.large, etc."
+  KeyName:
+    Type: "AWS::EC2::KeyPair::KeyName"
+    Description: "Name of an existing EC2 KeyPair to enable SSH access to the web server"
+    Default: "infosec-pdx-workweek-2018"
+  IamInstanceProfile:
+    Type: "String"
+    Description: "The ARN of the IAM Instance Profile"
+    Default: "arn:aws:iam::656532927350:instance-profile/netsecdevbastion-BastionInstanceProfile-12CM3TOELV20R"
+  AutoScaleGroupSubnetIds:
+    Type: "List<AWS::EC2::Subnet::Id>"
+    Description: "A comma delimited list of subnet IDs"
+    Default: "subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6"
+  AMIImageId:
+    Type: "String"
+    Description: "The AMI Image ID to use of the EC2 instance"
+    Default: "ami-0ff5b922fb3ae2332"
+  EFSID:
+    Type: "String"
+    Description: "Logical ID of the EFS Filesystem"
+  EFSMountPoint:
+    Type: "String"
+    Description: "Directory to mount EFS to"
+    Default: "/var/lib/mongodb"
+  MozDefSecurityGroupId:
+    Type: "String"
+    Description: "The security group to apply to the EC2 instance"
+  MozDefLoadBalancerSecurityGroupId:
+    Type: "String"
+    Description: "The security group to apply to the EC2 instance"
+  MozDefACMCertArn:
+    Type: "String"
+    Description: "The arn of your pre-issued certificate for ssl termination."
+    Default: "arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583"
+  ESURL:
+    Type: "String"
+    Description: "The AWS ES endpoint URL"
+    Default: http://elasticsearch.example.com/
+  KibanaURL:
+    Type: "String"
+    Description: "The AWS ES Kibana complete URL"
+    Default: https://kibana.example.com/_plugin/kibana
+  KibanaDomainOnlyURL:
+    Type: "String"
+    Description: "The AWS ES Kibana URL with domain only"
+    Default: https://kibana.example.com/
+  OIDCClientId:
+    Description: "The client ID that your OIDC provider issues you for your Mozdef instance."
+    Type: String
+    Default: "lGsSlYNdiV6f5tF05pWN3EbQoDPHx44k"
+  OIDCClientSecret:
+    Type: String
+    Description: "The secret that your OIDC provider issues you for your Mozdef instance."
+    NoEcho: true
+  OIDCDiscoveryURL:
+    Type: String
+    Default: "https://auth.mozilla.auth0.com/.well-known/openid-configuration"
+    Description: "The URL of your OIDC provider's well-known discovery URL"
+  CloudTrailSQSNotificationQueueName:
+    Type: String
+    Description: "The URL of your OIDC provider's well-known discovery URL"
+Resources:
+  MozDefElasticLoadBalancingV2TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckPath: "/health"
+      HealthCheckIntervalSeconds: 5
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+      VpcId: !Ref VpcId
+  MozDefElasticLoadBalancingV2TargetGroupKibana:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckPath: "/health"
+      Port: 9090
+      Protocol: HTTP
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+      VpcId: !Ref VpcId
+  MozDefLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      IamInstanceProfile: !Ref IamInstanceProfile
+      ImageId: !Ref AMIImageId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      SecurityGroups:
+        - !Ref MozDefSecurityGroupId
+      UserData:
+        Fn::Base64: !Sub |
+          #cloud-config
+
+          packages:
+            - amazon-efs-utils
+          write_files:
+            - content: |
+                OPTIONS_ESSERVERS=${ESURL}
+                OPTIONS_KIBANAURL=${KibanaURL}
+                # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
+                client_id=${OIDCClientId}
+                client_secret=${OIDCClientSecret}
+                discovery_url=${OIDCDiscoveryURL}
+                backend=http://meteor:3000
+                redirect_uri_path=/redirect_uri
+                httpsredir=no
+                # Meteor settings
+                MONGO_URL=mongodb://mongodb:3002/meteor
+                ROOT_URL=http://localhost
+                OPTIONS_METEOR_PORT=3000
+                OPTIONS_METEOR_AUTHENTICATIONTYPE=oidc
+                ES={"servers": [${ESURL}]}
+                cookiename=sesmeteor
+              path: /opt/mozdef/docker/compose/cloudy_mozdef.env
+            - content: |
+                client_id=${OIDCClientId}
+                client_secret=${OIDCClientSecret}
+                discovery_url=${OIDCDiscoveryURL}
+                backend=${KibanaDomainOnlyURL}
+                redirect_uri_path=/redirect_uri
+                httpsredir=no
+                cookiename=seskibana
+              path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
+            - content: |
+                OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
+              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
+          runcmd:
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
+            - mkdir --verbose --parents ${EFSMountPoint}
+            - echo '*.* @@127.0.0.1:514' >> /etc/rsyslog.conf
+            - systemctl enable rsyslog
+            - systemctl start rsyslog
+            - grep "${EFSID}" /etc/fstab >/dev/null || echo "${EFSID}:/ ${EFSMountPoint} efs tls,_netdev" >> /etc/fstab
+            - for i in 1 2 3 4 5 6; do mount --verbose --all --types efs defaults && break || sleep 15; done
+            - cd /opt/mozdef && git pull origin infosec_workweek
+            - make -C /opt/mozdef -f /opt/mozdef/Makefile  run-cloudy-mozdef
+  MozDefAutoScaleGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: 1
+      LaunchConfigurationName: !Ref MozDefLaunchConfiguration
+      MaxSize: 2
+      MinSize: 1
+      Tags:
+        - Key: Name
+          Value: mozdef
+          PropagateAtLaunch: true
+        - Key: application
+          Value: mozdef
+          PropagateAtLaunch: true
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+          PropagateAtLaunch: true
+      TargetGroupARNs:
+        - !Ref MozDefElasticLoadBalancingV2TargetGroup
+        - !Ref MozDefElasticLoadBalancingV2TargetGroupKibana
+      TerminationPolicies:
+        - OldestLaunchConfiguration
+      VPCZoneIdentifier: !Ref AutoScaleGroupSubnetIds
+    UpdatePolicy:
+     AutoScalingRollingUpdate:
+       MinInstancesInService: '1'
+       MaxBatchSize: '1'
+       PauseTime: PT5S
+  MozDefElasticLoadBalancingV2LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      SecurityGroups:
+        - !Ref MozDefLoadBalancerSecurityGroupId
+      Subnets: !Ref AutoScaleGroupSubnetIds
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref "AWS::StackName"
+  MozDefElasticLoadBalancingV2ListenerKibanaHttps:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 9090
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+  MozDefElasticLoadBalancingV2ListenerHttps:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroup
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+  MozDefElasticLoadBalancingV2ListenerHttp:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroup
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 80
+      Protocol: HTTP

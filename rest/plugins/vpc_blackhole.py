@@ -75,7 +75,7 @@ class message(object):
             if cur_section is not None:
                 cur_options = myparser.options(cur_section)
                 if cur_options is not None:
-                    self.multioptions.append({ 'region': myparser.get(cur_section, 'region'), 'aws_access_key_id': myparser.get(cur_section, 'aws_access_key_id'), 'aws_secret_access_key': myparser.get(cur_section, 'aws_secret_access_key') } )
+                    self.multioptions.append({'region': myparser.get(cur_section, 'region'), 'aws_access_key_id': myparser.get(cur_section, 'aws_access_key_id'), 'aws_secret_access_key': myparser.get(cur_section, 'aws_secret_access_key')})
 
     def addBlackholeEntry(self,
                           ipaddress=None):
@@ -153,7 +153,6 @@ class message(object):
         except Exception as e:
             sys.stderr.write('Error while creating a blackhole entry %s: %r\n' % (ipaddress, e))
 
-
     def onMessage(self, request, response):
         '''
         request: http://bottlepy.org/docs/dev/api.html#the-request-object
@@ -189,7 +188,7 @@ class message(object):
                        and not ipcidr.ip.is_reserved():
                         ipaddress =  str(ipcidr.cidr)
                         self.addBlackholeEntry(ipaddress)
-                        sys.stdout.write ('Blackholed {0}\n'.format(ipaddress))
+                        sys.stdout.write('Blackholed {0}\n'.format(ipaddress))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 

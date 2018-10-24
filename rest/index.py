@@ -21,12 +21,11 @@ from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
-from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+from mozdef_util.query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
 
-from utilities.toUTC import toUTC
-from utilities.logger import logger, initLogger
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 options = None
@@ -68,7 +67,7 @@ def status():
         request.body.close()
     response.status = 200
     response.content_type = "application/json"
-    response.body = json.dumps(dict(status='ok'))
+    response.body = json.dumps(dict(status='ok', service='restapi'))
     sendMessgeToPlugins(request, response, 'status')
     return response
 
@@ -123,6 +122,13 @@ def index():
     sendMessgeToPlugins(request, response, 'blockip')
     return response
 
+@post('/blockfqdn', methods=['POST'])
+@post('/blockfqdn/', methods=['POST'])
+@enable_cors
+def index():
+    '''will receive a call to block an ip address'''
+    sendMessgeToPlugins(request, response, 'blockfqdn')
+    return response
 
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
@@ -308,7 +314,7 @@ def createIncident():
     except KeyError:
         response.status = 500
         response.body = json.dumps(dict(status='failed',
-                                        error='Missing required keys'\
+                                        error='Missing required keys'
                                               '(summary, phase, creator)'))
         return response
 
@@ -336,21 +342,20 @@ def createIncident():
     incident['dateMitigated'] = validateDate(body.get('dateMitigated'))
     incident['dateContained'] = validateDate(body.get('dateContained'))
 
-    dates = [ incident['dateOpened'],
+    dates = [incident['dateOpened'],
               incident['dateClosed'],
               incident['dateReported'],
               incident['dateVerified'],
               incident['dateMitigated'],
-              incident['dateContained'] ]
+              incident['dateContained']]
 
     # Validating all the dates for the format
     if False in dates:
         response.status = 500
         response.body = json.dumps(dict(status='failed',
-                                        error='Wrong format of date. Please '\
+                                        error='Wrong format of date. Please '
                                               'use yyyy-mm-dd hh:mm am/pm'))
         return response
-
 
     incident['tags'] = body.get('tags')
 
@@ -541,7 +546,7 @@ def kibanaDashboards():
         for dashboard in results['hits']:
             resultsList.append({
                 'name': dashboard['_source']['title'],
-                'url': "%s/%s/%s" % (options.kibanaurl,
+                'url': "%s#/%s/%s" % (options.kibanaurl,
                 "dashboard",
                 dashboard['_id'])
             })
@@ -585,16 +590,16 @@ def verisSummary(verisRegex=None):
         iveris=incidents.aggregate([
 
                                    {"$match":{"tags":{"$exists":True}}},
-                                   {"$unwind" : "$tags" },
-                                   {"$match":{"tags":{"$regex":''}}}, #regex for tag querying
-                                   { "$project" : { "dateOpened" : 1 ,
-                                                   "tags" : 1 ,
+                                   {"$unwind": "$tags"},
+                                   {"$match":{"tags":{"$regex":''}}},  # regex for tag querying
+                                   {"$project": {"dateOpened": 1,
+                                                   "tags": 1,
                                                    "phase": 1,
                                                    "_id": 0
-                                                   } }
+                                                   }}
                                    ])
-        if 'ok' in iveris.keys() and 'result' in iveris.keys():
-            return json.dumps(iveris['result'], default=json_util.default)
+        if iveris:
+            return json.dumps(list(iveris), default=json_util.default)
         else:
             return json.dumps(list())
     except Exception as e:

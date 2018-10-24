@@ -6,8 +6,6 @@ Copyright (c) 2014 Mozilla Corporation
 */
 
 /*base css */
-@import url('https://fonts.googleapis.com/css?family=Zilla+Slab+Highlight');
-@import url('https://fonts.googleapis.com/css?family=Zilla+Slab');
 html{
 	background: none;
 	min-height: 100%;
@@ -24,10 +22,6 @@ body{
     background: -ms-linear-gradient(top, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* IE10+ */
     background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
     background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
-    font-family: "Zilla Slab",sans-serif;
-    font-size: 14px;
-    /*margin: 0;*/
-    /*min-width: 990px;*/
     padding: 0;
     color: #000;
     line-height: normal;
@@ -199,6 +193,13 @@ caption, legend {
     color: wheat;
 }
 
+.row {
+    color: white;
+}
+
+.modal-body .row {
+    color: black;
+}
 /*bootstrap overrides*/
 
 .btn {
@@ -245,6 +246,9 @@ td{
     margin-top: 20px;
 }
 
+.tabnav a{
+    color: lightblue;
+}
 
 /* uncomment this login ui css to hide the local account/password signup options
 .logins-wrapper .svgtextlabel {
@@ -303,6 +307,10 @@ circle:hover{
     stroke: black;
 }
 
+.vtagholders {
+    padding-left: 1px;
+    padding-right: 0px;
+}
 
 #header:after {
     content: "";
@@ -563,51 +571,6 @@ circle:hover{
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     padding: 8px 10px;
-}
-
-.vr-sidenav {
-    color: white;
-}
-
-.vr-sidenav .filter-radios label:nth-child(1) {
-    margin-top: 5px;
-}
-
-.vr-sidenav .filter-radios label {
-    display: block;
-    text-align: left;
-    padding-left: 33%;
-}
-
-.vr-sidenav #specific-attack-details {
-    display: none;
-}
-
-.vr-sidenav .back-button {
-    position: absolute;
-    left: 5px;
-    top: 5px;
-    color: white;
-    font-size: 18px;
-}
-
-.vr-sidenav .back-button:hover {
-    cursor: pointer;
-}
-
-.vr-sidenav #attacks-list {
-    list-style: none;
-    color: white;
-    margin-left: -40px;
-}
-
-.vr-sidenav #attacks-list .attacks-list-item {
-    padding: 5px;
-}
-
-.vr-sidenav #attacks-list .attacks-list-item:hover {
-    cursor: pointer;
-    text-decoration: underline;
 }
 
 .mousepointer {

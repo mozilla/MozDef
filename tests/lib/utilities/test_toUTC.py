@@ -2,11 +2,10 @@ from datetime import datetime, date
 from dateutil.parser import parse
 
 import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../lib'))
 import pytz
 
 import tzlocal
+from mozdef_util.utilities.toUTC import toUTC
 
 UTC_TIMEZONE_COUNT = 0
 def utc_timezone():
@@ -22,10 +21,10 @@ def utc_timezone():
 tzlocal.get_localzone = utc_timezone
 
 import sys
-if 'utilities.toUTC' in sys.modules:
-    reload(sys.modules['utilities.toUTC'])
+if 'mozdef_util.utilities.toUTC' in sys.modules:
+    reload(sys.modules['mozdef_util.utilities.toUTC'])
 
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 
 class TestToUTC():
@@ -98,4 +97,23 @@ class TestToUTC():
     def test_negative_string_int(self):
         result = toUTC("-12345")
         self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_zero_int(self):
+        result = toUTC(0)
+        self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_zero_string_int(self):
+        result = toUTC("0")
+        self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_zero_string_float(self):
+        result = toUTC("0.0000")
+        self.result_is_datetime(result)
+        assert str(result) == '1970-01-01 00:00:00+00:00'
+
+    def test_zero_float(self):
+        result = toUTC(0.000000)
         assert str(result) == '1970-01-01 00:00:00+00:00'

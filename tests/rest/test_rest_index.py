@@ -27,7 +27,7 @@ class TestStatusRoute(RestTestSuite):
     routes = ['/status', '/status/']
 
     status_code = 200
-    body = '{"status": "ok"}'
+    body = '{"status": "ok", "service": "restapi"}'
 
 
 class TestKibanaDashboardsRoute(RestTestSuite):

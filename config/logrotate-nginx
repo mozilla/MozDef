@@ -1,15 +1,17 @@
-/var/log/mozdef/nginx/*.error_log {
-        weekly
-        missingok
-        rotate 4
-        compress
-        delaycompress
-        notifempty
-        create 644 mozdef mozdef
-        sharedscripts
-        postrotate
-                if [ -f /var/run/nginx.pid ]; then
-                        kill -USR1 `cat /var/run/nginx.pid`
-                fi
-        endscript
+/var/log/mozdef/nginx/*.error_log 
+{
+    su mozdef mozdef
+    weekly
+    missingok
+    rotate 4
+    compress
+    notifempty
+    create 644 mozdef mozdef
+    sharedscripts
+    postrotate
+        mv /var/log/mozdef/nginx/*.gz /var/logarchive/mozdef/
+        if [ -f /var/run/nginx.pid ]; then
+             kill -USR1 `cat /var/run/nginx.pid`
+        fi
+    endscript
 }

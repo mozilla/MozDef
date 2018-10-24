@@ -18,8 +18,7 @@ from kombu.mixins import ConsumerMixin
 from lib.alert_plugin_set import AlertPluginSet
 from lib.config import ALERT_PLUGINS
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.logger import logger, initLogger
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 class alertConsumer(ConsumerMixin):

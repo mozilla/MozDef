@@ -43,7 +43,6 @@ class message(object):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
 
-
     def onMessage(self, request, response):
         '''
         request: http://bottlepy.org/docs/dev/api.html#the-request-object
@@ -57,7 +56,6 @@ class message(object):
             requestDict = json.loads(arequest)
         except ValueError as e:
             response.status = 500
-
 
         print(requestDict, requestDict.keys())
         if 'ipaddress' in requestDict.keys():
@@ -83,7 +81,6 @@ class message(object):
 
         return (request, response)
 
-
     def initConfiguration(self):
         myparser = OptionParser()
         # setup self.options by sending empty list [] to parse_args
@@ -95,4 +92,3 @@ class message(object):
         self.options.cymonapikey = getConfig('cymonapikey',
                                         '',
                                         self.configfile)
-

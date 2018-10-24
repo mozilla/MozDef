@@ -3,11 +3,11 @@ from negative_test_suite import NegativeTestSuite
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from query_models import QueryStringMatch
+from mozdef_util.query_models import QueryStringMatch
 
 
 hostname_test_regex = 'hostname: /(.*\.)*(groupa|groupb)\.(.*\.)*subdomain\.(.*\.)*.*/'
+filename_matcher = 'summary: /.*\.(exe|sh)/'
 
 
 class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
@@ -36,6 +36,11 @@ class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
                 {'hostname': 'host1.groupa.subdomain.domain.company.com'},
                 {'hostname': 'someotherhost1.hgi.groupa.subdomain.domain1.company.com'},
                 {'hostname': 'host2.groupb.subdomain.domain.company.com'},
+            ],
+
+            QueryStringMatch(filename_matcher): [
+                {'summary': 'test.exe'},
+                {'summary': 'test.sh'},
             ],
         }
         return tests
@@ -70,5 +75,13 @@ class TestQueryStringMatchNegativeTestSuite(NegativeTestSuite):
                 {'hostname': 'host1.groupaa.subdomain.company.com'},
                 {'hostname': 'host1.agroupb.subdomain.company.com'},
             ],
+
+            QueryStringMatch(filename_matcher): [
+                {'summary': 'test.exe.abcd'},
+                {'summary': 'testexe'},
+                {'summary': 'test.1234'},
+                {'summary': '.exe.test'},
+            ],
+
         }
         return tests

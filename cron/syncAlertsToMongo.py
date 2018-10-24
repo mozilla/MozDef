@@ -16,10 +16,9 @@ from pymongo import MongoClient
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
-from query_models import SearchQuery, TermMatch
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.query_models import SearchQuery, TermMatch
 
 logger = logging.getLogger(sys.argv[0])
 

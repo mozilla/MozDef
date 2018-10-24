@@ -1,8 +1,14 @@
 Demo Instance
 =============
 
-Mozilla maintains a demo instance of MozDef that you can use try out the UI and get a feel for it in a live environment
-with test/random data.
+Mozilla used to maintain a demo instance of MozDef, however it's currently offline. Best bet for demo is to clone the repo and use the docker containers to stand up a local instance for yourself. There are some scripts in the https://github.com/mozilla/MozDef/tree/master/examples/demo folder to send sample events into a local docker instance that will generate alerts, attackers, etc and give you a feel for the flow.
 
-Simply browse to http://demo.mozdef.com:3000 and login using any gmail or yahoo email address. No credentials/passwords are
-sent to the demo instance, though your email will be logged. If you'd prefer you can also use mozdef@mockmyid.com as a userID which will not prompt for any credentials.
+Here's how to make MozDef go using the provided docker compose files:
+
+1) Pull the repo: git clone https://github.com/mozilla/MozDef.git
+2) Build the docker containers:
+docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-rebuild.yml -p mozdef build
+3) Run the containers:
+docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-rebuild.yml -p mozdef up
+4) Firefox yourself to http://localhost to see the main UI (when the container starts)
+5) Login using a locally created account (click login, create and choose a username/password)
