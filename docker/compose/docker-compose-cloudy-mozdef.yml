@@ -154,7 +154,7 @@ services:
     networks:
       - default
   mq_eventtask:
-    image: mozdef/mozdef_mq_eventtask
+    image: mozdef/mozdef_mq_worker
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -170,7 +170,7 @@ services:
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data/
   mq_cloudtrail:
-    image: mozdef/mozdef_mq_eventtask
+    image: mozdef/mozdef_mq_worker
     env_file:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_cloudtrail.env

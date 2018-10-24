@@ -48,7 +48,7 @@ services:
   mq_eventtask:
     build:
       context: ../../
-      dockerfile: docker/compose/mozdef_mq_eventtask/Dockerfile
+      dockerfile: docker/compose/mozdef_mq_worker/Dockerfile
   meteor:
     build:
       context: ../../

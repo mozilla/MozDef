@@ -24,7 +24,7 @@ services:
   loginput:
     image: mozdef/mozdef_loginput
   mq_eventtask:
-    image: mozdef/mozdef_mq_eventtask
+    image: mozdef/mozdef_mq_worker
   meteor:
     image: mozdef/mozdef_meteor
   rest:
