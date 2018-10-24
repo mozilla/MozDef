@@ -16,7 +16,7 @@ if (Meteor.isServer) {
         'loadKibanaDashboards': loadKibanaDashboards,
         'blockip': blockIP,
         'blockfqdn': blockFQDN,
-        'watchitem': watchitem,
+        'watchitem': watchItem,
         'ipwhois': ipwhois,
         'ipdshield': ipdshield,
         'ipintel': ipintel,
