@@ -36,6 +36,10 @@ if (Meteor.isClient) {
             Session.set('ipdshieldipaddress',($(e.target).attr('data-ipaddress')));
             $('#modaldshieldwindow').modal()
         },
+        "click .ipmenu-watchitem": function(e,t){
+            Session.set('watchItemwatchcontent',($(e.target).attr('data-ipaddress')));
+            $('#modalWatchItemWindow').modal()
+        },
         "click .ipmenu-blockip": function(e,t){
             Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalBlockIPWindow').modal()

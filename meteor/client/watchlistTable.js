@@ -1,4 +1,4 @@
- /*
+/*
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -9,7 +9,7 @@ if (Meteor.isClient) {
 
     //return all items
     Template.watchlist.helpers({
-        watch: function () {
+        watched: function () {
             return watchlist.find({},{
                                    sort: {dateExpiring: -1}
                                 });
@@ -18,15 +18,15 @@ if (Meteor.isClient) {
 
     //select an incident for editing
     Template.watchlist.events({
-        "click .watchadd": function(e,t){
-            //clear any leftover session val
-            Session.set('watchItemtwatchcontent','');
+        "click .watchedadd": function(e,t){
+            //clear any leftover ip session val
+            Session.set('watchItemwatchcontent','');
             $('#modalWatchItemWindow').modal();
         },
 
-        "click .watchdelete": function(e,t){
+        "click .watcheddelete": function(e,t){
             watchlist.remove(this._id);
-            Session.set('displayMessage','Deleted watch for & ' + this.address);
+            Session.set('displayMessage','Deleted watch item for & ' + this.watchcontent);
         }
     });
 

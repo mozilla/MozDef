@@ -68,7 +68,7 @@ Router.map(function () {
         path: '/watchlist',
         template: 'watchlist',
         layoutTemplate: 'layout'
-    });    
+    }); 
 
     this.route('investigations', {
         path: '/investigations',
@@ -182,11 +182,11 @@ Router.map(function () {
         layoutTemplate: 'layout'
     });
 
-    this.route('addwatchitem', {
-        path: '/addwatchitem/:_watchcontent',
+    this.route('watchitem', {
+        path: '/watchitem/:_watchcontent',
         template: 'watchItemform',
         data: function() {
-            Session.set('addwatchItemwatchcontent', this.params._watchcontent);
+            Session.set('watchItem', this.params._watchcontent);
         },
         layoutTemplate: 'layout'
     });
