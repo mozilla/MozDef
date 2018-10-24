@@ -38,12 +38,14 @@ update-stack: test ## Updates the nested stack on AWS
 	@export AWS_REGION=$(AWS_REGION)
 	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI) \
 	  --capabilities CAPABILITY_IAM \
-	  --parameters $(STACK_PARAMS)
+	  --parameters $(STACK_PARAMS) \
+	  --output text
 
+# --ignore-checks=E2502 : https://github.com/awslabs/cfn-python-lint/issues/408
 .PHONY: cflint test
 test: cflint
 cflint: ## Verify the CloudFormation template pass linting tests
-	-cfn-lint cloudformation/*.yml
+	-cfn-lint --ignore-checks=E2502 cloudformation/*.yml
 
 .PHONY: stack-status
 stack-status: ## Output current CloudFormation stack status

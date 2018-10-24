@@ -1,23 +1,22 @@
----
-AWSTemplateFormatVersion: "2010-09-09"
-Description: "Creates the MozDef base instance profile and delivery server IAM role"
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates the MozDef base instance profile and delivery server IAM role
 Parameters:
   CloudTrailS3BucketName:
     Type: String
-    Description: "The name of the S3 Bucket containing the CloudTrail logs"
+    Description: The name of the S3 Bucket containing the CloudTrail logs
   CloudTrailSQSQueueArn:
     Type: String
-    Description: "The ARN of the SQS queue that receives SNS notifications each time a new CloudTrail log is written to S3"
+    Description: The ARN of the SQS queue that receives SNS notifications each time a new CloudTrail log is written to S3
   CloudTrailS3BucketIAMRoleArn:
     Type: String
-    Description: "The ARN of an IAM Role that MozDef should assume in order to read from the S3 Bucket containing the CloudTrail logs"
-    Default: ""
+    Description: The ARN of an IAM Role that MozDef should assume in order to read from the S3 Bucket containing the CloudTrail logs
+    Default: ''
   MozDefSQSQueueArn:
     Type: String
-    Description: "The ARN of the SQS queue that receives events destined for MozDef"
+    Description: The ARN of the SQS queue that receives events destined for MozDef
 Conditions:
   IAMRoleSet:
-    !Not [!Equals [!Ref CloudTrailS3BucketIAMRoleArn, ""]]
+    !Not [!Equals [!Ref CloudTrailS3BucketIAMRoleArn, '']]
 Resources:
   MozDefCloudTrailPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -33,7 +32,7 @@ Resources:
     Properties:
       Description: Policy to access CloudTrail logs
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
           - Sid: AllowReadCloudTrailLogsListBucket
             Effect: Allow
@@ -42,7 +41,7 @@ Resources:
           - Sid: AllowReadCloudTrailLogsGetObject
             Effect: Allow
             Action: s3:GetObject*
-            Resource: !Join ["", ["arn:aws:s3:::", !Ref CloudTrailS3BucketName, "/AWSLogs/*"]]
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref CloudTrailS3BucketName, '/AWSLogs/*']]
           - Sid: AllowReadDeleteFromCloudTrailSQSQueue
             Effect: Allow
             Action:
@@ -65,12 +64,12 @@ Resources:
       Roles:
         - !Ref MozDefIAMRole
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
           - Sid: AllowGetSessionToken
             Effect: Allow
             Action: sts:GetSessionToken
-            Resource: "*"
+            Resource: '*'
           - Sid: AllowAssumeRole
             Effect: Allow
             Action: sts:AssumeRole
@@ -88,7 +87,7 @@ Resources:
     Properties:
       Description: Policy to access mozdef SQS queues
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: 2012-10-17
         Statement:
           - Sid: AllowReadDeleteFromSQSQueues
             Effect: Allow
@@ -98,22 +97,22 @@ Resources:
               - sqs:DeleteMessage
             Resource: !Ref MozDefSQSQueueArn
   MozDefIAMRole:
-    Type: "AWS::IAM::Role"
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: 2012-10-17
         Statement:
-          - Effect: "Allow"
+          - Effect: Allow
             Principal:
-              Service: "ec2.amazonaws.com"
-            Action: "sts:AssumeRole"
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
       ManagedPolicyArns:
         - !Ref MozDefCloudTrailPolicy
         # MozDefCloudTrailRoleAssumptionPolicy is not listed here because it's
         # optional and attached to this role within the policy itself
         - !Ref MozdefSQSPolicy
   InstanceProfile:
-    Type: "AWS::IAM::InstanceProfile"
+    Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
         - Ref: MozDefIAMRole
