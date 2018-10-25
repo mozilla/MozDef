@@ -22,8 +22,7 @@ from slackclient import SlackClient
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 
 logger = logging.getLogger()

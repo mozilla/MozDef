@@ -12,9 +12,8 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../mq"))
 from mq.esworker_sns_sqs import taskConsumer
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from utilities.dot_dict import DotDict
-from query_models import SearchQuery, ExistsMatch
+from mozdef_util.utilities.dot_dict import DotDict
+from mozdef_util.query_models import SearchQuery, ExistsMatch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite

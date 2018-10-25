@@ -12,9 +12,8 @@ import datetime
 import json
 from ipwhois import IPWhois
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
-from utilities.logger import logger
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger
+from mozdef_util.utilities.toUTC import toUTC
 
 
 class message(object):

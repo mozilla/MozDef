@@ -10,7 +10,7 @@
 # this case a VPN certificate)
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, PhraseMatch
+from mozdef_util.query_models import SearchQuery, PhraseMatch
 
 
 class AlertDuoFailOpen(AlertTask):

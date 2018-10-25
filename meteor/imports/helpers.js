@@ -5,13 +5,21 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 
 */
+import { _ } from 'meteor/underscore';
 
 // helper functions
 getSetting=function (settingKey){
-	  //returns the value given a setting key
-	  //makes server-side settings easier to 
-	  //deploy than normal meteor --settings
-	  var settingvalue = mozdefsettings.findOne({ key : settingKey }).value;
-	  return settingvalue;
-	};
+
+    // prefer Meteor.settings.public.mozdef
+    // then the subscribed collection
+    if ( _.has(Meteor.settings.public.mozdef,settingKey) ){
+        return Meteor.settings.public.mozdef[settingKey];
+    }else{
+        if ( mozdefsettings.findOne({ key : settingKey }) ){
+            return mozdefsettings.findOne({ key : settingKey }).value;
+        }else{
+            return '';
+        }
+    }
+};
 

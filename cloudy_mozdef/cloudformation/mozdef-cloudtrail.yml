@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Global CloudTrail, S3 Bucket and SNS Topic
+Resources:
+  MozDefCloudTrail:
+    Type: AWS::CloudTrail::Trail
+    DependsOn:
+      - MozDefCloudTrailBucketPolicy
+      - MozDefCloudTrailSNSTopicPolicy
+      - MozDefCloudTrailSNSSQSSubscription
+      - MozDefCloudTrailSQSQueuePolicy
+    Properties:
+      S3BucketName: !Ref MozDefCloudTrailBucket
+      SnsTopicName: !GetAtt MozDefCloudTrailSNSTopic.TopicName
+      IsLogging: true
+      IncludeGlobalServiceEvents: true
+      IsMultiRegionTrail: true
+  MozDefCloudTrailBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+  MozDefCloudTrailBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref MozDefCloudTrailBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource: !GetAtt MozDefCloudTrailBucket.Arn
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Join ['/', [ !GetAtt MozDefCloudTrailBucket.Arn, AWSLogs, !Ref 'AWS::AccountId', '*']]
+            Condition:
+              StringEquals:
+                "s3:x-amz-acl": bucket-owner-full-control
+  MozDefCloudTrailSNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: AllowCloudTrailToPublishToSNS
+          Effect: Allow
+          Principal:
+            Service: cloudtrail.amazonaws.com
+          Action: sns:Publish
+          Resource: !Ref MozDefCloudTrailSNSTopic
+      Topics:
+      - !Ref MozDefCloudTrailSNSTopic
+  MozDefCloudTrailSNSTopic:
+    Type: AWS::SNS::Topic
+  MozDefCloudTrailSQSQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: AllowSNSToSendToSQS
+          Effect: Allow
+          Principal: '*'
+          Action: sqs:SendMessage
+          Resource: !GetAtt MozDefCloudTrailSQSQueue.Arn
+          Condition:
+            ArnEquals:
+              "aws:SourceArn": !Ref MozDefCloudTrailSNSTopic
+      Queues:
+        - !Ref MozDefCloudTrailSQSQueue
+  MozDefCloudTrailSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+  MozDefCloudTrailSNSSQSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !GetAtt MozDefCloudTrailSQSQueue.Arn
+      Protocol: sqs
+      TopicArn: !Ref MozDefCloudTrailSNSTopic
+Outputs:
+  CloudTrailS3BucketName:
+    Description: Name of the S3 Bucket containing CloudTrail logs
+    Value: !Ref MozDefCloudTrailBucket
+  CloudTrailSQSQueueArn:
+    Description: ARN of the SQS Queue that will receive notifications of new CloudTrail logs in S3
+    Value: !GetAtt MozDefCloudTrailSQSQueue.Arn
+  CloudTrailSQSQueueName:
+    Description: Name of the SQS Queue that will receive notifications of new CloudTrail logs in S3
+    Value: !GetAtt MozDefCloudTrailSQSQueue.QueueName

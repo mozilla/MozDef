@@ -1,10 +1,7 @@
 ---
-version: '3'
+version: '2.2'
 services:
   elasticsearch:
-    build:
-      context: ../
-      dockerfile: docker/compose/elasticsearch/Dockerfile
     restart: always
     command: bin/elasticsearch
     # ports:
@@ -12,9 +9,6 @@ services:
     networks:
       - default
   rabbitmq:
-    build:
-      context: ../
-      dockerfile: docker/compose/rabbitmq/Dockerfile
     restart: always
     command: rabbitmq-server
     # ports:
@@ -22,14 +16,7 @@ services:
     networks:
       - default
   base:
-    build:
-      context: ../
-      dockerfile: ./docker/compose/mozdef_base/Dockerfile
-    image: base:latest
   tester:
-    build:
-      context: ../
-      dockerfile: ./docker/compose/tester/Dockerfile
     depends_on:
       - base
     networks:

@@ -1,0 +1,36 @@
+{
+  "variables": {
+      "aws_access_key":     "{{env `AWS_ACCESS_KEY_ID`}}",
+      "aws_secret_key":     "{{env `AWS_SECRET_ACCESS_KEY`}}",
+      "aws_security_token": "{{env `AWS_SESSION_TOKEN`}}"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "region": "us-west-2",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "token": "{{user `aws_security_token`}}",
+    "source_ami": "ami-0d1000aff9a9bad89",
+    "instance_type": "t2.large",
+    "ssh_pty" : "true",
+    "ssh_username": "ec2-user",
+    "ami_name": "mozdef_{{timestamp}}"
+  }],
+ "provisioners": [
+   {  "type": "shell",
+      "inline": [
+        "sudo yum update -y",
+        "sudo yum makecache fast",
+        "sudo yum install -y glibc-devel gcc libstdc++ libffi-devel zlib-devel make ",
+        "sudo yum install -y mysql-devel python python-devel python-pip",
+        "sudo yum install -y git",
+        "sudo yum install -y docker",
+        "sudo pip install virtualenv ",
+        "sudo pip install docker-compose",
+        "sudo systemctl enable docker",
+        "sudo mkdir -p /opt/mozdef/",
+        "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
+        "cd /opt/mozdef && sudo git checkout origin/infosec_workweek"
+    ]}
+ ]
+}

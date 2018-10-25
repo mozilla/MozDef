@@ -16,8 +16,7 @@ from elasticsearch.exceptions import ConnectionError
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
-from elasticsearch_client import ElasticsearchClient
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
@@ -27,8 +26,13 @@ parser.add_argument('backup_conf_file', help='The relative path to backup.conf f
 args = parser.parse_args()
 
 
-print "Connecting to " + args.esserver
-client = ElasticsearchClient(args.esserver)
+
+esserver = os.environ.get('OPTIONS_ESSERVERS')
+if esserver is None:
+    esserver = args.esserver
+esserver = esserver.strip('/')
+print "Connecting to " + esserver
+client = ElasticsearchClient(esserver)
 
 
 current_date = datetime.now()

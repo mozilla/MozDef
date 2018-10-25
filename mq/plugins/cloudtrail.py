@@ -5,8 +5,7 @@
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from utilities.key_exists import key_exists
+from mozdef_util.utilities.key_exists import key_exists
 
 
 class message(object):
