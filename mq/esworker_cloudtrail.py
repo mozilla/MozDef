@@ -12,7 +12,6 @@ import sys
 import socket
 from configlib import getConfig, OptionParser
 from datetime import datetime
-import boto.sqs
 import boto.sts
 import boto.s3
 from boto.sqs.message import RawMessage
@@ -21,15 +20,16 @@ from StringIO import StringIO
 from threading import Timer
 import re
 import time
+from ssl import SSLEOFError, SSLError
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
-from utilities.logger import logger, initLogger
-from utilities.to_unicode import toUnicode
-from utilities.remove_at import removeAt
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.utilities.to_unicode import toUnicode
+from mozdef_util.utilities.remove_at import removeAt
 
 from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 CLOUDTRAIL_VERB_REGEX = re.compile(r'^([A-Z][^A-Z]*)')
@@ -43,7 +43,7 @@ except ImportError as e:
 
 
 class RoleManager:
-    def __init__(self, aws_access_key_id=None, aws_secret_access_key=None):
+    def __init__(self, region='us-east-1', aws_access_key_id=None, aws_secret_access_key=None):
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.credentials = {}
@@ -51,10 +51,10 @@ class RoleManager:
         self.session_conn_sts = None
         try:
             self.local_conn_sts = boto.sts.connect_to_region(
-                'us-east-1',
-                aws_access_key_id=self.aws_access_key_id,
-                aws_secret_access_key=self.aws_secret_access_key
-            )
+                **get_aws_credentials(
+                    region,
+                    self.aws_access_key_id,
+                    self.aws_secret_access_key))
         except Exception, e:
             logger.error("Unable to connect to STS due to exception %s" % e.message)
             raise
@@ -68,10 +68,13 @@ class RoleManager:
                 logger.error("Unable to get session token due to exception %s" % e.message)
                 raise
             try:
+                creds = get_aws_credentials(
+                        self.session_credentials.access_key,
+                        self.session_credentials.secret_key,
+                        self.session_credentials.session_token) if self.session_credentials else {}
                 self.session_conn_sts = boto.sts.connect_to_region(
-                    'us-east-1',
-                    **self.get_credential_arguments(self.session_credentials)
-                )
+                    region=region,
+                    **creds)
             except Exception, e:
                 logger.error("Unable to connect to STS with session token due to exception %s" % e.message)
                 raise
@@ -122,6 +125,18 @@ class RoleManager:
             'aws_access_key_id': credential.access_key,
             'aws_secret_access_key': credential.secret_key,
             'security_token': credential.session_token} if credential else {}
+
+def get_aws_credentials(region=None, accesskey=None, secretkey=None, security_token=None):
+    result = {}
+    if region not in ['', '<add_region>', None]:
+        result['region'] = region
+    if accesskey not in ['', '<add_accesskey>', None]:
+        result['aws_access_key_id'] = accesskey
+    if secretkey not in ['', '<add_secretkey>', None]:
+        result['aws_secret_access_key'] = secretkey
+    if security_token not in [None]:
+        result['security_token'] = security_token
+    return result
 
 
 def keyMapping(aDict):
@@ -291,9 +306,17 @@ class taskConsumer(object):
         Timer(self.flush_wait_time, self.flush_s3_creds).start()
 
     def authenticate(self):
-        role_manager = RoleManager(options.accesskey, options.secretkey)
-        role_manager.assume_role(options.cloudtrail_arn)
-        role_creds = role_manager.get_credentials(options.cloudtrail_arn)
+        if options.cloudtrail_arn not in ['<cloudtrail_arn>', 'cloudtrail_arn']:
+            role_manager_args = {}
+
+            role_manager = RoleManager(**get_aws_credentials(
+                options.region,
+                options.accesskey,
+                options.secretkey))
+            role_manager.assume_role(options.cloudtrail_arn)
+            role_creds = role_manager.get_credentials(options.cloudtrail_arn)
+        else:
+            role_creds = {}
         self.s3_connection = boto.connect_s3(**role_creds)
 
     def flush_s3_creds(self):
@@ -345,14 +368,16 @@ class taskConsumer(object):
                             self.on_message(event)
 
                     self.taskQueue.delete_message(msg)
-
-            except KeyboardInterrupt:
-                sys.exit(1)
-            except Exception as e:
-                logger.exception(e)
-                time.sleep(3)
-
-            time.sleep(.1)
+            except (SSLEOFError, SSLError, socket.error) as e:
+                logger.info('Received network related error...reconnecting')
+                time.sleep(5)
+                self.connection, self.taskQueue = connect_sqs(
+                    task_exchange=options.taskexchange,
+                    **get_aws_credentials(
+                        options.region,
+                        options.accesskey,
+                        options.secretkey))
+                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, body):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -446,10 +471,12 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    sqs_conn = boto.sqs.connect_to_region(options.region, aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
-    # attach to the queue
-    eventTaskQueue = sqs_conn.get_queue(options.taskexchange)
-
+    sqs_conn, eventTaskQueue = connect_sqs(
+        task_exchange=options.taskexchange,
+        **get_aws_credentials(
+            options.region,
+            options.accesskey,
+            options.secretkey))
     # consume our queue
     taskConsumer(sqs_conn, eventTaskQueue, es).run()
 
@@ -487,7 +514,7 @@ def initConfig():
     # aws options
     options.accesskey = getConfig('accesskey', '', options.configfile)
     options.secretkey = getConfig('secretkey', '', options.configfile)
-    options.region = getConfig('region', 'us-west-1', options.configfile)
+    options.region = getConfig('region', '', options.configfile)
 
     # This is the full ARN that the s3 bucket lives under
     options.cloudtrail_arn = getConfig('cloudtrail_arn', 'cloudtrail_arn', options.configfile)
@@ -508,6 +535,10 @@ if __name__ == '__main__':
 
     try:
         main()
+    except KeyboardInterrupt as e:
+        logger.info("Exiting worker")
+        if options.esbulksize != 0:
+            es.finish_bulk()
     except Exception as e:
         if options.esbulksize != 0:
             es.finish_bulk()

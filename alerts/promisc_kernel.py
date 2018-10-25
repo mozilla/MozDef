@@ -8,7 +8,7 @@
 # This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 
 
 class PromiscKernel(AlertTask):
@@ -27,7 +27,7 @@ class PromiscKernel(AlertTask):
         ])
 
         self.filtersManual(search_query)
-        self.searchEventsAggregated('details.hostname', samplesLimit=10)
+        self.searchEventsAggregated('hostname', samplesLimit=10)
         self.walkAggregations(threshold=1)
 
     def onAggregation(self, aggreg):
@@ -38,4 +38,3 @@ class PromiscKernel(AlertTask):
         summary = 'Promiscuous mode enabled on {1} [{0}]'.format(aggreg['count'], aggreg['value'])
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-

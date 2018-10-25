@@ -6,7 +6,7 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 import json
 import sys
 import re
@@ -85,7 +85,7 @@ class SshLateral(AlertTask):
         ])
 
         self.filtersManual(search_query)
-        self.searchEventsAggregated('details.hostname', samplesLimit=10)
+        self.searchEventsAggregated('hostname', samplesLimit=10)
         self.walkAggregations(threshold=1)
 
     # Returns true if the user, host, and source IP fall into an exception
@@ -107,7 +107,7 @@ class SshLateral(AlertTask):
         # hostmustmatch, and then negate matches using hostmustnotmatch
         if len(aggreg['events']) == 0:
             return None
-        srchost = aggreg['events'][0]['_source']['details']['hostname']
+        srchost = aggreg['events'][0]['_source']['hostname']
         srcmatch = False
         for x in self._config['hostmustmatch']:
             if re.match(x, srchost) != None:
@@ -160,4 +160,3 @@ class SshLateral(AlertTask):
         summary = 'SSH lateral movement outside policy: access to {} from {} as {}'.format(srchost, sampleip, sampleuser)
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-

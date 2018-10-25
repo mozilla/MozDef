@@ -18,10 +18,9 @@ from celery import Task
 from celery.utils.log import get_task_logger
 from config import RABBITMQ, ES
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
-from query_models import TermMatch, ExistsMatch
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.query_models import TermMatch, ExistsMatch
 
 
 # utility functions used by AlertTask.mostCommon
@@ -29,7 +28,7 @@ from query_models import TermMatch, ExistsMatch
 # in a list of dicts
 def keypaths(nested):
     ''' return a list of nested dict key paths
-        like: [u'_source', u'details', u'hostname']
+        like: [u'_source', u'details', u'program']
     '''
     for key, value in nested.iteritems():
         if isinstance(value, collections.Mapping):
@@ -152,7 +151,6 @@ class AlertTask(Task):
 
         return Counter(inspectlist).most_common()
 
-
     def alertToMessageQueue(self, alertDict):
         """
         Send alert to the rabbit message queue
@@ -180,7 +178,6 @@ class AlertTask(Task):
             self.log.debug('alert sent to the alert queue')
         except Exception as e:
             self.log.error('Exception while sending alert to message queue: {0}'.format(e))
-
 
     def alertToES(self, alertDict):
         """
@@ -239,7 +236,6 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Error while searching events in ES: {0}'.format(e))
 
-
     def searchEventsAggregated(self, aggregationPath, samplesLimit=5):
         """
         Search events, aggregate matching ES filters by aggregationPath,
@@ -270,7 +266,6 @@ class AlertTask(Task):
             for r in results:
                 aggregationValues.append(getValueByPath(r['_source'], aggregationPath))
 
-
             # [{value:'evil@evil.com',count:1337,events:[...]}, ...]
             aggregationList = []
             for i in Counter(aggregationValues).most_common():
@@ -294,7 +289,6 @@ class AlertTask(Task):
             self.log.debug(self.aggregations)
         except Exception as e:
             self.log.error('Error while searching events in ES: {0}'.format(e))
-
 
     def walkEvents(self, **kwargs):
         """
@@ -323,7 +317,6 @@ class AlertTask(Task):
                 self.hookAfterInsertion(alert)
                 self.saveAlertID(alertResultES)
 
-
     def walkAggregations(self, threshold, config=None):
         """
         Walk through aggregations, provide some methods to hook in alerts
@@ -343,7 +336,6 @@ class AlertTask(Task):
                         self.tagEventsAlert(aggregation['allevents'], alertResultES)
                         self.alertToMessageQueue(alert)
                         self.saveAlertID(alertResultES)
-
 
     def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None, ircchannel=None):
         """
@@ -370,7 +362,6 @@ class AlertTask(Task):
         self.log.debug(alert)
         return alert
 
-
     def onEvent(self, event, *args, **kwargs):
         """
         To be overriden by children to run their code
@@ -378,7 +369,6 @@ class AlertTask(Task):
         must return an alert dict or None
         """
         pass
-
 
     def onNoEvent(self, *args, **kwargs):
         """
@@ -399,14 +389,12 @@ class AlertTask(Task):
         """
         pass
 
-
     def hookAfterInsertion(self, alert):
         """
         To be overriden by children to run their code
         to be used when creating an alert using an aggregation
         """
         pass
-
 
     def tagEventsAlert(self, events, alertResultES):
         """
@@ -431,13 +419,11 @@ class AlertTask(Task):
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 
-
     def main(self):
         """
         To be overriden by children to run their code
         """
         pass
-
 
     def run(self, *args, **kwargs):
         """

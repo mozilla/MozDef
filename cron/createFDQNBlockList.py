@@ -18,8 +18,7 @@ from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -104,7 +103,6 @@ def main():
         if len(options.aws_bucket_name)>0:
             s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
 
-
     except ValueError as e:
         logger.error("Exception %r generating FQDN block list" % e)
 
@@ -137,7 +135,7 @@ def initConfig():
     options.fqdnlimit = getConfig('fqdnlimit', 1000, options.configfile)
 
     # AWS creds
-    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to mozilla_infosec_blocklist
+    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)  # aws credentials to use to connect to mozilla_infosec_blocklist
     options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
     options.aws_bucket_name=getConfig('aws_bucket_name','',options.configfile)
     options.aws_document_key_name=getConfig('aws_document_key_name','',options.configfile)
@@ -154,14 +152,13 @@ def s3_upload_file(file_path, bucket_name, key_name):
         conn.create_bucket(bucket_name)
         bucket = conn.get_bucket(bucket_name, validate=False)
 
-
     key = boto.s3.key.Key(bucket)
     key.key = key_name
     key.set_contents_from_filename(file_path)
 
     key.set_acl('public-read')
     url = "https://s3.amazonaws.com/{}/{}".format(bucket.name, key.name)
-    print( "URL: {}".format(url))
+    print("URL: {}".format(url))
     return url
 
 if __name__ == '__main__':

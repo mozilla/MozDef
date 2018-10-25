@@ -9,7 +9,7 @@
 
 import datetime
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch, RangeMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch, RangeMatch
 
 
 class SessionOpenedUser(AlertTask):
@@ -57,10 +57,10 @@ class SessionOpenedUser(AlertTask):
         tags = ['pam', 'syslog']
 
         uniquehosts = []
-        sorted_events = sorted(aggreg['events'], key=lambda x: x['_source']['details']['hostname'])
+        sorted_events = sorted(aggreg['events'], key=lambda x: x['_source']['hostname'])
         for e in sorted_events:
-            if e['_source']['details']['hostname'] not in uniquehosts:
-                uniquehosts.append(e['_source']['details']['hostname'])
+            if e['_source']['hostname'] not in uniquehosts:
+                uniquehosts.append(e['_source']['hostname'])
 
         summary = 'Session opened by a sensitive user outside of the expected window - sample hosts: {0} [total {1} hosts]'.format(' '.join(uniquehosts), aggreg['count'])
 

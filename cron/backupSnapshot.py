@@ -65,7 +65,7 @@ def main():
             }
         }
         r = requests.put('%s/_snapshot/s3backup' % esserver, data=json.dumps(snapshot_config))
-        if r.json().has_key('status'):
+        if 'status' in r.json():
             logger.error("Error while registering snapshot repo: %s" % r.text)
         else:
             logger.debug('snapshot repo registered')
@@ -87,7 +87,7 @@ def main():
                 epoch=calendar.timegm(datetime.utcnow().utctimetuple())
                 r = requests.put('{0}/_snapshot/s3backup/{1}-{2}?wait_for_completion=true'.format(esserver,index_to_snapshot,epoch),
                     data=json.dumps(snapshot_config))
-                if r.json().has_key('status'):
+                if 'status' in r.json():
                     logger.error('Error snapshotting %s: %s' % (index_to_snapshot, r.json()))
                 else:
                     logger.debug('snapshot %s finished' % index_to_snapshot)

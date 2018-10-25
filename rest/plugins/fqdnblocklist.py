@@ -74,11 +74,6 @@ class message(object):
         (self.options, args) = myparser.parse_args([])
 
         # fill self.options with plugin-specific options
-
-        # options for your custom/internal ip blocking service
-        # mozilla's is called banhammer
-        # and uses an intermediary mysql DB
-        # here we set credentials
         self.options.mongohost = getConfig(
             'mongohost',
             'localhost',
@@ -112,10 +107,10 @@ class message(object):
             self.configfile)
 
     def blockFQDN(self,
-                fqdn = None,
-                comment = None,
-                duration = None,
-                referenceID = None,
+                fqdn=None,
+                comment=None,
+                duration=None,
+                referenceID=None,
                 userID=None
                 ):
         try:
@@ -164,19 +159,19 @@ class message(object):
                             # send the data as a form post per:
                             # https://doers.statuspage.io/api/v1/incidents/#create-realtime
                             post_data={
-                            'incident[name]' : 'block FQDN {}'.format(fqdn),
-                            'incident[status]' : 'resolved',
-                            'incident[impact_override]' : 'none',
-                            'incident[body]' : '{} initiated a block of FDQN {} until {}'.format(
+                            'incident[name]': 'block FQDN {}'.format(fqdn),
+                            'incident[status]': 'resolved',
+                            'incident[impact_override]': 'none',
+                            'incident[body]': '{} initiated a block of FDQN {} until {}'.format(
                                 userID,
                                 fqdn,
                                 end_date.isoformat()),
-                            'incident[component_ids][]' : self.options.statuspage_sub_component_id,
-                            'incident[components][{0}]'.format(self.options.statuspage_component_id) : "operational"}
+                            'incident[component_ids][]': self.options.statuspage_sub_component_id,
+                            'incident[components][{0}]'.format(self.options.statuspage_component_id): "operational"}
                             response = requests.post(self.options.statuspage_url,
                                                     headers=headers,
                                                     data=post_data)
-                            if response.ok :
+                            if response.ok:
                                 sys.stdout.write('%s: notification sent to statuspage.io\n' % (fqdn))
                             else:
                                 sys.stderr.write('%s: statuspage.io notification failed %s\n' % (fqdn,response.json()))

@@ -12,10 +12,9 @@ from kombu import Connection, Queue, Exchange
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
-from utilities.dot_dict import DotDict
+from mozdef_util.utilities.dot_dict import DotDict
 
 
 # The following functions before the UnitTest class definition
@@ -36,10 +35,12 @@ def parse_config_file():
 
         options.alertExchange = getConfig('alertexchange', 'alerts', options.configfile)
         options.queueName = getConfig('alertqueuename', 'alertBot', options.configfile)
+        options.alertqueue = getConfig('alertqueue', 'mozdef.alert', options.configfile)
         options.alerttopic = getConfig('alerttopic', 'mozdef.*', options.configfile)
 
         options.mquser = getConfig('mquser', 'guest', options.configfile)
         options.mqalertserver = getConfig('mqalertserver', 'localhost', options.configfile)
+        options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
         options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
         options.mqport = getConfig('mqport', 5672, options.configfile)
         options.mqack = getConfig('mqack', True, options.configfile)
