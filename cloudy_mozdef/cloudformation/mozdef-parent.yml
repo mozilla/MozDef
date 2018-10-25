@@ -175,6 +175,12 @@ Resources:
                 Resource: '*'
   GetArrayLengthLambdaFunction:
     Type: AWS::Lambda::Function
+    DependsOn: CloudFormationLambdaIAMRole
+    # This DependsOn shouldn't be needed because the "Role" value is set to
+    # "!GetAtt CloudFormationLambdaIAMRole.Arn" but without DependsOn the error
+    # "Template error: IAM role mozdef-aws-nested-CloudFormationLambdaIAMRole-108UCUPESC6WG doesn't exist"
+    # occurs on stack creation for this Lambda Function resource. The DependsOn
+    # prevents the error.
     Properties:
       Code:
         ZipFile: |
