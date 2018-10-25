@@ -41,7 +41,8 @@ class message(object):
             'details.serviceeventdetails',
             'details.requestparameters.disableApiTermination',
             'details.responseelements.findings.service.additionalInfo.unusual',
-            'details.responseelements.distribution.distributionConfig.callerReference'
+            'details.responseelements.distribution.distributionConfig.callerReference',
+            'details.requestparameters.logStreamName'
         ]
 
     def convert_key_raw_str(self, needle, haystack):
