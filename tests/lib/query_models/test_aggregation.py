@@ -7,8 +7,7 @@
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
-from query_models import SearchQuery, Aggregation, TermMatch, ExistsMatch
+from mozdef_util.query_models import SearchQuery, Aggregation, TermMatch, ExistsMatch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite

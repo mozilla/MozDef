@@ -11,7 +11,7 @@ RUN \
   yum install -y rabbitmq-server-$RABBITMQ_VERSION && \
   yum clean all
 
-COPY docker/conf/rabbitmq.config /etc/rabbitmq/
-COPY docker/conf/enabled_plugins /etc/rabbitmq/
+COPY docker/compose/rabbitmq/files/rabbitmq.config /etc/rabbitmq/
+COPY docker/compose/rabbitmq/files/enabled_plugins /etc/rabbitmq/
 
 EXPOSE 5672 15672

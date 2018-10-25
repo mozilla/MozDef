@@ -18,10 +18,9 @@ from celery import Task
 from celery.utils.log import get_task_logger
 from config import RABBITMQ, ES
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
-from query_models import TermMatch, ExistsMatch
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.query_models import TermMatch, ExistsMatch
 
 
 # utility functions used by AlertTask.mostCommon

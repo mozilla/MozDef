@@ -3,7 +3,7 @@ FROM centos:7
 LABEL maintainer="mozdef@mozilla.com"
 
 ENV NODE_VERSION 8.11.4
-ENV METEOR_VERSION 1.7.0.5
+ENV METEOR_VERSION 1.8
 
 ENV MONGO_URL=mongodb://mongodb:3002/meteor
 ENV ROOT_URL=http://localhost
@@ -29,23 +29,23 @@ RUN \
 RUN \
     curl -sL https://rpm.nodesource.com/setup_8.x | bash - && \
     yum -y install nodejs
-RUN \
-  mkdir /opt/mozdef/meteor && \
-  curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
-  tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
-  mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
-  rm -r /opt/mozdef/meteor && \
-  cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
+
+RUN mkdir /opt/mozdef/meteor
+RUN curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz
+RUN tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor
+RUN mv /opt/mozdef/meteor/.meteor /opt/mozdef
+RUN rm -r /opt/mozdef/meteor
+RUN cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
 COPY meteor /opt/mozdef/envs/mozdef/meteor
 COPY docker/compose/mozdef_meteor/files/settings.js /opt/mozdef/envs/mozdef/meteor/app/lib/settings.js
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
 
 USER mozdef
-RUN \
-  mkdir -p /opt/mozdef/envs/meteor/mozdef
+RUN mkdir -p /opt/mozdef/envs/meteor/mozdef
+
 # build meteor runtime if asked, if set to NO, only create the dir created above to mount to do live development
-RUN if   [ "${METEOR_BUILD}" = "YES" ]; then \
+RUN if [ "${METEOR_BUILD}" = "YES" ]; then \
         cd /opt/mozdef/envs/mozdef/meteor && \
         meteor npm install && \
         meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \

@@ -21,12 +21,11 @@ from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
-from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+from mozdef_util.query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
 
-from utilities.toUTC import toUTC
-from utilities.logger import logger, initLogger
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 options = None
@@ -555,7 +554,7 @@ def kibanaDashboards():
         for dashboard in results['hits']:
             resultsList.append({
                 'name': dashboard['_source']['title'],
-                'url': "%s/%s/%s" % (options.kibanaurl,
+                'url': "%s#/%s/%s" % (options.kibanaurl,
                 "dashboard",
                 dashboard['_id'])
             })

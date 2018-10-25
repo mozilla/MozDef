@@ -10,8 +10,7 @@ import os
 from configlib import getConfig, OptionParser
 import boto
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.logger import logger, initLogger
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 def fetch_ip_list(aws_key_id, aws_secret_key, s3_bucket, ip_list_filename):

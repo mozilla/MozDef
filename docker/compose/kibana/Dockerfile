@@ -8,7 +8,7 @@ RUN \
     curl -s -L https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C / -xz && \
     cd /kibana-$KIBANA_VERSION-linux-x86_64
 
-COPY docker/conf/kibana.yml /kibana-$KIBANA_VERSION-linux-x86_64/config/kibana.yml
+COPY docker/compose/kibana/files/kibana.yml /kibana-$KIBANA_VERSION-linux-x86_64/config/kibana.yml
 
 WORKDIR /kibana-$KIBANA_VERSION-linux-x86_64
 

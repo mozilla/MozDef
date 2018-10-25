@@ -17,10 +17,9 @@ import socket
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
-from query_models import SearchQuery, Aggregation
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from mozdef_util.query_models import SearchQuery, Aggregation
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -47,29 +46,24 @@ def initLogger():
 def esSearch(es):
     search_query = SearchQuery(minutes=options.aggregationminutes)
     search_query.add_aggregation(Aggregation('category'))
+    results = search_query.execute(es)
 
-    try:
-        results = search_query.execute(es)
-
-        mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
-        mozdefstats['category'] = 'stats'
-        mozdefstats['hostname'] = socket.gethostname()
-        mozdefstats['mozdefhostname'] = mozdefstats['hostname']
-        mozdefstats['severity'] = 'INFO'
-        mozdefstats['source'] = 'mozdef'
-        mozdefstats['tags'] = ['mozdef', 'stats']
-        mozdefstats['summary'] = 'Aggregated category counts'
-        mozdefstats['processid'] = os.getpid()
-        mozdefstats['processname'] = sys.argv[0]
-        mozdefstats['details'] = dict(counts=list())
-        for bucket in results['aggregations']['category']['terms']:
-            entry = dict()
-            entry[bucket['key']] = bucket['count']
-            mozdefstats['details']['counts'].append(entry)
-        return mozdefstats
-
-    except ElasticsearchBadServer:
-        logger.error('Elastic Search server could not be reached, check network connectivity')
+    mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
+    mozdefstats['category'] = 'stats'
+    mozdefstats['hostname'] = socket.gethostname()
+    mozdefstats['mozdefhostname'] = mozdefstats['hostname']
+    mozdefstats['severity'] = 'INFO'
+    mozdefstats['source'] = 'mozdef'
+    mozdefstats['tags'] = ['mozdef', 'stats']
+    mozdefstats['summary'] = 'Aggregated category counts'
+    mozdefstats['processid'] = os.getpid()
+    mozdefstats['processname'] = sys.argv[0]
+    mozdefstats['details'] = dict(counts=list())
+    for bucket in results['aggregations']['category']['terms']:
+        entry = dict()
+        entry[bucket['key']] = bucket['count']
+        mozdefstats['details']['counts'].append(entry)
+    return mozdefstats
 
 
 def main():

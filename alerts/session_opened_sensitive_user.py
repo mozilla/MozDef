@@ -9,7 +9,7 @@
 
 import datetime
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch, RangeMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch, RangeMatch
 
 
 class SessionOpenedUser(AlertTask):

@@ -6,14 +6,28 @@ Copyright (c) 2017 Mozilla Corporation
 */
 
 //configuration settings
+if (Meteor.isServer) {
+    mozdef = {
+        rootURL: process.env.OPTIONS_METEOR_ROOTURL || "http://localhost",
+        port: process.env.OPTIONS_METEOR_PORT || "80",
+        rootAPI: process.env.OPTIONS_METEOR_ROOTAPI || "http://rest:8081",
+        kibanaURL: process.env.OPTIONS_METEOR_KIBANAURL || "http://localhost:9090/app/kibana#",
+        enableBlockIP: process.env.OPTIONS_METEOR_ENABLEBLOCKIP || true,
+        enableClientAccountCreation: process.env.OPTIONS_METEOR_ENABLECLIENTACCOUNTCREATION || true,
+        authenticationType: process.env.OPTIONS_METEOR_AUTHENTICATIONTYPE || "meteor-password"
+    }
 
-mozdef = {
-  rootURL: "http://localhost",
-  port: "80",
-  rootAPI: "http://rest:8081",
-  kibanaURL: "http://localhost:9090/app/kibana#",
-  enableBlockIP: true,
-  enableClientAccountCreation: true,
-  authenticationType: "meteor-password"
+    // send these settings to the client via the Meteor.settings.public
+    // reactive object
+    // Note that:
+    // Meteor.settings.public=mozdef;
+    // doesn't work as you can't override the root 'public'
+    // but you can set public.mozdef, so we do that.
+    Meteor.settings.public.mozdef=mozdef;
+    console.log(Meteor.settings);
+
 }
 
+if (Meteor.isClient) {
+    mozdef=Meteor.settings.public.mozdef;
+}

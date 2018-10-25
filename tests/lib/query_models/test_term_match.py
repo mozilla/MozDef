@@ -3,8 +3,7 @@ from negative_test_suite import NegativeTestSuite
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from query_models import TermMatch
+from mozdef_util.query_models import TermMatch
 
 
 class TestTermMatchPositiveTestSuite(PositiveTestSuite):

@@ -12,9 +12,8 @@ from operator import itemgetter
 from datetime import datetime
 import pynsive
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.dict2List import dict2List
-from utilities.logger import logger
+from mozdef_util.utilities.dict2List import dict2List
+from mozdef_util.utilities.logger import logger
 
 
 def sendEventToPlugins(anevent, metadata, pluginList):

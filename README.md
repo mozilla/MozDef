@@ -22,6 +22,6 @@ The Mozilla Defense Platform (MozDef) seeks to automate the security incident ha
 
 MozDef is in production at Mozilla where we are using it to process over 300 million events per day.
 
-## DOCS:
+## Documentation:
 
 http://mozdef.readthedocs.org/en/latest/
