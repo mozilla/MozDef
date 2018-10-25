@@ -131,6 +131,8 @@ Resources:
                 OPTIONS_METEOR_AUTHENTICATIONTYPE=oidc
                 ES={"servers": [${ESURL}]}
                 cookiename=sesmeteor
+                # Increase the AWS ES total fields limit from 1000 to 4000
+                OPTIONS_MAPPING_TOTAL_FIELDS_LIMIT=4000
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
             - content: |
                 client_id=${OIDCClientId}
