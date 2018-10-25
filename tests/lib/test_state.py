@@ -2,8 +2,7 @@ import pytest
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from state import State, StateParsingError
+from mozdef_util.state import State, StateParsingError
 
 states_directory_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'states')
 

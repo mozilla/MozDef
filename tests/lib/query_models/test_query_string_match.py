@@ -3,8 +3,7 @@ from negative_test_suite import NegativeTestSuite
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from query_models import QueryStringMatch
+from mozdef_util.query_models import QueryStringMatch
 
 
 hostname_test_regex = 'hostname: /(.*\.)*(groupa|groupb)\.(.*\.)*subdomain\.(.*\.)*.*/'

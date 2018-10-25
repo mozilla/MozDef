@@ -1,0 +1,35 @@
+---
+version: '3.0'
+services:
+  meteor:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_meteor/Dockerfile
+      args:
+        METEOR_BUILD: 'NO'
+    restart: always
+    command: bash -c 'node -i'
+    depends_on:
+      - mongodb
+      - rest
+    networks:
+      - default
+    volumes:
+        - ../../meteor:/opt/mozdef/envs/mozdef/meteor
+    stdin_open: true
+    tty: true
+  sampledata:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_sampledata/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && /opt/mozdef/envs/mozdef/examples/demo/sampleevents.sh'
+    links:
+      - elasticsearch
+    depends_on:
+      - loginput
+      - elasticsearch
+      - mongodb
+      - bootstrap
+    networks:
+      - default

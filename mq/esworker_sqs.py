@@ -23,13 +23,12 @@ import base64
 import kombu
 from ssl import SSLEOFError, SSLError
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from utilities.to_unicode import toUnicode
-from utilities.remove_at import removeAt
-from utilities.is_cef import isCEF
-from utilities.logger import logger, initLogger
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.to_unicode import toUnicode
+from mozdef_util.utilities.remove_at import removeAt
+from mozdef_util.utilities.is_cef import isCEF
+from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from lib.plugins import sendEventToPlugins, registerPlugins
 from lib.sqs import connect_sqs

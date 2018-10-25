@@ -21,7 +21,8 @@ from Queue import Empty
 from requests.packages.urllib3.exceptions import ClosedPoolError
 import requests
 import time
-from configlib import getConfig, OptionParser, setConfig
+from configlib import getConfig, OptionParser
+import ConfigParser
 import glob
 from datetime import datetime
 from datetime import timedelta
@@ -31,8 +32,8 @@ import pytz
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
-from utilities.toUTC import toUTC
+
+from mozdef_util.utilities.toUTC import toUTC
 
 #use futures to run in the background
 #httpsession = FuturesSession(max_workers=5)
@@ -50,6 +51,19 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 #create a list of logs we can append json to and call for a post when we want.
 logcache=Queue()
 
+
+def setConfig(option,value,configfile):
+    """write an option/value pair to our config file"""
+    if os.path.isfile(configfile):
+        config = ConfigParser.ConfigParser()
+        configfp=open(configfile,'r')
+        config.readfp(configfp)
+        configfp.close()
+
+        config.set('options',option,value)
+        configfp=open(configfile,'w')
+        config.write(configfp)
+        configfp.close()
 
 def postLogs(logcache):
     #post logs asynchronously with requests workers and check on the results

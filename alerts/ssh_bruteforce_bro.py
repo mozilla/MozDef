@@ -6,7 +6,7 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, ExistsMatch, PhraseMatch
 
 
 class AlertSSHManyConns(AlertTask):

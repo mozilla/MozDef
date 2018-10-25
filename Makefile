@@ -4,109 +4,84 @@
 # Copyright (c) 2014 Mozilla Corporation
 #
 
-# usage:
-# make single-build - build new single image from Dockerfile
-# make single-build-no-cache - build new single image from Dockerfile from scratch
-# make single-debug - debug run already created image by tag
-# make single-run - run a single instance of MozDef
-# make single-stop - stop a single instance of MozDef
-# make single-rebuild - build, stop and run a new single instance of MozDef
-# make multiple-build - build new mozdef environment in multiple containers
-# make multiple-build-tests - build new mozdef environment for tests in multiple containers
-# make multiple-build-no-cache - build new mozdef environment in multiple containers from scratch
-# make multiple-run - run new mozdef environment in multiple containers
-# make multiple-run-tests - run new mozdef environment for tests in multiple containers
-# make multiple-stop - stop new mozdef environment in multiple containers
-# make multiple-stop-tests - stop new mozdef environment for tests in multiple containers
-# make multiple-rm - stop new mozdef environment in multiple containers and deattach volumes
-# make multiple-rm-tests - stop new mozdef tests environment in multiple containers and deattach volumes
-# make multiple-rebuild - build, stop and run new mozdef environment in multiple containers
-# make multiple-rebuild-new - build, stop/rm and run new mozdef environment in multiple containers
-# make multiple-rebuild-tests - build, stop/rm and run new mozdef environment for tests in multiple containers
-# make multiple-rebuild-tests-new - build, stop/rm and run new mozdef environment for tests in multiple containers
+ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
+		   mozdef_mq_eventtask mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
+		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq mozdef_kibana
+USE_DKR_IMAGES  := docker/compose/docker-compose-rebuild.yml  ## Pass docker/compose/docker-compose-norebuild.yml to use hub.docker.com images
+NAME		:= mozdef
+VERSION		:= 0.1
+NO_CACHE	:= ## Pass `--no-cache` in order to disable Docker cache
+GITHASH		:= $(shell git rev-parse --short HEAD) ## Pass `latest` to tag docker hub images as latest instead
 
-NAME=mozdef
-VERSION=0.1
+.PHONY:all
+all:
+	@echo 'Available make targets:'
+	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
 
+.PHONY: run run-only
+run: build ## Run all MozDef containers
+	docker-compose -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
-single-build:
-	docker build -f docker/Dockerfile -t $(NAME):$(VERSION) .
+run-only:
+	docker-compose -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
-single-build-no-cache:
-	docker build -f docker/Dockerfile --no-cache -t $(NAME):$(VERSION) .
+.PHONY: run-cloudy-mozdef restart-cloudy-mozdef
+run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy-mozdef`). This is used by the CloudFormation-initiated setup.
+	$(shell test -f docker/compose/cloudy_mozdef.env || touch docker/compose/cloudy_mozdef.env)
+	$(shell test -f docker/compose/cloudy_mozdef_kibana.env || touch docker/compose/cloudy_mozdef_kibana.env)
+	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) pull
+	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) up -d
 
-single-run:
-	docker run \
-		-e TZ=UTC \
-		-p 80:80 \
-		-p 9090:9090 \
-		-p 8080:8080 \
-		-p 8081:8081 \
-		-p 9200:9200 \
-		-p 5672:5672 \
-		-v mozdef-elasticsearch:/var/lib/elasticsearch \
-		-v mozdef-mongodb:/var/lib/mongo \
-		-v mozdef-rabbitmq:/var/lib/rabbitmq \
-		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
-		-h $(NAME) --name $(NAME) -d $(NAME):$(VERSION)
+restart-cloudy-mozdef:
+	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart
 
-single-debug:build
-	docker run \
-		-e TZ=UTC \
-		-p 80:80 \
-		-p 9090:9090 \
-		-p 8080:8080 \
-		-p 8081:8081 \
-		-p 3002:3002 \
-		-p 5672:5672 \
-		-p 15672:15672 \
-		-p 9200:9200 \
-		-v mozdef-elasticsearch:/var/lib/elasticsearch \
-		-v mozdef-mongodb:/var/lib/mongo \
-		-v mozdef-rabbitmq:/var/lib/rabbitmq \
-		-v mozdef-data:/opt/mozdef/envs/mozdef/data \
-		-h $(NAME) -t -i $(NAME):$(VERSION) /bin/bash
+# TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
+# The docker files are still in docker/compose/docker*test*
+.PHONY: test tests run-tests
+test: build-tests run-tests ## Running tests from locally-built images
+tests: build-tests run-tests
 
-single-stop:
-	-docker rm -f $(NAME)
+run-tests:
+	docker-compose -f $(USE_DKR_IMAGES) -f tests/docker-compose.yml -p $(NAME) up -d
+	@echo "Waiting for the instance to come up..."
+	sleep 10
+	@echo "Running flake8.."
+	docker run -it mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
+	@echo "Running py.test..."
+	docker run -it --network=mozdef_default mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
 
-single-rebuild: single-build single-stop single-run
+.PHONY: build
+build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
+	docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build base
+	docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
-.PHONY: single-build single-build-no-cache single-run single-debug single-stop single-rebuild
+.PHONY: build-tests nobuild-tests
+build-tests:
+	docker-compose  -f $(USE_DKR_IMAGES) -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build base
+	docker-compose  -f $(USE_DKR_IMAGES) -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build
 
-multiple-run:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
+.PHONY: stop down
+stop: down
+down: ## Shutdown all services we started with docker-compose
+	docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) stop
 
-multiple-run-tests:
-	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) up -d --remove-orphans
+.PHONY: docker-push docker-get hub hub-get
+docker-push: hub
+hub: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef).
+	docker login
+	@echo "Tagging current docker images with git HEAD shorthash..."
+	$(foreach var,$(DKR_IMAGES),docker tag $(var) mozdef/$(var):$(GITHASH);)
+	@echo "Uploading images to docker..."
+	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
 
-multiple-build:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build
+docker-get: hub-get
+hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
+	$(foreach var,$(DKR_IMAGES),docker pull mozdef/$(var):$(GITHASH);)
 
-multiple-build-tests:
-	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) build
-
-multiple-build-no-cache:
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) build --no-cache
-
-multiple-stop:
-	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
-
-multiple-stop-tests:
-	-docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) stop
-
-multiple-rm:
-	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
-
-multiple-rm-tests:
-	-docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) down -v --remove-orphans
-
-multiple-rebuild: multiple-build multiple-stop multiple-run
-
-multiple-rebuild-new: multiple-build multiple-rm multiple-run
-
-multiple-rebuild-tests: multiple-build-tests multiple-stop-tests multiple-run-tests
-
-multiple-rebuild-tests-new: multiple-build-tests multiple-rm-tests multiple-run-tests
-
-.PHONY: multiple-build multiple-run multiple-stop multiple-rebuild
+.PHONY: clean
+clean: ## Cleanup all docker volumes and shutdown all related services
+	-docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
+# Shorthands
+.PHONY: rebuild
+rebuild: clean build

@@ -1,7 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from plugin_set import PluginSet
+from mozdef_util.plugin_set import PluginSet
 
 
 class TestPluginSet(object):
