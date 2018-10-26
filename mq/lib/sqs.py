@@ -3,8 +3,8 @@ import boto
 import boto.utils
 
 
-def connect_sqs(region=None, access_key=None, secret_key=None,
-                task_exchange=None):
+def connect_sqs(region=None, aws_access_key_id=None,
+                aws_secret_access_key=None, task_exchange=None):
     if region is None:
         try:
             # connect_sqs defaults to us-east-1 instead of the local region
@@ -16,10 +16,10 @@ def connect_sqs(region=None, access_key=None, secret_key=None,
                 "MozDef isn't running in AWS")
 
     credentials = {}
-    if access_key is not None:
-        credentials['aws_access_key_id'] = access_key
-    if secret_key is not None:
-        credentials['aws_secret_access_key'] = secret_key
+    if aws_access_key_id is not None:
+        credentials['aws_access_key_id'] = aws_access_key_id
+    if aws_secret_access_key is not None:
+        credentials['aws_secret_access_key'] = aws_secret_access_key
     conn = sqs.connect_to_region(
         region_name=region,
         **credentials
