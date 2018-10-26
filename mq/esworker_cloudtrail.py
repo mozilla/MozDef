@@ -43,7 +43,7 @@ except ImportError as e:
 
 
 class RoleManager:
-    def __init__(self, region='us-east-1', aws_access_key_id=None, aws_secret_access_key=None):
+    def __init__(self, aws_access_key_id=None, aws_secret_access_key=None):
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.credentials = {}
@@ -51,10 +51,10 @@ class RoleManager:
         self.session_conn_sts = None
         try:
             self.local_conn_sts = boto.sts.connect_to_region(
-                **get_aws_credentials(
-                    region,
-                    self.aws_access_key_id,
-                    self.aws_secret_access_key))
+                'us-east-1',
+                aws_access_key_id=self.aws_access_key_id,
+                aws_secret_access_key=self.aws_secret_access_key
+            )
         except Exception, e:
             logger.error("Unable to connect to STS due to exception %s" % e.message)
             raise
@@ -68,13 +68,10 @@ class RoleManager:
                 logger.error("Unable to get session token due to exception %s" % e.message)
                 raise
             try:
-                creds = get_aws_credentials(
-                        self.session_credentials.access_key,
-                        self.session_credentials.secret_key,
-                        self.session_credentials.session_token) if self.session_credentials else {}
                 self.session_conn_sts = boto.sts.connect_to_region(
-                    region=region,
-                    **creds)
+                    'us-east-1',
+                    **self.get_credential_arguments(self.session_credentials)
+                )
             except Exception, e:
                 logger.error("Unable to connect to STS with session token due to exception %s" % e.message)
                 raise
@@ -125,18 +122,6 @@ class RoleManager:
             'aws_access_key_id': credential.access_key,
             'aws_secret_access_key': credential.secret_key,
             'security_token': credential.session_token} if credential else {}
-
-def get_aws_credentials(region=None, accesskey=None, secretkey=None, security_token=None):
-    result = {}
-    if region not in ['', '<add_region>', None]:
-        result['region'] = region
-    if accesskey not in ['', '<add_accesskey>', None]:
-        result['aws_access_key_id'] = accesskey
-    if secretkey not in ['', '<add_secretkey>', None]:
-        result['aws_secret_access_key'] = secretkey
-    if security_token not in [None]:
-        result['security_token'] = security_token
-    return result
 
 
 def keyMapping(aDict):
@@ -306,17 +291,9 @@ class taskConsumer(object):
         Timer(self.flush_wait_time, self.flush_s3_creds).start()
 
     def authenticate(self):
-        if options.cloudtrail_arn not in ['<cloudtrail_arn>', 'cloudtrail_arn']:
-            role_manager_args = {}
-
-            role_manager = RoleManager(**get_aws_credentials(
-                options.region,
-                options.accesskey,
-                options.secretkey))
-            role_manager.assume_role(options.cloudtrail_arn)
-            role_creds = role_manager.get_credentials(options.cloudtrail_arn)
-        else:
-            role_creds = {}
+        role_manager = RoleManager(options.accesskey, options.secretkey)
+        role_manager.assume_role(options.cloudtrail_arn)
+        role_creds = role_manager.get_credentials(options.cloudtrail_arn)
         self.s3_connection = boto.connect_s3(**role_creds)
 
     def flush_s3_creds(self):
@@ -372,11 +349,11 @@ class taskConsumer(object):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
                 self.connection, self.taskQueue = connect_sqs(
-                    task_exchange=options.taskexchange,
-                    **get_aws_credentials(
-                        options.region,
-                        options.accesskey,
-                        options.secretkey))
+                    options.region,
+                    options.accesskey,
+                    options.secretkey,
+                    options.taskexchange
+                )
                 self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, body):
@@ -472,11 +449,12 @@ def main():
         sys.exit(1)
 
     sqs_conn, eventTaskQueue = connect_sqs(
-        task_exchange=options.taskexchange,
-        **get_aws_credentials(
-            options.region,
-            options.accesskey,
-            options.secretkey))
+        options.region,
+        options.accesskey,
+        options.secretkey,
+        options.taskexchange
+    )
+
     # consume our queue
     taskConsumer(sqs_conn, eventTaskQueue, es).run()
 
@@ -514,7 +492,7 @@ def initConfig():
     # aws options
     options.accesskey = getConfig('accesskey', '', options.configfile)
     options.secretkey = getConfig('secretkey', '', options.configfile)
-    options.region = getConfig('region', '', options.configfile)
+    options.region = getConfig('region', 'us-west-1', options.configfile)
 
     # This is the full ARN that the s3 bucket lives under
     options.cloudtrail_arn = getConfig('cloudtrail_arn', 'cloudtrail_arn', options.configfile)
