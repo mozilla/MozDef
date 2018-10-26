@@ -9,13 +9,13 @@ import uuid from "uuid";
 
 //collections shared by client/server
 Meteor.startup(() => {
+    mozdefsettings = new Meteor.Collection("mozdefsettings");
     events = new Meteor.Collection("events");
     alerts = new Meteor.Collection("alerts");
     investigations = new Meteor.Collection("investigations");
     incidents = new Meteor.Collection("incidents");
     veris = new Meteor.Collection("veris");
     kibanadashboards = new Meteor.Collection("kibanadashboards");
-    mozdefsettings = new Meteor.Collection("mozdefsettings");
     healthfrontend = new Meteor.Collection("healthfrontend");
     sqsstats = new Meteor.Collection("sqsstats");
     healthescluster = new Meteor.Collection("healthescluster");
@@ -390,15 +390,22 @@ Meteor.startup(() => {
         });
     };
 
-
     if (Meteor.isClient) {
         //client side collections:
         options={
             _suppressSameNameError : true
         };
+        Meteor.subscribe("mozdefsettings",
+                onReady=function(){
+                    // Now that we have subscribed to our settings collection
+                    // register our login handler
+                    // and the login function of choice
+                    // based on how enableClientAccountCreation was set at deployment.
+                    Meteor.login();
+        });
+
         alertsCount = new Meteor.Collection("alerts-count",options);
         //client-side subscriptions to low volume collections
-        Meteor.subscribe("mozdefsettings");
         Meteor.subscribe("veris");
         Meteor.subscribe("kibanadashboards");
         Meteor.subscribe("userActivity");

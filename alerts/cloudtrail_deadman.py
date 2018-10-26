@@ -7,7 +7,7 @@
 
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch
 
 
 class AlertCloudtrailDeadman(AlertTask):

@@ -11,10 +11,6 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
 -->
 
 <template name="ipwhois">
-<style>
-    .row { color: white;
-    }
-</style>
 <body>
 
 
@@ -35,9 +31,9 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
             {{#each whois.data.nets}}
                 {{#each objKeyValue this}}
                         <li>{{key}}: {{value}}</li>
-                {{/each}}                
+                {{/each}}
             {{/each}}
-            
+
         </ul>
     </div>
     <div class="row center">
@@ -52,11 +48,6 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
 </template>
 
 <template name="whoismodal">
-    <style>
-    .modal-body .row {
-        color: black;
-    }
-    </style>
     <div class="modal fade" id="modalwhoiswindow">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -82,9 +73,9 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
                             {{#each whois.data.nets}}
                                 {{#each objKeyValue this}}
                                         <li>{{key}}: {{value}}</li>
-                                {{/each}}                
+                                {{/each}}
                             {{/each}}
-                            
+
                         </ul>
                     </div>
                     <div class="col-xs-1"><button class="btn btn-xs" data-toggle="collapse" data-target="#rawwhoisjson">raw json</button></div>
@@ -92,7 +83,7 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
                         <div id='rawwhoisjson' class="collapse">
                             <pre>{{whois.content}}</pre>
                         </div>
-                    </div>            
+                    </div>
                 </div>
                 <div class="modal-footer">
                   <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>

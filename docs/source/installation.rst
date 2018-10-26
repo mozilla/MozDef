@@ -1,23 +1,16 @@
 Installation
 ============
 
-The installation process has been tested on CentOS 6, RHEL 6, CentOS 7, and Ubuntu 14.
+The installation process has been tested on CentOS 7.
 
-Automated Docker Installation
------------------------------
+Build and run MozDef
+--------------------
 
-You can quickly install MozDef with an automated build generation using `docker`_.
-This will build on CentOS 7
+You can quickly install MozDef with an automated build generation using `docker`:
 
+  make build
 
-Single Container
-****************
-
-MozDef can run in a single docker container, which uses supervisord to handle executing all of the MozDef processes. In order to run a single container::
-
-  make single-build
-  make single-run
-  make single-stop # When you want to stop the container
+  make run
 
 You're done! Now go to:
 
@@ -27,26 +20,26 @@ You're done! Now go to:
  * http://localhost:8080 < loginput
  * http://localhost:8081 < rest api
 
-
-Multiple Containers
-*******************
-
-Since MozDef consists of many processes running at once, we also support running MozDef with each process given it's own container. This can be useful during development, since you can turn off a single process to debug/troubleshoot while maintaining a functioning MozDef environment.
-In order to run in multiple containers::
-
-  make multiple-build
-  make multiple-run
-  make multiple-stop # When you want to stop the containers
-
-You're done! Now go to:
-
- * http://localhost < meteor (main web interface)
- * http://localhost:9090/app/kibana < kibana
- * http://localhost:9200 < elasticsearch
- * http://localhost:8080 < loginput
- * http://localhost:8081 < rest api
 
 .. _docker: https://www.docker.io/
+.. note:: The build system has changed
+   `make` targets for `multiple-*` and `single-*` have been replaced by the above commands (`make run`, etc.)
+   Just type `make` to get a list of available targets.
+
+Run tests
+---------
+
+Simply run:
+
+  make test
+
+
+Note, if you end up with a clobbered ES index, or anything like that which might end up in failing tests, you can clean
+the environment with:
+
+  make clean
+
+Then run the tests again.
 
 
 Manual Installation for Yum or Apt based distros
@@ -98,8 +91,8 @@ Then::
   ./python2.7/bin/pip install virtualenv
   mkdir ~/envs
   cd ~/envs
-  ~/python2.7/bin/virtualenv mozdef
-  source mozdef/bin/activate
+  ~/python2.7/bin/virtualenv python
+  source python/bin/activate
   pip install -r ../requirements.txt
 
 Copy the following into a file called .bash_profile for the mozdef user within /opt/mozdef:
@@ -107,7 +100,7 @@ Copy the following into a file called .bash_profile for the mozdef user within /
   [mozdef@server ~]$ vim /opt/mozdef/.bash_profile
 
   # Add the following to the file before "export PATH":
-    
+
   PATH=$PATH:$HOME/.meteor
 
   export PATH
@@ -282,7 +275,7 @@ In this example we place it in /opt/mozdef/envs/meteor/mozdef::
   if [ -d /opt/mozdef/meteor ]
   then
       cd /opt/mozdef/meteor
-      source /opt/mozdef/envs/mozdef/bin/activate
+      source /opt/mozdef/envs/python/bin/activate
       mkdir -p /opt/mozdef/envs/meteor/mozdef
 
       meteor npm install
@@ -337,8 +330,8 @@ We use `uwsgi`_ to interface python and nginx, in your venv execute the followin
   cd uwsgi-2.0.12
   ~/python2.7/bin/python uwsgiconfig.py --build
   ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
-  cp python_plugin.so ~/envs/mozdef/bin/
-  cp uwsgi ~/envs/mozdef/bin/
+  cp python_plugin.so ~/envs/python/bin/
+  cp uwsgi ~/envs/python/bin/
 
   cd ..
   cp -r ~/mozdef/rest   ~/envs/mozdef/
@@ -368,7 +361,7 @@ you can start the restapi and loginput processes from within your venv via:
   # modify /etc/nginx/nginx.conf to reflect your server, and any path changes you've made.
   sudo vim /etc/nginx/nginx.conf
   # move uwsgi_params file into venv.
-  cp /etc/nginx/uwsgi_params /opt/mozdef/envs/mozdef/bin/
+  cp /etc/nginx/uwsgi_params /opt/mozdef/envs/python/bin/
   sudo service nginx restart
 
 .. _uwsgi: https://uwsgi-docs.readthedocs.io/en/latest/
@@ -386,7 +379,7 @@ To install supervisord perform the following as the user mozdef:
     cd bin
     pip install supervisor
 
-Within the alerts directory there is a supervisord_alerts.ini which is preconfigured. 
+Within the alerts directory there is a supervisord_alerts.ini which is preconfigured.
 If you've changed any directory paths for this installation then modify it to reflect your pathing changes.
 There are systemd files in the systemdfiles directory that you can use to start the mozdefalerts and mozdefalertplugins processes which we cover near the end of this tutorial.
 
@@ -411,7 +404,7 @@ Add the repo in /etc/yum/repos.d/elasticsearch.repo:
   autorefresh=1
   type=rpm-md
 
-  sudo yum install elasticsearch 
+  sudo yum install elasticsearch
 
 .. _Elasticsearch website: https://www.elastic.co/products/elasticsearch
 
@@ -452,7 +445,7 @@ Create the Repo in /etc/yum/repos.d/kibana.repo:
   sudo yum install kibana
 
 Now you'll need to configure kibana to work with your system:
-You can set the various settings in /etc/kibana/kibana.yml. 
+You can set the various settings in /etc/kibana/kibana.yml.
 Some of the settings you'll want to configure are:
 
 * server.name (your server's hostname)
@@ -481,7 +474,7 @@ Ensure it has root file permissions so that systemd can start it.
   cp /opt/mozdef/systemdfiles/alert/mozdefalertplugins.service /etc/systemd/system/
 
 Then you will need to enable them:
-  
+
   systemctl enable mozdefweb.service
   systemctl enable mozdefrestapi.service
   systemctl enable mozdefloginput.service
@@ -490,7 +483,7 @@ Then you will need to enable them:
   systemctl enable mozdefbot.service
   systemctl enable mozdefalertplugins.service
   systemctl enable mongod.service
-  
+
 Reload systemd:
 
   systemctl daemon-reload

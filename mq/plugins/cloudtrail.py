@@ -5,8 +5,7 @@
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from utilities.key_exists import key_exists
+from mozdef_util.utilities.key_exists import key_exists
 
 
 class message(object):
@@ -42,7 +41,8 @@ class message(object):
             'details.serviceeventdetails',
             'details.requestparameters.disableApiTermination',
             'details.responseelements.findings.service.additionalInfo.unusual',
-            'details.responseelements.distribution.distributionConfig.callerReference'
+            'details.responseelements.distribution.distributionConfig.callerReference',
+            'details.requestparameters.logStreamName'
         ]
 
     def convert_key_raw_str(self, needle, haystack):

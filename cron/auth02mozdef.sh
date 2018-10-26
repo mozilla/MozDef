@@ -6,5 +6,5 @@
 # Author: gdestuynder@mozilla.com
 
 
-source  /opt/mozdef/envs/mozdef/bin/activate
+source  /opt/mozdef/envs/python/bin/activate
 /opt/mozdef/envs/mozdef/cron/auth02mozdef.py

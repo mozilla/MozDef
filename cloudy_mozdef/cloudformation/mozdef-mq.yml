@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates MozDef Amazon MQ
+Parameters:
+  MQUserParameter:
+    Type: String
+    Default: mozdef
+    Description: The username for the AmazonMQ user.
+  MQPasswordParameter:
+    Type: String
+    NoEcho: true
+    Default: ''
+    Description: The password for the AmazonMQ user. Leave this blank if you want an auto-generated password.
+  MQInstanceType:
+    Type: String
+    Default: mq.t2.micro
+    Description: The instance type for the AmazonMQ instance.
+  MQVpcId:
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-dc8eacb4
+    Description: The VPC ID of the VPC within which the AmazonMQ instance will be provisioned.
+  MQSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Default: subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6
+    Description: Comma-delimited list of subnet IDs of the VPCs within which the AmazonMQ instance will be provisioned.
+  MozDefSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    Default: sg-02d7fe9627ea068e2
+    Description: The security group of the Mozdef endpoint that is accessing AmazonMQ
+Conditions:
+  PasswordIsSet: !Not [ !Equals [ !Ref MQPasswordParameter, '' ]]
+  PasswordIsNotSet: !Equals [ !Ref MQPasswordParameter, '' ]
+Resources:
+  AmazonMQSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Limits security group ingress and egress traffic for the Amazon MQ instance
+      VpcId: !Ref MQVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5671
+          ToPort: 5671
+          SourceSecurityGroupId: !Ref MozDefSecurityGroup
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+  MozDefAmazonMQ:
+    Type: AWS::AmazonMQ::Broker
+    Properties:
+      AutoMinorVersionUpgrade: false
+      BrokerName: !Join [ '-', [ Broker, !Select [ 2, !Split [ '/', !Ref 'AWS::StackId' ] ] ] ]
+      Users:
+        - Username: !Ref MQUserParameter
+          Password: !If [ PasswordIsSet, !Ref MQPasswordParameter, !GetAtt DefaultPassword.Password ]
+      DeploymentMode: ACTIVE_STANDBY_MULTI_AZ
+      EngineType: ACTIVEMQ
+      EngineVersion: 5.15.0
+      HostInstanceType: !Ref MQInstanceType
+      PubliclyAccessible: true
+      SecurityGroups:
+        - !Ref AmazonMQSecurityGroup
+      SubnetIds:
+        - !Select
+          - 0
+          - !Ref MQSubnetIds
+        - !Select
+          - 1
+          - !Ref MQSubnetIds
+  CloudFormationLambdaIAMRole:
+    Type: AWS::IAM::Role
+    Condition: PasswordIsNotSet
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        -
+          PolicyName: AllowLambdaLogging
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - logs:*
+                Resource: '*'
+        -
+          PolicyName: AllowMQDescribeBroker
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - mq:DescribeBroker
+                Resource: '*'
+  DefaultPasswordGeneratorLambdaFunction:
+    Type: AWS::Lambda::Function
+    Condition: PasswordIsNotSet
+    Properties:
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import secrets, string
+          def handler(event, context):
+            alphabet = string.ascii_letters + string.digits
+            password = ''.join(secrets.choice(alphabet) for i in range(int(event['ResourceProperties']['Length'])))
+            physical_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(13))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, {'Password': password}, "DefaultPasswordGenerator-%s" % physical_id)
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      Timeout: 20
+  MQBrokerURLLookupLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import boto3, secrets, string
+          from urllib.parse import urlparse
+          def handler(event, context):
+            response = boto3.client('mq').describe_broker(BrokerId=event['ResourceProperties']['BrokerID'])
+            url = urlparse(next(x for x in response['BrokerInstances'][0]['Endpoints'] if x.startswith('amqp+ssl://')))
+            response = {'URL': url.geturl(), 'HostName': url.hostname, 'Scheme': url.scheme, 'Port': url.port}
+            physical_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(13))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, response, "MQBrokerURLLookup-%s" % physical_id)
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      Timeout: 20
+  DefaultPassword:
+    Type: AWS::CloudFormation::CustomResource
+    Condition: PasswordIsNotSet
+    Properties:
+      Length: 16
+      ServiceToken: !GetAtt DefaultPasswordGeneratorLambdaFunction.Arn
+  MQBrokerURL:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      BrokerID: !Ref MozDefAmazonMQ
+      ServiceToken: !GetAtt MQBrokerURLLookupLambdaFunction.Arn
+Outputs:
+  MQUser:
+    Description: Username of the MQ user
+    Value: !Ref MQUserParameter
+  MQPassword:
+    Description: Password of the MQ user
+    Value: !If [ PasswordIsSet, !Ref MQPasswordParameter, !GetAtt DefaultPassword.Password ]
+  MQHostName:
+    Description: Hostname of the AMQP broker
+    Value: !GetAtt MQBrokerURL.HostName
+  MQScheme:
+    Description: Scheme of the AMQP broker
+    Value: !GetAtt MQBrokerURL.Scheme
+  MQPort:
+    Description: Port of the AMQP broker
+    Value: !GetAtt MQBrokerURL.Port

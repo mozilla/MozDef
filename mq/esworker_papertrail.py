@@ -20,8 +20,7 @@ from datetime import datetime, timedelta
 import calendar
 import requests
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from utilities.toUTC import toUTC
 from utilities.to_unicode import toUnicode

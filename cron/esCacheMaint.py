@@ -14,9 +14,8 @@ from configlib import getConfig, OptionParser
 from datetime import datetime, date, timedelta
 
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from elasticsearch_client import ElasticsearchClient
-from utilities.logger import logger
+from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.utilities.logger import logger
 
 
 def esConnect(conn):

@@ -1,0 +1,195 @@
+---
+version: '2.2'
+services:
+  nginx:
+    image: mozillaiam/mozilla.oidc.accessproxy
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    depends_on:
+      - meteor
+    links:
+      - "meteor"
+    ports:
+      - 80:80
+      - 443:80
+        #      - 8080:8080 is loginput
+        #      - 9090:9090 is kibana
+    networks:
+      - default
+  nginxkibana:
+    image: mozillaiam/mozilla.oidc.accessproxy
+    env_file:
+      - cloudy_mozdef_kibana.env
+    restart: always
+    ports:
+      - 9090:80
+    networks:
+      - default
+  mongodb:
+    image: mozdef/mozdef_mongodb
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
+    volumes:
+      - /var/lib/mongodb:/var/lib/mongo
+    networks:
+      - default
+  bootstrap:
+    image: mozdef/mozdef_bootstrap
+    env_file:
+      - cloudy_mozdef.env
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
+    depends_on:
+      - base
+    networks:
+      - default
+  # MozDef Specific Containers
+  base:
+    image: mozdef/mozdef_base
+    env_file:
+      - cloudy_mozdef.env
+    command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data
+  alertplugins:
+    image: mozdef/mozdef_alertplugins
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python alert_worker.py -c alert_worker.conf'
+    depends_on:
+      - base
+      - alerts
+      - bootstrap
+    networks:
+      - default
+  alerts:
+    image: mozdef/mozdef_alerts
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
+    depends_on:
+      - base
+      - bootstrap
+    networks:
+      - default
+  cron:
+    image: mozdef/mozdef_cron
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'crond -n'
+    volumes:
+      - cron:/opt/mozdef/envs/mozdef/cron
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
+    depends_on:
+      - base
+      - mongodb
+    networks:
+      - default
+  loginput:
+    image: mozdef/mozdef_loginput
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    depends_on:
+      - base
+      - bootstrap
+    ports:
+      - 8080:8080
+    networks:
+      - default
+  meteor:
+    image: mozdef/mozdef_meteor
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'node bundle/main.js'
+    depends_on:
+      - mongodb
+      - rest
+      - bootstrap
+    ports:
+      - 3000:3000
+    networks:
+      - default
+  rest:
+    image: mozdef/mozdef_rest
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    depends_on:
+      - base
+      - mongodb
+      - bootstrap
+    networks:
+      - default
+  syslog:
+    image: mozdef/mozdef_syslog
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c '/usr/sbin/syslog-ng --no-caps -F'
+    depends_on:
+      - loginput
+    ports:
+      - 514:514/udp
+      - 514:514
+    networks:
+      - default
+  rabbitmq:
+    image: mozdef/mozdef_rabbitmq
+    restart: always
+    command: rabbitmq-server
+    ports:
+       - 5672:5672
+       - 15672:15672 # Admin interface
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    networks:
+      - default
+  mq_eventtask:
+    image: mozdef/mozdef_mq_eventtask
+    env_file:
+      - cloudy_mozdef.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
+    scale: 1
+    depends_on:
+      - base
+      - rabbitmq
+      - loginput
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
+  mq_cloudtrail:
+    image: mozdef/mozdef_mq_eventtask
+    env_file:
+      - cloudy_mozdef.env
+      - cloudy_mozdef_mq_cloudtrail.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_cloudtrail.py -c esworker_cloudtrail.conf'
+    scale: 1
+    depends_on:
+      - base
+      - rabbitmq
+      - loginput
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
+volumes:
+  cron:
+  geolite_db:
+  rabbitmq:
+
+networks:
+  default:

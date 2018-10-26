@@ -28,10 +28,12 @@ Copyright (c) 2014 Mozilla Corporation
 
 </style>
 <div class="container">
-    <div class="row col-xs-4 col-xs-offset-3 alert alert-info">
+    <div class="row col-xs-5 col-xs-offset-3 alert alert-info">
           <div class="col-xs-2"><button class="btn btn-primary" id="saveInvestigation">save</button></div>
-          <span class="col-xs-2" id="saveMessage"></span>
+          <span class="col-xs-5" id="saveMessage"></span>
+          <button class="btn btn-md btn-danger  col-xs-5 makeincident" data-investigationid={{_id}}>Escalate To Incident</button>
     </div>
+
 </div>
 <div class="container">
     <div class="row col-xs-10 center ">
@@ -115,15 +117,14 @@ Copyright (c) 2014 Mozilla Corporation
                         <i class="fa fa-info-circle" data-toggle="tooltip" title="Drag and Drop the veris tags from the upper right to the area below"></i>
                     </label>
                     <div class="tags col-xs-10">
-                        <span class="form-control alert alert-info">drag here to add a tag
-                            <ul class="pull-left list-unstyled">
-                            {{#each tags}}
-                                <li class="list-unstyled pull-left">
-                                    <div class="form-control">{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
-                                </li>
-                            {{/each}}
-                            </ul>
-                        </span>
+                        <div class="form-control">drag here to add a tag</div>
+                        <ul class="pull-left list-unstyled">
+                        {{#each tags}}
+                            <li class="list-unstyled pull-left">
+                                <div class="form-control">{{.}}<button type="button" class="tagdelete close pull-left" aria-hidden="false">&times;</button></div>
+                            </li>
+                        {{/each}}
+                        </ul>
                     </div>
                 </div>
                 <div class="form-group">

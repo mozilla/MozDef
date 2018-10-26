@@ -14,9 +14,8 @@ from elasticsearch.exceptions import ConnectionTimeout
 import os
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
-from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+from mozdef_util.query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
