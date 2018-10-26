@@ -390,15 +390,34 @@ def initConfig():
     options.username = getConfig('username', 'username', options.configfile)
     options.realname = getConfig('realname', 'realname', options.configfile)
     options.password = getConfig('password', '', options.configfile)
+
+    # Our config parser removes '#'
+    # so we gotta re-add them
     options.join = getConfig('join', '#mzdf', options.configfile)
+    channels = []
+    for channel in options.join.split(','):
+        if not channel.startswith('#'):
+            channel = '#{0}'.format(channel)
+        channels.append(channel)
+    options.join = ','.join(channels)
+
     options.alertircchannel = getConfig(
         'alertircchannel',
         '',
         options.configfile)
+
     options.channelkeys = json.loads(getConfig(
         'channelkeys',
         '{"#somechannel": "somekey"}',
         options.configfile))
+
+    # Our config parser stomps out the '#' so we gotta readd
+    channelkeys = {}
+    for key, value in options.channelkeys.iteritems():
+        if not key.startswith('#'):
+            key = '#{0}'.format(key)
+        channelkeys[key] = value
+    options.channelkeys = channelkeys
 
     # message queue options
     # server hostname
