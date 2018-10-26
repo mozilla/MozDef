@@ -26,7 +26,8 @@ create-stack: test ## Create everything you need for a fresh new stack!
 	@echo "Make sure you have a param file ($(STACK_PARAMS)) with OIDCClientSecret set."
 	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI) \
 	  --capabilities CAPABILITY_IAM \
-	  --parameters $(STACK_PARAMS)
+	  --parameters $(STACK_PARAMS) \
+	  --output text
 
 .PHONY: create-s3-bucket
 create-s3-bucket:
