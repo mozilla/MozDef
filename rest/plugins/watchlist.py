@@ -53,11 +53,8 @@ class message(object):
             for line in text_file:
                 line=line.strip().strip("'").strip('"')
                 terms.append(line)
+        text_file.close()
         return terms
-
-    def write_watchlist(self, watchlist_file, watchcontent):
-        with open(watchlist_file, "a+") as text_file:
-            text_file.write(watchcontent + ",")
 
     def initConfiguration(self):
         myparser = OptionParser()
@@ -74,7 +71,7 @@ class message(object):
             3001,
             self.configfile)
 
-        # Watchlist as a comma separated list of terms
+        # Watchlist as a list of terms one each to a line
         self.options.watchlist_file = getConfig('watchlist_file', '/dev/null', self.configfile)
 
     def watchItem(self,
@@ -117,9 +114,8 @@ class message(object):
                 watched['creator']=userID
                 watched['reference']=referenceID
                 ref=watchlist.insert(watched)
-                self.write_watchlist(self.options.watchlist_file, watchcontent)
-                sys.stdout.write('{0} written to db\n'.format(ref))
-                sys.stdout.write('%s: added to the watchlist table\n' % (watchcontent))
+                sys.stdout.write('{0} written to db.\n'.format(ref))
+                sys.stdout.write('%s: added to the watchlist table.\n' % (watchcontent))
 
             else:
                 sys.stderr.write('%s: is already present in the watchlist table\n' % (str(watchcontent)))
@@ -166,7 +162,7 @@ class message(object):
                 for watchlist_term in self.options.watchlist:
                     if watchlist_term == watchcontent:
                         watchlisted = True
-                        sys.stdout.write('{0} is watchlisted as {1}\n'.format(watchitem, watchlist_term))
+                        sys.stdout.write('{0} is watchlisted as {1} with a duration of {3}.\n'.format(watchcontent, watchlist_term, duration))
 
                 if not watchlisted:
                     self.watchItem(str(watchcontent),
@@ -176,7 +172,7 @@ class message(object):
                                  userid)
                     sys.stdout.write('added {0} to watchlist\n'.format(watchcontent))
                 else:
-                     sys.stdout.write('not adding {0} to watchlist, it was found in watchlist\n'.format(watchcontent))
+                     sys.stdout.write('not adding {0}, the content already exists in the watchlist.\n'.format(watchcontent))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
