@@ -79,7 +79,7 @@ Then::
   wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
   tar xvzf Python-2.7.11.tgz
   cd Python-2.7.11
-  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared LDFLAGS="-W1,--rpath=/opt/mozdef/python.2.7/lib"
+  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared LDFLAGS="-Wl,--rpath=/opt/mozdef/python2.7/lib"
   make
   make install
 
