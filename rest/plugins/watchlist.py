@@ -172,8 +172,9 @@ class message(object):
                                  userid)
                     sys.stdout.write('added {0} to watchlist\n'.format(watchcontent))
                 else:
-                     sys.stdout.write('not adding {0}, the content already exists in the watchlist.\n'.format(watchcontent))
+                    sys.stdout.write('not adding {0}, the content already exists in the watchlist.\n'.format(watchcontent))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
         return (request, response)
+        
