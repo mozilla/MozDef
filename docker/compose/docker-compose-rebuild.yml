@@ -45,10 +45,12 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_loginput/Dockerfile
-  mq_eventtask:
+  # The generic worker container for all ingest processes
+  mq_worker:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_mq_worker/Dockerfile
+    restart: "no"
   meteor:
     build:
       context: ../../
