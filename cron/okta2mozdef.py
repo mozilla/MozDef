@@ -60,6 +60,7 @@ class State:
                     indent=4,
                     separators=(',', ': '))
 
+
 def main():
     if options.output=='syslog':
         logger.addHandler(SysLogHandler(address=(options.sysloghostname,options.syslogport)))

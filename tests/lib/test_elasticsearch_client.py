@@ -362,6 +362,7 @@ class TestGetIndices(ElasticsearchClientTest):
         indices.sort()
         assert indices == [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
 
+
 class TestIndexExists(ElasticsearchClientTest):
 
     def teardown(self):

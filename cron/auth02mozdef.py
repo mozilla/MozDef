@@ -21,6 +21,7 @@ except ImportError:
     quote_url = urllib.quote
 import traceback
 
+
 class DotDict(dict):
     '''dict.item notation for dict()'s'''
     __getattr__ = dict.__getitem__
@@ -33,9 +34,11 @@ class DotDict(dict):
                 value = DotDict(value)
             self[key] = value
 
+
 def fatal(msg):
     print(msg)
     sys.exit(1)
+
 
 def debug(msg):
     sys.stderr.write('+++ {}\n'.format(msg))
@@ -256,6 +259,7 @@ log_types=DotDict({
         }
 })
 
+
 def process_msg(mozmsg, msg):
     """Normalization function for auth0 msg.
     @mozmsg: MozDefEvent (mozdef message)
@@ -346,6 +350,7 @@ def process_msg(mozmsg, msg):
 
     return mozmsg
 
+
 def load_state(fpath):
     """Load last msg id we've read from auth0 (log index).
     @fpath string (path to state file)
@@ -358,6 +363,7 @@ def load_state(fpath):
         pass
     return state
 
+
 def save_state(fpath, state):
     """Saves last msg id we've read from auth0 (log index).
     @fpath string (path to state file)
@@ -365,6 +371,7 @@ def save_state(fpath, state):
     """
     with open(fpath, mode='w') as fd:
         fd.write(str(state)+'\n')
+
 
 def byteify(input):
     """Convert input to ascii"""
@@ -377,6 +384,7 @@ def byteify(input):
         return input.encode('utf-8')
     else:
         return input
+
 
 def fetch_auth0_logs(config, headers, fromid):
     lastid = fromid

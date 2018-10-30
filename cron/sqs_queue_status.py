@@ -31,12 +31,14 @@ from mozdef_util.utilities.is_cef import isCEF
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
+
 def getDocID(sqsregionidentifier):
     # create a hash to use as the ES doc id
     # hostname plus salt as doctype.latest
     hash = md5()
     hash.update('{0}.mozdefhealth.latest'.format(sqsregionidentifier))
     return hash.hexdigest()
+
 
 def getQueueSizes():
     logger.debug('starting')
@@ -114,10 +116,12 @@ def getQueueSizes():
 #    except Exception as e:
 #        logger.error("Exception %r when gathering health and status " % e)
 
+
 def main():
     logger.debug('Starting')
     logger.debug(options)
     getQueueSizes()
+
 
 def initConfig():
     # aws options

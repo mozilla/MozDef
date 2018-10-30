@@ -71,6 +71,7 @@ import netaddr
 #     ]
 # }
 
+
 class SshLateral(AlertTask):
     def __init__(self):
         AlertTask.__init__(self)

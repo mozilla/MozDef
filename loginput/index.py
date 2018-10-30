@@ -26,6 +26,7 @@ def status():
     response.body = json.dumps(dict(status='ok', service='loginput'))
     return response
 
+
 @route('/test')
 @route('/test/')
 def testindex():
@@ -34,6 +35,8 @@ def testindex():
     response.status=200
 
 #act like elastic search bulk index
+
+
 @route('/_bulk',method='POST')
 @route('/_bulk/',method='POST')
 def bulkindex():
@@ -64,6 +67,7 @@ def bulkindex():
                     bottlelog('value error {0}'.format(i))
     return
 
+
 @route('/_status')
 @route('/_status/')
 @route('/nxlog/', method=['POST','PUT'])
@@ -89,6 +93,7 @@ def eventsindex():
 
     return
 
+
 @route('/cef', method=['POST','PUT'])
 @route('/cef/',method=['POST','PUT'])
 #debug(True)
@@ -109,6 +114,7 @@ def cefindex():
         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
         ensurePublish(cefDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
     return
+
 
 @route('/custom/<application>',method=['POST','PUT'])
 def customindex(application):

@@ -11,6 +11,7 @@ import json
 import netaddr
 from boto3.session import Session
 
+
 def isIPv4(ip):
     try:
         # netaddr on it's own considers 1 and 0 to be valid_ipv4

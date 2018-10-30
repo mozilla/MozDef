@@ -33,6 +33,8 @@ logger = logging.getLogger(sys.argv[0])
 logger.level=logging.DEBUG
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
 def postLogs(logcache):
     #post logs asynchronously with requests workers and check on the results
     #expects a queue object from the multiprocessing library

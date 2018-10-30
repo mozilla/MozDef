@@ -336,6 +336,7 @@ def genNewAttacker():
 
     return newAttacker
 
+
 def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
     '''given an attacker ID and a dictionary of an elastic search event
        look for a valid geoIP in the dict and update the attacker's geo coordinates

@@ -27,6 +27,7 @@ logger = logging.getLogger(sys.argv[0])
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
 
+
 def initLogger():
     logger.level = logging.INFO
     formatter = logging.Formatter(
@@ -41,8 +42,10 @@ def initLogger():
         sh.setFormatter(formatter)
         logger.addHandler(sh)
 
+
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
+
 
 def isIPv4(ip):
     try:
@@ -58,11 +61,13 @@ def isIPv4(ip):
     except:
         return False
 
+
 def isIPv6(ip):
     try:
         return netaddr.valid_ipv6(ip)
     except:
         return False
+
 
 def aggregateAttackerIPs(attackers):
     iplist = []
@@ -100,6 +105,7 @@ def aggregateAttackerIPs(attackers):
             logger.debug('invalid:' + ip)
     return iplist
 
+
 def parse_network_whitelist(network_whitelist_location):
     networks = []
     with open(network_whitelist_location, "r") as text_file:
@@ -108,6 +114,7 @@ def parse_network_whitelist(network_whitelist_location):
             if isIPv4(line) or isIPv6(line):
                 networks.append(line)
     return networks
+
 
 def main():
     logger.debug('starting')

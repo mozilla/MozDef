@@ -121,6 +121,7 @@ echo "DONE!"
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
 
+
 def initConfig():
     # output our log to stdout or syslog
     options.output = getConfig(

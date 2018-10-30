@@ -24,6 +24,7 @@ def fetch_ip_list(aws_key_id, aws_secret_key, s3_bucket, ip_list_filename):
     contents = ip_list_key.get_contents_as_string().rstrip()
     return contents.split("\n")
 
+
 def save_ip_list(save_path, ips):
     ip_list_contents = '\n'.join(ips)
     logger.debug("Saving ip list")
@@ -33,6 +34,7 @@ def save_ip_list(save_path, ips):
         logger.debug("Creating new ip list file at " + str(save_path))
     with open(save_path, "w+") as text_file:
         text_file.write(ip_list_contents)
+
 
 def main():
     logger.debug('Starting')
@@ -48,6 +50,7 @@ def main():
     if len(ips) < options.ips_list_threshold:
         raise LookupError('IP List contains less than ' + str(options.ips_list_threshold) + ' entries...something is probably up here.')
     save_ip_list(options.local_ip_list_path, ips)
+
 
 def initConfig():
     # output our log to stdout or syslog

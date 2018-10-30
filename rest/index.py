@@ -58,6 +58,7 @@ def test():
     sendMessgeToPlugins(request, response, 'test')
     return response
 
+
 @route('/status')
 @route('/status/')
 def status():
@@ -122,6 +123,7 @@ def index():
     sendMessgeToPlugins(request, response, 'blockip')
     return response
 
+
 @post('/blockfqdn', methods=['POST'])
 @post('/blockfqdn/', methods=['POST'])
 @enable_cors
@@ -129,6 +131,7 @@ def index():
     '''will receive a call to block an ip address'''
     sendMessgeToPlugins(request, response, 'blockfqdn')
     return response
+
 
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
@@ -213,6 +216,7 @@ def index():
     sendMessgeToPlugins(request, response, 'ipdshieldquery')
     return response
 
+
 @route('/plugins', methods=['GET'])
 @route('/plugins/', methods=['GET'])
 @route('/plugins/<endpoint>', methods=['GET'])
@@ -248,6 +252,7 @@ def getPluginList(endpoint=None):
 
     sendMessgeToPlugins(request, response, 'plugins')
     return response
+
 
 @post('/incident', methods=['POST'])
 @post('/incident/', methods=['POST'])
@@ -389,6 +394,7 @@ def createIncident():
                                     ))
     return response
 
+
 def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
     '''
     Converts a date string into a datetime object based
@@ -410,8 +416,10 @@ def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
     finally:
         return dateObj
 
+
 def generateMeteorID():
     return('%024x' % random.randrange(16**24))
+
 
 def registerPlugins():
     '''walk the ./plugins directory
@@ -597,6 +605,7 @@ def verisSummary(verisRegex=None):
             return json.dumps(list())
     except Exception as e:
             sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
+
 
 def initConfig():
     # output our log to stdout or syslog

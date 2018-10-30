@@ -349,6 +349,7 @@ class alertConsumer(ConsumerMixin):
             logger.exception(
                 "alertworker exception while processing events queue %r" % e)
 
+
 @run_async
 def consumeAlerts(ircBot):
     # connect and declare the message queue/kombu objects.

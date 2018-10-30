@@ -105,6 +105,7 @@ def esSearch(es, macassignments=None):
     except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
+
 def esStoreCorrelations(es, correlations):
     for c in correlations:
         event=dict(

@@ -25,6 +25,7 @@ def addError(message, error):
     if isinstance(message['errors'], list):
         message['errors'].append(error)
 
+
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message

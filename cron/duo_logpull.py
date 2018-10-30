@@ -28,6 +28,7 @@ import duo_client
 import mozdef_client as mozdef
 import pickle
 
+
 def normalize(details):
     # Normalizes fields to conform to http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
     # This is mainly used for common field names to put inside the details structure
@@ -43,6 +44,7 @@ def normalize(details):
                 normalized["error"] = True
         normalized[f] = details[f]
     return normalized
+
 
 def process_events(mozmsg, duo_events, etype, state):
     # There are some key fields that we use as MozDef fields, those are set to "noconsume"
@@ -95,6 +97,7 @@ def process_events(mozmsg, duo_events, etype, state):
         pass
     return state
 
+
 def main():
     try:
         state = pickle.load(open(options.statepath, 'rb'))
@@ -120,6 +123,7 @@ def main():
     state = process_events(mozmsg, duo.get_telephony_log(mintime=state['telephony']+1), 'telephony', state)
 
     pickle.dump(state, open(options.statepath, 'wb'))
+
 
 def initConfig():
     options.IKEY = getConfig('IKEY', '', options.configfile)

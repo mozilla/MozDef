@@ -4,6 +4,8 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import hashlib
+
+
 class message(object):
     def __init__(self):
         '''

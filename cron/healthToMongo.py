@@ -64,6 +64,7 @@ def writeFrontendStats(data, mongo):
                 del host['_source']['details'][key]
         mongo.healthfrontend.insert(host['_source'])
 
+
 def getSqsStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
