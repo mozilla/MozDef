@@ -62,7 +62,7 @@ docker-push: hub
 hub: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef).
 	docker login
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) push
-	docker-compose -f docker/compose/docker-compose-test.yml -p test-$(NAME) push
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) push
 
 docker-get: hub-get
 hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
