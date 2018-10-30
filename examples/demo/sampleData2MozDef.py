@@ -84,18 +84,18 @@ def postLogs(logcache):
                 #posts.append((r,postdata,url))
     except Empty as e:
         pass
-    #for p,postdata,url in posts:
-        #try:
-        #if p.result().status_code >=500:
-        #logger.error("exception posting to %s %r [will retry]\n"%(url,p.result().status_code))
-        ##try again later when the next message in forces other attempts at posting.
-        #logcache.put(postdata)
-        #except ClosedPoolError as e:
-        ##logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n"%(url,e,postdata))
-        #logcache.put(postdata)
-        #except Exception as e:
-        #logger.fatal("exception posting to %s %r %r [will not retry]\n"%(url,e,postdata))
-        #sys.exit(1)
+    # for p, postdata, url in posts:
+    #     try:
+    #         if p.result().status_code >= 500:
+    #             logger.error("exception posting to %s %r [will retry]\n" % (url, p.result().status_code))
+    #             # try again later when the next message in forces other attempts at posting.
+    #             logcache.put(postdata)
+    #     except ClosedPoolError as e:
+    #         logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n" % (url, e, postdata))
+    #         logcache.put(postdata)
+    #     except Exception as e:
+    #         logger.fatal("exception posting to %s %r %r [will not retry]\n" % (url, e, postdata))
+    #         sys.exit(1)
 
 
 def genRandomIPv4():
