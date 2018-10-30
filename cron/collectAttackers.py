@@ -330,21 +330,22 @@ def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
     '''
 
     # geo ip should be in eventDictionary['details']['sourceipgeolocation']
-    #"sourceipgeolocation": {
-      #"city": "Polska",
-      #"region_code": "73",
-      #"area_code": 0,
-      #"time_zone": "Europe/Warsaw",
-      #"dma_code": 0,
-      #"metro_code": null,
-      #"country_code3": "POL",
-      #"latitude": 52.59309999999999,
-      #"postal_code": null,
-      #"longitude": 19.089400000000012,
-      #"country_code": "PL",
-      #"country_name": "Poland",
-      #"continent": "EU"
-    #logger.debug(eventDictionary)
+    # "sourceipgeolocation": {
+    #     "city": "Polska",
+    #     "region_code": "73",
+    #     "area_code": 0,
+    #     "time_zone": "Europe/Warsaw",
+    #     "dma_code": 0,
+    #     "metro_code": null,
+    #     "country_code3": "POL",
+    #     "latitude": 52.59309999999999,
+    #     "postal_code": null,
+    #     "longitude": 19.089400000000012,
+    #     "country_code": "PL",
+    #     "country_name": "Poland",
+    #     "continent": "EU"
+    # }
+    # logger.debug(eventDictionary)
     if 'details' in eventDictionary.keys():
         if 'sourceipgeolocation' in eventDictionary['details']:
             attackers=mozdefdb['attackers']

@@ -579,13 +579,6 @@ def verisSummary(verisRegex=None):
         client = MongoClient(options.mongohost, options.mongoport)
         # use meteor db
         incidents= client.meteor['incidents']
-        #iveris=incidents.aggregate([
-                                   #{"$match":{"tags":{"$exists":True}}},
-                                   #{"$unwind" : "$tags" },
-                                   #{"$match":{"tags":{"$regex":''}}}, #regex for tag querying
-                                   #{"$group": {"_id": "$tags", "hitcount": {"$sum": 1}}}, # count by tag
-                                   #{"$sort": SON([("hitcount", -1), ("_id", -1)])}, #sort
-                                   #])
 
         iveris=incidents.aggregate([
 

@@ -5,7 +5,6 @@ exclude =
   *__init__.py
 ignore =
   E114 # indentation is not a multiple of four (comment)
-  E116 # unexpected indentation (comment)
   E121 # continuation line under-indented for hanging indent
   E122 # continuation line missing indentation or outdented
   E123 # closing bracket does not match indentation of opening bracket's line
