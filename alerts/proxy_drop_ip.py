@@ -29,19 +29,11 @@ class AlertProxyDropIP(AlertTask):
         ])
 
         self.filtersManual(search_query)
-
-        # Search aggregations on field 'hostname', keep X samples of
-        # events at most
         self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
-        # alert when >= X matching events in an aggregation
-        # I think it makes sense to alert every time here
         self.walkAggregations(threshold=1)
 
     # Set alert properties
     def onAggregation(self, aggreg):
-        # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
-        # aggreg['value']: value of the aggregation field, ex: toto@example.com
-        # aggreg['events']: list of events in the aggregation
         category = 'squid'
         tags = ['squid', 'proxy']
         severity = 'WARNING'
@@ -66,5 +58,4 @@ class AlertProxyDropIP(AlertTask):
             ",".join(sorted(dropped_destinations))
         )
 
-        # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
