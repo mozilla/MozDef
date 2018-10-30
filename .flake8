@@ -15,7 +15,6 @@ ignore =
   E128 # continuation line under-indented for visual indent
   E129 # visually indented line with same indent as next logical line
   E131 # continuation line unaligned for hanging indent
-  E222 # multiple spaces after operator
   E225 # missing whitespace around operator
   E226 # missing whitespace around arithmetic operator
   E228 # missing whitespace around modulo operator

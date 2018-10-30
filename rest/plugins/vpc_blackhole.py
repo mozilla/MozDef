@@ -186,7 +186,7 @@ class message(object):
                     if not ipcidr.ip.is_loopback() \
                        and not ipcidr.ip.is_private() \
                        and not ipcidr.ip.is_reserved():
-                        ipaddress =  str(ipcidr.cidr)
+                        ipaddress = str(ipcidr.cidr)
                         self.addBlackholeEntry(ipaddress)
                         sys.stdout.write('Blackholed {0}\n'.format(ipaddress))
         except Exception as e:
