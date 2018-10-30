@@ -131,6 +131,7 @@ def initConfig():
     options.statepath = getConfig('statepath', '', options.configfile)
     options.update_tags = getConfig('addtag', '', options.configfile)
 
+
 if __name__ == '__main__':
     parser = OptionParser()
     defaultconfigfile = sys.argv[0].replace('.py', '.conf')

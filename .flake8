@@ -21,7 +21,6 @@ ignore =
   E265 # block comment should start with '# '
   E266 # too many leading '#' for block comment
   E302 # expected 2 blank lines, found 1
-  E305 # expected 2 blank lines after class or function definition
   E402 # module level import not at top of file
   E501 # line too long
   E722 # do not use bare except'

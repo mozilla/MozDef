@@ -187,6 +187,7 @@ def initConfig():
         options.configfile
         )
 
+
 if __name__ == '__main__':
     parser = OptionParser()
     defaultconfigfile = sys.argv[0].replace('.py', '.conf')

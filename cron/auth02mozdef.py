@@ -40,6 +40,7 @@ def fatal(msg):
 def debug(msg):
     sys.stderr.write('+++ {}\n'.format(msg))
 
+
 # This is from https://auth0.com/docs/api/management/v2#!/Logs/get_logs
 # and https://github.com/auth0/auth0-logs-to-logentries/blob/master/index.js (MIT)
 # levels
@@ -455,6 +456,7 @@ def main():
         fromid = lastid
 
     save_state(config.state_file, lastid)
+
 
 if __name__ == "__main__":
     main()

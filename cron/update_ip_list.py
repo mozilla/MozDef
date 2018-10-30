@@ -64,6 +64,7 @@ def initConfig():
     options.ips_list_threshold = getConfig('ips_list_threshold', 20, options.configfile)
     options.manual_additions = getConfig('manual_additions', '', options.configfile).split(',')
 
+
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option(

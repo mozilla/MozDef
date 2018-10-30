@@ -110,6 +110,7 @@ def initConfig():
         options.configfile).split(',')
         )
 
+
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-c",

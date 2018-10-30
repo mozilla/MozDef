@@ -619,6 +619,7 @@ def initConfig():
     default_user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/58.0'
     options.user_agent = getConfig('user_agent', default_user_agent, options.configfile)
 
+
 parser = OptionParser()
 parser.add_option("-c", dest='configfile',
     default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),

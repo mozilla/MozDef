@@ -133,6 +133,7 @@ def initConfig():
     options.index = getConfig('index', 'mozdefstate', options.configfile)
     options.account = getConfig('account', '', options.configfile)
 
+
 if __name__ == '__main__':
     # configure ourselves
     parser = OptionParser()
