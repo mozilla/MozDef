@@ -427,13 +427,14 @@ def fetch_auth0_logs(config, headers, fromid):
     else:
         return (0, 0, 0, lastid)
 
+
 def main():
-    #Configuration loading
+    # Configuration loading
     config_location = os.path.dirname(sys.argv[0]) + '/' + 'auth02mozdef.json'
     with open(config_location) as fd:
         config = DotDict(hjson.load(fd))
 
-    if config == None:
+    if config is None:
         print("No configuration file 'auth02mozdef.json' found.")
         sys.exit(1)
 

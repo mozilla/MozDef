@@ -65,7 +65,7 @@ class SSHKey(AlertTask):
                 rem = re.compile(went['hostre'])
             except:
                 continue
-            if rem.match(hostname) == None:
+            if rem.match(hostname) is None:
                 continue
             if privkey['path'] == went['path']:
                 return False
