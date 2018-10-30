@@ -40,7 +40,7 @@ tests: build-tests run-tests  ## Run all tests (getting/building images as neede
 run-test:
 run-tests:  ## Just run the tests (no build/get). Use `make TEST_CASE=test/...` for specific tests only
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) up -d
-	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 $(TEST_CASE)"
+	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 
 .PHONY: build
