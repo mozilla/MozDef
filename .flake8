@@ -26,7 +26,6 @@ ignore =
   E305 # expected 2 blank lines after class or function definition
   E402 # module level import not at top of file
   E501 # line too long
-  E712 # comparison to True should be 'if cond is True
   E713 # test for membership should be 'not in'
   E722 # do not use bare except'
   F401 # library imported but unused

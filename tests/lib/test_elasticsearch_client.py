@@ -374,7 +374,7 @@ class TestIndexExists(ElasticsearchClientTest):
             self.es_client.create_index('test_index')
         time.sleep(1)
         indices = self.es_client.index_exists('test_index')
-        assert indices == True
+        assert indices is True
 
 
 class TestClusterHealth(ElasticsearchClientTest):
