@@ -21,7 +21,6 @@ ignore =
   E226 # missing whitespace around arithmetic operator
   E228 # missing whitespace around modulo operator
   E231 # missing whitespace after ','
-  E241 # multiple spaces after ','
   E261 # at least two spaces before inline comment
   E265 # block comment should start with '# '
   E266 # too many leading '#' for block comment

@@ -66,7 +66,7 @@ def bulkindex():
 @route('/_status')
 @route('/_status/')
 @route('/nxlog/', method=['POST','PUT'])
-@route('/nxlog',  method=['POST','PUT'])
+@route('/nxlog', method=['POST','PUT'])
 @route('/events/',method=['POST','PUT'])
 @route('/events', method=['POST','PUT'])
 def eventsindex():
