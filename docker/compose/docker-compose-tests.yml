@@ -1,26 +1,63 @@
 ---
-version: '3.0'
+version: '3.7'
 services:
   elasticsearch:
+    image: mozdef/mozdef_elasticsearch
     build:
       context: ../../
       dockerfile: docker/compose/elasticsearch/Dockerfile
+      cache_from:
+        - mozdef_elasticsearch:latest
+        - mozdef_base:latest
+        - mozdef/mozdef_elasticsearch
+        - mozdef/mozdef_base
+    depends_on:
+      - base
     restart: always
     command: bin/elasticsearch
-    ports:
-      - 9200:9200
+    # ports:
+    #   - 9200:9200
     networks:
       - default
   rabbitmq:
+    image: mozdef/mozdef_rabbitmq
     build:
       context: ../../
       dockerfile: docker/compose/rabbitmq/Dockerfile
+      cache_from:
+        - mozdef_rabbitmq:latest
+        - mozdef_base:latest
+        - mozdef/mozdef_rabbitmq
+        - mozdef/mozdef_base
+    depends_on:
+      - base
     restart: always
     command: rabbitmq-server
-    ports:
-      - 5672:5672
+    # ports:
+    #   - 5672:5672
     networks:
       - default
-
+  base:
+    image: mozdef/mozdef_base
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_base/Dockerfile
+      cache_from:
+        - mozdef_base:latest
+        - mozdef/mozdef_base
+  tester:
+    image: mozdef/mozdef_tester
+    build:
+      context: ../../
+      dockerfile: docker/compose/tester/Dockerfile
+      cache_from:
+        - mozdef_tester:latest
+        - mozdef_base:latest
+        - mozdef/mozdef_tester
+        - mozdef/mozdef_base
+    depends_on:
+      - base
+    networks:
+      - default
 networks:
   default:
