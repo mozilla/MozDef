@@ -103,7 +103,7 @@ services:
       cache_from:
         - mozdef/mozdef_bootstrap
         - mozdef_bootstrap:latest
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
+    command: bash -c 'curl --retry 10 -s -S -f http://elasticsearch:9200 && source /opt/mozdef/envs/python/bin/activate && python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
     depends_on:
       - base
       - elasticsearch
@@ -120,7 +120,7 @@ services:
         - mozdef/mozdef_alertplugins
         - mozdef_alertplugins:latest
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python alert_worker.py -c alert_worker.conf'
+    command: bash -c 'curl --retry 10 -s -S -f http://elasticsearch:9200 && source /opt/mozdef/envs/python/bin/activate && python alert_worker.py -c alert_worker.conf'
     depends_on:
       - base
       - elasticsearch
@@ -138,7 +138,7 @@ services:
         - mozdef/mozdef_alerts
         - mozdef_alerts:latest
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
+    command: bash -c 'curl --retry 10 -s -S -f http://elasticsearch:9200 && source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
     depends_on:
       - base
       - elasticsearch
@@ -167,7 +167,7 @@ services:
         - mozdef/mozdef_cron
         - mozdef_cron:latest
     restart: always
-    command: bash -c 'crond -n'
+    command: bash -c 'curl --retry 10 -s -S -f http://elasticsearch:9200 && crond -n'
     volumes:
       - cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
@@ -188,7 +188,7 @@ services:
         - mozdef/mozdef_loginput
         - mozdef_loginput:latest
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    command: bash -c 'curl --retry 10 -s -S -f http://elasticsearch:9200 && source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
     depends_on:
       - base
       - elasticsearch
@@ -205,7 +205,7 @@ services:
         - mozdef/mozdef_mq_worker
         - mozdef_mq_worker:latest
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
+    command: bash -c 'curl --retry 10 -s -S -f http://elasticsearch:9200 && source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
     depends_on:
       - base
       - rabbitmq
@@ -240,7 +240,7 @@ services:
         - mozdef/mozdef_rest
         - mozdef_rest:latest
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    command: bash -c 'curl --retry 10 -s -S -f http://elasticsearch:9200 && source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
     depends_on:
       - base
       - elasticsearch
