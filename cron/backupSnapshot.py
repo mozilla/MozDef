@@ -71,8 +71,7 @@ def main():
             logger.debug('snapshot repo registered')
 
         # do the actual snapshotting
-        for (index, dobackup, rotation, pruning) in zip(options.indices,
-            options.dobackup, options.rotation, options.pruning):
+        for (index, dobackup, rotation, pruning) in zip(options.indices, options.dobackup, options.rotation, options.pruning):
             if dobackup == '1':
                 index_to_snapshot = index
                 if rotation == 'daily':

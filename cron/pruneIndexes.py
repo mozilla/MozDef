@@ -42,8 +42,7 @@ def esPruneIndexes():
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         indices = es.get_indices()
         # do the pruning
-        for (index, dobackup, rotation, pruning) in zip(options.indices,
-            options.dobackup, options.rotation, options.pruning):
+        for (index, dobackup, rotation, pruning) in zip(options.indices, options.dobackup, options.rotation, options.pruning):
             try:
                 if pruning != '0':
                     index_to_prune = index

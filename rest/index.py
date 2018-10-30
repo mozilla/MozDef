@@ -325,7 +325,7 @@ def createIncident():
 
     # Validating Incident phase type
     if (type(incident['phase']) not in (str, unicode) or
-        incident['phase'] not in validIncidentPhases):
+            incident['phase'] not in validIncidentPhases):
 
         response.status = 500
         response.body = json.dumps(dict(status='failed',
