@@ -39,21 +39,21 @@ restart-cloudy-mozdef:
 test: build-tests run-tests ## Running tests from locally-built images
 tests: build-tests run-tests
 run-tests:
-	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) up -d
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) up -d
 	@echo "Running flake8.."
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	@echo "Running py.test..."
 	docker run -it --rm --network=mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
 	@echo "Shutting down test environment..."
-	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) stop
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) stop
 
 .PHONY: build
 build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
 
-.PHONY: build-tests fetch-tests
+.PHONY: build-tests
 build-tests:  ## Build end-to-end test environment only
-	docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) $(NO_CACHE) $(BUILD_MODE)
 
 .PHONY: stop down
 stop: down
