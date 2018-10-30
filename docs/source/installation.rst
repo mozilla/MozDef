@@ -158,11 +158,12 @@ On Yum-based systems:
 
 In /etc/yum.repos.d/mongo.repo, add::
 
-  [mongodb]
+  [mongodb-org-3.4]
   name=MongoDB Repository
-  baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-  gpgcheck=0
+  baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.4/x86_64/
+  gpgcheck=1
   enabled=1
+  gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
 
 Then you can install mongodb::
 
