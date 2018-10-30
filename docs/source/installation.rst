@@ -79,7 +79,7 @@ Then::
   wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
   tar xvzf Python-2.7.11.tgz
   cd Python-2.7.11
-  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared LDFLAGS="-W1,--rpath=/opt/mozdef/python.2.7/lib"
+  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared LDFLAGS="-Wl,--rpath=/opt/mozdef/python2.7/lib"
   make
   make install
 
@@ -156,17 +156,18 @@ We first need to install `Mongodb`_ since it's the DB used by Meteor.
 
 On Yum-based systems:
 
-In /etc/yum.repo.d/mongo, add::
+In /etc/yum.repos.d/mongo.repo, add::
 
-  [mongodb]
+  [mongodb-org-3.4]
   name=MongoDB Repository
-  baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-  gpgcheck=0
+  baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.4/x86_64/
+  gpgcheck=1
   enabled=1
+  gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
 
 Then you can install mongodb::
 
-  sudo yum install mongodb
+  sudo yum install mongodb-org
 
 On APT-based systems::
 
@@ -178,11 +179,11 @@ We have a mongod.conf in the config directory prepared for you. To use it simply
 
 For meteor installation follow these steps::
 
-  curl https://install.meteor.com/?release=1.4.2.3 | sh
+  curl https://install.meteor.com/?release=1.8 | sh
 
-  wget https://nodejs.org/dist/v4.7.0/node-v4.7.0.tar.gz
-  tar xvzf node-v4.7.0.tar.gz
-  cd node-v4.7.0
+  wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
+  tar xvzf node-v8.12.0.tar.gz
+  cd node-v8.12.0
   ./configure
   make
   sudo make install
@@ -348,14 +349,12 @@ We use `uwsgi`_ to interface python and nginx, in your venv execute the followin
   vim loginput.ini
 
 Alternatively, if you do not wish to use the systemd unit files for starting these processes
-you can start the restapi and loginput processes from within your venv via:
+you can start the restapi and loginput processes from within your venv via::
 
-  cd  /opt/mozdef/envs/mozdef
+  cd /opt/mozdef/envs/python
   source bin/activate
   (mozdef) [mozdef@mozdev mozdef]$ uwsgi --ini rest/restapi.ini
   (mozdef) [mozdef@mozdev mozdef]$ uwsgi --ini loginput/loginput.ini
-
-
 
   sudo cp nginx.conf /etc/nginx
   # modify /etc/nginx/nginx.conf to reflect your server, and any path changes you've made.
@@ -372,9 +371,9 @@ Supervisord
 
 We use supervisord to run the alerts and alertplugins. If you plan on starting services manually, you can skip this step.
 
-To install supervisord perform the following as the user mozdef:
+To install supervisord perform the following as the user mozdef::
 
-    cd /opt/mozdef/envs/mozdef
+    cd /opt/mozdef/envs/python
     source bin/activate
     cd bin
     pip install supervisor
@@ -393,7 +392,7 @@ MozDef supports Elasticsearch version 5.x
 Installation instructions are available on `Elasticsearch website`_.
 You should prefer packages over archives if one is available for your distribution.
 
-Add the repo in /etc/yum/repos.d/elasticsearch.repo:
+Add the repo in /etc/yum/repos.d/elasticsearch.repo::
 
   [elasticsearch-5.x]
   name=Elasticsearch repository for 5.x packages
@@ -431,7 +430,7 @@ Kibana
 
 `Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data::
 
-Create the Repo in /etc/yum/repos.d/kibana.repo:
+Create the Repo in /etc/yum/repos.d/kibana.repo::
 
   [kibana-5.x]
   name=Kibana repository for 5.x packages
@@ -462,7 +461,7 @@ Start Services
 **************
 
 To use the included systemd files you'll copy them to your system's default directory of /etc/systemd/system/.
-Ensure it has root file permissions so that systemd can start it.
+Ensure it has root file permissions so that systemd can start it::
 
   cp /opt/mozdef/systemdfiles/web/mozdefweb.service /etc/systemd/system/
   cp /opt/mozdef/systemdfiles/web/mozdefrestapi.service /etc/systemd/system/
@@ -473,7 +472,7 @@ Ensure it has root file permissions so that systemd can start it.
   cp /opt/mozdef/systemdfiles/alert/mozdefbot.service /etc/systemd/system/
   cp /opt/mozdef/systemdfiles/alert/mozdefalertplugins.service /etc/systemd/system/
 
-Then you will need to enable them:
+Then you will need to enable them::
 
   systemctl enable mozdefweb.service
   systemctl enable mozdefrestapi.service
@@ -484,11 +483,11 @@ Then you will need to enable them:
   systemctl enable mozdefalertplugins.service
   systemctl enable mongod.service
 
-Reload systemd:
+Reload systemd::
 
   systemctl daemon-reload
 
-Now you can start your services:
+Now you can start your services::
 
   systemctl start mongod
   systemctl start mozdefalerts
@@ -500,7 +499,7 @@ Now you can start your services:
   systemctl start mozdefalertplugins
 
 
-Alternatively you can start the following services manually in this way from inside the venv as mozdef:
+Alternatively you can start the following services manually in this way from inside the venv as mozdef::
 
   # Eventtask worker
   cd ~/MozDef/mq
@@ -515,7 +514,7 @@ To initialize elasticsearch indices and load some sample data::
   (mozdef) [mozdef@mozdev mozdef]$ cd examples/es-docs/
   (mozdef) [mozdef@mozdev es-docs]$ python inject.py
 
-To add more sample data you can run the following from inside the venv:
+To add more sample data you can run the following from inside the venv::
 
   (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/examples/demo
   (mozdef) [mozdef@mozdev demo]$ ./syncalerts.sh
