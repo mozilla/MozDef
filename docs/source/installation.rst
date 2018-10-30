@@ -179,11 +179,11 @@ We have a mongod.conf in the config directory prepared for you. To use it simply
 
 For meteor installation follow these steps::
 
-  curl https://install.meteor.com/?release=1.4.2.3 | sh
+  curl https://install.meteor.com/?release=1.8 | sh
 
-  wget https://nodejs.org/dist/v4.7.0/node-v4.7.0.tar.gz
-  tar xvzf node-v4.7.0.tar.gz
-  cd node-v4.7.0
+  wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
+  tar xvzf node-v8.12.0.tar.gz
+  cd node-v8.12.0
   ./configure
   make
   sudo make install
