@@ -167,7 +167,7 @@ In /etc/yum.repos.d/mongo.repo, add::
 
 Then you can install mongodb::
 
-  sudo yum install mongodb
+  sudo yum install mongodb-org
 
 On APT-based systems::
 
