@@ -56,7 +56,8 @@ def bulkindex():
                     except ValueError as e:
                         response.status=500
                         return
-                    if not 'index' in json.loads(i).keys():  # don't post the items telling us where to post things..
+                    # don't post the items telling us where to post things..
+                    if 'index' not in json.loads(i):
                         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
                         ensurePublish(eventDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
                 except ValueError:
