@@ -78,7 +78,7 @@ def esSearch(es, macassignments=None):
     Expecting an event like: user: username@somewhere.com; mac: 5c:f9:38:b1:de:cf; author reason: roamed session; ssid: ANSSID; AP 46/2\n
     '''
     usermacre=re.compile(r'''user: (?P<username>.*?); mac: (?P<macaddress>.*?); ''',re.IGNORECASE)
-    correlations={} # list of dicts to populate hits we find
+    correlations={}
 
     search_query = SearchQuery(minutes=options.correlationminutes)
     search_query.add_must(TermMatch('details.program', 'AUTHORIZATION-SUCCESS'))

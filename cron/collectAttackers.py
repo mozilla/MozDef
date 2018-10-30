@@ -135,18 +135,30 @@ def searchMongoAlerts(mozdefdb):
     # aggregate IPv4 addresses in the most recent alerts
     # to find common attackers.
     ipv4TopHits = alerts.aggregate([
-        {"$sort": {"utcepoch":-1}}, # reverse sort the current alerts
-        {"$limit": 100},  # most recent 100
-        {"$match": {"events.documentsource.details.sourceipaddress":{"$exists": True}}}, # must have an ip address
-        {"$match": {"attackerid":{"$exists": False}}}, # must not be already related to an attacker
-        {"$unwind":"$events"},  # make each event into it's own doc
-        {"$project":{"_id":0,
-                     "sourceip":"$events.documentsource.details.sourceipaddress"}},  # emit the source ip only
-        {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}}, # count by ip
-        {"$match":{"hitcount":{"$gt":5}}}, # limit to those with X observances
-        {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort
-        {"$limit": 10} # top 10
-        ])
+        # reverse sort the current alerts
+        {"$sort": {"utcepoch": -1}},
+        # most recent 100
+        {"$limit": 100},
+        # must have an ip address
+        {"$match": {"events.documentsource.details.sourceipaddress": {"$exists": True}}},
+        # must not be already related to an attacker
+        {"$match": {"attackerid": {"$exists": False}}},
+        # make each event into it's own doc
+        {"$unwind": "$events"},
+        {"$project": {
+            "_id": 0,
+            # emit the source ip only
+            "sourceip": "$events.documentsource.details.sourceipaddress"
+        }},
+        # count by ip
+        {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}},
+        # limit to those with X observances
+        {"$match": {"hitcount": {"$gt": 5}}},
+        # sort
+        {"$sort": SON([("hitcount", -1), ("_id", -1)])},
+        # top 10
+        {"$limit": 10}
+    ])
     for ip in ipv4TopHits:
         # sanity check ip['_id'] which should be the ipv4 address
         if isIPv4(ip['_id']) and ip['_id'] not in netaddr.IPSet(['0.0.0.0']):
