@@ -13,6 +13,7 @@ NAME		:= mozdef
 VERSION		:= 0.1
 NO_CACHE	:= ## Pass `--no-cache` in order to disable Docker cache
 GITHASH		:= latest  ## Pass `$(git rev-parse --short HEAD`) to tag docker hub images as latest git-hash instead
+TEST_CASE	:= tests  ## Run all (`tests`) or a specific test case (ex `tests/alerts/tests/alerts/test_proxy_drop_exfil_domains.py`)
 
 .PHONY:all
 all:
@@ -33,19 +34,14 @@ run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy
 restart-cloudy-mozdef:
 	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart
 
-# TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
-# The docker files are still in docker/compose/docker*test*
-.PHONY: test tests run-tests
-test: build-tests run-tests ## Running tests from locally-built images
-tests: build-tests run-tests
-run-tests:
+.PHONY: tests run-tests
+test: build-tests run-tests
+tests: build-tests run-tests  ## Run all tests (getting/building images as needed)
+run-test:
+run-tests:  ## Just run the tests (no build/get). Use `make TEST_CASE=test/...` for specific tests only
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) up -d
-	@echo "Running flake8.."
-	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
-	@echo "Running py.test..."
-	docker run -it --rm --network=mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
-	@echo "Shutting down test environment..."
-	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) stop
+	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 $(TEST_CASE)"
+	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 
 .PHONY: build
 build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
@@ -59,6 +55,7 @@ build-tests:  ## Build end-to-end test environment only
 stop: down
 down: ## Shutdown all services we started with docker-compose
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
+	docker-compose -f docker/compose/docker-compose.yml -p test-$(NAME) stop
 
 .PHONY: docker-push docker-get hub hub-get
 docker-push: hub
@@ -76,7 +73,7 @@ hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
 .PHONY: clean
 clean: ## Cleanup all docker volumes and shutdown all related services
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
-	-docker-compose -f docker/compose/docker-compose-tests.yml -p $(NAME) down -v --remove-orphans
+	-docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) down -v --remove-orphans
 # Shorthands
 .PHONY: rebuild
 rebuild: clean build

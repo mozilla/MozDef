@@ -11,9 +11,7 @@ before_install:
   - set -e
 install:
   # Build containers
-  # Choose nobuild if you prefer pulling existing images
+  # Use BUILD_MODE=pull if you prefer pulling existing images
   - make build-tests
-  #- make nobuild-tests
 script:
-  - make test
-  #  - make test-fast
+  - make tests
