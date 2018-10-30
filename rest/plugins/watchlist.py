@@ -177,4 +177,3 @@ class message(object):
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
         return (request, response)
-        
