@@ -61,14 +61,13 @@ down: ## Shutdown all services we started with docker-compose
 docker-push: hub
 hub: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef).
 	docker login
-	@echo "Tagging current docker images with $(GITHASH)..."
-	$(foreach var,$(DKR_IMAGES),docker tag $(var) mozdef/$(var):$(GITHASH);)
-	@echo "Uploading images to docker..."
-	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) push
+	docker-compose -f docker/compose/docker-compose-test.yml -p test-$(NAME) push
 
 docker-get: hub-get
 hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
-	$(foreach var,$(DKR_IMAGES),docker pull mozdef/$(var):$(GITHASH);)
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) pull
+	docker-compose -f docker/compose/docker-compose-test.yml -p test-$(NAME) pull
 
 .PHONY: clean
 clean: ## Cleanup all docker volumes and shutdown all related services

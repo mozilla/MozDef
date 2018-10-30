@@ -204,7 +204,6 @@ services:
       cache_from:
         - mozdef/mozdef_mq_worker
         - mozdef_mq_worker:latest
-    image: mozdef_mq_worker
     restart: always
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
     depends_on:
