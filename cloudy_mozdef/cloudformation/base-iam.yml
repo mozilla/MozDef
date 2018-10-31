@@ -14,9 +14,15 @@ Parameters:
   MozDefSQSQueueArn:
     Type: String
     Description: The ARN of the SQS queue that receives events destined for MozDef
+  ESServiceLinkedRoleExists:
+    Type: String
+    Description: Does the ES Service Linked Role already exist. true or false
+    Default: 'true'
 Conditions:
   IAMRoleSet:
     !Not [!Equals [!Ref CloudTrailS3BucketIAMRoleArn, '']]
+  CreateESServiceLinkedRole:
+    !Not [!Equals [!Ref ESServiceLinkedRoleExists, 'true']]  # Match either True or 'true' but not 'True'
 Resources:
   MozDefCloudTrailPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -116,6 +122,12 @@ Resources:
     Properties:
       Roles:
         - Ref: MozDefIAMRole
+  ESServiceLinkedIAMRole:
+    Type: "AWS::IAM::ServiceLinkedRole"
+    Condition: CreateESServiceLinkedRole
+    DeletionPolicy: Retain
+    Properties:
+      AWSServiceName: es.amazonaws.com
 Outputs:
   InstanceProfileArn:
     Description: The arn of the Instance Profile
