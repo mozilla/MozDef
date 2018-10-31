@@ -10,7 +10,7 @@ from lib.alerttask import AlertTask
 from mozdef_util.query_models import QueryStringMatch, SearchQuery, TermMatch
 
 
-class {{alert_name}}(AlertTask):
+class {{ alert_name }}(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=20)
         search_query.add_must([
