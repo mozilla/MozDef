@@ -1,12 +1,12 @@
 Alert Development Guide
-========================
+=======================
 
 
 This guide is for someone seeking to write a MozDef alert.
 
 
 Starting a feature branch
---------------------------
+-------------------------
 
 Before you do anything else, start with checking out the MozDef repo and starting a feature branch.
 
@@ -18,7 +18,7 @@ Before you do anything else, start with checking out the MozDef repo and startin
 
 
 How to start your alert
-------------------------
+-----------------------
 
 Run:
 
@@ -33,7 +33,7 @@ You can now edit these files in place, but it is recommended that you run unit-t
 
 
 How to run tests on your alert
--------------------------------
+------------------------------
 Requirements:
 
 - Make sure you have the latest version of docker installed.
@@ -52,7 +52,7 @@ At this point, begin development and periodically run your unit-tests locally wi
 
 
 Background on concepts
------------------------
+----------------------
 
 Logs - These are individual log line that are emitted from systems, like an Apache log
 Events - These logs parsed into a JSON format, which exist in MozDef and used with the ELK stack
@@ -69,18 +69,18 @@ In both cases, because the alert is simple Python, you will find that getting st
 
 
 How to get the alert in MozDef?
--------------
+-------------------------------
 
 The best way to get your alert (once it's completed) into MozDef is to propose a pull request and ask for a review from a MozDef developer.  They will be able to help you get the most out of the alert and help point out pitfalls.  Once the alert is accepted into MozDef master, there is a process by which MozDef installations can make use or 'enable' that alert.  It's best to work with that MozDef instance's maintainer to enable the alerts.
 
 
 Questions?
--------------
+----------
 
 This guide is not intended to teach you how to develop in Python, there are some good resources below we would point you to to get more experience there.  However, should you have questions or run into problems trying to write an alert, we would like to hear from you (in IRC/Slack) so we can (1) help you get what you want to get done and (2) make it easier in the future for anyone to contribue alert logic to MozDef.
 
 
 Resources
--------------
+---------
 
 Python for Beginners <https://www.python.org/about/gettingstarted/>
