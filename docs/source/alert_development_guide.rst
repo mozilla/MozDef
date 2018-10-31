@@ -10,7 +10,9 @@ Starting a feature branch
 Before you do anything else, start with checking out the MozDef repo and starting a feature branch.
 
   git clone git@github.com:mozilla/MozDef.git
+
   cd MozDef
+
   git checkout -b name_of_alert_you_want_to_create
 
 
@@ -37,7 +39,9 @@ Requirements:
 - Make sure you have the latest version of docker installed.
 - Known Issue: docker's overlayfs has a known issue, so you will need to go to Docker => Preferences => Daemon => Advanced and add the following key pair ("storage-driver" : "aufs")
 
+
   make build-tests
+  
   make run-tests TEST_CASE=tests/alerts/[YOUR ALERT TEST FILE].py
 
 This test should pass and you will have confirmed you have a working environment.
