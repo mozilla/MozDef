@@ -38,7 +38,7 @@ restart-cloudy-mozdef:
 test: build-tests run-tests
 tests: build-tests run-tests  ## Run all tests (getting/building images as needed)
 run-test:
-run-tests:  ## Just run the tests (no build/get). Use `make TEST_CASE=test/...` for specific tests only
+run-tests:  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) up -d
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
@@ -76,3 +76,8 @@ clean: ## Cleanup all docker volumes and shutdown all related services
 # Shorthands
 .PHONY: rebuild
 rebuild: clean build
+
+# Allow creation of alert and unit test skeleton
+.PHONY: new-alert
+new-alert: ## Create an example alert and working alert unit test
+	python tests/alert_templater.py
