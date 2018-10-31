@@ -109,15 +109,15 @@ def esSearch(es, macassignments=None):
 def esStoreCorrelations(es, correlations):
     for c in correlations:
         event=dict(
-                   utctimestamp=correlations[c]['utctimestamp'],
-                   summary=c,
-                   details=dict(
-                       username=correlations[c]['username'],
-                       macaddress=correlations[c]['macaddress'],
-                       entity=correlations[c]['entity']
-                       ),
-                   category='indicators'
-                   )
+            utctimestamp=correlations[c]['utctimestamp'],
+            summary=c,
+            details=dict(
+                username=correlations[c]['username'],
+                macaddress=correlations[c]['macaddress'],
+                entity=correlations[c]['entity']
+            ),
+            category='indicators'
+        )
         try:
             es.save_object(index='intelligence', doc_id=getDocID(c), doc_type='usernamemacaddress', body=json.dumps(event))
         except Exception as e:

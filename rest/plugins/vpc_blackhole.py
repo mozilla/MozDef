@@ -107,33 +107,33 @@ class message(object):
                         sys.stdout.write('{0} {1}\n'.format(rt_id, vpc_id))
 
                         response = client.describe_network_interfaces(
-                                Filters=[
-                                    {
-                                        'Name': 'description',
-                                        'Values': [
-                                            'blackhole',
-                                        ]
-                                    },
-                                    {
-                                        'Name': 'group-name',
-                                        'Values': [
-                                            'blackhole',
-                                        ]
-                                    },
-                                    {
-                                        'Name': 'vpc-id',
-                                        'Values': [
-                                            vpc_id,
-                                        ]
-                                    },
-                                    {
-                                        'Name': 'subnet-id',
-                                        'Values': [
-                                             subnet_id,
-                                        ]
-                                    },
-                                ]
-                                )
+                            Filters=[
+                                {
+                                    'Name': 'description',
+                                    'Values': [
+                                        'blackhole',
+                                    ]
+                                },
+                                {
+                                    'Name': 'group-name',
+                                    'Values': [
+                                        'blackhole',
+                                    ]
+                                },
+                                {
+                                    'Name': 'vpc-id',
+                                    'Values': [
+                                        vpc_id,
+                                    ]
+                                },
+                                {
+                                    'Name': 'subnet-id',
+                                    'Values': [
+                                        subnet_id,
+                                    ]
+                                },
+                            ]
+                        )
 
                         sys.stdout.write('{0}\n'.format(response))
                         if len(response['NetworkInterfaces']) > 0:
@@ -144,9 +144,9 @@ class message(object):
                             route_table = ec2.RouteTable(rt_id)
 
                             response = route_table.create_route(
-                                                        DestinationCidrBlock=ipaddress,
-                                                        NetworkInterfaceId=bheni_id,
-                                                        )
+                                DestinationCidrBlock=ipaddress,
+                                NetworkInterfaceId=bheni_id,
+                            )
                         else:
                             sys.stdout.write('Skipping route table {0} in the VPC {1} - blackhole ENI could not be found\n'.format(rt_id, vpc_id))
                             continue

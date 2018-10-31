@@ -124,10 +124,10 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'customendpoint': '',
-           'category': 'suricata',
-           'SOURCE': 'eve-log',
-           'event_type': 'alamakota'
+            'customendpoint': '',
+            'category': 'suricata',
+            'SOURCE': 'eve-log',
+            'event_type': 'alamakota'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -186,25 +186,25 @@ class TestSuricataFixup(object):
 
     def test_nomatch_syslog(self):
         event = {
-                "category": "syslog",
-                "processid": "0",
-                "receivedtimestamp": "2017-09-26T00:22:24.210945+00:00",
-                "severity": "7",
-                "utctimestamp": "2017-09-26T00:22:23+00:00",
-                "timestamp": "2017-09-26T00:22:23+00:00",
-                "hostname": "syslog1.private.scl3.mozilla.com",
-                "mozdefhostname": "mozdef1.private.scl3.mozilla.com",
-                "summary": "Connection from 10.22.74.208 port 9071 on 10.22.74.45 nsm suricata port 22\n",
-                "eventsource": "systemslogs",
-                "details": {
-                    "processid": "21233",
-                    "Random": 2,
-                    "sourceipv4address": "10.22.74.208",
-                    "hostname": "hostname1.subdomain.domain.com",
-                    "program": "sshd",
-                    "sourceipaddress": "10.22.74.208"
-                }
+            "category": "syslog",
+            "processid": "0",
+            "receivedtimestamp": "2017-09-26T00:22:24.210945+00:00",
+            "severity": "7",
+            "utctimestamp": "2017-09-26T00:22:23+00:00",
+            "timestamp": "2017-09-26T00:22:23+00:00",
+            "hostname": "syslog1.private.scl3.mozilla.com",
+            "mozdefhostname": "mozdef1.private.scl3.mozilla.com",
+            "summary": "Connection from 10.22.74.208 port 9071 on 10.22.74.45 nsm suricata port 22\n",
+            "eventsource": "systemslogs",
+            "details": {
+                "processid": "21233",
+                "Random": 2,
+                "sourceipv4address": "10.22.74.208",
+                "hostname": "hostname1.subdomain.domain.com",
+                "program": "sshd",
+                "sourceipaddress": "10.22.74.208"
             }
+        }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result['category'] == 'syslog'
         assert result['eventsource'] == 'systemslogs'

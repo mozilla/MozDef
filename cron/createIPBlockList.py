@@ -150,18 +150,18 @@ def main():
                  'dateAdded': datetime.utcnow()})
 
         # Lastly, export the combined blocklist
-        ipCursor=mozdefdb['ipblocklist'].aggregate([
-                {"$sort": {"dateAdded": -1}},
-                {"$match": {"address": {"$exists": True}}},
-                {"$match":
-                    {"$or":[
-                        {"dateExpiring": {"$gte": datetime.utcnow()}},
-                        {"dateExpiring": {"$exists": False}},
-                    ]},
-                },
-                {"$project":{"address":1}},
-                {"$limit": options.iplimit}
-            ])
+        ipCursor = mozdefdb['ipblocklist'].aggregate([
+            {"$sort": {"dateAdded": -1}},
+            {"$match": {"address": {"$exists": True}}},
+            {"$match": {
+                "$or": [
+                    {"dateExpiring": {"$gte": datetime.utcnow()}},
+                    {"dateExpiring": {"$exists": False}},
+                ]},
+             },
+            {"$project": {"address": 1}},
+            {"$limit": options.iplimit}
+        ])
         IPList=[]
         for ip in ipCursor:
             IPList.append(ip['address'])

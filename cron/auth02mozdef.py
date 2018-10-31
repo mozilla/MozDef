@@ -52,211 +52,211 @@ def debug(msg):
 #     2 = Warning
 #     3 = Error
 #     4 = Critical
-log_types=DotDict({
-        's': {
-            "event": 'Success Login',
-            "level": 1
-            },
-        'slo': {
-            "event": 'Success Logout',
-            "level": 1
-            },
-        'flo': {
-            "event": 'Failed Logout',
-            "level": 3
-            },
-        'seacft': {
-            "event": 'Success Exchange (Authorization Code for Access Token)',
-            "level": 1
-            },
-        'feacft': {
-            "event": 'Failed Exchange (Authorization Code for Access Token)',
-            "level": 3
-            },
-        'f': {
-            "event": 'Failed Login',
-            "level": 3
-            },
-        'w': {
-            "event": 'Warnings During Login',
-            "level": 2
-            },
-        'du': {
-            "event": 'Deleted User',
-            "level": 1
-            },
-        'fu': {
-            "event": 'Failed Login (invalid email/username)',
-            "level": 3
-            },
-        'fp': {
-            "event": 'Failed Login (wrong password)',
-            "level": 3
-            },
-        'fc': {
-            "event": 'Failed by Connector',
-            "level": 3
-            },
-        'fco': {
-            "event": 'Failed by CORS',
-            "level": 3
-            },
-        'con': {
-            "event": 'Connector Online',
-            "level": 1
-            },
-        'coff': {
-            "event": 'Connector Offline',
-            "level": 3
-            },
-        'fcpro': {
-            "event": 'Failed Connector Provisioning',
-            "level": 4
-            },
-        'ss': {
-                "event": 'Success Signup',
-                "level": 1
-                },
-        'fs': {
-                "event": 'Failed Signup',
-                "level": 3
-                },
-        'cs': {
-                "event": 'Code Sent',
-                "level": 0
-                },
-        'cls': {
-                "event": 'Code/Link Sent',
-                "level": 0
-                },
-        'sv': {
-                "event": 'Success Verification Email',
-                "level": 0
-                },
-        'fv': {
-                "event": 'Failed Verification Email',
-                "level": 0
-                },
-        'scp': {
-                "event": 'Success Change Password',
-                "level": 1
-                },
-        'fcp': {
-                "event": 'Failed Change Password',
-                "level": 3
-                },
-        'sce': {
-                "event": 'Success Change Email',
-                "level": 1
-                },
-        'fce': {
-                "event": 'Failed Change Email',
-                "level": 3
-                },
-        'scu': {
-                "event": 'Success Change Username',
-                "level": 1
-                },
-        'fcu': {
-                "event": 'Failed Change Username',
-                "level": 3
-                },
-        'scpn': {
-                "event": 'Success Change Phone Number',
-                "level": 1
-                },
-        'fcpn': {
-                "event": 'Failed Change Phone Number',
-                "level": 3
-                },
-        'svr': {
-                "event": 'Success Verification Email Request',
-                "level": 0
-                },
-        'fvr': {
-                "event": 'Failed Verification Email Request',
-                "level": 3
-                },
-        'scpr': {
-                "event": 'Success Change Password Request',
-                "level": 0
-                },
-        'fcpr': {
-                "event": 'Failed Change Password Request',
-                "level": 3
-                },
-        'fn': {
-                "event": 'Failed Sending Notification',
-                "level": 3
-                },
-        'sapi': {
-                "event": 'API Operation',
-                "level": 1
-                },
-        'fapi': {
-                "event": 'Failed API Operation',
-                "level": 3
-                },
-        'limit_wc': {
-                "event": 'Blocked Account',
-                "level": 4
-                },
-        'limit_ui': {
-                "event": 'Too Many Calls to /userinfo',
-                "level": 4
-                },
-        'api_limit': {
-                "event": 'Rate Limit On API',
-                "level": 4
-                },
-        'sdu': {
-                "event": 'Successful User Deletion',
-                "level": 1
-                },
-        'fdu': {
-                "event": 'Failed User Deletion',
-                "level": 3
-                },
-        'sd': {
-                "event": 'Success Delegation',
-                "level": 3
-         },
-        'fd': {
-                "event": 'Failed Delegation',
-                "level": 3
-         },
-        'seccft': {
-                "event": "Success Exchange (Client Credentials for Access Token)",
-                "level": 1
-        },
-        'feccft': {
-                "event": "Failed Exchange (Client Credentials for Access Token)",
-                "level": 1
-        },
-        'fsa': {
-                "event": "Failed Silent Auth",
-                "level": 3
-        },
-        'ssa': {
-                "event": "Success Silent Auth",
-                "level": 1
-        },
-        'fepft': {
-                "event": "Failed Exchange (Password for Access Token)",
-                "level": 3
-        },
-        'limit_mu': {
-                "event": "Blocked IP Address",
-                "level": 3
-        },
-        'sepft': {
-                "event": "Success Exchange (Password for Access Token)",
-                "level": 1
-        },
-        'fcoa': {
-                "event": "Failed Cross Origin Authentication",
-                "level": 3
-        }
+log_types = DotDict({
+    's': {
+        "event": 'Success Login',
+        "level": 1
+    },
+    'slo': {
+        "event": 'Success Logout',
+        "level": 1
+    },
+    'flo': {
+        "event": 'Failed Logout',
+        "level": 3
+    },
+    'seacft': {
+        "event": 'Success Exchange (Authorization Code for Access Token)',
+        "level": 1
+    },
+    'feacft': {
+        "event": 'Failed Exchange (Authorization Code for Access Token)',
+        "level": 3
+    },
+    'f': {
+        "event": 'Failed Login',
+        "level": 3
+    },
+    'w': {
+        "event": 'Warnings During Login',
+        "level": 2
+    },
+    'du': {
+        "event": 'Deleted User',
+        "level": 1
+    },
+    'fu': {
+        "event": 'Failed Login (invalid email/username)',
+        "level": 3
+    },
+    'fp': {
+        "event": 'Failed Login (wrong password)',
+        "level": 3
+    },
+    'fc': {
+        "event": 'Failed by Connector',
+        "level": 3
+    },
+    'fco': {
+        "event": 'Failed by CORS',
+        "level": 3
+    },
+    'con': {
+        "event": 'Connector Online',
+        "level": 1
+    },
+    'coff': {
+        "event": 'Connector Offline',
+        "level": 3
+    },
+    'fcpro': {
+        "event": 'Failed Connector Provisioning',
+        "level": 4
+    },
+    'ss': {
+        "event": 'Success Signup',
+        "level": 1
+    },
+    'fs': {
+        "event": 'Failed Signup',
+        "level": 3
+    },
+    'cs': {
+        "event": 'Code Sent',
+        "level": 0
+    },
+    'cls': {
+        "event": 'Code/Link Sent',
+        "level": 0
+    },
+    'sv': {
+        "event": 'Success Verification Email',
+        "level": 0
+    },
+    'fv': {
+        "event": 'Failed Verification Email',
+        "level": 0
+    },
+    'scp': {
+        "event": 'Success Change Password',
+        "level": 1
+    },
+    'fcp': {
+        "event": 'Failed Change Password',
+        "level": 3
+    },
+    'sce': {
+        "event": 'Success Change Email',
+        "level": 1
+    },
+    'fce': {
+        "event": 'Failed Change Email',
+        "level": 3
+    },
+    'scu': {
+        "event": 'Success Change Username',
+        "level": 1
+    },
+    'fcu': {
+        "event": 'Failed Change Username',
+        "level": 3
+    },
+    'scpn': {
+        "event": 'Success Change Phone Number',
+        "level": 1
+    },
+    'fcpn': {
+        "event": 'Failed Change Phone Number',
+        "level": 3
+    },
+    'svr': {
+        "event": 'Success Verification Email Request',
+        "level": 0
+    },
+    'fvr': {
+        "event": 'Failed Verification Email Request',
+        "level": 3
+    },
+    'scpr': {
+        "event": 'Success Change Password Request',
+        "level": 0
+    },
+    'fcpr': {
+        "event": 'Failed Change Password Request',
+        "level": 3
+    },
+    'fn': {
+        "event": 'Failed Sending Notification',
+        "level": 3
+    },
+    'sapi': {
+        "event": 'API Operation',
+        "level": 1
+    },
+    'fapi': {
+        "event": 'Failed API Operation',
+        "level": 3
+    },
+    'limit_wc': {
+        "event": 'Blocked Account',
+        "level": 4
+    },
+    'limit_ui': {
+        "event": 'Too Many Calls to /userinfo',
+        "level": 4
+    },
+    'api_limit': {
+        "event": 'Rate Limit On API',
+        "level": 4
+    },
+    'sdu': {
+        "event": 'Successful User Deletion',
+        "level": 1
+    },
+    'fdu': {
+        "event": 'Failed User Deletion',
+        "level": 3
+    },
+    'sd': {
+        "event": 'Success Delegation',
+        "level": 3
+    },
+    'fd': {
+        "event": 'Failed Delegation',
+        "level": 3
+    },
+    'seccft': {
+        "event": "Success Exchange (Client Credentials for Access Token)",
+        "level": 1
+    },
+    'feccft': {
+        "event": "Failed Exchange (Client Credentials for Access Token)",
+        "level": 1
+    },
+    'fsa': {
+        "event": "Failed Silent Auth",
+        "level": 3
+    },
+    'ssa': {
+        "event": "Success Silent Auth",
+        "level": 1
+    },
+    'fepft': {
+        "event": "Failed Exchange (Password for Access Token)",
+        "level": 3
+    },
+    'limit_mu': {
+        "event": "Blocked IP Address",
+        "level": 3
+    },
+    'sepft': {
+        "event": "Success Exchange (Password for Access Token)",
+        "level": 1
+    },
+    'fcoa': {
+        "event": "Failed Cross Origin Authentication",
+        "level": 3
+    }
 })
 
 

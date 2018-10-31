@@ -50,7 +50,8 @@ class AlertHoneycomb(AlertTask):
             offendingIPs.append(ip_match.group(1))
 
         summary = 'Honeypot activity on {0} from IP(s): {1}'.format(
-                aggreg['value'], ", ".join(sorted(set(offendingIPs))))
+            aggreg['value'], ", ".join(sorted(set(offendingIPs)))
+        )
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

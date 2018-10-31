@@ -255,8 +255,8 @@ def searchMongoAlerts(mozdefdb):
                         # and if they are all the same category
                         # auto-categorize the attacker
                         matchingalerts = alerts.find(
-                            {"attackerid":attacker['_id']}
-                             ).sort('utcepoch', -1).limit(50)
+                            {"attackerid": attacker['_id']}
+                        ).sort('utcepoch', -1).limit(50)
                         # summarize the alert categories
                         # returns list of tuples: [(u'bruteforce', 8)]
                         categoryCounts= mostCommon(matchingalerts,'category')
