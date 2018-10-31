@@ -1516,7 +1516,7 @@ class TestBroFixup(object):
 
     def test_sip_log2(self):
         event = {
-        'category': 'bro',
+            'category': 'bro',
             'SOURCE': 'bro_sip',
             'customendpoint': 'bro'
         }
