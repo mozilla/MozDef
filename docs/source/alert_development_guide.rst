@@ -1,11 +1,12 @@
 Alert Development Guide
-============
+========================
+
 
 This guide is for someone seeking to write a MozDef alert.
 
 
 Starting a feature branch
--------------
+--------------------------
 
 Before you do anything else, start with checking out the MozDef repo and starting a feature branch.
 
@@ -17,7 +18,7 @@ Before you do anything else, start with checking out the MozDef repo and startin
 
 
 How to start your alert
--------------
+------------------------
 
 Run:
 
@@ -32,8 +33,7 @@ You can now edit these files in place, but it is recommended that you run unit-t
 
 
 How to run tests on your alert
--------------
-
+-------------------------------
 Requirements:
 
 - Make sure you have the latest version of docker installed.
@@ -41,7 +41,7 @@ Requirements:
 
 
   make build-tests
-  
+
   make run-tests TEST_CASE=tests/alerts/[YOUR ALERT TEST FILE].py
 
 This test should pass and you will have confirmed you have a working environment.
@@ -52,7 +52,7 @@ At this point, begin development and periodically run your unit-tests locally wi
 
 
 Background on concepts
--------------
+-----------------------
 
 Logs - These are individual log line that are emitted from systems, like an Apache log
 Events - These logs parsed into a JSON format, which exist in MozDef and used with the ELK stack
