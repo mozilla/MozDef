@@ -536,9 +536,15 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
                     success = t['count']
                 if t['key'].upper() == 'LDAP_INVALID_CREDENTIALS':
                     failures = t['count']
-            resultsList.append(dict(dn=dn, failures=failures,
-                success=success, begin=begindateUTC.isoformat(),
-                end=enddateUTC.isoformat()))
+            resultsList.append(
+                dict(
+                    dn=dn,
+                    failures=failures,
+                    success=success,
+                    begin=begindateUTC.isoformat(),
+                    end=enddateUTC.isoformat()
+                )
+            )
 
         return(json.dumps(resultsList))
     except Exception as e:
@@ -556,9 +562,11 @@ def kibanaDashboards():
         for dashboard in results['hits']:
             resultsList.append({
                 'name': dashboard['_source']['title'],
-                'url': "%s#/%s/%s" % (options.kibanaurl,
-                "dashboard",
-                dashboard['_id'])
+                'url': "%s#/%s/%s" % (
+                    options.kibanaurl,
+                    "dashboard",
+                    dashboard['_id']
+                )
             })
 
     except ElasticsearchInvalidIndex as e:
@@ -632,7 +640,9 @@ def initConfig():
 
 
 parser = OptionParser()
-parser.add_option("-c", dest='configfile',
+parser.add_option(
+    "-c",
+    dest='configfile',
     default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
     help="configuration file to use")
 (options, args) = parser.parse_args()

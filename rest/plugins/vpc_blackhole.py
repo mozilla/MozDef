@@ -89,13 +89,11 @@ class message(object):
                     region_name = cur_account['region']
 
                     session = Session(aws_access_key_id=aws_access_key_id,
-                                  aws_secret_access_key=aws_secret_access_key,
-                                  region_name=region_name)
+                                      aws_secret_access_key=aws_secret_access_key,
+                                      region_name=region_name)
 
                     ec2 = session.resource('ec2')
                     client = session.client('ec2')
-                    #ec2 = session.resource('ec2', region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-                    #client = session.client('ec2', region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
                     response = client.describe_route_tables()
                     for routetable in response['RouteTables']:

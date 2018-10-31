@@ -447,8 +447,10 @@ def main():
         print("No configuration file 'auth02mozdef.json' found.")
         sys.exit(1)
 
-    headers = {'Authorization': 'Bearer {}'.format(config.auth0.token),
-            'Accept': 'application/json'}
+    headers = {
+        'Authorization': 'Bearer {}'.format(config.auth0.token),
+        'Accept': 'application/json'
+    }
 
     fromid = load_state(config.state_file)
     # Auth0 will interpret a 0 state as an error on our hosted instance, but will accept an empty parameter "as if it was 0"

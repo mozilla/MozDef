@@ -165,15 +165,15 @@ def initConfig():
 
     # default time period in minutes to look back in time for the aggregation
     options.correlationminutes = getConfig('correlationminutes',
-                                         150,
-                                         options.configfile)
+                                           150,
+                                           options.configfile)
 
     # default location of the OUI file from IEEE for resolving mac prefixes
     # Expects the OUI file from IEEE:
     # wget http://www.ieee.org/netstorage/standards/oui.txt
     options.ouifilename = getConfig('ouifilename',
-                                'oui.txt',
-                                options.configfile)
+                                    'oui.txt',
+                                    options.configfile)
 
 
 if __name__ == '__main__':
