@@ -7,16 +7,18 @@
 
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, ExistsMatch, PhraseMatch, WildcardMatch
 
 
 class TEMPLATE_ALERT_CLASSNAME(AlertTask):
     def main(self):
+        # Create a query to look back the last 20 minutes
         search_query = SearchQuery(minutes=20)
+
+        # Add search terms to our query
         search_query.add_must([
-            TermMatch('category', 'squid'),
-            TermMatch('tags', 'squid'),
-            TermMatch('details.proxyaction', 'TCP_DENIED/-')
+            TermMatch('category', 'helloworld'),
+            ExistsMatch('details.sourceipaddress'),
         ])
 
         self.filtersManual(search_query)
@@ -31,18 +33,10 @@ class TEMPLATE_ALERT_CLASSNAME(AlertTask):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
-        category = 'squid'
-        tags = ['squid', 'proxy']
+        category = 'hellocategory'
+        tags = ['hello', 'world']
         severity = 'WARNING'
-
-        dropped_urls = set()
-        for event in aggreg['allevents']:
-            dropped_urls.add(event['_source']['details']['destination'])
-
-        summary = 'Suspicious Proxy DROP event(s) detected from {0} to the following executable file destination(s): {1}'.format(
-            aggreg['value'],
-            ",".join(sorted(dropped_urls))
-        )
+        summary = "My first alert!"
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
