@@ -355,10 +355,12 @@ class alertConsumer(ConsumerMixin):
 def consumeAlerts(ircBot):
     # connect and declare the message queue/kombu objects.
     # server/exchange/queue
-    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,
-                                                        options.mqpassword,
-                                                        options.mqalertserver,
-                                                        options.mqport)
+    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(
+        options.mquser,
+        options.mqpassword,
+        options.mqalertserver,
+        options.mqport
+    )
     mqAlertConn = Connection(mqConnString)
 
     # Exchange for alerts we pass to plugins

@@ -347,12 +347,14 @@ def createIncident():
     incident['dateMitigated'] = validateDate(body.get('dateMitigated'))
     incident['dateContained'] = validateDate(body.get('dateContained'))
 
-    dates = [incident['dateOpened'],
-              incident['dateClosed'],
-              incident['dateReported'],
-              incident['dateVerified'],
-              incident['dateMitigated'],
-              incident['dateContained']]
+    dates = [
+        incident['dateOpened'],
+        incident['dateClosed'],
+        incident['dateReported'],
+        incident['dateVerified'],
+        incident['dateMitigated'],
+        incident['dateContained']
+    ]
 
     # Validating all the dates for the format
     if False in dates:
@@ -586,19 +588,19 @@ def verisSummary(verisRegex=None):
         # aggregate the veris tags from the incidents collection and return as json
         client = MongoClient(options.mongohost, options.mongoport)
         # use meteor db
-        incidents= client.meteor['incidents']
+        incidents = client.meteor['incidents']
 
-        iveris=incidents.aggregate([
-
-                                   {"$match":{"tags":{"$exists":True}}},
-                                   {"$unwind": "$tags"},
-                                   {"$match":{"tags":{"$regex":''}}},  # regex for tag querying
-                                   {"$project": {"dateOpened": 1,
-                                                   "tags": 1,
-                                                   "phase": 1,
-                                                   "_id": 0
-                                                   }}
-                                   ])
+        iveris = incidents.aggregate([
+            {"$match": {"tags": {"$exists": True}}},
+            {"$unwind": "$tags"},
+            {"$match": {"tags": {"$regex": ''}}},
+            {"$project": {
+                "dateOpened": 1,
+                "tags": 1,
+                "phase": 1,
+                "_id": 0
+            }}
+        ])
         if iveris:
             return json.dumps(list(iveris), default=json_util.default)
         else:
