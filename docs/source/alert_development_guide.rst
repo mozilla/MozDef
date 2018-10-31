@@ -1,7 +1,7 @@
 Alert Development
 ============
 
-This guide is for someone seeking to write a MozDef alert plugin.
+This guide is for someone seeking to write a MozDef alert.
 
 
 Starting a feature branch
@@ -14,38 +14,35 @@ Before you do anything else, start with checking out the MozDef repo and startin
 `git checkout -b name_of_alert_you_want_to_create`
 
 
-Where do alerts live?
+How to start your alert
 -------------
 
-Alerts and their associated tests live in ./alerts and ./tests/alerts.  If you plan to write an alert, you will need produce a minumum of those files.  You can use other alerts and associated tests as a means to copy and paste and iterate.  It's also helpful if you pick an alert that is similar in category as a base.  For instance, if you would like to write a proxy alert, use the patterns that exist in existing proxy alerts as guidance, though they will likely require modification.
+Run `make new-alert`
 
-Things you will likely need to change after copying your alert to make sure you have a functional alert base..
+This will prompt for information and create two things:
 
-- The names of the alert file and the test file (should be ./alerts/alert_name.py and ./tests/alerts/test_alert_name.py respectively)
-- The class name in the alert and in the alert test files
-- The alert_filename variable in the test file
+- The new alert file
+- The new alert test file
 
-Once you've made these changes (without any others), you should be able to perform a unit-test run against your new alert to know that it functionally works and you're starting on good footing.
+You can now edit these files in place, but it is recommended that you run unit-tests on the new alert to make sure it passes before editing (instructions below).
 
 
-How to get up for test-runs?
+How to run tests on your alert
 -------------
 
-Make sure you have the latest version of docker installed.
+Requirements:
 
-Known Issue: docker's overlayfs has a known issue, so you will need to go to Docker => Preferences => Daemon => Advanced and add the following key pair ("storage-driver" : "aufs")
+- Make sure you have the latest version of docker installed.
+- Known Issue: docker's overlayfs has a known issue, so you will need to go to Docker => Preferences => Daemon => Advanced and add the following key pair ("storage-driver" : "aufs")
 
-To get your local development environment setup for running tests, you need to run the following...
-
-`make build-test`
-
-This will build all the essential docker containers, then you can run this..
-
-`make run-test ./tests/alerts/test_proxy_drop_executable.py`
+`make build-tests`
+`make run-tests TEST_CASE=tests/alerts/[YOUR ALERT TEST FILE].py`
 
 This test should pass and you will have confirmed you have a working environment.
 
-At this point, you can run tests on your copy to ensure it too is a working base to begin development.
+At this point, begin development and periodically run your unit-tests locally with the following command:
+
+`make run-tests TEST_CASE=tests/alerts/[YOUR ALERT TEST FILE].py`
 
 
 Background on concepts
@@ -63,6 +60,7 @@ main - This is where the alert defines the criteria for the types of events it w
 onAggregation/onEvent - This is where the alert defines what happens when it sees those events, such as post processing of events and making them into a useful summary to emit as an alert. 
 
 In both cases, because the alert is simple Python, you will find that getting started writing alerts is pretty easy.  It's important to note that when you change the alert from the base you copied to regularly test to ensure that the alert is still firing.  Should you run into a space where it's not firing, the best way to approach this is to backout the recent change and review the tests to ensure that the expectations are still the same.
+
 
 How to get the alert in MozDef?
 -------------
