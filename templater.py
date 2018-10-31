@@ -1,6 +1,5 @@
 import os
 import sys
-from jinja2 import Template
 
 # Handle python2
 try:
@@ -8,11 +7,6 @@ try:
 except NameError:
     pass
 
-alert_template_file = open('alerts/alert_template.template', 'r')
-alert_test_template_file = open('tests/alerts/test_alert_template.template', 'r')
-
-alert_raw_template = alert_template_file.read()
-alert_test_raw_template = alert_test_template_file.read()
 
 alert_name = input('Enter your alert name (Example: proxy drop executable): ')
 
@@ -31,11 +25,16 @@ if os.path.isfile(alert_filepath) or os.path.isfile(test_filepath):
     print("ERROR: {0} already exists...exiting".format(alert_filepath))
     sys.exit(1)
 
-alert_template = Template(alert_raw_template)
-alert_test_template = Template(alert_test_raw_template)
-
 with open(alert_filepath, "w") as python_alert_file:
-    python_alert_file.write(alert_template.render(alert_name=alert_classname))
+    with open('alerts/alert_template.template', 'r') as alert_template_file:
+        alert_template_content = alert_template_file.read()
+        alert_template_content = alert_template_content.replace('TEMPLATE_ALERT_CLASSNAME', alert_classname)
+        python_alert_file.write(alert_template_content)
 
 with open(test_filepath, "w") as test_alert_file:
-    test_alert_file.write(alert_test_template.render(alert_classname=alert_classname, alert_filename=filename, alert_test_name=test_alert_classname))
+    with open('tests/alerts/test_alert_template.template', 'r') as test_template_content:
+        test_template_content = test_template_content.read()
+        test_template_content = test_template_content.replace('TEMPLATE_TEST_CLASSNAME', test_alert_classname)
+        test_template_content = test_template_content.replace('TEMPLATE_ALERT_FILENAME', filename)
+        test_template_content = test_template_content.replace('TEMPLATE_ALERT_CLASSNAME', alert_classname)
+        test_alert_file.write(test_template_content)

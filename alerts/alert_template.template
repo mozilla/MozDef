@@ -7,10 +7,10 @@
 
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import QueryStringMatch, SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch
 
 
-class {{ alert_name }}(AlertTask):
+class TEMPLATE_ALERT_CLASSNAME(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=20)
         search_query.add_must([
@@ -20,10 +20,17 @@ class {{ alert_name }}(AlertTask):
         ])
 
         self.filtersManual(search_query)
+        # Search aggregations on field 'sourceipaddress'
+        # keep X samples of events at most
         self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
+        # alert when >= X matching events in an aggregation
         self.walkAggregations(threshold=1)
 
+    # Set alert properties
     def onAggregation(self, aggreg):
+        # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
+        # aggreg['value']: value of the aggregation field, ex: toto@example.com
+        # aggreg['events']: list of events in the aggregation
         category = 'squid'
         tags = ['squid', 'proxy']
         severity = 'WARNING'
@@ -37,4 +44,5 @@ class {{ alert_name }}(AlertTask):
             ",".join(sorted(dropped_urls))
         )
 
+        # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
