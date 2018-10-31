@@ -29,6 +29,7 @@ with open(alert_filepath, "w") as python_alert_file:
     with open('alerts/alert_template.template', 'r') as alert_template_file:
         alert_template_content = alert_template_file.read()
         alert_template_content = alert_template_content.replace('TEMPLATE_ALERT_CLASSNAME', alert_classname)
+        print("Creating {0}".format(alert_filepath))
         python_alert_file.write(alert_template_content)
 
 with open(test_filepath, "w") as test_alert_file:
@@ -37,4 +38,5 @@ with open(test_filepath, "w") as test_alert_file:
         test_template_content = test_template_content.replace('TEMPLATE_TEST_CLASSNAME', test_alert_classname)
         test_template_content = test_template_content.replace('TEMPLATE_ALERT_FILENAME', filename)
         test_template_content = test_template_content.replace('TEMPLATE_ALERT_CLASSNAME', alert_classname)
+        print("Creating {0}".format(test_filepath))
         test_alert_file.write(test_template_content)
