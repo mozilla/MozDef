@@ -12,6 +12,7 @@ from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 
+
 def isIPv4(ip):
     try:
         # netaddr on it's own considers 1 and 0 to be valid_ipv4
@@ -26,14 +27,17 @@ def isIPv4(ip):
     except:
         return False
 
+
 def isIPv6(ip):
     try:
         return netaddr.valid_ipv6(ip)
     except:
         return False
 
+
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
+
 
 class message(object):
     def __init__(self):

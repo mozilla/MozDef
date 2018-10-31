@@ -24,6 +24,7 @@ from datetime import datetime
 from os import stat
 from os.path import exists, getsize
 
+
 class MozDefError(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -162,6 +163,7 @@ def main():
                      category='vidyo',
                      hostname=socket.gethostname()
                      )
+
 
 def getConfig(optionname, thedefault, configfile):
     """read an option from a config file or set a default

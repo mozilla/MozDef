@@ -9,6 +9,7 @@ from mozdef_util.utilities.key_exists import key_exists
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.dot_dict import DotDict
 
+
 class message(object):
     def __init__(self):
         '''

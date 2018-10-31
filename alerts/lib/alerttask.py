@@ -201,7 +201,7 @@ class AlertTask(Task):
             alert['notify_mozdefbot'] = False
 
         # If an alert sets specific ircchannel, then we should probably always notify in mozdefbot
-        if 'ircchannel' in alert and alert['ircchannel'] != '' and alert['ircchannel'] != None:
+        if 'ircchannel' in alert and alert['ircchannel'] != '' and alert['ircchannel'] is not None:
             alert['notify_mozdefbot'] = True
         return alert
 

@@ -362,6 +362,7 @@ class TestGetIndices(ElasticsearchClientTest):
         indices.sort()
         assert indices == [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
 
+
 class TestIndexExists(ElasticsearchClientTest):
 
     def teardown(self):
@@ -374,7 +375,7 @@ class TestIndexExists(ElasticsearchClientTest):
             self.es_client.create_index('test_index')
         time.sleep(1)
         indices = self.es_client.index_exists('test_index')
-        assert indices == True
+        assert indices is True
 
 
 class TestClusterHealth(ElasticsearchClientTest):

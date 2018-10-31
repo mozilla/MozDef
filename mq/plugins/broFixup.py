@@ -421,7 +421,7 @@ class message(object):
                         u'destination {dst} '
                         u'port {p}'
                         ).format(**sumstruct)
-                        # Thank you for your service
+                    # Thank you for your service
                     return (newmessage, metadata)
 
                 if logtype == 'rdp':

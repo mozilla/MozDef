@@ -430,7 +430,7 @@ class TestBroFixup(object):
             'SOURCE': 'bro_http',
             'customendpoint': 'bro'
         }
-        MESSAGE =  {
+        MESSAGE = {
             "ts":1505701210.163246,
             "uid":"CMxwva4RHFtKpxWLba",
             "id.orig_h":"10.22.74.212",

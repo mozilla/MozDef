@@ -9,6 +9,7 @@ import os
 import sys
 from configlib import getConfig, OptionParser
 
+
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message

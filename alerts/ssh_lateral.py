@@ -71,6 +71,7 @@ import netaddr
 #     ]
 # }
 
+
 class SshLateral(AlertTask):
     def __init__(self):
         AlertTask.__init__(self)
@@ -92,8 +93,8 @@ class SshLateral(AlertTask):
     # listed in the configuration file.
     def exception_check(self, user, host, srcip):
         for x in self._config['exceptions']:
-            if re.match(x[0], user) != None and \
-                re.match(x[1], host) != None and \
+            if re.match(x[0], user) is not None and \
+                re.match(x[1], host) is not None and \
                 netaddr.IPAddress(srcip) in netaddr.IPNetwork(x[2]):
                 return True
         return False
@@ -110,13 +111,13 @@ class SshLateral(AlertTask):
         srchost = aggreg['events'][0]['_source']['hostname']
         srcmatch = False
         for x in self._config['hostmustmatch']:
-            if re.match(x, srchost) != None:
+            if re.match(x, srchost) is not None:
                 srcmatch = True
                 break
         if not srcmatch:
             return None
         for x in self._config['hostmustnotmatch']:
-            if re.match(x, srchost) != None:
+            if re.match(x, srchost) is not None:
                 return None
 
         # Determine if the origin of the connection was from a source outside
@@ -126,7 +127,7 @@ class SshLateral(AlertTask):
         sampleuser = None
         for x in aggreg['events']:
             m = re.match('Accepted publickey for (\S+) from (\S+).*', x['_source']['summary'])
-            if m != None and len(m.groups()) == 2:
+            if m is not None and len(m.groups()) == 2:
                 ipaddr = netaddr.IPAddress(m.group(2))
                 for y in self._config['alertifsource']:
                     if ipaddr in netaddr.IPNetwork(y):
@@ -149,9 +150,9 @@ class SshLateral(AlertTask):
                         # Check our exception list
                         if self.exception_check(m.group(1), srchost, m.group(2)):
                             continue
-                        if sampleip == None:
+                        if sampleip is None:
                             sampleip = m.group(2)
-                        if sampleuser == None:
+                        if sampleuser is None:
                             sampleuser = m.group(1)
                         candidates.append(x)
         if len(candidates) == 0:

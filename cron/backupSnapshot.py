@@ -71,8 +71,7 @@ def main():
             logger.debug('snapshot repo registered')
 
         # do the actual snapshotting
-        for (index, dobackup, rotation, pruning) in zip(options.indices,
-            options.dobackup, options.rotation, options.pruning):
+        for (index, dobackup, rotation, pruning) in zip(options.indices, options.dobackup, options.rotation, options.pruning):
             if dobackup == '1':
                 index_to_snapshot = index
                 if rotation == 'daily':
@@ -120,6 +119,7 @@ echo "DONE!"
         logger.error("No auth handler found, check your credentials")
     except Exception as e:
         logger.error("Unhandled exception, terminating: %r"%e)
+
 
 def initConfig():
     # output our log to stdout or syslog
@@ -186,6 +186,7 @@ def initConfig():
         '',
         options.configfile
         )
+
 
 if __name__ == '__main__':
     parser = OptionParser()
