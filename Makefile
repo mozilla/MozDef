@@ -77,7 +77,6 @@ clean: ## Cleanup all docker volumes and shutdown all related services
 .PHONY: rebuild
 rebuild: clean build
 
-# Allow creation of alert and unit test skeleton
 .PHONY: new-alert
 new-alert: ## Create an example alert and working alert unit test
 	python tests/alert_templater.py
