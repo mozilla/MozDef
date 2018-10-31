@@ -41,7 +41,7 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'suricata': 'value1'
+            'suricata': 'value1'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -56,9 +56,9 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'category': 'suricata',
-           'SOURCE': 'eve-log',
-           'event_type': 'alert'
+            'category': 'suricata',
+            'SOURCE': 'eve-log',
+            'event_type': 'alert'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -72,9 +72,9 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'customendpoint': '',
-           'SOURCE': 'eve-log',
-           'event_type': 'alert'
+            'customendpoint': '',
+            'SOURCE': 'eve-log',
+            'event_type': 'alert'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -88,10 +88,10 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'customendpoint': '',
-           'category': 'alamakota',
-           'SOURCE': 'eve-log',
-           'event_type': 'alert'
+            'customendpoint': '',
+            'category': 'alamakota',
+            'SOURCE': 'eve-log',
+            'event_type': 'alert'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -106,10 +106,10 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'category': 'suricata',
-           'customendpoint': '',
-           'category': 'suricata',
-           'SOURCE': 'eve-log'
+            'category': 'suricata',
+            'customendpoint': '',
+            'category': 'suricata',
+            'SOURCE': 'eve-log'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -138,8 +138,8 @@ class TestSuricataFixup(object):
 
     def test_suricata_nosource_log(self):
         event = {
-           'customendpoint': '',
-           'category': 'suricata',
+            'customendpoint': '',
+            'category': 'suricata',
         }
         MESSAGE = {
             'ts': 1505701210.163043
@@ -153,10 +153,10 @@ class TestSuricataFixup(object):
 
     def test_suricata_wrongsource_log(self):
         event = {
-           'customendpoint': '',
-           'category': 'suricata',
-           'SOURCE': 'alamakota',
-           'event_type': 'alert'
+            'customendpoint': '',
+            'category': 'suricata',
+            'SOURCE': 'alamakota',
+            'event_type': 'alert'
         }
         MESSAGE = {
             'ts': 1505701210.163043
@@ -221,7 +221,7 @@ class TestSuricataFixup(object):
                 "audisp-json",
                 "2.1.1",
                 "audit"
-                ],
+            ],
             "summary": "Execve: sh -c sudo suricata nsm /usr/lib64/nagios/plugins/custom/check_auditd.sh",
             "processname": "audisp-json",
             "details": {

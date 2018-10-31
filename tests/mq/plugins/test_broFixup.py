@@ -39,7 +39,7 @@ class TestBroFixup(object):
             'index': 'events'
         }
         event = {
-           'bro': 'value1'
+            'bro': 'value1'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -54,7 +54,7 @@ class TestBroFixup(object):
             'index': 'events'
         }
         event = {
-           'category': 'bro'
+            'category': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -64,9 +64,9 @@ class TestBroFixup(object):
 
     def test_bro_wrongtype_log(self):
         event = {
-           'category': 'bro',
-           'SOURCE': 'nosuchtype',
-           'customendpoint': 'bro'
+            'category': 'bro',
+            'SOURCE': 'nosuchtype',
+            'customendpoint': 'bro'
         }
         MESSAGE = {
             'ts': 1505701210.163043
