@@ -331,7 +331,7 @@ class alertConsumer(ConsumerMixin):
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
-            if self.lastalert != None:
+            if self.lastalert is not None:
                 delta = toUTC(datetime.now()) - self.lastalert
                 sys.stdout.write('new alert, delta since last is {}\n'.format(delta))
                 if delta.seconds < 2:
@@ -348,6 +348,7 @@ class alertConsumer(ConsumerMixin):
         except ValueError as e:
             logger.exception(
                 "alertworker exception while processing events queue %r" % e)
+
 
 @run_async
 def consumeAlerts(ircBot):

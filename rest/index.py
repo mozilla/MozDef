@@ -58,6 +58,7 @@ def test():
     sendMessgeToPlugins(request, response, 'test')
     return response
 
+
 @route('/status')
 @route('/status/')
 def status():
@@ -122,6 +123,7 @@ def index():
     sendMessgeToPlugins(request, response, 'blockip')
     return response
 
+
 @post('/blockfqdn', methods=['POST'])
 @post('/blockfqdn/', methods=['POST'])
 @enable_cors
@@ -129,6 +131,7 @@ def index():
     '''will receive a call to block an ip address'''
     sendMessgeToPlugins(request, response, 'blockfqdn')
     return response
+
 
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
@@ -213,6 +216,7 @@ def index():
     sendMessgeToPlugins(request, response, 'ipdshieldquery')
     return response
 
+
 @route('/plugins', methods=['GET'])
 @route('/plugins/', methods=['GET'])
 @route('/plugins/<endpoint>', methods=['GET'])
@@ -248,6 +252,7 @@ def getPluginList(endpoint=None):
 
     sendMessgeToPlugins(request, response, 'plugins')
     return response
+
 
 @post('/incident', methods=['POST'])
 @post('/incident/', methods=['POST'])
@@ -320,7 +325,7 @@ def createIncident():
 
     # Validating Incident phase type
     if (type(incident['phase']) not in (str, unicode) or
-        incident['phase'] not in validIncidentPhases):
+            incident['phase'] not in validIncidentPhases):
 
         response.status = 500
         response.body = json.dumps(dict(status='failed',
@@ -389,6 +394,7 @@ def createIncident():
                                     ))
     return response
 
+
 def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
     '''
     Converts a date string into a datetime object based
@@ -410,8 +416,10 @@ def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
     finally:
         return dateObj
 
+
 def generateMeteorID():
     return('%024x' % random.randrange(16**24))
+
 
 def registerPlugins():
     '''walk the ./plugins directory
@@ -579,13 +587,6 @@ def verisSummary(verisRegex=None):
         client = MongoClient(options.mongohost, options.mongoport)
         # use meteor db
         incidents= client.meteor['incidents']
-        #iveris=incidents.aggregate([
-                                   #{"$match":{"tags":{"$exists":True}}},
-                                   #{"$unwind" : "$tags" },
-                                   #{"$match":{"tags":{"$regex":''}}}, #regex for tag querying
-                                   #{"$group": {"_id": "$tags", "hitcount": {"$sum": 1}}}, # count by tag
-                                   #{"$sort": SON([("hitcount", -1), ("_id", -1)])}, #sort
-                                   #])
 
         iveris=incidents.aggregate([
 
@@ -604,6 +605,7 @@ def verisSummary(verisRegex=None):
             return json.dumps(list())
     except Exception as e:
             sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
+
 
 def initConfig():
     # output our log to stdout or syslog
@@ -625,6 +627,7 @@ def initConfig():
 
     default_user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/58.0'
     options.user_agent = getConfig('user_agent', default_user_agent, options.configfile)
+
 
 parser = OptionParser()
 parser.add_option("-c", dest='configfile',

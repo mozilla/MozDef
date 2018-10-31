@@ -12,6 +12,7 @@ from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 
+
 def isFQDN(fqdn):
     try:
         # We could resolve FQDNs here, but that could tip our hand and it's
@@ -22,8 +23,10 @@ def isFQDN(fqdn):
     except:
         return False
 
+
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
+
 
 class message(object):
     def __init__(self):

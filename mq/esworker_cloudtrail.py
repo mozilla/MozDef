@@ -125,6 +125,7 @@ class RoleManager:
             'aws_secret_access_key': credential.secret_key,
             'security_token': credential.session_token} if credential else {}
 
+
 def get_aws_credentials(region=None, accesskey=None, secretkey=None, security_token=None):
     result = {}
     if region not in ['', '<add_region>', None]:

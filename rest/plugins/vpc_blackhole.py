@@ -11,6 +11,7 @@ import json
 import netaddr
 from boto3.session import Session
 
+
 def isIPv4(ip):
     try:
         # netaddr on it's own considers 1 and 0 to be valid_ipv4
@@ -186,7 +187,7 @@ class message(object):
                     if not ipcidr.ip.is_loopback() \
                        and not ipcidr.ip.is_private() \
                        and not ipcidr.ip.is_reserved():
-                        ipaddress =  str(ipcidr.cidr)
+                        ipaddress = str(ipcidr.cidr)
                         self.addBlackholeEntry(ipaddress)
                         sys.stdout.write('Blackholed {0}\n'.format(ipaddress))
         except Exception as e:

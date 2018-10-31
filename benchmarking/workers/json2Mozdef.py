@@ -33,6 +33,8 @@ logger = logging.getLogger(sys.argv[0])
 logger.level=logging.DEBUG
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
 def postLogs(logcache):
     #post logs asynchronously with requests workers and check on the results
     #expects a queue object from the multiprocessing library
@@ -60,6 +62,7 @@ def postLogs(logcache):
         except Exception as e:
             logger.fatal("exception posting to %s %r %r [will not retry]\n"%(url,e,postdata))
             sys.exit(1)
+
 
 if __name__ == '__main__':
     parser=OptionParser()

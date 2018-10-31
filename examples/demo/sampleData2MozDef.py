@@ -65,6 +65,7 @@ def setConfig(option,value,configfile):
         config.write(configfp)
         configfp.close()
 
+
 def postLogs(logcache):
     #post logs asynchronously with requests workers and check on the results
     #expects a queue object from the multiprocessing library
@@ -83,22 +84,24 @@ def postLogs(logcache):
                 #posts.append((r,postdata,url))
     except Empty as e:
         pass
-    #for p,postdata,url in posts:
-        #try:
-            #if p.result().status_code >=500:
-                #logger.error("exception posting to %s %r [will retry]\n"%(url,p.result().status_code))
-                ##try again later when the next message in forces other attempts at posting.
-                #logcache.put(postdata)
-        #except ClosedPoolError as e:
-            ##logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n"%(url,e,postdata))
-            #logcache.put(postdata)
-        #except Exception as e:
-            #logger.fatal("exception posting to %s %r %r [will not retry]\n"%(url,e,postdata))
-            #sys.exit(1)
+    # for p, postdata, url in posts:
+    #     try:
+    #         if p.result().status_code >= 500:
+    #             logger.error("exception posting to %s %r [will retry]\n" % (url, p.result().status_code))
+    #             # try again later when the next message in forces other attempts at posting.
+    #             logcache.put(postdata)
+    #     except ClosedPoolError as e:
+    #         logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n" % (url, e, postdata))
+    #         logcache.put(postdata)
+    #     except Exception as e:
+    #         logger.fatal("exception posting to %s %r %r [will not retry]\n" % (url, e, postdata))
+    #         sys.exit(1)
+
 
 def genRandomIPv4():
     #random, IPs
     return '.'.join("%d" % (random.randint(0,254)) for x in range(4))
+
 
 def genAttackerIPv4():
     #random, but not too random as to allow for alerting about attacks from
@@ -164,6 +167,7 @@ def makeEvents():
 
     except KeyboardInterrupt as e:
         sys.exit(1)
+
 
 def makeAlerts():
     '''
@@ -233,6 +237,7 @@ def makeAlerts():
 
     except KeyboardInterrupt as e:
         sys.exit(1)
+
 
 def makeAttackers():
     '''

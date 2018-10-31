@@ -186,6 +186,7 @@ class alertConsumer(ConsumerMixin):
         except ValueError as e:
             logger.exception("mozdefbot_slack exception while processing events queue %r" % e)
 
+
 def consumeAlerts(bot):
     # connect and declare the message queue/kombu objects.
     # server/exchange/queue

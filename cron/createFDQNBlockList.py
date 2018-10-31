@@ -27,6 +27,7 @@ logger = logging.getLogger(sys.argv[0])
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
 
+
 def initLogger():
     logger.level = logging.INFO
     formatter = logging.Formatter(
@@ -41,8 +42,10 @@ def initLogger():
         sh.setFormatter(formatter)
         logger.addHandler(sh)
 
+
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
+
 
 def isFQDN(fqdn):
     try:
@@ -54,6 +57,7 @@ def isFQDN(fqdn):
     except:
         return False
 
+
 def parse_fqdn_whitelist(fqdn_whitelist_location):
     fqdns = []
     with open(fqdn_whitelist_location, "r") as text_file:
@@ -62,6 +66,7 @@ def parse_fqdn_whitelist(fqdn_whitelist_location):
             if isFQDN(line):
                 fqdns.append(line)
     return fqdns
+
 
 def main():
     logger.debug('starting')
@@ -160,6 +165,7 @@ def s3_upload_file(file_path, bucket_name, key_name):
     url = "https://s3.amazonaws.com/{}/{}".format(bucket.name, key.name)
     print("URL: {}".format(url))
     return url
+
 
 if __name__ == '__main__':
     parser = OptionParser()

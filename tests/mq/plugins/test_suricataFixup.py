@@ -34,7 +34,7 @@ class TestSuricataFixup(object):
         assert result == event
         assert metadata['doc_type'] is not 'nsm'
 
-    ## Should never match and be modified by the plugin
+    # Should never match and be modified by the plugin
     def test_notsuri_log2(self):
         metadata = {
             'doc_type': 'event',
@@ -49,7 +49,7 @@ class TestSuricataFixup(object):
         assert result == event
         assert metadata['doc_type'] is not 'nsm'
 
-    ## Should never match and be modified by the plugin
+    # Should never match and be modified by the plugin
     def test_suricata_nocustomendpoint_log(self):
         metadata = {
             'doc_type': 'event',
