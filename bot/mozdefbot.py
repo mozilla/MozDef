@@ -124,7 +124,8 @@ def isIP(ip):
 def ipLocation(ip):
     location = ""
     try:
-        geoip = GeoIP()
+        geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/GeoLite2-City.mmdb")
+        geoip = GeoIP(geoip_data_dir)
         geoDict = geoip.lookup_ip(ip)
         if geoDict is not None:
             if 'error' in geoDict:

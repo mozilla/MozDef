@@ -27,7 +27,8 @@ class message(object):
         '''
         self.registration = ['sourceipaddress', 'destinationipaddress']
         self.priority = 20
-        self.geoip = GeoIP()
+        geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../data/GeoLite2-City.mmdb")
+        self.geoip = GeoIP(geoip_data_dir)
 
     def ipLocation(self, ip):
         location = dict()
