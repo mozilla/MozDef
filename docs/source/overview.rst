@@ -1,7 +1,7 @@
 Overview
 ========
 What?
-----
+-----
 Easiest to describe The Mozilla Defense Platform (MozDef) as a set of micro-services you can use as an open source Security Informaition and Event Management (SIEM) overlay on top of Elasticsearch.
 
 Why?

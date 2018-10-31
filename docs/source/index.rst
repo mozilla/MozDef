@@ -14,6 +14,7 @@ Table of Contents
   demo
   installation
   screenshots
+  alert_development_guide
   usage
   cloud_deployment
   advanced_settings

@@ -7,8 +7,12 @@ Here's how to make MozDef go using the provided docker compose files:
 
 1) Pull the repo: git clone https://github.com/mozilla/MozDef.git
 2) Build the docker containers:
-docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-rebuild.yml -p mozdef build
+
+  docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-rebuild.yml -p mozdef build
+
 3) Run the containers:
-docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-rebuild.yml -p mozdef up
+
+  docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-rebuild.yml -p mozdef up
+
 4) Firefox yourself to http://localhost to see the main UI (when the container starts)
 5) Login using a locally created account (click login, create and choose a username/password)
