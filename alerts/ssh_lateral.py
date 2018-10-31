@@ -94,8 +94,8 @@ class SshLateral(AlertTask):
     def exception_check(self, user, host, srcip):
         for x in self._config['exceptions']:
             if re.match(x[0], user) is not None and \
-                re.match(x[1], host) is not None and \
-                netaddr.IPAddress(srcip) in netaddr.IPNetwork(x[2]):
+                    re.match(x[1], host) is not None and \
+                    netaddr.IPAddress(srcip) in netaddr.IPNetwork(x[2]):
                 return True
         return False
 
