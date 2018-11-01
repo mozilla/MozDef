@@ -62,8 +62,8 @@ When writing alerts, it's important to keep the above concepts in mind.
 
 Each alert tends to have two different blocks of code:
 
-main - This is where the alert defines the criteria for the types of events it wants to look at
-onAggregation/onEvent - This is where the alert defines what happens when it sees those events, such as post processing of events and making them into a useful summary to emit as an alert. 
+- main - This is where the alert defines the criteria for the types of events it wants to look at
+- onAggregation/onEvent - This is where the alert defines what happens when it sees those events, such as post processing of events and making them into a useful summary to emit as an alert. 
 
 In both cases, because the alert is simple Python, you will find that getting started writing alerts is pretty easy.  It's important to note that when you change the alert from the base you copied to regularly test to ensure that the alert is still firing.  Should you run into a space where it's not firing, the best way to approach this is to backout the recent change and review the tests to ensure that the expectations are still the same.
 
