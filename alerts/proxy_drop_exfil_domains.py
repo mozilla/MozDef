@@ -7,10 +7,10 @@
 
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import QueryStringMatch, SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, ExistsMatch, PhraseMatch, WildcardMatch
 
 
-class AlertProxyDropExfilDomain(AlertTask):
+class AlertProxyDropExfilDomains(AlertTask):
     def main(self):
         self.parse_config('proxy_drop_exfil_domains.conf', ['exfil_domains'])
 
@@ -19,12 +19,12 @@ class AlertProxyDropExfilDomain(AlertTask):
         search_query.add_must([
             TermMatch('category', 'squid'),
             TermMatch('tags', 'squid'),
-            TermMatch('details.proxyaction', 'TCP_DENIED/-')
+            TermMatch('details.proxyaction', "TCP_DENIED/-")
         ])
 
         # Only notify on certain domains listed in the config
         domain_regex = "/({0}).*/".format(
-            self.config.exfil_daomins.replace(',', '|'))
+            self.config.exfil_domains.replace(',', '|'))
         search_query.add_must([
             QueryStringMatch('details.destination: {}'.format(domain_regex))
         ])
@@ -47,13 +47,14 @@ class AlertProxyDropExfilDomain(AlertTask):
         tags = ['squid', 'proxy']
         severity = 'WARNING'
 
-        dropped_domains = set()
+        exfil_domains = set()
         for event in aggreg['allevents']:
-            dropped_domains.add(event['_source']['details']['destination'])
+            domain = event['_source']['details']['destination'].split(':')
+            exfil_domains.add(domain[0])
 
-        summary = 'Suspicious Proxy DROP event(s) detected from {0} to the following exfil domains: {1}'.format(
+        summary = 'Suspicious Proxy DROP event(s) detected from {0} to the following exfil domain(s): {1}'.format(
             aggreg['value'],
-            ",".join(sorted(dropped_domains))
+            ",".join(sorted(exfil_domains))
         )
 
         # Create the alert object based on these properties
