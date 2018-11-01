@@ -7,8 +7,10 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestAlertProxyDropExfilDomain(AlertTestSuite):
-    alert_filename = "proxy_drop_executable"
+class TestProxyDropExfilDomains(AlertTestSuite):
+    alert_filename = "proxy_drop_exfil_domains"
+    alert_classname = "AlertProxyDropExfilDomains"
+
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
@@ -18,7 +20,7 @@ class TestAlertProxyDropExfilDomain(AlertTestSuite):
             "tags": ["squid"],
             "details": {
                 "sourceipaddress": "1.2.3.4",
-                "destination": "http://pastebin.com/",
+                "destination": "pastebin.com",
                 "proxyaction": "TCP_DENIED/-",
             }
         }
@@ -26,25 +28,25 @@ class TestAlertProxyDropExfilDomain(AlertTestSuite):
 
     # This event is an alternate destination that we'd want to aggregate
     default_event2 = AlertTestSuite.copy(default_event)
-    default_event2["_source"]["details"]["destination"] = "http://hastebin.com"
+    default_event2["_source"]["details"]["destination"] = "hastebin.com"
 
     # This event is the default negative event that will not cause the
     # alert to trigger
     default_negative_event = AlertTestSuite.copy(default_event)
-    default_negative_event["_source"]["details"]["destination"] = "http://foo.mozilla.com/index.html"
+    default_negative_event["_source"]["details"]["destination"] = "foo.mozilla.com"
 
     # This alert is the expected result from running this task
     default_alert = {
         "category": "squid",
         "tags": ['squid', 'proxy'],
         "severity": "WARNING",
-        "summary": 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following exfil domain(s): http://pastebin.com/',
+        "summary": 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following exfil domain(s): pastebin.com',
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
-        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following exfil domain(s): http://pastebin.com/,http://hastebin.com'
+        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following exfil domain(s): hastebin.com,pastebin.com'
 
     test_cases = []
 
