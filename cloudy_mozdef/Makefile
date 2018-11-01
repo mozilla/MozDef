@@ -9,7 +9,7 @@ S3_BUCKET_NAME  := mozdef.infosec.allizom.org
 S3_BUCKET_PATH	:= cf
 S3_BUCKET_URI	:= s3://$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)
 S3_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)/
-# OIDC_CLIENT_SECRET is set in an environment variable by running ". aws_parameters.sh"
+# OIDC_CLIENT_SECRET is set in an environment variable by running "source aws_parameters.sh"
 
 all:
 	@echo 'Available make targets:'
