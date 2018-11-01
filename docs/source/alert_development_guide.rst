@@ -54,16 +54,16 @@ At this point, begin development and periodically run your unit-tests locally wi
 Background on concepts
 ----------------------
 
-Logs - These are individual log line that are emitted from systems, like an Apache log
-Events - These logs parsed into a JSON format, which exist in MozDef and used with the ELK stack
-Alerts - These are effectively either a 1:1 events to alerts (this thing happens and alert) or a M:1 events to alerts (N of these things happen and alert).
+- Logs - These are individual log line that are emitted from systems, like an Apache log
+- Events - These logs parsed into a JSON format, which exist in MozDef and used with the ELK stack
+- Alerts - These are effectively either a 1:1 events to alerts (this thing happens and alert) or a M:1 events to alerts (N of these things happen and alert).
 
 When writing alerts, it's important to keep the above concepts in mind.
 
 Each alert tends to have two different blocks of code:
 
-main - This is where the alert defines the criteria for the types of events it wants to look at
-onAggregation/onEvent - This is where the alert defines what happens when it sees those events, such as post processing of events and making them into a useful summary to emit as an alert. 
+- main - This is where the alert defines the criteria for the types of events it wants to look at
+- onAggregation/onEvent - This is where the alert defines what happens when it sees those events, such as post processing of events and making them into a useful summary to emit as an alert. 
 
 In both cases, because the alert is simple Python, you will find that getting started writing alerts is pretty easy.  It's important to note that when you change the alert from the base you copied to regularly test to ensure that the alert is still firing.  Should you run into a space where it's not firing, the best way to approach this is to backout the recent change and review the tests to ensure that the expectations are still the same.
 
@@ -77,7 +77,10 @@ The best way to get your alert (once it's completed) into MozDef is to propose a
 Questions?
 ----------
 
-This guide is not intended to teach you how to develop in Python, there are some good resources below we would point you to to get more experience there.  However, should you have questions or run into problems trying to write an alert, we would like to hear from you (in IRC/Slack) so we can (1) help you get what you want to get done and (2) make it easier in the future for anyone to contribue alert logic to MozDef.
+This guide is not intended to teach you how to develop in Python, there are some good resources below we would point you to to get more experience there.  However, should you have questions or run into problems trying to write an alert, we would like to hear from you (in IRC/Slack) so we can:
+
+- help you get what you want to get done
+- make it easier for anyone to contribue alerts
 
 
 Resources
