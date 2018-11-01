@@ -54,9 +54,9 @@ At this point, begin development and periodically run your unit-tests locally wi
 Background on concepts
 ----------------------
 
-Logs - These are individual log line that are emitted from systems, like an Apache log
-Events - These logs parsed into a JSON format, which exist in MozDef and used with the ELK stack
-Alerts - These are effectively either a 1:1 events to alerts (this thing happens and alert) or a M:1 events to alerts (N of these things happen and alert).
+- Logs - These are individual log line that are emitted from systems, like an Apache log
+- Events - These logs parsed into a JSON format, which exist in MozDef and used with the ELK stack
+- Alerts - These are effectively either a 1:1 events to alerts (this thing happens and alert) or a M:1 events to alerts (N of these things happen and alert).
 
 When writing alerts, it's important to keep the above concepts in mind.
 
