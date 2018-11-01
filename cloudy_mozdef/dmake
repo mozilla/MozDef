@@ -39,9 +39,7 @@ fi
 
 dmake_env_file="`mktemp`"
 trap "{ rm -f \"$dmake_env_file\"; }" EXIT
-env | egrep "^AWS" > "$dmake_env_file"
-
-cat $dmake_env_file
+env | egrep "^AWS|OIDC_CLIENT_SECRET" > "$dmake_env_file"
 
 exec docker run --rm --name ${CONTAINER_NAME} \
   -u $(id -u) \
@@ -49,5 +47,4 @@ exec docker run --rm --name ${CONTAINER_NAME} \
   ${config_file_mount} \
   -v $(pwd):${DOCKER_PROJECT_DIR} \
   --env-file "$dmake_env_file" \
-  -e "OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}" \
   ${HUB}/${IMG_NAME}:latest make $@
