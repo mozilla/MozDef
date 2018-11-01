@@ -6,10 +6,9 @@ The installation process has been tested on CentOS 7.
 Build and run MozDef
 --------------------
 
-You can quickly install MozDef with an automated build generation using `docker`:
+You can quickly install MozDef with an automated build generation using `docker`::
 
   make build
-
   make run
 
 You're done! Now go to:
@@ -29,13 +28,13 @@ You're done! Now go to:
 Run tests
 ---------
 
-Simply run:
+Simply run::
 
   make test
 
 
 Note, if you end up with a clobbered ES index, or anything like that which might end up in failing tests, you can clean
-the environment with:
+the environment with::
 
   make clean
 
@@ -47,7 +46,7 @@ Manual Installation for Yum or Apt based distros
 
 Summary
 *******
-This section explains the manual installation process for the MozDef system.
+This section explains the manual installation process for the MozDef system::
 
   git clone https://github.com/mozilla/MozDef.git mozdef
 
@@ -440,6 +439,8 @@ Create the Repo in /etc/yum/repos.d/kibana.repo::
   enabled=1
   autorefresh=1
   type=rpm-md
+
+::
 
   sudo yum install kibana
 

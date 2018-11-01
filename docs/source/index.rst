@@ -13,8 +13,8 @@ Table of Contents
   introduction
   demo
   installation
-  screenshots
   alert_development_guide
+  screenshots
   usage
   cloud_deployment
   advanced_settings
