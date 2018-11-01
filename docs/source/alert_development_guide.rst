@@ -77,7 +77,10 @@ The best way to get your alert (once it's completed) into MozDef is to propose a
 Questions?
 ----------
 
-This guide is not intended to teach you how to develop in Python, there are some good resources below we would point you to to get more experience there.  However, should you have questions or run into problems trying to write an alert, we would like to hear from you (in IRC/Slack) so we can (1) help you get what you want to get done and (2) make it easier in the future for anyone to contribue alert logic to MozDef.
+This guide is not intended to teach you how to develop in Python, there are some good resources below we would point you to to get more experience there.  However, should you have questions or run into problems trying to write an alert, we would like to hear from you (in IRC/Slack) so we can:
+
+- help you get what you want to get done
+- make it easier for anyone to contribue alerts
 
 
 Resources
