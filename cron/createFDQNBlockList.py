@@ -83,18 +83,18 @@ def main():
         fqdnblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(days=options.expireage)}})
 
         # Lastly, export the combined blocklist
-        fqdnCursor=mozdefdb['fqdnblocklist'].aggregate([
-                {"$sort": {"dateAdded": -1}},
-                {"$match": {"address": {"$exists": True}}},
-                {"$match":
-                    {"$or":[
-                        {"dateExpiring": {"$gte": datetime.utcnow()}},
-                        {"dateExpiring": {"$exists": False}},
-                    ]},
-                },
-                {"$project":{"address":1}},
-                {"$limit": options.fqdnlimit}
-            ])
+        fqdnCursor = mozdefdb['fqdnblocklist'].aggregate([
+            {"$sort": {"dateAdded": -1}},
+            {"$match": {"address": {"$exists": True}}},
+            {"$match": {
+                "$or": [
+                    {"dateExpiring": {"$gte": datetime.utcnow()}},
+                    {"dateExpiring": {"$exists": False}},
+                ]},
+             },
+            {"$project": {"address": 1}},
+            {"$limit": options.fqdnlimit}
+        ])
         FQDNList=[]
         for fqdn in fqdnCursor:
             if fqdn not in options.fqdnwhitelist:

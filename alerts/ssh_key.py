@@ -94,6 +94,6 @@ class SSHKey(AlertTask):
         summary = 'Private keys detected on {} missing from whitelist'.format(hostname)
         ret = self.createAlertDict(summary, category, tags, [event], severity)
         ret['details'] = {
-                'private': alertkeys
-                }
+            'private': alertkeys
+        }
         return ret

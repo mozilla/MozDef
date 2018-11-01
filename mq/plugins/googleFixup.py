@@ -20,14 +20,12 @@ class message(object):
         # and do any clean up
 
         # check for details.kind like 'admin#reports#activity'
-        if ('details' in message.keys() and
-             'kind' in message['details'].keys() and
-             'activity' in message['details']['kind']):
-
+        if ('details' in message and 'kind' in message['details'] and
+                'activity' in message['details']['kind']):
             # details.etag might be quoted..unquote it
-            if 'etag' in message['details'].keys():
+            if 'etag' in message['details']:
                 message['details']['etag'] = message['details']['etag'].replace('"', '')
 
-            metadata['doc_type']= 'google'
+            metadata['doc_type'] = 'google'
 
         return (message, metadata)

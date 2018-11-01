@@ -83,9 +83,11 @@ def main():
                 snapshot_config = {
                     'indices': index_to_snapshot
                 }
-                epoch=calendar.timegm(datetime.utcnow().utctimetuple())
-                r = requests.put('{0}/_snapshot/s3backup/{1}-{2}?wait_for_completion=true'.format(esserver,index_to_snapshot,epoch),
-                    data=json.dumps(snapshot_config))
+                epoch = calendar.timegm(datetime.utcnow().utctimetuple())
+                r = requests.put(
+                    '{0}/_snapshot/s3backup/{1}-{2}?wait_for_completion=true'.format(esserver, index_to_snapshot, epoch),
+                    data=json.dumps(snapshot_config)
+                )
                 if 'status' in r.json():
                     logger.error('Error snapshotting %s: %s' % (index_to_snapshot, r.json()))
                 else:

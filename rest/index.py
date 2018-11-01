@@ -347,12 +347,14 @@ def createIncident():
     incident['dateMitigated'] = validateDate(body.get('dateMitigated'))
     incident['dateContained'] = validateDate(body.get('dateContained'))
 
-    dates = [incident['dateOpened'],
-              incident['dateClosed'],
-              incident['dateReported'],
-              incident['dateVerified'],
-              incident['dateMitigated'],
-              incident['dateContained']]
+    dates = [
+        incident['dateOpened'],
+        incident['dateClosed'],
+        incident['dateReported'],
+        incident['dateVerified'],
+        incident['dateMitigated'],
+        incident['dateContained']
+    ]
 
     # Validating all the dates for the format
     if False in dates:
@@ -534,9 +536,15 @@ def esLdapResults(begindateUTC=None, enddateUTC=None):
                     success = t['count']
                 if t['key'].upper() == 'LDAP_INVALID_CREDENTIALS':
                     failures = t['count']
-            resultsList.append(dict(dn=dn, failures=failures,
-                success=success, begin=begindateUTC.isoformat(),
-                end=enddateUTC.isoformat()))
+            resultsList.append(
+                dict(
+                    dn=dn,
+                    failures=failures,
+                    success=success,
+                    begin=begindateUTC.isoformat(),
+                    end=enddateUTC.isoformat()
+                )
+            )
 
         return(json.dumps(resultsList))
     except Exception as e:
@@ -554,9 +562,11 @@ def kibanaDashboards():
         for dashboard in results['hits']:
             resultsList.append({
                 'name': dashboard['_source']['title'],
-                'url': "%s#/%s/%s" % (options.kibanaurl,
-                "dashboard",
-                dashboard['_id'])
+                'url': "%s#/%s/%s" % (
+                    options.kibanaurl,
+                    "dashboard",
+                    dashboard['_id']
+                )
             })
 
     except ElasticsearchInvalidIndex as e:
@@ -586,19 +596,19 @@ def verisSummary(verisRegex=None):
         # aggregate the veris tags from the incidents collection and return as json
         client = MongoClient(options.mongohost, options.mongoport)
         # use meteor db
-        incidents= client.meteor['incidents']
+        incidents = client.meteor['incidents']
 
-        iveris=incidents.aggregate([
-
-                                   {"$match":{"tags":{"$exists":True}}},
-                                   {"$unwind": "$tags"},
-                                   {"$match":{"tags":{"$regex":''}}},  # regex for tag querying
-                                   {"$project": {"dateOpened": 1,
-                                                   "tags": 1,
-                                                   "phase": 1,
-                                                   "_id": 0
-                                                   }}
-                                   ])
+        iveris = incidents.aggregate([
+            {"$match": {"tags": {"$exists": True}}},
+            {"$unwind": "$tags"},
+            {"$match": {"tags": {"$regex": ''}}},
+            {"$project": {
+                "dateOpened": 1,
+                "tags": 1,
+                "phase": 1,
+                "_id": 0
+            }}
+        ])
         if iveris:
             return json.dumps(list(iveris), default=json_util.default)
         else:
@@ -630,7 +640,9 @@ def initConfig():
 
 
 parser = OptionParser()
-parser.add_option("-c", dest='configfile',
+parser.add_option(
+    "-c",
+    dest='configfile',
     default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
     help="configuration file to use")
 (options, args) = parser.parse_args()

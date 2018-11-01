@@ -109,13 +109,7 @@ class message(object):
             '',
             self.configfile)
 
-    def blockFQDN(self,
-                fqdn=None,
-                comment=None,
-                duration=None,
-                referenceID=None,
-                userID=None
-                ):
+    def blockFQDN(self, fqdn=None, comment=None, duration=None, referenceID=None, userID=None):
         try:
             # DB connection/table
             mongoclient = MongoClient(self.options.mongohost, self.options.mongoport)
@@ -151,35 +145,36 @@ class message(object):
                     fqdnblock['comment'] = comment
                     fqdnblock['creator'] = userID
                     fqdnblock['reference'] = referenceID
-                    ref=fqdnblocklist.insert(fqdnblock)
+                    ref = fqdnblocklist.insert(fqdnblock)
                     sys.stdout.write('{0} written to db\n'.format(ref))
                     sys.stdout.write('%s: added to the fqdnblocklist table\n' % (fqdn))
 
                     # send to statuspage.io?
-                    if len(self.options.statuspage_api_key)>1:
+                    if len(self.options.statuspage_api_key) > 1:
                         try:
                             headers = {'Authorization': 'Oauth {0}'.format(self.options.statuspage_api_key)}
                             # send the data as a form post per:
                             # https://doers.statuspage.io/api/v1/incidents/#create-realtime
-                            post_data={
-                            'incident[name]': 'block FQDN {}'.format(fqdn),
-                            'incident[status]': 'resolved',
-                            'incident[impact_override]': 'none',
-                            'incident[body]': '{} initiated a block of FDQN {} until {}'.format(
-                                userID,
-                                fqdn,
-                                end_date.isoformat()),
-                            'incident[component_ids][]': self.options.statuspage_sub_component_id,
-                            'incident[components][{0}]'.format(self.options.statuspage_component_id): "operational"}
+                            post_data = {
+                                'incident[name]': 'block FQDN {}'.format(fqdn),
+                                'incident[status]': 'resolved',
+                                'incident[impact_override]': 'none',
+                                'incident[body]': '{} initiated a block of FDQN {} until {}'.format(
+                                    userID,
+                                    fqdn,
+                                    end_date.isoformat()),
+                                'incident[component_ids][]': self.options.statuspage_sub_component_id,
+                                'incident[components][{0}]'.format(self.options.statuspage_component_id): "operational"
+                            }
                             response = requests.post(self.options.statuspage_url,
-                                                    headers=headers,
-                                                    data=post_data)
+                                                     headers=headers,
+                                                     data=post_data)
                             if response.ok:
                                 sys.stdout.write('%s: notification sent to statuspage.io\n' % (fqdn))
                             else:
-                                sys.stderr.write('%s: statuspage.io notification failed %s\n' % (fqdn,response.json()))
+                                sys.stderr.write('%s: statuspage.io notification failed %s\n' % (fqdn, response.json()))
                         except Exception as e:
-                            sys.stderr.write('Error while notifying statuspage.io for %s: %s\n' %(fqdn,e))
+                            sys.stderr.write('Error while notifying statuspage.io for %s: %s\n' %(fqdn, e))
                 else:
                     sys.stderr.write('%s: is already present in the fqdnblocklist table\n' % (fqdn))
             else:
@@ -232,11 +227,13 @@ class message(object):
                                 sys.stdout.write('{0} is whitelisted as part of {1}\n'.format(fqdn, whitelist_fqdn))
 
                         if not whitelisted:
-                            self.blockFQDN(fqdn,
-                                         comment,
-                                         duration,
-                                         referenceID,
-                                         userid)
+                            self.blockFQDN(
+                                fqdn,
+                                comment,
+                                duration,
+                                referenceID,
+                                userid
+                            )
                             sys.stdout.write('added {0} to blocklist\n'.format(fqdn))
                         else:
                             sys.stdout.write('not adding {0} to blocklist, it was found in whitelist\n'.format(fqdn))
@@ -245,7 +242,7 @@ class message(object):
                     response.status = "400 invalid FQDN"
                     response.body = "invalid FQDN"
         except Exception as e:
-            sys.stderr.write('Error handling request.json %r \n'% (e))
+            sys.stderr.write('Error handling request.json %r \n' % (e))
             response.status = "500"
 
         return (request, response)
