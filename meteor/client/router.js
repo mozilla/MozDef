@@ -7,17 +7,11 @@ Copyright (c) 2014 Mozilla Corporation
 
 Router.configure({
     // the default layout
-    layoutTemplate: 'layout'
-});
-
-Router.onBeforeAction(function () {
-    // before we go anywhere, make sure we have settings
-    this.subscribe('mozdefsettings').wait();
-    if (this.ready()) {
-        this.next();
-      } else {
-        this.render('Loading settings...');
-    }
+    layoutTemplate: 'layout',
+    // ensure we have settings
+    waitOn: function() {
+        return Meteor.subscribe('mozdefsettings')
+        }
 });
 
 Router.map(function () {
