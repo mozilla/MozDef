@@ -184,12 +184,11 @@ function registerLoginViaHeader() {
             });
         }
 
-        //generate login tokens
-        var stampedToken = Accounts._generateStampedLoginToken();
-        // return ala: https://github.com/meteor/meteor/blob/devel/packages/accounts-base/accounts_server.js#L340
+        // per https://github.com/meteor/meteor/blob/devel/packages/accounts-base/accounts_server.js#L263
+        // generating and storing the stamped login token is optional
+        // so we just return the userId and let the accounts module do it's thing
         return {
-            userId: userId,
-            stampedLoginToken: stampedToken
+            userId: userId
         }
     });
 }
