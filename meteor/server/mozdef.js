@@ -26,12 +26,20 @@ if (Meteor.isServer) {
         features.remove({});
         var featuresFile = Assets.getText("features.txt");
         var featuresObject = featuresFile.split("\n");
+        var featuresRemoved = mozdef.removeFeatures.split(',').map(function(item) {
+            return item.trim();
+        });
+        console.log(featuresRemoved);
         featuresObject.forEach(function (featureItem) {
             feature = models.feature();
             feature.name = featureItem.split(" ")[0];
             feature.url = featureItem.split(" ")[1]
+            if ( featuresRemoved.includes(feature.name) ){
+                feature.enabled=false;
+            }
             features.insert(feature);
         });
+        console.log('settings', mozdef);
         // in addition to the Meteor.settings we use put deployment
         // settings in settings.js to make it easier to deploy
         // and to allow clients to get access to deployment-specific settings.

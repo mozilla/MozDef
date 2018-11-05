@@ -14,7 +14,8 @@ if (Meteor.isServer) {
         kibanaURL: process.env.OPTIONS_METEOR_KIBANAURL || "http://localhost:9090/app/kibana#",
         enableBlockIP: process.env.OPTIONS_METEOR_ENABLEBLOCKIP || true,
         enableClientAccountCreation: process.env.OPTIONS_METEOR_ENABLECLIENTACCOUNTCREATION || true,
-        authenticationType: process.env.OPTIONS_METEOR_AUTHENTICATIONTYPE || "meteor-password"
+        authenticationType: process.env.OPTIONS_METEOR_AUTHENTICATIONTYPE || "meteor-password",
+        removeFeatures: process.env.OPTIONS_REMOVE_FEATURES || ""
     }
 
     // send these settings to the client via the Meteor.settings.public
