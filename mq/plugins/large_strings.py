@@ -6,9 +6,10 @@
 
 class message(object):
     def __init__(self):
-        self.registration = ['nubis_events_prod']
+        self.registration = ['nubis_events_prod', 'githubeventsqs']
         self.priority = 20
         self.MAX_STRING_LENGTH = 3000
+
 
     def onMessage(self, message, metadata):
         if 'details' in message:
@@ -23,6 +24,12 @@ class message(object):
                         and len(message['details']['cmdline']) > self.MAX_STRING_LENGTH:
                     message['details']['cmdline'] = message['details']['cmdline'][:self.MAX_STRING_LENGTH]
                     message['details']['cmdline'] += ' ...'
+            
+            if 'pr_body' in message['details']:
+                if type(message['details']['pr_body']) in (str, unicode) \
+                        and len(message['details']['pr_body']) > self.MAX_STRING_LENGTH:
+                    message['details']['pr_body'] = message['details']['pr_body'][:self.MAX_STRING_LENGTH]
+                    message['details']['pr_body'] += ' ...'
 
         if 'summary' in message:
             if type(message['summary']) in (str, unicode) \
