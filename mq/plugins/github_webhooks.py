@@ -62,4 +62,3 @@ class message(object):
             newmessage = None
 
         return (newmessage, metadata)
-
