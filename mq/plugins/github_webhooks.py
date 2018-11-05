@@ -26,7 +26,6 @@ class message(object):
         self.yap = yap
         del(map)
 
-
     def onMessage(self, message, metadata):
 
         if 'tags' not in message:
@@ -63,3 +62,4 @@ class message(object):
             newmessage = None
 
         return (newmessage, metadata)
+
