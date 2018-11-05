@@ -37,4 +37,3 @@ class message(object):
                 message['summary'] += ' ...'
 
         return (message, metadata)
-
