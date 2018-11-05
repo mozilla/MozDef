@@ -35,6 +35,9 @@ class message(object):
         self.priority = 10
 
     def onMessage(self, message, metadata):
+
+        if 'eventsource' not in message:
+            return (message, metadata)
         #drop non-relevant messages
         if message['eventsource'] in ('Fxa-customsMozSvc', 'FxaContentWebserver', 'FxaAuthWebserver', 'FxaOauthWebserver', 'FxaAuth', 'fxa-auth-server'):
             if 'details' in message.keys():
