@@ -10,6 +10,8 @@ import json
 import kombu
 import os
 import sys
+import socket
+import netaddr
 
 from configlib import getConfig, OptionParser
 from datetime import datetime
@@ -56,6 +58,17 @@ def getValueByPath(input_dict, path_string):
     for chunk in path_string.split('.'):
         return_data = return_data.get(chunk, {})
     return return_data
+
+
+def add_hostname_to_ip(ip, output_format, require_internal=True):
+    ip_obj = netaddr.IPNetwork(ip)[0]
+    if require_internal and not ip_obj.is_private():
+        return ip
+    try:
+        reversed_dns = socket.gethostbyaddr(ip)
+        return output_format.format(ip, reversed_dns[0])
+    except socket.herror:
+        return ip
 
 
 class AlertTask(Task):
