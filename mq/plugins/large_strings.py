@@ -10,7 +10,6 @@ class message(object):
         self.priority = 20
         self.MAX_STRING_LENGTH = 3000
 
-
     def onMessage(self, message, metadata):
         if 'details' in message:
             if 'message' in message['details']:
@@ -24,7 +23,7 @@ class message(object):
                         and len(message['details']['cmdline']) > self.MAX_STRING_LENGTH:
                     message['details']['cmdline'] = message['details']['cmdline'][:self.MAX_STRING_LENGTH]
                     message['details']['cmdline'] += ' ...'
-            
+
             if 'pr_body' in message['details']:
                 if type(message['details']['pr_body']) in (str, unicode) \
                         and len(message['details']['pr_body']) > self.MAX_STRING_LENGTH:
@@ -38,3 +37,4 @@ class message(object):
                 message['summary'] += ' ...'
 
         return (message, metadata)
+
