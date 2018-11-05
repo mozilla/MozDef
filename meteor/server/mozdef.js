@@ -5,6 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor';
+import '/imports/models.js';
 
 
 if (Meteor.isServer) {
@@ -20,6 +21,17 @@ if (Meteor.isServer) {
         // set to what the browser thinks you are coming from (i.e. localhost, or actual servername)
         Meteor.absoluteUrl.defaultOptions.rootUrl = mozdef.rootURL + ':' + mozdef.port
 
+        // figure out what features are enabled
+        console.log("updating features");
+        features.remove({});
+        var featuresFile = Assets.getText("features.txt");
+        var featuresObject = featuresFile.split("\n");
+        featuresObject.forEach(function (featureItem) {
+            feature = models.feature();
+            feature.name = featureItem.split(" ")[0];
+            feature.url = featureItem.split(" ")[1]
+            features.insert(feature);
+        });
         // in addition to the Meteor.settings we use put deployment
         // settings in settings.js to make it easier to deploy
         // and to allow clients to get access to deployment-specific settings.

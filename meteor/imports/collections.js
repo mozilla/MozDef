@@ -10,6 +10,7 @@ import uuid from "uuid";
 //collections shared by client/server
 Meteor.startup(() => {
     mozdefsettings = new Meteor.Collection("mozdefsettings");
+    features = new Meteor.Collection("features");
     events = new Meteor.Collection("events");
     alerts = new Meteor.Collection("alerts");
     investigations = new Meteor.Collection("investigations");
@@ -33,7 +34,9 @@ Meteor.startup(() => {
         Meteor.publish("mozdefsettings",function(){
             return mozdefsettings.find();
         });
-
+        Meteor.publish("features",function(){
+            return features.find();
+        });
         Meteor.publish("alerts-summary", function (searchregex,timeperiod,recordlimit) {
             //tail the last 100 records by default
 
@@ -383,7 +386,7 @@ Meteor.startup(() => {
                     // based on how enableClientAccountCreation was set at deployment.
                     Meteor.login();
         });
-
+        Meteor.subscribe("features");
         alertsCount = new Meteor.Collection("alerts-count",options);
         //client-side subscriptions to low volume collections
         Meteor.subscribe("veris");
