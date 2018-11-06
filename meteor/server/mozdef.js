@@ -64,10 +64,6 @@ if (Meteor.isServer) {
             value: mozdef.kibanaURL
         });
         mozdefsettings.insert({
-            key: 'enableBlockIP',
-            value: mozdef.enableBlockIP
-        });
-        mozdefsettings.insert({
             key: 'authenticationType',
             value: mozdef.authenticationType
         });
