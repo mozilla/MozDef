@@ -36,10 +36,7 @@ class NSMScanPort(AlertTask):
         tags = ['nsm', "bro", 'portscan']
 
         indicators = 'unknown'
-        # port = 'unknown'
-        # Maybe iterate through it?
         x = aggreg['events'][0]['_source']
-        import pdb; pdb.set_trace()
         if 'details' in x:
             if 'indicators' in x['details']:
                 indicators = x['details']['sourceipaddress']
