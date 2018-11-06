@@ -9,3 +9,4 @@ logincounts /logincounts
 attackers /attackers
 globe /globe
 about /about
+blockip /blockip
