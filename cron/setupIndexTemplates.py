@@ -17,6 +17,7 @@ from configlib import getConfig, OptionParser
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utils import es as es_module
 
+
 def initConfig():
     options.esservers = list(getConfig(
         'esservers',
@@ -33,6 +34,7 @@ def initConfig():
         '',
         options.configfile).split(',')
         )
+
 
 if __name__ == '__main__':
     parser = OptionParser()

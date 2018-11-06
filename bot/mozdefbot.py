@@ -124,7 +124,8 @@ def isIP(ip):
 def ipLocation(ip):
     location = ""
     try:
-        geoip = GeoIP()
+        geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/GeoLite2-City.mmdb")
+        geoip = GeoIP(geoip_data_dir)
         geoDict = geoip.lookup_ip(ip)
         if geoDict is not None:
             if 'error' in geoDict:
@@ -331,7 +332,7 @@ class alertConsumer(ConsumerMixin):
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
-            if self.lastalert != None:
+            if self.lastalert is not None:
                 delta = toUTC(datetime.now()) - self.lastalert
                 sys.stdout.write('new alert, delta since last is {}\n'.format(delta))
                 if delta.seconds < 2:
@@ -349,14 +350,17 @@ class alertConsumer(ConsumerMixin):
             logger.exception(
                 "alertworker exception while processing events queue %r" % e)
 
+
 @run_async
 def consumeAlerts(ircBot):
     # connect and declare the message queue/kombu objects.
     # server/exchange/queue
-    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,
-                                                        options.mqpassword,
-                                                        options.mqalertserver,
-                                                        options.mqport)
+    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(
+        options.mquser,
+        options.mqpassword,
+        options.mqalertserver,
+        options.mqport
+    )
     mqAlertConn = Connection(mqConnString)
 
     # Exchange for alerts we pass to plugins
@@ -390,15 +394,34 @@ def initConfig():
     options.username = getConfig('username', 'username', options.configfile)
     options.realname = getConfig('realname', 'realname', options.configfile)
     options.password = getConfig('password', '', options.configfile)
+
+    # Our config parser removes '#'
+    # so we gotta re-add them
     options.join = getConfig('join', '#mzdf', options.configfile)
+    channels = []
+    for channel in options.join.split(','):
+        if not channel.startswith('#'):
+            channel = '#{0}'.format(channel)
+        channels.append(channel)
+    options.join = ','.join(channels)
+
     options.alertircchannel = getConfig(
         'alertircchannel',
         '',
         options.configfile)
+
     options.channelkeys = json.loads(getConfig(
         'channelkeys',
         '{"#somechannel": "somekey"}',
         options.configfile))
+
+    # Our config parser stomps out the '#' so we gotta readd
+    channelkeys = {}
+    for key, value in options.channelkeys.iteritems():
+        if not key.startswith('#'):
+            key = '#{0}'.format(key)
+        channelkeys[key] = value
+    options.channelkeys = channelkeys
 
     # message queue options
     # server hostname

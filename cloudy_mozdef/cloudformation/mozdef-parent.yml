@@ -72,6 +72,7 @@ Resources:
         CloudTrailSQSQueueArn: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueArn
         MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
         # CloudTrailS3BucketIAMRoleArn we leave empty as we will consume CloudTrail logs from our own account
+        ESServiceLinkedRoleExists: !GetAtt ESServiceLinkedRoleExists.RoleExists
       Tags:
         - Key: application
           Value: mozdef
@@ -105,6 +106,7 @@ Resources:
       TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-instance.yml ] ]
   MozDefES:
     Type: AWS::CloudFormation::Stack
+    DependsOn: MozDefIAMRoleAndInstanceProfile
     Properties:
       Parameters:
         SubnetIds: !Join [ ',', !Ref PublicSubnetIds ]
@@ -172,9 +174,16 @@ Resources:
                 Effect: Allow
                 Action:
                   - logs:*
+                  - iam:ListRoles
                 Resource: '*'
   GetArrayLengthLambdaFunction:
     Type: AWS::Lambda::Function
+    DependsOn: CloudFormationLambdaIAMRole
+    # This DependsOn shouldn't be needed because the "Role" value is set to
+    # "!GetAtt CloudFormationLambdaIAMRole.Arn" but without DependsOn the error
+    # "Template error: IAM role mozdef-aws-nested-CloudFormationLambdaIAMRole-108UCUPESC6WG doesn't exist"
+    # occurs on stack creation for this Lambda Function resource. The DependsOn
+    # prevents the error.
     Properties:
       Code:
         ZipFile: |
@@ -198,3 +207,42 @@ Resources:
     Properties:
       Array: !Ref PublicSubnetIds
       ServiceToken: !GetAtt GetArrayLengthLambdaFunction.Arn
+  DoesRoleExistLambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: CloudFormationLambdaIAMRole
+    # This DependsOn shouldn't be needed because the "Role" value is set to
+    # "!GetAtt CloudFormationLambdaIAMRole.Arn" but without DependsOn the error
+    # "Template error: IAM role mozdef-aws-nested-CloudFormationLambdaIAMRole-108UCUPESC6WG doesn't exist"
+    # occurs on stack creation for this Lambda Function resource. The DependsOn
+    # prevents the error.
+    Properties:
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import boto3, secrets, string
+          def handler(event, context):
+              paginator = boto3.client('iam').get_paginator('list_roles')
+              args = {'PathPrefix': event['ResourceProperties']['PathPrefix']} if 'PathPrefix' in event['ResourceProperties'] else {}
+              iterator = paginator.paginate(**args).search(
+                  "Roles[?RoleName == '%s'][]" % event['ResourceProperties']['RoleName'])
+              response = {'RoleExists': len([x for x in iterator]) > 0}
+              physical_id = ''.join(
+                  secrets.choice(string.ascii_uppercase + string.digits) for i in
+                  range(13))
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response,
+                               "DoesRoleExist-%s" % physical_id)
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      Timeout: 20
+  ESServiceLinkedRoleExists:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      RoleName: AWSServiceRoleForAmazonElasticsearchService
+      PathPrefix: '/aws-service-role/es.amazonaws.com/'
+      ServiceToken: !GetAtt DoesRoleExistLambdaFunction.Arn

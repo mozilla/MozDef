@@ -52,7 +52,7 @@ class TestDotDict(UnitTestSuite):
             }
         }
         dct = DotDict(original_dct)
-        assert dct.get('does.not.exist') == None
+        assert dct.get('does.not.exist') is None
         assert dct.get('details') == {'key1': 'value1','subkey': {'subkey': 'subvalue'}}
         assert dct.get('details.key1') == 'value1'
         assert dct.get('details.subkey') == {'subkey':'subvalue'}

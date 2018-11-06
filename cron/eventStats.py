@@ -118,8 +118,8 @@ def initConfig():
 
     # default time period in minutes to look back in time for the aggregation
     options.aggregationminutes = getConfig('aggregationminutes',
-                                         15,
-                                         options.configfile)
+                                           15,
+                                           options.configfile)
     # configure the index to save events to
     options.index = getConfig('index', 'mozdefstate', options.configfile)
 

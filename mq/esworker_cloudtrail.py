@@ -43,7 +43,7 @@ except ImportError as e:
 
 
 class RoleManager:
-    def __init__(self, region='us-east-1', aws_access_key_id=None, aws_secret_access_key=None):
+    def __init__(self, region_name='us-east-1', aws_access_key_id=None, aws_secret_access_key=None):
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
         self.credentials = {}
@@ -52,7 +52,7 @@ class RoleManager:
         try:
             self.local_conn_sts = boto.sts.connect_to_region(
                 **get_aws_credentials(
-                    region,
+                    region_name,
                     self.aws_access_key_id,
                     self.aws_secret_access_key))
         except Exception, e:
@@ -69,12 +69,11 @@ class RoleManager:
                 raise
             try:
                 creds = get_aws_credentials(
-                        self.session_credentials.access_key,
-                        self.session_credentials.secret_key,
-                        self.session_credentials.session_token) if self.session_credentials else {}
-                self.session_conn_sts = boto.sts.connect_to_region(
-                    region=region,
-                    **creds)
+                    region_name,
+                    self.session_credentials.access_key,
+                    self.session_credentials.secret_key,
+                    self.session_credentials.session_token) if self.session_credentials else {}
+                self.session_conn_sts = boto.sts.connect_to_region(**creds)
             except Exception, e:
                 logger.error("Unable to connect to STS with session token due to exception %s" % e.message)
                 raise
@@ -126,10 +125,11 @@ class RoleManager:
             'aws_secret_access_key': credential.secret_key,
             'security_token': credential.session_token} if credential else {}
 
+
 def get_aws_credentials(region=None, accesskey=None, secretkey=None, security_token=None):
     result = {}
     if region not in ['', '<add_region>', None]:
-        result['region'] = region
+        result['region_name'] = region
     if accesskey not in ['', '<add_accesskey>', None]:
         result['aws_access_key_id'] = accesskey
     if secretkey not in ['', '<add_secretkey>', None]:

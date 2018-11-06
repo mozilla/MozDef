@@ -9,6 +9,7 @@ import os
 import sys
 from configlib import getConfig, OptionParser
 
+
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
@@ -72,7 +73,7 @@ class message(object):
             if dresponse.status_code == 200:
                 response.content_type = "application/json"
                 response.body = dresponse.content
-                response.status=200
+                response.status = 200
             else:
                 response.status = dresponse.status_code
 
@@ -90,5 +91,5 @@ class message(object):
 
         # cymon options
         self.options.cymonapikey = getConfig('cymonapikey',
-                                        '',
-                                        self.configfile)
+                                             '',
+                                             self.configfile)

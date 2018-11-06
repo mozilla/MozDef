@@ -77,7 +77,6 @@ class AlertTestSuite(UnitTestSuite):
         assert test_case.description is not ""
 
         # Verify alert_filename is a legit file
-        # full_alert_file_path = "../../../alerts/" + self.alert_filename + ".py"
         full_alert_file_path = "./" + self.alert_filename + ".py"
         assert os.path.isfile(full_alert_file_path) is True
 
@@ -86,7 +85,9 @@ class AlertTestSuite(UnitTestSuite):
         # gonna grep for class name
         alert_source_str = open(full_alert_file_path, 'r').read()
         class_search_str = "class " + self.alert_classname + "("
-        assert class_search_str in alert_source_str
+        error_text = "Incorrect alert classname. We tried guessing the class name ({0}), but that wasn't it.".format(self.alert_classname)
+        error_text += ' Define self.alert_classname in your alert unit test class.'
+        assert class_search_str in alert_source_str, error_text
 
         # Verify events is not empty
         assert len(test_case.events) is not 0

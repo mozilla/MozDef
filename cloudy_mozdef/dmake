@@ -29,12 +29,22 @@ function check_img() {
 
 check_img || exit 127
 
+if [ -n "$AWS_CONFIG_FILE" ]; then
+  config_file_mount="-v ${AWS_CONFIG_FILE}:${AWS_CONFIG_FILE}"
+fi
+
+if [ -n "$AWS_SHARED_CREDENTIALS_FILE" ]; then
+  config_file_mount="${config_file_mount} -v ${AWS_SHARED_CREDENTIALS_FILE}:${AWS_SHARED_CREDENTIALS_FILE}"
+fi
+
+dmake_env_file="`mktemp`"
+trap "{ rm -f \"$dmake_env_file\"; }" EXIT
+env | egrep "^AWS|OIDC_CLIENT_SECRET" > "$dmake_env_file"
+
 exec docker run --rm --name ${CONTAINER_NAME} \
   -u $(id -u) \
   -v ${AWS_CREDS_DIR}:/root/.aws \
+  ${config_file_mount} \
   -v $(pwd):${DOCKER_PROJECT_DIR} \
-  -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" \
-  -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" \
-  -e "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}" \
-  -e "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}" \
+  --env-file "$dmake_env_file" \
   ${HUB}/${IMG_NAME}:latest make $@

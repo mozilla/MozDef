@@ -117,6 +117,7 @@ Resources:
             - content: |
                 OPTIONS_ESSERVERS=${ESURL}
                 OPTIONS_KIBANAURL=${KibanaURL}
+                OPTIONS_METEOR_KIBANAURL=${KibanaURL}
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
@@ -131,6 +132,8 @@ Resources:
                 OPTIONS_METEOR_AUTHENTICATIONTYPE=oidc
                 ES={"servers": [${ESURL}]}
                 cookiename=sesmeteor
+                # Increase the AWS ES total fields limit from 1000 to 4000
+                OPTIONS_MAPPING_TOTAL_FIELDS_LIMIT=4000
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
             - content: |
                 client_id=${OIDCClientId}
@@ -153,7 +156,7 @@ Resources:
             - systemctl start rsyslog
             - grep "${EFSID}" /etc/fstab >/dev/null || echo "${EFSID}:/ ${EFSMountPoint} efs tls,_netdev" >> /etc/fstab
             - for i in 1 2 3 4 5 6; do mount --verbose --all --types efs defaults && break || sleep 15; done
-            - cd /opt/mozdef && git pull origin infosec_workweek
+            - cd /opt/mozdef && git pull origin master
             - make -C /opt/mozdef -f /opt/mozdef/Makefile  run-cloudy-mozdef
   MozDefAutoScaleGroup:
     Type: AWS::AutoScaling::AutoScalingGroup

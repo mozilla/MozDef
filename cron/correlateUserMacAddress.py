@@ -78,7 +78,7 @@ def esSearch(es, macassignments=None):
     Expecting an event like: user: username@somewhere.com; mac: 5c:f9:38:b1:de:cf; author reason: roamed session; ssid: ANSSID; AP 46/2\n
     '''
     usermacre=re.compile(r'''user: (?P<username>.*?); mac: (?P<macaddress>.*?); ''',re.IGNORECASE)
-    correlations={} # list of dicts to populate hits we find
+    correlations={}
 
     search_query = SearchQuery(minutes=options.correlationminutes)
     search_query.add_must(TermMatch('details.program', 'AUTHORIZATION-SUCCESS'))
@@ -105,18 +105,19 @@ def esSearch(es, macassignments=None):
     except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
+
 def esStoreCorrelations(es, correlations):
     for c in correlations:
         event=dict(
-                   utctimestamp=correlations[c]['utctimestamp'],
-                   summary=c,
-                   details=dict(
-                       username=correlations[c]['username'],
-                       macaddress=correlations[c]['macaddress'],
-                       entity=correlations[c]['entity']
-                       ),
-                   category='indicators'
-                   )
+            utctimestamp=correlations[c]['utctimestamp'],
+            summary=c,
+            details=dict(
+                username=correlations[c]['username'],
+                macaddress=correlations[c]['macaddress'],
+                entity=correlations[c]['entity']
+            ),
+            category='indicators'
+        )
         try:
             es.save_object(index='intelligence', doc_id=getDocID(c), doc_type='usernamemacaddress', body=json.dumps(event))
         except Exception as e:
@@ -164,15 +165,15 @@ def initConfig():
 
     # default time period in minutes to look back in time for the aggregation
     options.correlationminutes = getConfig('correlationminutes',
-                                         150,
-                                         options.configfile)
+                                           150,
+                                           options.configfile)
 
     # default location of the OUI file from IEEE for resolving mac prefixes
     # Expects the OUI file from IEEE:
     # wget http://www.ieee.org/netstorage/standards/oui.txt
     options.ouifilename = getConfig('ouifilename',
-                                'oui.txt',
-                                options.configfile)
+                                    'oui.txt',
+                                    options.configfile)
 
 
 if __name__ == '__main__':

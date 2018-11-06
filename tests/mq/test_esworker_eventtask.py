@@ -13,6 +13,7 @@ import datetime
 def utc_timezone():
     return pytz.timezone('UTC')
 
+
 tzlocal.get_localzone = utc_timezone
 
 

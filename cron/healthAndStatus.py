@@ -170,6 +170,7 @@ def initConfig():
     default_mapping_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mozdefStateDefaultMappingTemplate.json')
     options.default_mapping_file = getConfig('default_mapping_file', default_mapping_location, options.configfile)
 
+
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option(

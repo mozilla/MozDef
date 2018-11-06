@@ -110,9 +110,6 @@
               "sourceport" : {
                 "index" : "not_analyzed",
                 "type" : "long"
-              },
-              "apiversion" : {
-                "type" : "keyword"
               }
             }
           },
