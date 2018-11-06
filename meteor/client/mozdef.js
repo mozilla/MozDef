@@ -15,6 +15,7 @@ import PNotify from 'pnotify';
 import 'pnotify/dist/pnotify.css';
 import './mozdef.html';
 import './menu.html';
+import './menu.js';
 import '/client/layout.js';
 
 
@@ -149,7 +150,7 @@ if (Meteor.isClient) {
             result.push({key:prefix,value: x})
         }
         return result
-    }
+    };
 
     Template.hello.helpers({
         greeting: function() {
@@ -175,12 +176,7 @@ if (Meteor.isClient) {
     });
 
     UI.registerHelper('isFeature',function(featureName){
-        console.log(features.find().count())
-        if ( features.findOne({'name':featureName}) ){
-            return features.findOne({'name':featureName}).enabled;
-        }else{
-            return true;
-        }
+        return isFeature(featureName);
     });
 
     UI.registerHelper('uiDateFormat',function(adate){
@@ -316,7 +312,11 @@ if (Meteor.isClient) {
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
-            blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
+            if ( isFeature('blockip') ){
+                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
+            }else{
+                blockIPitem=$();
+            }
 
             ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,blockIPitem);
 
