@@ -6,7 +6,7 @@
 # Copyright (c) 2018 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch, ExistsMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch, ExistsMatch
 
 
 class NSMScanPort(AlertTask):
@@ -30,7 +30,6 @@ class NSMScanPort(AlertTask):
         self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
         self.walkAggregations(threshold=1)
 
-
     def onAggregation(self, aggreg):
         category = 'nsm'
         severity = 'WARNING'
@@ -40,6 +39,7 @@ class NSMScanPort(AlertTask):
         # port = 'unknown'
         # Maybe iterate through it?
         x = aggreg['events'][0]['_source']
+        import pdb; pdb.set_trace()
         if 'details' in x:
             if 'indicators' in x['details']:
                 indicators = x['details']['sourceipaddress']
@@ -47,4 +47,3 @@ class NSMScanPort(AlertTask):
         summary = 'Port scan from {}'.format(indicators)
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-
