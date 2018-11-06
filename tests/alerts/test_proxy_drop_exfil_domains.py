@@ -28,7 +28,7 @@ class TestProxyDropExfilDomains(AlertTestSuite):
 
     # This event is an alternate destination that we'd want to aggregate
     default_event2 = AlertTestSuite.copy(default_event)
-    default_event2["_source"]["details"]["destination"] = "hastebin.com"
+    default_event2["_source"]["details"]["destination"] = "www.sendspace.com"
 
     # This event is the default negative event that will not cause the
     # alert to trigger
@@ -46,7 +46,7 @@ class TestProxyDropExfilDomains(AlertTestSuite):
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
-        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following exfil domain(s): hastebin.com,pastebin.com'
+        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following exfil domain(s): www.sendspace.com,pastebin.com'
 
     test_cases = []
 
