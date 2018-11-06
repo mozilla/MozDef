@@ -16,6 +16,23 @@ These files all follow the same format:
 
 All programs do their best to set reasonable, sane defaults and most will run fine without a conf file. By default programname.py will look for programname.conf as it's configuration file so if you follow that convention you don't even need to specify the -c path/to/file.conf option.
 
+You can override any .conf file setting by providing an equivalent environment variable.
+
+Certain environment variables have special meaning to the web ui (meteor):
+
+::
+
+    OPTIONS_METEOR_ROOTURL is "http://localhost" by default and should be set to the dns name of the UI where you will run MozDef
+    OPTIONS_METEOR_PORT is 80 by default and is the port on which the UI will run
+    OPTIONS_METEOR_ROOTAPI is http://rest:8081 by default and should resolve to the location of the rest api
+    OPTIONS_METEOR_KIBANAURL is http://localhost:9090/app/kibana# by default and should resolve to your kibana installation
+    OPTIONS_METEOR_ENABLECLIENTACCOUNTCREATION is true by default and governs whether accounts can be created
+    OPTIONS_METEOR_AUTHENTICATIONTYPE is meteor-password by default and can be set to oidc to allow for oidc authentication
+    OPTIONS_REMOVE_FEATURES is empty by default, but if you pass a comma separated list of features you'd like to remove they will no longer be available.
+
+You can find a list of features in the meteor/private/features.txt file in the git repo.
+
+
 Special Config Items
 _____________________
 
