@@ -46,7 +46,7 @@ class TestProxyDropExfilDomains(AlertTestSuite):
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
-        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following exfil domain(s): www.sendspace.com,pastebin.com'
+        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following exfil domain(s): pastebin.com,www.sendspace.com'
 
     test_cases = []
 
