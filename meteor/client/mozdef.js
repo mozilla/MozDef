@@ -4,7 +4,7 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
-import { Meteor } from 'meteor/meteor'
+import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import validator from 'validator';
 import '/imports/collections.js';
@@ -171,6 +171,15 @@ if (Meteor.isClient) {
         kibanadashboards: function() {
             Meteor.call('loadKibanaDashboards');
             return kibanadashboards.find();
+        }
+    });
+
+    UI.registerHelper('isFeature',function(featureName){
+        console.log(features.find().count())
+        if ( features.findOne({'name':featureName}) ){
+            return features.findOne({'name':featureName}).enabled;
+        }else{
+            return true;
         }
     });
 
