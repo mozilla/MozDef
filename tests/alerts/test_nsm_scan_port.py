@@ -60,7 +60,6 @@ class TestNSMScanPort(AlertTestSuite):
         )
     )
 
-    
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
         event['_source']['category'] = 'syslog'
@@ -123,3 +122,4 @@ class TestNSMScanPort(AlertTestSuite):
             events=events,
         )
 )
+
