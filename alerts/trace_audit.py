@@ -8,7 +8,7 @@
 # This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 
 
 class TraceAudit(AlertTask):
@@ -21,7 +21,7 @@ class TraceAudit(AlertTask):
         ])
 
         for host in self.config.hostfilter.split():
-            search_query.add_must_not(PhraseMatch('hostname', host ))
+            search_query.add_must_not(PhraseMatch('hostname', host))
 
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.originaluser', samplesLimit=10)

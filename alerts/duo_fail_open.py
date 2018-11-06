@@ -10,7 +10,7 @@
 # this case a VPN certificate)
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, PhraseMatch
+from mozdef_util.query_models import SearchQuery, PhraseMatch
 
 
 class AlertDuoFailOpen(AlertTask):
@@ -23,7 +23,7 @@ class AlertDuoFailOpen(AlertTask):
 
         # Search aggregations on field 'sourceipaddress', keep X samples of
         # events at most
-        self.searchEventsAggregated('details.hostname', samplesLimit=10)
+        self.searchEventsAggregated('hostname', samplesLimit=10)
         # alert when >= X matching events in an aggregation
         # in this case, always
         self.walkAggregations(threshold=1)

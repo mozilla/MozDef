@@ -21,10 +21,9 @@ from kombu import Connection, Exchange
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
-from query_models import SearchQuery, PhraseMatch
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.query_models import SearchQuery, PhraseMatch
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -136,18 +135,30 @@ def searchMongoAlerts(mozdefdb):
     # aggregate IPv4 addresses in the most recent alerts
     # to find common attackers.
     ipv4TopHits = alerts.aggregate([
-        {"$sort": {"utcepoch":-1}}, # reverse sort the current alerts
-        {"$limit": 100}, #most recent 100
-        {"$match": {"events.documentsource.details.sourceipaddress":{"$exists": True}}}, # must have an ip address
-        {"$match": {"attackerid":{"$exists": False}}}, # must not be already related to an attacker
-        {"$unwind":"$events"}, #make each event into it's own doc
-        {"$project":{"_id":0,
-                     "sourceip":"$events.documentsource.details.sourceipaddress"}}, #emit the source ip only
-        {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}}, # count by ip
-        {"$match":{"hitcount":{"$gt":5}}}, # limit to those with X observances
-        {"$sort": SON([("hitcount", -1), ("_id", -1)])}, # sort
-        {"$limit": 10} # top 10
-        ])
+        # reverse sort the current alerts
+        {"$sort": {"utcepoch": -1}},
+        # most recent 100
+        {"$limit": 100},
+        # must have an ip address
+        {"$match": {"events.documentsource.details.sourceipaddress": {"$exists": True}}},
+        # must not be already related to an attacker
+        {"$match": {"attackerid": {"$exists": False}}},
+        # make each event into it's own doc
+        {"$unwind": "$events"},
+        {"$project": {
+            "_id": 0,
+            # emit the source ip only
+            "sourceip": "$events.documentsource.details.sourceipaddress"
+        }},
+        # count by ip
+        {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}},
+        # limit to those with X observances
+        {"$match": {"hitcount": {"$gt": 5}}},
+        # sort
+        {"$sort": SON([("hitcount", -1), ("_id", -1)])},
+        # top 10
+        {"$limit": 10}
+    ])
     for ip in ipv4TopHits:
         # sanity check ip['_id'] which should be the ipv4 address
         if isIPv4(ip['_id']) and ip['_id'] not in netaddr.IPSet(['0.0.0.0']):
@@ -244,8 +255,8 @@ def searchMongoAlerts(mozdefdb):
                         # and if they are all the same category
                         # auto-categorize the attacker
                         matchingalerts = alerts.find(
-                            {"attackerid":attacker['_id']}
-                             ).sort('utcepoch', -1).limit(50)
+                            {"attackerid": attacker['_id']}
+                        ).sort('utcepoch', -1).limit(50)
                         # summarize the alert categories
                         # returns list of tuples: [(u'bruteforce', 8)]
                         categoryCounts= mostCommon(matchingalerts,'category')
@@ -298,9 +309,11 @@ def broadcastAttacker(attacker):
             mqproducer,
             mqproducer.publish,
             max_retries=10)
-        ensurePublish(mqAlert,
+        ensurePublish(
+            mqAlert,
             exchange=alertExchange,
-            routing_key=options.routingkey)
+            routing_key=options.routingkey
+        )
     except Exception as e:
         logger.error('Exception while publishing attacker: {0}'.format(e))
 
@@ -325,29 +338,31 @@ def genNewAttacker():
 
     return newAttacker
 
+
 def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
     '''given an attacker ID and a dictionary of an elastic search event
        look for a valid geoIP in the dict and update the attacker's geo coordinates
     '''
 
     # geo ip should be in eventDictionary['details']['sourceipgeolocation']
-    #"sourceipgeolocation": {
-      #"city": "Polska",
-      #"region_code": "73",
-      #"area_code": 0,
-      #"time_zone": "Europe/Warsaw",
-      #"dma_code": 0,
-      #"metro_code": null,
-      #"country_code3": "POL",
-      #"latitude": 52.59309999999999,
-      #"postal_code": null,
-      #"longitude": 19.089400000000012,
-      #"country_code": "PL",
-      #"country_name": "Poland",
-      #"continent": "EU"
-    #logger.debug(eventDictionary)
+    # "sourceipgeolocation": {
+    #     "city": "Polska",
+    #     "region_code": "73",
+    #     "area_code": 0,
+    #     "time_zone": "Europe/Warsaw",
+    #     "dma_code": 0,
+    #     "metro_code": null,
+    #     "country_code3": "POL",
+    #     "latitude": 52.59309999999999,
+    #     "postal_code": null,
+    #     "longitude": 19.089400000000012,
+    #     "country_code": "PL",
+    #     "country_name": "Poland",
+    #     "continent": "EU"
+    # }
+    # logger.debug(eventDictionary)
     if 'details' in eventDictionary.keys():
-        if  'sourceipgeolocation' in eventDictionary['details']:
+        if 'sourceipgeolocation' in eventDictionary['details']:
             attackers=mozdefdb['attackers']
             attacker = attackers.find_one({'_id': attackerID})
             if attacker is not None:
@@ -378,10 +393,12 @@ def updateMongoWithESEvents(mozdefdb, results):
                 # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
                 sourceIP.prefixlen = 24
                 if not sourceIP.ip.is_loopback() and not sourceIP.ip.is_private() and not sourceIP.ip.is_reserved():
-                    esrecord = dict(documentid=r['_id'],
-                         documenttype=r['_type'],
-                         documentindex=r['_index'],
-                         documentsource=r['_source'])
+                    esrecord = dict(
+                        documentid=r['_id'],
+                        documenttype=r['_type'],
+                        documentindex=r['_index'],
+                        documentsource=r['_source']
+                    )
 
                     logger.debug('Trying to find existing attacker at ' + str(sourceIP))
                     attacker = attackers.find_one({'indicators.ipv4address': str(sourceIP)})
@@ -393,7 +410,7 @@ def updateMongoWithESEvents(mozdefdb, results):
                         logger.debug('Creating new attacker from ' + str(sourceIP))
                         newAttacker = genNewAttacker()
 
-                        #expand the source ip to a /24 for the indicator match.
+                        # expand the source ip to a /24 for the indicator match.
                         sourceIP.prefixlen = 24
                         # str sourceIP to get the ip/cidr rather than netblock cidr.
                         newAttacker['indicators'].append(dict(ipv4address=str(sourceIP)))

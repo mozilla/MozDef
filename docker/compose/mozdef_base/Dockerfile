@@ -14,20 +14,15 @@ RUN \
                   libstdc++ \
                   libffi-devel \
                   zlib-devel \
+                  git \
                   make && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
-  curl -s -L https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz  | tar -C /opt/mozdef/ -xz && \
-  cd /opt/mozdef/Python-$PYTHON_VERSION && \
-  ./configure && \
-  make && \
-  make install && \
-  rm -r /opt/mozdef/Python-$PYTHON_VERSION && \
   cd /opt/mozdef && \
   yum install -y mysql-devel \
+                    python \
                     python-devel \
                     python-pip && \
-  chown -R mozdef:mozdef /opt/mozdef/ && \
   pip install virtualenv && \
   mkdir /opt/mozdef/envs/mozdef && \
   mkdir /opt/mozdef/envs/mozdef/cron
@@ -39,21 +34,23 @@ COPY cron/update_geolite_db.py /opt/mozdef/envs/mozdef/cron/update_geolite_db.py
 COPY cron/update_geolite_db.conf /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
 COPY cron/update_geolite_db.sh /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
 
+RUN chown -R mozdef:mozdef /opt/mozdef/
 USER mozdef
 RUN \
   virtualenv /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
   pip install -r /opt/mozdef/envs/mozdef/requirements.txt
 
-COPY lib /opt/mozdef/envs/mozdef/lib
-
+# Local copy for dev
+COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
 USER root
-RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef
+RUN \
+  source /opt/mozdef/envs/python/bin/activate && \
+  cd /opt/mozdef/envs/mozdef/mozdef_util && \
+  pip install -e .
+RUN chown -R mozdef:mozdef /opt/mozdef/
 
 USER mozdef
-# We have to replace the python virtualenv path until
-# https://github.com/mozilla/MozDef/issues/421 is fixed
-RUN sed -i 's|/opt/mozdef/envs/mozdef/bin/activate|/opt/mozdef/envs/python/bin/activate|g' /opt/mozdef/envs/mozdef/cron/*.sh
 
 RUN mkdir /opt/mozdef/envs/mozdef/data
 

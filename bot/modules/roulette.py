@@ -43,7 +43,7 @@ class Roulette(Module):
                 self.gun_current_slot = 0
             if self.gun_current_slot == self.gun_bullet_slot:
                 if not isinstance(actor, User):
-                            actor = User(actor)                
+                            actor = User(actor)
                 client.msg(recipient, '*BANG*. {0} is lying on the floor'.format(actor.nick))
                 self.gun_bullet_slot = random.randint(1, self.gun_max_load)
                 self.gun_current_slot = 0
@@ -51,6 +51,7 @@ class Roulette(Module):
                 client.msg(recipient, '*click* (slot {0})'.format(self.gun_current_slot))
             # tell kitnirc that we handled this, no need to pass to other modules.
             return True
+
 
 # Let KitnIRC know what module class it should be loading.
 module = Roulette

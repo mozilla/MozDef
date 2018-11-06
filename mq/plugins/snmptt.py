@@ -5,6 +5,7 @@
 
 import re
 
+
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
@@ -25,8 +26,12 @@ class message(object):
                     if search:
                         message['details']['trapname'] = search.group('trapname')
                         message['details']['trapseverity'] = search.group('trapseverity')
-                        message['details']['sourcehostname'] = search.group('source_host')
                         message['details']['trappayload'] = search.group('trappayload')
-                        message['details']['hostname'] = search.group('source_host')
+                        message['hostname'] = search.group('source_host')
+                        # tag the message
+                        if 'tags' in message.keys() and isinstance(message['tags'], list):
+                            message['tags'].append('alert')
+                        else:
+                            message['tags'] = ['alert']
 
         return (message, metadata)

@@ -18,20 +18,20 @@ import socket
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
-import boto.sqs
 from boto.sqs.message import RawMessage
 import base64
 import kombu
+from ssl import SSLEOFError, SSLError
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from utilities.to_unicode import toUnicode
-from utilities.remove_at import removeAt
-from utilities.is_cef import isCEF
-from utilities.logger import logger, initLogger
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.to_unicode import toUnicode
+from mozdef_util.utilities.remove_at import removeAt
+from mozdef_util.utilities.is_cef import isCEF
+from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 # running under uwsgi?
@@ -191,6 +191,13 @@ class taskConsumer(object):
                             self.taskQueue.delete_message(msg)
                             continue
 
+                    # If this is still not a dict,
+                    # let's just drop the message and move on
+                    if type(msgbody) is not dict:
+                        logger.debug("Message is not a dictionary, dropping message.")
+                        self.taskQueue.delete_message(msg)
+                        continue
+
                     event = dict()
                     event = msgbody
 
@@ -221,6 +228,16 @@ class taskConsumer(object):
             except ValueError as e:
                 logger.exception('Exception while handling message: %r' % e)
                 self.taskQueue.delete_message(msg)
+            except (SSLEOFError, SSLError, socket.error):
+                logger.info('Received network related error...reconnecting')
+                time.sleep(5)
+                self.connection, self.taskQueue = connect_sqs(
+                    options.region,
+                    options.accesskey,
+                    options.secretkey,
+                    options.taskexchange
+                )
+                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -328,14 +345,12 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    mqConn = boto.sqs.connect_to_region(
+    mqConn, eventTaskQueue = connect_sqs(
         options.region,
-        aws_access_key_id=options.accesskey,
-        aws_secret_access_key=options.secretkey
+        options.accesskey,
+        options.secretkey,
+        options.taskexchange
     )
-
-    # attach to the queue
-    eventTaskQueue = mqConn.get_queue(options.taskexchange)
 
     # consume our queue
     taskConsumer(mqConn, eventTaskQueue, es).run()
@@ -399,6 +414,10 @@ if __name__ == '__main__':
 
     try:
         main()
+    except KeyboardInterrupt as e:
+        logger.info("Exiting worker")
+        if options.esbulksize != 0:
+            es.finish_bulk()
     except Exception as e:
         if options.esbulksize != 0:
             es.finish_bulk()

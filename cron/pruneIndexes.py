@@ -20,9 +20,8 @@ from configlib import getConfig, OptionParser
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -43,8 +42,7 @@ def esPruneIndexes():
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         indices = es.get_indices()
         # do the pruning
-        for (index, dobackup, rotation, pruning) in zip(options.indices,
-            options.dobackup, options.rotation, options.pruning):
+        for (index, dobackup, rotation, pruning) in zip(options.indices, options.dobackup, options.rotation, options.pruning):
             try:
                 if pruning != '0':
                     index_to_prune = index
@@ -110,6 +108,7 @@ def initConfig():
         '20,0,0',
         options.configfile).split(',')
         )
+
 
 if __name__ == '__main__':
     parser = OptionParser()

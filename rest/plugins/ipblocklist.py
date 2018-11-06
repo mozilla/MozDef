@@ -12,6 +12,7 @@ from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 
+
 def isIPv4(ip):
     try:
         # netaddr on it's own considers 1 and 0 to be valid_ipv4
@@ -26,14 +27,17 @@ def isIPv4(ip):
     except:
         return False
 
+
 def isIPv6(ip):
     try:
         return netaddr.valid_ipv6(ip)
     except:
         return False
 
+
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
+
 
 class message(object):
     def __init__(self):
@@ -84,11 +88,6 @@ class message(object):
         (self.options, args) = myparser.parse_args([])
 
         # fill self.options with plugin-specific options
-
-        # options for your custom/internal ip blocking service
-        # mozilla's is called banhammer
-        # and uses an intermediary mysql DB
-        # here we set credentials
         self.options.mongohost = getConfig(
             'mongohost',
             'localhost',
@@ -122,10 +121,10 @@ class message(object):
             self.configfile)
 
     def blockIP(self,
-                ipaddress = None,
-                comment = None,
-                duration = None,
-                referenceID = None,
+                ipaddress=None,
+                comment=None,
+                duration=None,
+                referenceID=None,
                 userID=None
                 ):
         try:
@@ -134,7 +133,7 @@ class message(object):
             ipblocklist = mongoclient.meteor['ipblocklist']
 
             # good data?
-            if ( isIPv6(ipaddress) or isIPv4(ipaddress) ) and ( ipaddress not in netaddr.IPSet(['0.0.0.0']) ):
+            if (isIPv6(ipaddress) or isIPv4(ipaddress)) and (ipaddress not in netaddr.IPSet(['0.0.0.0'])):
                 ipcidr = netaddr.IPNetwork(ipaddress)
 
                 # already in the table?
@@ -166,30 +165,31 @@ class message(object):
                     ipblock['comment'] = comment
                     ipblock['creator'] = userID
                     ipblock['reference'] = referenceID
-                    ref=ipblocklist.insert(ipblock)
+                    ref = ipblocklist.insert(ipblock)
                     sys.stdout.write('{0} written to db\n'.format(ref))
                     sys.stdout.write('%s: added to the ipblocklist table\n' % (ipaddress))
 
                     # send to statuspage.io?
-                    if len(self.options.statuspage_api_key)>1:
+                    if len(self.options.statuspage_api_key) > 1:
                         try:
                             headers = {'Authorization': 'Oauth {0}'.format(self.options.statuspage_api_key)}
                             # send the data as a form post per:
                             # https://doers.statuspage.io/api/v1/incidents/#create-realtime
-                            post_data={
-                            'incident[name]' : 'block IP {}'.format(str(ipcidr)),
-                            'incident[status]' : 'resolved',
-                            'incident[impact_override]' : 'none',
-                            'incident[body]' : '{} initiated a block of IP {} until {}'.format(
-                                userID,
-                                str(ipcidr),
-                                end_date.isoformat()),
-                            'incident[component_ids][]' : self.options.statuspage_sub_component_id,
-                            'incident[components][{0}]'.format(self.options.statuspage_component_id) : "operational"}
+                            post_data = {
+                                'incident[name]': 'block IP {}'.format(str(ipcidr)),
+                                'incident[status]': 'resolved',
+                                'incident[impact_override]': 'none',
+                                'incident[body]': '{} initiated a block of IP {} until {}'.format(
+                                    userID,
+                                    str(ipcidr),
+                                    end_date.isoformat()),
+                                'incident[component_ids][]': self.options.statuspage_sub_component_id,
+                                'incident[components][{0}]'.format(self.options.statuspage_component_id): "operational"
+                            }
                             response = requests.post(self.options.statuspage_url,
-                                                    headers=headers,
-                                                    data=post_data)
-                            if response.ok :
+                                                     headers=headers,
+                                                     data=post_data)
+                            if response.ok:
                                 sys.stdout.write('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
                             else:
                                 sys.stderr.write('%s: statuspage.io notification failed %s\n' % (str(ipcidr),response.json()))

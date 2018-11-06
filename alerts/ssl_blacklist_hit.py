@@ -6,7 +6,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, ExistsMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, ExistsMatch
 
 
 class AlertSSLBlacklistHit(AlertTask):
@@ -38,4 +38,3 @@ class AlertSSLBlacklistHit(AlertTask):
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, [event], severity)
-

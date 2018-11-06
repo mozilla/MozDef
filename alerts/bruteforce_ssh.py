@@ -6,7 +6,7 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, TermsMatch
 
 
 class AlertBruteforceSsh(AlertTask):
@@ -42,7 +42,7 @@ class AlertBruteforceSsh(AlertTask):
         severity = 'NOTICE'
 
         summary = ('{0} ssh bruteforce attempts by {1}'.format(aggreg['count'], aggreg['value']))
-        hosts = self.mostCommon(aggreg['allevents'], '_source.details.hostname')
+        hosts = self.mostCommon(aggreg['allevents'], '_source.hostname')
         for i in hosts[:5]:
             summary += ' {0} ({1} hits)'.format(i[0], i[1])
 

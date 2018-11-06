@@ -11,6 +11,7 @@ import json
 import netaddr
 from boto3.session import Session
 
+
 def isIPv4(ip):
     try:
         # netaddr on it's own considers 1 and 0 to be valid_ipv4
@@ -75,7 +76,7 @@ class message(object):
             if cur_section is not None:
                 cur_options = myparser.options(cur_section)
                 if cur_options is not None:
-                    self.multioptions.append({ 'region': myparser.get(cur_section, 'region'), 'aws_access_key_id': myparser.get(cur_section, 'aws_access_key_id'), 'aws_secret_access_key': myparser.get(cur_section, 'aws_secret_access_key') } )
+                    self.multioptions.append({'region': myparser.get(cur_section, 'region'), 'aws_access_key_id': myparser.get(cur_section, 'aws_access_key_id'), 'aws_secret_access_key': myparser.get(cur_section, 'aws_secret_access_key')})
 
     def addBlackholeEntry(self,
                           ipaddress=None):
@@ -88,13 +89,11 @@ class message(object):
                     region_name = cur_account['region']
 
                     session = Session(aws_access_key_id=aws_access_key_id,
-                                  aws_secret_access_key=aws_secret_access_key,
-                                  region_name=region_name)
+                                      aws_secret_access_key=aws_secret_access_key,
+                                      region_name=region_name)
 
                     ec2 = session.resource('ec2')
                     client = session.client('ec2')
-                    #ec2 = session.resource('ec2', region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-                    #client = session.client('ec2', region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
                     response = client.describe_route_tables()
                     for routetable in response['RouteTables']:
@@ -106,33 +105,33 @@ class message(object):
                         sys.stdout.write('{0} {1}\n'.format(rt_id, vpc_id))
 
                         response = client.describe_network_interfaces(
-                                Filters=[
-                                    {
-                                        'Name': 'description',
-                                        'Values': [
-                                            'blackhole',
-                                        ]
-                                    },
-                                    {
-                                        'Name': 'group-name',
-                                        'Values': [
-                                            'blackhole',
-                                        ]
-                                    },
-                                    {
-                                        'Name': 'vpc-id',
-                                        'Values': [
-                                            vpc_id,
-                                        ]
-                                    },
-                                    {
-                                        'Name': 'subnet-id',
-                                        'Values': [
-                                             subnet_id,
-                                        ]
-                                    },
-                                ]
-                                )
+                            Filters=[
+                                {
+                                    'Name': 'description',
+                                    'Values': [
+                                        'blackhole',
+                                    ]
+                                },
+                                {
+                                    'Name': 'group-name',
+                                    'Values': [
+                                        'blackhole',
+                                    ]
+                                },
+                                {
+                                    'Name': 'vpc-id',
+                                    'Values': [
+                                        vpc_id,
+                                    ]
+                                },
+                                {
+                                    'Name': 'subnet-id',
+                                    'Values': [
+                                        subnet_id,
+                                    ]
+                                },
+                            ]
+                        )
 
                         sys.stdout.write('{0}\n'.format(response))
                         if len(response['NetworkInterfaces']) > 0:
@@ -143,16 +142,15 @@ class message(object):
                             route_table = ec2.RouteTable(rt_id)
 
                             response = route_table.create_route(
-                                                        DestinationCidrBlock=ipaddress,
-                                                        NetworkInterfaceId=bheni_id,
-                                                        )
+                                DestinationCidrBlock=ipaddress,
+                                NetworkInterfaceId=bheni_id,
+                            )
                         else:
                             sys.stdout.write('Skipping route table {0} in the VPC {1} - blackhole ENI could not be found\n'.format(rt_id, vpc_id))
                             continue
 
         except Exception as e:
             sys.stderr.write('Error while creating a blackhole entry %s: %r\n' % (ipaddress, e))
-
 
     def onMessage(self, request, response):
         '''
@@ -187,9 +185,9 @@ class message(object):
                     if not ipcidr.ip.is_loopback() \
                        and not ipcidr.ip.is_private() \
                        and not ipcidr.ip.is_reserved():
-                        ipaddress =  str(ipcidr.cidr)
+                        ipaddress = str(ipcidr.cidr)
                         self.addBlackholeEntry(ipaddress)
-                        sys.stdout.write ('Blackholed {0}\n'.format(ipaddress))
+                        sys.stdout.write('Blackholed {0}\n'.format(ipaddress))
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 

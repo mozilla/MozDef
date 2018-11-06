@@ -15,8 +15,10 @@ except ImportError:
     class UTC(tzinfo):
         def utcoffset(self, dt):
             return timedelta(0)
+
         def tzname(self, dt):
             return "UTC"
+
         def dst(self, dt):
             return timedelta(0)
     utc = UTC()
@@ -25,6 +27,7 @@ import json
 import duo_client
 import mozdef_client as mozdef
 import pickle
+
 
 def normalize(details):
     # Normalizes fields to conform to http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
@@ -41,6 +44,7 @@ def normalize(details):
                 normalized["error"] = True
         normalized[f] = details[f]
     return normalized
+
 
 def process_events(mozmsg, duo_events, etype, state):
     # There are some key fields that we use as MozDef fields, those are set to "noconsume"
@@ -67,8 +71,8 @@ def process_events(mozmsg, duo_events, etype, state):
             if i in noconsume:
                 continue
 
-    # Duo client doesn't translate inner dicts to dicts for some reason - its just a string, so we have to process and parse it
-            if e[i] != None and type(e[i]) == str and  e[i].startswith('{'):
+            # Duo client doesn't translate inner dicts to dicts for some reason - its just a string, so we have to process and parse it
+            if e[i] is not None and type(e[i]) == str and e[i].startswith('{'):
                 j = json.loads(e[i])
                 for x in j:
                     details[x] = j[x]
@@ -92,6 +96,7 @@ def process_events(mozmsg, duo_events, etype, state):
         # duo_events was empty, no new event
         pass
     return state
+
 
 def main():
     try:
@@ -119,6 +124,7 @@ def main():
 
     pickle.dump(state, open(options.statepath, 'wb'))
 
+
 def initConfig():
     options.IKEY = getConfig('IKEY', '', options.configfile)
     options.SKEY = getConfig('SKEY', '', options.configfile)
@@ -128,6 +134,7 @@ def initConfig():
     options.DEBUG = getConfig('DEBUG', True, options.configfile)
     options.statepath = getConfig('statepath', '', options.configfile)
     options.update_tags = getConfig('addtag', '', options.configfile)
+
 
 if __name__ == '__main__':
     parser = OptionParser()

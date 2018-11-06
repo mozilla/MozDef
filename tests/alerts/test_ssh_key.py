@@ -81,13 +81,13 @@ class TestSSHKey(AlertTestSuite):
     event = AlertTestSuite.create_event(default_event)
     event['_source']['details']['agent'] = 'somehost.ignorehosts.com'
     event['_source']['details']['private'] = [
-                    {
-                        'fingerprint_sha256': 'SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                        'encrypted': False,
-                        'fingerprint_md5': '00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00',
-                        'path': '/home/user/.ssh/id_rsa'
-                    }
-                    ]
+        {
+            'fingerprint_sha256': 'SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            'encrypted': False,
+            'fingerprint_md5': '00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00',
+            'path': '/home/user/.ssh/id_rsa'
+        }
+    ]
     test_cases.append(
         NegativeAlertTestCase(
             description='Whitelist test with default configuration file',
@@ -98,13 +98,13 @@ class TestSSHKey(AlertTestSuite):
     event = AlertTestSuite.create_event(default_event)
     event['_source']['details']['agent'] = 'somehost.ignorehosts.com'
     event['_source']['details']['private'] = [
-                    {
-                        'fingerprint_sha256': 'SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                        'encrypted': False,
-                        'fingerprint_md5': '00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00',
-                        'path': '/home/user2/.ssh/id_rsa'
-                    }
-                    ]
+        {
+            'fingerprint_sha256': 'SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            'encrypted': False,
+            'fingerprint_md5': '00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00',
+            'path': '/home/user2/.ssh/id_rsa'
+        }
+    ]
     specific_alert = default_alert.copy()
     specific_alert['summary'] = 'Private keys detected on somehost.ignorehosts.com missing from whitelist'
     test_cases.append(
@@ -114,4 +114,3 @@ class TestSSHKey(AlertTestSuite):
             expected_alert=specific_alert
         )
     )
-

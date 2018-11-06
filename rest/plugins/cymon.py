@@ -9,6 +9,7 @@ import os
 import sys
 from configlib import getConfig, OptionParser
 
+
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
@@ -43,7 +44,6 @@ class message(object):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
 
-
     def onMessage(self, request, response):
         '''
         request: http://bottlepy.org/docs/dev/api.html#the-request-object
@@ -57,7 +57,6 @@ class message(object):
             requestDict = json.loads(arequest)
         except ValueError as e:
             response.status = 500
-
 
         print(requestDict, requestDict.keys())
         if 'ipaddress' in requestDict.keys():
@@ -74,7 +73,7 @@ class message(object):
             if dresponse.status_code == 200:
                 response.content_type = "application/json"
                 response.body = dresponse.content
-                response.status=200
+                response.status = 200
             else:
                 response.status = dresponse.status_code
 
@@ -82,7 +81,6 @@ class message(object):
             response.status = 500
 
         return (request, response)
-
 
     def initConfiguration(self):
         myparser = OptionParser()
@@ -93,6 +91,5 @@ class message(object):
 
         # cymon options
         self.options.cymonapikey = getConfig('cymonapikey',
-                                        '',
-                                        self.configfile)
-
+                                             '',
+                                             self.configfile)

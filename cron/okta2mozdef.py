@@ -19,9 +19,8 @@ import netaddr
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -40,26 +39,26 @@ class State:
         try:
             with open(self.filename, 'r') as f:
                 self.data = json.load(f)
-            iterator = iter(self.data)
         except IOError:
             self.data = {}
         except ValueError:
-            logger.error("%s state file found but isn't a recognized json format" %
-                    self.filename)
+            logger.error("%s state file found but isn't a recognized json format" % self.filename)
             raise
         except TypeError:
-            logger.error("%s state file found and parsed but it doesn't contain an iterable object" %
-                    self.filename)
+            logger.error("%s state file found and parsed but it doesn't contain an iterable object" % self.filename)
             raise
 
     def write_state_file(self):
         '''Write the self.data value into the state file'''
         with open(self.filename, 'w') as f:
-            json.dump(self.data,
-                    f,
-                    sort_keys=True,
-                    indent=4,
-                    separators=(',', ': '))
+            json.dump(
+                self.data,
+                f,
+                sort_keys=True,
+                indent=4,
+                separators=(',', ': ')
+            )
+
 
 def main():
     if options.output=='syslog':
@@ -143,19 +142,19 @@ def main():
 
 
 def initConfig():
-    options.output=getConfig('output','stdout',options.configfile)                              #output our log to stdout or syslog
-    options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)           #syslog hostname
-    options.syslogport=getConfig('syslogport',514,options.configfile)                           #syslog port
-    options.apikey=getConfig('apikey','',options.configfile)                                    #okta api key to use
-    options.oktadomain = getConfig('oktadomain', 'yourdomain.okta.com', options.configfile)     #okta domain: something.okta.com
+    options.output=getConfig('output','stdout',options.configfile)  # output our log to stdout or syslog
+    options.sysloghostname=getConfig('sysloghostname','localhost',options.configfile)  # syslog hostname
+    options.syslogport=getConfig('syslogport',514,options.configfile)  # syslog port
+    options.apikey=getConfig('apikey','',options.configfile)  # okta api key to use
+    options.oktadomain = getConfig('oktadomain', 'yourdomain.okta.com', options.configfile)  # okta domain: something.okta.com
     options.esservers=list(getConfig('esservers','http://localhost:9200',options.configfile).split(','))
     options.state_file=getConfig('state_file','{0}.json'.format(sys.argv[0]),options.configfile)
-    options.recordlimit = getConfig('recordlimit', 10000, options.configfile)                    #max number of records to request
+    options.recordlimit = getConfig('recordlimit', 10000, options.configfile)  # max number of records to request
 
 
 if __name__ == '__main__':
     parser=OptionParser()
-    parser.add_option("-c", dest='configfile' , default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
+    parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options,args) = parser.parse_args()
     initConfig()
     main()

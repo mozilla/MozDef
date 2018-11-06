@@ -17,10 +17,9 @@ from hashlib import md5
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
-from query_models import SearchQuery, TermMatch, PhraseMatch
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -79,7 +78,7 @@ def esSearch(es, macassignments=None):
     Expecting an event like: user: username@somewhere.com; mac: 5c:f9:38:b1:de:cf; author reason: roamed session; ssid: ANSSID; AP 46/2\n
     '''
     usermacre=re.compile(r'''user: (?P<username>.*?); mac: (?P<macaddress>.*?); ''',re.IGNORECASE)
-    correlations={} # list of dicts to populate hits we find
+    correlations={}
 
     search_query = SearchQuery(minutes=options.correlationminutes)
     search_query.add_must(TermMatch('details.program', 'AUTHORIZATION-SUCCESS'))
@@ -106,18 +105,19 @@ def esSearch(es, macassignments=None):
     except ElasticsearchBadServer:
         logger.error('Elastic Search server could not be reached, check network connectivity')
 
+
 def esStoreCorrelations(es, correlations):
     for c in correlations:
         event=dict(
-                   utctimestamp=correlations[c]['utctimestamp'],
-                   summary=c,
-                   details=dict(
-                       username=correlations[c]['username'],
-                       macaddress=correlations[c]['macaddress'],
-                       entity=correlations[c]['entity']
-                       ),
-                   category='indicators'
-                   )
+            utctimestamp=correlations[c]['utctimestamp'],
+            summary=c,
+            details=dict(
+                username=correlations[c]['username'],
+                macaddress=correlations[c]['macaddress'],
+                entity=correlations[c]['entity']
+            ),
+            category='indicators'
+        )
         try:
             es.save_object(index='intelligence', doc_id=getDocID(c), doc_type='usernamemacaddress', body=json.dumps(event))
         except Exception as e:
@@ -158,25 +158,22 @@ def initConfig():
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
 
-
     # default time period in minutes to look back in time for the aggregation
     options.correlationminutes = getConfig('correlationminutes',
-                                         150,
-                                         options.configfile)
+                                           150,
+                                           options.configfile)
 
     # default location of the OUI file from IEEE for resolving mac prefixes
     # Expects the OUI file from IEEE:
     # wget http://www.ieee.org/netstorage/standards/oui.txt
     options.ouifilename = getConfig('ouifilename',
-                                'oui.txt',
-                                options.configfile)
-
+                                    'oui.txt',
+                                    options.configfile)
 
 
 if __name__ == '__main__':

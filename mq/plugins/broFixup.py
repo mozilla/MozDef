@@ -5,9 +5,9 @@
 
 import netaddr
 import json
-from utilities.toUTC import toUTC
 from datetime import datetime
 from platform import node
+from mozdef_util.utilities.toUTC import toUTC
 
 
 def isIPv4(ip):
@@ -54,7 +54,6 @@ class message(object):
             self.mozdefhostname = 'failed to fetch mozdefhostname'
             pass
 
-
     def onMessage(self, message, metadata):
 
         # make sure I really wanted to see this message
@@ -98,7 +97,6 @@ class message(object):
         if 'resp_cc' in newmessage['details']:
             del(newmessage['details']['resp_cc'])
 
-
         # add mandatory fields
         if 'ts' in newmessage['details']:
             newmessage[u'utctimestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
@@ -113,7 +111,6 @@ class message(object):
         newmessage[u'eventsource'] = u'nsm'
         newmessage[u'severity'] = u'INFO'
         newmessage[u'mozdefhostname'] = self.mozdefhostname
-
 
         if 'id.orig_h' in newmessage['details']:
             newmessage[u'details'][u'sourceipaddress'] = newmessage['details']['id.orig_h']
@@ -380,8 +377,7 @@ class message(object):
                         if newmessage['details']['actions'] == "Notice::ACTION_LOG":
                             # retrieve indicator ip addresses from the sub field
                             # "sub": "Indicator: 1.2.3.4, Indicator: 5.6.7.8"
-                            newmessage['details']['indicators'] = [ip for ip
-                                in findIPv4(newmessage['details']['sub'])]
+                            newmessage['details']['indicators'] = [ip for ip in findIPv4(newmessage['details']['sub'])]
                     # remove the details.src field and add it to indicators
                     # as it may not be the actual source.
                     if 'src' in newmessage['details']:
@@ -424,7 +420,7 @@ class message(object):
                         u'destination {dst} '
                         u'port {p}'
                         ).format(**sumstruct)
-                        # Thank you for your service
+                    # Thank you for your service
                     return (newmessage, metadata)
 
                 if logtype == 'rdp':
@@ -671,6 +667,5 @@ class message(object):
                         'X509 certificate seen'
                     ).format(**newmessage['details']['certificate'])
                     return (newmessage, metadata)
-
 
         return (newmessage, metadata)

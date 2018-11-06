@@ -1,17 +1,24 @@
 language: python
-python:
-  - '2.7.11'
-before_install:
-  - ES_VERSION=5.6.7; curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.deb && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
-  - sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime
-  - sudo dpkg-reconfigure --frontend noninteractive tzdata
+sudo: required
 services:
-  - rabbitmq
+  - docker
+branches:
+  # Restrict push builds to only master
+  only:
+  - master
+env:
+  - DOCKER_COMPOSE_VERSION=1.22.0
+before_install:
+  # Fail immediately on any error
+  - set -e
+  # See https://docs.travis-ci.com/user/docker/
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 install:
-  - "pip install -r requirements.txt"
-  - "pip install -r tests/requirements_tests.txt"
-before_script:
-  - sleep 5
-  - export BOTO_CONFIG=/dev/null
+  # Build containers
+  # Use BUILD_MODE=pull if you prefer pulling existing images
+  - make build-tests
 script:
-  - py.test --delete_indexes --delete_queues tests
+  - make tests

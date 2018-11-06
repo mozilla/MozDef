@@ -100,4 +100,4 @@ class TestTraceAudit(AlertTestSuite):
             description="Negative test case with old timestamp",
             events=events,
         )
-)
+    )

@@ -12,14 +12,14 @@ import sys
 from datetime import datetime
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
+from time import sleep
 import socket
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
-from query_models import SearchQuery, Aggregation
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from mozdef_util.query_models import SearchQuery, Aggregation
 
 logger = logging.getLogger(sys.argv[0])
 
@@ -46,29 +46,24 @@ def initLogger():
 def esSearch(es):
     search_query = SearchQuery(minutes=options.aggregationminutes)
     search_query.add_aggregation(Aggregation('category'))
+    results = search_query.execute(es)
 
-    try:
-        results = search_query.execute(es)
-
-        mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
-        mozdefstats['category'] = 'stats'
-        mozdefstats['hostname'] = socket.gethostname()
-        mozdefstats['mozdefhostname'] = mozdefstats['hostname']
-        mozdefstats['severity'] = 'INFO'
-        mozdefstats['source'] = 'mozdef'
-        mozdefstats['tags'] = ['mozdef', 'stats']
-        mozdefstats['summary'] = 'Aggregated category counts'
-        mozdefstats['processid'] = os.getpid()
-        mozdefstats['processname'] = sys.argv[0]
-        mozdefstats['details'] = dict(counts=list())
-        for bucket in results['aggregations']['category']['terms']:
-            entry = dict()
-            entry[bucket['key']] = bucket['count']
-            mozdefstats['details']['counts'].append(entry)
-        return mozdefstats
-
-    except ElasticsearchBadServer:
-        logger.error('Elastic Search server could not be reached, check network connectivity')
+    mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
+    mozdefstats['category'] = 'stats'
+    mozdefstats['hostname'] = socket.gethostname()
+    mozdefstats['mozdefhostname'] = mozdefstats['hostname']
+    mozdefstats['severity'] = 'INFO'
+    mozdefstats['source'] = 'mozdef'
+    mozdefstats['tags'] = ['mozdef', 'stats']
+    mozdefstats['summary'] = 'Aggregated category counts'
+    mozdefstats['processid'] = os.getpid()
+    mozdefstats['processname'] = sys.argv[0]
+    mozdefstats['details'] = dict(counts=list())
+    for bucket in results['aggregations']['category']['terms']:
+        entry = dict()
+        entry[bucket['key']] = bucket['count']
+        mozdefstats['details']['counts'].append(entry)
+    return mozdefstats
 
 
 def main():
@@ -79,12 +74,21 @@ def main():
     logger.debug('starting')
     logger.debug(options)
     es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
+    index = options.index
     stats = esSearch(es)
     logger.debug(json.dumps(stats))
+    sleepcycles = 0
     try:
-        # post to elastic search servers directly without going through
-        # message queues in case there is an availability issue
-        es.save_event(body=json.dumps(stats), doc_type='mozdefstats')
+        while not es.index_exists(index):
+            sleep(3)
+            if sleepcycles == 3:
+                logger.debug("The index is not created. Terminating eventStats.py cron job.")
+                exit(1)
+            sleepcycles += 1
+        if es.index_exists(index):
+            # post to elastic search servers directly without going through
+            # message queues in case there is an availability issue
+            es.save_event(index=index, body=json.dumps(stats), doc_type='mozdefstats')
 
     except Exception as e:
         logger.error("Exception %r when gathering statistics " % e)
@@ -102,7 +106,6 @@ def initConfig():
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-
     # elastic search server settings
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
@@ -115,9 +118,10 @@ def initConfig():
 
     # default time period in minutes to look back in time for the aggregation
     options.aggregationminutes = getConfig('aggregationminutes',
-                                         15,
-                                         options.configfile)
-
+                                           15,
+                                           options.configfile)
+    # configure the index to save events to
+    options.index = getConfig('index', 'mozdefstate', options.configfile)
 
 
 if __name__ == '__main__':

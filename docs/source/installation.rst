@@ -1,22 +1,15 @@
 Installation
 ============
 
-The installation process has been tested on CentOS 6, RHEL 6 and Ubuntu 14.
+The installation process has been tested on CentOS 7.
 
-Docker
-------
+Build and run MozDef
+--------------------
 
-You can quickly install MozDef with an automated build generation using `docker`_.
+You can quickly install MozDef with an automated build generation using `docker`::
 
-
-Single Container
-****************
-
-MozDef can run in a single docker container, which uses supervisord to handle executing all of the MozDef processes. In order to run a single container::
-
-  make single-build
-  make single-run
-  make single-stop # When you want to stop the container
+  make build
+  make run
 
 You're done! Now go to:
 
@@ -26,68 +19,36 @@ You're done! Now go to:
  * http://localhost:8080 < loginput
  * http://localhost:8081 < rest api
 
-
-Multiple Containers
-*******************
-
-Since MozDef consists of many processes running at once, we also support running MozDef with each process given it's own container. This can be useful during development, since you can turn off a single process to debug/troubleshoot while maintaining a functioning MozDef environment.
-In order to run in multiple containers::
-
-  make multiple-build
-  make multiple-run
-  make multiple-stop # When you want to stop the containers
-
-You're done! Now go to:
-
- * http://localhost < meteor (main web interface)
- * http://localhost:9090/app/kibana < kibana
- * http://localhost:9200 < elasticsearch
- * http://localhost:8080 < loginput
- * http://localhost:8081 < rest api
 
 .. _docker: https://www.docker.io/
+.. note:: The build system has changed
+   `make` targets for `multiple-*` and `single-*` have been replaced by the above commands (`make run`, etc.)
+   Just type `make` to get a list of available targets.
+
+Run tests
+---------
+
+Simply run::
+
+  make test
 
 
-MozDef manual installation process on RedHat systems
+Note, if you end up with a clobbered ES index, or anything like that which might end up in failing tests, you can clean
+the environment with::
+
+  make clean
+
+Then run the tests again.
+
+
+Manual Installation for Yum or Apt based distros
 ----------------------------------------------------
 
 Summary
 *******
-This section explains the manual installation process for the MozDef system.
-  git clone https://github.com/mozilla/MozDef.git
+This section explains the manual installation process for the MozDef system::
 
-
-
-Elasticsearch nodes
--------------------
-
-This section explains the manual installation process for Elasticsearch nodes (search and storage).
-
-ElasticSearch
-*************
-
-Installation instructions are available on `Elasticsearch website`_.
-You should prefer packages over archives if one is available for your distribution.
-
-.. _Elasticsearch website: http://www.elasticsearch.org/overview/elkdownloads/
-
-Marvel plugin
-*************
-
-`Marvel`_ is a monitoring plugin developed by Elasticsearch (the company).
-
-WARNING: this plugin is NOT open source. At the time of writing, Marvel is free for 30 days.
-After which you can apply for a free basic license to continue using it for it's key monitoring features.
-
-To install Marvel, on each of your elasticsearch node, from the Elasticsearch home directory::
-
-  sudo bin/plugin install license
-  sudo bin/plugin install marvel-agent
-  sudo service elasticsearch restart
-
-You should now be able to access to Marvel at http://any-server-in-cluster:9200/_plugin/marvel
-
-.. _Marvel: https://www.elastic.co/guide/en/marvel/current/introduction.html
+  git clone https://github.com/mozilla/MozDef.git mozdef
 
 Web and Workers nodes
 ---------------------
@@ -117,7 +78,7 @@ Then::
   wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
   tar xvzf Python-2.7.11.tgz
   cd Python-2.7.11
-  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared
+  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared LDFLAGS="-Wl,--rpath=/opt/mozdef/python2.7/lib"
   make
   make install
 
@@ -129,13 +90,23 @@ Then::
   ./python2.7/bin/pip install virtualenv
   mkdir ~/envs
   cd ~/envs
-  ~/python2.7/bin/virtualenv mozdef
-  source mozdef/bin/activate
-  pip install -r MozDef/requirements.txt
+  ~/python2.7/bin/virtualenv python
+  source python/bin/activate
+  pip install -r ../requirements.txt
 
-At this point when you launch python, It should tell you that you're using Python 2.7.11.
+Copy the following into a file called .bash_profile for the mozdef user within /opt/mozdef:
 
-Whenever you launch a python script from now on, you should have your mozdef virtualenv actived and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/
+  [mozdef@server ~]$ vim /opt/mozdef/.bash_profile
+
+  # Add the following to the file before "export PATH":
+
+  PATH=$PATH:$HOME/.meteor
+
+  export PATH
+
+At this point when you launch python from within your virtual environment, It should tell you that you're using Python 2.7.11.
+
+Whenever you launch a python script from now on, you should have your mozdef virtualenv active and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/ automatically.
 
 RabbitMQ
 ********
@@ -168,6 +139,10 @@ On APT-based systems ::
   sudo apt-get install rabbitmq-server
   sudo invoke-rc.d rabbitmq-server start
 
+We do advise using rabbitmq and erlang's latest versions if you plan on using TLS protected connections with Rabbitmq.
+A simple way of doing this would be to use Bintray's repo located at: https://www.rabbitmq.com/install-rpm.html#bintray
+to download both the latest versions of rabbitmq and erlang.
+
 .. _RabbitMQ: https://www.rabbitmq.com/
 .. _EPEL repos: http://fedoraproject.org/wiki/EPEL/FAQ#howtouse
 
@@ -180,34 +155,39 @@ We first need to install `Mongodb`_ since it's the DB used by Meteor.
 
 On Yum-based systems:
 
-In /etc/yum.repo.d/mongo, add::
+In /etc/yum.repos.d/mongo.repo, add::
 
-  [mongodb]
+  [mongodb-org-3.4]
   name=MongoDB Repository
-  baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-  gpgcheck=0
+  baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.4/x86_64/
+  gpgcheck=1
   enabled=1
+  gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
 
 Then you can install mongodb::
 
-  sudo yum install mongodb
+  sudo yum install mongodb-org
 
 On APT-based systems::
 
   sudo apt-get install mongodb-server
 
-For meteor, in a terminal::
+We have a mongod.conf in the config directory prepared for you. To use it simply move it in to /etc::
 
-  curl https://install.meteor.com/ | sh
+  cp /opt/mozdef/config/mongod.conf /etc/
 
-  wget https://nodejs.org/dist/v4.7.0/node-v4.7.0.tar.gz
-  tar xvzf node-v4.7.0.tar.gz
-  cd node-v4.7.0
+For meteor installation follow these steps::
+
+  curl https://install.meteor.com/?release=1.8 | sh
+
+  wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
+  tar xvzf node-v8.12.0.tar.gz
+  cd node-v8.12.0
   ./configure
   make
   sudo make install
 
-Then from the meteor subdirectory of this git repository (/opt/mozdef/MozDef/meteor) run::
+Then from the meteor subdirectory of this git repository (/opt/mozdef/meteor) run::
 
   meteor add iron-router
 
@@ -264,7 +244,7 @@ First install node::
     make
     make install
 
-Then bundle the meteor portion of mozdef::
+Then bundle the meteor portion of mozdef to deploy on another server::
 
   cd <your meteor mozdef directory>
   meteor bundle mozdef.tgz
@@ -287,8 +267,29 @@ the fibers node module::
   rm -rf fibers
   sudo npm install fibers@1.0.1
 
-There are systemd unit files available in the systemd directory of the public repo you can use to start meteor using node.
-If you aren't using systemd, then run the mozdef UI via node manually::
+Or you can bundle the meteor portion of mozdef to deploy on into a different directory.
+In this example we place it in /opt/mozdef/envs/meteor/mozdef::
+
+  #!/bin/bash
+
+  if [ -d /opt/mozdef/meteor ]
+  then
+      cd /opt/mozdef/meteor
+      source /opt/mozdef/envs/python/bin/activate
+      mkdir -p /opt/mozdef/envs/meteor/mozdef
+
+      meteor npm install
+      meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/
+      cp -r node_modules /opt/mozdef/envs/meteor/mozdef/node_modules
+  else
+    echo "Meteor does not exist on this host."
+    exit 0
+  fi
+
+There are systemd unit files available in the systemd directory of the public repo you can use to start mongo, meteor (mozdefweb), and the restapi (mozdefrestapi).
+These systemd files are pointing to the bundled alternative directory we just mentioned.
+
+If you aren't using systemd, or didn't bundle to the alternative directory, then run the mozdef UI via node manually::
 
   export MONGO_URL=mongodb://mongoservername:3002/meteor
   export ROOT_URL=http://meteorUIservername/
@@ -322,187 +323,201 @@ If you don't have this package in your repos, before installing create `/etc/yum
 UWSGI
 *****
 
-We use `uwsgi`_ to interface python and nginx::
+We use `uwsgi`_ to interface python and nginx, in your venv execute the following::
 
   wget https://projects.unbit.it/downloads/uwsgi-2.0.12.tar.gz
   tar zxvf uwsgi-2.0.12.tar.gz
   cd uwsgi-2.0.12
   ~/python2.7/bin/python uwsgiconfig.py --build
   ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
-  cp python_plugin.so ~/envs/mozdef/bin/
-  cp uwsgi ~/envs/mozdef/bin/
+  cp python_plugin.so ~/envs/python/bin/
+  cp uwsgi ~/envs/python/bin/
 
-  cp -r ~/MozDef/rest   ~/envs/mozdef/
-  cp -r ~/MozDef/loginput   ~/envs/mozdef/
-  mkdir ~/envs/mozdef/logs
+  cd ..
+  cp -r ~/mozdef/rest   ~/envs/mozdef/
+  cp -r ~/mozdef/loginput   ~/envs/mozdef/
 
   cd ~/envs/mozdef/rest
   # modify config file
   vim index.conf
-  # modify uwsgi.ini
-  vim uwsgi.ini
-  uwsgi --ini uwsgi.ini
+  # modify restapi.ini with any changes to pathing or number of processes you might need for your use case.
+  vim restapi.ini
 
   cd ../loginput
-  # modify uwsgi.ini
-  vim uwsgi.ini
-  uwsgi --ini uwsgi.ini
+  # modify loginput.ini with any changes to pathing or number of processes you might need for your use case.
+  vim loginput.ini
+
+Alternatively, if you do not wish to use the systemd unit files for starting these processes
+you can start the restapi and loginput processes from within your venv via::
+
+  cd /opt/mozdef/envs/python
+  source bin/activate
+  (mozdef) [mozdef@mozdev mozdef]$ uwsgi --ini rest/restapi.ini
+  (mozdef) [mozdef@mozdev mozdef]$ uwsgi --ini loginput/loginput.ini
 
   sudo cp nginx.conf /etc/nginx
-  # modify /etc/nginx/nginx.conf
+  # modify /etc/nginx/nginx.conf to reflect your server, and any path changes you've made.
   sudo vim /etc/nginx/nginx.conf
+  # move uwsgi_params file into venv.
+  cp /etc/nginx/uwsgi_params /opt/mozdef/envs/python/bin/
   sudo service nginx restart
 
 .. _uwsgi: https://uwsgi-docs.readthedocs.io/en/latest/
+
+
+Supervisord
+***********
+
+We use supervisord to run the alerts and alertplugins. If you plan on starting services manually, you can skip this step.
+
+To install supervisord perform the following as the user mozdef::
+
+    cd /opt/mozdef/envs/python
+    source bin/activate
+    cd bin
+    pip install supervisor
+
+Within the alerts directory there is a supervisord_alerts.ini which is preconfigured.
+If you've changed any directory paths for this installation then modify it to reflect your pathing changes.
+There are systemd files in the systemdfiles directory that you can use to start the mozdefalerts and mozdefalertplugins processes which we cover near the end of this tutorial.
+
+
+ElasticSearch
+*************
+
+This section explains the manual installation process for Elasticsearch nodes (search and storage).
+MozDef supports Elasticsearch version 5.x
+
+Installation instructions are available on `Elasticsearch website`_.
+You should prefer packages over archives if one is available for your distribution.
+
+Add the repo in /etc/yum/repos.d/elasticsearch.repo::
+
+  [elasticsearch-5.x]
+  name=Elasticsearch repository for 5.x packages
+  baseurl=https://artifacts.elastic.co/packages/5.x/yum
+  gpgcheck=1
+  gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+  enabled=1
+  autorefresh=1
+  type=rpm-md
+
+  sudo yum install elasticsearch
+
+.. _Elasticsearch website: https://www.elastic.co/products/elasticsearch
+
+Marvel plugin
+*************
+
+`Marvel`_ is a monitoring plugin developed by Elasticsearch (the company).
+
+WARNING: this plugin is NOT open source. At the time of writing, Marvel is free for 30 days.
+After which you can apply for a free basic license to continue using it for it's key monitoring features.
+
+To install Marvel, on each of your elasticsearch node, from the Elasticsearch home directory::
+
+  sudo bin/plugin install license
+  sudo bin/plugin install marvel-agent
+  sudo service elasticsearch restart
+
+You should now be able to access to Marvel at http://any-server-in-cluster:9200/_plugin/marvel
+
+.. _Marvel: https://www.elastic.co/guide/en/marvel/current/introduction.html
 
 Kibana
 ******
 
 `Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data::
 
-  wget https://download.elastic.co/kibana/kibana/kibana-4.6.2-linux-x86_64.tar.gz
-  tar xvzf kibana-4.6.2-linux-x86_64.tar.gz
-  ln -s kibana-4.6.2 kibana
-  # configure /etc/nginx/nginx.conf to target this folder
-  sudo service nginx reload
+Create the Repo in /etc/yum/repos.d/kibana.repo::
 
-To initialize elasticsearch indices and load some sample data::
+  [kibana-5.x]
+  name=Kibana repository for 5.x packages
+  baseurl=https://artifacts.elastic.co/packages/5.x/yum
+  gpgcheck=1
+  gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+  enabled=1
+  autorefresh=1
+  type=rpm-md
 
-  cd examples/es-docs/
-  python inject.py
+::
+
+  sudo yum install kibana
+
+Now you'll need to configure kibana to work with your system:
+You can set the various settings in /etc/kibana/kibana.yml.
+Some of the settings you'll want to configure are:
+
+* server.name (your server's hostname)
+* elasticsearch.url (the url to your elasticsearch instance and port)
+* logging.dest ( /path/to/kibana.log so you can easily troubleshoot any issues)
+
+Then you can start the service!
+
+  service kibana start
 
 .. _Kibana: https://www.elastic.co/products/kibana
 
 Start Services
 **************
 
-TO DO: Add in services like supervisord, and refer to systemd files.
+To use the included systemd files you'll copy them to your system's default directory of /etc/systemd/system/.
+Ensure it has root file permissions so that systemd can start it::
 
-Start the following services
+  cp /opt/mozdef/systemdfiles/web/mozdefweb.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/web/mozdefrestapi.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/web/mongod.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/consumer/mozdefloginput.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/consumer/mworker-eventtask.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/alert/mozdefalerts.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/alert/mozdefbot.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/alert/mozdefalertplugins.service /etc/systemd/system/
 
+Then you will need to enable them::
+
+  systemctl enable mozdefweb.service
+  systemctl enable mozdefrestapi.service
+  systemctl enable mozdefloginput.service
+  systemctl enable mworker-eventtask.service
+  systemctl enable mozdefalerts.service
+  systemctl enable mozdefbot.service
+  systemctl enable mozdefalertplugins.service
+  systemctl enable mongod.service
+
+Reload systemd::
+
+  systemctl daemon-reload
+
+Now you can start your services::
+
+  systemctl start mongod
+  systemctl start mozdefalerts
+  systemctl start mozdefbot
+  systemctl start mozdefloginput
+  systemctl start mozdefrestapi
+  systemctl start mozdefweb
+  systemctl start mworker-eventtask
+  systemctl start mozdefalertplugins
+
+
+Alternatively you can start the following services manually in this way from inside the venv as mozdef::
+
+  # Eventtask worker
   cd ~/MozDef/mq
-  ./esworker.py
+  (mozdef) [mozdef@mozdev mq]$ uwsgi --ini eventtask.ini
 
-  cd ~/MozDef/alerts
-  celery -A celeryconfig worker --loglevel=info --beat
+  # alert worker
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/alerts
+  (mozdef) [mozdef@mozdev alerts]$ celery -A celeryconfig worker --loglevel=info --beat
 
-  cd ~/MozDef/examples/demo
-  ./syncalerts.sh
-  ./sampleevents.sh
+To initialize elasticsearch indices and load some sample data::
 
-Manual Installation
---------------------
+  (mozdef) [mozdef@mozdev mozdef]$ cd examples/es-docs/
+  (mozdef) [mozdef@mozdev es-docs]$ python inject.py
 
-*Use sudo whereever required*
+To add more sample data you can run the following from inside the venv::
 
-**(Currently only for apt-based systems using Docker)**
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/examples/demo
+  (mozdef) [mozdef@mozdev demo]$ ./syncalerts.sh
+  (mozdef) [mozdef@mozdev demo]$ ./sampleevents.sh
 
-
-1. Cloning repository ::
-
-    $ export MOZDEF_PATH=/opt/MozDef
-    $ git clone https://github.com/mozilla/MozDef.git $MOZDEF_PATH
-
-2. Installing dependencies ::
-
-    # RabbitMQ
-    $ apt-get install -y rabbitmq-server
-    $ rabbitmq-plugins enable rabbitmq_management
-
-    # MongoDB
-    $ apt-get install -y mongodb
-
-    # NodeJS and NPM
-    $ curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
-    $ apt-get install -y nodejs npm
-
-    # Nginx
-    $ apt-get install -y nginx-full
-    $ cp $MOZDEF_PATH/docker/conf/nginx.conf /etc/nginx/nginx.conf
-
-    # Libraries
-    $ apt-get install -y python2.7-dev python-pip curl supervisor wget libmysqlclient-dev
-    $ pip install -U pip
-
-3. Installing python libraries ::
-
-    $ pip install uwsgi celery virtualenv
-
-    $ export PATH_TO_VENV=$HOME/.mozdef_env
-    $ virtualenv $PATH_TO_VENV
-    $ source $PATH_TO_VENV/bin/activate
-
-    (.mozdef_env)$ pip install -r $MOZDEF_PATH/requirements.txt
-
-4. Setting up uwsgi for rest and loginput ::
-
-    $ mkdir /var/log/mozdef
-    $ mkdir -p /run/uwsgi/apps/
-    $ touch /run/uwsgi/apps/loginput.socket
-    $ chmod 666 /run/uwsgi/apps/loginput.socket
-    $ touch /run/uwsgi/apps/rest.socket
-    $ chmod 666 /run/uwsgi/apps/rest.socket
-
-5. Setting up local settings ::
-
-    $ cp $MOZDEF_PATH/docker/conf/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
-    $ cp $MOZDEF_PATH/docker/conf/settings.js $MOZDEF_PATH/meteor/app/lib/settings.js
-    $ cp $MOZDEF_PATH/docker/conf/config.py $MOZDEF_PATH/alerts/lib/config.py
-    $ cp $MOZDEF_PATH/docker/conf/sampleData2MozDef.conf $MOZDEF_PATH/examples/demo/sampleData2MozDef.conf
-    $ cp $MOZDEF_PATH/docker/conf/mozdef.localloginenabled.css $MOZDEF_PATH/meteor/public/css/mozdef.css
-
-6. Installing Kibana ::
-
-    $ cd /tmp/
-    $ curl -L https://download.elastic.co/kibana/kibana/kibana-4.6.2-linux-x86_64.tar.gz | tar -C /opt -xz
-    $ /bin/ln -s /opt/kibana-4.6.2 /opt/kibana
-    $ cp $MOZDEF_PATH/examples/kibana/dashboards/alert.js /opt/kibana/app/dashboards/alert.js
-    $ cp $MOZDEF_PATH/examples/kibana/dashboards/event.js /opt/kibana/app/dashboards/event.js
-
-7. Installing Elasticsearch ::
-
-    For Red Hat based:
-    $ wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/rpm/elasticsearch/2.4.5/elasticsearch-2.4.5.rpm
-    For Debian based:
-    $ wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.5/elasticsearch-2.4.5.deb
-    # You can download and install any version of ELasticSearch > 2.x and < 5.x
-
-8. Setting up Meteor ::
-
-    $ curl -L https://install.meteor.com/ | /bin/sh
-    $ cd $MOZDEF_PATH/meteor
-    $ meteor
-
-9. Inserting some sample data ::
-
-    # Elasticsearch server should be running
-    $ service elasticsearch start
-    $ source $PATH_TO_VENV/bin/activate
-    (.mozdef_env)$ cd $MOZDEF_PATH/examples/es-docs && python inject.py
-
-Start Services
-***************
-
-Start the following services ::
-
-    $ invoke-rc.d rabbitmq-server start
-
-    $ service elasticsearch start
-
-    $ service nginx start
-
-    $ uwsgi --socket /run/uwsgi/apps/loginput.socket --wsgi-file $MOZDEF_PATH/loginput/index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/loginput --chmod-socket --logto /var/log/mozdef/uwsgi.loginput.log -H $PATH_TO_VENV
-
-    $ uwsgi --socket /run/uwsgi/apps/rest.socket --wsgi-file $MOZDEF_PATH/rest/index.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/rest --chmod-socket --logto /var/log/mozdef/uwsgi.rest.log -H $PATH_TO_VENV
-
-    $ cd $MOZDEF_PATH/mq && uwsgi --socket /run/uwsgi/apps/esworker.socket --mule=esworker.py --mule=esworker.py --buffer-size 32768 --master --listen 100 --uid root --pp $MOZDEF_PATH/mq --stats 127.0.0.1:9192  --logto /var/log/mozdef/uwsgi.esworker.log --master-fifo /run/uwsgi/apps/esworker.fifo -H $PATH_TO_VENV
-
-    $ cd $MOZDEF_PATH/meteor && meteor run
-
-    # Activate the virtualenv to run background jobs
-    $ source $PATH_TO_VENV/bin/activate
-
-    (.mozdef_env)$ cd $MOZDEF_PATH/alerts && celery -A celeryconfig worker --loglevel=info --beat
-    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./healthjobs.sh
-    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./sampleevents.sh
-    (.mozdef_env)$ cd $MOZDEF_PATH/examples/demo && ./syncalerts.sh

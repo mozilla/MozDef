@@ -6,7 +6,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class AlertSFTPEvent(AlertTask):
@@ -34,9 +34,9 @@ class AlertSFTPEvent(AlertTask):
         username = 'unknown'
         directory = 'unknown'
         x = event['_source']
+        if 'hostname' in x:
+            srchost = x['hostname']
         if 'details' in x:
-            if 'hostname' in x['details']:
-                srchost = x['details']['hostname']
             if 'originaluser' in x['details']:
                 username = x['details']['originaluser']
             if 'cwd' in x['details']:

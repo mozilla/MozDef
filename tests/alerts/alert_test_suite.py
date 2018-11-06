@@ -18,6 +18,9 @@ import copy
 import re
 import json
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
+from lib import alerttask
+
 
 class AlertTestSuite(UnitTestSuite):
     def teardown(self):
@@ -26,6 +29,21 @@ class AlertTestSuite(UnitTestSuite):
     def setup(self):
         self.orig_path = os.getcwd()
         super(AlertTestSuite, self).setup()
+
+        # Overwrite the ES and RABBITMQ configs for alerts
+        # since it pulls it from alerts/lib/config.py
+        alerttask.ES = {
+            'servers': list('{0}'.format(s) for s in self.options.esservers)
+        }
+        alerttask.RABBITMQ = {
+            'mquser': self.options.mquser,
+            'alertexchange': self.options.alertExchange,
+            'alertqueue': self.options.alertqueue,
+            'mqport': self.options.mqport,
+            'mqserver': self.options.mqserver,
+            'mqpassword': self.options.mqpassword,
+            'mqalertserver': self.options.mqalertserver
+        }
 
         alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
         os.chdir(alerts_dir)
@@ -59,7 +77,6 @@ class AlertTestSuite(UnitTestSuite):
         assert test_case.description is not ""
 
         # Verify alert_filename is a legit file
-        # full_alert_file_path = "../../../alerts/" + self.alert_filename + ".py"
         full_alert_file_path = "./" + self.alert_filename + ".py"
         assert os.path.isfile(full_alert_file_path) is True
 
@@ -68,7 +85,9 @@ class AlertTestSuite(UnitTestSuite):
         # gonna grep for class name
         alert_source_str = open(full_alert_file_path, 'r').read()
         class_search_str = "class " + self.alert_classname + "("
-        assert class_search_str in alert_source_str
+        error_text = "Incorrect alert classname. We tried guessing the class name ({0}), but that wasn't it.".format(self.alert_classname)
+        error_text += ' Define self.alert_classname in your alert unit test class.'
+        assert class_search_str in alert_source_str, error_text
 
         # Verify events is not empty
         assert len(test_case.events) is not 0

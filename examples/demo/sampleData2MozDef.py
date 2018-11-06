@@ -18,10 +18,11 @@ import random
 import logging
 from logging.handlers import SysLogHandler
 from Queue import Empty
-from  requests.packages.urllib3.exceptions import ClosedPoolError
+from requests.packages.urllib3.exceptions import ClosedPoolError
 import requests
 import time
-from configlib import getConfig, OptionParser, setConfig
+from configlib import getConfig, OptionParser
+import ConfigParser
 import glob
 from datetime import datetime
 from datetime import timedelta
@@ -31,16 +32,15 @@ import pytz
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../lib'))
-from utilities.toUTC import toUTC
+
+from mozdef_util.utilities.toUTC import toUTC
 
 #use futures to run in the background
 #httpsession = FuturesSession(max_workers=5)
 httpsession = requests.session()
-httpsession.trust_env=False #turns of needless .netrc check for creds
+httpsession.trust_env=False  # turns of needless .netrc check for creds
 #a = requests.adapters.HTTPAdapter(max_retries=2)
 #httpsession.mount('http://', a)
-
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -50,6 +50,20 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 #create a list of logs we can append json to and call for a post when we want.
 logcache=Queue()
+
+
+def setConfig(option,value,configfile):
+    """write an option/value pair to our config file"""
+    if os.path.isfile(configfile):
+        config = ConfigParser.ConfigParser()
+        configfp=open(configfile,'r')
+        config.readfp(configfp)
+        configfp.close()
+
+        config.set('options',option,value)
+        configfp=open(configfile,'w')
+        config.write(configfp)
+        configfp.close()
 
 
 def postLogs(logcache):
@@ -70,22 +84,24 @@ def postLogs(logcache):
                 #posts.append((r,postdata,url))
     except Empty as e:
         pass
-    #for p,postdata,url in posts:
-        #try:
-            #if p.result().status_code >=500:
-                #logger.error("exception posting to %s %r [will retry]\n"%(url,p.result().status_code))
-                ##try again later when the next message in forces other attempts at posting.
-                #logcache.put(postdata)
-        #except ClosedPoolError as e:
-            ##logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n"%(url,e,postdata))
-            #logcache.put(postdata)
-        #except Exception as e:
-            #logger.fatal("exception posting to %s %r %r [will not retry]\n"%(url,e,postdata))
-            #sys.exit(1)
+    # for p, postdata, url in posts:
+    #     try:
+    #         if p.result().status_code >= 500:
+    #             logger.error("exception posting to %s %r [will retry]\n" % (url, p.result().status_code))
+    #             # try again later when the next message in forces other attempts at posting.
+    #             logcache.put(postdata)
+    #     except ClosedPoolError as e:
+    #         logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n" % (url, e, postdata))
+    #         logcache.put(postdata)
+    #     except Exception as e:
+    #         logger.fatal("exception posting to %s %r %r [will not retry]\n" % (url, e, postdata))
+    #         sys.exit(1)
+
 
 def genRandomIPv4():
     #random, IPs
     return '.'.join("%d" % (random.randint(0,254)) for x in range(4))
+
 
 def genAttackerIPv4():
     #random, but not too random as to allow for alerting about attacks from
@@ -143,15 +159,15 @@ def makeEvents():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
                         logger.error('%r'%e)
 
-
     except KeyboardInterrupt as e:
         sys.exit(1)
+
 
 def makeAlerts():
     '''
@@ -213,15 +229,15 @@ def makeAlerts():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
                         logger.error('%r'%e)
 
-
     except KeyboardInterrupt as e:
         sys.exit(1)
+
 
 def makeAttackers():
     '''
@@ -283,16 +299,14 @@ def makeAttackers():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35: #resource temporarily unavailable.
+                    if e.errno==35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
                         logger.error('%r'%e)
 
-
     except KeyboardInterrupt as e:
         sys.exit(1)
-
 
 
 def initConfig():
@@ -330,13 +344,12 @@ if __name__ == '__main__':
     makeAlerts()
     makeAttackers()
 
-
     while not logcache.empty():
         try:
             postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
             postingProcess.start()
         except OSError as e:
-            if e.errno==35: #resource temporarily unavailable.
+            if e.errno==35:  # resource temporarily unavailable.
                 print(e)
                 pass
             else:

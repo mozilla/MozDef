@@ -34,4 +34,15 @@ class message(object):
                         message['details']['sitetype'] = 'office'
                     else:
                         message['details']['sitetype'] = 'unknown'
+        elif 'hostname' in message.keys():
+            hostnamesplit = str.lower(message['hostname'].encode('ascii', 'ignore')).split('.')
+            if len(hostnamesplit) == 5:
+                if 'mozilla' == hostnamesplit[-2]:
+                    message['details']['site'] = hostnamesplit[-3]
+                    if message['details']['site'] in self.dc_code_list:
+                        message['details']['sitetype'] = 'datacenter'
+                    elif message['details']['site'] in self.offices_code_list:
+                        message['details']['sitetype'] = 'office'
+                    else:
+                        message['details']['sitetype'] = 'unknown'
         return (message, metadata)

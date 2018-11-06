@@ -14,10 +14,10 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
         "_type": "event",
         "_source": {
             "tags": ["releng"],
+            "hostname": 'host1',
             "summary": 'Accepted publickey for ttesterson from 1.2.3.4 port 39190 ssh2',
             "details": {
                 "sourceipaddress": "1.2.3.4",
-                "hostname": 'host1',
                 "program": 'sshd'
             }
         }
@@ -107,7 +107,7 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['details']['hostname'] = 'badhostname'
+    event['_source']['hostname'] = 'badhostname'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad hostname",

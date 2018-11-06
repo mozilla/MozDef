@@ -21,6 +21,7 @@ except ImportError:
     quote_url = urllib.quote
 import traceback
 
+
 class DotDict(dict):
     '''dict.item notation for dict()'s'''
     __getattr__ = dict.__getitem__
@@ -33,221 +34,231 @@ class DotDict(dict):
                 value = DotDict(value)
             self[key] = value
 
+
 def fatal(msg):
     print(msg)
     sys.exit(1)
 
+
 def debug(msg):
     sys.stderr.write('+++ {}\n'.format(msg))
 
-#This is from https://auth0.com/docs/api/management/v2#!/Logs/get_logs
-#and https://github.com/auth0/auth0-logs-to-logentries/blob/master/index.js (MIT)
-log_types=DotDict({
-        's': {
-            "event": 'Success Login',
-            "level": 1 # Info
-            },
-        'slo': {
-            "event": 'Success Logout',
-            "level": 1 # Info
-            },
-        'flo': {
-            "event": 'Failed Logout',
-            "level": 3 # Error
-            },
-        'seacft': {
-            "event": 'Success Exchange (Authorization Code for Access Token)',
-            "level": 1 # Info
-            },
-        'feacft': {
-            "event": 'Failed Exchange (Authorization Code for Access Token)',
-            "level": 3 # Error
-            },
-        'f': {
-            "event": 'Failed Login',
-            "level": 3 # Error
-            },
-        'w': {
-            "event": 'Warnings During Login',
-            "level": 2 # Warning
-            },
-        'du': {
-            "event": 'Deleted User',
-            "level": 1 # Info
-            },
-        'fu': {
-            "event": 'Failed Login (invalid email/username)',
-            "level": 3 # Error
-            },
-        'fp': {
-            "event": 'Failed Login (wrong password)',
-            "level": 3 # Error
-            },
-        'fc': {
-            "event": 'Failed by Connector',
-            "level": 3 # Error
-            },
-        'fco': {
-            "event": 'Failed by CORS',
-            "level": 3 # Error
-            },
-        'con': {
-            "event": 'Connector Online',
-            "level": 1 # Info
-            },
-        'coff': {
-            "event": 'Connector Offline',
-            "level": 3 # Error
-            },
-        'fcpro': {
-            "event": 'Failed Connector Provisioning',
-            "level": 4 # Critical
-            },
-        'ss': {
-                "event": 'Success Signup',
-                "level": 1 # Info
-                },
-        'fs': {
-                "event": 'Failed Signup',
-                "level": 3 # Error
-                },
-        'cs': {
-                "event": 'Code Sent',
-                "level": 0 # Debug
-                },
-        'cls': {
-                "event": 'Code/Link Sent',
-                "level": 0 # Debug
-                },
-        'sv': {
-                "event": 'Success Verification Email',
-                "level": 0 # Debug
-                },
-        'fv': {
-                "event": 'Failed Verification Email',
-                "level": 0 # Debug
-                },
-        'scp': {
-                "event": 'Success Change Password',
-                "level": 1 # Info
-                },
-        'fcp': {
-                "event": 'Failed Change Password',
-                "level": 3 # Error
-                },
-        'sce': {
-                "event": 'Success Change Email',
-                "level": 1 # Info
-                },
-        'fce': {
-                "event": 'Failed Change Email',
-                "level": 3 # Error
-                },
-        'scu': {
-                "event": 'Success Change Username',
-                "level": 1 # Info
-                },
-        'fcu': {
-                "event": 'Failed Change Username',
-                "level": 3 # Error
-                },
-        'scpn': {
-                "event": 'Success Change Phone Number',
-                "level": 1 # Info
-                },
-        'fcpn': {
-                "event": 'Failed Change Phone Number',
-                "level": 3 # Error
-                },
-        'svr': {
-                "event": 'Success Verification Email Request',
-                "level": 0 # Debug
-                },
-        'fvr': {
-                "event": 'Failed Verification Email Request',
-                "level": 3 # Error
-                },
-        'scpr': {
-                "event": 'Success Change Password Request',
-                "level": 0 # Debug
-                },
-        'fcpr': {
-                "event": 'Failed Change Password Request',
-                "level": 3 # Error
-                },
-        'fn': {
-                "event": 'Failed Sending Notification',
-                "level": 3 # Error
-                },
-        'sapi': {
-                "event": 'API Operation',
-                "level": 1 #Info
-                },
-        'fapi': {
-                "event": 'Failed API Operation',
-                "level": 3 #Error
-                },
-        'limit_wc': {
-                "event": 'Blocked Account',
-                "level": 4 # Critical
-                },
-        'limit_ui': {
-                "event": 'Too Many Calls to /userinfo',
-                "level": 4 # Critical
-                },
-        'api_limit': {
-                "event": 'Rate Limit On API',
-                "level": 4 #Critical
-                },
-        'sdu': {
-                "event": 'Successful User Deletion',
-                "level": 1 # Info
-                },
-        'fdu': {
-                "event": 'Failed User Deletion',
-                "level": 3 # Error
-                },
-        'sd': {
-                "event": 'Success Delegation',
-                "level": 3 # error
-         },
-        'fd': {
-                "event": 'Failed Delegation',
-                "level": 3 # error
-         },
-        'seccft': {
-                "event": "Success Exchange (Client Credentials for Access Token)",
-                "level": 1
-        },
-        'feccft': {
-                "event": "Failed Exchange (Client Credentials for Access Token)",
-                "level": 1
-        },
-        'fsa': {
-                "event": "Failed Silent Auth",
-                "level": 3
-        },
-        'ssa': {
-                "event": "Success Silent Auth",
-                "level": 1
-        },
-        'fepft': {
-                "event": "Failed Exchange (Password for Access Token)",
-                "level": 3
-        },
-        'limit_mu': {
-                "event": "Blocked IP Address",
-                "level": 3
-        },
-        'sepft': {
-                "event": "Success Exchange (Password for Access Token)",
-                "level": 1
-        },
-        'fcoa': {
-                "event": "Failed Cross Origin Authentication",
-                "level": 3
-        }
+
+# This is from https://auth0.com/docs/api/management/v2#!/Logs/get_logs
+# and https://github.com/auth0/auth0-logs-to-logentries/blob/master/index.js (MIT)
+# levels
+#     0 = Debug
+#     1 = Info
+#     2 = Warning
+#     3 = Error
+#     4 = Critical
+log_types = DotDict({
+    's': {
+        "event": 'Success Login',
+        "level": 1
+    },
+    'slo': {
+        "event": 'Success Logout',
+        "level": 1
+    },
+    'flo': {
+        "event": 'Failed Logout',
+        "level": 3
+    },
+    'seacft': {
+        "event": 'Success Exchange (Authorization Code for Access Token)',
+        "level": 1
+    },
+    'feacft': {
+        "event": 'Failed Exchange (Authorization Code for Access Token)',
+        "level": 3
+    },
+    'f': {
+        "event": 'Failed Login',
+        "level": 3
+    },
+    'w': {
+        "event": 'Warnings During Login',
+        "level": 2
+    },
+    'du': {
+        "event": 'Deleted User',
+        "level": 1
+    },
+    'fu': {
+        "event": 'Failed Login (invalid email/username)',
+        "level": 3
+    },
+    'fp': {
+        "event": 'Failed Login (wrong password)',
+        "level": 3
+    },
+    'fc': {
+        "event": 'Failed by Connector',
+        "level": 3
+    },
+    'fco': {
+        "event": 'Failed by CORS',
+        "level": 3
+    },
+    'con': {
+        "event": 'Connector Online',
+        "level": 1
+    },
+    'coff': {
+        "event": 'Connector Offline',
+        "level": 3
+    },
+    'fcpro': {
+        "event": 'Failed Connector Provisioning',
+        "level": 4
+    },
+    'ss': {
+        "event": 'Success Signup',
+        "level": 1
+    },
+    'fs': {
+        "event": 'Failed Signup',
+        "level": 3
+    },
+    'cs': {
+        "event": 'Code Sent',
+        "level": 0
+    },
+    'cls': {
+        "event": 'Code/Link Sent',
+        "level": 0
+    },
+    'sv': {
+        "event": 'Success Verification Email',
+        "level": 0
+    },
+    'fv': {
+        "event": 'Failed Verification Email',
+        "level": 0
+    },
+    'scp': {
+        "event": 'Success Change Password',
+        "level": 1
+    },
+    'fcp': {
+        "event": 'Failed Change Password',
+        "level": 3
+    },
+    'sce': {
+        "event": 'Success Change Email',
+        "level": 1
+    },
+    'fce': {
+        "event": 'Failed Change Email',
+        "level": 3
+    },
+    'scu': {
+        "event": 'Success Change Username',
+        "level": 1
+    },
+    'fcu': {
+        "event": 'Failed Change Username',
+        "level": 3
+    },
+    'scpn': {
+        "event": 'Success Change Phone Number',
+        "level": 1
+    },
+    'fcpn': {
+        "event": 'Failed Change Phone Number',
+        "level": 3
+    },
+    'svr': {
+        "event": 'Success Verification Email Request',
+        "level": 0
+    },
+    'fvr': {
+        "event": 'Failed Verification Email Request',
+        "level": 3
+    },
+    'scpr': {
+        "event": 'Success Change Password Request',
+        "level": 0
+    },
+    'fcpr': {
+        "event": 'Failed Change Password Request',
+        "level": 3
+    },
+    'fn': {
+        "event": 'Failed Sending Notification',
+        "level": 3
+    },
+    'sapi': {
+        "event": 'API Operation',
+        "level": 1
+    },
+    'fapi': {
+        "event": 'Failed API Operation',
+        "level": 3
+    },
+    'limit_wc': {
+        "event": 'Blocked Account',
+        "level": 4
+    },
+    'limit_ui': {
+        "event": 'Too Many Calls to /userinfo',
+        "level": 4
+    },
+    'api_limit': {
+        "event": 'Rate Limit On API',
+        "level": 4
+    },
+    'sdu': {
+        "event": 'Successful User Deletion',
+        "level": 1
+    },
+    'fdu': {
+        "event": 'Failed User Deletion',
+        "level": 3
+    },
+    'sd': {
+        "event": 'Success Delegation',
+        "level": 3
+    },
+    'fd': {
+        "event": 'Failed Delegation',
+        "level": 3
+    },
+    'seccft': {
+        "event": "Success Exchange (Client Credentials for Access Token)",
+        "level": 1
+    },
+    'feccft': {
+        "event": "Failed Exchange (Client Credentials for Access Token)",
+        "level": 1
+    },
+    'fsa': {
+        "event": "Failed Silent Auth",
+        "level": 3
+    },
+    'ssa': {
+        "event": "Success Silent Auth",
+        "level": 1
+    },
+    'fepft': {
+        "event": "Failed Exchange (Password for Access Token)",
+        "level": 3
+    },
+    'limit_mu': {
+        "event": "Blocked IP Address",
+        "level": 3
+    },
+    'sepft': {
+        "event": "Success Exchange (Password for Access Token)",
+        "level": 1
+    },
+    'fcoa': {
+        "event": "Failed Cross Origin Authentication",
+        "level": 3
+    }
 })
+
 
 def process_msg(mozmsg, msg):
     """Normalization function for auth0 msg.
@@ -339,6 +350,7 @@ def process_msg(mozmsg, msg):
 
     return mozmsg
 
+
 def load_state(fpath):
     """Load last msg id we've read from auth0 (log index).
     @fpath string (path to state file)
@@ -351,6 +363,7 @@ def load_state(fpath):
         pass
     return state
 
+
 def save_state(fpath, state):
     """Saves last msg id we've read from auth0 (log index).
     @fpath string (path to state file)
@@ -358,6 +371,7 @@ def save_state(fpath, state):
     """
     with open(fpath, mode='w') as fd:
         fd.write(str(state)+'\n')
+
 
 def byteify(input):
     """Convert input to ascii"""
@@ -370,6 +384,7 @@ def byteify(input):
         return input.encode('utf-8')
     else:
         return input
+
 
 def fetch_auth0_logs(config, headers, fromid):
     lastid = fromid
@@ -421,18 +436,21 @@ def fetch_auth0_logs(config, headers, fromid):
     else:
         return (0, 0, 0, lastid)
 
+
 def main():
-    #Configuration loading
+    # Configuration loading
     config_location = os.path.dirname(sys.argv[0]) + '/' + 'auth02mozdef.json'
     with open(config_location) as fd:
         config = DotDict(hjson.load(fd))
 
-    if config == None:
+    if config is None:
         print("No configuration file 'auth02mozdef.json' found.")
         sys.exit(1)
 
-    headers = {'Authorization': 'Bearer {}'.format(config.auth0.token),
-            'Accept': 'application/json'}
+    headers = {
+        'Authorization': 'Bearer {}'.format(config.auth0.token),
+        'Accept': 'application/json'
+    }
 
     fromid = load_state(config.state_file)
     # Auth0 will interpret a 0 state as an error on our hosted instance, but will accept an empty parameter "as if it was 0"
@@ -448,6 +466,7 @@ def main():
         fromid = lastid
 
     save_state(config.state_file, lastid)
+
 
 if __name__ == "__main__":
     main()

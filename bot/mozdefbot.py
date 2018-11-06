@@ -27,9 +27,8 @@ from ipwhois import IPWhois
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from geo_ip import GeoIP
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.geo_ip import GeoIP
 
 
 logger = logging.getLogger()
@@ -125,7 +124,8 @@ def isIP(ip):
 def ipLocation(ip):
     location = ""
     try:
-        geoip = GeoIP()
+        geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/GeoLite2-City.mmdb")
+        geoip = GeoIP(geoip_data_dir)
         geoDict = geoip.lookup_ip(ip)
         if geoDict is not None:
             if 'error' in geoDict:
@@ -170,7 +170,7 @@ class mozdefBot():
         self.root_logger.setLevel(logging.INFO)
 
         self.client = kitnirc.client.Client(options.host, options.port)
-        self.controller  = kitnirc.modular.Controller(self.client, options.configfile)
+        self.controller = kitnirc.modular.Controller(self.client, options.configfile)
         self.controller.load_config()
         self.controller.start()
         self.client.root_logger = self.root_logger
@@ -182,7 +182,6 @@ class mozdefBot():
             ssl=True
         )
         self.mqConsumer = None
-
 
     def run(self):
         try:
@@ -198,7 +197,6 @@ class mozdefBot():
                 # start the mq consumer
                 consumeAlerts(self)
 
-
             @self.client.handle('LINE')
             def line_handler(client, *params):
                 try:
@@ -207,7 +205,6 @@ class mozdefBot():
                     # catch error in kitnrc : chan.remove(actor) where channel
                     # object has no attribute remove
                     pass
-
 
             @self.client.handle('PRIVMSG')
             def priv_handler(client, actor, recipient, message):
@@ -255,7 +252,6 @@ class mozdefBot():
                                 self.client.msg(
                                     recipient, "{0}: hrm..loopback? private ip?".format(i))
 
-
             @self.client.handle('JOIN')
             def join_handler(client, user, channel, *params):
                 self.root_logger.debug('%r' % channel)
@@ -296,7 +292,6 @@ class alertConsumer(ConsumerMixin):
         self.lastalert = None
         ircBot.mqConsumer = self
 
-
     def get_consumers(self, Consumer, channel):
         consumer = Consumer(
             self.alertQueue,
@@ -304,7 +299,6 @@ class alertConsumer(ConsumerMixin):
             accept=['json'])
         consumer.qos(prefetch_count=options.prefetch)
         return [consumer]
-
 
     def on_message(self, body, message):
         try:
@@ -338,7 +332,7 @@ class alertConsumer(ConsumerMixin):
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
-            if self.lastalert != None:
+            if self.lastalert is not None:
                 delta = toUTC(datetime.now()) - self.lastalert
                 sys.stdout.write('new alert, delta since last is {}\n'.format(delta))
                 if delta.seconds < 2:
@@ -356,14 +350,17 @@ class alertConsumer(ConsumerMixin):
             logger.exception(
                 "alertworker exception while processing events queue %r" % e)
 
+
 @run_async
 def consumeAlerts(ircBot):
     # connect and declare the message queue/kombu objects.
     # server/exchange/queue
-    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,
-                                                        options.mqpassword,
-                                                        options.mqalertserver,
-                                                        options.mqport)
+    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(
+        options.mquser,
+        options.mqpassword,
+        options.mqalertserver,
+        options.mqport
+    )
     mqAlertConn = Connection(mqConnString)
 
     # Exchange for alerts we pass to plugins
@@ -397,15 +394,34 @@ def initConfig():
     options.username = getConfig('username', 'username', options.configfile)
     options.realname = getConfig('realname', 'realname', options.configfile)
     options.password = getConfig('password', '', options.configfile)
+
+    # Our config parser removes '#'
+    # so we gotta re-add them
     options.join = getConfig('join', '#mzdf', options.configfile)
+    channels = []
+    for channel in options.join.split(','):
+        if not channel.startswith('#'):
+            channel = '#{0}'.format(channel)
+        channels.append(channel)
+    options.join = ','.join(channels)
+
     options.alertircchannel = getConfig(
         'alertircchannel',
         '',
         options.configfile)
+
     options.channelkeys = json.loads(getConfig(
         'channelkeys',
         '{"#somechannel": "somekey"}',
         options.configfile))
+
+    # Our config parser stomps out the '#' so we gotta readd
+    channelkeys = {}
+    for key, value in options.channelkeys.iteritems():
+        if not key.startswith('#'):
+            key = '#{0}'.format(key)
+        channelkeys[key] = value
+    options.channelkeys = channelkeys
 
     # message queue options
     # server hostname

@@ -34,11 +34,11 @@ accept_message['details']['sourceipaddress'] = '10.22.74.208'
 # Short username, RSA fpr present
 class TestSSHDAcceptedMessageV1():
     def setup(self):
-        
+
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'Accepted publickey for user1 from 10.22.74.208 port 26388 ssh2: RSA 1f:c9:4c:90:bc:fb:72:c7:4d:02:da:07:ed:fe:07:ac'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -55,13 +55,15 @@ class TestSSHDAcceptedMessageV1():
         assert retmessage['details']['sourceipaddress'] == '10.22.74.208'
 
 # Long Username and SHA256 fpr present
+
+
 class TestSSHDAcceptedMessageV2():
     def setup(self):
-        
+
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'Accepted publickey for user1@domainname.com from 10.22.248.134 port 52216 ssh2: RSA SHA256:1fPhSawXQzFDrJoN2uSos2nGg3wS3oGp15x8/HR+pBc'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -109,7 +111,7 @@ class TestSSHDAcceptedMessageV4():
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'Accepted publickey for user1 from 10.22.74.208 port 26388 ssh2'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -133,7 +135,7 @@ class TestSSHDPAMSessionOpenedMessageV1():
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'pam_unix(sshd:session): session opened for user user1 by (uid=0)'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -152,7 +154,7 @@ class TestSSHDPAMSessionClosedMessageV1():
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'pam_unix(sshd:session): session closed for user user1'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -191,7 +193,7 @@ class TestSSHDPostponedMessageV2():
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'Postponed publickey for user1 from 10.22.75.209 port 37486 ssh2 [preauth]'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -211,7 +213,7 @@ class TestSSHDPostponedMessageV3():
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'Postponed publickey for user1@somewhere.com from 10.22.75.209 port 37486 ssh2 [preauth]'
-    
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -231,7 +233,7 @@ class TestSSHDStartingSessionV1():
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'Starting session: command for user1 from 10.22.128.93 port 51748'
-       
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'
@@ -253,7 +255,7 @@ class TestSSHDStartingSessionV2():
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
         self.msg['summary'] = 'Starting session: shell on pts/0 for user2 from 10.22.252.6 port 59983'
-       
+
     def test_onMessage(self):
         metadata = {}
         metadata['doc_type'] = 'event'

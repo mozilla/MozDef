@@ -8,7 +8,7 @@
 # TODO: Dont use query_models, nicer fixes for AlertTask
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch
 import hjson
 import logging
 import sys
@@ -139,14 +139,12 @@ class AlertGenericLoader(AlertTask):
         url = aggreg['config']['alert_url']
 
         # Find all affected hosts
-        # Normally, the hostname data is in e.details.hostname so try that first,
+        # Normally, the hostname data is in e.hostname so try that first,
         # but fall back to e.hostname if it is missing, or nothing at all if there's no hostname! ;-)
         hostnames = []
         for e in aggreg['events']:
             event_source = e['_source']
-            if 'details' in event_source and 'hostname' in event_source['details']:
-                hostnames.append(event_source['details']['hostname'])
-            elif 'hostname' in event_source:
+            if 'hostname' in event_source:
                 hostnames.append(event_source['hostname'])
 
         summary = '{} ({}): {}'.format(

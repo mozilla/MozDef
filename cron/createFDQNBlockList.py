@@ -18,8 +18,7 @@ from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -27,6 +26,7 @@ logger = logging.getLogger(sys.argv[0])
 
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
+
 
 def initLogger():
     logger.level = logging.INFO
@@ -42,8 +42,10 @@ def initLogger():
         sh.setFormatter(formatter)
         logger.addHandler(sh)
 
+
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
+
 
 def isFQDN(fqdn):
     try:
@@ -55,6 +57,7 @@ def isFQDN(fqdn):
     except:
         return False
 
+
 def parse_fqdn_whitelist(fqdn_whitelist_location):
     fqdns = []
     with open(fqdn_whitelist_location, "r") as text_file:
@@ -63,6 +66,7 @@ def parse_fqdn_whitelist(fqdn_whitelist_location):
             if isFQDN(line):
                 fqdns.append(line)
     return fqdns
+
 
 def main():
     logger.debug('starting')
@@ -79,18 +83,18 @@ def main():
         fqdnblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(days=options.expireage)}})
 
         # Lastly, export the combined blocklist
-        fqdnCursor=mozdefdb['fqdnblocklist'].aggregate([
-                {"$sort": {"dateAdded": -1}},
-                {"$match": {"address": {"$exists": True}}},
-                {"$match":
-                    {"$or":[
-                        {"dateExpiring": {"$gte": datetime.utcnow()}},
-                        {"dateExpiring": {"$exists": False}},
-                    ]},
-                },
-                {"$project":{"address":1}},
-                {"$limit": options.fqdnlimit}
-            ])
+        fqdnCursor = mozdefdb['fqdnblocklist'].aggregate([
+            {"$sort": {"dateAdded": -1}},
+            {"$match": {"address": {"$exists": True}}},
+            {"$match": {
+                "$or": [
+                    {"dateExpiring": {"$gte": datetime.utcnow()}},
+                    {"dateExpiring": {"$exists": False}},
+                ]},
+             },
+            {"$project": {"address": 1}},
+            {"$limit": options.fqdnlimit}
+        ])
         FQDNList=[]
         for fqdn in fqdnCursor:
             if fqdn not in options.fqdnwhitelist:
@@ -103,7 +107,6 @@ def main():
         # to s3?
         if len(options.aws_bucket_name)>0:
             s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
-
 
     except ValueError as e:
         logger.error("Exception %r generating FQDN block list" % e)
@@ -137,7 +140,7 @@ def initConfig():
     options.fqdnlimit = getConfig('fqdnlimit', 1000, options.configfile)
 
     # AWS creds
-    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)          #aws credentials to use to connect to mozilla_infosec_blocklist
+    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)  # aws credentials to use to connect to mozilla_infosec_blocklist
     options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
     options.aws_bucket_name=getConfig('aws_bucket_name','',options.configfile)
     options.aws_document_key_name=getConfig('aws_document_key_name','',options.configfile)
@@ -154,15 +157,15 @@ def s3_upload_file(file_path, bucket_name, key_name):
         conn.create_bucket(bucket_name)
         bucket = conn.get_bucket(bucket_name, validate=False)
 
-
     key = boto.s3.key.Key(bucket)
     key.key = key_name
     key.set_contents_from_filename(file_path)
 
     key.set_acl('public-read')
     url = "https://s3.amazonaws.com/{}/{}".format(bucket.name, key.name)
-    print( "URL: {}".format(url))
+    print("URL: {}".format(url))
     return url
+
 
 if __name__ == '__main__':
     parser = OptionParser()
