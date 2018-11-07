@@ -373,6 +373,7 @@ Meteor.startup(() => {
 
         // since we store email from oidc calls in the profile
         // deny updates to the profile which is writeable by default
+        // https://docs.meteor.com/api/accounts.html#Meteor-users
 
         Meteor.users.deny({ update: () => true });
 
