@@ -68,21 +68,21 @@ if (Meteor.isServer) {
             value: mozdef.authenticationType
         });
 
-        //allow local account creation?
-        //http://docs.meteor.com/#/full/accounts_config
-        var enableClientAccountCreation = !!(mozdef.enableClientAccountCreation || false);
-        Accounts._options.enableClientAccountCreation = enableClientAccountCreation;
         mozdefsettings.insert({
             key: 'enableClientAccountCreation',
-            value: enableClientAccountCreation
+            value: mozdef.enableClientAccountCreation
         });
 
+        // allow local account creation?
+        // http://docs.meteor.com/#/full/accounts_config
+        // https://docs.meteor.com/api/accounts-multi.html#AccountsCommon-config
+        // https://github.com/meteor/meteor/blob/master/packages/accounts-base/accounts_common.js#L124
         // newer meteor uses a key of forbidClientAccountCreation, so
-        // we negate the enableClientAccountCreation mozdef setting
-        Accounts._options.forbidClientAccountCreation = !enableClientAccountCreation;
+        // we invert the enableClientAccountCreation mozdef setting
+        Accounts._options.forbidClientAccountCreation = !mozdef.enableClientAccountCreation;
         mozdefsettings.insert({
             key: 'forbidClientAccountCreation',
-            value: !!!enableClientAccountCreation
+            value: !mozdef.enableClientAccountCreation
         });
 
         registerLoginMethod();
