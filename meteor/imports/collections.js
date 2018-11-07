@@ -279,97 +279,102 @@ Meteor.startup(() => {
             return fqdnblocklist.find({},{limit:0});
         })
 
-    //access rules from clients
-    //barebones to allow you to specify rules
+        //access rules from clients
+        //barebones to allow you to specify rules
 
-    incidents.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // can only remove one's own indicents
-            return doc.creator === Meteor.user().profile.email;
-        },
-        fetch: ['creator']
+        incidents.allow({
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // can only remove one's own indicents
+                return doc.creator === Meteor.user().profile.email;
+            },
+            fetch: ['creator']
         });
 
         attackers.allow({
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        }
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            }
         });
 
         alerts.allow({
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        }
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            }
         });
 
         investigations.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // can only remove one's own items
-            return doc.creator === Meteor.user().profile.email;
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // can only remove one's own items
+                return doc.creator === Meteor.user().profile.email;
         },
         fetch: ['creator']
         });
 
         userActivity.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // can only remove one's own items
-            return doc.userId === Meteor.user().profile.email;
-        },
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // can only remove one's own items
+                return doc.userId === Meteor.user().profile.email;
+            },
         });
 
         ipblocklist.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        fetch: ['creator']
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            fetch: ['creator']
         });
 
         fqdnblocklist.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        fetch: ['creator']
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            fetch: ['creator']
         });
+
+        // since we store email from oidc calls in the profile
+        // deny updates to the profile
+
+        Meteor.users.deny({ update: () => true });
 
     };
 
