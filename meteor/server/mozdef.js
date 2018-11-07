@@ -135,6 +135,9 @@ function registerLoginViaPassword() {
         if (typeof (email) === "undefined") {
             console.log("User Email address not defined.")
             return user;
+        }else{
+            // set the username to the primary email
+            user.username=email;
         }
 
         if (typeof (user.profile) === "undefined") {
@@ -151,6 +154,7 @@ function registerLoginViaPassword() {
         }
 
         // set any other profile information here.
+
 
         return user
     });
