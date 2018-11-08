@@ -52,13 +52,12 @@ class message(object):
                 'Content-type': 'application/json',
             }
             payload = json.dumps({
-              "service_key": "{0}".format(self.options.serviceKey),
-              "event_type": "trigger",
-              "description": "{0}".format(message['summary']),
-              "client": "MozDef",
-              "client_url": "https://" + self.options.clienturl + "/{0}".format(message['events'][0]['documentsource']['alerts'][0]['id']),
-#              "details": message['events'],
-              "contexts": [
+                "service_key": "{0}".format(self.options.serviceKey),
+                "event_type": "trigger",
+                "description": "{0}".format(message['summary']),
+                "client": "MozDef",
+                "client_url": "https://" + self.options.clienturl + "/{0}".format(message['events'][0]['documentsource']['alerts'][0]['id']),
+                "contexts": [
                     {
                         "type": "link",
                         "href": "https://" + "{0}".format(doclink),
@@ -67,9 +66,9 @@ class message(object):
                 ]
             })
             r = requests.post(
-                            'https://events.pagerduty.com/generic/2010-04-15/create_event.json',
-                            headers=headers,
-                            data=payload,
+                'https://events.pagerduty.com/generic/2010-04-15/create_event.json',
+                headers=headers,
+                data=payload,
             )
         # you can modify the message if needed
         # plugins registered with lower (>2) priority

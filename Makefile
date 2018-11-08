@@ -8,23 +8,21 @@ ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
 		   mozdef_mq_worker mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
 		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq mozdef_kibana
-USE_DKR_IMAGES  := docker/compose/docker-compose-rebuild.yml  ## Pass docker/compose/docker-compose-norebuild.yml to use hub.docker.com images
+BUILD_MODE	:= build  ## Pass `pull` in order to pull images instead of building them
 NAME		:= mozdef
 VERSION		:= 0.1
 NO_CACHE	:= ## Pass `--no-cache` in order to disable Docker cache
-GITHASH		:= $(shell git rev-parse --short HEAD) ## Pass `latest` to tag docker hub images as latest instead
+GITHASH		:= latest  ## Pass `$(git rev-parse --short HEAD`) to tag docker hub images as latest git-hash instead
+TEST_CASE	:= tests  ## Run all (`tests`) or a specific test case (ex `tests/alerts/tests/alerts/test_proxy_drop_exfil_domains.py`)
 
 .PHONY:all
 all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
 
-.PHONY: run run-only
+.PHONY: run
 run: build ## Run all MozDef containers
-	docker-compose -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) up -d
-
-run-only:
-	docker-compose -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) up -d
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
 .PHONY: run-cloudy-mozdef restart-cloudy-mozdef
 run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy-mozdef`). This is used by the CloudFormation-initiated setup.
@@ -36,52 +34,49 @@ run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy
 restart-cloudy-mozdef:
 	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart
 
-# TODO? add custom test targets for individual tests (what used to be `multiple-tests` for example
-# The docker files are still in docker/compose/docker*test*
-.PHONY: test tests run-tests
-test: build-tests run-tests ## Running tests from locally-built images
-tests: build-tests run-tests
-
-run-tests:
-	docker-compose -f $(USE_DKR_IMAGES) -f tests/docker-compose.yml -p $(NAME) up -d
-	@echo "Waiting for the instance to come up..."
-	sleep 10
-	@echo "Running flake8.."
-	docker run -it mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
-	@echo "Running py.test..."
-	docker run -it --network=mozdef_default mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues tests"
+.PHONY: tests run-tests
+test: build-tests run-tests
+tests: build-tests run-tests  ## Run all tests (getting/building images as needed)
+run-test:
+run-tests:  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) up -d
+	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
+	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 
 .PHONY: build
 build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
-	docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build base
-	docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) build
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
 
-.PHONY: build-tests nobuild-tests
-build-tests:
-	docker-compose  -f $(USE_DKR_IMAGES) -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build base
-	docker-compose  -f $(USE_DKR_IMAGES) -f tests/docker-compose.yml -p $(NAME) $(NO_CACHE) build
+.PHONY: build-tests
+build-tests:  ## Build end-to-end test environment only
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) $(NO_CACHE) $(BUILD_MODE)
 
 .PHONY: stop down
 stop: down
 down: ## Shutdown all services we started with docker-compose
-	docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) stop
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
+	docker-compose -f docker/compose/docker-compose.yml -p test-$(NAME) stop
 
 .PHONY: docker-push docker-get hub hub-get
 docker-push: hub
 hub: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef).
 	docker login
-	@echo "Tagging current docker images with git HEAD shorthash..."
-	$(foreach var,$(DKR_IMAGES),docker tag $(var) mozdef/$(var):$(GITHASH);)
-	@echo "Uploading images to docker..."
-	$(foreach var,$(DKR_IMAGES),docker push mozdef/$(var):$(GITHASH);)
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) push
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) push
 
 docker-get: hub-get
 hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
-	$(foreach var,$(DKR_IMAGES),docker pull mozdef/$(var):$(GITHASH);)
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) pull
+	docker-compose -f docker/compose/docker-compose-test.yml -p test-$(NAME) pull
 
 .PHONY: clean
 clean: ## Cleanup all docker volumes and shutdown all related services
-	-docker-compose  -f $(USE_DKR_IMAGES) -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
+	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
+	-docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) down -v --remove-orphans
 # Shorthands
 .PHONY: rebuild
 rebuild: clean build
+
+.PHONY: new-alert
+new-alert: ## Create an example alert and working alert unit test
+	python tests/alert_templater.py

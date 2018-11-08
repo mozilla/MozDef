@@ -10,8 +10,8 @@ import time
 import logging
 
 ALERTS = {
-# 'pythonfile.pythonclass':{'schedule': crontab(minute='*/10')},
-# 'pythonfile.pythonclass':{'schedule': timedelta(minutes=10),'kwargs':dict(hostlist=['nsm3', 'nsm5'])},
+    # 'pythonfile.pythonclass':{'schedule': crontab(minute='*/10')},
+    # 'pythonfile.pythonclass':{'schedule': timedelta(minutes=10),'kwargs':dict(hostlist=['nsm3', 'nsm5'])},
 }
 
 ALERT_PLUGINS = [

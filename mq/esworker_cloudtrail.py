@@ -69,10 +69,10 @@ class RoleManager:
                 raise
             try:
                 creds = get_aws_credentials(
-                        region_name,
-                        self.session_credentials.access_key,
-                        self.session_credentials.secret_key,
-                        self.session_credentials.session_token) if self.session_credentials else {}
+                    region_name,
+                    self.session_credentials.access_key,
+                    self.session_credentials.secret_key,
+                    self.session_credentials.session_token) if self.session_credentials else {}
                 self.session_conn_sts = boto.sts.connect_to_region(**creds)
             except Exception, e:
                 logger.error("Unable to connect to STS with session token due to exception %s" % e.message)
@@ -124,6 +124,7 @@ class RoleManager:
             'aws_access_key_id': credential.access_key,
             'aws_secret_access_key': credential.secret_key,
             'security_token': credential.session_token} if credential else {}
+
 
 def get_aws_credentials(region=None, accesskey=None, secretkey=None, security_token=None):
     result = {}

@@ -1,4 +1,4 @@
-FROM mozdef_base:latest
+FROM mozdef/mozdef_base
 
 COPY tests /opt/mozdef/envs/mozdef/tests
 COPY alerts /opt/mozdef/envs/mozdef/alerts

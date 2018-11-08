@@ -13,6 +13,7 @@ Table of Contents
   introduction
   demo
   installation
+  alert_development_guide
   screenshots
   usage
   cloud_deployment
