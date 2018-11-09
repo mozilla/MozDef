@@ -195,7 +195,7 @@ If you wish to use meteor as the authentication handler you'll also need to inst
 
   meteor add accounts-password
 
-You may want to edit the app/lib/settings.js file to properly configure the URLs and Authentication
+You may want to edit the /meteor/imports/settings.js file to properly configure the URLs and Authentication
 The default setting will use Meteor Accounts, but you can just as easily install an external provider like Github, Google, Facebook or your own OIDC::
 
   mozdef = {
@@ -250,7 +250,7 @@ This will create a 'bundle' directory with the entire UI code below that directo
 
 If you didn't update the settings.js before bundling the meteor installation, you will need to update the settings.js file to match your servername/port::
 
-  vim bundle/programs/server/app/app/lib/settings.js
+  vim bundle/programs/server/app/imports/settings.js
 
 If your development OS is different than your production OS you will also need to update
 the fibers node module::
