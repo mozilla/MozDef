@@ -199,25 +199,17 @@ You may want to edit the app/lib/settings.js file to properly configure the URLs
 The default setting will use Meteor Accounts, but you can just as easily install an external provider like Github, Google, Facebook or your own OIDC::
 
   mozdef = {
-    rootURL: "localhost",
-    port: "443",
-    rootAPI: "https://localhost:8444",
-    kibanaURL: "https://localhost:9443/app/kibana#",
-    enableBlockIP: true,
-    enableClientAccountCreation: true,
-    authenticationType: "meteor-password"
+    ...
+    authenticationType: "meteor-password",
+    ...
   }
 
 or for an OIDC implementation that passes a header to the nginx reverse proxy (for example using OpenResty with Lua and Auth0)::
 
   mozdef = {
-    rootURL: "localhost",
-    port: "443",
-    rootAPI: "https://localhost:8444",
-    kibanaURL: "https://localhost:9443/app/kibana#",
-    enableBlockIP: true,
-    enableClientAccountCreation: false,
-    authenticationType: "OIDC"
+    ...
+    authenticationType: "OIDC",
+    ...
   }
 
 Then start meteor with::
