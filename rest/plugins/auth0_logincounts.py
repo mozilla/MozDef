@@ -76,7 +76,7 @@ class message(object):
             enddateUTC = datetime.now()
             enddateUTC = toUTC(enddateUTC)
 
-        es_client = ElasticsearchClient(list('{0}'.format(s) for s in options['esservers']))
+        es_client = ElasticsearchClient(list('{0}'.format(s) for s in self.restoptions['esservers']))
         search_query = SearchQuery()
         # a query to tally users with failed logins
         date_range_match = RangeMatch('utctimestamp', begindateUTC, enddateUTC)
