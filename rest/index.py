@@ -441,7 +441,7 @@ def registerPlugins():
                 if 'message' in dir(module):
                     mclass = module.message()
                     mreg = mclass.registration
-                    mclass.restoptions = options
+                    mclass.restoptions = options.__dict__
 
                     if 'priority' in dir(mclass):
                         mpriority = mclass.priority
