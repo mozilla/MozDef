@@ -136,8 +136,8 @@ if (Meteor.isServer) {
     }
 
     function logincounts(){
-        //console.log('Calling ' + mozdef.rootAPI + '/ldapLogins/');
-        var logincountsResponse = HTTP.get(mozdef.rootAPI + '/ldapLogins/');
+        //console.log('Calling ' + mozdef.rootAPI + '/logincounts/');
+        var logincountsResponse = HTTP.get(mozdef.rootAPI + '/logincounts/');
 
         if ( typeof logincountsResponse == 'undefined') {
             console.log("logincountsResponse: no response from server")
