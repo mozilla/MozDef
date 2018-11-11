@@ -73,8 +73,8 @@ def status():
     return response
 
 
-@route('/ldapLogins')
-@route('/ldapLogins/')
+@route('/logincounts')
+@route('/logincounts/')
 @enable_cors
 def index():
     '''an endpoint to return success/failed login counts'''
@@ -82,8 +82,8 @@ def index():
         request.body.read()
         request.body.close()
     response.content_type = "application/json"
-    sendMessgeToPlugins(request, response, 'ldapLogins')
-    return(esLdapResults())
+    sendMessgeToPlugins(request, response, 'logincounts')
+    return response
 
 
 @route('/veris')
