@@ -8,11 +8,11 @@ import json
 import os
 import sys
 from configlib import getConfig, OptionParser
+from datetime import datetime, timedelta
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 from mozdef_util.query_models import SearchQuery, TermMatch, TermsMatch, QueryStringMatch, RangeMatch, Aggregation, ExistsMatch
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
-
 
 class message(object):
     def __init__(self):
@@ -54,16 +54,6 @@ class message(object):
         response: http://bottlepy.org/docs/dev/api.html#the-response-object
 
         '''
-        if request.body:
-            arequest = request.body.read()
-            request.body.close()
-        try:
-            requestDict = json.loads(arequest)
-        except ValueError as e:
-            response.status = 500
-
-        #print(requestDict, requestDict.keys())
-
         # an ES query/facet to count success/failed logins
         # oriented to the data sent via auth02mozdef.py
         begindateUTC=None
