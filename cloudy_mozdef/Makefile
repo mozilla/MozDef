@@ -10,6 +10,7 @@ S3_BUCKET_PATH	:= cf
 S3_BUCKET_URI	:= s3://$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)
 S3_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)/
 # OIDC_CLIENT_SECRET is set in an environment variable by running "source aws_parameters.sh"
+OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET)")
 
 all:
 	@echo 'Available make targets:'
@@ -43,7 +44,7 @@ update-stack: test ## Updates the nested stack on AWS
 	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
 	  --parameters ParameterKey=S3TemplateLocation,ParameterValue=$(S3_STACK_URI) \
-	               ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET) \
+	               $(OIDC_CLIENT_SECRET_PARAM_ARG) \
 	  --output text
 
 # --ignore-checks=E2502 : https://github.com/awslabs/cfn-python-lint/issues/408

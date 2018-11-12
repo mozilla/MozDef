@@ -16,3 +16,5 @@ alerts/generic_alerts
 cloudy_mozdef/aws_parameters.json
 moz_private
 cloudy_mozdef/aws_parameters.sh
+docs/source/_build
+docs/source/_static

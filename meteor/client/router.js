@@ -4,14 +4,19 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
+import { Meteor } from 'meteor/meteor';
 
 Router.configure({
     // the default layout
     layoutTemplate: 'layout',
-    // ensure we have settings
+    loadingTemplate: 'loading',
+
     waitOn: function() {
-        return Meteor.subscribe('mozdefsettings')
-        }
+        return [
+            Meteor.subscribe('features'),
+            Meteor.subscribe('mozdefsettings')
+        ];
+    }
 });
 
 Router.map(function () {
