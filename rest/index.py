@@ -488,69 +488,6 @@ def isIPv4(ip):
     except:
         return False
 
-
-def esLdapResults(begindateUTC=None, enddateUTC=None):
-    '''an ES query/facet to count success/failed logins'''
-    resultsList = list()
-    if begindateUTC is None:
-        begindateUTC = datetime.now() - timedelta(hours=1)
-        begindateUTC = toUTC(begindateUTC)
-    if enddateUTC is None:
-        enddateUTC = datetime.now()
-        enddateUTC = toUTC(enddateUTC)
-
-    try:
-        es_client = ElasticsearchClient(list('{0}'.format(s) for s in options.esservers))
-        search_query = SearchQuery()
-        range_match = RangeMatch('utctimestamp', begindateUTC, enddateUTC)
-
-        search_query.add_must(range_match)
-        search_query.add_must(TermMatch('tags', 'ldap'))
-
-        search_query.add_must(TermMatch('details.result', 'LDAP_INVALID_CREDENTIALS'))
-
-        search_query.add_aggregation(Aggregation('details.result'))
-        search_query.add_aggregation(Aggregation('details.dn'))
-
-        results = search_query.execute(es_client, indices=['events'])
-
-        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com', 'mozillafoundation.org', 'org', 'mozillafoundation')
-
-        for t in results['aggregations']['details.dn']['terms']:
-            if t['key'] in stoplist:
-                continue
-            failures = 0
-            success = 0
-            dn = t['key']
-
-            details_query = SearchQuery()
-            details_query.add_must(range_match)
-            details_query.add_must(TermMatch('tags', 'ldap'))
-            details_query.add_must(TermMatch('details.dn', dn))
-            details_query.add_aggregation(Aggregation('details.result'))
-
-            results = details_query.execute(es_client)
-
-            for t in results['aggregations']['details.result']['terms']:
-                if t['key'].upper() == 'LDAP_SUCCESS':
-                    success = t['count']
-                if t['key'].upper() == 'LDAP_INVALID_CREDENTIALS':
-                    failures = t['count']
-            resultsList.append(
-                dict(
-                    dn=dn,
-                    failures=failures,
-                    success=success,
-                    begin=begindateUTC.isoformat(),
-                    end=enddateUTC.isoformat()
-                )
-            )
-
-        return(json.dumps(resultsList))
-    except Exception as e:
-        sys.stderr.write('Error trying to get ldap results: {0}\n'.format(e))
-
-
 def kibanaDashboards():
     resultsList = []
     try:
