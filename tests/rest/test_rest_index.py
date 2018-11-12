@@ -207,7 +207,7 @@ class TestLdapLoginsRoute(RestTestSuite):
             self.populate_test_event(event)
 
         for count in range(3):
-            timestamp = RestTestSuite.subtract_from_timestamp({'hours': 2})
+            timestamp = RestTestSuite.subtract_from_timestamp({'hours': 22})
             event = {
                 "receivedtimestamp": timestamp,
                 "utctimestamp": timestamp,
@@ -240,7 +240,7 @@ class TestLdapLoginsRoute(RestTestSuite):
             assert json_resp[0].keys() == ['username', 'failures', 'begin', 'end', 'success']
             assert json_resp[0]['username'] == 'qwerty@mozillafoundation.org'
             assert json_resp[0]['failures'] == 8
-            assert json_resp[0]['success'] == 6
+            assert json_resp[0]['success'] == 3
             assert type(json_resp[0]['begin']) == unicode
             assert parse(json_resp[0]['begin']).tzname() == 'UTC'
             assert type(json_resp[0]['end']) == unicode
