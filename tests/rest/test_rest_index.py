@@ -161,7 +161,7 @@ class TestLdapLoginsRoute(RestTestSuite):
                 "receivedtimestamp": timestamp,
                 "utctimestamp": timestamp,
                 "tags": [
-                    "ldap"
+                    "auth0"
                 ],
                 "timestamp": timestamp,
                 "summary": "Success Login for ttester@mozilla.com srcIP=1.1.1.1",
@@ -179,7 +179,7 @@ class TestLdapLoginsRoute(RestTestSuite):
                 "receivedtimestamp": timestamp,
                 "utctimestamp": timestamp,
                 "tags": [
-                    "ldap"
+                    "auth0"
                 ],
                 "timestamp": timestamp,
                 "summary": "Failed Login from qwerty@mozillafoundation.org srcIP=1.1.1.1",
@@ -195,7 +195,7 @@ class TestLdapLoginsRoute(RestTestSuite):
                 "receivedtimestamp": timestamp,
                 "utctimestamp": timestamp,
                 "tags": [
-                    "ldap"
+                    "auth0"
                 ],
                 "timestamp": timestamp,
                 "summary": "Success Login for qwerty@mozillafoundation.org",
@@ -212,7 +212,7 @@ class TestLdapLoginsRoute(RestTestSuite):
                 "receivedtimestamp": timestamp,
                 "utctimestamp": timestamp,
                 "tags": [
-                    "ldap"
+                    "auth0"
                 ],
                 "timestamp": timestamp,
                 "summary": "Success Login for qwerty@mozillafoundation.org",
