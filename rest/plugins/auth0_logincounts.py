@@ -83,8 +83,6 @@ class message(object):
         # especially useful if ES is analyzing the username field and breaking apart user@somewhere.com
         # into user somewhere and .com
         stoplist =['']
-
-
         # walk the aggregate failed users
         # and look for successes/failures
         for t in results['aggregations']['details.username']['terms']:
@@ -117,7 +115,8 @@ class message(object):
                 )
             )
 
-        print(json.dumps(resultsList))
+        response.body = json.dumps(resultsList)
+        response.status = 200
 
         return (request, response)
 
