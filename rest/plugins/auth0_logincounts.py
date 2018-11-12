@@ -3,16 +3,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-import requests
 import json
 import os
 import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
-from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
-from mozdef_util.query_models import SearchQuery, TermMatch, TermsMatch, QueryStringMatch, RangeMatch, Aggregation, ExistsMatch
+from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, RangeMatch, Aggregation, ExistsMatch
 from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.utilities.logger import logger, initLogger
 
 
 class message(object):
