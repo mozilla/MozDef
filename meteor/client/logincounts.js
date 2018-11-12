@@ -73,6 +73,7 @@ if (Meteor.isClient) {
                     //debugLog(err,result);
                     logincountsResult.status='error';
                     logincountsResult.error=err;
+                    container.style.cursor='auto';
                }
            });
 
