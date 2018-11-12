@@ -424,14 +424,20 @@ def generateMeteorID():
 
 
 def registerPlugins():
-    '''walk the ./plugins directory
+    '''walk the plugins directory
        and register modules in pluginList
        as a tuple: (mfile, mname, mdescription, mreg, mpriority, mclass)
     '''
 
+    plugin_location = os.path.join(os.path.dirname(__file__), "plugins")
+    module_name = os.path.basename(plugin_location)
+    root_plugin_directory = os.path.join(plugin_location, '..')
+
     plugin_manager = pynsive.PluginManager()
-    if os.path.exists('plugins'):
-        modules = pynsive.list_modules('plugins')
+    plugin_manager.plug_into(root_plugin_directory)
+
+    if os.path.exists(plugin_location):
+        modules = pynsive.list_modules(module_name)
         for mfile in modules:
             module = pynsive.import_module(mfile)
             reload(module)
