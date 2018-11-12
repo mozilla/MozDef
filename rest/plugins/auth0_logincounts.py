@@ -127,7 +127,7 @@ class message(object):
 
         # fill self.options with plugin-specific options
 
-        # cymon options
+        # options
         self.options.ignoreusernames = getConfig('ignoreusernames',
-                                             '',
-                                             self.configfile)
+                                                 '',
+                                                 self.configfile)
