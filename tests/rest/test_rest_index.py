@@ -240,7 +240,7 @@ class TestLdapLoginsRoute(RestTestSuite):
             assert json_resp[0].keys() == ['username', 'failures', 'begin', 'end', 'success']
             assert json_resp[0]['username'] == 'qwerty@mozillafoundation.org'
             assert json_resp[0]['failures'] == 8
-            assert json_resp[0]['success'] == 3
+            assert json_resp[0]['success'] == 6
             assert type(json_resp[0]['begin']) == unicode
             assert parse(json_resp[0]['begin']).tzname() == 'UTC'
             assert type(json_resp[0]['end']) == unicode
