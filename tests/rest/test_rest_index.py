@@ -238,7 +238,7 @@ class TestLdapLoginsRoute(RestTestSuite):
             json_resp.sort()
 
             assert json_resp[0].keys() == ['username', 'failures', 'begin', 'end', 'success']
-            assert json_resp[0]['username'] == 'qwerty@mozillafoundation.org,o=org,dc=mozillafoundation'
+            assert json_resp[0]['username'] == 'qwerty@mozillafoundation.org'
             assert json_resp[0]['failures'] == 8
             assert json_resp[0]['success'] == 3
             assert type(json_resp[0]['begin']) == unicode
@@ -247,7 +247,7 @@ class TestLdapLoginsRoute(RestTestSuite):
             assert parse(json_resp[0]['begin']).tzname() == 'UTC'
 
             assert json_resp[1].keys() == ['username', 'failures', 'begin', 'end', 'success']
-            assert json_resp[1]['username'] == 'ttester@mozilla.com,o=com,dc=mozilla'
+            assert json_resp[1]['username'] == 'ttester@mozilla.com'
             assert json_resp[1]['failures'] == 9
             assert json_resp[1]['success'] == 7
             assert type(json_resp[1]['begin']) == unicode
@@ -256,7 +256,7 @@ class TestLdapLoginsRoute(RestTestSuite):
             assert parse(json_resp[1]['begin']).tzname() == 'UTC'
 
             assert json_resp[2].keys() == ['username', 'failures', 'begin', 'end', 'success']
-            assert json_resp[2]['username'] == 'ttesterson@mozilla.com,o=com,dc=mozilla'
+            assert json_resp[2]['username'] == 'ttesterson@mozilla.com'
             assert json_resp[2]['failures'] == 10
             assert json_resp[2]['success'] == 5
             assert type(json_resp[2]['begin']) == unicode
