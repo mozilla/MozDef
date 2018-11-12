@@ -14,6 +14,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch, TermsMatch, QuerySt
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 
+
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
