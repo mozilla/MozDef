@@ -45,7 +45,7 @@ class message(object):
         self.options = None
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
-            self.initConfiguration()
+        self.initConfiguration()
 
     def onMessage(self, request, response):
         '''
