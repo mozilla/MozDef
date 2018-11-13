@@ -20,7 +20,7 @@ class RestTestSuite(HTTPTestSuite):
 
     def setup(self):
         sample_config = RestTestDict()
-        sample_config.configfile = os.path.join(os.path.dirname(__file__), 'rest_index.conf')
+        sample_config.configfile = os.path.join(os.path.dirname(__file__), 'index.conf')
         OptionParser.parse_args = mock.Mock(return_value=(sample_config, {}))
 
         from rest import index
