@@ -81,7 +81,7 @@ class message(object):
         # any usernames or words to ignore
         # especially useful if ES is analyzing the username field and breaking apart user@somewhere.com
         # into user somewhere and .com
-        stoplist =['']
+        stoplist =self.options.ignoreusernames.split(',')
         # walk the aggregate failed users
         # and look for successes/failures
         for t in results['aggregations']['details.username']['terms']:
@@ -127,6 +127,8 @@ class message(object):
         # fill self.options with plugin-specific options
 
         # options
+        # comma separated list of usernames to exclude
+        # from the data
         self.options.ignoreusernames = getConfig('ignoreusernames',
                                                  '',
                                                  self.configfile)
