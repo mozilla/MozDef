@@ -60,15 +60,23 @@ def getValueByPath(input_dict, path_string):
     return return_data
 
 
+def hostname_from_ip(ip):
+    try:
+        reversed_dns = socket.gethostbyaddr(ip)
+        return reversed_dns[0]
+    except socket.herror:
+        return None
+
+
 def add_hostname_to_ip(ip, output_format, require_internal=True):
     ip_obj = netaddr.IPNetwork(ip)[0]
     if require_internal and not ip_obj.is_private():
         return ip
-    try:
-        reversed_dns = socket.gethostbyaddr(ip)
-        return output_format.format(ip, reversed_dns[0])
-    except socket.herror:
+    hostname = hostname_from_ip(ip)
+    if hostname is None:
         return ip
+    else:
+        return output_format.format(ip, hostname)
 
 
 class AlertTask(Task):

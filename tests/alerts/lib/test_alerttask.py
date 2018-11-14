@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../alerts/lib"))
-from alerttask import add_hostname_to_ip
+from alerttask import hostname_from_ip, add_hostname_to_ip
 
 import mock
 import socket
@@ -12,6 +12,18 @@ def reverse_lookup(ip):
         return ('test.domain.com', ip)
     if ip == '8.8.8.8':
         raise socket.herror
+
+
+class TestHostnameFromIP(object):
+    def test_good_hostname_from_ip(ip):
+        with mock.patch("socket.gethostbyaddr", side_effect=reverse_lookup):
+            hostname = hostname_from_ip('10.1.1.1')
+        assert hostname == 'test.domain.com'
+
+    def test_bad_hostname_from_ip(ip):
+        with mock.patch("socket.gethostbyaddr", side_effect=reverse_lookup):
+            hostname = hostname_from_ip('8.8.8.8')
+        assert hostname is None
 
 
 class TestAddHostnameToIP(object):
