@@ -12,6 +12,8 @@ import sys
 import os
 import requests
 import mozdef_client as mozdef
+from mozdef_util.utilities.dot_dict import DotDict
+
 try:
     import urllib.parse
     quote_url = urllib.parse.quote
@@ -20,19 +22,6 @@ except ImportError:
     import urllib
     quote_url = urllib.quote
 import traceback
-
-
-class DotDict(dict):
-    '''dict.item notation for dict()'s'''
-    __getattr__ = dict.__getitem__
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __init__(self, dct):
-        for key, value in dct.items():
-            if hasattr(value, 'keys'):
-                value = DotDict(value)
-            self[key] = value
 
 
 def fatal(msg):
@@ -45,7 +34,11 @@ def debug(msg):
 
 
 # This is from https://auth0.com/docs/api/management/v2#!/Logs/get_logs
-# and https://github.com/auth0/auth0-logs-to-logentries/blob/master/index.js (MIT)
+# auth0 calls these events with an acronym and description
+# The logs have the acronym, but not the description
+# but do include a 'description' field that is additional detailed words
+# about what happened.
+# See also: https://github.com/auth0/auth0-logs-to-logentries/blob/master/index.js (MIT)
 # levels
 #     0 = Debug
 #     1 = Info
@@ -262,7 +255,7 @@ log_types = DotDict({
 
 def process_msg(mozmsg, msg):
     """Normalization function for auth0 msg.
-    @mozmsg: MozDefEvent (mozdef message)
+    @mozmsg: MozDefEvent (mozdef message as DotDict)
     @msg: DotDict (json with auth0 raw message data).
 
     All the try-except loops handle cases where the auth0 msg may or may not contain expected fields.
@@ -271,34 +264,91 @@ def process_msg(mozmsg, msg):
     """
     details = DotDict({})
 
+    # key words used to set category and success/failure markers
+    authentication_words=['Login','Logout','Auth']
+    authorization_words=['Authorization','Access','Delegation']
+    success_words=['Success']
+    failed_words=['Failed']
+
+    # default category (might be modified below to be more specific)
+    mozmsg.category='iam'
+    mozmsg.source='auth0'
+    # fields that should always exist
+    mozmsg.timestamp = msg.date
+    details['messageid'] = msg._id
+    details['userid'] = msg.user_id
+    details['sourceipaddress'] = msg.ip
+
+    try:
+        details['username'] = msg.user_name
+    except KeyError:
+        pass
+
+    try:
+        # the details.request/response exist for api calls
+        # but not for logins and other events
+        # check and prefer them if present.
+        details['username'] = msg.details.request.auth.user.name
+        details['action'] = msg.details.response.body.name
+    except KeyError:
+        pass
+
     try:
         mozmsg.useragent = msg.user_agent
     except KeyError:
         pass
 
     try:
-        details['type'] = log_types[msg.type].event
+        # auth0 calls these events with an acronym and name
+        details['eventname'] = log_types[msg.type].event
+        # determine the event category
+        if any( authword in details['eventname'] for authword in authentication_words  ):
+            mozmsg.category="authentication"
+        if any( authword in details['eventname'] for authword in authorization_words  ):
+            mozmsg.category="authorization"
+        # determine success/failure
+        if any( failword in details['eventname'] for failword in failed_words):
+            details.success=False
+        if any( successword details['eventname'] for successword in success_words):
+            details.success=True
     except KeyError:
         #New message type, check https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Logs/get_logs for ex.
         debug('New auth0 message type, please add support: {}'.format(msg.type))
-        details['type'] = msg.type
+        details['eventname'] = msg.type
 
+    # determine severity level
     if log_types[msg.type].level == 3:
         mozmsg.set_severity(mozdef.MozDefEvent.SEVERITY_ERROR)
     elif log_types[msg.type].level > 3:
         mozmsg.set_severity(mozdef.MozDefEvent.SEVERITY_CRITICAL)
-    details['sourceipaddress'] = msg.ip
 
+    # default description
+    details['description'] = ""
     try:
-        details['description'] = msg.description
+        if msg.has_key('description') and msg.description is not None:
+            # use the detailed description of the operation sent from auth0
+            # Update a rule, add a site, update a site, etc
+            details['description'] = msg.description
     except KeyError:
         details['description'] = ""
 
-    mozmsg.timestamp = msg.date
-    details['auth0_msg_id'] = msg._id
+    # set the summary
+    if 'auth' in mozmsg.category:
+        # make summary be action/username (success login user@place.com)
+        mozmsg.summary = "{event} {desc}".format(
+            event=details.eventname,
+            desc=details.username
+        )
+
+    else:
+        # default summary as action and description (if it exists)
+        mozmsg.summary = "{event} {desc}".format(
+            event=details.eventname,
+            desc=details.description
+        )
 
     try:
-        details['auth0_client'] = msg.client_name
+        details['clientname'] = msg.client_name
     except KeyError:
         pass
 
@@ -308,25 +358,9 @@ def process_msg(mozmsg, msg):
         pass
 
     try:
-        details['auth0_client_id'] = msg.client_id
+        details['clientid'] = msg.client_id
     except KeyError:
         pass
-
-    try:
-        details['username'] = msg.details.request.auth.user.name
-        details['action'] = msg.details.response.body.name
-    except KeyError:
-        try:
-            details['error'] = 'true'
-            details['errormsg'] = msg.details.error.message
-        except KeyError:
-            pass
-        except AttributeError:
-            pass
-        try:
-            details['username'] = msg.user_name
-        except KeyError:
-            pass
 
     # Differenciate auto login (session cookie check validated) from logged in and had password verified
 
@@ -334,19 +368,15 @@ def process_msg(mozmsg, msg):
         for i in msg.details.prompt:
             # Session cookie check
             if i.get('name') == 'authenticate':
-                details['auth_type'] = 'Login succeeded due to a valid session cookie being supplied'
+                details['authtype'] = 'Login succeeded due to a valid session cookie being supplied'
             elif i.get('name') == 'lock-password-authenticate':
-                details['auth_type'] = 'Login succeeded due to a valid plaintext password being supplied'
+                details['authtype'] = 'Login succeeded due to a valid plaintext password being supplied'
     except KeyError:
         pass
 
-    mozmsg.summary = "{mtype} {desc}".format(
-        mtype=details.type,
-        desc=details.description
-    )
 
     mozmsg.details = details
-    mozmsg.details['auth0_raw'] = str(msg)
+    mozmsg.details['raw'] = str(msg)
 
     return mozmsg
 
