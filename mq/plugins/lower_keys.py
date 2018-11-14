@@ -16,6 +16,16 @@ class message(object):
         self.priority = 5
 
     def onMessage(self, message, metadata):
-        if isinstance(message, dict):
-            message = dict((k.lower(), v) for k, v in message.items())
-            return (message, metadata)
+        def renameKeysToLower(message):
+            if isinstance(message, dict):
+                for key in message.keys():
+                    message[key.lower()] = message.pop(key)
+                    if isinstance(message[key.lower()], dict) or isinstance(message[key.lower()], list):
+                        message[key.lower()] = renameKeysToLower(message[key.lower()])
+            elif isinstance(message, list):
+                for item in message:
+                    item = renameKeysToLower(item)
+            return message
+
+        message = renameKeysToLower(message)
+        return (message, metadata)
