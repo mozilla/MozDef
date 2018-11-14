@@ -302,14 +302,14 @@ def process_msg(mozmsg, msg):
         # auth0 calls these events with an acronym and name
         details['eventname'] = log_types[msg.type].event
         # determine the event category
-        if any( authword in details['eventname'] for authword in authentication_words  ):
+        if any(authword in details['eventname'] for authword in authentication_words):
             mozmsg.category="authentication"
-        if any( authword in details['eventname'] for authword in authorization_words  ):
+        if any(authword in details['eventname'] for authword in authorization_words):
             mozmsg.category="authorization"
         # determine success/failure
-        if any( failword in details['eventname'] for failword in failed_words):
+        if any(failword in details['eventname'] for failword in failed_words):
             details.success=False
-        if any( successword details['eventname'] for successword in success_words):
+        if any(successword in details['eventname'] for successword in success_words):
             details.success=True
     except KeyError:
         #New message type, check https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Logs/get_logs for ex.
@@ -325,7 +325,7 @@ def process_msg(mozmsg, msg):
     # default description
     details['description'] = ""
     try:
-        if msg.has_key('description') and msg.description is not None:
+        if 'description' in msg and msg.description is not None:
             # use the detailed description of the operation sent from auth0
             # Update a rule, add a site, update a site, etc
             details['description'] = msg.description
@@ -373,7 +373,6 @@ def process_msg(mozmsg, msg):
                 details['authtype'] = 'Login succeeded due to a valid plaintext password being supplied'
     except KeyError:
         pass
-
 
     mozmsg.details = details
     mozmsg.details['raw'] = str(msg)
