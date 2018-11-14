@@ -24,6 +24,7 @@ class message(object):
             'details.additionaleventdata',
             'details.apiversion',
             'details.requestparameters.attribute',
+            'details.requestparameters.bucketPolicy.Statement.Principal',
             'details.requestparameters.callerReference',
             'details.requestparameters.description',
             'details.requestparameters.disableApiTermination',
