@@ -18,7 +18,7 @@ try:
     import urllib.parse
     quote_url = urllib.parse.quote
 except ImportError:
-    #Well hello there python2 user!
+    # Well hello there python2 user!
     import urllib
     quote_url = urllib.quote
 import traceback
@@ -265,14 +265,14 @@ def process_msg(mozmsg, msg):
     details = DotDict({})
 
     # key words used to set category and success/failure markers
-    authentication_words=['Login','Logout','Auth']
-    authorization_words=['Authorization','Access','Delegation']
-    success_words=['Success']
-    failed_words=['Failed']
+    authentication_words = ['Login', 'Logout', 'Auth']
+    authorization_words = ['Authorization', 'Access', 'Delegation']
+    success_words = ['Success']
+    failed_words = ['Failed']
 
     # default category (might be modified below to be more specific)
-    mozmsg.category='iam'
-    mozmsg.source='auth0'
+    mozmsg.category = 'iam'
+    mozmsg.source = 'auth0'
     # fields that should always exist
     mozmsg.timestamp = msg.date
     details['messageid'] = msg._id
@@ -303,16 +303,16 @@ def process_msg(mozmsg, msg):
         details['eventname'] = log_types[msg.type].event
         # determine the event category
         if any(authword in details['eventname'] for authword in authentication_words):
-            mozmsg.category="authentication"
+            mozmsg.category = "authentication"
         if any(authword in details['eventname'] for authword in authorization_words):
-            mozmsg.category="authorization"
+            mozmsg.category = "authorization"
         # determine success/failure
         if any(failword in details['eventname'] for failword in failed_words):
-            details.success=False
+            details.success = False
         if any(successword in details['eventname'] for successword in success_words):
-            details.success=True
+            details.success = True
     except KeyError:
-        #New message type, check https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Logs/get_logs for ex.
+        # New message type, check https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Logs/get_logs for ex.
         debug('New auth0 message type, please add support: {}'.format(msg.type))
         details['eventname'] = msg.type
 
@@ -399,7 +399,7 @@ def save_state(fpath, state):
     @state int (state value)
     """
     with open(fpath, mode='w') as fd:
-        fd.write(str(state)+'\n')
+        fd.write(str(state) + '\n')
 
 
 def byteify(input):
@@ -424,12 +424,12 @@ def fetch_auth0_logs(config, headers, fromid):
         fromid=fromid),
         headers=headers)
 
-    #If we fail here, auth0 is not responding to us the way we expected it
+    # If we fail here, auth0 is not responding to us the way we expected it
     if (not r.ok):
         raise Exception(r.url, r.reason, r.status_code, r.json())
     ret = r.json()
 
-    #Sometimes API give us the requested totals.. sometimes not.
+    # Sometimes API give us the requested totals.. sometimes not.
     if (type(ret) is dict) and ('logs' in ret.keys()):
         have_totals = True
         all_msgs = ret['logs']
@@ -437,7 +437,7 @@ def fetch_auth0_logs(config, headers, fromid):
         have_totals = False
         all_msgs = ret
 
-    #Process all new auth0 log msgs, normalize and send them to mozdef
+    # Process all new auth0 log msgs, normalize and send them to mozdef
     for msg in all_msgs:
         mozmsg = mozdef.MozDefEvent(config.mozdef.url)
         if config.DEBUG == 'True':
@@ -448,13 +448,13 @@ def fetch_auth0_logs(config, headers, fromid):
         msg = DotDict(msg)
         lastid = msg._id
 
-        #Fill in mozdef msg fields from the auth0 msg
+        # Fill in mozdef msg fields from the auth0 msg
         try:
             mozmsg = process_msg(mozmsg, msg)
         except KeyError as e:
-            #if this happens the msg was malformed in some way
+            # if this happens the msg was malformed in some way
             mozmsg.details['error'] = 'true'
-            mozmsg.details['errormsg'] = '"'+str(e)+'"'
+            mozmsg.details['errormsg'] = '"' + str(e) + '"'
             mozmsg.summary = 'Failed to parse auth0 message'
             if config.DEBUG == 'True':
                 traceback.print_exc()
@@ -490,7 +490,7 @@ def main():
     length = 0
 
     # Fetch until we've gotten all messages
-    while (totals > start+length):
+    while (totals > start + length):
         (totals, start, length, lastid) = fetch_auth0_logs(config, headers, fromid)
         fromid = lastid
 
