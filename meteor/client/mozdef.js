@@ -313,7 +313,7 @@ if (Meteor.isClient) {
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
-            if ( isFeature('watchItemitem') ){
+            if ( isFeature('watchItem') ){
             watchItemitem=$("<li><a class='ipmenu-watchitem' data-ipaddress='" + iptext + "'href='#'>watch</a></li>");
             }else{
             watchItemitem=$();
@@ -323,7 +323,6 @@ if (Meteor.isClient) {
             }else{
                 blockIPitem=$();
             }
-
             ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,watchItemitem,blockIPitem);
 
             $(this).parent().parent().append(ipmenu);

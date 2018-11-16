@@ -7,7 +7,7 @@ Copyright (c) 2014 Mozilla Corporation
 
 <template name="menu">
     <div class="container headercontainer">
-        {{#if haveFeatures }}
+       {{#if haveFeatures }}
             <div id="header"  class="row center">
                 <span id="nav-main">
                 <ul>
@@ -29,7 +29,7 @@ Copyright (c) 2014 Mozilla Corporation
                             <ul>
                                 {{#if isFeature "watchlist"}}
                                     <li><a href="/watchlist">watchlist</a></li>
-                                {{/if}}                                
+                                {{/if}}
                                 {{#if isFeature "ipblocklist"}}
                                     <li><a href="/ipblocklist">ip blocklist</a></li>
                                 {{/if}}
@@ -93,4 +93,3 @@ Copyright (c) 2014 Mozilla Corporation
         <a target=" _blank" href="{{url}}">{{name}}</a>
     </li>
 </template>
-

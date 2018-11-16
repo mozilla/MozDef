@@ -140,6 +140,7 @@ def index():
     sendMessgeToPlugins(request, response, 'watchitem')
     return response
 
+
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
 @enable_cors
