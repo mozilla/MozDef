@@ -72,6 +72,19 @@ def status():
     sendMessgeToPlugins(request, response, 'status')
     return response
 
+## placeholder for future watchlist request ##
+@route('/getwatchlist')
+@route('/getwatchlist/')
+def status():
+    '''endpoint for grabbing watchlist contents'''
+    if request.body:
+        request.body.read()
+        request.body.close()
+    response.status = 200
+    response.content_type = "application/json"
+    response.body = json.dumps(dict(status='ok', service='restapi'))
+    sendMessgeToPlugins(request, response, 'watchlist')
+return response
 
 @route('/logincounts')
 @route('/logincounts/')
