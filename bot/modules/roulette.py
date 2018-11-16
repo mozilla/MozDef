@@ -52,5 +52,6 @@ class Roulette(Module):
             # tell kitnirc that we handled this, no need to pass to other modules.
             return True
 
+
 # Let KitnIRC know what module class it should be loading.
 module = Roulette

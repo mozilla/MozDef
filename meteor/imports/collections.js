@@ -10,6 +10,7 @@ import uuid from "uuid";
 //collections shared by client/server
 Meteor.startup(() => {
     mozdefsettings = new Meteor.Collection("mozdefsettings");
+    features = new Meteor.Collection("features");
     events = new Meteor.Collection("events");
     alerts = new Meteor.Collection("alerts");
     investigations = new Meteor.Collection("investigations");
@@ -34,7 +35,9 @@ Meteor.startup(() => {
         Meteor.publish("mozdefsettings",function(){
             return mozdefsettings.find();
         });
-
+        Meteor.publish("features",function(){
+            return features.find();
+        });
         Meteor.publish("alerts-summary", function (searchregex,timeperiod,recordlimit) {
             //tail the last 100 records by default
 
@@ -281,96 +284,96 @@ Meteor.startup(() => {
             return watchlist.find({},{limit:0});
         })
 
-    //access rules from clients
-    //barebones to allow you to specify rules
+        //access rules from clients
+        //barebones to allow you to specify rules
 
-    incidents.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // can only remove one's own indicents
-            return doc.creator === Meteor.user().profile.email;
-        },
-        fetch: ['creator']
+        incidents.allow({
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // can only remove one's own indicents
+                return doc.creator === Meteor.user().profile.email;
+            },
+            fetch: ['creator']
         });
 
         attackers.allow({
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        }
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            }
         });
 
         alerts.allow({
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        }
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            }
         });
 
         investigations.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // can only remove one's own items
-            return doc.creator === Meteor.user().profile.email;
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // can only remove one's own items
+                return doc.creator === Meteor.user().profile.email;
         },
         fetch: ['creator']
         });
 
         userActivity.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // can only remove one's own items
-            return doc.userId === Meteor.user().profile.email;
-        },
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // can only remove one's own items
+                return doc.userId === Meteor.user().profile.email;
+            },
         });
 
         ipblocklist.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        fetch: ['creator']
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            fetch: ['creator']
         });
 
         fqdnblocklist.allow({
-        insert: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        update: function (userId, doc, fields, modifier) {
-            // the user must be logged in
-            return (userId);
-        },
-        remove: function (userId, doc) {
-            // the user must be logged in
-            return (userId);
-        },
-        fetch: ['creator']
+            insert: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            update: function (userId, doc, fields, modifier) {
+                // the user must be logged in
+                return (userId);
+            },
+            remove: function (userId, doc) {
+                // the user must be logged in
+                return (userId);
+            },
+            fetch: ['creator']
         });
 
         watchlist.allow({
@@ -388,6 +391,13 @@ Meteor.startup(() => {
         },
         fetch: ['creator']
         });
+
+        // since we store email from oidc calls in the profile
+        // deny updates to the profile which is writeable by default
+        // https://docs.meteor.com/api/accounts.html#Meteor-users
+
+        Meteor.users.deny({ update: () => true });
+
     };
 
     if (Meteor.isClient) {
@@ -403,7 +413,7 @@ Meteor.startup(() => {
                     // based on how enableClientAccountCreation was set at deployment.
                     Meteor.login();
         });
-
+        Meteor.subscribe("features");
         alertsCount = new Meteor.Collection("alerts-count",options);
         //client-side subscriptions to low volume collections
         Meteor.subscribe("veris");

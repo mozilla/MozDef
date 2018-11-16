@@ -33,6 +33,8 @@ logger = logging.getLogger(sys.argv[0])
 logger.level=logging.DEBUG
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
 def postLogs(logcache):
     #post logs asynchronously with requests workers and check on the results
     #expects a queue object from the multiprocessing library
@@ -61,6 +63,7 @@ def postLogs(logcache):
             logger.fatal("exception posting to %s %r %r [will not retry]\n"%(url,e,postdata))
             sys.exit(1)
 
+
 if __name__ == '__main__':
     parser=OptionParser()
     parser.add_option("-u", dest='url', default='http://localhost:8080/events/', help="mozdef events URL to use when posting events")
@@ -74,15 +77,17 @@ if __name__ == '__main__':
         for i in range(0,10):
 
             print(i)
-            alog=dict(eventtime=pytz.timezone('UTC').localize(datetime.now()).isoformat(),
-                        hostname=socket.gethostname(),
-                        processid=os.getpid(),
-                        processname=sys.argv[0],
-                        severity='INFO',
-                        summary='joe login failed',
-                        category='authentication',
-                        tags=[],
-                        details=[])
+            alog = dict(
+                eventtime=pytz.timezone('UTC').localize(datetime.now()).isoformat(),
+                hostname=socket.gethostname(),
+                processid=os.getpid(),
+                processname=sys.argv[0],
+                severity='INFO',
+                summary='joe login failed',
+                category='authentication',
+                tags=[],
+                details=[]
+            )
             alog['details']=dict(success=True,username='mozdef')
             alog['tags']=['mozdef','stresstest']
 

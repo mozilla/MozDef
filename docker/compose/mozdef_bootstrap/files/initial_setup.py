@@ -26,7 +26,6 @@ parser.add_argument('backup_conf_file', help='The relative path to backup.conf f
 args = parser.parse_args()
 
 
-
 esserver = os.environ.get('OPTIONS_ESSERVERS')
 if esserver is None:
     esserver = args.esserver

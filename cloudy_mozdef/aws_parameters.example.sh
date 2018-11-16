@@ -1,0 +1,1 @@
+export OIDC_CLIENT_SECRET=secretgoeshere

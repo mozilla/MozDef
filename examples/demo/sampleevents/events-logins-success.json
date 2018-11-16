@@ -40,7 +40,7 @@
       "result": "LDAP_SUCCESS",
       "success": true
     }
-  },  
+  },
   {
     "tags": [
       "ldap",
@@ -52,6 +52,54 @@
       "source": "Apr 17 00:05:02 ldap slapd[15932]: conn=25123333 fd=93 ACCEPT from IP=10.0.0.209:8325 (IP=0.0.0.0:389)\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=bind-openvpn,ou=logins,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 BIND dn=\"uid=vpn,ou=logins,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=0 RESULT tag=97 err=0 text=\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND anonymous mech=implicit ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=sue@example.com,o=com,dc=example\" method=128\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 BIND dn=\"mail=sue@example.com,o=com,dc=example\" mech=SIMPLE ssf=0\nApr 17 00:05:02 ldap slapd[15932]: conn=25123333 op=1 RESULT tag=97 err=0 text=\n",
       "srcip": "10.0.0.209",
       "result": "LDAP_SUCCESS",
+      "success": true
+    }
+  },
+  {
+    "tags": [
+      "auth0",
+      "example"
+    ],
+    "summary": "Success login for john@example.com",
+    "details": {
+      "username": "john@example.com",
+      "type": "Success Login",
+      "success": true
+    }
+  },
+  {
+    "tags": [
+      "auth0",
+      "example"
+    ],
+    "summary": "Success login for bob@example.com",
+    "details": {
+      "username": "bob@example.com",
+      "type": "Success Login",
+      "success": true
+    }
+  },
+  {
+    "tags": [
+      "auth0",
+      "example"
+    ],
+    "summary": "Success login for mary@example.com",
+    "details": {
+      "username": "mary@example.com",
+      "type": "Success Login",
+      "success": true
+    }
+  },
+  {
+    "tags": [
+      "auth0",
+      "example"
+    ],
+    "summary": "Success login for sue@example.com",
+    "details": {
+      "username": "sue@example.com",
+      "type": "Success Login",
       "success": true
     }
   }

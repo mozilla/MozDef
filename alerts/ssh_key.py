@@ -20,6 +20,7 @@ import re
 # alert will not generate an alert event. If the detected key is not in
 # the whitelist, an alert will be created.
 
+
 class SSHKey(AlertTask):
     def __init__(self):
         # _whitelist contains all whitelisted key paths, loaded from the
@@ -65,7 +66,7 @@ class SSHKey(AlertTask):
                 rem = re.compile(went['hostre'])
             except:
                 continue
-            if rem.match(hostname) == None:
+            if rem.match(hostname) is None:
                 continue
             if privkey['path'] == went['path']:
                 return False
@@ -93,6 +94,6 @@ class SSHKey(AlertTask):
         summary = 'Private keys detected on {} missing from whitelist'.format(hostname)
         ret = self.createAlertDict(summary, category, tags, [event], severity)
         ret['details'] = {
-                'private': alertkeys
-                }
+            'private': alertkeys
+        }
         return ret

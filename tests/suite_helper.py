@@ -74,10 +74,12 @@ def setup_rabbitmq_client(options):
     try:
         RABBITMQ_CLIENT
     except NameError:
-        mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,
-                                                    options.mqpassword,
-                                                    options.mqalertserver,
-                                                    options.mqport)
+        mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(
+            options.mquser,
+            options.mqpassword,
+            options.mqalertserver,
+            options.mqport
+        )
         mqAlertConn = Connection(mqConnString)
         alertExchange = Exchange(name=options.alertExchange, type='topic', durable=True, delivery_mode=1)
         alertExchange(mqAlertConn).declare()

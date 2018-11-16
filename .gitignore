@@ -14,4 +14,6 @@ alerts/generic_alerts
 /data
 .vscode
 cloudy_mozdef/aws_parameters.json
-moz_private
+cloudy_mozdef/aws_parameters.sh
+docs/source/_build
+docs/source/_static

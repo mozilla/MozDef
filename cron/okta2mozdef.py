@@ -39,26 +39,26 @@ class State:
         try:
             with open(self.filename, 'r') as f:
                 self.data = json.load(f)
-            iterator = iter(self.data)
         except IOError:
             self.data = {}
         except ValueError:
-            logger.error("%s state file found but isn't a recognized json format" %
-                    self.filename)
+            logger.error("%s state file found but isn't a recognized json format" % self.filename)
             raise
         except TypeError:
-            logger.error("%s state file found and parsed but it doesn't contain an iterable object" %
-                    self.filename)
+            logger.error("%s state file found and parsed but it doesn't contain an iterable object" % self.filename)
             raise
 
     def write_state_file(self):
         '''Write the self.data value into the state file'''
         with open(self.filename, 'w') as f:
-            json.dump(self.data,
-                    f,
-                    sort_keys=True,
-                    indent=4,
-                    separators=(',', ': '))
+            json.dump(
+                self.data,
+                f,
+                sort_keys=True,
+                indent=4,
+                separators=(',', ': ')
+            )
+
 
 def main():
     if options.output=='syslog':

@@ -55,6 +55,8 @@ class TestSSHDAcceptedMessageV1():
         assert retmessage['details']['sourceipaddress'] == '10.22.74.208'
 
 # Long Username and SHA256 fpr present
+
+
 class TestSSHDAcceptedMessageV2():
     def setup(self):
 
