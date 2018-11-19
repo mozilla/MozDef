@@ -435,7 +435,7 @@ class AlertTask(Task):
             self.main(*args, **kwargs)
             self.log.debug('finished')
         except Exception as e:
-            self.log.error('Exception in main() method: {0}'.format(e))
+            self.log.exception('Exception in main() method: {0}'.format(e))
 
     def parse_json_alert_config(self, config_file):
         """

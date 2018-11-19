@@ -23,3 +23,11 @@ getSetting=function (settingKey){
     }
 };
 
+isFeature = function(featureName){
+    if ( features.findOne({'name':featureName}) ){
+        return features.findOne({'name':featureName}).enabled;
+    }else{
+        return true;
+    }
+};
+

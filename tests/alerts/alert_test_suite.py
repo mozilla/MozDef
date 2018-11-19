@@ -7,6 +7,7 @@
 
 import os.path
 import sys
+import logging
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
@@ -69,6 +70,10 @@ class AlertTestSuite(UnitTestSuite):
         # Meaning, this will throw if no events are found
         if not hasattr(self, 'deadman'):
             self.deadman = False
+
+        # Log to stdout so pytest will report any
+        # stack traces on any test failures
+        logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):

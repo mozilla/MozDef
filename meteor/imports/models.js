@@ -177,5 +177,13 @@ models={
             'dateCreated': today
         };
     },
+    feature: function(){
+        return {
+            '_id': uuid(),
+            'name':'',
+            'url':'',
+            'enabled':true
+        };
+    },
 
 };
