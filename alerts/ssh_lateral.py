@@ -5,10 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
-import json
-import sys
+from lib.alerttask import AlertTask, add_hostname_to_ip
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 import re
 import netaddr
 
@@ -78,7 +76,7 @@ class SshLateral(AlertTask):
         self._config = self.parse_json_alert_config('ssh_lateral.json')
 
     def main(self):
-        search_query = SearchQuery(minutes=2)
+        search_query = SearchQuery(minutes=15)
         search_query.add_must([
             TermMatch('category', 'syslog'),
             TermMatch('details.program', 'sshd'),
@@ -123,8 +121,8 @@ class SshLateral(AlertTask):
         # Determine if the origin of the connection was from a source outside
         # of the exception policy, and in our address scope
         candidates = []
-        sampleip = None
-        sampleuser = None
+        source_ips = []
+        users = []
         for x in aggreg['events']:
             m = re.match('Accepted publickey for (\S+) from (\S+).*', x['_source']['summary'])
             if m is not None and len(m.groups()) == 2:
@@ -150,14 +148,16 @@ class SshLateral(AlertTask):
                         # Check our exception list
                         if self.exception_check(m.group(1), srchost, m.group(2)):
                             continue
-                        if sampleip is None:
-                            sampleip = m.group(2)
-                        if sampleuser is None:
-                            sampleuser = m.group(1)
+                        source_ips.append(m.group(2))
+                        users.append(m.group(1))
                         candidates.append(x)
         if len(candidates) == 0:
             return None
 
-        summary = 'SSH lateral movement outside policy: access to {} from {} as {}'.format(srchost, sampleip, sampleuser)
+        src_hosts_info = []
+        for source_ip in source_ips:
+            src_hosts_info.append(add_hostname_to_ip(source_ip, '{0} ({1})'))
+
+        summary = 'SSH lateral movement outside policy: access to {} from {} as {}'.format(srchost, ','.join(src_hosts_info), ','.join(users))
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
