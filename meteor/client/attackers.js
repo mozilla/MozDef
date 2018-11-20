@@ -709,7 +709,7 @@ if (Meteor.isClient) {
             //create the character's nameplate
             var acallout=$('<div class="container-fluid attackercallout"></div>');
             var abuttons=$('<div class="row-fluid"/>');
-            if (getSetting('enableBlockIP')) {
+            if (isFeature('blockip')) {
                 abuttons.append($('<button/>',{
                     'class': 'blockip btn btn-danger btn-mini center',
                     'data-ipaddress': dbrecord.indicators[0].ipv4address,

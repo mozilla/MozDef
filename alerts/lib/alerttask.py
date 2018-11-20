@@ -10,6 +10,8 @@ import json
 import kombu
 import os
 import sys
+import socket
+import netaddr
 
 from configlib import getConfig, OptionParser
 from datetime import datetime
@@ -56,6 +58,25 @@ def getValueByPath(input_dict, path_string):
     for chunk in path_string.split('.'):
         return_data = return_data.get(chunk, {})
     return return_data
+
+
+def hostname_from_ip(ip):
+    try:
+        reversed_dns = socket.gethostbyaddr(ip)
+        return reversed_dns[0]
+    except socket.herror:
+        return None
+
+
+def add_hostname_to_ip(ip, output_format, require_internal=True):
+    ip_obj = netaddr.IPNetwork(ip)[0]
+    if require_internal and not ip_obj.is_private():
+        return ip
+    hostname = hostname_from_ip(ip)
+    if hostname is None:
+        return ip
+    else:
+        return output_format.format(ip, hostname)
 
 
 class AlertTask(Task):
@@ -435,7 +456,7 @@ class AlertTask(Task):
             self.main(*args, **kwargs)
             self.log.debug('finished')
         except Exception as e:
-            self.log.error('Exception in main() method: {0}'.format(e))
+            self.log.exception('Exception in main() method: {0}'.format(e))
 
     def parse_json_alert_config(self, config_file):
         """

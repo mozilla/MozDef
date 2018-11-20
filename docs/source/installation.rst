@@ -195,29 +195,21 @@ If you wish to use meteor as the authentication handler you'll also need to inst
 
   meteor add accounts-password
 
-You may want to edit the app/lib/settings.js file to properly configure the URLs and Authentication
+You may want to edit the /meteor/imports/settings.js file to properly configure the URLs and Authentication
 The default setting will use Meteor Accounts, but you can just as easily install an external provider like Github, Google, Facebook or your own OIDC::
 
   mozdef = {
-    rootURL: "localhost",
-    port: "443",
-    rootAPI: "https://localhost:8444",
-    kibanaURL: "https://localhost:9443/app/kibana#",
-    enableBlockIP: true,
-    enableClientAccountCreation: true,
-    authenticationType: "meteor-password"
+    ...
+    authenticationType: "meteor-password",
+    ...
   }
 
 or for an OIDC implementation that passes a header to the nginx reverse proxy (for example using OpenResty with Lua and Auth0)::
 
   mozdef = {
-    rootURL: "localhost",
-    port: "443",
-    rootAPI: "https://localhost:8444",
-    kibanaURL: "https://localhost:9443/app/kibana#",
-    enableBlockIP: true,
-    enableClientAccountCreation: false,
-    authenticationType: "OIDC"
+    ...
+    authenticationType: "OIDC",
+    ...
   }
 
 Then start meteor with::
@@ -258,7 +250,7 @@ This will create a 'bundle' directory with the entire UI code below that directo
 
 If you didn't update the settings.js before bundling the meteor installation, you will need to update the settings.js file to match your servername/port::
 
-  vim bundle/programs/server/app/app/lib/settings.js
+  vim bundle/programs/server/app/imports/settings.js
 
 If your development OS is different than your production OS you will also need to update
 the fibers node module::

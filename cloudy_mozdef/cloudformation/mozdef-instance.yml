@@ -117,7 +117,7 @@ Resources:
             - content: |
                 OPTIONS_ESSERVERS=${ESURL}
                 OPTIONS_KIBANAURL=${KibanaURL}
-                OPTIONS_METEOR_KIBANAURL=${KibanaURL}
+                OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}

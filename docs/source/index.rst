@@ -40,4 +40,3 @@ Contact
 
 * mozdef INSERTAT mozilla.com
 * `#mozdef <irc://irc.mozilla.org/mozdef>`_
-* https://lists.mozilla.org/listinfo/dev-mozdef
