@@ -82,8 +82,8 @@ def status():
         request.body.close()
     response.status = 200
     response.content_type = "application/json"
-    response.body = json.dumps(dict(status='ok', service='restapi'))
-    sendMessgeToPlugins(request, response, 'watchlist')
+    response.body = getWatchlist()
+    sendMessgeToPlugins(request, response, 'getwatchlist')
 return response
 
 @route('/logincounts')
@@ -542,6 +542,43 @@ def kibanaDashboards():
 
     return json.dumps(resultsList)
 
+
+def getWatchlist():
+    WatchList = []
+    try:
+        # connect to mongo
+        client = MongoClient(options.mongohost, options.mongoport)
+        mozdefdb = client.meteor
+        watchlist = mozdefdb['watchlist']
+
+        # Log the entries we are removing to maintain an audit log
+        expired = watchlist.find({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(hours=1)}})
+        for entry in expired:
+            sys.stdout.write('Deleting entry {0} from watchlist /n'.format(entry))
+
+        # delete any that expired
+        watchlist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(hours=1)}})
+
+        # Lastly, export the combined watchlist
+        watchCursor=mozdefdb['watchlist'].aggregate([
+                {"$sort": {"dateAdded": -1}},
+                {"$match": {"watchcontent": {"$exists": True}}},
+                {"$match":
+                    {"$or":[
+                        {"dateExpiring": {"$gte": datetime.utcnow()}},
+                        {"dateExpiring": {"$exists": False}},
+                    ]},
+                },
+                {"$project":{"watchcontent":1}},
+            ])
+        WatchList=[]
+        for content in watchCursor:
+            WatchList.append(
+                content['watchcontent']
+           )
+        return json.dumps({'content': WatchList})
+    except ValueError as e:
+        sys.stderr.write('Exception {0} collecting watch list\n'.format(e))
 
 def getWhois(ipaddress):
     try:
