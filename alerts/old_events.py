@@ -9,10 +9,10 @@
 # which could mean theres something wrong in the event pipeline
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, LessThanMatch
+from mozdef_util.query_models import SearchQuery, LessThanMatch
 
 from datetime import datetime, timedelta
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 
 class OldEvents(AlertTask):

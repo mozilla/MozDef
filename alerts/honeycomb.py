@@ -6,7 +6,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch
 import re
 
 
@@ -50,7 +50,8 @@ class AlertHoneycomb(AlertTask):
             offendingIPs.append(ip_match.group(1))
 
         summary = 'Honeypot activity on {0} from IP(s): {1}'.format(
-                aggreg['value'], ", ".join(sorted(set(offendingIPs))))
+            aggreg['value'], ", ".join(sorted(set(offendingIPs)))
+        )
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

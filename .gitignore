@@ -13,3 +13,7 @@ alerts/generic_alerts
 /.project
 /data
 .vscode
+cloudy_mozdef/aws_parameters.json
+cloudy_mozdef/aws_parameters.sh
+docs/source/_build
+docs/source/_static

@@ -18,8 +18,7 @@ from kombu.mixins import ConsumerMixin
 from lib.alert_plugin_set import AlertPluginSet
 from lib.config import ALERT_PLUGINS
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.logger import logger, initLogger
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 class alertConsumer(ConsumerMixin):
@@ -68,10 +67,12 @@ class alertConsumer(ConsumerMixin):
 def main():
     # connect and declare the message queue/kombu objects.
     # Event server/exchange/queue
-    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,
-                                                        options.mqpassword,
-                                                        options.mqalertserver,
-                                                        options.mqport)
+    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(
+        options.mquser,
+        options.mqpassword,
+        options.mqalertserver,
+        options.mqport
+    )
     mqAlertConn = Connection(mqConnString)
 
     # Exchange for alerts we pass to plugins

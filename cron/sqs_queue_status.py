@@ -24,13 +24,13 @@ from boto.sqs.message import RawMessage
 import base64
 import kombu
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from utilities.to_unicode import toUnicode
-from utilities.remove_at import removeAt
-from utilities.is_cef import isCEF
-from utilities.logger import logger, initLogger
-from elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.to_unicode import toUnicode
+from mozdef_util.utilities.remove_at import removeAt
+from mozdef_util.utilities.is_cef import isCEF
+from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+
 
 def getDocID(sqsregionidentifier):
     # create a hash to use as the ES doc id
@@ -38,6 +38,7 @@ def getDocID(sqsregionidentifier):
     hash = md5()
     hash.update('{0}.mozdefhealth.latest'.format(sqsregionidentifier))
     return hash.hexdigest()
+
 
 def getQueueSizes():
     logger.debug('starting')
@@ -47,27 +48,22 @@ def getQueueSizes():
     sqslist['queue_stats'] = {}
     qcount = len(options.taskexchange)
     qcounter = qcount - 1
-    try:
-        # meant only to talk to SQS using boto
-        # and return queue attributes.a
 
-        mqConn = boto.sqs.connect_to_region(
-            options.region,
-            aws_access_key_id=options.accesskey,
-            aws_secret_access_key=options.secretkey
-        )
+    mqConn = boto.sqs.connect_to_region(
+        options.region,
+        aws_access_key_id=options.accesskey,
+        aws_secret_access_key=options.secretkey
+    )
 
-        while qcounter >= 0:
-            for exchange in options.taskexchange:
-                logger.debug('Looking for sqs queue stats in queue' + exchange)
-                eventTaskQueue = mqConn.get_queue(exchange)
-                # get queue stats
-                taskQueueStats = eventTaskQueue.get_attributes('All')
-                sqslist['queue_stats'][qcounter] = taskQueueStats
-                sqslist['queue_stats'][qcounter]['name'] = exchange
-                qcounter -= 1
-    except Exception as e:
-        logger.error("Exception %r when gathering health and status " % e)
+    while qcounter >= 0:
+        for exchange in options.taskexchange:
+            logger.debug('Looking for sqs queue stats in queue' + exchange)
+            eventTaskQueue = mqConn.get_queue(exchange)
+            # get queue stats
+            taskQueueStats = eventTaskQueue.get_attributes('All')
+            sqslist['queue_stats'][qcounter] = taskQueueStats
+            sqslist['queue_stats'][qcounter]['name'] = exchange
+            qcounter -= 1
 
     # setup a log entry for health/status.
     sqsid = '{0}-{1}'.format(options.account, options.region)
@@ -120,10 +116,12 @@ def getQueueSizes():
 #    except Exception as e:
 #        logger.error("Exception %r when gathering health and status " % e)
 
+
 def main():
     logger.debug('Starting')
     logger.debug(options)
     getQueueSizes()
+
 
 def initConfig():
     # aws options
@@ -138,6 +136,7 @@ def initConfig():
     options.esservers = list(getConfig('esservers', 'http://localhost:9200', options.configfile).split(','))
     options.index = getConfig('index', 'mozdefstate', options.configfile)
     options.account = getConfig('account', '', options.configfile)
+
 
 if __name__ == '__main__':
     # configure ourselves

@@ -7,12 +7,14 @@
 
 import os.path
 import sys
+import logging
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from unit_test_suite import UnitTestSuite
 
 from freezegun import freeze_time
+import mock
 
 import copy
 import re
@@ -20,6 +22,13 @@ import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
 from lib import alerttask
+
+
+def mock_add_hostname_to_ip(ip):
+    if ip == '10.2.3.4':
+        return ['mock_hostname1.mozilla.org', ip]
+    else:
+        return ['mock.mozilla.org', ip]
 
 
 class AlertTestSuite(UnitTestSuite):
@@ -70,6 +79,10 @@ class AlertTestSuite(UnitTestSuite):
         if not hasattr(self, 'deadman'):
             self.deadman = False
 
+        # Log to stdout so pytest will report any
+        # stack traces on any test failures
+        logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
+
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):
         # Verify the description for the test case is populated
@@ -77,7 +90,6 @@ class AlertTestSuite(UnitTestSuite):
         assert test_case.description is not ""
 
         # Verify alert_filename is a legit file
-        # full_alert_file_path = "../../../alerts/" + self.alert_filename + ".py"
         full_alert_file_path = "./" + self.alert_filename + ".py"
         assert os.path.isfile(full_alert_file_path) is True
 
@@ -86,7 +98,9 @@ class AlertTestSuite(UnitTestSuite):
         # gonna grep for class name
         alert_source_str = open(full_alert_file_path, 'r').read()
         class_search_str = "class " + self.alert_classname + "("
-        assert class_search_str in alert_source_str
+        error_text = "Incorrect alert classname. We tried guessing the class name ({0}), but that wasn't it.".format(self.alert_classname)
+        error_text += ' Define self.alert_classname in your alert unit test class.'
+        assert class_search_str in alert_source_str, error_text
 
         # Verify events is not empty
         assert len(test_case.events) is not 0
@@ -141,7 +155,8 @@ class AlertTestSuite(UnitTestSuite):
 
         self.flush('events')
 
-        alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
+        with mock.patch("socket.gethostbyaddr", side_effect=mock_add_hostname_to_ip):
+            alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
         self.verify_alert_task(alert_task, test_case)
 
     def verify_rabbitmq_alert(self, found_alert, test_case):

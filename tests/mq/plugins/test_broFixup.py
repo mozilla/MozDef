@@ -1,7 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../lib"))
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 import mock
 import json
@@ -40,7 +39,7 @@ class TestBroFixup(object):
             'index': 'events'
         }
         event = {
-           'bro': 'value1'
+            'bro': 'value1'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -55,7 +54,7 @@ class TestBroFixup(object):
             'index': 'events'
         }
         event = {
-           'category': 'bro'
+            'category': 'bro'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -65,9 +64,9 @@ class TestBroFixup(object):
 
     def test_bro_wrongtype_log(self):
         event = {
-           'category': 'bro',
-           'SOURCE': 'nosuchtype',
-           'customendpoint': 'bro'
+            'category': 'bro',
+            'SOURCE': 'nosuchtype',
+            'customendpoint': 'bro'
         }
         MESSAGE = {
             'ts': 1505701210.163043
@@ -123,25 +122,25 @@ class TestBroFixup(object):
 
     def test_nomatch_syslog(self):
         event = {
-                "category": "syslog",
-                "processid": "0",
-                "receivedtimestamp": "2017-09-26T00:22:24.210945+00:00",
-                "severity": "7",
-                "utctimestamp": "2017-09-26T00:22:23+00:00",
-                "timestamp": "2017-09-26T00:22:23+00:00",
-                "hostname": "syslog1.private.scl3.mozilla.com",
-                "mozdefhostname": "mozdef1.private.scl3.mozilla.com",
-                "summary": "Connection from 10.22.74.208 port 9071 on 10.22.74.45 nsm bro port 22\n",
-                "eventsource": "systemslogs",
-                "details": {
-                    "processid": "21233",
-                    "Random": 2,
-                    "sourceipv4address": "10.22.74.208",
-                    "hostname": "hostname1.subdomain.domain.com",
-                    "program": "sshd",
-                    "sourceipaddress": "10.22.74.208"
-                }
+            "category": "syslog",
+            "processid": "0",
+            "receivedtimestamp": "2017-09-26T00:22:24.210945+00:00",
+            "severity": "7",
+            "utctimestamp": "2017-09-26T00:22:23+00:00",
+            "timestamp": "2017-09-26T00:22:23+00:00",
+            "hostname": "syslog1.private.scl3.mozilla.com",
+            "mozdefhostname": "mozdef1.private.scl3.mozilla.com",
+            "summary": "Connection from 10.22.74.208 port 9071 on 10.22.74.45 nsm bro port 22\n",
+            "eventsource": "systemslogs",
+            "details": {
+                "processid": "21233",
+                "Random": 2,
+                "sourceipv4address": "10.22.74.208",
+                "hostname": "hostname1.subdomain.domain.com",
+                "program": "sshd",
+                "sourceipaddress": "10.22.74.208"
             }
+        }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result['category'] == 'syslog'
         assert result['eventsource'] == 'systemslogs'
@@ -431,7 +430,7 @@ class TestBroFixup(object):
             'SOURCE': 'bro_http',
             'customendpoint': 'bro'
         }
-        MESSAGE =  {
+        MESSAGE = {
             "ts":1505701210.163246,
             "uid":"CMxwva4RHFtKpxWLba",
             "id.orig_h":"10.22.74.212",
@@ -1517,7 +1516,7 @@ class TestBroFixup(object):
 
     def test_sip_log2(self):
         event = {
-        'category': 'bro',
+            'category': 'bro',
             'SOURCE': 'bro_sip',
             'customendpoint': 'bro'
         }

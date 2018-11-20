@@ -10,10 +10,11 @@ for alert in ALERTS.keys():
 alerts_include = list(set(alerts_include))
 
 BROKER_URL = 'amqp://{0}:{1}@{2}:{3}//'.format(
-                RABBITMQ['mquser'],
-                RABBITMQ['mqpassword'],
-                RABBITMQ['mqserver'],
-                RABBITMQ['mqport'])
+    RABBITMQ['mquser'],
+    RABBITMQ['mqpassword'],
+    RABBITMQ['mqserver'],
+    RABBITMQ['mqport']
+)
 CELERY_DISABLE_RATE_LIMITS = True
 CELERYD_CONCURRENCY = 1
 CELERY_IGNORE_RESULT = True

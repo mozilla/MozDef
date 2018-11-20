@@ -21,12 +21,11 @@ from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
-from query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+from mozdef_util.query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
 
-from utilities.toUTC import toUTC
-from utilities.logger import logger, initLogger
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 options = None
@@ -59,6 +58,7 @@ def test():
     sendMessgeToPlugins(request, response, 'test')
     return response
 
+
 @route('/status')
 @route('/status/')
 def status():
@@ -73,8 +73,8 @@ def status():
     return response
 
 
-@route('/ldapLogins')
-@route('/ldapLogins/')
+@route('/logincounts')
+@route('/logincounts/')
 @enable_cors
 def index():
     '''an endpoint to return success/failed login counts'''
@@ -82,8 +82,8 @@ def index():
         request.body.read()
         request.body.close()
     response.content_type = "application/json"
-    sendMessgeToPlugins(request, response, 'ldapLogins')
-    return(esLdapResults())
+    sendMessgeToPlugins(request, response, 'logincounts')
+    return response
 
 
 @route('/veris')
@@ -123,6 +123,7 @@ def index():
     sendMessgeToPlugins(request, response, 'blockip')
     return response
 
+
 @post('/blockfqdn', methods=['POST'])
 @post('/blockfqdn/', methods=['POST'])
 @enable_cors
@@ -130,6 +131,7 @@ def index():
     '''will receive a call to block an ip address'''
     sendMessgeToPlugins(request, response, 'blockfqdn')
     return response
+
 
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
@@ -214,6 +216,7 @@ def index():
     sendMessgeToPlugins(request, response, 'ipdshieldquery')
     return response
 
+
 @route('/plugins', methods=['GET'])
 @route('/plugins/', methods=['GET'])
 @route('/plugins/<endpoint>', methods=['GET'])
@@ -249,6 +252,7 @@ def getPluginList(endpoint=None):
 
     sendMessgeToPlugins(request, response, 'plugins')
     return response
+
 
 @post('/incident', methods=['POST'])
 @post('/incident/', methods=['POST'])
@@ -321,7 +325,7 @@ def createIncident():
 
     # Validating Incident phase type
     if (type(incident['phase']) not in (str, unicode) or
-        incident['phase'] not in validIncidentPhases):
+            incident['phase'] not in validIncidentPhases):
 
         response.status = 500
         response.body = json.dumps(dict(status='failed',
@@ -343,12 +347,14 @@ def createIncident():
     incident['dateMitigated'] = validateDate(body.get('dateMitigated'))
     incident['dateContained'] = validateDate(body.get('dateContained'))
 
-    dates = [incident['dateOpened'],
-              incident['dateClosed'],
-              incident['dateReported'],
-              incident['dateVerified'],
-              incident['dateMitigated'],
-              incident['dateContained']]
+    dates = [
+        incident['dateOpened'],
+        incident['dateClosed'],
+        incident['dateReported'],
+        incident['dateVerified'],
+        incident['dateMitigated'],
+        incident['dateContained']
+    ]
 
     # Validating all the dates for the format
     if False in dates:
@@ -390,6 +396,7 @@ def createIncident():
                                     ))
     return response
 
+
 def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
     '''
     Converts a date string into a datetime object based
@@ -411,18 +418,26 @@ def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
     finally:
         return dateObj
 
+
 def generateMeteorID():
     return('%024x' % random.randrange(16**24))
 
+
 def registerPlugins():
-    '''walk the ./plugins directory
+    '''walk the plugins directory
        and register modules in pluginList
        as a tuple: (mfile, mname, mdescription, mreg, mpriority, mclass)
     '''
 
+    plugin_location = os.path.join(os.path.dirname(__file__), "plugins")
+    module_name = os.path.basename(plugin_location)
+    root_plugin_directory = os.path.join(plugin_location, '..')
+
     plugin_manager = pynsive.PluginManager()
-    if os.path.exists('plugins'):
-        modules = pynsive.list_modules('plugins')
+    plugin_manager.plug_into(root_plugin_directory)
+
+    if os.path.exists(plugin_location):
+        modules = pynsive.list_modules(module_name)
         for mfile in modules:
             module = pynsive.import_module(mfile)
             reload(module)
@@ -432,7 +447,7 @@ def registerPlugins():
                 if 'message' in dir(module):
                     mclass = module.message()
                     mreg = mclass.registration
-                    mclass.restoptions = options
+                    mclass.restoptions = options.__dict__
 
                     if 'priority' in dir(mclass):
                         mpriority = mclass.priority
@@ -480,62 +495,6 @@ def isIPv4(ip):
         return False
 
 
-def esLdapResults(begindateUTC=None, enddateUTC=None):
-    '''an ES query/facet to count success/failed logins'''
-    resultsList = list()
-    if begindateUTC is None:
-        begindateUTC = datetime.now() - timedelta(hours=1)
-        begindateUTC = toUTC(begindateUTC)
-    if enddateUTC is None:
-        enddateUTC = datetime.now()
-        enddateUTC = toUTC(enddateUTC)
-
-    try:
-        es_client = ElasticsearchClient(list('{0}'.format(s) for s in options.esservers))
-        search_query = SearchQuery()
-        range_match = RangeMatch('utctimestamp', begindateUTC, enddateUTC)
-
-        search_query.add_must(range_match)
-        search_query.add_must(TermMatch('tags', 'ldap'))
-
-        search_query.add_must(TermMatch('details.result', 'LDAP_INVALID_CREDENTIALS'))
-
-        search_query.add_aggregation(Aggregation('details.result'))
-        search_query.add_aggregation(Aggregation('details.dn'))
-
-        results = search_query.execute(es_client, indices=['events'])
-
-        stoplist = ('o', 'mozilla', 'dc', 'com', 'mozilla.com', 'mozillafoundation.org', 'org', 'mozillafoundation')
-
-        for t in results['aggregations']['details.dn']['terms']:
-            if t['key'] in stoplist:
-                continue
-            failures = 0
-            success = 0
-            dn = t['key']
-
-            details_query = SearchQuery()
-            details_query.add_must(range_match)
-            details_query.add_must(TermMatch('tags', 'ldap'))
-            details_query.add_must(TermMatch('details.dn', dn))
-            details_query.add_aggregation(Aggregation('details.result'))
-
-            results = details_query.execute(es_client)
-
-            for t in results['aggregations']['details.result']['terms']:
-                if t['key'].upper() == 'LDAP_SUCCESS':
-                    success = t['count']
-                if t['key'].upper() == 'LDAP_INVALID_CREDENTIALS':
-                    failures = t['count']
-            resultsList.append(dict(dn=dn, failures=failures,
-                success=success, begin=begindateUTC.isoformat(),
-                end=enddateUTC.isoformat()))
-
-        return(json.dumps(resultsList))
-    except Exception as e:
-        sys.stderr.write('Error trying to get ldap results: {0}\n'.format(e))
-
-
 def kibanaDashboards():
     resultsList = []
     try:
@@ -547,9 +506,11 @@ def kibanaDashboards():
         for dashboard in results['hits']:
             resultsList.append({
                 'name': dashboard['_source']['title'],
-                'url': "%s/%s/%s" % (options.kibanaurl,
-                "dashboard",
-                dashboard['_id'])
+                'url': "%s#/%s/%s" % (
+                    options.kibanaurl,
+                    "dashboard",
+                    dashboard['_id']
+                )
             })
 
     except ElasticsearchInvalidIndex as e:
@@ -579,32 +540,26 @@ def verisSummary(verisRegex=None):
         # aggregate the veris tags from the incidents collection and return as json
         client = MongoClient(options.mongohost, options.mongoport)
         # use meteor db
-        incidents= client.meteor['incidents']
-        #iveris=incidents.aggregate([
-                                   #{"$match":{"tags":{"$exists":True}}},
-                                   #{"$unwind" : "$tags" },
-                                   #{"$match":{"tags":{"$regex":''}}}, #regex for tag querying
-                                   #{"$group": {"_id": "$tags", "hitcount": {"$sum": 1}}}, # count by tag
-                                   #{"$sort": SON([("hitcount", -1), ("_id", -1)])}, #sort
-                                   #])
+        incidents = client.meteor['incidents']
 
-        iveris=incidents.aggregate([
-
-                                   {"$match":{"tags":{"$exists":True}}},
-                                   {"$unwind": "$tags"},
-                                   {"$match":{"tags":{"$regex":''}}},  # regex for tag querying
-                                   {"$project": {"dateOpened": 1,
-                                                   "tags": 1,
-                                                   "phase": 1,
-                                                   "_id": 0
-                                                   }}
-                                   ])
+        iveris = incidents.aggregate([
+            {"$match": {"tags": {"$exists": True}}},
+            {"$unwind": "$tags"},
+            {"$match": {"tags": {"$regex": ''}}},
+            {"$project": {
+                "dateOpened": 1,
+                "tags": 1,
+                "phase": 1,
+                "_id": 0
+            }}
+        ])
         if iveris:
             return json.dumps(list(iveris), default=json_util.default)
         else:
             return json.dumps(list())
     except Exception as e:
             sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
+
 
 def initConfig():
     # output our log to stdout or syslog
@@ -627,8 +582,11 @@ def initConfig():
     default_user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/58.0'
     options.user_agent = getConfig('user_agent', default_user_agent, options.configfile)
 
+
 parser = OptionParser()
-parser.add_option("-c", dest='configfile',
+parser.add_option(
+    "-c",
+    dest='configfile',
     default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
     help="configuration file to use")
 (options, args) = parser.parse_args()

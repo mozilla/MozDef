@@ -201,6 +201,13 @@ caption, legend {
     color: wheat;
 }
 
+.row {
+    color: white;
+}
+
+.modal-body .row {
+    color: black;
+}
 /*bootstrap overrides*/
 
 .btn {
@@ -247,6 +254,9 @@ td{
     margin-top: 20px;
 }
 
+.tabnav a{
+    color: lightblue;
+}
 
 /* uncomment this login ui css to hide the local account/password signup options
 .logins-wrapper .svgtextlabel {
@@ -305,6 +315,10 @@ circle:hover{
     stroke: black;
 }
 
+.vtagholders {
+    padding-left: 1px;
+    padding-right: 0px;
+}
 
 #header:after {
     content: "";

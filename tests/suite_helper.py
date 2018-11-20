@@ -12,10 +12,9 @@ from kombu import Connection, Queue, Exchange
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from elasticsearch_client import ElasticsearchClient
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
-from utilities.dot_dict import DotDict
+from mozdef_util.utilities.dot_dict import DotDict
 
 
 # The following functions before the UnitTest class definition
@@ -75,10 +74,12 @@ def setup_rabbitmq_client(options):
     try:
         RABBITMQ_CLIENT
     except NameError:
-        mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,
-                                                    options.mqpassword,
-                                                    options.mqalertserver,
-                                                    options.mqport)
+        mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(
+            options.mquser,
+            options.mqpassword,
+            options.mqalertserver,
+            options.mqport
+        )
         mqAlertConn = Connection(mqConnString)
         alertExchange = Exchange(name=options.alertExchange, type='topic', durable=True, delivery_mode=1)
         alertExchange(mqAlertConn).declare()

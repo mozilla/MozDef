@@ -7,8 +7,7 @@ import netaddr
 import os
 
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from geo_ip import GeoIP
+from mozdef_util.geo_ip import GeoIP
 
 
 def isIP(ip):
@@ -28,7 +27,8 @@ class message(object):
         '''
         self.registration = ['sourceipaddress', 'destinationipaddress']
         self.priority = 20
-        self.geoip = GeoIP()
+        geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../data/GeoLite2-City.mmdb")
+        self.geoip = GeoIP(geoip_data_dir)
 
     def ipLocation(self, ip):
         location = dict()

@@ -1,0 +1,248 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy MozDef into AWS
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+    - Label:
+        default: VPC Settings
+      Parameters:
+      - VpcId
+      - PublicSubnetIds
+    - Label:
+        default: EC2 Instance
+      Parameters:
+      - InstanceType
+      - KeyName
+      - AMIImageId
+Parameters:
+  S3TemplateLocation:
+    Type: String
+    Description: The URL to the S3 bucket used to fetch the nested stack templates
+    Default: https://s3-us-west-2.amazonaws.com/mozdef.infosec.allizom.org/cf/
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: The VPC ID of the VPC to deploy in
+    Default: vpc-dc8eacb4
+  PublicSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: A comma delimited list of public subnet IDs
+    Default: subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6
+  InstanceType:
+    Type: String
+    Default: m5.large
+    Description: EC2 instance type, e.g. m1.small, m1.large, etc.
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the web server
+    Default: infosec-pdx-workweek-2018
+  AMIImageId:
+    Type: String
+    Description: The AMI Image ID to use of the EC2 instance
+    Default: ami-0ff5b922fb3ae2332
+  ACMCertArn:
+    Description: The ARN of your pre-issued ACM cert.
+    Default : arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583
+    Type: String
+    MinLength: '1'
+  OIDCClientId:
+    Description: The client ID that your OIDC provider issues you for your Mozdef instance.
+    Type: String
+    Default: lGsSlYNdiV6f5tF05pWN3EbQoDPHx44k
+  OIDCClientSecret:
+    Type: String
+    Description: The secret that your OIDC provider issues you for your Mozdef instance.
+    NoEcho: true
+  OIDCDiscoveryURL:
+    Type: String
+    Default: https://auth.mozilla.auth0.com/.well-known/openid-configuration
+    Description: The URL of your OIDC provider's well-known discovery URL
+Resources:
+  MozDefSecurityGroups:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-security-group.yml ] ]
+  MozDefIAMRoleAndInstanceProfile:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        CloudTrailS3BucketName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailS3BucketName
+        CloudTrailSQSQueueArn: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueArn
+        MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
+        # CloudTrailS3BucketIAMRoleArn we leave empty as we will consume CloudTrail logs from our own account
+        ESServiceLinkedRoleExists: !GetAtt ESServiceLinkedRoleExists.RoleExists
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, base-iam.yml ] ]
+  MozDefInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !Ref VpcId
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyName
+        IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
+        AutoScaleGroupSubnetIds: !Join [ ',', !Ref PublicSubnetIds ]
+        AMIImageId: !Ref AMIImageId
+        EFSID: !GetAtt MozDefEFS.Outputs.EFSID
+        MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+        MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
+        MozDefACMCertArn: !Ref ACMCertArn
+        ESURL: !GetAtt MozDefES.Outputs.ElasticsearchURL
+        KibanaURL: !GetAtt MozDefES.Outputs.ElasticsearchKibanaURL
+        KibanaDomainOnlyURL: !GetAtt MozDefES.Outputs.ElasticsearchDomainOnlyURL
+        OIDCClientId: !Ref OIDCClientId
+        OIDCClientSecret: !Ref OIDCClientSecret
+        OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
+        CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-instance.yml ] ]
+  MozDefES:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: MozDefIAMRoleAndInstanceProfile
+    Properties:
+      Parameters:
+        SubnetIds: !Join [ ',', !Ref PublicSubnetIds ]
+        BlockStoreSizeGB: '100'
+        VpcId: !Ref VpcId
+        MozDefInstanceSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+        ESInstanceCount: '1'
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-es.yml ] ]
+  MozDefEFS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VPCID0: !Ref VpcId
+        Subnet: !Join [ ',', !Ref PublicSubnetIds ]
+        NumberOfSubnets: !GetAtt NumberOfSubnets.Length
+        MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-efs.yml ] ]
+  MozDefSQS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-sqs.yml ] ]
+  MozDefCloudTrail:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-cloudtrail.yml ] ]
+  CloudFormationLambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        -
+          PolicyName: AllowLambdaLogging
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - logs:*
+                  - iam:ListRoles
+                Resource: '*'
+  GetArrayLengthLambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: CloudFormationLambdaIAMRole
+    # This DependsOn shouldn't be needed because the "Role" value is set to
+    # "!GetAtt CloudFormationLambdaIAMRole.Arn" but without DependsOn the error
+    # "Template error: IAM role mozdef-aws-nested-CloudFormationLambdaIAMRole-108UCUPESC6WG doesn't exist"
+    # occurs on stack creation for this Lambda Function resource. The DependsOn
+    # prevents the error.
+    Properties:
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import secrets, string
+          def handler(event, context):
+            length = len(event['ResourceProperties']['Array'])
+            physical_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(13))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, {'Length': length}, "GetArrayLength-%s" % physical_id)
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      Timeout: 20
+  NumberOfSubnets:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      Array: !Ref PublicSubnetIds
+      ServiceToken: !GetAtt GetArrayLengthLambdaFunction.Arn
+  DoesRoleExistLambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: CloudFormationLambdaIAMRole
+    # This DependsOn shouldn't be needed because the "Role" value is set to
+    # "!GetAtt CloudFormationLambdaIAMRole.Arn" but without DependsOn the error
+    # "Template error: IAM role mozdef-aws-nested-CloudFormationLambdaIAMRole-108UCUPESC6WG doesn't exist"
+    # occurs on stack creation for this Lambda Function resource. The DependsOn
+    # prevents the error.
+    Properties:
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import boto3, secrets, string
+          def handler(event, context):
+              paginator = boto3.client('iam').get_paginator('list_roles')
+              args = {'PathPrefix': event['ResourceProperties']['PathPrefix']} if 'PathPrefix' in event['ResourceProperties'] else {}
+              iterator = paginator.paginate(**args).search(
+                  "Roles[?RoleName == '%s'][]" % event['ResourceProperties']['RoleName'])
+              response = {'RoleExists': len([x for x in iterator]) > 0}
+              physical_id = ''.join(
+                  secrets.choice(string.ascii_uppercase + string.digits) for i in
+                  range(13))
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response,
+                               "DoesRoleExist-%s" % physical_id)
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      Timeout: 20
+  ESServiceLinkedRoleExists:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      RoleName: AWSServiceRoleForAmazonElasticsearchService
+      PathPrefix: '/aws-service-role/es.amazonaws.com/'
+      ServiceToken: !GetAtt DoesRoleExistLambdaFunction.Arn

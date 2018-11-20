@@ -22,8 +22,7 @@ from slackclient import SlackClient
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 
 logger = logging.getLogger()
@@ -187,13 +186,16 @@ class alertConsumer(ConsumerMixin):
         except ValueError as e:
             logger.exception("mozdefbot_slack exception while processing events queue %r" % e)
 
+
 def consumeAlerts(bot):
     # connect and declare the message queue/kombu objects.
     # server/exchange/queue
-    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,
-                                                        options.mqpassword,
-                                                        options.mqalertserver,
-                                                        options.mqport)
+    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(
+        options.mquser,
+        options.mqpassword,
+        options.mqalertserver,
+        options.mqport
+    )
     mqAlertConn = Connection(mqConnString)
 
     # Exchange for alerts we pass to plugins

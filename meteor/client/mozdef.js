@@ -4,8 +4,10 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
-import { Meteor } from 'meteor/meteor'
+import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import validator from 'validator';
+import '/imports/collections.js';
 import '/imports/settings.js';
 import '/imports/helpers.js';
 import '/client/js/jquery.highlight.js';
@@ -13,6 +15,7 @@ import PNotify from 'pnotify';
 import 'pnotify/dist/pnotify.css';
 import './mozdef.html';
 import './menu.html';
+import './menu.js';
 import '/client/layout.js';
 
 
@@ -31,10 +34,6 @@ if (Meteor.isClient) {
         Session.set('blockFQDN','');
         getAllPlugins();
 
-        // Sends us to register our login handler
-        // and then to the login function of choice
-        // based on how enableClientAccountCreation was set at deployment.
-        Meteor.login();
     });
 
     //find plugins registered for a
@@ -151,7 +150,7 @@ if (Meteor.isClient) {
             result.push({key:prefix,value: x})
         }
         return result
-    }
+    };
 
     Template.hello.helpers({
         greeting: function() {
@@ -174,6 +173,10 @@ if (Meteor.isClient) {
             Meteor.call('loadKibanaDashboards');
             return kibanadashboards.find();
         }
+    });
+
+    UI.registerHelper('isFeature',function(featureName){
+        return isFeature(featureName);
     });
 
     UI.registerHelper('uiDateFormat',function(adate){
@@ -309,7 +312,11 @@ if (Meteor.isClient) {
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
-            blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
+            if ( isFeature('blockip') ){
+                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
+            }else{
+                blockIPitem=$();
+            }
 
             ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,blockIPitem);
 
@@ -373,7 +380,7 @@ if (Meteor.isClient) {
 
     // login abstraction
     Meteor.login = function(callback) {
-        var authenticationType = mozdef.authenticationType.toLowerCase();
+        var authenticationType = getSetting('authenticationType').toLowerCase();
         switch(authenticationType){
             case 'meteor-password':
                 Meteor.loginViaPassword(callback);
@@ -407,7 +414,7 @@ if (Meteor.isClient) {
     };
 
     Meteor.logout = function(callback) {
-        var authenticationType = mozdef.authenticationType.toLowerCase();
+        var authenticationType = getSetting('authenticationType').toLowerCase();
         switch(authenticationType){
             case 'meteor-password':
                 Meteor.logoutViaAccounts(callback);
@@ -423,43 +430,11 @@ if (Meteor.isClient) {
 
     // Logout via custom URL
     Meteor.logoutViaHeader = function(callback) {
-        window.location.href = mozdef.rootURL + '/logout';
+        window.location.href = getSetting('rootURL').toLowerCase() + '/logout';
     };
 
     Meteor.logoutViaAccounts = function(callback) {
         return Accounts.logout(callback);
     };
-    // Intercepts all XHRs and reload the main browser window on redirect or request error (such as CORS denying access)
-    // This is because, if you run MozDef behind an access-proxy, the requests maybe 302'd to an authentication
-    // provider, but Meteor does not know or handle this. Reloading the main browser window will send the user to the
-    // authentication provider correctly and follow the 302.
-    // Note that since they're 302's they will ALWAYS cause a CORS error, which we keep as this is the SAFE way to
-    // handle this situation.
-    (function(xhr) {
-        var authenticationType = mozdef.authenticationType.toLowerCase();
-        function intercept_xhr(xhrInstance) {
-            // Verify a user is actually logged in and Meteor is running
-            if ((Meteor.user() !== null) && (Meteor.status().connected)) {
-                // Status 0 means the request failed (CORS denies access)
-                if (xhrInstance.readyState == 4 && (xhrInstance.status == 302 || xhrInstance.status == 0)) {
-                        location.reload();
-                }
-            }
-        }
-        var send = xhr.send;
-        xhr.send = function(data) {
-            var origFunc = this.onreadystatechange;
-            if (origFunc) {
-                this.onreadystatechange = function() {
-                    // We only start hooking for oidc authentication, as this is the only method that is currently
-                    // REQUIRING an access proxy and thus likely to run into 302s
-                    if (authenticationType == 'oidc'){
-                        intercept_xhr(this);
-                    }
-                    return origFunc.apply(this, arguments);
-                };
-            }
-            return send.apply(this, arguments);
-        };
-    })(XMLHttpRequest.prototype);
+
 };

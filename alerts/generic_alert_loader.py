@@ -8,7 +8,7 @@
 # TODO: Dont use query_models, nicer fixes for AlertTask
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch
 import hjson
 import logging
 import sys
@@ -154,6 +154,6 @@ class AlertGenericLoader(AlertTask):
         )
 
         if hostnames:
-            summary += ' [{}]'.format(', '.join(hostnames))
+            summary += ' [{}]'.format(', '.join(set(hostnames)))
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity, url)

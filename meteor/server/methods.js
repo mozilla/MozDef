@@ -5,6 +5,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor';
+import { _ } from 'meteor/underscore';
+
 
 if (Meteor.isServer) {
 
@@ -19,7 +21,8 @@ if (Meteor.isServer) {
         'ipintel': ipintel,
         'verisstats': verisstats,
         'logincounts': logincounts,
-        'getplugins': getplugins
+        'getplugins': getplugins,
+        'getserversetting': getserversetting
     });
 
     function saySomething() {
@@ -133,8 +136,8 @@ if (Meteor.isServer) {
     }
 
     function logincounts(){
-        //console.log('Calling ' + mozdef.rootAPI + '/ldapLogins/');
-        var logincountsResponse = HTTP.get(mozdef.rootAPI + '/ldapLogins/');
+        //console.log('Calling ' + mozdef.rootAPI + '/logincounts/');
+        var logincountsResponse = HTTP.get(mozdef.rootAPI + '/logincounts/');
 
         if ( typeof logincountsResponse == 'undefined') {
             console.log("logincountsResponse: no response from server")
@@ -154,6 +157,14 @@ if (Meteor.isServer) {
             var response = HTTP.get(mozdef.rootAPI + '/plugins/' + endpoint);
         }
         return response
+    }
+
+    function getserversetting(settingKey){
+        if ( _.has(mozdef,settingKey) ){
+            return mozdef[settingKey];
+        }else{
+            return '';
+        }
     }
 
 };

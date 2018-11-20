@@ -8,8 +8,7 @@
 import netaddr
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
-from utilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 
 def isIPv4(ip):
@@ -25,6 +24,7 @@ def addError(message, error):
         message['errors'] = list()
     if isinstance(message['errors'], list):
         message['errors'].append(error)
+
 
 class message(object):
     def __init__(self):
@@ -45,24 +45,20 @@ class message(object):
         # Making sufficiently sure this is a fluentd-forwarded message from
         # fluentd SQS plugin, so that we don't spend too much time on other
         # message types
-        if ((not 'az' in message.keys())
-                and (not 'instance_id' in message.keys())
-                and (not '__tag' in message.keys())):
+        if 'az' not in message and 'instance_id' not in message and '__tag' not in message:
             return (message, metadata)
 
-        if not 'details' in message.keys():
+        if 'details' not in message:
             message['details'] = dict()
 
-        if (not 'summary' in message.keys()) and ('message' in message.keys()):
+        if 'summary' not in message and 'message' in message:
             message['summary'] = message['message']
 
-        if ((not 'utctimestamp' in message.keys())
-                and ('time' in message.keys())):
+        if 'utctimestamp' not in message and 'time' in message:
             message['utctimestamp'] = toUTC(message['time']).isoformat()
 
         # Bro format of {u'Timestamp': 1.482437837e+18}
-        if ((not 'utctimestamp' in message.keys())
-                and ('Timestamp' in message.keys())):
+        if 'utctimestamp' not in message and 'Timestamp' in message:
             message['utctimestamp'] = toUTC(message['Timestamp']).isoformat()
 
         # host is used to store dns-style-ip entries in AWS, for ex
@@ -70,7 +66,7 @@ class message(object):
         # that this is always trusted. It's better than nothing though. At the
         # time of writing, there is  no ipv6 support AWS-side for this kind of
         # field. It may be overridden later by a better field, if any exists
-        if 'host' in message.keys():
+        if 'host' in message:
             tmp = message['host']
             if tmp.startswith('ip-'):
                 ipText = tmp.split('ip-')[1].replace('-', '.')
@@ -87,7 +83,7 @@ class message(object):
                                  'fluentSqsFixUp.py',
                                  'destinationipaddress is invalid',
                                  ipText))
-            if not 'hostname' in message.keys():
+            if 'hostname' not in message:
                 message['hostname'] = tmp
 
         # All messages with __tag 'ec2.forward*' are actually syslog forwarded
@@ -101,16 +97,14 @@ class message(object):
         if 'ident' in message.keys():
             tmp = message['ident']
             message['details']['program'] = tmp
-            if ((not 'processname' in message.keys())
-                    and ('program' in message['details'].keys())):
+            if 'processname' not in message and 'program' in message['details']:
                 message['processname'] = message['details']['program']
-            if ((not 'processid' in message.keys())
-                    and ('pid' in message.keys())):
+            if 'processid' not in message and 'pid' in message:
                 message['processid'] = message['pid']
             else:
                 message['processid'] = 0
             # Unknown really, but this field is mandatory.
-            if not 'severity' in message.keys():
+            if 'severity' not in message:
                 message['severity'] = 'INFO'
 
         # We already have the time of event stored in 'timestamp' so we don't

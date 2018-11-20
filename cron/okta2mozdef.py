@@ -19,9 +19,8 @@ import netaddr
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.toUTC import toUTC
-from elasticsearch_client import ElasticsearchClient
+from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -40,26 +39,26 @@ class State:
         try:
             with open(self.filename, 'r') as f:
                 self.data = json.load(f)
-            iterator = iter(self.data)
         except IOError:
             self.data = {}
         except ValueError:
-            logger.error("%s state file found but isn't a recognized json format" %
-                    self.filename)
+            logger.error("%s state file found but isn't a recognized json format" % self.filename)
             raise
         except TypeError:
-            logger.error("%s state file found and parsed but it doesn't contain an iterable object" %
-                    self.filename)
+            logger.error("%s state file found and parsed but it doesn't contain an iterable object" % self.filename)
             raise
 
     def write_state_file(self):
         '''Write the self.data value into the state file'''
         with open(self.filename, 'w') as f:
-            json.dump(self.data,
-                    f,
-                    sort_keys=True,
-                    indent=4,
-                    separators=(',', ': '))
+            json.dump(
+                self.data,
+                f,
+                sort_keys=True,
+                indent=4,
+                separators=(',', ': ')
+            )
+
 
 def main():
     if options.output=='syslog':

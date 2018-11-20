@@ -6,7 +6,7 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch
 import re
 
 # This alert consumes data produced by the MIG sshkey module and mig-runner.
@@ -19,6 +19,7 @@ import re
 # If a host matches the regex, and the detected key matches the path, the
 # alert will not generate an alert event. If the detected key is not in
 # the whitelist, an alert will be created.
+
 
 class SSHKey(AlertTask):
     def __init__(self):
@@ -65,7 +66,7 @@ class SSHKey(AlertTask):
                 rem = re.compile(went['hostre'])
             except:
                 continue
-            if rem.match(hostname) == None:
+            if rem.match(hostname) is None:
                 continue
             if privkey['path'] == went['path']:
                 return False
@@ -93,6 +94,6 @@ class SSHKey(AlertTask):
         summary = 'Private keys detected on {} missing from whitelist'.format(hostname)
         ret = self.createAlertDict(summary, category, tags, [event], severity)
         ret['details'] = {
-                'private': alertkeys
-                }
+            'private': alertkeys
+        }
         return ret

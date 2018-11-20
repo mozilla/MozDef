@@ -6,7 +6,7 @@
 # Copyright (c) 2015 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 import re
 from configlib import getConfig, OptionParser
 

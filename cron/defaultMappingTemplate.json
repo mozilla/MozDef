@@ -112,7 +112,22 @@
                 "type" : "long"
               },
               "apiversion" : {
-                "type" : "keyword"
+                "properties" : {
+                  "raw_value": {
+                    "type" : "keyword"
+                  }
+                }
+              },
+              "requestparameters" : {
+                "properties" : {
+                  "logStreamName": {
+                    "properties": {
+                      "raw_value": {
+                        "type" : "keyword"
+                      }
+                    }
+                  }
+                }
               }
             }
           },

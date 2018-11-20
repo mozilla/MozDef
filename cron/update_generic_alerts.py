@@ -11,8 +11,7 @@ import sys
 import os
 from configlib import getConfig, OptionParser
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../lib'))
-from utilities.logger import logger, initLogger
+from mozdef_util.utilities.logger import logger, initLogger
 
 
 def download_generic_alerts(repo_url, save_location, deploy_key):

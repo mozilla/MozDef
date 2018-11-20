@@ -2,7 +2,7 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV ES_VERSION 5.6.7
+ENV ES_VERSION 5.6.8
 ENV ES_JAVA_VERSION 1.8.0
 
 RUN \
@@ -18,8 +18,8 @@ RUN \
   chown -R mozdef:mozdef /var/lib/elasticsearch && \
   yum clean all
 
-COPY docker/conf/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
-COPY docker/conf/jvm.options /opt/mozdef/envs/elasticsearch/config/
+COPY docker/compose/elasticsearch/files/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
+COPY docker/compose/elasticsearch/files/jvm.options /opt/mozdef/envs/elasticsearch/config/
 
 WORKDIR /opt/mozdef/envs/elasticsearch
 

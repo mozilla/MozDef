@@ -8,16 +8,19 @@ Copyright (c) 2014 Mozilla Corporation
 <template name="veristags">
 <style>
 .veristagform{
-    float:right;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 10px;
     font-size: 95%;
     background: #999;
     color: #fff;
 }
+
+.veristagform .dropdown {
+    margin: 10px 0;
+}
 .tag{
     cursor: pointer;
     text-align: left;
+    word-wrap: break-word;
 }
 li {
     cursor: pointer;
@@ -29,8 +32,8 @@ li {
 
 </style>
 
-<form class="veristagform form-horizontal" role="form">
-    <div class="form-group">
+<form class="veristagform" role="form">
+    <div>
             <div class="nothing">
                 <input type="search" class="form-control search-query tagfilter" id="tagfilter" placeholder="tag filter">
             </div>
