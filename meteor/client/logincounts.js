@@ -9,7 +9,9 @@ import d3 from 'd3';
 if (Meteor.isClient) {
     var logincountsResult = new Object;
 
-    //d3 code to animate login counts
+    // d3 code to animate login counts
+    // grouping by ratio of success
+    // to failures
     Template.logincounts.rendered = function () {
         container=document.getElementById('logins-wrapper')
         container.style.cursor='wait'
@@ -43,7 +45,6 @@ if (Meteor.isClient) {
         var node = svg.selectAll(".node"),
             link = svg.selectAll(".link");
 
-        //.domain([0, d3.max(force.nodes(), function(d) { return d.count; })])
         var r = d3.scale.sqrt()
             .range([0, maxRadius]);
 
@@ -60,7 +61,7 @@ if (Meteor.isClient) {
                     container.style.cursor='auto';
                     r.domain([0, d3.max(jsondata, function(d) { return d.success+ d.failures; })])
                     jsondata.forEach(function(d){
-                        d.id=d.dn;
+                        d.id=d.username;
                         d.count=(d.success +d.failures)
                         d.k = fraction(d.success, d.failures);
                         d.r = r(d.count);
@@ -72,6 +73,7 @@ if (Meteor.isClient) {
                     //debugLog(err,result);
                     logincountsResult.status='error';
                     logincountsResult.error=err;
+                    container.style.cursor='auto';
                }
            });
 
@@ -84,7 +86,6 @@ if (Meteor.isClient) {
                 .append("a")
                 .attr("class", function(d) { return "node " + d.id; })
                 .attr("class", "node")
-                //.attr("r", function(d) {return Math.min(Math.max(d.failures,d.success)/20,20)})
                 .call(force.drag);
 
             // delineate between success/failures:
@@ -92,7 +93,7 @@ if (Meteor.isClient) {
                 .attr("class", "g-success");
 
             successEnter.append("clipPath")
-                .attr("id", function(d) { return "g-clip-success-" + d.dn; })
+                .attr("id", function(d) { return "g-clip-success-" + d.username; })
                 .append("rect");
 
             successEnter.append("circle")
@@ -103,7 +104,7 @@ if (Meteor.isClient) {
                 .attr("class", "g-failures");
 
             failureEnter.append("clipPath")
-                .attr("id", function(d) { return "g-clip-failure-" + d.dn; })
+                .attr("id", function(d) { return "g-clip-failure-" + d.username; })
                 .append("rect");
 
             failureEnter.append("circle")
@@ -112,7 +113,6 @@ if (Meteor.isClient) {
 
             node.append("line")
                 .attr("class", "g-split")
-                //.data(force.nodes())
                 .attr("x1", function(d) { return -d.cr + 2 * d.r * d.k; })
                 .attr("y1", function(d) {
                     return -Math.sqrt(d.cr * d.cr - Math.pow(-d.cr + 2 * d.cr * d.k, 2));
@@ -126,13 +126,13 @@ if (Meteor.isClient) {
                 .attr("x", 1)
                 .attr("y", ".3em")
                 .attr("class","textlabel")
-                .text(function(d) { return d.dn; });
+                .text(function(d) { return d.username; });
 
-            //make a mouse over for the success/failure counts
+            // make a mouse over for the success/failure counts
             node.append("title")
-              .text(function(d) { return d.dn + ": " + d.success + " / " + d.failures });
+              .text(function(d) { return d.username + ": " + d.success + " / " + d.failures });
 
-            //size circle clips
+            // size circle clips
             node.selectAll("rect")
               .attr("y", function(d) { return -d.r - clipPadding; })
               .attr("height", function(d) { return 2 * d.r + 2 * clipPadding; });
@@ -143,7 +143,7 @@ if (Meteor.isClient) {
               .attr("width", function(d) { return 2 * d.r * d.k + clipPadding; });
 
               node.select(".g-success circle")
-                .attr("clip-path", function(d) { return d.k < 1 ? "url(#g-clip-success-" + d.dn + ")" : null; });
+                .attr("clip-path", function(d) { return d.k < 1 ? "url(#g-clip-success-" + d.username + ")" : null; });
 
               node.select(".g-failures rect")
                 .style("display", function(d) { return d.k < 1 ? null : "none" })
@@ -151,7 +151,7 @@ if (Meteor.isClient) {
                 .attr("width", function(d) { return 2 * d.cr; });
 
               node.select(".g-failures circle")
-                .attr("clip-path", function(d) { return d.k > 0 ? "url(#g-clip-failure-" + d.dn + ")" : null; });
+                .attr("clip-path", function(d) { return d.k > 0 ? "url(#g-clip-failure-" + d.username + ")" : null; });
 
             node.exit().remove();
             force.start();
@@ -160,7 +160,8 @@ if (Meteor.isClient) {
         function tick(e) {
             var k = .1 * e.alpha;
 
-            // Push nodes toward their designated focus.
+            // Push nodes toward their designated focus
+            // based on ratio of success to failure
             nodes.forEach(function(o, i) {
               if (o.success > o.failures ){
                   o.y += (foci[0].y - o.y) * k;
