@@ -33,9 +33,9 @@ class TestNSMScanAddress(AlertTestSuite):
     default_alert = {
         "category": "nsm",
         "severity": "NOTICE",
-        "summary": "Address scan from 10.99.88.77",
         "tags": ['nsm', 'bro', 'addressscan'],
-        "notify_mozdefbot": False,
+        "summary": "Address scan from 10.99.88.77 (mock.mozilla.org)",
+        'notify_mozdefbot': False
     }
 
     test_cases = []
