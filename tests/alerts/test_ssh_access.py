@@ -4,9 +4,9 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestAlertSSHFromNagios(AlertTestSuite):
-    alert_classname = "AlertSSHFromNagios"
-    alert_filename = "ssh_access_fromnagios"
+class TestAlertSSHAccess(AlertTestSuite):
+    alert_classname = "AlertSSHAccess"
+    alert_filename = "ssh_access"
 
     # This event is the default positive event that will cause the
     # alert to trigger
@@ -28,7 +28,7 @@ class TestAlertSSHFromNagios(AlertTestSuite):
     default_alert = {
         "category": "access",
         "severity": "CRITICAL",
-        "summary": "Nagios SSH login from 11.22.33.44 on victim1.small.corp.com as user alamakota",
+        "summary": "SSH login from 11.22.33.44 on victim1.small.corp.com as user alamakota",
         "tags": ['ssh'],
         "notify_mozdefbot": True
     }
@@ -47,7 +47,7 @@ class TestAlertSSHFromNagios(AlertTestSuite):
     event = AlertTestSuite.create_event(default_event)
     event['_source']['details']['sourceipaddress'] = "11.22.33.45"
     newip_alert = default_alert.copy()
-    newip_alert['summary'] = "Nagios SSH login from 11.22.33.45 on victim1.small.corp.com as user alamakota"
+    newip_alert['summary'] = "SSH login from 11.22.33.45 on victim1.small.corp.com as user alamakota"
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case from a different server",
@@ -103,32 +103,3 @@ class TestAlertSSHFromNagios(AlertTestSuite):
             events=[event],
         )
     )
-
-    #event = AlertTestSuite.create_event(default_event)
-    #event['_source']['summary'] = 'bad summary'
-    #test_cases.append(
-    #    NegativeAlertTestCase(
-    #        description="Negative test case with bad summary",
-    #        events=[event],
-    #    )
-    #)
-#
-    #event = AlertTestSuite.create_event(default_event)
-    #event['_source']['summary'] = 'Accepted publickey for someuser from 4.5.6.7 port 39190 ssh2'
-    #event['_source']['details']['sourceipaddress'] = '4.5.6.7'
-    #test_cases.append(
-    #    NegativeAlertTestCase(
-    #        description="Negative test case with good event with excluded user and ip",
-    #        events=[event],
-    #    )
-    #)
-#
-    #event = AlertTestSuite.create_event(default_event)
-    #event['_source']['summary'] = 'Accepted publickey for anotheruser from 8.9.10.11 port 39190 ssh2'
-    #event['_source']['details']['sourceipaddress'] = '8.9.10.11'
-    #test_cases.append(
-    #    NegativeAlertTestCase(
-    #        description="Negative test case with good event with excluded user and ip from second index",
-    #        events=[event],
-    #    )
-    #)

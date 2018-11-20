@@ -9,11 +9,11 @@ from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, TermsMatch, PhraseMatch
 
 
-class AlertSSHFromNagios(AlertTask):
+class AlertSSHAccess(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=15)
 
-        self.config = self.parse_json_alert_config('ssh_access_fromnagios.json')
+        self.config = self.parse_json_alert_config('ssh_access.json')
 
         search_query.add_must([
             TermMatch('category', 'syslog'),
@@ -50,5 +50,5 @@ class AlertSSHFromNagios(AlertTask):
             else:
                 username = "UNKNOWN"
 
-        summary = 'Nagios SSH login from {0} on {1} as user {2}'.format(sourceipaddress, hostname, username)
+        summary = 'SSH login from {0} on {1} as user {2}'.format(sourceipaddress, hostname, username)
         return self.createAlertDict(summary, category, tags, [event], severity)
