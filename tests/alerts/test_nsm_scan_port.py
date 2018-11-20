@@ -114,6 +114,18 @@ class TestNSMScanPort(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
+        event['_source']['details']['sourceipaddress'] = '1.2.3.4'
+        event['_source']['details']['indicators'] = '1.2.3.4'
+        event['_source']['details']['msg'] = '2620:101:80f8:224:44af:81c2:372c:6cbf scanned at least 15 unique ports on hosts 2001:41d0:e:9d4::1, 192.168.1.1, 2400:6180:0:d0::4a6b:4001, 2a03:b0c0:1:e0::13a:2001, 2001:0:3e8a:ee2d:5c:3162:3f57:fd8d in 0m11s'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with an excluded destination",
+            events=events,
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 5)
+    for event in events:
         event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
         event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
     test_cases.append(

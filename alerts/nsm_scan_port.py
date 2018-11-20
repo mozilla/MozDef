@@ -25,6 +25,9 @@ class NSMScanPort(AlertTask):
         search_query.add_must_not([
             QueryStringMatch('details.sourceipaddress: {}'.format(self._config['sourcemustnotmatch']))
         ])
+        search_query.add_must_not([
+            QueryStringMatch('details.msg: {}'.format(self._config['destinationmustnotmatch']))
+        ])
 
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
