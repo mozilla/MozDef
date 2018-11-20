@@ -7,89 +7,141 @@ Copyright (c) 2014 Mozilla Corporation
 
 
 <template name="menu">
-    <div class="area"></div>
+  <div class="area"></div>
+  <div class="container itemcontainer">
     <nav class="main-menu">
+    {{#if haveFeatures }}
       <ul>
-        <li>
-          <a href="https://mozilla.org">
-            <span class="moz">
+      <li>
+        <a href="https://mozilla.org">
+          <span class="moz">
             <img src="/images/moz-logo.png" width="30" height="30">
-            </span>
-            <span class="nav-text">
-              Mozilla
-            </span>
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href={{mozdef.kibanaURL}}>
-            <i class="fa fa-home fa-2x"></i>
-            <span class="nav-text">
-              Kibana
-            </span>
-          </a>
-          <ul>
-            <li class="has-subnav">
-                {{#each kibanadashboards as item}}
-                    {{>kibanaDashboardItem}}
-                {{/each}}
+          </span>
+          <span class="nav-text">
+            Mozilla
+          </span>
+        </a>
+      </li>
+      {{#if isFeature "kibana"}}
+      <li>
+        <a target="_blank" href={{mozdef.kibanaURL}}>
+          <i class="fa fa-home fa-2x"></i>
+          <span class="nav-text">
+            Kibana
+          </span>
+        </a>
+        <ul>
+          <li class="has-subnav">
+            {{#each kibanadashboards as item}}
+            {{>kibanaDashboardItem}}
+            {{/each}}
+          </li>
+        </ul>
+      </li>
+      {{/if}}
+      {{#if isFeature "alerts"}}
+      <li class="has-subnav">
+        <a href="/alerts/">
+          <i class="fa fa-list fa-2x"></i>
+          <span class="nav-text">
+            Alerts
+          </span>
+        </a>
+        <ul>
+          <li class="has-subnav">
+            {{#if isFeature "ipblocklist"}}
+            <li>
+              <a href="/ipblocklist">ip blocklist</a>
             </li>
-          </ul>
-        </li>
-        <li class="has-subnav">
-          <a href="/alerts/">
-            <i class="fa fa-list fa-2x"></i>
-            <span class="nav-text">
-              Alerts
-            </span>
-          </a>
-        </li>
-        <li class="has-subnav">
-          <a href="/investigations">
-            <i class="fa fa-crosshairs fa-2x"></i>
-            <span class="nav-text">
-              Investigations
-            </span>
-          </a>
-        </li>
-        <li class="has-subnav">
-          <a href="/incidents">
-            <i class="fa fa-exclamation-circle fa-2x"></i>
-            <span class="nav-text">
-              Incidents
-            </span>
-          </a>
-        </li>
-        <li class="has-subnav">
-          <a href="#">
-            <i class="fa fa-eye fa-2x"></i>
-            <span class="nav-text">
-              Visualizations
-            </span>
-          </a>
-          <div class="sub-nav-content">
-            <ul>
-                <li class="first"><a href="/logincounts/">logincounts</a></li>
-                <li><a href="/attackers">attackers</a></li>
-                <li class="last"><a href="/globe">globe</a></li>
-            </ul>
-          </div>
-        </li>
-        <li>
-          <a href="https://mozdef.readthedocs.io/en/latest/"  target="_blank">
-            <i class="fa fa-info fa-2x"></i>
-            <span class="nav-text">
-              Documentation
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="/about">
-            <i class="fa fa-font fa-2x"></i>
-            <span class="nav-text">
-              About
-            </span>
-          </a>
-        </li>
+            {{/if}}
+            {{#if isFeature "fqdnblocklist"}}
+            <li>
+              <a href="/fqdnblocklist">fqdn blocklist</a>
+            </li>
+            {{/if}}
+          </li>
+        </ul>
+      </li>
+      {{/if}}
+      {{#if isFeature "investigations"}}
+      <li class="has-subnav">
+        <a href="/investigations">
+          <i class="fa fa-crosshairs fa-2x"></i>
+          <span class="nav-text">
+            Investigations
+          </span>
+        </a>
+      </li>
+      {{/if}}
+      {{#if isFeature "incidents"}}
+      <li class="has-subnav">
+        <a href="/incidents">
+          <i class="fa fa-exclamation-circle fa-2x"></i>
+          <span class="nav-text">
+            Incidents
+          </span>
+        </a>
+        <ul>
+          <li class="has-subnav">
+            <li>
+              <a href="/incident/new/">new incident</a>
+            </li>
+            <li>
+              <a href="/incidents/veris/">veris stats</a>
+            </li>
+          </li>
+        </ul>
+      </li>
+      {{/if}}
+      {{#if isFeature "visualizations"}}
+      <li class="has-subnav">
+        <a href="#">
+          <i class="fa fa-eye fa-2x"></i>
+          <span class="nav-text">
+            Visualizations
+          </span>
+        </a>
+        <ul>
+          <li class="has-subnav">
+            {{#if isFeature "logincounts"}}
+            <li>
+              <a href="/logincounts/">logincounts</a>
+            </li>
+            {{/if}}
+            {{#if isFeature "attackers"}}
+            <li>
+              <a href="/attackers">attackers</a>
+            </li>
+            {{/if}}
+            {{#if isFeature "globe"}}
+            <li>
+              <a href="/globe">globe</a>
+            </li>
+            {{/if}}
+          </li>
+        </ul>
+      </li>
+      {{/if}}
+      {{#if isFeature "Documentation"}}
+      <li>
+        <a href="https://mozdef.readthedocs.io/en/latest/" target="_blank">
+          <i class="fa fa-info fa-2x"></i>
+          <span class="nav-text">
+            Documentation
+          </span>
+        </a>
+      </li>
+      {{/if}}
+      {{#if isFeature "about"}}
+      <li>
+        <a href="/about">
+          <i class="fa fa-font fa-2x"></i>
+          <span class="nav-text">
+            About
+          </span>
+        </a>
+      </li>
+      {{/if}}
       </ul>
       <ul class="logout">
         <li>
@@ -99,20 +151,22 @@ Copyright (c) 2014 Mozilla Corporation
               <span class="login">
                 <label>
                   {{#if loggingIn}}
-                          loading
+                  loading
                   {{/if}}
                   {{> loginButtons align="left"}}
-              </label>
+                </label>
               </span>
             </span>
           </a>
         </li>
       </ul>
+      {{/if}}
     </nav>
-  </template>
-  
-  <template name="kibanaDashboardItem">
-    <li>
-        <a target=" _blank" href="{{url}}">{{name}}</a>
-    </li>
-  </template>
+  </div>
+</template>
+
+<template name="kibanaDashboardItem">
+  <li>
+    <a target="_blank" href="{{url}}">{{name}}</a>
+  </li>
+</template>
