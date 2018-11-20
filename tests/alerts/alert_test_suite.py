@@ -7,12 +7,14 @@
 
 import os.path
 import sys
+import logging
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from unit_test_suite import UnitTestSuite
 
 from freezegun import freeze_time
+import mock
 
 import copy
 import re
@@ -20,6 +22,13 @@ import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
 from lib import alerttask
+
+
+def mock_add_hostname_to_ip(ip):
+    if ip == '10.2.3.4':
+        return ['mock_hostname1.mozilla.org', ip]
+    else:
+        return ['mock.mozilla.org', ip]
 
 
 class AlertTestSuite(UnitTestSuite):
@@ -69,6 +78,10 @@ class AlertTestSuite(UnitTestSuite):
         # Meaning, this will throw if no events are found
         if not hasattr(self, 'deadman'):
             self.deadman = False
+
+        # Log to stdout so pytest will report any
+        # stack traces on any test failures
+        logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
     # Some housekeeping stuff here to make sure the data we get is 'good'
     def verify_starting_values(self, test_case):
@@ -142,7 +155,8 @@ class AlertTestSuite(UnitTestSuite):
 
         self.flush('events')
 
-        alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
+        with mock.patch("socket.gethostbyaddr", side_effect=mock_add_hostname_to_ip):
+            alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
         self.verify_alert_task(alert_task, test_case)
 
     def verify_rabbitmq_alert(self, found_alert, test_case):

@@ -34,12 +34,13 @@ run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy
 restart-cloudy-mozdef:
 	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart
 
-.PHONY: tests run-tests
+.PHONY: tests run-tests-resources run-tests
 test: build-tests run-tests
 tests: build-tests run-tests  ## Run all tests (getting/building images as needed)
-run-test:
-run-tests:  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
+run-tests-resources:  ## Just run the external resources required for tests
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) up -d
+run-test:
+run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 
