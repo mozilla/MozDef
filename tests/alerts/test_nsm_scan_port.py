@@ -33,7 +33,7 @@ class TestNSMScanPort(AlertTestSuite):
     default_alert = {
         "category": "nsm",
         "severity": "WARNING",
-        "summary": "Port scan from 10.99.88.77",
+        "summary": "Port scan from 10.99.88.77 (mock.mozilla.org)",
         "tags": ['nsm', 'bro', 'portscan'],
         "notify_mozdefbot": True,
     }

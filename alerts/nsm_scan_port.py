@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2018 Mozilla Corporation
 
-from lib.alerttask import AlertTask
+from lib.alerttask import AlertTask, add_hostname_to_ip
 from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch, ExistsMatch
 
 
@@ -40,7 +40,8 @@ class NSMScanPort(AlertTask):
         if 'details' in x:
             if 'indicators' in x['details']:
                 indicators = x['details']['sourceipaddress']
+                indicators_info = add_hostname_to_ip(indicators, '{0} ({1})', require_internal=False)
 
-        summary = 'Port scan from {}'.format(indicators)
+        summary = 'Port scan from {}'.format(indicators_info)
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
