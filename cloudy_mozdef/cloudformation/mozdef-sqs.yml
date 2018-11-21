@@ -9,6 +9,19 @@ Resources:
         Value: mozdef
       - Key: stack
         Value: !Ref AWS::StackName
+  MozDefCloudTrailSQSQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: AllowThisAccountSendToSQS
+          Effect: Allow
+          Principal: '*'
+          Action: sqs:SendMessage
+          Resource: !GetAtt MozDefCloudTrailSQSQueue.Arn
+      Queues:
+        - !Ref MozDefCloudTrailSQSQueue
 Outputs:
   SQSQueueArn:
     Description: ARN of the SQS Queue that MozDef will consume events from

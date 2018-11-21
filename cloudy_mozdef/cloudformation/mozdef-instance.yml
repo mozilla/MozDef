@@ -152,7 +152,7 @@ Resources:
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
             - content: |
                 OPTIONS_TASKEXCHANGE=${MozDefSQSQueName}
-              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
+              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
           runcmd:
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
