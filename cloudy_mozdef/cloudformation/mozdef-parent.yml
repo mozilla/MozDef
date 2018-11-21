@@ -98,6 +98,7 @@ Resources:
         OIDCClientSecret: !Ref OIDCClientSecret
         OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
+        MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
       Tags:
         - Key: application
           Value: mozdef
@@ -142,7 +143,7 @@ Resources:
         Value: mozdef
       - Key: stack
         Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-sqs.yml ] ]
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-sqs.yml ]
   MozDefCloudTrail:
     Type: AWS::CloudFormation::Stack
     Properties:

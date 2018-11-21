@@ -186,6 +186,23 @@ services:
       - default
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data/
+  mq_sqs:
+    image: mozdef/mozdef_mq_worker
+    env_file:
+      - cloudy_mozdef.env
+      - cloudy_mozdef_mq_sqs.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_sqs.py -c esworker_sqs.conf'
+    scale: 1
+    depends_on:
+      - base
+      - rabbitmq
+      - loginput
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
 volumes:
   cron:
   geolite_db:
