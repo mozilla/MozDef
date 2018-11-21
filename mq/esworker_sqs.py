@@ -367,6 +367,7 @@ def main():
     # consume our queue
     taskConsumer(sqs_conn, eventTaskQueue, es).run()
 
+
 def initConfig():
     # capture the hostname
     options.mozdefhostname = getConfig('mozdefhostname', socket.gethostname(), options.configfile)
