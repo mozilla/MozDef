@@ -19,9 +19,9 @@ Resources:
           Effect: Allow
           Principal: '*'
           Action: sqs:SendMessage
-          Resource: !GetAtt MozDefCloudTrailSQSQueue.Arn
+          Resource: !GetAtt MozDefSQSQueue.Arn
       Queues:
-        - !Ref MozDefCloudTrailSQSQueue
+        - !Ref MozDefSQSQueue
 Outputs:
   SQSQueueArn:
     Description: ARN of the SQS Queue that MozDef will consume events from

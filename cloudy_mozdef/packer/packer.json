@@ -30,7 +30,7 @@
         "sudo systemctl enable docker",
         "sudo mkdir -p /opt/mozdef/",
         "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
-        "cd /opt/mozdef && sudo git checkout origin/master"
-    ]}
+        "cd /opt/mozdef && sudo git checkout guardduty"
+      ]}
  ]
 }

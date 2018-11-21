@@ -38,7 +38,7 @@ Parameters:
   AMIImageId:
     Type: String
     Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-0ff5b922fb3ae2332
+    Default: ami-0c3705bb3b43ad51f
   ACMCertArn:
     Description: The ARN of your pre-issued ACM cert.
     Default : arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583
@@ -143,7 +143,7 @@ Resources:
         Value: mozdef
       - Key: stack
         Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-sqs.yml ]
+      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-sqs.yml ] ]
   MozDefCloudTrail:
     Type: AWS::CloudFormation::Stack
     Properties:

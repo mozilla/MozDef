@@ -24,7 +24,6 @@ Parameters:
   AMIImageId:
     Type: AWS::EC2::Image::Id
     Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-0ff5b922fb3ae2332
   EFSID:
     Type: String
     Description: Logical ID of the EFS Filesystem
@@ -151,7 +150,7 @@ Resources:
                 OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
             - content: |
-                OPTIONS_TASKEXCHANGE=${MozDefSQSQueName}
+                OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
           runcmd:
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
