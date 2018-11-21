@@ -24,7 +24,6 @@ Parameters:
   AMIImageId:
     Type: AWS::EC2::Image::Id
     Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-0ff5b922fb3ae2332
   EFSID:
     Type: String
     Description: Logical ID of the EFS Filesystem
@@ -68,7 +67,10 @@ Parameters:
     Description: The URL of your OIDC provider's well-known discovery URL
   CloudTrailSQSNotificationQueueName:
     Type: String
-    Description: The URL of your OIDC provider's well-known discovery URL
+    Description: The name of the SQS used for CloudTrail notifications.
+  MozDefSQSQueueName:
+    Type: String
+    Description: The name of the generic SQS queue used to pickup events.
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -147,9 +149,13 @@ Resources:
             - content: |
                 OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
+            - content: |
+                OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
+              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
           runcmd:
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
             - mkdir --verbose --parents ${EFSMountPoint}
             - echo '*.* @@127.0.0.1:514' >> /etc/rsyslog.conf
             - systemctl enable rsyslog
