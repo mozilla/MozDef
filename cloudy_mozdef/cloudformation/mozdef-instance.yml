@@ -152,7 +152,7 @@ Resources:
                 ALERTS = {
                     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
                     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
-                    'guard_duty_probe.AlertGuardDutyProbe: {'schedule': crontab(minute='*/1')}',
+                    'guard_duty_probe.AlertGuardDutyProbe': {'schedule': crontab(minute='*/1')}',
                     'cloudtrail_logging_disabled.AlertCloudtrailLoggingDisabled': {'schedule': timedelta(minutes=1)},
                     'cloudtrail_deadman.AlertCloudtrailDeadman': {'schedule': timedelta(hours=1)}
                 }
