@@ -29,6 +29,7 @@ class TEMPLATE_TEST_CLASSNAME(AlertTestSuite):
         "tags": ['hello', 'world'],
         "severity": "WARNING",
         "summary": 'My first alert!',
+        "notify_mozdefbot": False,
     }
 
     test_cases = []
