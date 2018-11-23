@@ -71,6 +71,9 @@ Parameters:
   MozDefSQSQueueName:
     Type: String
     Description: The name of the generic SQS queue used to pickup events.
+  DomainName:
+    Type: String
+    Description: The fully qualified domain you'll be hosting MozDef at.
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -119,7 +122,8 @@ Resources:
             - content: |
                 OPTIONS_ESSERVERS=${ESURL}
                 OPTIONS_KIBANAURL=${KibanaURL}
-                OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
+                OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/ # not a typo needed for meteor
+                OPTIONS_METEOR_ROOTURL=https://${DomainName}
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
@@ -136,8 +140,10 @@ Resources:
                 cookiename=sesmeteor
                 # Increase the AWS ES total fields limit from 1000 to 4000
                 OPTIONS_MAPPING_TOTAL_FIELDS_LIMIT=4000
+                # Set thresholds for attack dataviz lower means more ogres
+                OPTIONS_IPV4ATTACKERHITCOUNT=5
+                OPTIONS_IPV4ATTACKERPREFIXLENGTH=24
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
-          write_files:
             - content: |
                 #!/usr/bin/env python
                 # This Source Code Form is subject to the terms of the Mozilla Public
@@ -152,7 +158,7 @@ Resources:
                 ALERTS = {
                     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
                     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
-                    'guard_duty_probe.AlertGuardDutyProbe': {'schedule': crontab(minute='*/1')}',
+                    'guard_duty_probe.AlertGuardDutyProbe': {'schedule': crontab(minute='*/1')},
                     'cloudtrail_logging_disabled.AlertCloudtrailLoggingDisabled': {'schedule': timedelta(minutes=1)},
                     'cloudtrail_deadman.AlertCloudtrailDeadman': {'schedule': timedelta(hours=1)}
                 }
@@ -171,7 +177,7 @@ Resources:
                 }
 
                 ES = {
-                    'servers': [${ESURL}]
+                    'servers': ["${ESURL}"]
                 }
 
                 OPTIONS = {
