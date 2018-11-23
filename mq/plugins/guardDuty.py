@@ -31,7 +31,7 @@ class message(object):
         # AWS guard duty can send IPs in a bunch of places
         # Lets pick out some likely targets and format them
         # so other mozdef plugins can rely on their location
-        self.ipaddress_keys =[
+        self.ipaddress_keys = [
             'details.finding.action.networkConnectionAction.remoteIpDetails.ipAddressV4',
             'details.finding.action.awsApiCallAction.remoteIpDetails.ipAdrressV4'
         ]
@@ -43,7 +43,8 @@ class message(object):
         current_pointer = haystack
         for updated_key in num_levels:
             if updated_key == num_levels[-1]:
-                current_pointer[updated_key] = toUTC(current_pointer[updated_key]).isoformat()
+                current_pointer[updated_key] = toUTC(
+                    current_pointer[updated_key]).isoformat()
                 return haystack
             if updated_key in current_pointer:
                 current_pointer = current_pointer[updated_key]
@@ -63,12 +64,25 @@ class message(object):
                 message = self.convert_key_date_format(date_key, message)
 
         # convert the dict to a dot dict for saner deep key/value processing
-        message=DotDict(message)
+        message = DotDict(message)
         # pull out the likely source IP address
         for ipaddress_key in self.ipaddress_keys:
             if 'sourceipaddress' not in message['details'].keys():
-                if key_exists(ipaddress_key,message):
-                    message.details.sourceipaddress = message.get(ipaddress_key)
+                if key_exists(ipaddress_key, message):
+                    message.details.sourceipaddress = message.get(
+                        ipaddress_key)
+
+        # if we still haven't found what we are looking for #U2
+        # sometimes it's in a list
+        if 'sourceipaddress' not in message['details'].keys():
+            if key_exists('details.finding.action.portProbeAction.portProbeDetails', message) \
+                    and isinstance(message.details.finding.action.portProbeAction.portProbeDetails, list):
+
+                # inspect the first list entry and see if it contains an IP
+                portProbeDetails = DotDict(
+                    message.details.finding.action.portProbeAction.portProbeDetails[0])
+                if key_exists('remoteIpDetails.ipAddressV4', portProbeDetails):
+                    message.details.sourceipaddress = portProbeDetails.remoteIpDetails.ipAddressV4
 
         # recovert the message back to a plain dict
         return (dict(message), metadata)
