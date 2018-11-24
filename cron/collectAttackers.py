@@ -487,7 +487,6 @@ def initConfig():
     options.ipv4attackerhitcount = getConfig('ipv4ipv4attackerhitcount', 5, options.configfile)
 
 
-
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option(
