@@ -19,9 +19,11 @@ class TestGuardDutyProbe(AlertTestSuite):
             "source": "guardduty",
             "details": {
                 "sourceipaddress": "1.2.3.4",
-                "finding": {"action":
-                            {"actionType": "PORT_PROBE"}
-                            }
+                "finding": {
+                    "action": {
+                        "actionType": "PORT_PROBE"
+                    }
+                }
             }
         }
     }
