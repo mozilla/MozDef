@@ -39,6 +39,8 @@ Metadata:
         default: EC2 SSH Key Name
       AMIImageId:
         default: EC2 AMI Image ID
+      DomainName:
+        default: FQDN to host MozDef at
       ACMCertArn:
         default: ACM Certificate ARN
       OIDCDiscoveryURL:
@@ -66,7 +68,11 @@ Parameters:
   AMIImageId:
     Type: AWS::EC2::Image::Id
     Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-0c3705bb3b43ad51f
+    Default: ami-073434079b0366251
+  DomainName:
+    Type: String
+    Description: The fully qualified DNS name you will host CloudyMozDef at.
+    Default: cloudymozdef.security.allizom.org
   ACMCertArn:
     Type: String
     Description: "The ARN of your pre-issued ACM cert. (Example: arn:aws:acm:us-west-2:123456789012:certificate/abcdef01-2345-6789-abcd-ef0123456789)"
@@ -132,6 +138,7 @@ Resources:
         OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
         MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
+        DomainName: !Ref DomainName
       Tags:
         - Key: application
           Value: mozdef

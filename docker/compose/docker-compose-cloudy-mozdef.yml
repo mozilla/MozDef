@@ -69,6 +69,8 @@ services:
     image: mozdef/mozdef_alerts
     env_file:
       - cloudy_mozdef.env
+    volumes:
+      - /opt/mozdef/docker/compose/mozdef_alerts/files/config.py:/opt/mozdef/envs/mozdef/alerts/lib/config.py
     restart: always
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
     depends_on:
