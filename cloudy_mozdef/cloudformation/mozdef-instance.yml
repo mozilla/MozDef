@@ -122,7 +122,9 @@ Resources:
             - content: |
                 OPTIONS_ESSERVERS=${ESURL}
                 OPTIONS_KIBANAURL=${KibanaURL}
-                OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/ # not a typo needed for meteor
+                # The OPTIONS_METEOR_KIBANAURL uses the reserved word "relative" which triggers MozDef
+                # to use relative links to Kibana : https://github.com/mozilla/MozDef/pull/956
+                OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
                 OPTIONS_METEOR_ROOTURL=https://${DomainName}
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
                 client_id=${OIDCClientId}
