@@ -13,7 +13,7 @@ ingest cloudtrail, guardduty, and provide security services.
 Feedback
 -----------
 
-MozDef for AWS is new an we'd love your feedback.  Try filing github issues here in the repository or connect with us
+MozDef for AWS is new and we'd love your feedback.  Try filing GitHub issues here in the repository or connect with us
 in the Mozilla Discourse Security Category.
 
 https://discourse.mozilla.org/c/security
