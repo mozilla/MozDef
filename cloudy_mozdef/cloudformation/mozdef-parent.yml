@@ -60,6 +60,8 @@ Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
     Properties:
+      Parameters:
+        VpcId: !Ref VpcId
       Tags:
         - Key: application
           Value: mozdef
