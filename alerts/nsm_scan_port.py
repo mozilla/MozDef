@@ -15,7 +15,7 @@ class NSMScanPort(AlertTask):
         self._config = self.parse_json_alert_config('nsm_scan_port.json')
 
     def main(self):
-        search_query = SearchQuery(minutes=1)
+        search_query = SearchQuery(minutes=2)
         search_query.add_must([
             TermMatch('category', 'bro'),
             TermMatch('details.source', 'notice'),
