@@ -136,13 +136,6 @@ class AlertTestSuite(UnitTestSuite):
     @freeze_time("2017-01-01 01:00:00", tz_offset=0)
     def test_alert_test_case(self, test_case):
         self.verify_starting_values(test_case)
-        if test_case.expected_test_result is True:
-            # if we dont set notify_mozdefbot field, autoset it to True
-            if 'notify_mozdefbot' not in test_case.expected_alert:
-                test_case.expected_alert['notify_mozdefbot'] = True
-            if 'ircchannel' not in test_case.expected_alert:
-                test_case.expected_alert['ircchannel'] = None
-
         temp_events = test_case.events
         for event in temp_events:
             temp_event = self.dict_merge(self.generate_default_event(), self.default_event)
@@ -202,8 +195,14 @@ class AlertTestSuite(UnitTestSuite):
         # Verify there is a utctimestamp field
         assert 'utctimestamp' in found_alert['_source'], 'Alert does not have utctimestamp specified'
 
-        # Verify notify_mozdefbot is set correctly
-        assert found_alert['_source']['notify_mozdefbot'] is test_case.expected_alert['notify_mozdefbot'], 'Alert notify_mozdefbot field is bad'
+        # Verify notify_mozdefbot is set correctly based on severity
+        expected_notify_mozdefbot = True
+        if test_case.expected_alert['severity'] == 'NOTICE' or test_case.expected_alert['severity'] == 'INFO':
+            expected_notify_mozdefbot = False
+        test_case.expected_alert['notify_mozdefbot'] = expected_notify_mozdefbot
+
+        if 'ircchannel' not in test_case.expected_alert:
+            test_case.expected_alert['ircchannel'] = None
 
         # Verify ircchannel is set correctly
         assert found_alert['_source']['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert ircchannel field is bad'

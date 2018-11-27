@@ -62,7 +62,6 @@ class TestAlertFeedbackEvents(AlertTestSuite):
         "category": "user_feedback",
         "tags": ['user_feedback', 'customtag1'],
         "severity": "NOTICE",
-        "notify_mozdefbot": False,
         "summary": "ad|Mozilla|ttesterson escalated alert within single-sign on (SSO) dashboard. Event Date: 2012-06-15 Summary: \"Did you recently login from Montana, Tonga (109.117.1.33)?\"",
     }
 
