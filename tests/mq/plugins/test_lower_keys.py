@@ -56,3 +56,31 @@ class TestLowerKeysPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_uppercase_nested_keys2(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'RequestParameters': {
+                    'Description': 'astringvalue',
+                    'ApplicationSource': {
+                        'someKey:': 'anothervalue',
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'description': 'astringvalue',
+                    'applicationsource': {
+                        'somekey:': 'anothervalue',
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}

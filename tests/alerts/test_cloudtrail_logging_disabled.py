@@ -15,7 +15,7 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
             "eventname": "StopLogging",
             "source": "cloudtrail",
             "requestparameters": {
-                "name": "cloudtrail_example_name"
+                "name": "cloudtrail_example_name",
             }
         }
     }

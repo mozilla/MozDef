@@ -12,8 +12,8 @@ class message(object):
         and sets the keys to lowercase
         '''
 
-        self.registration = ['summary']
-        self.priority = 5
+        self.registration = ['cloudtrail', 'firefoxaccounts', 'vidyo', 'suricata', 'guardduty']
+        self.priority = 4
 
     def onMessage(self, message, metadata):
         def renameKeysToLower(message):

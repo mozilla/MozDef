@@ -198,7 +198,6 @@ class TestSuricataFixup(object):
             "eventsource": "systemslogs",
             "details": {
                 "processid": "21233",
-                "Random": 2,
                 "sourceipv4address": "10.22.74.208",
                 "hostname": "hostname1.subdomain.domain.com",
                 "program": "sshd",
@@ -520,9 +519,9 @@ class TestSuricataFixup(object):
             },
             "vars":{
                 "flowbits":{
-                    "ET.http.javaclient.vulnerable":"true",
-                    "ET.JavaNotJar":"true",
-                    "ET.http.javaclient":"true"
+                    "et.http.javaclient.vulnerable":"true",
+                    "et.javanotjar":"true",
+                    "et.http.javaclient":"true"
                 }
             }
         }
@@ -533,8 +532,8 @@ class TestSuricataFixup(object):
         self.verify_metadata(metadata)
         assert 'vars' in result['details']
         assert 'flowbits' in result['details']['vars']
-        assert result['details']['vars']['flowbits']['ET.http.javaclient.vulnerable'] == "True"
-        assert result['details']['vars']['flowbits']['ET.JavaNotJar'] == "true"
+        assert result['details']['vars']['flowbits']['et.http.javaclient.vulnerable'] == "true"
+        assert result['details']['vars']['flowbits']['et.javanotjar'] == "true"
 
     def test_eve_log_alert_rename(self):
         event = {

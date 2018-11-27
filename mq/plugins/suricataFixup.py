@@ -175,7 +175,7 @@ class message(object):
                             if 'ET.http.javaclient' in newmessage['details']['vars']['flowbits']:
                                 if 'ET.http.javaclient.vulnerable':
                                     del(newmessage['details']['vars']['flowbits']['ET.http.javaclient'])
-                                    newmessage['details']['vars']['flowbits']['ET.http.javaclient.vulnerable'] = "True"
+                                    newmessage['details']['vars']['flowbits']['et.http.javaclient.vulnerable'] = "True"
                     newmessage[u'summary'] = (
                         u'{sourceipaddress}:'+
                         u'{sourceport} -> '+
