@@ -33,74 +33,71 @@ class TestTraceAudit(AlertTestSuite):
     default_alert = {
         "category": "trace",
         "severity": "WARNING",
-        "summary": "8 instances of Strace or Ptrace executed by randomjoe on exhostname (5), exhostname2 (3)",
+        "summary": "5 instances of Strace or Ptrace executed on a system by randomjoe",
         "tags": ['audit'],
+        "notify_mozdefbot": True,
     }
 
     test_cases = []
 
-    events = AlertTestSuite.create_events(default_event, 8)
-    events[5]['_source']['hostname'] = 'exhostname2'
-    events[6]['_source']['hostname'] = 'exhostname2'
-    events[7]['_source']['hostname'] = 'exhostname2'
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default event and default alert expected",
+            events=AlertTestSuite.create_events(default_event, 5),
+            expected_alert=default_alert
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 5)
+    for event in events:
+        event['_source']['summary'] = 'Unknown'
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with events with a summary of 'Write: /etc/audit/rules.d/'",
             events=events,
             expected_alert=default_alert
         )
     )
 
-    # events = AlertTestSuite.create_events(default_event, 5)
-    # for event in events:
-    #     event['_source']['summary'] = 'Unknown'
-    # test_cases.append(
-    #     PositiveAlertTestCase(
-    #         description="Positive test with events with a summary of 'Write: /etc/audit/rules.d/'",
-    #         events=events,
-    #         expected_alert=default_alert
-    #     )
-    # )
+    events = AlertTestSuite.create_events(default_event, 5)
+    for event in events:
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 1})
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with events a minute earlier",
+            events=events,
+            expected_alert=default_alert
+        )
+    )
 
-    # events = AlertTestSuite.create_events(default_event, 5)
-    # for event in events:
-    #     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 14})
-    #     event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 14})
-    # test_cases.append(
-    #     PositiveAlertTestCase(
-    #         description="Positive test with events a minute earlier than window",
-    #         events=events,
-    #         expected_alert=default_alert
-    #     )
-    # )
+    events = AlertTestSuite.create_events(default_event, 5)
+    for event in events:
+        event['_source']['hostname'] = 'example.hostname.com'
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with example hostname that matches exclusion of 'hostfilter'",
+            events=events,
+        )
+    )
 
-    # events = AlertTestSuite.create_events(default_event, 5)
-    # for event in events:
-    #     event['_source']['hostname'] = 'example.hostname.com'
-    # test_cases.append(
-    #     NegativeAlertTestCase(
-    #         description="Negative test case with events with example hostname that matches exclusion of 'hostfilter'",
-    #         events=events,
-    #     )
-    # )
+    events = AlertTestSuite.create_events(default_event, 5)
+    for event in events:
+        event['_source']['details']['originaluser'] = None
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case aggregation key excluded",
+            events=events,
+        )
+    )
 
-    # events = AlertTestSuite.create_events(default_event, 5)
-    # for event in events:
-    #     event['_source']['details']['originaluser'] = None
-    # test_cases.append(
-    #     NegativeAlertTestCase(
-    #         description="Negative test case aggregation key excluded",
-    #         events=events,
-    #     )
-    # )
-
-    # events = AlertTestSuite.create_events(default_event, 5)
-    # for event in events:
-    #     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 16})
-    #     event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 16})
-    # test_cases.append(
-    #     NegativeAlertTestCase(
-    #         description="Negative test case with old timestamp",
-    #         events=events,
-    #     )
-    # )
+    events = AlertTestSuite.create_events(default_event, 5)
+    for event in events:
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 15})
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with old timestamp",
+            events=events,
+        )
+    )
