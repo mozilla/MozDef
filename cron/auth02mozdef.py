@@ -276,8 +276,12 @@ def process_msg(mozmsg, msg):
     # fields that should always exist
     mozmsg.timestamp = msg.date
     details['messageid'] = msg._id
-    details['userid'] = msg.user_id
     details['sourceipaddress'] = msg.ip
+
+    try:
+        details['userid'] = msg.user_id
+    except KeyError:
+        pass
 
     try:
         details['username'] = msg.user_name
