@@ -43,6 +43,8 @@ run-test:
 run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
+rebuild-run-tests: build-tests run-tests
+
 
 .PHONY: build
 build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
