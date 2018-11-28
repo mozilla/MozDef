@@ -316,7 +316,7 @@ If you don't have this package in your repos, before installing create `/etc/yum
 
  [nginx]
  name=nginx repo
- baseurl=http://nginx.org/packages/OS/OSRELEASE/$basearch/
+ baseurl=http://nginx.org/packages/centos/7/$basearch/
  gpgcheck=0
  enabled=1
 
