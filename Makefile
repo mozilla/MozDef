@@ -34,9 +34,12 @@ run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy
 restart-cloudy-mozdef:
 	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart
 
-.PHONY: tests run-tests-resources run-tests
+.PHONY: tests run-tests-resources run-tests-resources-external run-tests
 test: build-tests run-tests
 tests: build-tests run-tests  ## Run all tests (getting/building images as needed)
+run-tests-resources-external: ## Just spin up external resources for tests and have them listen externally
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 9200:9200 -d elasticsearch
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 5672:5672 -d rabbitmq
 run-tests-resources:  ## Just run the external resources required for tests
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) up -d
 run-test:
