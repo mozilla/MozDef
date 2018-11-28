@@ -73,6 +73,74 @@ How to get the alert in MozDef?
 The best way to get your alert into MozDef (once it's completed) is to propose a pull request and ask for a review from a MozDef developer.  They will be able to help you get the most out of the alert and help point out pitfalls.  Once the alert is accepted into MozDef master, there is a process by which MozDef installations can make use or 'enable' that alert.  It's best to work with that MozDef instance's maintainer to enable any new alerts.
 
 
+Example first alert
+-------------------
+Let's step through creating a simple alert you might want to verify a working deployment.
+For this sub-section it is assumed that you have a working MozDef instance which resides in some MozDefDir and is receiving logs.
+
+First move to to your MozDefDir and issue
+::
+
+  make new-alert
+
+You will be asked for a string to name a new alert and the associated test. For this example we will use the string "foo"
+::
+
+  make new-alert
+  Enter your alert name (Example: proxy drop executable): foo
+  Creating alerts/foo.py
+  Creating tests/alerts/test_foo.py
+
+These will be created as above in the alerts and tests/alerts directories.
+There's a lot to the generated code, but a class called  "AlertFoo" is of immediate interest and will define when and how to alert.
+Here's the head of the auto generated class.
+::
+
+  class AlertFoo(AlertTask):
+    def main(self):
+        # Create a query to look back the last 20 minutes
+        search_query = SearchQuery(minutes=20)
+
+        # Add search terms to our query
+        search_query.add_must([
+            TermMatch('category', 'helloworld'),
+            ExistsMatch('details.sourceipaddress'),
+        ])
+        ...
+
+In essence this code will tell MozDef to query the collection of logs for messages timestamped within 20 minutes (from time of query execution) and to look for messages which are of category "helloworld" which also have a source IP address.
+If you're pumping logs into MozDef odds are you don't have any which will be tagged as "helloworld". You can of course create those logs, but lets assume that you have logs tagged as "syslog" for the moment.
+Change the TermMatch line to
+::
+
+  TermMatch('category', 'syslog'),
+
+and you will get alerts for syslog labeled messages.
+Ideally you should edit your test to match, but it's not strictly necessary.
+
+Next we will need to enable the log and to schedule it. At time of writing this is a bit annoying.
+Open the file
+::
+
+  docker/compose/mozdef_alerts/files/config.py
+
+or simply
+::
+
+  mozdef_alerts/files/config.py
+
+if you are not working from the docker images
+and add your new foo alert to the others with a crontab style schedule
+::
+
+  ALERTS = {
+    'foo.AlertFoo': {'schedule': crontab(minute='*/1')},
+    'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
+    'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
+  }
+
+Restart your MozDef instance and you should begin seeing alerts on the alerts page.
+
 Questions?
 ----------
 
