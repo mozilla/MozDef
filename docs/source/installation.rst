@@ -61,6 +61,7 @@ Python
 Create a mozdef user::
 
   adduser mozdef -d /opt/mozdef
+  cp /etc/skel/.bash* /opt/mozdef/
 
 We need to install a python2.7 virtualenv.
 
@@ -74,7 +75,8 @@ On APT-based systems::
 
 Then::
 
-  su - mozdef
+  sudo -i -u mozdef -g mozdef
+  mkdir /opt/mozdef/python2.7
   wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
   tar xvzf Python-2.7.11.tgz
   cd Python-2.7.11
@@ -132,7 +134,7 @@ You can then install the rabbitmq server::
 
 To start rabbitmq at startup::
 
-  chkconfig rabbitmq-server on
+  systemctl enable rabbitmq-server
 
 On APT-based systems ::
 
@@ -178,7 +180,10 @@ We have a mongod.conf in the config directory prepared for you. To use it simply
 
 For meteor installation follow these steps::
 
+  sudo -i -u mozdef -g mozdef
   curl https://install.meteor.com/?release=1.8 | sh
+
+For node you can exit from the mozdef user::
 
   wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
   tar xvzf node-v8.12.0.tar.gz
@@ -187,8 +192,10 @@ For meteor installation follow these steps::
   make
   sudo make install
 
-Then from the meteor subdirectory of this git repository (/opt/mozdef/meteor) run::
+Then from the meteor subdirectory of this git repository (/opt/mozdef/meteor) run as the mozdef user with venv activated::
 
+  sudo -i -u mozdef -g mozdef
+  source envs/python/bin/activate
   meteor add iron-router
 
 If you wish to use meteor as the authentication handler you'll also need to install the Accounts-Password pkg::
@@ -229,12 +236,12 @@ Alternatively you can run the meteor UI in 'deployment' mode using a native node
 First install node::
 
     yum install bzip2 gcc gcc-c++ sqlite sqlite-devel
-    wget https://nodejs.org/dist/v4.7.0/node-v4.7.0.tar.gz
-    tar xvfz node-v4.7.0.tar.gz
-    cd node-v4.7.0
-    python configure
+    wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
+    tar xvzf node-v8.12.0.tar.gz
+    cd node-v8.12.0
+    ./configure
     make
-    make install
+    sudo make install
 
 Then bundle the meteor portion of mozdef to deploy on another server::
 
@@ -317,9 +324,9 @@ UWSGI
 
 We use `uwsgi`_ to interface python and nginx, in your venv execute the following::
 
-  wget https://projects.unbit.it/downloads/uwsgi-2.0.12.tar.gz
-  tar zxvf uwsgi-2.0.12.tar.gz
-  cd uwsgi-2.0.12
+  wget https://projects.unbit.it/downloads/uwsgi-2.0.17.1.tar.gz
+  tar zxvf uwsgi-2.0.17.1.tar.gz
+  cd uwsgi-2.0.17
   ~/python2.7/bin/python uwsgiconfig.py --build
   ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/python/bin/
