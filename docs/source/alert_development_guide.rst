@@ -127,7 +127,7 @@ Open the file
 or simply
 ::
 
-  mozdef_alerts/files/config.py
+  alerts/files/config.py
 
 if you are not working from the docker images
 and add your new foo alert to the others with a crontab style schedule
