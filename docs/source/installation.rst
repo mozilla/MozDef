@@ -62,6 +62,9 @@ Create a mozdef user::
 
   adduser mozdef -d /opt/mozdef
   cp /etc/skel/.bash* /opt/mozdef/
+  cd /opt/mozdef
+  chown mozdef: .bash*
+  chown -R mozdef: *
 
 We need to install a python2.7 virtualenv.
 
