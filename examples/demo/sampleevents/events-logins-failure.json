@@ -23,7 +23,7 @@
     "timestamp": "2014-08-05T20:38:39+00:00",
     "summary": "LDAP_INVALID_CREDENTIALS bob@example.com,o=com,dc=example srcIP=10.20.70.200",
     "details": {
-      "dn": "bob@example.com,o=com,dc=example",    
+      "dn": "bob@example.com,o=com,dc=example",
       "success": false,
       "sourceipv4address": "10.20.70.200",
       "result": "LDAP_INVALID_CREDENTIALS",
@@ -62,5 +62,54 @@
       "srcip": "10.20.0.200",
       "sourceipaddress": "10.20.0.200"
     }
+},
+{
+  "tags": [
+    "auth0",
+    "example"
+  ],
+  "summary": "Failed login for john@example.com",
+  "details": {
+    "username": "john@example.com",
+    "type": "Failed Login",
+    "success": false
+  }
+}
+,
+{
+  "tags": [
+    "auth0",
+    "example"
+  ],
+  "summary": "Failed login for bob@example.com",
+  "details": {
+    "username": "bob@example.com",
+    "type": "Failed Login",
+    "success": false
+  }
+},
+{
+  "tags": [
+    "auth0",
+    "example"
+  ],
+  "summary": "Failed login for mary@example.com",
+  "details": {
+    "username": "mary@example.com",
+    "type": "Failed Login",
+    "success": false
+  }
+},
+{
+  "tags": [
+    "auth0",
+    "example"
+  ],
+  "summary": "Failed login for sue@example.com",
+  "details": {
+    "username": "sue@example.com",
+    "type": "Failed Login",
+    "success": false
+  }
 }
 ]

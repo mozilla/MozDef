@@ -69,6 +69,8 @@ services:
     image: mozdef/mozdef_alerts
     env_file:
       - cloudy_mozdef.env
+    volumes:
+      - /opt/mozdef/docker/compose/mozdef_alerts/files/config.py:/opt/mozdef/envs/mozdef/alerts/lib/config.py
     restart: always
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
     depends_on:
@@ -176,6 +178,23 @@ services:
       - cloudy_mozdef_mq_cloudtrail.env
     restart: always
     command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_cloudtrail.py -c esworker_cloudtrail.conf'
+    scale: 1
+    depends_on:
+      - base
+      - rabbitmq
+      - loginput
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
+  mq_sqs:
+    image: mozdef/mozdef_mq_worker
+    env_file:
+      - cloudy_mozdef.env
+      - cloudy_mozdef_mq_sns_sqs.env
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_sns_sqs.py -c esworker_sns_sqs.conf'
     scale: 1
     depends_on:
       - base

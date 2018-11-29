@@ -8,7 +8,9 @@ STACK_PARAMS	:= file://aws_parameters.json
 S3_BUCKET_NAME  := mozdef.infosec.allizom.org
 S3_BUCKET_PATH	:= cf
 S3_BUCKET_URI	:= s3://$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)
-S3_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)/mozdef-parent.yml
+S3_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)/
+# OIDC_CLIENT_SECRET is set in an environment variable by running "source aws_parameters.sh"
+OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET)")
 
 all:
 	@echo 'Available make targets:'
@@ -23,10 +25,12 @@ packer-build: ## Build the base AMI with packer
 .PHONY: create-stack
 create-stack: test ## Create everything you need for a fresh new stack!
 	@export AWS_REGION=$(AWS_REGION)
-	@echo "Make sure you have a param file ($(STACK_PARAMS)) with OIDCClientSecret set."
-	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI) \
+	@echo "Make sure you have an environment variable OIDC_CLIENT_SECRET set."
+	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
 	  --parameters $(STACK_PARAMS) \
+	  --parameters ParameterKey=S3TemplateLocation,ParameterValue=$(S3_STACK_URI) \
+	               ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET) \
 	  --output text
 
 .PHONY: create-s3-bucket
@@ -37,9 +41,10 @@ create-s3-bucket:
 .PHONY: updated-nested-stack
 update-stack: test ## Updates the nested stack on AWS
 	@export AWS_REGION=$(AWS_REGION)
-	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI) \
+	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
-	  --parameters $(STACK_PARAMS) \
+	  --parameters ParameterKey=S3TemplateLocation,ParameterValue=$(S3_STACK_URI) \
+	               $(OIDC_CLIENT_SECRET_PARAM_ARG) \
 	  --output text
 
 # --ignore-checks=E2502 : https://github.com/awslabs/cfn-python-lint/issues/408

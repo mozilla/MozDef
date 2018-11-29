@@ -30,7 +30,7 @@ class message(object):
             # drop disabled for now
             #if 'signatureid' in message['details']:
                 #if message['details'].lower() == 'execve' and \
-                   #'command' not in message['details']:
+                    #'command' not in message['details']:
                     # auditd entry without a command
                     # likely a result of another command (java starting a job, etc.)
                     # signal a drop

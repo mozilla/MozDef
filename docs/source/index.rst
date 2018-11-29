@@ -13,6 +13,8 @@ Table of Contents
   introduction
   demo
   installation
+  alert_development_guide
+  mozdef_util
   screenshots
   usage
   cloud_deployment
@@ -39,4 +41,3 @@ Contact
 
 * mozdef INSERTAT mozilla.com
 * `#mozdef <irc://irc.mozilla.org/mozdef>`_
-* https://lists.mozilla.org/listinfo/dev-mozdef

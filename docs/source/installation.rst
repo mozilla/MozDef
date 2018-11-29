@@ -6,10 +6,9 @@ The installation process has been tested on CentOS 7.
 Build and run MozDef
 --------------------
 
-You can quickly install MozDef with an automated build generation using `docker`:
+You can quickly install MozDef with an automated build generation using `docker`::
 
   make build
-
   make run
 
 You're done! Now go to:
@@ -29,13 +28,13 @@ You're done! Now go to:
 Run tests
 ---------
 
-Simply run:
+Simply run::
 
   make test
 
 
 Note, if you end up with a clobbered ES index, or anything like that which might end up in failing tests, you can clean
-the environment with:
+the environment with::
 
   make clean
 
@@ -47,7 +46,7 @@ Manual Installation for Yum or Apt based distros
 
 Summary
 *******
-This section explains the manual installation process for the MozDef system.
+This section explains the manual installation process for the MozDef system::
 
   git clone https://github.com/mozilla/MozDef.git mozdef
 
@@ -62,6 +61,10 @@ Python
 Create a mozdef user::
 
   adduser mozdef -d /opt/mozdef
+  cp /etc/skel/.bash* /opt/mozdef/
+  cd /opt/mozdef
+  chown mozdef: .bash*
+  chown -R mozdef: *
 
 We need to install a python2.7 virtualenv.
 
@@ -75,7 +78,8 @@ On APT-based systems::
 
 Then::
 
-  su - mozdef
+  sudo -i -u mozdef -g mozdef
+  mkdir /opt/mozdef/python2.7
   wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
   tar xvzf Python-2.7.11.tgz
   cd Python-2.7.11
@@ -133,7 +137,7 @@ You can then install the rabbitmq server::
 
 To start rabbitmq at startup::
 
-  chkconfig rabbitmq-server on
+  systemctl enable rabbitmq-server
 
 On APT-based systems ::
 
@@ -179,7 +183,10 @@ We have a mongod.conf in the config directory prepared for you. To use it simply
 
 For meteor installation follow these steps::
 
+  sudo -i -u mozdef -g mozdef
   curl https://install.meteor.com/?release=1.8 | sh
+
+For node you can exit from the mozdef user::
 
   wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
   tar xvzf node-v8.12.0.tar.gz
@@ -188,37 +195,31 @@ For meteor installation follow these steps::
   make
   sudo make install
 
-Then from the meteor subdirectory of this git repository (/opt/mozdef/meteor) run::
+Then from the meteor subdirectory of this git repository (/opt/mozdef/meteor) run as the mozdef user with venv activated::
 
+  sudo -i -u mozdef -g mozdef
+  source envs/python/bin/activate
   meteor add iron-router
 
 If you wish to use meteor as the authentication handler you'll also need to install the Accounts-Password pkg::
 
   meteor add accounts-password
 
-You may want to edit the app/lib/settings.js file to properly configure the URLs and Authentication
+You may want to edit the /meteor/imports/settings.js file to properly configure the URLs and Authentication
 The default setting will use Meteor Accounts, but you can just as easily install an external provider like Github, Google, Facebook or your own OIDC::
 
   mozdef = {
-    rootURL: "localhost",
-    port: "443",
-    rootAPI: "https://localhost:8444",
-    kibanaURL: "https://localhost:9443/app/kibana#",
-    enableBlockIP: true,
-    enableClientAccountCreation: true,
-    authenticationType: "meteor-password"
+    ...
+    authenticationType: "meteor-password",
+    ...
   }
 
 or for an OIDC implementation that passes a header to the nginx reverse proxy (for example using OpenResty with Lua and Auth0)::
 
   mozdef = {
-    rootURL: "localhost",
-    port: "443",
-    rootAPI: "https://localhost:8444",
-    kibanaURL: "https://localhost:9443/app/kibana#",
-    enableBlockIP: true,
-    enableClientAccountCreation: false,
-    authenticationType: "OIDC"
+    ...
+    authenticationType: "OIDC",
+    ...
   }
 
 Then start meteor with::
@@ -238,12 +239,12 @@ Alternatively you can run the meteor UI in 'deployment' mode using a native node
 First install node::
 
     yum install bzip2 gcc gcc-c++ sqlite sqlite-devel
-    wget https://nodejs.org/dist/v4.7.0/node-v4.7.0.tar.gz
-    tar xvfz node-v4.7.0.tar.gz
-    cd node-v4.7.0
-    python configure
+    wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
+    tar xvzf node-v8.12.0.tar.gz
+    cd node-v8.12.0
+    ./configure
     make
-    make install
+    sudo make install
 
 Then bundle the meteor portion of mozdef to deploy on another server::
 
@@ -259,7 +260,7 @@ This will create a 'bundle' directory with the entire UI code below that directo
 
 If you didn't update the settings.js before bundling the meteor installation, you will need to update the settings.js file to match your servername/port::
 
-  vim bundle/programs/server/app/app/lib/settings.js
+  vim bundle/programs/server/app/imports/settings.js
 
 If your development OS is different than your production OS you will also need to update
 the fibers node module::
@@ -315,7 +316,7 @@ If you don't have this package in your repos, before installing create `/etc/yum
 
  [nginx]
  name=nginx repo
- baseurl=http://nginx.org/packages/OS/OSRELEASE/$basearch/
+ baseurl=http://nginx.org/packages/centos/7/$basearch/
  gpgcheck=0
  enabled=1
 
@@ -326,9 +327,9 @@ UWSGI
 
 We use `uwsgi`_ to interface python and nginx, in your venv execute the following::
 
-  wget https://projects.unbit.it/downloads/uwsgi-2.0.12.tar.gz
-  tar zxvf uwsgi-2.0.12.tar.gz
-  cd uwsgi-2.0.12
+  wget https://projects.unbit.it/downloads/uwsgi-2.0.17.1.tar.gz
+  tar zxvf uwsgi-2.0.17.1.tar.gz
+  cd uwsgi-2.0.17.1
   ~/python2.7/bin/python uwsgiconfig.py --build
   ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/python/bin/
@@ -440,6 +441,8 @@ Create the Repo in /etc/yum/repos.d/kibana.repo::
   enabled=1
   autorefresh=1
   type=rpm-md
+
+::
 
   sudo yum install kibana
 

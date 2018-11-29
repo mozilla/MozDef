@@ -34,14 +34,14 @@ class TestSuricataFixup(object):
         assert result == event
         assert metadata['doc_type'] is not 'nsm'
 
-    ## Should never match and be modified by the plugin
+    # Should never match and be modified by the plugin
     def test_notsuri_log2(self):
         metadata = {
             'doc_type': 'event',
             'index': 'events'
         }
         event = {
-           'suricata': 'value1'
+            'suricata': 'value1'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -49,16 +49,16 @@ class TestSuricataFixup(object):
         assert result == event
         assert metadata['doc_type'] is not 'nsm'
 
-    ## Should never match and be modified by the plugin
+    # Should never match and be modified by the plugin
     def test_suricata_nocustomendpoint_log(self):
         metadata = {
             'doc_type': 'event',
             'index': 'events'
         }
         event = {
-           'category': 'suricata',
-           'SOURCE': 'eve-log',
-           'event_type': 'alert'
+            'category': 'suricata',
+            'SOURCE': 'eve-log',
+            'event_type': 'alert'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -72,9 +72,9 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'customendpoint': '',
-           'SOURCE': 'eve-log',
-           'event_type': 'alert'
+            'customendpoint': '',
+            'SOURCE': 'eve-log',
+            'event_type': 'alert'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -88,10 +88,10 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'customendpoint': '',
-           'category': 'alamakota',
-           'SOURCE': 'eve-log',
-           'event_type': 'alert'
+            'customendpoint': '',
+            'category': 'alamakota',
+            'SOURCE': 'eve-log',
+            'event_type': 'alert'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -106,10 +106,10 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'category': 'suricata',
-           'customendpoint': '',
-           'category': 'suricata',
-           'SOURCE': 'eve-log'
+            'category': 'suricata',
+            'customendpoint': '',
+            'category': 'suricata',
+            'SOURCE': 'eve-log'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -124,10 +124,10 @@ class TestSuricataFixup(object):
             'index': 'events'
         }
         event = {
-           'customendpoint': '',
-           'category': 'suricata',
-           'SOURCE': 'eve-log',
-           'event_type': 'alamakota'
+            'customendpoint': '',
+            'category': 'suricata',
+            'SOURCE': 'eve-log',
+            'event_type': 'alamakota'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -138,8 +138,8 @@ class TestSuricataFixup(object):
 
     def test_suricata_nosource_log(self):
         event = {
-           'customendpoint': '',
-           'category': 'suricata',
+            'customendpoint': '',
+            'category': 'suricata',
         }
         MESSAGE = {
             'ts': 1505701210.163043
@@ -153,10 +153,10 @@ class TestSuricataFixup(object):
 
     def test_suricata_wrongsource_log(self):
         event = {
-           'customendpoint': '',
-           'category': 'suricata',
-           'SOURCE': 'alamakota',
-           'event_type': 'alert'
+            'customendpoint': '',
+            'category': 'suricata',
+            'SOURCE': 'alamakota',
+            'event_type': 'alert'
         }
         MESSAGE = {
             'ts': 1505701210.163043
@@ -186,25 +186,25 @@ class TestSuricataFixup(object):
 
     def test_nomatch_syslog(self):
         event = {
-                "category": "syslog",
-                "processid": "0",
-                "receivedtimestamp": "2017-09-26T00:22:24.210945+00:00",
-                "severity": "7",
-                "utctimestamp": "2017-09-26T00:22:23+00:00",
-                "timestamp": "2017-09-26T00:22:23+00:00",
-                "hostname": "syslog1.private.scl3.mozilla.com",
-                "mozdefhostname": "mozdef1.private.scl3.mozilla.com",
-                "summary": "Connection from 10.22.74.208 port 9071 on 10.22.74.45 nsm suricata port 22\n",
-                "eventsource": "systemslogs",
-                "details": {
-                    "processid": "21233",
-                    "Random": 2,
-                    "sourceipv4address": "10.22.74.208",
-                    "hostname": "hostname1.subdomain.domain.com",
-                    "program": "sshd",
-                    "sourceipaddress": "10.22.74.208"
-                }
+            "category": "syslog",
+            "processid": "0",
+            "receivedtimestamp": "2017-09-26T00:22:24.210945+00:00",
+            "severity": "7",
+            "utctimestamp": "2017-09-26T00:22:23+00:00",
+            "timestamp": "2017-09-26T00:22:23+00:00",
+            "hostname": "syslog1.private.scl3.mozilla.com",
+            "mozdefhostname": "mozdef1.private.scl3.mozilla.com",
+            "summary": "Connection from 10.22.74.208 port 9071 on 10.22.74.45 nsm suricata port 22\n",
+            "eventsource": "systemslogs",
+            "details": {
+                "processid": "21233",
+                "Random": 2,
+                "sourceipv4address": "10.22.74.208",
+                "hostname": "hostname1.subdomain.domain.com",
+                "program": "sshd",
+                "sourceipaddress": "10.22.74.208"
             }
+        }
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result['category'] == 'syslog'
         assert result['eventsource'] == 'systemslogs'
@@ -221,7 +221,7 @@ class TestSuricataFixup(object):
                 "audisp-json",
                 "2.1.1",
                 "audit"
-                ],
+            ],
             "summary": "Execve: sh -c sudo suricata nsm /usr/lib64/nagios/plugins/custom/check_auditd.sh",
             "processname": "audisp-json",
             "details": {

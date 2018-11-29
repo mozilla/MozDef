@@ -57,30 +57,44 @@ class TestWriteWithRead(ElasticsearchClientTest):
     def setup(self):
         super(TestWriteWithRead, self).setup()
 
-        self.alert = {'category': 'correlatedalerts',
-                 'events': [{'documentid': 'l-a3V5mbQl-C91RDzjpNig',
-                             'documentindex': 'events-20160819',
-                             'documentsource': {'category': 'bronotice',
-                                                'details': {'hostname': 'testhostname',
-                                                            'note': 'CrowdStrike::Correlated_Alerts example alert',
-                                                            'sourceipaddress': '1.2.3.4'},
-                                                'eventsource': 'nsm',
-                                                'hostname': 'nsm',
-                                                'processid': '1337',
-                                                'processname': 'syslog',
-                                                'receivedtimestamp': '2016-08-19T16:40:55.818595+00:00',
-                                                'severity': 'NOTICE',
-                                                'source': 'nsm_src',
-                                                'summary': 'CrowdStrike::Correlated_Alerts Host 1.2.3.4 caused an alert to throw',
-                                                'tags': ['tag1', 'tag2'],
-                                                'timestamp': '2016-08-19T16:40:55.818595+00:00',
-                                                'utctimestamp': '2016-08-19T16:40:55.818595+00:00'},
-                             'documenttype': 'bro'}],
-                 'severity': 'NOTICE',
-                 'summary': 'nsm CrowdStrike::Correlated_Alerts Host 1.2.3.4 caused an alert to throw',
-                 'tags': ['nsm,bro,correlated'],
-                 'url': 'https://mozilla.org',
-                 'utctimestamp': '2016-08-19T16:40:57.851092+00:00'}
+        self.alert = {
+            'category': 'correlatedalerts',
+            'events': [
+                {
+                    'documentid': 'l-a3V5mbQl-C91RDzjpNig',
+                    'documentindex': 'events-20160819',
+                    'documentsource': {
+                        'category': 'bronotice',
+                        'details': {
+                            'hostname': 'testhostname',
+                            'note': 'CrowdStrike::Correlated_Alerts example alert',
+                            'sourceipaddress': '1.2.3.4'
+                        },
+                        'eventsource': 'nsm',
+                        'hostname': 'nsm',
+                        'processid': '1337',
+                        'processname': 'syslog',
+                        'receivedtimestamp': '2016-08-19T16:40:55.818595+00:00',
+                        'severity': 'NOTICE',
+                        'source': 'nsm_src',
+                        'summary': 'CrowdStrike::Correlated_Alerts Host 1.2.3.4 caused an alert to throw',
+                        'tags': ['tag1', 'tag2'],
+                        'timestamp': '2016-08-19T16:40:55.818595+00:00',
+                        'utctimestamp': '2016-08-19T16:40:55.818595+00:00'
+                    },
+                    'documenttype': 'bro'
+                }
+            ],
+            'severity': 'NOTICE',
+            'summary': 'nsm CrowdStrike::Correlated_Alerts Host 1.2.3.4 caused an alert to throw',
+            'tags': [
+                'nsm',
+                'bro',
+                'correlated'
+            ],
+            'url': 'https://mozilla.org',
+            'utctimestamp': '2016-08-19T16:40:57.851092+00:00'
+        }
         self.saved_alert = self.es_client.save_alert(body=self.alert)
         self.flush('alerts')
 
@@ -362,6 +376,7 @@ class TestGetIndices(ElasticsearchClientTest):
         indices.sort()
         assert indices == [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
 
+
 class TestIndexExists(ElasticsearchClientTest):
 
     def teardown(self):
@@ -374,7 +389,7 @@ class TestIndexExists(ElasticsearchClientTest):
             self.es_client.create_index('test_index')
         time.sleep(1)
         indices = self.es_client.index_exists('test_index')
-        assert indices == True
+        assert indices is True
 
 
 class TestClusterHealth(ElasticsearchClientTest):

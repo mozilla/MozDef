@@ -36,7 +36,6 @@ class TestWriteAudit(AlertTestSuite):
         "severity": "WARNING",
         "summary": "5 Filesystem write(s) to an auditd path by randomjoe",
         "tags": ['audit'],
-        "notify_mozdefbot": True,
     }
 
     test_cases = []

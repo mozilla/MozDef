@@ -85,10 +85,10 @@ def main():
                 logger.debug("The index is not created. Terminating eventStats.py cron job.")
                 exit(1)
             sleepcycles += 1
-            if es.index_exists(index):
-                # post to elastic search servers directly without going through
-                # message queues in case there is an availability issue
-                es.save_event(index=index, body=json.dumps(stats), doc_type='mozdefstats')
+        if es.index_exists(index):
+            # post to elastic search servers directly without going through
+            # message queues in case there is an availability issue
+            es.save_event(index=index, body=json.dumps(stats), doc_type='mozdefstats')
 
     except Exception as e:
         logger.error("Exception %r when gathering statistics " % e)
@@ -118,8 +118,8 @@ def initConfig():
 
     # default time period in minutes to look back in time for the aggregation
     options.aggregationminutes = getConfig('aggregationminutes',
-                                         15,
-                                         options.configfile)
+                                           15,
+                                           options.configfile)
     # configure the index to save events to
     options.index = getConfig('index', 'mozdefstate', options.configfile)
 

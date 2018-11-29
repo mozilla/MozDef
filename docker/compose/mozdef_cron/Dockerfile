@@ -1,4 +1,4 @@
-FROM mozdef_base:latest
+FROM mozdef/mozdef_base
 
 LABEL maintainer="mozdef@mozilla.com"
 

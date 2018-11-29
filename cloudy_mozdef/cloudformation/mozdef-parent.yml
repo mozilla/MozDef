@@ -15,6 +15,10 @@ Metadata:
       - KeyName
       - AMIImageId
 Parameters:
+  DomainName:
+    Type: String
+    Description: The fully qualified DNS name you will host CloudyMozDef at.
+    Default: cloudymozdef.security.allizom.org
   S3TemplateLocation:
     Type: String
     Description: The URL to the S3 bucket used to fetch the nested stack templates
@@ -38,7 +42,7 @@ Parameters:
   AMIImageId:
     Type: String
     Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-0ff5b922fb3ae2332
+    Default: ami-073434079b0366251
   ACMCertArn:
     Description: The ARN of your pre-issued ACM cert.
     Default : arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583
@@ -72,6 +76,7 @@ Resources:
         CloudTrailSQSQueueArn: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueArn
         MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
         # CloudTrailS3BucketIAMRoleArn we leave empty as we will consume CloudTrail logs from our own account
+        ESServiceLinkedRoleExists: !GetAtt ESServiceLinkedRoleExists.RoleExists
       Tags:
         - Key: application
           Value: mozdef
@@ -97,6 +102,8 @@ Resources:
         OIDCClientSecret: !Ref OIDCClientSecret
         OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
+        MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
+        DomainName: !Ref DomainName
       Tags:
         - Key: application
           Value: mozdef
@@ -105,6 +112,7 @@ Resources:
       TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-instance.yml ] ]
   MozDefES:
     Type: AWS::CloudFormation::Stack
+    DependsOn: MozDefIAMRoleAndInstanceProfile
     Properties:
       Parameters:
         SubnetIds: !Join [ ',', !Ref PublicSubnetIds ]
@@ -172,6 +180,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - logs:*
+                  - iam:ListRoles
                 Resource: '*'
   GetArrayLengthLambdaFunction:
     Type: AWS::Lambda::Function
@@ -204,3 +213,42 @@ Resources:
     Properties:
       Array: !Ref PublicSubnetIds
       ServiceToken: !GetAtt GetArrayLengthLambdaFunction.Arn
+  DoesRoleExistLambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: CloudFormationLambdaIAMRole
+    # This DependsOn shouldn't be needed because the "Role" value is set to
+    # "!GetAtt CloudFormationLambdaIAMRole.Arn" but without DependsOn the error
+    # "Template error: IAM role mozdef-aws-nested-CloudFormationLambdaIAMRole-108UCUPESC6WG doesn't exist"
+    # occurs on stack creation for this Lambda Function resource. The DependsOn
+    # prevents the error.
+    Properties:
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import boto3, secrets, string
+          def handler(event, context):
+              paginator = boto3.client('iam').get_paginator('list_roles')
+              args = {'PathPrefix': event['ResourceProperties']['PathPrefix']} if 'PathPrefix' in event['ResourceProperties'] else {}
+              iterator = paginator.paginate(**args).search(
+                  "Roles[?RoleName == '%s'][]" % event['ResourceProperties']['RoleName'])
+              response = {'RoleExists': len([x for x in iterator]) > 0}
+              physical_id = ''.join(
+                  secrets.choice(string.ascii_uppercase + string.digits) for i in
+                  range(13))
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response,
+                               "DoesRoleExist-%s" % physical_id)
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      Timeout: 20
+  ESServiceLinkedRoleExists:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      RoleName: AWSServiceRoleForAmazonElasticsearchService
+      PathPrefix: '/aws-service-role/es.amazonaws.com/'
+      ServiceToken: !GetAtt DoesRoleExistLambdaFunction.Arn

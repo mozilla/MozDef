@@ -34,8 +34,12 @@ def initLogger():
     if options.output == 'syslog':
         logger.addHandler(
             SysLogHandler(
-                address=(options.sysloghostname,
-                    options.syslogport)))
+                address=(
+                    options.sysloghostname,
+                    options.syslogport
+                )
+            )
+        )
     else:
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(formatter)
@@ -63,6 +67,7 @@ def writeFrontendStats(data, mongo):
             if '.' in key:
                 del host['_source']['details'][key]
         mongo.healthfrontend.insert(host['_source'])
+
 
 def getSqsStats(es):
     search_query = SearchQuery(minutes=15)
@@ -164,13 +169,13 @@ def initConfig():
     options.output = getConfig('output', 'stdout', options.configfile)
     # syslog hostname
     options.sysloghostname = getConfig('sysloghostname', 'localhost',
-        options.configfile)
+                                       options.configfile)
     # syslog port
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
     # elastic search server settings
     options.esservers = list(getConfig('esservers', 'http://localhost:9200',
-        options.configfile).split(','))
+                                       options.configfile).split(','))
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
     options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
