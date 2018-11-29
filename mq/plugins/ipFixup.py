@@ -130,6 +130,7 @@ class message(object):
                 ipText = message['details']['cluster_client_ip']
                 if isIPv4(ipText):
                     message['details']['sourceipaddress'] = ipText
+                    message['details']['sourceipv4address'] = ipText
                 if isIPv6(ipText):
                     message['details']['sourceipv6address'] = ipText
 
