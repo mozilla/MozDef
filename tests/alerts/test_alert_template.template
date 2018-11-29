@@ -29,9 +29,6 @@ class TEMPLATE_TEST_CLASSNAME(AlertTestSuite):
         "tags": ['hello', 'world'],
         "severity": "WARNING",
         "summary": 'My first alert!',
-        # Set to False if alert severity is less than a WARNING
-        # or if ircchannel is specifically set to None in the alert
-        "notify_mozdefbot": True,
     }
 
     test_cases = []
