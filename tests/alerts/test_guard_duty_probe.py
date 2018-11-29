@@ -7,31 +7,34 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TEMPLATE_TEST_CLASSNAME(AlertTestSuite):
-    alert_filename = "TEMPLATE_ALERT_FILENAME"
-    alert_classname = "TEMPLATE_ALERT_CLASSNAME"
+class TestGuardDutyProbe(AlertTestSuite):
+    alert_filename = "guard_duty_probe"
+    alert_classname = "AlertGuardDutyProbe"
 
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
         "_type": "event",
         "_source": {
-            "category": "helloworld",
+            "source": "guardduty",
             "details": {
                 "sourceipaddress": "1.2.3.4",
+                "finding": {
+                    "action": {
+                        "actionType": "PORT_PROBE"
+                    }
+                }
             }
         }
     }
 
     # This alert is the expected result from running this task
     default_alert = {
-        "category": "hellocategory",
-        "tags": ['hello', 'world'],
-        "severity": "WARNING",
-        "summary": 'My first alert!',
-        # Set to False if alert severity is less than a WARNING
-        # or if ircchannel is specifically set to None in the alert
-        "notify_mozdefbot": True,
+        "category": "bruteforce",
+        "tags": ['guardduty', 'bruteforce'],
+        "severity": "INFO",
+        "summary": 'Guard Duty Port Probe by 1.2.3.4',
+        "notify_mozdefbot": False,
     }
 
     test_cases = []
@@ -46,7 +49,7 @@ class TEMPLATE_TEST_CLASSNAME(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['category'] = 'bad'
+        event['_source']['source'] = 'bad'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with incorrect category",
@@ -65,8 +68,10 @@ class TEMPLATE_TEST_CLASSNAME(AlertTestSuite):
     )
 
     for event in events:
-        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 21})
-        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 21})
+        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(
+            date_timedelta={'minutes': 21})
+        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(
+            date_timedelta={'minutes': 21})
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with old timestamp",

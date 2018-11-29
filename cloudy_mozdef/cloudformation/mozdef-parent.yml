@@ -15,6 +15,10 @@ Metadata:
       - KeyName
       - AMIImageId
 Parameters:
+  DomainName:
+    Type: String
+    Description: The fully qualified DNS name you will host CloudyMozDef at.
+    Default: cloudymozdef.security.allizom.org
   S3TemplateLocation:
     Type: String
     Description: The URL to the S3 bucket used to fetch the nested stack templates
@@ -38,7 +42,7 @@ Parameters:
   AMIImageId:
     Type: String
     Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-0ff5b922fb3ae2332
+    Default: ami-073434079b0366251
   ACMCertArn:
     Description: The ARN of your pre-issued ACM cert.
     Default : arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583
@@ -98,6 +102,8 @@ Resources:
         OIDCClientSecret: !Ref OIDCClientSecret
         OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
+        MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
+        DomainName: !Ref DomainName
       Tags:
         - Key: application
           Value: mozdef

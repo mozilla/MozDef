@@ -21,29 +21,30 @@ class message(object):
         # which are mixed string and dict
         # into a dict with a raw_value key as the string value
         self.modify_keys = [
-            'details.requestparameters.iaminstanceprofile',
-            'details.requestparameters.instancetype',
+            'details.additionaleventdata',
+            'details.apiversion',
+            'details.serviceeventdetails',
             'details.requestparameters.attribute',
-            'details.requestparameters.description',
-            'details.requestparameters.filter',
-            'details.requestparameters.rule',
-            'details.requestparameters.ebsoptimized',
-            'details.requestparameters.source',
+            'details.requestparameters.bucketpolicy.statement.principal',
             'details.requestparameters.callerreference',
+            'details.requestparameters.description',
+            'details.requestparameters.disableapitermination',
             'details.requestparameters.domainname',
             'details.requestparameters.domainnames',
+            'details.requestparameters.ebsoptimized',
+            'details.requestparameters.filter',
+            'details.requestparameters.iaminstanceprofile',
+            'details.requestparameters.instancetype',
+            'details.requestparameters.logstreamname',
+            'details.requestparameters.source',
             'details.responseelements.role',
+            'details.requestparameters.rule',
             'details.responseelements.subnets',
             'details.responseelements.endpoint',
             'details.responseelements.securitygroups',
             'details.responseelements.lastmodified',
-            'details.additionaleventdata',
-            'details.serviceeventdetails',
-            'details.requestparameters.disableapitermination',
             'details.responseelements.findings.service.additionalinfo.unusual',
-            'details.responseelements.distribution.distributionconfig.callerreference',
-            'details.requestparameters.logstreamname',
-            'details.apiversion'
+            'details.responseelements.distribution.distributionconfig.callerreference'
         ]
 
     def convert_key_raw_str(self, needle, haystack):
