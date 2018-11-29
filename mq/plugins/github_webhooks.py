@@ -18,7 +18,7 @@ class message(object):
         self.registration = ['githubeventsqs']
         self.priority = 10
 
-        with open('mq/github_mapping.yml', 'r') as f:
+        with open('mq/plugins/github_mapping.yml', 'r') as f:
             map = f.read()
 
         yap = yaml.load(map)
