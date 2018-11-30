@@ -576,7 +576,7 @@ def getWatchlist():
             WatchList.append(
                 content['watchcontent']
            )
-        return json.dumps({'content': WatchList})
+        return json.dumps(WatchList)
     except ValueError as e:
         sys.stderr.write('Exception {0} collecting watch list\n'.format(e))
 
