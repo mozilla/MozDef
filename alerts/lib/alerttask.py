@@ -365,7 +365,6 @@ class AlertTask(Task):
                         self.alertToMessageQueue(alert)
                         self.saveAlertID(alertResultES)
 
-
     def alertPlugins(self, alert):
         """
         Send alerts through a plugin system
@@ -376,7 +375,6 @@ class AlertTask(Task):
         alertDict = plugin_set.run_plugins(alert)[0]
 
         return alertDict
-
 
     def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None, ircchannel=None):
         """
