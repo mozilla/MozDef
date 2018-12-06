@@ -1,7 +1,52 @@
 [
   {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-abcdef12",
+    "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "PublicSubnetIds",
+    "ParameterValue": "subnet-abcdef12,subnet-bcdef123",
+    "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "InstanceType",
+    "ParameterValue": "m5.large",
+    "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "KeyName",
+    "ParameterValue": "my-key-name",
+    "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "AMIImageId",
+    "ParameterValue": "ami-0c3705bb3b43ad51f",
+    "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "ACMCertArn",
+    "ParameterValue": "arn:aws:acm:us-west-2:123456789012:certificate/abcdef01-2345-6789-abcd-ef0123456789",
+    "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "OIDCDiscoveryURL",
+    "ParameterValue": "https://auth.example.com/.well-known/openid-configuration",
+    "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "OIDCClientId",
+    "ParameterValue": "abcdefghijklmnopqrstuvwxyz012345",
+    "UsePreviousValue": false
+  },
+  {
     "ParameterKey": "OIDCClientSecret",
-    "ParameterValue": "secret-goes-here",
+    "ParameterValue": "secret-value-goes-here",
+    "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "S3TemplateLocation",
+    "ParameterValue": "https://s3-us-west-2.amazonaws.com/example-bucket-name/cloudformation/path/",
     "UsePreviousValue": false
   }
 ]
