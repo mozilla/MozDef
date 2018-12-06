@@ -13,7 +13,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, E
 
 class AlertProxyExfilDomains(AlertTask):
     def main(self):
-        self.parse_config('proxy_drop_exfil_domains.conf', ['exfil_domains'])
+        self.parse_config('proxy_exfil_domains.conf', ['exfil_domains'])
 
         search_query = SearchQuery(minutes=20)
 
