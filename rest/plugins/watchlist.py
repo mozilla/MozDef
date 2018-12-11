@@ -16,6 +16,7 @@ from pymongo import MongoClient
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
 
+
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
@@ -75,12 +76,11 @@ class message(object):
         self.options.watchlist_file = getConfig('watchlist_file', '/dev/null', self.configfile)
 
     def watchItem(self,
-                watchcontent=None,
-                comment=None,
-                duration=None,
-                referenceID=None,
-                userID=None
-                ):
+                  watchcontent=None,
+                  comment=None,
+                  duration=None,
+                  referenceID=None,
+                  userID=None):
         try:
             # DB connection/table
             mongoclient = MongoClient(self.options.mongohost, self.options.mongoport)
@@ -166,10 +166,10 @@ class message(object):
 
                 if not watchlisted:
                     self.watchItem(str(watchcontent),
-                                 comment,
-                                 duration,
-                                 referenceID,
-                                 userid)
+                                   comment,
+                                   duration,
+                                   referenceID,
+                                   userid)
                     sys.stdout.write('added {0} to watchlist\n'.format(watchcontent))
                 else:
                     sys.stdout.write('not adding {0}, the content already exists in the watchlist.\n'.format(watchcontent))
@@ -177,4 +177,3 @@ class message(object):
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
         return (request, response)
-

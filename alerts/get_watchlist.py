@@ -15,6 +15,7 @@ import logging
 logger = logging.getLogger()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+
 class AlertWatchList(AlertTask):
     def main(self):
         self.parse_config('get_watchlist.conf', ['api_url'])
@@ -65,4 +66,3 @@ class AlertWatchList(AlertTask):
 
         summary = 'Watchlist term detected by {} from {} on {}'.format(user, sourceipaddress, hostname)
         return self.createAlertDict(summary, category, tags, [event], severity)
-
