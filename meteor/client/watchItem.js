@@ -49,12 +49,12 @@ if (Meteor.isClient) {
                     if (typeof err == 'undefined') {
                         //console.log(result);
                         if ( result == true){
-                            Session.set('displayMessage','Watched successfully ');
+                            Session.set('displayMessage','watched & successfully ');
                         }else{
-                            Session.set('errorMessage','Add watch failed, returned & ' + JSON.stringify(result) );
+                            Session.set('errorMessage','add watch failed, returned & ' + JSON.stringify(result) );
                         }
                     }else{
-                        Session.set('errorMessage','Add watch failed & ' + JSON.stringify(err));
+                        Session.set('errorMessage','add watch failed & ' + JSON.stringify(err));
                     }
                 });
             $('#modalWatchItemWindow').modal('hide')

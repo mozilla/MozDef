@@ -65,3 +65,4 @@ class AlertWatchList(AlertTask):
 
         summary = 'Watchlist term detected by {} from {} on {}'.format(user, sourceipaddress, hostname)
         return self.createAlertDict(summary, category, tags, [event], severity)
+

@@ -72,7 +72,8 @@ def status():
     sendMessgeToPlugins(request, response, 'status')
     return response
 
-## placeholder for future watchlist request ##
+
+# placeholder for future watchlist request #
 @route('/getwatchlist')
 @route('/getwatchlist/')
 def status():
@@ -85,6 +86,7 @@ def status():
     response.body = getWatchlist()
     sendMessgeToPlugins(request, response, 'getwatchlist')
     return response
+
 
 @route('/logincounts')
 @route('/logincounts/')
@@ -144,6 +146,7 @@ def index():
     '''will receive a call to block an ip address'''
     sendMessgeToPlugins(request, response, 'blockfqdn')
     return response
+
 
 @post('/watchitem', methods=['POST'])
 @post('/watchitem/', methods=['POST'])
@@ -559,23 +562,24 @@ def getWatchlist():
         # delete any that expired
         watchlist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(hours=1)}})
 
+
         # Lastly, export the combined watchlist
         watchCursor=mozdefdb['watchlist'].aggregate([
-                {"$sort": {"dateAdded": -1}},
-                {"$match": {"watchcontent": {"$exists": True}}},
-                {"$match":
-                    {"$or":[
-                        {"dateExpiring": {"$gte": datetime.utcnow()}},
-                        {"dateExpiring": {"$exists": False}},
-                    ]},
-                },
-                {"$project":{"watchcontent":1}},
-            ])
+            {"$sort": {"dateAdded": -1}},
+            {"$match": {"watchcontent": {"$exists": True}}},
+            {"$match":
+                {"$or":[
+                    {"dateExpiring": {"$gte": datetime.utcnow()}},
+                    {"dateExpiring": {"$exists": False}},
+                ]},
+            },
+            {"$project":{"watchcontent":1}},
+        ])
         WatchList=[]
         for content in watchCursor:
             WatchList.append(
                 content['watchcontent']
-           )
+            )
         return json.dumps(WatchList)
     except ValueError as e:
         sys.stderr.write('Exception {0} collecting watch list\n'.format(e))
@@ -656,3 +660,4 @@ if __name__ == "__main__":
     run(host=options.listen_host, port=8081)
 else:
     application = default_app()
+
