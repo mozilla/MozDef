@@ -562,7 +562,6 @@ def getWatchlist():
         # delete any that expired
         watchlist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(hours=1)}})
 
-
         # Lastly, export the combined watchlist
         watchCursor=mozdefdb['watchlist'].aggregate([
             {"$sort": {"dateAdded": -1}},
@@ -572,7 +571,7 @@ def getWatchlist():
                     {"dateExpiring": {"$gte": datetime.utcnow()}},
                     {"dateExpiring": {"$exists": False}},
                 ]},
-            },
+             },
             {"$project":{"watchcontent":1}},
         ])
         WatchList=[]
@@ -583,6 +582,7 @@ def getWatchlist():
         return json.dumps(WatchList)
     except ValueError as e:
         sys.stderr.write('Exception {0} collecting watch list\n'.format(e))
+
 
 def getWhois(ipaddress):
     try:
@@ -660,4 +660,3 @@ if __name__ == "__main__":
     run(host=options.listen_host, port=8081)
 else:
     application = default_app()
-
