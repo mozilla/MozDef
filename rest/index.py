@@ -84,7 +84,7 @@ def status():
     response.content_type = "application/json"
     response.body = getWatchlist()
     sendMessgeToPlugins(request, response, 'getwatchlist')
-return response
+    return response
 
 @route('/logincounts')
 @route('/logincounts/')
