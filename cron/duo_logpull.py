@@ -41,7 +41,9 @@ def normalize(details):
             continue
         if f == "result":
             if details[f] != "SUCCESS":
-                normalized["error"] = True
+                normalized["success"] = False
+            else:
+                normalized["success"] = True
         normalized[f] = details[f]
     return normalized
 
@@ -79,6 +81,7 @@ def process_events(mozmsg, duo_events, etype, state):
                 continue
 
             details[i] = e[i]
+        mozmsg.category= etype
         mozmsg.details = normalize(details)
         if etype == 'administration':
             mozmsg.summary = e['action']
@@ -107,11 +110,11 @@ def main():
 
     duo = duo_client.Admin(ikey=options.IKEY, skey=options.SKEY, host=options.URL)
     mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
-    mozmsg.tags=['duosecurity', 'logs']
+    mozmsg.tags=['duosecurity']
     if options.update_tags != '':
         mozmsg.tags.append(options.update_tags)
-    mozmsg.category = 'Authentication'
-    mozmsg.source = 'DuoSecurity API'
+    mozmsg.category = 'authentication'
+    mozmsg.source = 'DuoSecurityAPI'
     if options.DEBUG:
         mozmsg.debug = options.DEBUG
         mozmsg.set_send_to_syslog(True, only_syslog=True)
