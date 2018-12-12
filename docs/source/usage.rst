@@ -263,7 +263,7 @@ Examples
 	        "username": "joe",
 	        "task": "access to admin page /admin_secret_radioactiv",
 	        "result": "10 authentication failures in a row",
-			"success": false
+	        "success": false
 	    }
 	}
 
