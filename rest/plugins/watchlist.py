@@ -117,8 +117,6 @@ class message(object):
         '''
         response.headers['X-PLUGIN'] = self.description
 
-        excludes = ['*','<','>']
-
         watchcontent = None
         comment = None
         duration = None
@@ -145,17 +143,18 @@ class message(object):
                     userid = i.values()[0]
 
             if watchitem and watchcontent is not None:
-                watchlisted = False
-                if watchlisted == False:
-                    if watchcontent not in excludes and len(watchcontent) > 1:
+                if len(watchcontent) > 1:
+                    sys.stderr.write('{0} does not meet requirements. Not added. \n'.format(watchcontent))
+
+                else:
+                    watchlisted = False
+                    if watchlisted == False:
                         self.watchItem(str(watchcontent),
                                        comment,
                                        duration,
                                        referenceID,
                                        userid)
-                        sys.stdout.write('added {0} to watchlist\n'.format(watchcontent))
-                else:
-                    sys.stdout.write('not adding {0}, the content already exists in the watchlist.\n'.format(watchcontent))
+
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))
 
