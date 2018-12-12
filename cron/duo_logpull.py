@@ -36,14 +36,14 @@ def normalize(details):
     normalized = {}
 
     for f in details:
-        if f in ("ip", "ip_address"):
+        if f in ("ip", "ip_address","client_ip"):
             normalized["sourceipaddress"] = details[f]
             continue
         if f == "result":
-            if details[f] != "SUCCESS":
-                normalized["success"] = False
-            else:
+            if details[f] == "SUCCESS":
                 normalized["success"] = True
+            else:
+                normalized["success"] = False
         normalized[f] = details[f]
     return normalized
 
