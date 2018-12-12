@@ -16,7 +16,6 @@ from pymongo import MongoClient
 def genMeteorID():
     return('%024x' % random.randrange(16**24))
 
-
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
@@ -48,15 +47,6 @@ class message(object):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
         self.initConfiguration()
 
-    def parse_watchlist(self, watchlist_file):
-        terms = []
-        with open(watchlist_file, "r") as text_file:
-            for line in text_file:
-                line=line.strip().strip("'").strip('"')
-                terms.append(line)
-        text_file.close()
-        return terms
-
     def initConfiguration(self):
         myparser = OptionParser()
         # setup self.options by sending empty list [] to parse_args
@@ -72,15 +62,13 @@ class message(object):
             3001,
             self.configfile)
 
-        # Watchlist as a list of terms one each to a line
-        self.options.watchlist_file = getConfig('watchlist_file', '/dev/null', self.configfile)
-
     def watchItem(self,
-                  watchcontent=None,
-                  comment=None,
-                  duration=None,
-                  referenceID=None,
-                  userID=None):
+                watchcontent=None,
+                comment=None,
+                duration=None,
+                referenceID=None,
+                userID=None
+                ):
         try:
             # DB connection/table
             mongoclient = MongoClient(self.options.mongohost, self.options.mongoport)
@@ -115,10 +103,10 @@ class message(object):
                 watched['reference']=referenceID
                 ref=watchlist.insert(watched)
                 sys.stdout.write('{0} written to db.\n'.format(ref))
-                sys.stdout.write('%s: added to the watchlist table.\n' % (watchcontent))
+                sys.stdout.write('%s added to the watchlist table.\n' % (watchcontent))
 
             else:
-                sys.stderr.write('%s: is already present in the watchlist table\n' % (str(watchcontent)))
+                sys.stderr.write('%s is already present in the watchlist table\n' % (str(watchcontent)))
         except Exception as e:
             sys.stderr.write('Error while watching %s: %s\n' % (watchcontent, e))
 
@@ -129,8 +117,7 @@ class message(object):
         '''
         response.headers['X-PLUGIN'] = self.description
 
-        # Refresh the watch list each time we get a message
-        self.options.watchlist = self.parse_watchlist(self.options.watchlist_file)
+        excludes = ['*','<','>']
 
         watchcontent = None
         comment = None
@@ -159,12 +146,7 @@ class message(object):
 
             if watchitem and watchcontent is not None:
                 watchlisted = False
-                for watchlist_term in self.options.watchlist:
-                    if watchlist_term == watchcontent:
-                        watchlisted = True
-                        sys.stdout.write('{0} is watchlisted as {1} with a duration of {3}.\n'.format(watchcontent, watchlist_term, duration))
-
-                if not watchlisted:
+                if watchlisted == False and watchcontent not in excludes:
                     self.watchItem(str(watchcontent),
                                    comment,
                                    duration,
