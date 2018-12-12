@@ -60,7 +60,7 @@ class TestKeyMapping():
         assert result['mozdefhostname'] == 'sample'
         assert result['hostname'] == 'ub_server'
         assert result['summary'] == 'Stopped Getty on tty1.'
-        assert result['source'] == 'daemon'
+        assert result['source'] == 'syslog_tcp'
         assert result['receivedtimestamp'] != result['utctimestamp']
         expected_year = datetime.datetime.now().year
         assert result['utctimestamp'] == str(expected_year) + '-10-27T14:01:12+00:00'

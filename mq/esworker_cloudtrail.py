@@ -181,7 +181,7 @@ def keyMapping(aDict):
             elif k == 'sourceipaddress':
                 returndict[u'details']['sourceipaddress'] = v
 
-            elif k == 'facility':
+            elif k in ('facility', 'source'):
                 returndict[u'source'] = v
 
             elif k in ('eventsource'):
