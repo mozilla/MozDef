@@ -148,7 +148,7 @@ class message(object):
 
                 else:
                     watchlisted = False
-                    if watchlisted == False:
+                    if watchlisted is False:
                         self.watchItem(str(watchcontent),
                                        comment,
                                        duration,
