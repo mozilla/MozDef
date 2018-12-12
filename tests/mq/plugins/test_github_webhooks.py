@@ -7,7 +7,6 @@ import random
 import string
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../mq/plugins'))
-sys.path.append('../../../mozdef_util')
 from mozdef_util.utilities.toUTC import toUTC
 from github_webhooks import message
 
