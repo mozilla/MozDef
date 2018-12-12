@@ -26,7 +26,7 @@ if (Meteor.isClient) {
 
         "click .watcheddelete": function(e,t){
             watchlist.remove(this._id);
-            Session.set('displayMessage','Deleted watch item for & ' + this.watchcontent);
+            Session.set('displayMessage','Deleted watch item & ' + this.watchcontent);
         }
     });
 

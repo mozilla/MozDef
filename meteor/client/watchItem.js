@@ -21,7 +21,7 @@ if (Meteor.isClient) {
                     if (typeof err == 'undefined') {
                         //console.log(result);
                         if ( result == true){
-                            Session.set('displayMessage','Watched & successfully ');
+                            Session.set('displayMessage','Watched successfully &' + JSON.stringify(result) );
                         }else{
                             Session.set('errorMessage','Add watch failed, returned & ' + JSON.stringify(result) );
                         }
@@ -49,7 +49,7 @@ if (Meteor.isClient) {
                     if (typeof err == 'undefined') {
                         //console.log(result);
                         if ( result == true){
-                            Session.set('displayMessage','watched & successfully ');
+                            Session.set('displayMessage','watched successfully &' + JSON.stringify(result) );
                         }else{
                             Session.set('errorMessage','add watch failed, returned & ' + JSON.stringify(result) );
                         }
