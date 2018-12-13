@@ -149,8 +149,8 @@ def keyMapping(aDict):
             if k in ('syslogseverity', 'severity', 'severityvalue', 'level'):
                 returndict[u'severity'] = toUnicode(v).upper()
 
-            if k in ('facility', 'syslogfacility'):
-                returndict[u'facility'] = toUnicode(v)
+            if k in ('facility', 'syslogfacility','source'):
+                returndict[u'source'] = toUnicode(v)
 
             if k in ('pid', 'processid'):
                 returndict[u'processid'] = toUnicode(v)

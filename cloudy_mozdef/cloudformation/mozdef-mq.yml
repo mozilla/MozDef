@@ -3,28 +3,25 @@ Description: Creates MozDef Amazon MQ
 Parameters:
   MQUserParameter:
     Type: String
-    Default: mozdef
     Description: The username for the AmazonMQ user.
+    Default: mozdef
   MQPasswordParameter:
     Type: String
-    NoEcho: true
-    Default: ''
     Description: The password for the AmazonMQ user. Leave this blank if you want an auto-generated password.
+    Default: ''
+    NoEcho: true
   MQInstanceType:
     Type: String
-    Default: mq.t2.micro
     Description: The instance type for the AmazonMQ instance.
+    Default: mq.t2.micro
   MQVpcId:
     Type: AWS::EC2::VPC::Id
-    Default: vpc-dc8eacb4
     Description: The VPC ID of the VPC within which the AmazonMQ instance will be provisioned.
   MQSubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Default: subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6
     Description: Comma-delimited list of subnet IDs of the VPCs within which the AmazonMQ instance will be provisioned.
   MozDefSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
-    Default: sg-02d7fe9627ea068e2
     Description: The security group of the Mozdef endpoint that is accessing AmazonMQ
 Conditions:
   PasswordIsSet: !Not [ !Equals [ !Ref MQPasswordParameter, '' ]]

@@ -34,7 +34,6 @@ class TestGuardDutyProbe(AlertTestSuite):
         "tags": ['guardduty', 'bruteforce'],
         "severity": "INFO",
         "summary": 'Guard Duty Port Probe by 1.2.3.4',
-        "notify_mozdefbot": False,
     }
 
     test_cases = []
