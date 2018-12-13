@@ -143,7 +143,7 @@ class message(object):
                     userid = i.values()[0]
 
             if watchitem and watchcontent is not None:
-                if len(watchcontent) > 1:
+                if len(watchcontent) < 2:
                     sys.stderr.write('{0} does not meet requirements. Not added. \n'.format(watchcontent))
 
                 else:

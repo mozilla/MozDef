@@ -11,6 +11,7 @@ from mozdef_util.query_models import SearchQuery, PhraseMatch, TermsMatch, Query
 import requests
 import json
 import logging
+import jwt
 
 logger = logging.getLogger()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -19,9 +20,12 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 class AlertWatchList(AlertTask):
     def main(self):
         self.parse_config('get_watchlist.conf', ['api_url'])
+        self.parse_config('get_watchlist.conf', ['jwt_secret'])
+
+        jwt_token = self.config.jwt_secret
 
         #Connect to rest api and grab response
-        r = requests.get(self.config.api_url)
+        r = requests.get(self.config.api_url, headers={'Authorization': 'jwt_secret {0}'.format(jwt_token) })
         status = r.status_code
         index = 0
         if status == 200:

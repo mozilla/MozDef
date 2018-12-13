@@ -49,6 +49,7 @@ pyparsing==2.1.10
 python-dateutil==2.6.1
 pytz==2017.3
 requests==2.18.4
+requests-jwt==0.5.3
 requests-futures==0.9.7
 rsa==3.1.4
 s3cmd==1.0.1
