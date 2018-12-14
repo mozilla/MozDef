@@ -104,7 +104,7 @@ class message(object):
             details_results = details_query.execute(es_client)
             # details.success is boolean. As an aggregate is an int (0/1)
             for details_term in details_results['aggregations']['details.success']['terms']:
-                if details_term['key']== 1:
+                if details_term['key'] == 1:
                     success = details_term['count']
                 if details_term['key'] == 0:
                     failures = details_term['count']
