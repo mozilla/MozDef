@@ -6,24 +6,24 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 
+from urlparse import urlparse
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, ExistsMatch, PhraseMatch, WildcardMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch
 
 
-class AlertProxyDropExfilDomains(AlertTask):
+class AlertProxyExfilDomains(AlertTask):
     def main(self):
-        self.parse_config('proxy_drop_exfil_domains.conf', ['exfil_domains'])
+        self.parse_config('proxy_exfil_domains.conf', ['exfil_domains'])
 
         search_query = SearchQuery(minutes=20)
 
         search_query.add_must([
             TermMatch('category', 'squid'),
             TermMatch('tags', 'squid'),
-            TermMatch('details.proxyaction', "TCP_DENIED/-")
         ])
 
         # Only notify on certain domains listed in the config
-        domain_regex = "/({0}).*/".format(
+        domain_regex = "/.*({0}).*/".format(
             self.config.exfil_domains.replace(',', '|'))
         search_query.add_must([
             QueryStringMatch('details.destination: {}'.format(domain_regex))
@@ -49,10 +49,16 @@ class AlertProxyDropExfilDomains(AlertTask):
 
         exfil_domains = set()
         for event in aggreg['allevents']:
-            domain = event['_source']['details']['destination'].split(':')
-            exfil_domains.add(domain[0])
+            try:
+                domain = urlparse(event['_source']['details']['destination']).netloc
+            except Exception:
+                # We already have a domain, not a URL
+                target = event['_source']['details']['destination'].split(':')
+                domain = target[0]
 
-        summary = 'Suspicious Proxy DROP event(s) detected from {0} to the following exfil domain(s): {1}'.format(
+            exfil_domains.add(domain)
+
+        summary = 'Suspicious Proxy event(s) detected from {0} to the following exfil domain(s): {1}'.format(
             aggreg['value'],
             ",".join(sorted(exfil_domains))
         )

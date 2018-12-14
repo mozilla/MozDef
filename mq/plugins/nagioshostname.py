@@ -21,6 +21,6 @@ class message(object):
         self.priority = 5
 
     def onMessage(self, message, metadata):
-        docid=hashlib.md5('nagiosstatus'+message['details']['nagios_hostname']).hexdigest()
-        metadata['id']=docid
+        docid = hashlib.md5('nagiosstatus' + message['details']['nagios_hostname']).hexdigest()
+        metadata['id'] = docid
         return (message, metadata)

@@ -10,7 +10,6 @@
 
 import logging
 import random
-from kitnirc.client import Channel
 from kitnirc.modular import Module
 from kitnirc.user import User
 

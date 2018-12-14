@@ -2,7 +2,6 @@ import os
 import sys
 from mozdef_util.utilities.toUTC import toUTC
 
-import mock
 import json
 import random
 import string

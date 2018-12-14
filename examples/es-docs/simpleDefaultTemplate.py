@@ -67,9 +67,9 @@ defaultTemplate = r'''
 }
 '''
 
-#valid json?
+# valid json?
 templateJson = json.loads(defaultTemplate)
 
-#post it:
+# post it
 r = requests.put(url="http://servername:9200/_template/defaulttemplate", data=defaultTemplate)
 print(r)

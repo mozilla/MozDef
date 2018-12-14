@@ -55,7 +55,7 @@ class message(object):
             request.body.close()
         try:
             requestDict = json.loads(arequest)
-        except ValueError as e:
+        except ValueError:
             response.status = 500
 
         print(requestDict, requestDict.keys())

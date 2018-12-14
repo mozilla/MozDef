@@ -16,8 +16,6 @@ from requests.auth import HTTPBasicAuth
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
@@ -71,7 +69,7 @@ def main():
             logger.debug('Creating %s index' % index)
             es.create_index(index, default_mapping_contents)
         except Exception as e:
-            logger.error("Unhandled exception, terminating: %r"%e)
+            logger.error("Unhandled exception, terminating: %r" % e)
 
     auth = HTTPBasicAuth(options.mquser, options.mqpassword)
 

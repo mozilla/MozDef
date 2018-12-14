@@ -6,8 +6,6 @@
 import os
 import sys
 import ConfigParser
-from datetime import datetime, timedelta
-import json
 import netaddr
 from boto3.session import Session
 
@@ -160,7 +158,6 @@ class message(object):
         '''
         # format/validate request.json:
         ipaddress = None
-        CIDR = None
         sendToBHVPC = False
 
         # loop through the fields of the form
@@ -179,7 +176,7 @@ class message(object):
                 sendToBHVPC = False
 
             if sendToBHVPC and ipaddress is not None:
-                #figure out the CIDR mask
+                # figure out the CIDR mask
                 if isIPv4(ipaddress) or isIPv6(ipaddress):
                     ipcidr=netaddr.IPNetwork(ipaddress)
                     if not ipcidr.ip.is_loopback() \

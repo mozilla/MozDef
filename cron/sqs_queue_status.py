@@ -14,22 +14,14 @@
 import json
 import os
 import sys
-import socket
-import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from hashlib import md5
 import boto.sqs
-from boto.sqs.message import RawMessage
-import base64
-import kombu
 
 from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.utilities.to_unicode import toUnicode
-from mozdef_util.utilities.remove_at import removeAt
-from mozdef_util.utilities.is_cef import isCEF
 from mozdef_util.utilities.logger import logger, initLogger
-from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 def getDocID(sqsregionidentifier):

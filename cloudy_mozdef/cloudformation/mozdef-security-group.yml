@@ -4,7 +4,6 @@ Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: The VPC ID of the VPC to deploy in
-    Default: vpc-dc8eacb4
 Resources:
   MozDefSecurityGroup:
     Type: AWS::EC2::SecurityGroup

@@ -36,7 +36,6 @@ class TestAlertGeomodel(AlertTestSuite):
         "category": "geomodel",
         "tags": ['geomodel'],
         "severity": "NOTICE",
-        "notify_mozdefbot": False,
         "summary": "ttesterson@mozilla.com NEWCOUNTRY Diamond Bar, United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
         "details": {
             "category": "NEWCOUNTRY",
@@ -67,7 +66,6 @@ class TestAlertGeomodel(AlertTestSuite):
     event = AlertTestSuite.create_event(default_event)
     event['_source']['details']['severity'] = 3
     alert = AlertTestSuite.create_alert(default_alert)
-    alert['notify_mozdefbot'] = True
     alert['severity'] = 'WARNING'
     test_cases.append(
         PositiveAlertTestCase(
@@ -103,7 +101,6 @@ class TestAlertGeomodel(AlertTestSuite):
         "category": "geomodel",
         "tags": ['geomodel'],
         "severity": "NOTICE",
-        "notify_mozdefbot": False,
         "summary": "person1@mozilla.com MOVEMENT window violation (London, United Kingdom) -> (San Jose, United States) -> (Frankfurt am Main, Germany) within 4h window",
     }
     test_cases.append(
@@ -130,7 +127,6 @@ class TestAlertGeomodel(AlertTestSuite):
         "category": "geomodel",
         "tags": ['geomodel'],
         "severity": "NOTICE",
-        "notify_mozdefbot": False,
         "summary": u"\xfcttesterson@mozilla.com NEWCOUNTRY \u0107Bar, \u0107United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
         "details": {
             "category": "NEWCOUNTRY",
