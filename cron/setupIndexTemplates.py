@@ -9,7 +9,6 @@
 # You only need to run it once, it will setup the templates
 # used as future indexes are created
 
-import requests
 import sys
 import os
 from configlib import getConfig, OptionParser

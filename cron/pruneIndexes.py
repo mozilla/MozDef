@@ -18,8 +18,6 @@ from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 

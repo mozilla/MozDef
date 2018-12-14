@@ -4,14 +4,11 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 import os
-import sys
-import bottle
-from bottle import debug,route, run, template, response,request,post, default_app
+from bottle import route, run, response, request, default_app
 from bottle import _stdout as bottlelog
-import kombu
-from kombu import Connection,Queue,Exchange
+from kombu import Connection, Queue, Exchange
 import json
-from configlib import getConfig,OptionParser
+from configlib import getConfig, OptionParser
 
 
 @route('/status')

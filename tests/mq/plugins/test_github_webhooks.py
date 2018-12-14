@@ -1,13 +1,7 @@
 import os
 import sys
 
-import mock
-import json
-import random
-import string
-
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../mq/plugins'))
-from mozdef_util.utilities.toUTC import toUTC
 from github_webhooks import message
 
 

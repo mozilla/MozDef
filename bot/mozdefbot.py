@@ -8,25 +8,18 @@
 import json
 import kitnirc.client
 import kitnirc.modular
-import kombu
 import logging
 import netaddr
 import os
-import pytz
 import random
-import select
 import sys
 import time
-import threading
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from dateutil.parser import parse
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 from ipwhois import IPWhois
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.geo_ip import GeoIP
 

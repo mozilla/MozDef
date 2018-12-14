@@ -19,8 +19,6 @@ from pymongo import MongoClient
 from collections import Counter
 from kombu import Connection, Exchange
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, PhraseMatch

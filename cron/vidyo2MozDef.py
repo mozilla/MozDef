@@ -8,21 +8,13 @@
 import copy
 import os
 import sys
-import re
 import json
-import csv
-import string
 import ConfigParser
-import tempfile
-import logging
 import socket
-import hashlib
 import MySQLdb
 from requests import Session
 from optparse import OptionParser
 from datetime import datetime
-from os import stat
-from os.path import exists, getsize
 
 
 class MozDefError(Exception):

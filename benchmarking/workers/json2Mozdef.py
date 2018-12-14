@@ -11,16 +11,12 @@ from datetime import datetime
 import pytz
 import json
 import socket
-import json
 from optparse import OptionParser
 from requests_futures.sessions import FuturesSession
 from multiprocessing import Process, Queue
-import random
 import logging
-from logging.handlers import SysLogHandler
 from Queue import Empty
 from requests.packages.urllib3.exceptions import ClosedPoolError
-import requests
 import time
 
 httpsession = FuturesSession(max_workers=5)

@@ -3,8 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import sys
-import os
 from mozdef_util.utilities.key_exists import key_exists
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.dot_dict import DotDict

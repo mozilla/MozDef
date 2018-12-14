@@ -1,5 +1,3 @@
-import os
-import sys
 from mozdef_util.event import Event
 from mozdef_util.utilities.toUTC import toUTC
 import socket

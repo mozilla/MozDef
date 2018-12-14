@@ -6,7 +6,6 @@
 import netaddr
 import os
 
-import sys
 from mozdef_util.geo_ip import GeoIP
 
 

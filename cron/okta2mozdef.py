@@ -5,9 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-import os
 import sys
-from configlib import getConfig,OptionParser
+from configlib import getConfig, OptionParser
 import logging
 from logging.handlers import SysLogHandler
 import json
@@ -17,8 +16,6 @@ from datetime import date
 import requests
 import netaddr
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 

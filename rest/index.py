@@ -14,7 +14,7 @@ import requests
 import sys
 import socket
 from bottle import route, run, response, request, default_app, post
-from datetime import datetime, timedelta
+from datetime import datetime
 from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
 from operator import itemgetter
@@ -22,9 +22,8 @@ from pymongo import MongoClient
 from bson import json_util
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
-from mozdef_util.query_models import SearchQuery, TermMatch, RangeMatch, Aggregation
+from mozdef_util.query_models import SearchQuery, TermMatch
 
-from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 
 

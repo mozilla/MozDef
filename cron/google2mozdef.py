@@ -5,21 +5,17 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-import os
 import sys
 import logging
 import requests
 import json
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from datetime import timedelta
 from logging.handlers import SysLogHandler
 from httplib2 import Http
 from oauth2client.client import SignedJwtAssertionCredentials
 from apiclient.discovery import build
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 
 logger = logging.getLogger(sys.argv[0])

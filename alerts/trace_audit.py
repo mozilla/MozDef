@@ -8,7 +8,7 @@
 # This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class TraceAudit(AlertTask):

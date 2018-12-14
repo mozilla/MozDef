@@ -9,7 +9,6 @@ import time
 import json
 
 import pytest
-from elasticsearch.exceptions import ConnectionTimeout
 
 import os
 import sys

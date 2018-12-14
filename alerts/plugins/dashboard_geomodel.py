@@ -5,7 +5,6 @@
 
 import hjson
 import os
-import sys
 from binascii import b2a_hex
 import boto3
 import datetime

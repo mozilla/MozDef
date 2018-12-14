@@ -7,9 +7,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import logging
-from kitnirc.client import Channel
 from kitnirc.modular import Module
-from kitnirc.user import User
 import threading
 import time
 import json

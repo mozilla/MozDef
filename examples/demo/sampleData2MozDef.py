@@ -10,28 +10,16 @@ import sys
 from datetime import datetime
 import pytz
 import json
-import socket
-import json
-from requests_futures.sessions import FuturesSession
 from multiprocessing import Process, Queue
 import random
 import logging
-from logging.handlers import SysLogHandler
 from Queue import Empty
-from requests.packages.urllib3.exceptions import ClosedPoolError
 import requests
 import time
 from configlib import getConfig, OptionParser
 import ConfigParser
 import glob
-from datetime import datetime
 from datetime import timedelta
-from dateutil.parser import parse
-from datetime import date
-import pytz
-
-import sys
-import os
 
 from mozdef_util.utilities.toUTC import toUTC
 

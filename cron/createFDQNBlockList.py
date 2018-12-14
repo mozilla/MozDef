@@ -17,7 +17,6 @@ from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
-import os
 from mozdef_util.utilities.toUTC import toUTC
 
 

@@ -6,8 +6,6 @@
 import os
 import sys
 import ConfigParser
-from datetime import datetime, timedelta
-import json
 import netaddr
 from boto3.session import Session
 

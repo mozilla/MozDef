@@ -5,7 +5,6 @@
 #
 
 import sys
-import os
 from datetime import datetime, timedelta, tzinfo
 try:
     from datetime import timezone
