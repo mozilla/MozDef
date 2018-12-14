@@ -18,4 +18,3 @@ ignore =
   E722 # do not use bare except'
   F811 # redefinition of unused 'datetime' from line 10
   F841 # local variable 'CIDR' is assigned to but never used
-  W503 # line break before binary operator

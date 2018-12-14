@@ -144,10 +144,11 @@ def formatAlert(jsonDictIn):
     if 'category' in jsonDictIn.keys():
         category = jsonDictIn['category']
 
-    return colorify('{0}: {1} {2}'.format(severity, colors['blue']
-                                          + category
-                                          + colors['normal'],
-                                          summary.encode('ascii', 'replace')))
+    return colorify('{0}: {1} {2}'.format(
+        severity,
+        colors['blue'] + category + colors['normal'],
+        summary.encode('ascii', 'replace')
+    ))
 
 
 class mozdefBot():
