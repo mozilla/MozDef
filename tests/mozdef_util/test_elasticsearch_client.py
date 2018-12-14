@@ -357,7 +357,7 @@ class TestWriteWithIDExists(ElasticsearchClientTest):
         saved_event = self.es_client.save_event(body=event, doc_id=event_id)
         assert saved_event['_id'] == event_id
         self.flush(self.event_index_name)
-        fetched_event = self.es_client.get_event_by_id(event_id)
+        self.es_client.get_event_by_id(event_id)
 
 
 class TestGetIndices(ElasticsearchClientTest):

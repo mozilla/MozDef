@@ -50,7 +50,7 @@ def enable_cors(fn):
 @route('/test/')
 def test():
     '''test endpoint for..testing'''
-    ip = request.environ.get('REMOTE_ADDR')
+    # ip = request.environ.get('REMOTE_ADDR')
     # response.headers['X-IP'] = '{0}'.format(ip)
     response.status = 200
 
@@ -143,7 +143,7 @@ def index():
     # valid json?
     try:
         requestDict = json.loads(arequest)
-    except ValueError as e:
+    except ValueError:
         response.status = 500
 
     if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
@@ -167,7 +167,7 @@ def ipintel():
     # valid json?
     try:
         requestDict = json.loads(arequest)
-    except ValueError as e:
+    except ValueError:
         response.status = 500
     if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
         response.content_type = "application/json"
@@ -192,7 +192,7 @@ def index():
     # valid json?
     try:
         requestDict = json.loads(arequest)
-    except ValueError as e:
+    except ValueError:
         response.status = 500
         return
     if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):

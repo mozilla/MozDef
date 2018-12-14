@@ -224,7 +224,7 @@ def s3_upload_file(file_path, bucket_name, key_name):
     conn = boto.connect_s3(aws_access_key_id=options.aws_access_key_id, aws_secret_access_key=options.aws_secret_access_key)
     try:
         bucket = conn.get_bucket(bucket_name, validate=False)
-    except boto.exception.S3ResponseError as e:
+    except boto.exception.S3ResponseError:
         conn.create_bucket(bucket_name)
         bucket = conn.get_bucket(bucket_name, validate=False)
 

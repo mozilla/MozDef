@@ -158,7 +158,6 @@ class message(object):
         '''
         # format/validate request.json:
         ipaddress = None
-        CIDR = None
         sendToBHVPC = False
 
         # loop through the fields of the form

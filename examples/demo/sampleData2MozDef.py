@@ -57,7 +57,7 @@ def setConfig(option,value,configfile):
 def postLogs(logcache):
     # post logs asynchronously with requests workers and check on the results
     # expects a queue object from the multiprocessing library
-    posts=[]
+    # posts=[]
     try:
         while not logcache.empty():
             postdata=logcache.get_nowait()
@@ -70,7 +70,7 @@ def postLogs(logcache):
                 # append to posts if this is long running and you want
                 # events to try again later.
                 # posts.append((r,postdata,url))
-    except Empty as e:
+    except Empty:
         pass
     # for p, postdata, url in posts:
     #     try:

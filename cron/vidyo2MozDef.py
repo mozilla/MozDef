@@ -100,7 +100,7 @@ class MozDefEvent():
             raise MozDefError('Summary is a required field')
 
         try:
-            r = self.httpsession.post(self.url, json.dumps(log_msg, encoding='utf-8'), verify=self.verify_certificate)
+            self.httpsession.post(self.url, json.dumps(log_msg, encoding='utf-8'), verify=self.verify_certificate)
 
         except Exception as e:
             if not self.fire_and_forget_mode:

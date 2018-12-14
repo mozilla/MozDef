@@ -27,7 +27,7 @@ def status():
 @route('/test')
 @route('/test/')
 def testindex():
-    ip = request.environ.get('REMOTE_ADDR')
+    # ip = request.environ.get('REMOTE_ADDR')
     # response.headers['X-IP'] = '{0}'.format(ip)
     response.status=200
 
@@ -53,7 +53,7 @@ def bulkindex():
                     # valid json?
                     try:
                         eventDict=json.loads(i)
-                    except ValueError as e:
+                    except ValueError:
                         response.status=500
                         return
                     # don't post the items telling us where to post things..
@@ -79,7 +79,7 @@ def eventsindex():
         # valid json?
         try:
             eventDict=json.loads(anevent)
-        except ValueError as e:
+        except ValueError:
             response.status=500
             return
         # let the message queue worker who gets this know where it was posted
@@ -101,7 +101,7 @@ def cefindex():
         # valid json?
         try:
             cefDict=json.loads(anevent)
-        except ValueError as e:
+        except ValueError:
             response.status=500
             return
         # let the message queue worker who gets this know where it was posted
@@ -129,7 +129,7 @@ def customindex(application):
         # valid json?
         try:
             customDict=json.loads(anevent)
-        except ValueError as e:
+        except ValueError:
             response.status=500
             return
         # let the message queue worker who gets this know where it was posted

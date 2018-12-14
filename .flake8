@@ -17,4 +17,3 @@ ignore =
   E402 # module level import not at top of file
   E501 # line too long
   E722 # do not use bare except'
-  F841 # local variable 'CIDR' is assigned to but never used

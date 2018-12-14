@@ -127,7 +127,7 @@ def ipLocation(ip):
             if geoDict['country_code'] in ('US'):
                 if geoDict['metro_code']:
                     location = location + '/{0}'.format(geoDict['metro_code'])
-    except Exception as e:
+    except Exception:
         location = ""
     return location
 

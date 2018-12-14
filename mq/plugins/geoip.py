@@ -37,7 +37,7 @@ class message(object):
                 return geoDict
             else:
                 location['location'] = 'unknown'
-        except ValueError as e:
+        except ValueError:
             pass
         return location
 
