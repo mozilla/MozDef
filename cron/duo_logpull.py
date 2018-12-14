@@ -81,7 +81,7 @@ def process_events(mozmsg, duo_events, etype, state):
                 continue
 
             details[i] = e[i]
-        mozmsg.category= etype
+        mozmsg.set_category(etype)
         mozmsg.details = normalize(details)
         if etype == 'administration':
             mozmsg.summary = e['action']
@@ -113,7 +113,7 @@ def main():
     mozmsg.tags=['duosecurity']
     if options.update_tags != '':
         mozmsg.tags.append(options.update_tags)
-    mozmsg.category = 'authentication'
+    mozmsg.set_category('authentication')
     mozmsg.source = 'DuoSecurityAPI'
     if options.DEBUG:
         mozmsg.debug = options.DEBUG
