@@ -144,14 +144,14 @@ def makeEvents():
             if not logcache.empty():
                 time.sleep(.01)
                 try:
-                    postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
+                    postingProcess = Process(target=postLogs, args=(logcache,), name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35:  # resource temporarily unavailable.
+                    if e.errno == 35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
-                        logger.error('%r'%e)
+                        logger.error('%r' % e)
 
     except KeyboardInterrupt as e:
         sys.exit(1)
@@ -217,11 +217,11 @@ def makeAlerts():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35:  # resource temporarily unavailable.
+                    if e.errno == 35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
-                        logger.error('%r'%e)
+                        logger.error('%r' % e)
 
     except KeyboardInterrupt as e:
         sys.exit(1)
@@ -287,11 +287,11 @@ def makeAttackers():
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35:  # resource temporarily unavailable.
+                    if e.errno == 35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
-                        logger.error('%r'%e)
+                        logger.error('%r' % e)
 
     except KeyboardInterrupt as e:
         sys.exit(1)
@@ -337,8 +337,8 @@ if __name__ == '__main__':
             postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefDemoData")
             postingProcess.start()
         except OSError as e:
-            if e.errno==35:  # resource temporarily unavailable.
+            if e.errno == 35:  # resource temporarily unavailable.
                 print(e)
                 pass
             else:
-                logger.error('%r'%e)
+                logger.error('%r' % e)

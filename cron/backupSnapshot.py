@@ -120,7 +120,7 @@ echo "DONE!"
     except boto.exception.NoAuthHandlerFound:
         logger.error("No auth handler found, check your credentials")
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
 
 
 def initConfig():

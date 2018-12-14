@@ -69,7 +69,7 @@ def main():
             logger.debug('Creating %s index' % index)
             es.create_index(index, default_mapping_contents)
         except Exception as e:
-            logger.error("Unhandled exception, terminating: %r"%e)
+            logger.error("Unhandled exception, terminating: %r" % e)
 
     auth = HTTPBasicAuth(options.mquser, options.mqpassword)
 

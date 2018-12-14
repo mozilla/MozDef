@@ -130,7 +130,7 @@ def main():
         else:
             logger.error('Could not get Okta events HTTP error code {} reason {}'.format(r.status_code, r.reason))
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
 
 
 def initConfig():

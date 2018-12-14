@@ -183,7 +183,7 @@ def main():
         state.data['lastrun'] = lastrun
         state.write_state_file()
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
 
 
 def initConfig():

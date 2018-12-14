@@ -38,7 +38,7 @@ def postLogs(logcache):
     try:
         while not logcache.empty():
             postdata=logcache.get_nowait()
-            if len(postdata)>0:
+            if len(postdata) > 0:
                 url=options.url
                 a=httpsession.get_adapter(url)
                 a.max_retries=3
@@ -48,15 +48,15 @@ def postLogs(logcache):
         pass
     for p,postdata,url in posts:
         try:
-            if p.result().status_code >=500:
-                logger.error("exception posting to %s %r [will retry]\n"%(url,p.result().status_code))
+            if p.result().status_code >= 500:
+                logger.error("exception posting to %s %r [will retry]\n" % (url, p.result().status_code))
                 #try again later when the next message in forces other attempts at posting.
                 logcache.put(postdata)
         except ClosedPoolError as e:
             #logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n"%(url,e,postdata))
             logcache.put(postdata)
         except Exception as e:
-            logger.fatal("exception posting to %s %r %r [will not retry]\n"%(url,e,postdata))
+            logger.fatal("exception posting to %s %r %r [will not retry]\n" % (url, e, postdata))
             sys.exit(1)
 
 
@@ -94,21 +94,21 @@ if __name__ == '__main__':
                     postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
                     postingProcess.start()
                 except OSError as e:
-                    if e.errno==35:  # resource temporarily unavailable.
+                    if e.errno == 35:  # resource temporarily unavailable.
                         print(e)
                         pass
                     else:
-                        logger.error('%r'%e)
+                        logger.error('%r' % e)
 
         while not logcache.empty():
             try:
                 postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
                 postingProcess.start()
             except OSError as e:
-                if e.errno==35:  # resource temporarily unavailable.
+                if e.errno == 35:  # resource temporarily unavailable.
                     print(e)
                     pass
                 else:
-                    logger.error('%r'%e)
+                    logger.error('%r' % e)
     except KeyboardInterrupt as e:
         sys.exit(1)

@@ -13,7 +13,6 @@ per-file-ignores =
 
 ignore =
   E225 # missing whitespace around operator
-  E228 # missing whitespace around modulo operator
   E231 # missing whitespace after ','
   E265 # block comment should start with '# '
   E402 # module level import not at top of file
