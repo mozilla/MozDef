@@ -21,7 +21,7 @@ class message(object):
         self.priority = 5
 
     def onMessage(self, message, metadata):
-        docid=hashlib.md5('vidyoUniqueCallID'+message['details']['UniqueCallID']).hexdigest()
-        metadata['id']=docid
+        docid = hashlib.md5('vidyoUniqueCallID' + message['details']['UniqueCallID']).hexdigest()
+        metadata['id'] = docid
         metadata['doc_type'] = 'vidyo'
         return (message, metadata)

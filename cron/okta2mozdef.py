@@ -11,8 +11,6 @@ import logging
 from logging.handlers import SysLogHandler
 import json
 from datetime import datetime
-from datetime import timedelta
-from datetime import date
 import requests
 import netaddr
 
@@ -21,7 +19,7 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.INFO
+logger.level = logging.INFO
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -72,14 +70,11 @@ def main():
         s = requests.Session()
         s.headers.update({'Accept': 'application/json'})
         s.headers.update({'Content-type': 'application/json'})
-        s.headers.update({'Authorization':'SSWS {0}'.format(options.apikey)})
+        s.headers.update({'Authorization': 'SSWS {0}'.format(options.apikey)})
 
         #capture the time we start running so next time we catch any events created while we run.
         state = State(options.state_file)
         lastrun = toUTC(datetime.now()).isoformat()
-        #in case we don't archive files..only look at today and yesterday's files.
-        yesterday=date.strftime(datetime.utcnow()-timedelta(days=1),'%Y/%m/%d')
-        today = date.strftime(datetime.utcnow(),'%Y/%m/%d')
 
         r = s.get('https://{0}/api/v1/events?startDate={1}&limit={2}'.format(
             options.oktadomain,

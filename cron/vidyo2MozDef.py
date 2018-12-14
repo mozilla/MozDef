@@ -149,7 +149,7 @@ def main():
                 call[k] = call[k].decode('utf-8','ignore').encode('ascii','ignore')
 
         mdEvent.send(timestamp=call['JoinTime'],
-                     summary='Vidyo call status for '+call['UniqueCallID'].encode('ascii', 'ignore'),
+                     summary='Vidyo call status for ' + call['UniqueCallID'].encode('ascii', 'ignore'),
                      tags=['vidyo'],
                      details=call,
                      category='vidyo',

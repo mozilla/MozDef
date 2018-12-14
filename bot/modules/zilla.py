@@ -39,7 +39,7 @@ class Zilla(Module):
             self.interval = 9999999
             self.channel = '#test'
 
-        self._bugzilla = bugzilla.Bugzilla(url=self.url+'rest/', api_key=self.api_key)
+        self._bugzilla = bugzilla.Bugzilla(url=self.url + 'rest/', api_key=self.api_key)
 
         _log.info("zilla module initialized for {}, pooling every {} seconds.".format(self.url, self.interval))
 
@@ -47,7 +47,7 @@ class Zilla(Module):
         last = 0
         while not self._stop:
             now = time.time()
-            if ((now-last) > self.interval):
+            if ((now - last) > self.interval):
                 #Add all the actions you want to do with bugzilla here ;)
                 self.bugzilla_search()
                 last = now

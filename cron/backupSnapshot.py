@@ -50,8 +50,8 @@ def main():
             aws_access_key_id=options.aws_access_key_id,
             aws_secret_access_key=options.aws_secret_access_key
         )
-        idate = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y%m%d')
-        bucketdate = date.strftime(datetime.utcnow()-timedelta(days=1),'%Y-%m')
+        idate = date.strftime(datetime.utcnow() - timedelta(days=1), '%Y%m%d')
+        bucketdate = date.strftime(datetime.utcnow() - timedelta(days=1), '%Y-%m')
         hostname = socket.gethostname()
 
         # Create or update snapshot configuration

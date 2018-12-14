@@ -25,7 +25,7 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.WARNING
+logger.level = logging.WARNING
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -47,10 +47,10 @@ def esPruneIndexes():
                 if pruning != '0':
                     index_to_prune = index
                     if rotation == 'daily':
-                        idate = date.strftime(toUTC(datetime.now()) - timedelta(days=int(pruning)),'%Y%m%d')
+                        idate = date.strftime(toUTC(datetime.now()) - timedelta(days=int(pruning)), '%Y%m%d')
                         index_to_prune += '-%s' % idate
                     elif rotation == 'monthly':
-                        idate = date.strftime(datetime.utcnow() - timedelta(days=31*int(pruning)),'%Y%m')
+                        idate = date.strftime(datetime.utcnow() - timedelta(days=31 * int(pruning)), '%Y%m')
                         index_to_prune += '-%s' % idate
 
                     if index_to_prune in indices:
@@ -62,7 +62,7 @@ def esPruneIndexes():
                 logger.error("Unhandled exception while deleting %s, terminating: %r" % (index_to_prune, e))
 
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
 
 
 def initConfig():

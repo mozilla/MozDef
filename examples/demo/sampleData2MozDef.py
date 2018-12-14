@@ -115,7 +115,7 @@ def makeEvents():
             #print(eventfile)
             events = json.load(open(eventfile))
             target = random.randint(0, len(events))
-            for event in events[target:target+1]:
+            for event in events[target:target + 1]:
                 event['timestamp'] = pytz.timezone('UTC').localize(datetime.utcnow()).isoformat()
                 #remove stored times
                 if 'utctimestamp' in event.keys():
@@ -179,7 +179,7 @@ def makeAlerts():
             # if there's only one event in the file..use it.
             if len(events) == 1 and target == 1:
                 target = 0
-            for event in events[target:target+1]:
+            for event in events[target:target + 1]:
                 event['timestamp'] = pytz.timezone('UTC').localize(datetime.utcnow()).isoformat()
                 #remove stored times
                 if 'utctimestamp' in event.keys():
@@ -249,7 +249,7 @@ def makeAttackers():
             # if there's only one event in the file..use it.
             if len(events) == 1 and target == 1:
                 target = 0
-            for event in events[target:target+1]:
+            for event in events[target:target + 1]:
                 event['timestamp'] = pytz.timezone('UTC').localize(datetime.utcnow()).isoformat()
                 #remove stored times
                 if 'utctimestamp' in event.keys():
