@@ -58,6 +58,6 @@ six==1.11.0
 supervisor==3.3.1
 tzlocal==1.4
 uritemplate==0.6
-urllib3==1.22
+urllib3==1.23
 uwsgi==2.0.17.1
 virtualenv==1.11.4
