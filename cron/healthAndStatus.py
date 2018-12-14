@@ -16,8 +16,6 @@ from requests.auth import HTTPBasicAuth
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
