@@ -101,7 +101,7 @@ class message(object):
         if 'ts' in newmessage['details']:
             newmessage[u'utctimestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
             newmessage[u'timestamp'] = toUTC(float(newmessage['details']['ts'])).isoformat()
-            #del(newmessage['details']['ts'])
+            # del(newmessage['details']['ts'])
         else:
             # a malformed message somehow managed to crawl to us, let's put it somewhat together
             newmessage[u'utctimestamp'] = toUTC(datetime.now()).isoformat()

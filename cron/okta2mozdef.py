@@ -64,7 +64,7 @@ def main():
         logger.addHandler(sh)
 
     logger.debug('started')
-    #logger.debug(options)
+    # logger.debug(options)
     try:
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         s = requests.Session()
@@ -72,7 +72,7 @@ def main():
         s.headers.update({'Content-type': 'application/json'})
         s.headers.update({'Authorization': 'SSWS {0}'.format(options.apikey)})
 
-        #capture the time we start running so next time we catch any events created while we run.
+        # capture the time we start running so next time we catch any events created while we run.
         state = State(options.state_file)
         lastrun = toUTC(datetime.now()).isoformat()
 

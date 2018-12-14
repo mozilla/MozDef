@@ -33,9 +33,9 @@ class TraceAudit(AlertTask):
         tags = ['audit']
 
         summary = ('{0} instances of Strace or Ptrace executed on a system by {1}'.format(aggreg['count'], aggreg['value'], ))
-        hostnames = self.mostCommon(aggreg['allevents'],'_source.hostname')
-        #did they modify more than one host?
-        #or just modify an existing configuration more than once?
+        hostnames = self.mostCommon(aggreg['allevents'], '_source.hostname')
+        # did they modify more than one host?
+        # or just modify an existing configuration more than once?
         if len(hostnames) > 1:
             for i in hostnames[:5]:
                 summary += ' on {0} ({1} hosts)'.format(i[0], i[1])

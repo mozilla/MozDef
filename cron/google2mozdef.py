@@ -199,10 +199,10 @@ def initConfig():
     # for detailed information on delegating a service account for use in gathering google admin sdk reports
     #
 
-    #google's json credential file exported from the project/admin console
+    # google's json credential file exported from the project/admin console
     options.jsoncredentialfile=getConfig('jsoncredentialfile','/path/to/filename.json',options.configfile)
 
-    #email of admin to impersonate as a service account
+    # email of admin to impersonate as a service account
     options.impersonate = getConfig('impersonate', 'someone@yourcompany.com', options.configfile)
 
 

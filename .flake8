@@ -14,7 +14,6 @@ per-file-ignores =
 ignore =
   E225 # missing whitespace around operator
   E231 # missing whitespace after ','
-  E265 # block comment should start with '# '
   E402 # module level import not at top of file
   E501 # line too long
   E722 # do not use bare except'

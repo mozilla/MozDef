@@ -258,10 +258,10 @@ def searchMongoAlerts(mozdefdb):
                         # summarize the alert categories
                         # returns list of tuples: [(u'bruteforce', 8)]
                         categoryCounts= mostCommon(matchingalerts,'category')
-                        #are the alerts all the same category?
+                        # are the alerts all the same category?
 
                         if len(categoryCounts) == 1:
-                            #is the alert category mapped to an attacker category?
+                            # is the alert category mapped to an attacker category?
                             for category in options.categorymapping:
                                 if category.keys()[0] == categoryCounts[0][0]:
                                     attacker['category'] = category[category.keys()[0]]

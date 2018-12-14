@@ -21,8 +21,8 @@ import time
 
 httpsession = FuturesSession(max_workers=5)
 httpsession.trust_env=False  # turns of needless .netrc check for creds
-#a = requests.adapters.HTTPAdapter(max_retries=2)
-#httpsession.mount('http://', a)
+# a = requests.adapters.HTTPAdapter(max_retries=2)
+# httpsession.mount('http://', a)
 
 
 logger = logging.getLogger(sys.argv[0])
@@ -32,8 +32,8 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 
 def postLogs(logcache):
-    #post logs asynchronously with requests workers and check on the results
-    #expects a queue object from the multiprocessing library
+    # post logs asynchronously with requests workers and check on the results
+    # expects a queue object from the multiprocessing library
     posts=[]
     try:
         while not logcache.empty():
@@ -50,10 +50,10 @@ def postLogs(logcache):
         try:
             if p.result().status_code >= 500:
                 logger.error("exception posting to %s %r [will retry]\n" % (url, p.result().status_code))
-                #try again later when the next message in forces other attempts at posting.
+                # try again later when the next message in forces other attempts at posting.
                 logcache.put(postdata)
         except ClosedPoolError as e:
-            #logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n"%(url,e,postdata))
+            # logger.fatal("Closed Pool Error exception posting to %s %r %r [will retry]\n"%(url,e,postdata))
             logcache.put(postdata)
         except Exception as e:
             logger.fatal("exception posting to %s %r %r [will not retry]\n" % (url, e, postdata))
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     sh=logging.StreamHandler(sys.stdout)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
-    #create a list of logs we can append json to and call for a post when we want.
+    # create a list of logs we can append json to and call for a post when we want.
     logcache=Queue()
     try:
         for i in range(0,10):

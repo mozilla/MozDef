@@ -48,7 +48,7 @@ class Zilla(Module):
         while not self._stop:
             now = time.time()
             if ((now - last) > self.interval):
-                #Add all the actions you want to do with bugzilla here ;)
+                # Add all the actions you want to do with bugzilla here ;)
                 self.bugzilla_search()
                 last = now
             time.sleep(1)

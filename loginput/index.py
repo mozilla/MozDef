@@ -28,10 +28,10 @@ def status():
 @route('/test/')
 def testindex():
     ip = request.environ.get('REMOTE_ADDR')
-    #response.headers['X-IP'] = '{0}'.format(ip)
+    # response.headers['X-IP'] = '{0}'.format(ip)
     response.status=200
 
-#act like elastic search bulk index
+# act like elastic search bulk index
 
 
 @route('/_bulk',method='POST')
@@ -39,10 +39,10 @@ def testindex():
 def bulkindex():
     if request.body:
         bulkpost=request.body.read()
-        #bottlelog('request:{0}\n'.format(bulkpost))
+        # bottlelog('request:{0}\n'.format(bulkpost))
         request.body.close()
         if len(bulkpost)>10:  # TODO Check for bulk format.
-            #iterate on messages and post to event message queue
+            # iterate on messages and post to event message queue
 
             eventlist=[]
             for i in bulkpost.splitlines():
@@ -50,7 +50,7 @@ def bulkindex():
 
             for i in eventlist:
                 try:
-                    #valid json?
+                    # valid json?
                     try:
                         eventDict=json.loads(i)
                     except ValueError as e:
@@ -74,17 +74,17 @@ def bulkindex():
 def eventsindex():
     if request.body:
         anevent=request.body.read()
-        #bottlelog('request:{0}\n'.format(anevent))
+        # bottlelog('request:{0}\n'.format(anevent))
         request.body.close()
-        #valid json?
+        # valid json?
         try:
             eventDict=json.loads(anevent)
         except ValueError as e:
             response.status=500
             return
-        #let the message queue worker who gets this know where it was posted
+        # let the message queue worker who gets this know where it was posted
         eventDict['endpoint']='events'
-        #post to event message queue
+        # post to event message queue
         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
         ensurePublish(eventDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
 
@@ -93,21 +93,21 @@ def eventsindex():
 
 @route('/cef', method=['POST','PUT'])
 @route('/cef/',method=['POST','PUT'])
-#debug(True)
+# debug(True)
 def cefindex():
     if request.body:
         anevent=request.body.read()
         request.body.close()
-        #valid json?
+        # valid json?
         try:
             cefDict=json.loads(anevent)
         except ValueError as e:
             response.status=500
             return
-        #let the message queue worker who gets this know where it was posted
+        # let the message queue worker who gets this know where it was posted
         cefDict['endpoint']='cef'
 
-        #post to eventtask exchange
+        # post to eventtask exchange
         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
         ensurePublish(cefDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
     return
@@ -126,17 +126,17 @@ def customindex(application):
     if request.body:
         anevent=request.body.read()
         request.body.close()
-        #valid json?
+        # valid json?
         try:
             customDict=json.loads(anevent)
         except ValueError as e:
             response.status=500
             return
-        #let the message queue worker who gets this know where it was posted
+        # let the message queue worker who gets this know where it was posted
         customDict['endpoint']= application
         customDict['customendpoint'] = True
 
-        #post to eventtask exchange
+        # post to eventtask exchange
         ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
         ensurePublish(customDict,exchange=eventTaskExchange,routing_key=options.taskexchange)
     return
@@ -151,13 +151,13 @@ def initConfig():
     options.listen_host=getConfig('listen_host', '127.0.0.1', options.configfile)
 
 
-#get config info:
+# get config info:
 parser=OptionParser()
 parser.add_option("-c", dest='configfile', default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'), help="configuration file to use")
 (options,args) = parser.parse_args()
 initConfig()
 
-#connect and declare the message queue/kombu objects.
+# connect and declare the message queue/kombu objects.
 connString='amqp://{0}:{1}@{2}:{3}//'.format(options.mquser,options.mqpassword,options.mqserver,options.mqport)
 mqConn=Connection(connString)
 

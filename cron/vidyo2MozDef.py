@@ -115,7 +115,7 @@ def main():
     mdEvent.debug = True
     mdEvent.fire_and_forget_mode = False
 
-    #connect to mysql
+    # connect to mysql
     db=MySQLdb.connect(host=options.hostname, user=options.username,passwd=options.password,db=options.database)
     c=db.cursor(MySQLdb.cursors.DictCursor)
 
@@ -138,7 +138,7 @@ def main():
             duration = call['LeaveTime'] - call['JoinTime']
             call['CallDuration'] = duration.seconds
 
-        #fix up the data for json
+        # fix up the data for json
         for k in call.keys():
             # convert datetime objects to isoformat for json serialization
             if isinstance(call[k], datetime):

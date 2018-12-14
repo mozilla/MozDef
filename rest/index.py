@@ -163,7 +163,7 @@ def ipintel():
     '''send an IP address through plugins for intel enhancement'''
     if request.body:
         arequest = request.body.read()
-        #request.body.close()
+        # request.body.close()
     # valid json?
     try:
         requestDict = json.loads(arequest)

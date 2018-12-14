@@ -60,7 +60,7 @@ def readOUIFile(ouifilename):
     for i in ouifile.readlines()[0::]:
         i=i.strip()
         if '(hex)' in i:
-            #print(i)
+            # print(i)
             fields=i.split('\t')
             macprefix=fields[0][0:8].replace('-',':').lower()
             entity=fields[2]
