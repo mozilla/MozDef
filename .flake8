@@ -16,7 +16,6 @@ ignore =
   E402 # module level import not at top of file
   E501 # line too long
   E722 # do not use bare except'
-  F601 # dictionary key 'tags' repeated with different values
   F811 # redefinition of unused 'datetime' from line 10
   F841 # local variable 'CIDR' is assigned to but never used
   W503 # line break before binary operator
