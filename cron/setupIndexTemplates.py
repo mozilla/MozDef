@@ -22,17 +22,17 @@ def initConfig():
         'esservers',
         'http://localhost:9200',
         options.configfile).split(',')
-        )
+    )
     options.templatenames = list(getConfig(
         'templatenames',
         'defaulttemplate',
         options.configfile).split(',')
-        )
+    )
     options.templatefiles = list(getConfig(
         'templatefiles',
         '',
         options.configfile).split(',')
-        )
+    )
 
 
 if __name__ == '__main__':

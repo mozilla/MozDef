@@ -132,48 +132,48 @@ def initConfig():
         'output',
         'stdout',
         options.configfile
-        )
+    )
     # syslog hostname
     options.sysloghostname = getConfig(
         'sysloghostname',
         'localhost',
         options.configfile
-        )
+    )
     options.syslogport = getConfig(
         'syslogport',
         514,
         options.configfile
-        )
+    )
     options.esservers = list(getConfig(
         'esservers',
         'http://localhost:9200',
         options.configfile).split(',')
-        )
+    )
     options.indices = list(getConfig(
         'backup_indices',
         'events,alerts,.kibana',
         options.configfile).split(',')
-        )
+    )
     options.dobackup = list(getConfig(
         'backup_dobackup',
         '1,1,1',
         options.configfile).split(',')
-        )
+    )
     options.rotation = list(getConfig(
         'backup_rotation',
         'daily,monthly,none',
         options.configfile).split(',')
-        )
+    )
     options.pruning = list(getConfig(
         'backup_pruning',
         '20,0,0',
         options.configfile).split(',')
-        )
+    )
     options.weekly_rotation_indices = list(getConfig(
         'weekly_rotation_indices',
         'events',
         options.configfile).split(',')
-        )
+    )
 
     default_mapping_location = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'defaultMappingTemplate.json')
     options.default_mapping_file = getConfig('default_mapping_file', default_mapping_location, options.configfile)

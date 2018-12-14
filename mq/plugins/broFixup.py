@@ -419,7 +419,7 @@ class message(object):
                         u'source {src} '
                         u'destination {dst} '
                         u'port {p}'
-                        ).format(**sumstruct)
+                    ).format(**sumstruct)
                     # Thank you for your service
                     return (newmessage, metadata)
 

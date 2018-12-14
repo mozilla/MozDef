@@ -129,65 +129,65 @@ def initConfig():
         'output',
         'stdout',
         options.configfile
-        )
+    )
     # syslog hostname
     options.sysloghostname = getConfig(
         'sysloghostname',
         'localhost',
         options.configfile
-        )
+    )
     options.syslogport = getConfig(
         'syslogport',
         514,
         options.configfile
-        )
+    )
     options.esservers = list(getConfig(
         'esservers',
         'http://localhost:9200',
         options.configfile).split(',')
-        )
+    )
     options.indices = list(getConfig(
         'backup_indices',
         'events,alerts,.kibana',
         options.configfile).split(',')
-        )
+    )
     options.dobackup = list(getConfig(
         'backup_dobackup',
         '1,1,1',
         options.configfile).split(',')
-        )
+    )
     options.rotation = list(getConfig(
         'backup_rotation',
         'daily,monthly,none',
         options.configfile).split(',')
-        )
+    )
     options.pruning = list(getConfig(
         'backup_pruning',
         '20,0,0',
         options.configfile).split(',')
-        )
+    )
     # aws credentials to use to send files to s3
     options.aws_access_key_id = getConfig(
         'aws_access_key_id',
         '',
         options.configfile
-        )
+    )
     options.aws_secret_access_key = getConfig(
         'aws_secret_access_key',
         '',
         options.configfile
-        )
+    )
     options.aws_region = getConfig(
         'aws_region',
         'us-west-1',
         options.configfile
-        )
+    )
 
     options.aws_bucket = getConfig(
         'aws_bucket',
         '',
         options.configfile
-        )
+    )
 
 
 if __name__ == '__main__':
