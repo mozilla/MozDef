@@ -6,7 +6,6 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 import sys
-import os
 from configlib import getConfig, OptionParser
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient

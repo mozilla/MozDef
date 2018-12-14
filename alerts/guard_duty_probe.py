@@ -7,7 +7,7 @@
 
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, ExistsMatch, PhraseMatch, WildcardMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, ExistsMatch
 
 
 class AlertGuardDutyProbe(AlertTask):

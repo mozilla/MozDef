@@ -5,13 +5,12 @@
 #
 
 import sys
-import os
 from datetime import datetime, timedelta, tzinfo
 try:
     from datetime import timezone
     utc = timezone.utc
 except ImportError:
-    #Hi there python2 user
+    # Hi there python2 user
     class UTC(tzinfo):
         def utcoffset(self, dt):
             return timedelta(0)
@@ -36,7 +35,7 @@ def normalize(details):
     normalized = {}
 
     for f in details:
-        if f in ("ip", "ip_address","client_ip"):
+        if f in ("ip", "ip_address", "client_ip"):
             normalized["sourceipaddress"] = details[f]
             continue
         if f == "result":
@@ -88,7 +87,7 @@ def process_events(mozmsg, duo_events, etype, state):
         elif etype == 'telephony':
             mozmsg.summary = e['context']
         elif etype == 'authentication':
-            mozmsg.summary = e['eventtype']+' '+e['result']+' for '+e['username']
+            mozmsg.summary = e['eventtype'] + ' ' + e['result'] + ' for ' + e['username']
 
         mozmsg.send()
 
@@ -110,7 +109,7 @@ def main():
 
     duo = duo_client.Admin(ikey=options.IKEY, skey=options.SKEY, host=options.URL)
     mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
-    mozmsg.tags=['duosecurity']
+    mozmsg.tags = ['duosecurity']
     if options.update_tags != '':
         mozmsg.tags.append(options.update_tags)
     mozmsg.set_category('authentication')
@@ -121,9 +120,9 @@ def main():
 
     # This will process events for all 3 log types and send them to MozDef. the state stores the last position in the
     # log when this script was last called.
-    state = process_events(mozmsg, duo.get_administrator_log(mintime=state['administration']+1), 'administration', state)
-    state = process_events(mozmsg, duo.get_authentication_log(mintime=state['authentication']+1), 'authentication', state)
-    state = process_events(mozmsg, duo.get_telephony_log(mintime=state['telephony']+1), 'telephony', state)
+    state = process_events(mozmsg, duo.get_administrator_log(mintime=state['administration'] + 1), 'administration', state)
+    state = process_events(mozmsg, duo.get_authentication_log(mintime=state['authentication'] + 1), 'authentication', state)
+    state = process_events(mozmsg, duo.get_telephony_log(mintime=state['telephony'] + 1), 'telephony', state)
 
     pickle.dump(state, open(options.statepath, 'wb'))
 

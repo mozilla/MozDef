@@ -8,7 +8,7 @@
 # This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class WriteAudit(AlertTask):
@@ -34,9 +34,9 @@ class WriteAudit(AlertTask):
         tags = ['audit']
 
         summary = ('{0} Filesystem write(s) to an auditd path by {1}'.format(aggreg['count'], aggreg['value'], ))
-        hostnames = self.mostCommon(aggreg['allevents'],'_source.hostname')
-        #did they modify more than one host?
-        #or just modify an existing configuration more than once?
+        hostnames = self.mostCommon(aggreg['allevents'], '_source.hostname')
+        # did they modify more than one host?
+        # or just modify an existing configuration more than once?
         if len(hostnames) > 1:
             for i in hostnames[:5]:
                 summary += ' on {0} ({1} hosts)'.format(i[0], i[1])

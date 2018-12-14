@@ -14,7 +14,6 @@ from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch

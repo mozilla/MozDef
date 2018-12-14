@@ -14,7 +14,6 @@ import json
 
 from elasticsearch.exceptions import ConnectionError
 
-import sys
 import os
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 

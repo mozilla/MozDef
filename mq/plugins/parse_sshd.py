@@ -3,10 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import sys
-import os
 import re
-from mozdef_util.utilities.toUTC import toUTC
 
 
 class message(object):

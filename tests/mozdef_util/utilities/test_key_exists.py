@@ -5,9 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-
-import os
-import sys
 from mozdef_util.utilities.key_exists import key_exists
 
 

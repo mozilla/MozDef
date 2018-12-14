@@ -6,7 +6,6 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 
-import sys
 import os
 from operator import itemgetter
 from datetime import datetime
