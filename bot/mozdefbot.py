@@ -190,15 +190,6 @@ class mozdefBot():
                 # start the mq consumer
                 consumeAlerts(self)
 
-            @self.client.handle('LINE')
-            def line_handler(client, *params):
-                try:
-                    self.root_logger.debug('linegot:' + line)
-                except AttributeError as e:
-                    # catch error in kitnrc : chan.remove(actor) where channel
-                    # object has no attribute remove
-                    pass
-
             @self.client.handle('PRIVMSG')
             def priv_handler(client, actor, recipient, message):
                 self.root_logger.debug(

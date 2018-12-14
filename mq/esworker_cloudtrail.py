@@ -20,6 +20,7 @@ from StringIO import StringIO
 from threading import Timer
 import re
 import time
+import kombu
 from ssl import SSLEOFError, SSLError
 
 from mozdef_util.utilities.toUTC import toUTC

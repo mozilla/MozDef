@@ -18,6 +18,5 @@ ignore =
   E722 # do not use bare except'
   F601 # dictionary key 'tags' repeated with different values
   F811 # redefinition of unused 'datetime' from line 10
-  F821 # undefined name 'SysLogHandler'
   F841 # local variable 'CIDR' is assigned to but never used
   W503 # line break before binary operator
