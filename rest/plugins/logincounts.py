@@ -9,7 +9,7 @@ import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, RangeMatch, Aggregation, ExistsMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, RangeMatch, Aggregation, ExistsMatch, PhraseMatch
 from mozdef_util.utilities.toUTC import toUTC
 
 
