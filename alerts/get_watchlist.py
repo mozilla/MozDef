@@ -11,7 +11,10 @@ from mozdef_util.query_models import SearchQuery, PhraseMatch, TermsMatch, Query
 import requests
 import json
 import logging
+from requests_jwt import JWTAuth
+import requests_jwt
 import jwt
+import sys
 
 logger = logging.getLogger()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -19,13 +22,13 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 class AlertWatchList(AlertTask):
     def main(self):
-        self.parse_config('get_watchlist.conf', ['api_url'])
-        self.parse_config('get_watchlist.conf', ['jwt_secret'])
+        self.parse_config('get_watchlist.conf', ['api_url', 'jwt_secret'])
 
-        jwt_token = self.config.jwt_secret
+        jwt_token = JWTAuth(self.config.jwt_secret)
+        jwt_token.set_header_format('Bearer %s')
 
         #Connect to rest api and grab response
-        r = requests.get(self.config.api_url, headers={'Authorization': 'jwt_secret {0}'.format(jwt_token) })
+        r = requests.get(self.config.api_url, auth=jwt_token)
         status = r.status_code
         index = 0
         if status == 200:
@@ -45,6 +48,9 @@ class AlertWatchList(AlertTask):
                 self.searchEventsSimple()
                 self.walkEvents()
 
+        else:
+            sys.stderr.write('The watchlist request failed. Status {0}.\n'.format(status))
+
     # Set alert properties
     def onEvent(self, event):
         category = 'watchlist'
@@ -52,6 +58,9 @@ class AlertWatchList(AlertTask):
         severity = 'WARNING'
 
         ev = event['_source']
+        user = ''
+        sourceipaddress = ''
+        hostname = ''
 
         # If the event severity is below what we want, just ignore
         # the event.
@@ -60,7 +69,6 @@ class AlertWatchList(AlertTask):
         if 'details' in ev:
             if 'sourceipaddress' in ev['details']:
                 sourceipaddress = ev['details']['sourceipaddress']
-                print sourceipaddress
             if 'username' in ev['details'] or 'originaluser' in ev['details']:
                 user = ev['details']['username']
             if 'hostname' in ev:
