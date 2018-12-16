@@ -157,7 +157,7 @@ class TestBroFixup(object):
                 "audisp-json",
                 "2.1.1",
                 "audit"
-                ],
+            ],
             "summary": "Execve: sh -c sudo bro nsm /usr/lib64/nagios/plugins/custom/check_auditd.sh",
             "processname": "audisp-json",
             "details": {

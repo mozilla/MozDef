@@ -5,21 +5,17 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-import os
 import sys
 import logging
 import requests
 import json
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from datetime import timedelta
 from logging.handlers import SysLogHandler
 from httplib2 import Http
 from oauth2client.client import SignedJwtAssertionCredentials
 from apiclient.discovery import build
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 
 logger = logging.getLogger(sys.argv[0])
@@ -187,7 +183,7 @@ def main():
         state.data['lastrun'] = lastrun
         state.write_state_file()
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
 
 
 def initConfig():
@@ -203,10 +199,10 @@ def initConfig():
     # for detailed information on delegating a service account for use in gathering google admin sdk reports
     #
 
-    #google's json credential file exported from the project/admin console
+    # google's json credential file exported from the project/admin console
     options.jsoncredentialfile=getConfig('jsoncredentialfile','/path/to/filename.json',options.configfile)
 
-    #email of admin to impersonate as a service account
+    # email of admin to impersonate as a service account
     options.impersonate = getConfig('impersonate', 'someone@yourcompany.com', options.configfile)
 
 

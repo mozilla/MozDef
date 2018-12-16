@@ -19,8 +19,6 @@ from pymongo import MongoClient
 from collections import Counter
 from kombu import Connection, Exchange
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, PhraseMatch
@@ -153,7 +151,7 @@ def searchMongoAlerts(mozdefdb):
         # count by ip
         {"$group": {"_id": "$sourceip", "hitcount": {"$sum": 1}}},
         # limit to those with X observances
-        {"$match": {"hitcount": {"$gt": 5}}},
+        {"$match": {"hitcount": {"$gt": options.ipv4attackerhitcount}}},
         # sort
         {"$sort": SON([("hitcount", -1), ("_id", -1)])},
         # top 10
@@ -166,7 +164,7 @@ def searchMongoAlerts(mozdefdb):
             # set CIDR
             # todo: lookup ipwhois for asn_cidr value
             # potentially with a max mask value (i.e. asn is /8, limit attackers to /24)
-            ipcidr.prefixlen = 32
+            ipcidr.prefixlen = options.ipv4attackerprefixlength
 
             # append to or create attacker.
             # does this match an existing attacker's indicators
@@ -260,10 +258,10 @@ def searchMongoAlerts(mozdefdb):
                         # summarize the alert categories
                         # returns list of tuples: [(u'bruteforce', 8)]
                         categoryCounts= mostCommon(matchingalerts,'category')
-                        #are the alerts all the same category?
+                        # are the alerts all the same category?
 
                         if len(categoryCounts) == 1:
-                            #is the alert category mapped to an attacker category?
+                            # is the alert category mapped to an attacker category?
                             for category in options.categorymapping:
                                 if category.keys()[0] == categoryCounts[0][0]:
                                     attacker['category'] = category[category.keys()[0]]
@@ -481,6 +479,10 @@ def initConfig():
     options.mqvhost = getConfig('mqvhost', '/', options.configfile)
     # set to either amqp or amqps for ssl
     options.mqprotocol = getConfig('mqprotocol', 'amqp', options.configfile)
+
+    # Set these settings to change the correlation for attackers
+    options.ipv4attackerprefixlength = getConfig('ipv4attackerprefixlength', 32, options.configfile)
+    options.ipv4attackerhitcount = getConfig('ipv4ipv4attackerhitcount', 5, options.configfile)
 
 
 if __name__ == '__main__':

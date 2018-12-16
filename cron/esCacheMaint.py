@@ -13,7 +13,6 @@ import logging
 from configlib import getConfig, OptionParser
 from datetime import datetime, date, timedelta
 
-import os
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.utilities.logger import logger
 

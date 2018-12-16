@@ -271,13 +271,17 @@ def process_msg(mozmsg, msg):
     failed_words = ['Failed']
 
     # default category (might be modified below to be more specific)
-    mozmsg.category = 'iam'
+    mozmsg.set_category('iam')
     mozmsg.source = 'auth0'
     # fields that should always exist
     mozmsg.timestamp = msg.date
     details['messageid'] = msg._id
-    details['userid'] = msg.user_id
     details['sourceipaddress'] = msg.ip
+
+    try:
+        details['userid'] = msg.user_id
+    except KeyError:
+        pass
 
     try:
         details['username'] = msg.user_name
@@ -303,9 +307,9 @@ def process_msg(mozmsg, msg):
         details['eventname'] = log_types[msg.type].event
         # determine the event category
         if any(authword in details['eventname'] for authword in authentication_words):
-            mozmsg.category = "authentication"
+            mozmsg.set_category("authentication")
         if any(authword in details['eventname'] for authword in authorization_words):
-            mozmsg.category = "authorization"
+            mozmsg.set_category("authorization")
         # determine success/failure
         if any(failword in details['eventname'] for failword in failed_words):
             details.success = False
@@ -333,7 +337,7 @@ def process_msg(mozmsg, msg):
         details['description'] = ""
 
     # set the summary
-    if 'auth' in mozmsg.category:
+    if 'auth' in mozmsg._category:
         # make summary be action/username (success login user@place.com)
         mozmsg.summary = "{event} {desc}".format(
             event=details.eventname,

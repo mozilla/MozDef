@@ -22,11 +22,8 @@ def utc_timezone():
 
 tzlocal.get_localzone = utc_timezone
 
-import sys
 if 'mozdef_util.utilities.toUTC' in sys.modules:
     reload(sys.modules['mozdef_util.utilities.toUTC'])
-
-from mozdef_util.utilities.toUTC import toUTC
 
 
 class TestToUTC():

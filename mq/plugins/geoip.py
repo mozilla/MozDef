@@ -6,7 +6,6 @@
 import netaddr
 import os
 
-import sys
 from mozdef_util.geo_ip import GeoIP
 
 
@@ -38,7 +37,7 @@ class message(object):
                 return geoDict
             else:
                 location['location'] = 'unknown'
-        except ValueError as e:
+        except ValueError:
             pass
         return location
 

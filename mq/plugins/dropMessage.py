@@ -28,15 +28,15 @@ class message(object):
         # early exit by setting message = None and return
         if 'details' in message.keys():
             # drop disabled for now
-            #if 'signatureid' in message['details']:
-                #if message['details'].lower() == 'execve' and \
-                    #'command' not in message['details']:
+            # if 'signatureid' in message['details']:
+                # if message['details'].lower() == 'execve' and \
+                    # 'command' not in message['details']:
                     # auditd entry without a command
                     # likely a result of another command (java starting a job, etc.)
                     # signal a drop
 
-                    #message = None
-                    #return message
+                    # message = None
+                    # return message
             if 'http_user_agent' in message['details']:
                 if message['details']['http_user_agent'] == 'ELB-HealthChecker/1.0':
                     message = None

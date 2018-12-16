@@ -152,14 +152,14 @@ Mandatory Fields
 +-----------------+-------------------------------------+-----------------------------------+
 |    Field        |             Purpose                 |            Sample Value           |
 +=================+=====================================+===================================+
-| category        | General category/type of event      | Authentication, Authorization,    |
-|                 | matching the 'what should I log'    | Account Creation, Shutdown,       |
-|                 | section below                       | Startup, Account Deletion,        |
-|                 |                                     | Account Unlock, brointel,         |
-|                 |                                     | bronotice                         |
+| category        | General category/type of event      | authentication, authorization,    |
+|                 | matching the 'what should I log'    | account creation, shutdown,       |
+|                 | section below                       | atartup, account deletion,        |
+|                 |                                     | account unlock, zeek              |
+|                 |                                     |                                   |
 +-----------------+-------------------------------------+-----------------------------------+
-| details         | Additional, event-specific fields   | "dn": "john@example.com,o=com,    |
-|                 | that you would like included with   | dc=example", "facility": "daemon" |
+| details         | Additional, event-specific fields   | <see below>                       |
+|                 | that you would like included with   |                                   |
 |                 | the event. Please completely spell  |                                   |
 |                 | out a field rather an abbreviate:   |                                   |
 |                 | i.e. sourceipaddress instead of     |                                   |
@@ -187,7 +187,7 @@ Mandatory Fields
 +-----------------+-------------------------------------+-----------------------------------+
 | tags            | An array or list of any tags you    | vpn, audit                        |
 |                 | would like applied to the event     |                                   |
-|                 |                                     | nsm,bro,intel                     |
+|                 |                                     | nsm,zeek,intel                    |
 +-----------------+-------------------------------------+-----------------------------------+
 | timestamp       | Full date plus time timestamp of    | 2014-01-30T19:24:43+06:00         |
 |                 | the event in ISO format including   |                                   |
@@ -230,6 +230,9 @@ Details substructure (mandatory if such data is sent, otherwise optional)
 | error                | Action resulted in an    | true/false                      |
 |                      | error or failure         |                                 |
 +----------------------+--------------------------+---------------------------------+
+| success              | Transaction failed/      | true/false                      |
+|                      | or succeeded             |                                 |
++----------------------+--------------------------+---------------------------------+
 | username             | Username, email, login,  | kang@mozilla.com                |
 |                      | etc.                     |                                 |
 +----------------------+--------------------------+---------------------------------+
@@ -259,7 +262,8 @@ Examples
 	    "details": {
 	        "username": "joe",
 	        "task": "access to admin page /admin_secret_radioactiv",
-	        "result": "10 authentication failures in a row"
+	        "result": "10 authentication failures in a row",
+	        "success": false
 	    }
 	}
 

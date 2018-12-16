@@ -12,7 +12,6 @@
 
 
 import json
-import os
 import sys
 import socket
 import time
@@ -40,6 +39,19 @@ try:
     hasUWSGI = True
 except ImportError as e:
     hasUWSGI = False
+
+
+def get_aws_credentials(region=None, accesskey=None, secretkey=None, security_token=None):
+    result = {}
+    if region not in ['', '<add_region>', None]:
+        result['region_name'] = region
+    if accesskey not in ['', '<add_accesskey>', None]:
+        result['aws_access_key_id'] = accesskey
+    if secretkey not in ['', '<add_secretkey>', None]:
+        result['aws_secret_access_key'] = secretkey
+    if security_token not in [None]:
+        result['security_token'] = security_token
+    return result
 
 
 def keyMapping(aDict):
@@ -87,8 +99,8 @@ def keyMapping(aDict):
             if k in ('syslogseverity', 'severity', 'severityvalue', 'level'):
                 returndict[u'severity'] = toUnicode(v).upper()
 
-            if k in ('facility', 'syslogfacility'):
-                returndict[u'facility'] = toUnicode(v)
+            if k in ('facility', 'syslogfacility','source'):
+                returndict[u'source'] = toUnicode(v)
 
             if k in ('pid', 'processid'):
                 returndict[u'processid'] = toUnicode(v)
@@ -345,15 +357,14 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    mqConn, eventTaskQueue = connect_sqs(
-        options.region,
-        options.accesskey,
-        options.secretkey,
-        options.taskexchange
-    )
-
+    sqs_conn, eventTaskQueue = connect_sqs(
+        task_exchange=options.taskexchange,
+        **get_aws_credentials(
+            options.region,
+            options.accesskey,
+            options.secretkey))
     # consume our queue
-    taskConsumer(mqConn, eventTaskQueue, es).run()
+    taskConsumer(sqs_conn, eventTaskQueue, es).run()
 
 
 def initConfig():
@@ -389,7 +400,7 @@ def initConfig():
     # aws options
     options.accesskey = getConfig('accesskey', '', options.configfile)
     options.secretkey = getConfig('secretkey', '', options.configfile)
-    options.region = getConfig('region', 'us-west-1', options.configfile)
+    options.region = getConfig('region', '', options.configfile)
 
     # plugin options
     # secs to pass before checking for new/updated plugins

@@ -15,10 +15,8 @@ from logging.handlers import SysLogHandler
 from time import sleep
 import socket
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, Aggregation
 
 logger = logging.getLogger(sys.argv[0])
