@@ -5,7 +5,6 @@
 
 import os
 import random
-import requests
 import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta

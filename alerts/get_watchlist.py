@@ -12,8 +12,6 @@ import requests
 import json
 import logging
 from requests_jwt import JWTAuth
-import requests_jwt
-import jwt
 import sys
 
 logger = logging.getLogger()
