@@ -38,17 +38,17 @@ class message(object):
 
         if 'eventsource' not in message:
             return (message, metadata)
-        #drop non-relevant messages
+        # drop non-relevant messages
         if message['eventsource'] in ('Fxa-customsMozSvc', 'FxaContentWebserver', 'FxaAuthWebserver', 'FxaOauthWebserver', 'FxaAuth', 'fxa-auth-server'):
             if 'details' in message.keys():
                 if 'status' in message['details']:
                     if message['details']['status'] == 200:
-                        #normal 200 returns for web content
+                        # normal 200 returns for web content
                         return(None, metadata)
                 # FxaAuth sends http status as 'code'
                 if 'code' in message['details']:
                     if message['details']['code'] == 200:
-                        #normal 200 returns for web content
+                        # normal 200 returns for web content
                         return(None, metadata)
                 if 'op' in message['details']:
                     if message['details']['op'] == 'mailer.send.1':
@@ -93,15 +93,15 @@ class message(object):
                         message['details']['remoteAddressChain'][0] == '[' and
                         message['details']['remoteAddressChain'][-1] == ']'):
                     # remove the brackets and double quotes
-                    for i in ['[',']','"']:
-                        message['details']['remoteAddressChain']=message['details']['remoteAddressChain'].replace(i,'')
+                    for i in ['[', ']', '"']:
+                        message['details']['remoteAddressChain'] = message['details']['remoteAddressChain'].replace(i, '')
                     # make sure it's still a list
                     if ',' in message['details']['remoteAddressChain']:
                         sourceIP = message['details']['remoteAddressChain'].split(',')[0]
                         if isIP(sourceIP):
                             message['details']['sourceipaddress'] = sourceIP
 
-            #fxacustoms sends source ip as just 'ip'
+            # fxacustoms sends source ip as just 'ip'
             if 'ip' in message['details'].keys():
                 if isIP(message['details']['ip']):
                     message['details']['sourceipaddress'] = message['details']['ip']

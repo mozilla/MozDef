@@ -1,5 +1,5 @@
 import os
-import sys
+
 from mozdef_util.plugin_set import PluginSet
 
 

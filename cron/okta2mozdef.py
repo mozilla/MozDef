@@ -5,26 +5,21 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-import os
 import sys
-from configlib import getConfig,OptionParser
+from configlib import getConfig, OptionParser
 import logging
 from logging.handlers import SysLogHandler
 import json
 from datetime import datetime
-from datetime import timedelta
-from datetime import date
 import requests
 import netaddr
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.INFO
+logger.level = logging.INFO
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -69,20 +64,17 @@ def main():
         logger.addHandler(sh)
 
     logger.debug('started')
-    #logger.debug(options)
+    # logger.debug(options)
     try:
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         s = requests.Session()
         s.headers.update({'Accept': 'application/json'})
         s.headers.update({'Content-type': 'application/json'})
-        s.headers.update({'Authorization':'SSWS {0}'.format(options.apikey)})
+        s.headers.update({'Authorization': 'SSWS {0}'.format(options.apikey)})
 
-        #capture the time we start running so next time we catch any events created while we run.
+        # capture the time we start running so next time we catch any events created while we run.
         state = State(options.state_file)
         lastrun = toUTC(datetime.now()).isoformat()
-        #in case we don't archive files..only look at today and yesterday's files.
-        yesterday=date.strftime(datetime.utcnow()-timedelta(days=1),'%Y/%m/%d')
-        today = date.strftime(datetime.utcnow(),'%Y/%m/%d')
 
         r = s.get('https://{0}/api/v1/events?startDate={1}&limit={2}'.format(
             options.oktadomain,
@@ -138,7 +130,7 @@ def main():
         else:
             logger.error('Could not get Okta events HTTP error code {} reason {}'.format(r.status_code, r.reason))
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
 
 
 def initConfig():

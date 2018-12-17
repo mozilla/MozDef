@@ -9,11 +9,9 @@ from configlib import getConfig
 
 from kombu import Connection, Queue, Exchange
 
-
 import os
-import sys
-from mozdef_util.elasticsearch_client import ElasticsearchClient
 
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.utilities.dot_dict import DotDict
 
 

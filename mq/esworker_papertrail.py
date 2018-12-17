@@ -10,7 +10,6 @@
 
 
 import json
-import os
 import kombu
 import sys
 import socket

@@ -8,7 +8,6 @@
 
 import json
 import kombu
-import os
 import sys
 import socket
 from configlib import getConfig, OptionParser

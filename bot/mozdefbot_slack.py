@@ -20,8 +20,6 @@ from kombu.mixins import ConsumerMixin
 
 from slackclient import SlackClient
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 
 

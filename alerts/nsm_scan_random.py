@@ -5,28 +5,25 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2018 Mozilla Corporation
 
-from lib.alerttask import AlertTask, add_hostname_to_ip
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from lib.alerttask import AlertTask
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch, ExistsMatch
 
 
-class NSMScanPort(AlertTask):
+class NSMScanRandom(AlertTask):
     def __init__(self):
         AlertTask.__init__(self)
-        self._config = self.parse_json_alert_config('nsm_scan_port.json')
+        self._config = self.parse_json_alert_config('nsm_scan_random.json')
 
     def main(self):
-        search_query = SearchQuery(minutes=2)
+        search_query = SearchQuery(minutes=1)
         search_query.add_must([
             TermMatch('category', 'bro'),
             TermMatch('details.source', 'notice'),
-            PhraseMatch('details.note', 'Scan::Port_Scan'),
+            PhraseMatch('details.note', 'Scan::Random_Scan'),
             QueryStringMatch('details.sourceipaddress: {}'.format(self._config['sourcemustmatch']))
         ])
         search_query.add_must_not([
             QueryStringMatch('details.sourceipaddress: {}'.format(self._config['sourcemustnotmatch']))
-        ])
-        search_query.add_must_not([
-            QueryStringMatch('details.msg: {}'.format(self._config['destinationmustnotmatch']))
         ])
 
         self.filtersManual(search_query)
@@ -36,15 +33,14 @@ class NSMScanPort(AlertTask):
     def onAggregation(self, aggreg):
         category = 'nsm'
         severity = 'WARNING'
-        tags = ['nsm', "bro", 'portscan']
+        tags = ['nsm', "bro", 'randomscan']
 
         indicators = 'unknown'
         x = aggreg['events'][0]['_source']
         if 'details' in x:
             if 'indicators' in x['details']:
                 indicators = x['details']['sourceipaddress']
-                indicators_info = add_hostname_to_ip(indicators, '{0} ({1})', require_internal=False)
 
-        summary = 'Port scan from {}'.format(indicators_info)
+        summary = 'Random scan from {}'.format(indicators)
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
