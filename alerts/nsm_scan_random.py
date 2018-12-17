@@ -6,7 +6,7 @@
 # Copyright (c) 2018 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch, ExistsMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 
 
 class NSMScanRandom(AlertTask):
