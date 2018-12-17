@@ -14,7 +14,7 @@ import requests
 import sys
 import socket
 from bottle import route, run, response, request, default_app, post
-from datetime import datetime
+from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
 from operator import itemgetter
@@ -554,12 +554,12 @@ def getWatchlist():
         watchlist = mozdefdb['watchlist']
 
         # Log the entries we are removing to maintain an audit log
-        expired = watchlist.find({'dateExpiring': {"$lte": datetime.utcnow()-datetime.timedelta(hours=1)}})
+        expired = watchlist.find({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
         for entry in expired:
             sys.stdout.write('Deleting entry {0} from watchlist /n'.format(entry))
 
         # delete any that expired
-        watchlist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-datetime.timedelta(hours=1)}})
+        watchlist.delete_many({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
 
         # Lastly, export the combined watchlist
         watchCursor=mozdefdb['watchlist'].aggregate([
