@@ -69,8 +69,13 @@ class AlertWatchList(AlertTask):
         if 'details' in ev:
             if 'sourceipaddress' in ev['details']:
                 sourceipaddress = ev['details']['sourceipaddress']
-            if 'username' in ev['details'] or 'originaluser' in ev['details']:
-                user = ev['details']['username']
+            if 'username' in ev['details'] or 'originaluser' in ev['details'] or 'user' in ev['details']:
+                if ev['details']['username'] is not None:
+                    user = ev['details']['username']
+                elif ev['details']['originaluser'] is not None:
+                    user = ev['details']['originaluser']
+                else:
+                    user = ev['details']['user']
             if 'hostname' in ev:
                 hostname = ev['hostname']
             else:
