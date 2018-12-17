@@ -12,7 +12,10 @@ import json
 import logging
 import random
 import sys
+import os
 import time
+import netaddr
+from ipwhois import IPWhois
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from kombu import Connection, Queue, Exchange
@@ -21,23 +24,77 @@ from kombu.mixins import ConsumerMixin
 from slackclient import SlackClient
 
 from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.geo_ip import GeoIP
 
 
 logger = logging.getLogger()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-greetz = ["mozdef bot in da house",
-          "mozdef here..what's up",
-          "mozdef has joined the room..no one panic",
-          "mozdef bot here..nice to see everyone"]
+greetings = [
+    "mozdef bot in da house",
+    "mozdef here..what's up",
+    "mozdef has joined the room..no one panic",
+    "mozdef bot here..nice to see everyone"
+]
+
+
+def isIP(ip):
+    try:
+        netaddr.IPNetwork(ip)
+        return True
+    except Exception:
+        return False
+
+
+def ipLocation(ip):
+    location = ""
+    try:
+        geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../data/GeoLite2-City.mmdb")
+        geoip = GeoIP(geoip_data_dir)
+        geoDict = geoip.lookup_ip(ip)
+        if geoDict is not None:
+            if 'error' in geoDict:
+                return geoDict['error']
+            location = geoDict['country_name']
+            if geoDict['country_code'] in ('US'):
+                if geoDict['metro_code']:
+                    location = location + '/{0}'.format(geoDict['metro_code'])
+    except Exception:
+        location = ""
+    return location
 
 
 def formatAlert(jsonDictIn):
-    # defaults
-    summary = ''
-    if 'summary' in jsonDictIn.keys():
-        summary = jsonDictIn['summary']
+    summary = jsonDictIn['summary']
+    if 'category' in jsonDictIn.keys():
+        summary = "_{0}_: {1}".format(jsonDictIn['category'], summary)
     return summary
+
+
+def handle_ipinfo(ip_token):
+    if isIP(ip_token):
+        ip = netaddr.IPNetwork(ip_token)[0]
+        if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
+            response = "{0} location: {1}".format(ip_token, ipLocation(ip_token))
+        else:
+            response = "{0}: hrm...loopback? private ip?".format(ip_token)
+    else:
+        response = "{0} is not an IP address".format(ip_token)
+    return response
+
+
+def handle_ipwhois(ip_token):
+    if isIP(ip_token):
+        ip = netaddr.IPNetwork(ip_token)[0]
+        if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
+            whois = IPWhois(ip).lookup_whois()
+            description = str(whois['nets'][0]['description']).encode('string_escape')
+            response = "{0} description: {1}".format(ip_token, description)
+        else:
+            response = "{0}: hrm...loopback? private ip?".format(ip_token)
+    else:
+        response = "{0} is not an IP address".format(ip_token)
+    return response
 
 
 class SlackBot(object):
@@ -49,13 +106,73 @@ class SlackBot(object):
 
     def run(self):
         if self.slack_client.rtm_connect():
-            print("SlackBot connected and running!")
-            self.post_welcome_message(random.choice(greetz))
+            print("Bot connected to slack")
+            self.post_welcome_message(random.choice(greetings))
+            self.listen_for_messages()
         else:
-            print("Unable to connect")
+            print("Unable to connect to slack")
+            sys.exit(1)
 
-    def handle_command(self, command, channel):
-        print(command)
+    def handle_command(self, message_text):
+        response = ""
+        message_tokens = message_text.split()
+        command = message_tokens[0]
+        parameters = message_tokens[1:len(message_tokens)]
+        if command == '!help':
+            response = """
+Help on it's way...try these:
+
+!ipinfo --do a geoip lookup on an ip address
+!ipwhois --do a whois lookup on an ip address
+            """
+        elif command == '!ipinfo':
+            for ip_token in parameters:
+                response += "\n" + handle_ipinfo(ip_token)
+        elif command == '!ipwhois':
+            for ip_token in parameters:
+                response += "\n" + handle_ipwhois(ip_token)
+        else:
+            response = "Unknown command: " + command + ". Try !help"
+
+        return response
+
+    def parse_command(self, content):
+        # messages look like this:
+        # pwnbus: @mozdef !help
+        tokens = content.split('@' + self.bot_name)
+        command = tokens[1].strip()
+        return command
+
+    def handle_message(self, message):
+        channel = message['channel']
+        thread_ts = message['ts']
+        content = message['content']
+        command = self.parse_command(content)
+
+        response = self.handle_command(command)
+        if response is not "":
+            self.post_thread_message(
+                text=response,
+                channel=channel,
+                thread_ts=thread_ts
+            )
+
+    def listen_for_messages(self):
+        while True:
+            for slack_message in self.slack_client.rtm_read():
+                message_type = slack_message.get('type')
+                if message_type == 'desktop_notification':
+                    self.handle_message(slack_message)
+            time.sleep(1)
+
+    def post_thread_message(self, text, channel, thread_ts):
+        self.slack_client.api_call(
+            "chat.postMessage",
+            as_user="true",
+            channel=channel,
+            text=text,
+            thread_ts=thread_ts
+        )
 
     def post_attachment(self, message, channel, color):
         if channel is None:
@@ -89,16 +206,6 @@ class SlackBot(object):
     def post_unknown_severity_message(self, message, channel=None):
         self.post_attachment(message, channel, '#000000')
 
-    def parse_slack_output(self, slack_rtm_output):
-        output_list = slack_rtm_output
-        if output_list and len(output_list) > 0:
-            for output in output_list:
-                AT_BOT = "<@" + self.bot_id + ">"
-                if output and 'text' in output and AT_BOT in output['text']:
-                    # return text after the @ mention, whitespace removed
-                    return output['text'].split(AT_BOT)[1].strip().lower(), output['channel']
-        return None, None
-
     def get_bot_id(self):
         api_call = self.slack_client.api_call("users.list")
         if api_call.get('ok'):
@@ -118,7 +225,7 @@ class alertConsumer(ConsumerMixin):
         self.alertExchange = alertExchange
         self.bot = bot
         self.lastalert = None
-        bot.mqConsumer = self
+        self.bot.mqConsumer = self
 
     def get_consumers(self, Consumer, channel):
         consumer = Consumer(
@@ -152,9 +259,9 @@ class alertConsumer(ConsumerMixin):
             # process valid message
             # see where we send this alert
             channel = options.default_alert_channel
-            if 'channel' in bodyDict.keys():
-                if bodyDict['channel'] in options.channels:
-                    channel = bodyDict['channel']
+            if 'ircchannel' in bodyDict.keys():
+                if bodyDict['ircchannel'] in options.channels:
+                    channel = bodyDict['ircchannel']
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
