@@ -256,6 +256,8 @@ class taskConsumer(object):
                         event['summary'] = event['details']['message']
                     if 'severity' in event['details']:
                         event['severity'] = event['details']['severity']
+                    if 'source_ip' in event['details']:
+                        event['sourceipaddress'] = event['details']['source_ip']
                     else:
                         event['severity'] = 'INFO'
                     event['category'] = 'syslog'
