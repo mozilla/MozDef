@@ -151,7 +151,7 @@ class alertConsumer(ConsumerMixin):
 
             # process valid message
             # see where we send this alert
-            channel = options.alert_channel
+            channel = options.default_alert_channel
             if 'channel' in bodyDict.keys():
                 if bodyDict['channel'] in options.channels:
                     channel = bodyDict['channel']
@@ -220,7 +220,7 @@ def initConfig():
     options.slack_token = getConfig('slack_token', '<CHANGE ME>', options.configfile)
     options.name = getConfig('name', 'mozdef', options.configfile)
     options.channels = getConfig('channels', 'general', options.configfile).split(',')
-    options.alert_channel = getConfig('alert_channel', 'siem', options.configfile)
+    options.default_alert_channel = getConfig('default_alert_channel', 'mozdef', options.configfile)
 
     # queue exchange name
     options.alertExchange = getConfig(
