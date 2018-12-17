@@ -7,7 +7,6 @@ import os
 import random
 import requests
 import sys
-import re
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient

@@ -7,7 +7,7 @@
 
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, PhraseMatch, TermsMatch, QueryStringMatch
+from mozdef_util.query_models import SearchQuery, QueryStringMatch
 import requests
 import json
 import logging
@@ -27,7 +27,7 @@ class AlertWatchList(AlertTask):
         jwt_token = JWTAuth(self.config.jwt_secret)
         jwt_token.set_header_format('Bearer %s')
 
-        #Connect to rest api and grab response
+        # Connect to rest api and grab response
         r = requests.get(self.config.api_url, auth=jwt_token)
         status = r.status_code
         index = 0
