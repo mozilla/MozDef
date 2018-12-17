@@ -69,17 +69,25 @@ class AlertWatchList(AlertTask):
         if 'details' in ev:
             if 'sourceipaddress' in ev['details']:
                 sourceipaddress = ev['details']['sourceipaddress']
+                source_data = 'from {}'.format(sourceipaddress)
+            else:
+                source_data = 'from unknown source IP'
             if 'username' in ev['details'] or 'originaluser' in ev['details'] or 'user' in ev['details']:
-                if ev['details']['username'] is not None:
+                if 'username' in ev['details']:
                     user = ev['details']['username']
-                elif ev['details']['originaluser'] is not None:
+                    user_data = 'by {}'.format(user)
+                elif 'originaluser' in ev['details']:
                     user = ev['details']['originaluser']
-                else:
+                    user_data = 'by {}'.format(user)
+                elif 'user' in ev['details']:
                     user = ev['details']['user']
+                    user_data = 'by {}'.format(user)
+                else:
+                    user_data = 'by an unidentified user'
             if 'hostname' in ev:
                 hostname = ev['hostname']
             else:
                 return None
 
-        summary = 'Watchlist term detected by {} from {} on {}'.format(user, sourceipaddress, hostname)
+        summary = 'Watchlist term detected {} {} on {}'.format(user_data, source_data, hostname)
         return self.createAlertDict(summary, category, tags, [event], severity)
