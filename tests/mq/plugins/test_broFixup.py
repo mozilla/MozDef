@@ -134,7 +134,6 @@ class TestBroFixup(object):
             "eventsource": "systemslogs",
             "details": {
                 "processid": "21233",
-                "Random": 2,
                 "sourceipv4address": "10.22.74.208",
                 "hostname": "hostname1.subdomain.domain.com",
                 "program": "sshd",
