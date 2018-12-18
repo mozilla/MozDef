@@ -9,7 +9,6 @@
 """
 
 import json
-import logging
 import random
 import sys
 import os
@@ -25,10 +24,8 @@ from slackclient import SlackClient
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.geo_ip import GeoIP
+from mozdef_util.utilities.logger import logger
 
-
-logger = logging.getLogger()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 greetings = [
     "mozdef bot in da house",
@@ -44,6 +41,40 @@ def isIP(ip):
         return True
     except Exception:
         return False
+
+
+def run_async(func):
+    """
+    run_async(func)
+    function decorator, intended to make "func" run in a separate
+    thread (asynchronously).
+    Returns the created Thread object
+    from: http://code.activestate.com/recipes/576684-simple-threading-decorator/
+
+    E.g.:
+    @run_async
+    def task1():
+    do_something
+
+    @run_async
+    def task2():
+    do_something_too
+
+    t1 = task1()
+    t2 = task2()
+    ...
+    t1.join()
+    t2.join()
+    """
+    from threading import Thread
+    from functools import wraps
+
+    @wraps(func)
+    def async_func(*args, **kwargs):
+        func_hl = Thread(target=func, args=args, kwargs=kwargs)
+        func_hl.start()
+        return func_hl
+    return async_func
 
 
 def ipLocation(ip):
@@ -106,11 +137,12 @@ class SlackBot(object):
 
     def run(self):
         if self.slack_client.rtm_connect():
-            print("Bot connected to slack")
+            logger.info("Bot connected to slack")
             self.post_welcome_message(random.choice(greetings))
+            consumeAlerts(self)
             self.listen_for_messages()
         else:
-            print("Unable to connect to slack")
+            logger.error("Unable to connect to slack")
             sys.exit(1)
 
     def handle_command(self, message_text):
@@ -292,6 +324,7 @@ class alertConsumer(ConsumerMixin):
             logger.exception("mozdefbot_slack exception while processing events queue %r" % e)
 
 
+@run_async
 def consumeAlerts(bot):
     # connect and declare the message queue/kombu objects.
     # server/exchange/queue
@@ -358,10 +391,6 @@ def initConfig():
 
 
 if __name__ == "__main__":
-    sh = logging.StreamHandler(sys.stderr)
-    sh.setFormatter(formatter)
-    logger.addHandler(sh)
-
     parser = OptionParser()
     parser.add_option(
         "-c", dest='configfile',
@@ -372,4 +401,3 @@ if __name__ == "__main__":
 
     theBot = SlackBot(options.slack_token, options.channels, options.name)
     theBot.run()
-    consumeAlerts(theBot)
