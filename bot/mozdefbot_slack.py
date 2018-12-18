@@ -178,6 +178,9 @@ Help on it's way...try these:
     def handle_message(self, message):
         channel = message['channel']
         thread_ts = message['ts']
+        # If we're already in a thread, reply within that thread
+        if 'thread_ts' in message:
+            thread_ts = message['thread_ts']
         content = message['content']
         command = self.parse_command(content)
 
