@@ -13,7 +13,7 @@ class AlertDuoAuthFail(AlertTask):
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
-            TermMatch('category', 'event'),
+            TermMatch('category', 'authentication'),
             ExistsMatch('details.sourceipaddress'),
             ExistsMatch('details.username'),
             PhraseMatch('details.result', 'FRAUD')
