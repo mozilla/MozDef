@@ -19,19 +19,19 @@ class message(object):
         # AWS guard duty sends dates as iso_8601 which ES doesn't appreciate
         # here's a list of date fields we'll convert to isoformat
         self.date_keys = [
-            'details.finding.eventLastSeen',
-            'details.finding.eventFirstSeen',
-            'details.resource.instanceDetails.launchTime',
-            'details.createdAt',
-            'details.updatedAt'
+            'details.finding.eventlastseen',
+            'details.finding.eventfirstseen',
+            'details.resource.instancedetails.launchtime',
+            'details.createdat',
+            'details.updatedat'
         ]
 
         # AWS guard duty can send IPs in a bunch of places
         # Lets pick out some likely targets and format them
         # so other mozdef plugins can rely on their location
         self.ipaddress_keys = [
-            'details.finding.action.networkConnectionAction.remoteIpDetails.ipAddressV4',
-            'details.finding.action.awsApiCallAction.remoteIpDetails.ipAdrressV4'
+            'details.finding.action.networkconnectionaction.remoteipdetails.ipaddressv4',
+            'details.finding.action.awsapicallaction.remoteipdetails.ipadrressv4'
         ]
 
     def convert_key_date_format(self, needle, haystack):
@@ -73,14 +73,14 @@ class message(object):
         # if we still haven't found what we are looking for #U2
         # sometimes it's in a list
         if 'sourceipaddress' not in message['details'].keys():
-            if key_exists('details.finding.action.portProbeAction.portProbeDetails', message) \
-                    and isinstance(message.details.finding.action.portProbeAction.portProbeDetails, list):
+            if key_exists('details.finding.action.portprobeaction.portprobedetails', message) \
+                    and isinstance(message.details.finding.action.portprobeaction.portprobedetails, list):
 
                 # inspect the first list entry and see if it contains an IP
-                portProbeDetails = DotDict(
-                    message.details.finding.action.portProbeAction.portProbeDetails[0])
-                if key_exists('remoteIpDetails.ipAddressV4', portProbeDetails):
-                    message.details.sourceipaddress = portProbeDetails.remoteIpDetails.ipAddressV4
+                portprobedetails = DotDict(
+                    message.details.finding.action.portprobeaction.portprobedetails[0])
+                if key_exists('remoteipdetails.ipaddressv4', portprobedetails):
+                    message.details.sourceipaddress = portprobedetails.remoteipdetails.ipaddressv4
 
         # recovert the message back to a plain dict
         return (dict(message), metadata)

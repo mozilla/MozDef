@@ -18,10 +18,10 @@ class message(object):
         # for a particular event to allow you to have an event that just updates
         # current status
         self.registration = ['uniquecallid']
-        self.priority = 5
+        self.priority = 2
 
     def onMessage(self, message, metadata):
-        docid = hashlib.md5('vidyoUniqueCallID' + message['details']['UniqueCallID']).hexdigest()
+        docid = hashlib.md5('vidyouniquecallid' + message['details']['uniquecallid']).hexdigest()
         metadata['id'] = docid
         metadata['doc_type'] = 'vidyo'
         return (message, metadata)
