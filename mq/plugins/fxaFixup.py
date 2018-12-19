@@ -77,14 +77,6 @@ class message(object):
                 if message['details']['name'] == 'fxa-auth-server':
                     message['category'] = 'fxa-auth-server'
 
-            if 'fileName' in message['details'].keys():
-                message['details']['filename'] = message['details']['fileName']
-                del message['details']['fileName']
-
-            if 'fileSize' in message['details'].keys():
-                message['details']['filesize'] = message['details']['fileSize']
-                del message['details']['fileSize']
-
             if message['eventsource'] in ('FxaContentWebserver', 'FxaAuthWebserver'):
                 if message['category'] == 'logfile':
                     message['category'] = 'weblog'
