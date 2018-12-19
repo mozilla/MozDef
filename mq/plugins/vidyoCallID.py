@@ -18,7 +18,7 @@ class message(object):
         # for a particular event to allow you to have an event that just updates
         # current status
         self.registration = ['uniquecallid']
-        self.priority = 2
+        self.priority = 5
 
     def onMessage(self, message, metadata):
         docid = hashlib.md5('vidyouniquecallid' + message['details']['uniquecallid']).hexdigest()
