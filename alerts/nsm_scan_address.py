@@ -6,7 +6,7 @@
 # Copyright (c) 2018 Mozilla Corporation
 
 from lib.alerttask import AlertTask, add_hostname_to_ip
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch, ExistsMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 
 
 class NSMScanAddress(AlertTask):
