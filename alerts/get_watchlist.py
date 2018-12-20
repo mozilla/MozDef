@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -20,6 +18,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 class AlertWatchList(AlertTask):
     def main(self):
+        global watchterm
         self.parse_config('get_watchlist.conf', ['api_url', 'jwt_secret'])
 
         jwt_token = JWTAuth(self.config.jwt_secret)
@@ -36,18 +35,19 @@ class AlertWatchList(AlertTask):
             while index < len(terms_list):
                 term = terms_list[index]
                 term = '"{}"'.format(term)
+                watchterm = term
                 index += 1
-
-                # Create a query to look back the last 20 minutes
-                search_query = SearchQuery(minutes=20)
-                content = QueryStringMatch(str(term))
-                search_query.add_must(content)
-                self.filtersManual(search_query)
-                self.searchEventsSimple()
-                self.walkEvents()
-
+                self.process_alert(term)
         else:
             sys.stderr.write('The watchlist request failed. Status {0}.\n'.format(status))
+
+    def process_alert(self, term):
+        search_query = SearchQuery(minutes=20)
+        content = QueryStringMatch(str(term))
+        search_query.add_must(content)
+        self.filtersManual(search_query)
+        self.searchEventsSimple()
+        self.walkEvents()
 
     # Set alert properties
     def onEvent(self, event):
@@ -87,5 +87,5 @@ class AlertWatchList(AlertTask):
             else:
                 return None
 
-        summary = 'Watchlist term detected {} {} on {}'.format(user_data, source_data, hostname)
+        summary = 'Watchlist term {} detected {} {} on {}'.format(watchterm, user_data, source_data, hostname)
         return self.createAlertDict(summary, category, tags, [event], severity)
