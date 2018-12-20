@@ -17,7 +17,7 @@ class TestAlertDuoAuthFail(AlertTestSuite):
     default_event = {
         "_type": "event",
         "_source": {
-            "category": "event",
+            "category": "authentication",
             "summary": 'authentication FRAUD for you@somewhere.com',
             "details": {
                 "sourceipaddress": "1.2.3.4",
