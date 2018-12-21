@@ -13,6 +13,17 @@ from mozdef_util.query_models import TermMatch, SearchQuery, RangeMatch, QuerySt
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 
+class RingBuffer:
+    def __init__(self, size):
+        self.data = [None for i in xrange(size)]
+
+    def append(self, x):
+        self.data.pop(0)
+        self.data.append(x)
+
+    def get(self):
+        return self.data
+
 class UsernameNetResolve:
 
     def __init__(self):
@@ -24,6 +35,7 @@ class UsernameNetResolve:
         self.macassignments = self.readOUIFile()
         self.esClient = ElasticsearchClient(self.options.esreadurl)
         self.logger.debug('started')
+        self.seenRing = RingBuffer(100)
 
     def loggerTimeStamp(self, record, datefmt=None):
         return toUTC(datetime.now()).isoformat()
@@ -62,8 +74,7 @@ class UsernameNetResolve:
         with open(os.path.join(os.path.dirname(__file__), self.options.cpmap), 'r') as f:
             map = f.read()
 
-        yap = load(map)
-        eventtypes = yap.keys()
+        self.yap = load(map)
         del(map)
 
     def readOUIFile(self):
@@ -93,7 +104,7 @@ class UsernameNetResolve:
                     +'(([2][5][0-5])|([2][0-4][0-9])|([0-1]?[0-9]?[0-9]))')
         mac = compile('([a-fA-F0-9]{2}[:|\-]?){6}')
 
-        search_query = SearchQuery(seconds=60)
+        search_query = SearchQuery(hours=8)
         search_query.add_must([
             TermMatch('category', 'syslog'),
             TermMatch('processname', 'dhcpd'),
@@ -115,6 +126,10 @@ class UsernameNetResolve:
             except:
                 pass
             self.logger.debug('%s <- %s', match_ip, match_mac)
+            if match_ip+match_mac in self.seenRing.get():
+                return
+            else:
+                self.seenRing.append(match_ip+match_mac)
             self.find_username_by_mac(match_mac, match_ip)
 
         self.logger.debug('Found %s DHCP events',len(events['hits']))
@@ -137,7 +152,7 @@ class UsernameNetResolve:
             newmessage['details']['hwvendor'] = self.macassignments[match_mac[0:8].lower()]
             self.logger.debug('found vendor in the out.txt')
 
-        search_query = SearchQuery(seconds=90)
+        search_query = SearchQuery(hours=8)
         search_query.add_must([
             TermMatch('category', 'syslog'),
             TermMatch('facility', 'local1'),
@@ -194,7 +209,7 @@ class UsernameNetResolve:
         mozmsg.timestamp = toUTC(newmessage['details']['radiustimestamp']).isoformat()
 
         mozmsg.details = newmessage['details']
-        mozmsg.summary = '%s <- %s'.format(newmessage['details']['username'], newmessage['details']['ipaddress'])
+        mozmsg.summary = '%s <- %s'.format(newmessage['details']['username'], newmessage['details']['eventipaddress'])
 
         mozmsg.send()
 
