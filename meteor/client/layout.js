@@ -48,7 +48,7 @@ if (Meteor.isClient) {
             var ipText=$(e.target).attr('data-ipaddress');
             console.log("IP: " + ipText)
             var searchDomain=getSetting('kibanaURL');
-            var searchPath="#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-7d,mode:quick,to:now))&_a=(columns:!(_source),index:AWdcCjsPo9lh6BmjcvcD,interval:auto,query:(query_string:(analyze_wildcard:!t,query:'details.sourceipaddress:"+ipText+"')),sort:!(utctimestamp,desc))";
+            var searchPath="#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-1h,mode:quick,to:now))&_a=(columns:!(_source),index:AWdcCjsPo9lh6BmjcvcD,interval:auto,query:(query_string:(analyze_wildcard:!t,query:'details.sourceipaddress:"+ipText+"')),sort:!(utctimestamp,desc))";
             var url=searchDomain+searchPath;
             console.log("Opening url: " + url);
             window.open(url, '_blank');
