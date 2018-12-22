@@ -201,6 +201,15 @@ Router.map(function () {
 
     });
 
+    this.route('ipsearch',{
+        path: '/ipsearch/:_ipaddress',
+        template: 'ipsearch',
+        data: function(){
+            Session.set('ipsearchipaddress',this.params._ipaddress)
+        }
+
+    });
+
     this.route('veris',{
        path: '/veris',
        template:'veristags',

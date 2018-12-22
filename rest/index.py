@@ -13,6 +13,7 @@ import re
 import requests
 import sys
 import socket
+import webbrowser
 from bottle import route, run, response, request, default_app, post
 from datetime import datetime
 from configlib import getConfig, OptionParser
@@ -175,6 +176,16 @@ def ipintel():
         response.status = 500
 
     sendMessgeToPlugins(request, response, 'ipintel')
+    return response
+
+
+@route('/ipsearch', methods=['POST'])
+@route('/ipsearch/', methods=['POST'])
+def ipsearch():
+    '''send an IP address to a Kibana search'''
+    response.status = 200
+
+    sendMessgeToPlugins(request, response, 'ipsearch')
     return response
 
 

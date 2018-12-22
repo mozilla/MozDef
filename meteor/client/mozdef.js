@@ -312,13 +312,14 @@ if (Meteor.isClient) {
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
+            searchitem=$("<li><a class='ipmenu-search' data-ipaddress='" + iptext + "'href='#'>search kibana</a></li>");
             if ( isFeature('blockip') ){
                 blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
             }else{
                 blockIPitem=$();
             }
 
-            ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,blockIPitem);
+            ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,searchitem,blockIPitem);
 
             $(this).parent().parent().append(ipmenu);
         });
