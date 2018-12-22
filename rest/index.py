@@ -13,7 +13,6 @@ import re
 import requests
 import sys
 import socket
-import webbrowser
 from bottle import route, run, response, request, default_app, post
 from datetime import datetime
 from configlib import getConfig, OptionParser
