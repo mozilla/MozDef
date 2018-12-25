@@ -6,7 +6,7 @@
 ul.dropdown {
     position: relative;
     display: inline-block;
-    width: min-content;
+    width: max-content;
     border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 3px;
     box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
