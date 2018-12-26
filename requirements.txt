@@ -5,7 +5,6 @@ boto==2.49.0
 boto3==1.7.67
 botocore==1.10.67
 bottle==0.12.4
-bugzilla==1.0.0
 celery==4.1.0
 cffi==1.9.1
 configlib==2.0.2
@@ -29,7 +28,6 @@ ipaddr==2.1.11
 ipaddress==1.0.17
 ipwhois==0.15.0
 jmespath==0.9.3
-KitnIRC==0.2.6
 kombu==4.1.0
 meld3==1.0.2
 mozdef-client==1.0.11
@@ -55,9 +53,11 @@ s3cmd==1.0.1
 setuptools-scm==1.11.1
 simplejson==3.13.2
 six==1.11.0
+slackclient==1.0.9
 supervisor==3.3.1
 tzlocal==1.4
 uritemplate==0.6
 urllib3==1.23
 uwsgi==2.0.17.1
 virtualenv==1.11.4
+websocket-client==0.44.0

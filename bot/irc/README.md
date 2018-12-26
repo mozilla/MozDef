@@ -4,6 +4,10 @@ KitnIRC - A Python IRC Bot Framework
 KitnIRC is an IRC framework that attempts to handle most of the
 monotony of writing IRC bots without sacrificing flexibility.
 
+Installation
+------------
+    pip install -r bot/irc/requirements.txt
+
 Usage
 -----
 
