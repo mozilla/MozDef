@@ -46,21 +46,21 @@ class message(object):
         newmessage = dict()
 
         try:
-            newmessage['details'] = json.loads(message['MESSAGE'])
+            newmessage['details'] = json.loads(message['message'])
         except:
             newmessage['details'] = {}
             newmessage['rawdetails'] = message
 
         # move some fields that are expected at the event 'root' where they belong
-        if 'HOST_FROM' in message:
-            newmessage['hostname'] = message['HOST_FROM']
+        if 'host_from' in message:
+            newmessage['hostname'] = message['host_from']
         if 'tags' in message:
             newmessage['tags'] = message['tags']
         if 'category' in message:
             newmessage['category'] = message['category']
         newmessage[u'source'] = u'unknown'
-        if 'SOURCE' in message:
-            newmessage[u'source'] = message['SOURCE']
+        if 'source' in message:
+            newmessage[u'source'] = message['source']
         logtype = newmessage['source']
         newmessage[u'event_type'] = u'unknown'
         if 'event_type' in message:
@@ -103,12 +103,12 @@ class message(object):
                 newmessage[u'details'][u'destinationport'] = newmessage['details']['dest_port']
                 del(newmessage['details']['dest_port'])
 
-            if 'FILE_NAME' in newmessage['details']:
-                del(newmessage['details']['FILE_NAME'])
-            if 'MESSAGE' in newmessage['details']:
-                del(newmessage['details']['MESSAGE'])
-            if 'SOURCE' in newmessage['details']:
-                del(newmessage['details']['SOURCE'])
+            if 'file_name' in newmessage['details']:
+                del(newmessage['details']['file_name'])
+            if 'message' in newmessage['details']:
+                del(newmessage['details']['message'])
+            if 'source' in newmessage['details']:
+                del(newmessage['details']['source'])
 
             if logtype == 'eve-log':
                 if eventtype == 'alert':
@@ -174,7 +174,7 @@ class message(object):
                             if 'ET.http.javaclient' in newmessage['details']['vars']['flowbits']:
                                 if 'ET.http.javaclient.vulnerable':
                                     del(newmessage['details']['vars']['flowbits']['ET.http.javaclient'])
-                                    newmessage['details']['vars']['flowbits']['et.http.javaclient.vulnerable'] = "True"
+                                    newmessage['details']['vars']['flowbits']['ET.http.javaclient.vulnerable'] = "True"
                     newmessage[u'summary'] = (
                         u'{sourceipaddress}:'+
                         u'{sourceport} -> '+

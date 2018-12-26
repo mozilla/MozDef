@@ -56,7 +56,7 @@ class TestSuricataFixup(object):
         }
         event = {
             'category': 'suricata',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
 
@@ -72,7 +72,7 @@ class TestSuricataFixup(object):
         }
         event = {
             'customendpoint': '',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
 
@@ -89,7 +89,7 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'alamakota',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
 
@@ -108,7 +108,7 @@ class TestSuricataFixup(object):
             'category': 'suricata',
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'eve-log'
+            'source': 'eve-log'
         }
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -125,7 +125,7 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alamakota'
         }
 
@@ -143,7 +143,7 @@ class TestSuricataFixup(object):
         MESSAGE = {
             'ts': 1505701210.163043
         }
-        event['MESSAGE'] = json.dumps(MESSAGE)
+        event['message'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result['category'] == 'suricata'
@@ -154,13 +154,13 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'alamakota',
+            'source': 'alamakota',
             'event_type': 'alert'
         }
         MESSAGE = {
             'ts': 1505701210.163043
         }
-        event['MESSAGE'] = json.dumps(MESSAGE)
+        event['message'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result['category'] == 'suricata'
@@ -174,7 +174,7 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
@@ -273,7 +273,7 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
         MESSAGE = {
@@ -312,7 +312,7 @@ class TestSuricataFixup(object):
                 "linktype":1
             }
         }
-        event['MESSAGE'] = json.dumps(MESSAGE)
+        event['message'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -335,7 +335,7 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
         MESSAGE = {
@@ -384,7 +384,7 @@ class TestSuricataFixup(object):
                 "redirect":"afakedestination"
             },
         }
-        event['MESSAGE'] = json.dumps(MESSAGE)
+        event['message'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -403,7 +403,7 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
         MESSAGE = {
@@ -456,7 +456,7 @@ class TestSuricataFixup(object):
         MESSAGE['payload_printable'] = large_pseudorandom_string
         MESSAGE['http']['http_response_body'] = large_pseudorandom_string
         MESSAGE['http']['http_response_body_printable'] = large_pseudorandom_string
-        event['MESSAGE'] = json.dumps(MESSAGE)
+        event['message'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -478,7 +478,7 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
         MESSAGE = {
@@ -524,7 +524,7 @@ class TestSuricataFixup(object):
                 }
             }
         }
-        event['MESSAGE'] = json.dumps(MESSAGE)
+        event['message'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
@@ -538,7 +538,7 @@ class TestSuricataFixup(object):
         event = {
             'customendpoint': '',
             'category': 'suricata',
-            'SOURCE': 'eve-log',
+            'source': 'eve-log',
             'event_type': 'alert'
         }
         MESSAGE = {
@@ -577,7 +577,7 @@ class TestSuricataFixup(object):
                 "linktype":1
             }
         }
-        event['MESSAGE'] = json.dumps(MESSAGE)
+        event['message'] = json.dumps(MESSAGE)
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
