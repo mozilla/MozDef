@@ -2,11 +2,13 @@ FROM mozdef/mozdef_base
 
 LABEL maintainer="mozdef@mozilla.com"
 
-COPY bot /opt/mozdef/envs/mozdef/bot
-COPY docker/compose/mozdef_bot/files/mozdefbot.conf /opt/mozdef/envs/mozdef/bot/mozdefbot.conf
+ARG BOT_TYPE
 
-RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/bot
+COPY bot/$BOT_TYPE /opt/mozdef/envs/mozdef/bot/$BOT_TYPE
+COPY docker/compose/mozdef_bot/files/mozdefbot.conf /opt/mozdef/envs/mozdef/bot/$BOT_TYPE/mozdefbot.conf
 
-WORKDIR /opt/mozdef/envs/mozdef/bot
+RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/bot/$BOT_TYPE
+
+WORKDIR /opt/mozdef/envs/mozdef/bot/$BOT_TYPE
 
 USER mozdef
