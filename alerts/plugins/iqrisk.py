@@ -72,7 +72,7 @@ class message(object):
             # generic reputation info
             rep.get_reputation('reputation', "ip")
             message['intel']['reputation'] = rep.reputation['reputation']
-        if 'sourceipaddress' in message['details']:
+        if 'destinationfqdn' in message['details']:
             rep = iqr(message['details']['destinationfqdn'], self.options)
             message['intel'] = {}
             # generic reputation info
