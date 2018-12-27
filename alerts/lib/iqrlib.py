@@ -1,13 +1,10 @@
 #!/usr/bin/env python
-import pprint
-from configlib import getConfig, OptionParser
-from datetime import datetime, timedelta
-import json
 import requests
 import netaddr
 import sys
 
 intel = ''
+
 
 class iqr():
 
@@ -15,7 +12,6 @@ class iqr():
         self.reputation = {}
         self.intel = intel
         self.options = options
-
 
     def sendRequest(self, reqtype):
         headers = {'Authorization': self.options.apikey}
@@ -28,7 +24,6 @@ class iqr():
         if len(reqtype) and len(url) > 1:
             try:
                 request = requests.get(url=url, headers=headers, timeout=2)
-                print(request)
             except (
                     requests.exceptions.ConnectionError, requests.exceptions.TooManyRedirects,
                     requests.exceptions.Timeout) as e:
@@ -39,6 +34,8 @@ class iqr():
                         self.rawdata = request.json()
                     except (ValueError) as e:
                         sys.stderr.write('Failed to decode IQRisk data: {0}\n'.format(e))
+                else:
+                    sys.stderr.write('Failed to receive IQRisk data - status code: {0}\n'.format(request.status_code))
 
     def get_reputation(self, type, objtype):
         self.reputation[type] = dict()
@@ -47,6 +44,7 @@ class iqr():
                 self.sendRequest(type)
         if objtype == 'domain':
             self.sendRequest(type)
-        if 'response' in self.rawdata:
-            if self.rawdata['response'] and self.rawdata['success']:
-                self.reputation[type] = self.rawdata['response']
+        if self.rawdata:
+            if 'response' in self.rawdata:
+                if self.rawdata['response'] and self.rawdata['success']:
+                    self.reputation[type] = self.rawdata['response']
