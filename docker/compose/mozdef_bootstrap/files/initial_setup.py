@@ -17,7 +17,6 @@ from elasticsearch.exceptions import ConnectionError
 
 import os
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-from mozdef_util.query_models import SearchQuery, TermMatch
 
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
@@ -113,15 +112,12 @@ if kibana_index_name not in all_indices:
         with open(json_file_path) as json_data:
             mapping_data = json.load(json_data)
             print "Creating {0} index mapping".format(mapping_data['title'])
-            client.save_object(mapping_data, '.kibana', 'index-pattern')
+            client.save_object(body=mapping_data, index='.kibana', doc_type='index-pattern', doc_id=mapping_data['title'])
 
     # Assign default index to 'events'
     client.flush('.kibana')
-    query = SearchQuery()
-    query.add_must(TermMatch('title', 'events'))
-    results = query.execute(client, ['.kibana'])
     default_mapping_data = {
-        "defaultIndex": results['hits'][0]['_id']
+        "defaultIndex": 'events'
     }
     print "Assigning events as default index mapping"
     client.save_object(default_mapping_data, '.kibana', 'config', kibana_version)
