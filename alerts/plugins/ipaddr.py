@@ -5,7 +5,7 @@
 
 from configlib import getConfig, OptionParser
 import netaddr
-import sys
+import os
 
 
 def isIPv4(ip):
@@ -29,6 +29,7 @@ def addError(message, error):
     if isinstance(message['errors'], list):
         message['errors'].append(error)
 
+
 class message(object):
     def __init__(self):
         '''
@@ -39,20 +40,21 @@ class message(object):
 
         # set my own conf file
         # relative path to the rest index.py file
-        #self.configfile = os.path.join(os.path.dirname(__file__), 'addarandomstring.conf')
-        #self.options = None
-        #if os.path.exists(self.configfile):
-        #    self.initConfiguration()
+        self.configfile = os.path.join(os.path.dirname(__file__), 'ipaddr.conf')
+        self.options = None
+        if os.path.exists(self.configfile):
+            self.initConfiguration()
 
-        #self.registration = self.options.keywords.split(" ")
-        self.registration = ['sourceipaddress', 'destinationipaddress', 'http_x_forwarded_for', 'cluster_client_ip']
+        self.registration = self.options.keywords.split(" ")
         self.priority = 1
 
-    #def initConfiguration(self):
-    #    myparser = OptionParser()
-    #    # setup self.options by sending empty list [] to parse_args
-    #    (self.options, args) = myparser.parse_args([])
-#
+    def initConfiguration(self):
+        myparser = OptionParser()
+        # setup self.options by sending empty list [] to parse_args
+        (self.options, args) = myparser.parse_args([])
+
+        # fill self.options with plugin-specific options
+        self.options.keywords = getConfig('keywords', 'localhost', self.configfile)
 
     def onMessage(self, message):
         '''

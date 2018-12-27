@@ -3,7 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-import json
 import os
 from configlib import getConfig, OptionParser
 import sys
@@ -27,8 +26,7 @@ class message(object):
         if os.path.exists(self.configfile):
             self.initConfiguration()
 
-        #self.registration = self.options.keywords.split(" ")
-        self.registration = ['sshd', 'squid']
+        self.registration = self.options.keywords.split(" ")
         self.priority = 150
 
         self.timeformats = {}
@@ -43,6 +41,7 @@ class message(object):
         (self.options, args) = myparser.parse_args([])
 
         # fill self.options with plugin-specific options
+        self.options.keywords = getConfig('keywords', 'localhost', self.configfile)
         self.options.apiurl = getConfig('apiurl', 'APIURLHERE', self.configfile)
         self.options.apikey = getConfig('apikey', 'APIKEYHERE', self.configfile)
         self.options.allowedipreptypes = getConfig('allowedipreptypes', 'DEFAULTS', self.configfile).split(',')

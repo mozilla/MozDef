@@ -4,16 +4,17 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from configlib import getConfig, OptionParser
-import netaddr
-import sys
+import os
 import tldextract
+
 
 def addFQDN(host):
     fqdn = tldextract.extract(host)
 
     fqdn = '.'.join(part for part in fqdn if part)
-    
+
     return fqdn
+
 
 class message(object):
     def __init__(self):
@@ -23,10 +24,24 @@ class message(object):
         the pager duty event api
         '''
 
-        #self.registration = self.options.keywords.split(" ")
-        self.registration = ['squid']
+        # set my own conf file
+        # relative path to the rest index.py file
+        self.configfile = os.path.join(os.path.dirname(__file__), 'fqdn.conf')
+        self.options = None
+        if os.path.exists(self.configfile):
+            self.initConfiguration()
+
+        self.registration = self.options.keywords.split(" ")
         self.priority = 2
-    
+
+    def initConfiguration(self):
+        myparser = OptionParser()
+        # setup self.options by sending empty list [] to parse_args
+        (self.options, args) = myparser.parse_args([])
+
+        # fill self.options with plugin-specific options
+        self.options.keywords = getConfig('keywords', 'localhost', self.configfile)
+
     def onMessage(self, message):
         '''
         Extracts the subdomain, and the domain name and merges them into FQDN
