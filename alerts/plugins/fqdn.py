@@ -34,17 +34,15 @@ class message(object):
 
         # here is where you do something with the incoming alert message
         if 'events' in message.keys():
-            if 'details' not in message:
-                message['details'] = {}
             if 'documentsource' in message['events'][0].keys():
                 if 'details' in message['events'][0]['documentsource'].keys():
                     event = message['events'][0]['documentsource']['details']
-                if message['category'] == 'squid':
-                    if 'squid' in message['events'][0]['documentsource']['tags']:
-                        if 'destination' in event.keys():
-                            fqdn = addFQDN(event['destination'])
-                            if fqdn is not None:
-                                message['details']['destinationfqdn'] = fqdn
+            if 'details' not in message:
+                message['details'] = {}
+            if 'destination' in event.keys():
+                fqdn = addFQDN(event['destination'])
+                if fqdn is not None:
+                    message['details']['destinationfqdn'] = fqdn
 
         # you can modify the message if needed
         # plugins registered with lower (>2) priority
