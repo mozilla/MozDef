@@ -1,0 +1,10 @@
+---
+  session:
+    username: user_name
+    nas_ip: nas_ip
+    result: login_status
+    status: conn_status
+    radiustimestamp: write_timestamp
+    errorcode: error_code
+    macaddress: mac_address
+    wifi_alerts: alerts_present
