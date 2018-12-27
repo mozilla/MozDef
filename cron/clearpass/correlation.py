@@ -7,13 +7,14 @@ from yaml import load
 from re import compile
 from mozdef_util.utilities.toUTC import toUTC
 from netaddr import EUI, mac_bare, NotRegisteredError
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-from mozdef_util.query_models import TermMatch, SearchQuery, RangeMatch, QueryStringMatch
+from mozdef_util.query_models import TermMatch, SearchQuery, QueryStringMatch
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 
 # https://community.arubanetworks.com/t5/AAA-NAC-Guest-Access-BYOD/ClearPass-Error-Codes/ta-p/260799
+
 
 class RingBuffer:
     def __init__(self, size):
@@ -25,6 +26,7 @@ class RingBuffer:
 
     def get(self):
         return self.data
+
 
 class UsernameNetResolve:
 
@@ -102,8 +104,8 @@ class UsernameNetResolve:
         return macassignments
 
     def find_mac_by_ip(self):
-        ip = compile('(([2][5][0-5]\.)|([2][0-4][0-9]\.)|([0-1]?[0-9]?[0-9]\.)){3}'
-                    +'(([2][5][0-5])|([2][0-4][0-9])|([0-1]?[0-9]?[0-9]))')
+        ip = compile('(([2][5][0-5]\.)|([2][0-4][0-9]\.)|([0-1]?[0-9]?[0-9]\.)){3}'+
+                     '(([2][5][0-5])|([2][0-4][0-9])|([0-1]?[0-9]?[0-9]))')
         mac = compile('([a-fA-F0-9]{2}[:|\-]?){6}')
 
         search_query = SearchQuery(hours=8)
@@ -128,10 +130,10 @@ class UsernameNetResolve:
             except:
                 pass
             self.logger.debug('%s <- %s', match_ip, match_mac)
-            if match_ip+match_mac in self.seenRing.get():
+            if match_ip + match_mac in self.seenRing.get():
                 return
             else:
-                self.seenRing.append(match_ip+match_mac)
+                self.seenRing.append(match_ip + match_mac)
             self.find_username_by_mac(match_mac, match_ip)
 
         self.logger.debug('Found %s DHCP events',len(events['hits']))
@@ -158,7 +160,7 @@ class UsernameNetResolve:
         search_query.add_must([
             TermMatch('category', 'syslog'),
             TermMatch('facility', 'local1'),
-            QueryStringMatch('summary: '+mac_bare_str)
+            QueryStringMatch('summary: ' + mac_bare_str)
         ])
         events = search_query.execute(self.esClient, indices=['events-weekly'])
         for event in events['hits']:
@@ -195,7 +197,7 @@ class UsernameNetResolve:
 
         if len(events['hits']) > 0:
             self.createevent(newmessage)
- 
+
         return
 
     def createevent(self, newmessage):
@@ -204,9 +206,6 @@ class UsernameNetResolve:
         mozmsg = mozdef.MozDefEvent(self.options.eswriteurl)
         mozmsg.tags = ['authentication', 'clearpass', 'dhcp']
         mozmsg.set_category('authentication')
-        #if options.DEBUG:
-        #    mozmsg.debug = options.DEBUG
-        #    mozmsg.set_send_to_syslog(True, only_syslog=True)
 
         mozmsg.timestamp = toUTC(newmessage['details']['radiustimestamp']).isoformat()
 
@@ -215,9 +214,11 @@ class UsernameNetResolve:
 
         mozmsg.send()
 
+
 def main():
     iptouser = UsernameNetResolve()
     iptouser.find_mac_by_ip()
+
 
 if __name__ == '__main__':
     main()
