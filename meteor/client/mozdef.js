@@ -94,6 +94,17 @@ if (Meteor.isClient) {
       return false;
     };
 
+    isHostname=function(entry) {
+        var blocks = entry.split(".");
+        if(blocks.length >= 3 && blocks.length <= 5) {
+          return blocks.every(function(block){
+            return /^(\w+.)+$/.test(block) && !/^(\d+.)+$/.test(block);
+          });
+        }else{
+             return false;
+        }
+  };
+
     isURL=function(astring){
         return validator.isURL(astring);
     };
@@ -295,6 +306,13 @@ if (Meteor.isClient) {
                             {wordsOnly:false,
                             element: "em",
                             className:"ipaddress"});
+            } else if ( isHostname(w) ){
+                //console.log(w);
+                anelement.
+                highlight(  w,
+                            {wordsOnly:false,
+                            element: "em",
+                            className:"hostname"});
             }
           });
         //add a drop down menu to any .ipaddress
@@ -321,6 +339,15 @@ if (Meteor.isClient) {
             ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,blockIPitem);
 
             $(this).parent().parent().append(ipmenu);
+        });
+
+        anelement.children( '.hostname').each(function( index ){
+            hosttext=$(this).text();
+            $(this).append('<b></b>');
+            var searchDomain=getSetting('kibanaURL');
+            searchPath="#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-7d,mode:quick,to:now))&_a=(columns:!(_source),index:events-weekly,interval:auto,query:(query_string:(analyze_wildcard:!t,query:'hostname:"+hosttext+"')),sort:!(utctimestamp,desc))"
+            searchURL=searchDomain+searchPath;
+            $(this).wrap("<a href="+searchURL+" target='_blank'></a>" );
         });
         //return raw html, consume as {{{ ipDecorate fieldname }}} in a meteor template
         return anelement.prop('outerHTML');
