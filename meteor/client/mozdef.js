@@ -345,7 +345,7 @@ if (Meteor.isClient) {
             hosttext=$(this).text();
             $(this).append('<b></b>');
             var searchDomain=getSetting('kibanaURL');
-            searchPath="#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-7d,mode:quick,to:now))&_a=(columns:!(_source),index:events-weekly,interval:auto,query:(query_string:(analyze_wildcard:!t,query:'hostname:"+hosttext+"')),sort:!(utctimestamp,desc))"
+            searchPath="#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-1h,mode:quick,to:now))&_a=(columns:!(_source),index:events-weekly,interval:auto,query:(query_string:(analyze_wildcard:!t,query:'hostname:"+hosttext+"')),sort:!(utctimestamp,desc))"
             searchURL=searchDomain+searchPath;
             $(this).wrap("<a href="+searchURL+" target='_blank'></a>" );
         });
