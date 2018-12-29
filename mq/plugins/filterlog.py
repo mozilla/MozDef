@@ -71,9 +71,9 @@ class message(object):
             if 'tcp' not in message['details']:
                 message['details']['tcp'] = {}
 
-            message['details']['tcp']['source_port'] = summary_items[last_index + 4]
-            message['details']['tcp']['destination_port'] = summary_items[last_index + 5]
-            message['details']['tcp']['data_length'] = summary_items[last_index + 6]
+            message['details']['source_port'] = summary_items[last_index + 4]
+            message['details']['destination_port'] = summary_items[last_index + 5]
+            message['details']['data_length'] = summary_items[last_index + 6]
             message['details']['tcp']['flags'] = summary_items[last_index + 7]
             message['details']['tcp']['seq_number'] = summary_items[last_index + 8]
             message['details']['tcp']['ack_number'] = summary_items[last_index + 9]
@@ -81,11 +81,8 @@ class message(object):
             message['details']['tcp']['urg'] = summary_items[last_index + 11]
             message['details']['tcp']['options'] = summary_items[last_index + 12]
         elif proto_id == 17:
-            if 'udp' not in message['details']:
-                message['details']['udp'] = {}
-
-            message['details']['udp']['source_port'] = summary_items[last_index + 4]
-            message['details']['udp']['destination_port'] = summary_items[last_index + 5]
-            message['details']['udp']['data_length'] = summary_items[last_index + 6]
+            message['details']['source_port'] = summary_items[last_index + 4]
+            message['details']['destination_port'] = summary_items[last_index + 5]
+            message['details']['data_length'] = summary_items[last_index + 6]
 
         return (message, metadata)

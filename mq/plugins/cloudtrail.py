@@ -3,8 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import sys
-import os
 from mozdef_util.utilities.key_exists import key_exists
 
 
@@ -21,29 +19,30 @@ class message(object):
         # which are mixed string and dict
         # into a dict with a raw_value key as the string value
         self.modify_keys = [
-            'details.requestparameters.iamInstanceProfile',
-            'details.requestparameters.instanceType',
+            'details.additionaleventdata',
+            'details.apiversion',
+            'details.serviceeventdetails',
             'details.requestparameters.attribute',
+            'details.requestparameters.bucketpolicy.statement.principal',
+            'details.requestparameters.callerreference',
             'details.requestparameters.description',
+            'details.requestparameters.disableapitermination',
+            'details.requestparameters.domainname',
+            'details.requestparameters.domainnames',
+            'details.requestparameters.ebsoptimized',
             'details.requestparameters.filter',
-            'details.requestparameters.rule',
-            'details.requestparameters.ebsOptimized',
+            'details.requestparameters.iaminstanceprofile',
+            'details.requestparameters.instancetype',
+            'details.requestparameters.logstreamname',
             'details.requestparameters.source',
-            'details.requestparameters.callerReference',
-            'details.requestparameters.domainName',
-            'details.requestparameters.domainNames',
             'details.responseelements.role',
+            'details.requestparameters.rule',
             'details.responseelements.subnets',
             'details.responseelements.endpoint',
-            'details.responseelements.securityGroups',
-            'details.responseelements.lastModified',
-            'details.additionaleventdata',
-            'details.serviceeventdetails',
-            'details.requestparameters.disableApiTermination',
-            'details.responseelements.findings.service.additionalInfo.unusual',
-            'details.responseelements.distribution.distributionConfig.callerReference',
-            'details.requestparameters.logStreamName',
-            'details.apiversion'
+            'details.responseelements.securitygroups',
+            'details.responseelements.lastmodified',
+            'details.responseelements.findings.service.additionalinfo.unusual',
+            'details.responseelements.distribution.distributionconfig.callerreference'
         ]
 
     def convert_key_raw_str(self, needle, haystack):

@@ -1,5 +1,3 @@
-import os
-import sys
 from mozdef_util.event import Event
 from mozdef_util.utilities.toUTC import toUTC
 import socket
@@ -60,7 +58,6 @@ class TestEvent(object):
             'utctimestamp': '2017-09-14T20:05:20.299387+00:00',
             'timestamp': '2017-09-14T20:05:19.116195+00:00',
             'mozdefhostname': 'randomhostname',
-            'tags': [],
             'category': 'Authentication',
             'hostname': 'host.domain.com',
             'processid': 12345,

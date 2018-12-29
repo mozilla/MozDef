@@ -8,25 +8,18 @@
 import json
 import kitnirc.client
 import kitnirc.modular
-import kombu
 import logging
 import netaddr
 import os
-import pytz
 import random
-import select
 import sys
 import time
-import threading
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from dateutil.parser import parse
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 from ipwhois import IPWhois
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.geo_ip import GeoIP
 
@@ -134,7 +127,7 @@ def ipLocation(ip):
             if geoDict['country_code'] in ('US'):
                 if geoDict['metro_code']:
                     location = location + '/{0}'.format(geoDict['metro_code'])
-    except Exception as e:
+    except Exception:
         location = ""
     return location
 
@@ -151,10 +144,11 @@ def formatAlert(jsonDictIn):
     if 'category' in jsonDictIn.keys():
         category = jsonDictIn['category']
 
-    return colorify('{0}: {1} {2}'.format(severity, colors['blue']
-                                          + category
-                                          + colors['normal'],
-                                          summary.encode('ascii', 'replace')))
+    return colorify('{0}: {1} {2}'.format(
+        severity,
+        colors['blue'] + category + colors['normal'],
+        summary.encode('ascii', 'replace')
+    ))
 
 
 class mozdefBot():
@@ -196,15 +190,6 @@ class mozdefBot():
                         client.join(chan)
                 # start the mq consumer
                 consumeAlerts(self)
-
-            @self.client.handle('LINE')
-            def line_handler(client, *params):
-                try:
-                    self.root_logger.debug('linegot:' + line)
-                except AttributeError as e:
-                    # catch error in kitnrc : chan.remove(actor) where channel
-                    # object has no attribute remove
-                    pass
 
             @self.client.handle('PRIVMSG')
             def priv_handler(client, actor, recipient, message):

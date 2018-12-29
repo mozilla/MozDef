@@ -40,9 +40,9 @@ class AlertAccountCreations(AlertTask):
         severity = 'INFO'
 
         summary = ('{0} fxa account creation attempts by {1}'.format(aggreg['count'], aggreg['value']))
-        emails = self.mostCommon(aggreg['allevents'],'_source.details.email')
-        #did they try to create more than one email account?
-        #or just retry an existing one
+        emails = self.mostCommon(aggreg['allevents'], '_source.details.email')
+        # did they try to create more than one email account?
+        # or just retry an existing one
         if len(emails) > 1:
             for i in emails[:5]:
                 summary += ' {0} ({1} hits)'.format(i[0], i[1])

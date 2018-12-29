@@ -14,6 +14,7 @@ Table of Contents
   demo
   installation
   alert_development_guide
+  mozdef_util
   screenshots
   usage
   cloud_deployment

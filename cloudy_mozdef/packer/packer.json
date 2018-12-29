@@ -14,7 +14,10 @@
     "instance_type": "t2.large",
     "ssh_pty" : "true",
     "ssh_username": "ec2-user",
-    "ami_name": "mozdef_{{timestamp}}"
+    "ami_name": "mozdef_{{timestamp}}",
+    "ami_groups": [
+      "all"
+    ]
   }],
  "provisioners": [
    {  "type": "shell",
@@ -30,7 +33,7 @@
         "sudo systemctl enable docker",
         "sudo mkdir -p /opt/mozdef/",
         "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
-        "cd /opt/mozdef && sudo git checkout origin/master"
-    ]}
+        "cd /opt/mozdef && sudo git checkout master"
+      ]}
  ]
 }

@@ -17,7 +17,6 @@ from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
-import os
 from mozdef_util.utilities.toUTC import toUTC
 
 
@@ -62,7 +61,7 @@ def parse_fqdn_whitelist(fqdn_whitelist_location):
     fqdns = []
     with open(fqdn_whitelist_location, "r") as text_file:
         for line in text_file:
-            line=line.strip().strip("'").strip('"')
+            line = line.strip().strip("'").strip('"')
             if isFQDN(line):
                 fqdns.append(line)
     return fqdns
@@ -77,10 +76,10 @@ def main():
         mozdefdb = client.meteor
         fqdnblocklist = mozdefdb['fqdnblocklist']
         # ensure indexes
-        fqdnblocklist.create_index([('dateExpiring',-1)])
+        fqdnblocklist.create_index([('dateExpiring', -1)])
 
         # delete any that expired
-        fqdnblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow()-timedelta(days=options.expireage)}})
+        fqdnblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(days=options.expireage)}})
 
         # Lastly, export the combined blocklist
         fqdnCursor = mozdefdb['fqdnblocklist'].aggregate([
@@ -95,7 +94,7 @@ def main():
             {"$project": {"address": 1}},
             {"$limit": options.fqdnlimit}
         ])
-        FQDNList=[]
+        FQDNList = []
         for fqdn in fqdnCursor:
             if fqdn not in options.fqdnwhitelist:
                 FQDNList.append(fqdn['address'])
@@ -105,7 +104,7 @@ def main():
                 outputfile.write("{0}\n".format(fqdn))
         outputfile.close()
         # to s3?
-        if len(options.aws_bucket_name)>0:
+        if len(options.aws_bucket_name) > 0:
             s3_upload_file(options.outputfile, options.aws_bucket_name, options.aws_document_key_name)
 
     except ValueError as e:
@@ -134,26 +133,26 @@ def initConfig():
     options.outputfile = getConfig('outputfile', 'fqdnblocklist.txt', options.configfile)
 
     # Days after expiration that we purge an fqdnblocklist entry (from the ui, they don't end up in the export after expiring)
-    options.expireage = getConfig('expireage',1,options.configfile)
+    options.expireage = getConfig('expireage', 1, options.configfile)
 
     # Max FQDNs to emit
     options.fqdnlimit = getConfig('fqdnlimit', 1000, options.configfile)
 
     # AWS creds
-    options.aws_access_key_id=getConfig('aws_access_key_id','',options.configfile)  # aws credentials to use to connect to mozilla_infosec_blocklist
-    options.aws_secret_access_key=getConfig('aws_secret_access_key','',options.configfile)
-    options.aws_bucket_name=getConfig('aws_bucket_name','',options.configfile)
-    options.aws_document_key_name=getConfig('aws_document_key_name','',options.configfile)
+    options.aws_access_key_id = getConfig('aws_access_key_id', '', options.configfile)  # aws credentials to use to connect to mozilla_infosec_blocklist
+    options.aws_secret_access_key = getConfig('aws_secret_access_key', '', options.configfile)
+    options.aws_bucket_name = getConfig('aws_bucket_name', '', options.configfile)
+    options.aws_document_key_name = getConfig('aws_document_key_name', '', options.configfile)
 
 
 def s3_upload_file(file_path, bucket_name, key_name):
     """
     Upload a file to the given s3 bucket and return a template url.
     """
-    conn = boto.connect_s3(aws_access_key_id=options.aws_access_key_id,aws_secret_access_key=options.aws_secret_access_key)
+    conn = boto.connect_s3(aws_access_key_id=options.aws_access_key_id, aws_secret_access_key=options.aws_secret_access_key)
     try:
         bucket = conn.get_bucket(bucket_name, validate=False)
-    except boto.exception.S3ResponseError as e:
+    except boto.exception.S3ResponseError:
         conn.create_bucket(bucket_name)
         bucket = conn.get_bucket(bucket_name, validate=False)
 

@@ -48,7 +48,7 @@ pynsive==0.2.6
 pyparsing==2.1.10
 python-dateutil==2.6.1
 pytz==2017.3
-requests==2.18.4
+requests==2.20.0
 requests-futures==0.9.7
 rsa==3.1.4
 s3cmd==1.0.1
@@ -58,6 +58,6 @@ six==1.11.0
 supervisor==3.3.1
 tzlocal==1.4
 uritemplate==0.6
-urllib3==1.22
+urllib3==1.23
 uwsgi==2.0.17.1
 virtualenv==1.11.4

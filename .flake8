@@ -1,21 +1,19 @@
 [flake8]
-exclude =
-  .flake8
-  .git
-  *__init__.py
+per-file-ignores =
+  # Ignore 'library imported but unused' for only the alert config files
+  # since we stub timedelta and crontab
+  alerts/lib/config.py: F401
+  docker/compose/mozdef_alerts/files/config.py: F401
+
+  # Ignore any import statements in __init__ files
+  mozdef_util/mozdef_util/query_models/__init__.py: F401
+
+  # Ignore redefinition of index name
+  rest/index.py: F811
+
 ignore =
-  E123 # closing bracket does not match indentation of opening bracket's line
   E225 # missing whitespace around operator
-  E226 # missing whitespace around arithmetic operator
-  E228 # missing whitespace around modulo operator
   E231 # missing whitespace after ','
-  E265 # block comment should start with '# '
   E402 # module level import not at top of file
   E501 # line too long
   E722 # do not use bare except'
-  F401 # library imported but unused
-  F601 # dictionary key 'tags' repeated with different values
-  F811 # redefinition of unused 'datetime' from line 10
-  F821 # undefined name 'SysLogHandler'
-  F841 # local variable 'CIDR' is assigned to but never used
-  W503 # line break before binary operator

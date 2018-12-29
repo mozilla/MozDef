@@ -20,6 +20,7 @@ from StringIO import StringIO
 from threading import Timer
 import re
 import time
+import kombu
 from ssl import SSLEOFError, SSLError
 
 from mozdef_util.utilities.toUTC import toUTC
@@ -181,7 +182,7 @@ def keyMapping(aDict):
             elif k == 'sourceipaddress':
                 returndict[u'details']['sourceipaddress'] = v
 
-            elif k == 'facility':
+            elif k in ('facility', 'source'):
                 returndict[u'source'] = v
 
             elif k in ('eventsource'):
@@ -307,8 +308,6 @@ class taskConsumer(object):
 
     def authenticate(self):
         if options.cloudtrail_arn not in ['<cloudtrail_arn>', 'cloudtrail_arn']:
-            role_manager_args = {}
-
             role_manager = RoleManager(**get_aws_credentials(
                 options.region,
                 options.accesskey,
@@ -368,7 +367,7 @@ class taskConsumer(object):
                             self.on_message(event)
 
                     self.taskQueue.delete_message(msg)
-            except (SSLEOFError, SSLError, socket.error) as e:
+            except (SSLEOFError, SSLError, socket.error):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
                 self.connection, self.taskQueue = connect_sqs(

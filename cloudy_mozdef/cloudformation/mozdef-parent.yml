@@ -14,52 +14,91 @@ Metadata:
       - InstanceType
       - KeyName
       - AMIImageId
+    - Label:
+        default: Certificate
+      Parameters:
+        - ACMCertArn
+    - Label:
+        default: OIDC Configuration
+      Parameters:
+        - OIDCDiscoveryURL
+        - OIDCClientId
+        - OIDCClientSecret
+    - Label:
+        default: Template Location
+      Parameters:
+        - S3TemplateLocation
+    ParameterLabels:
+      VpcId:
+        default: VPC ID
+      PublicSubnetIds:
+        default: Public Subnet IDs
+      InstanceType:
+        default: EC2 Instance Type
+      KeyName:
+        default: EC2 SSH Key Name
+      AMIImageId:
+        default: EC2 AMI Image ID
+      DomainName:
+        default: FQDN to host MozDef at
+      ACMCertArn:
+        default: ACM Certificate ARN
+      OIDCDiscoveryURL:
+        default: OIDC Discovery URL
+      OIDCClientId:
+        default: OIDC Client ID
+      OIDCClientSecret:
+        default: OIDC Client Secret
+      S3TemplateLocation:
+        default: S3 Template Location URL
 Parameters:
-  S3TemplateLocation:
-    Type: String
-    Description: The URL to the S3 bucket used to fetch the nested stack templates
-    Default: https://s3-us-west-2.amazonaws.com/mozdef.infosec.allizom.org/cf/
   VpcId:
     Type: AWS::EC2::VPC::Id
-    Description: The VPC ID of the VPC to deploy in
-    Default: vpc-dc8eacb4
+    Description: 'The VPC ID of the VPC to deploy in (Example : vpc-abcdef12)'
   PublicSubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: A comma delimited list of public subnet IDs
-    Default: subnet-dd8eacb5,subnet-df8eacb7,subnet-de8eacb6
+    Description: 'A comma delimited list of public subnet IDs (Example: subnet-abcdef12,subnet-bcdef123)'
   InstanceType:
     Type: String
-    Default: m5.large
     Description: EC2 instance type, e.g. m1.small, m1.large, etc.
+    Default: m5.large
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: Name of an existing EC2 KeyPair to enable SSH access to the web server
-    Default: infosec-pdx-workweek-2018
   AMIImageId:
-    Type: String
+    Type: AWS::EC2::Image::Id
     Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-0ff5b922fb3ae2332
+    Default: ami-073434079b0366251
+  DomainName:
+    Type: String
+    Description: The fully qualified DNS name you will host CloudyMozDef at.
+    Default: cloudymozdef.security.allizom.org
   ACMCertArn:
-    Description: The ARN of your pre-issued ACM cert.
-    Default : arn:aws:acm:us-west-2:656532927350:certificate/79f641f2-4046-4754-a28f-4db80d7c0583
     Type: String
-    MinLength: '1'
+    Description: "The ARN of your pre-issued ACM cert. (Example: arn:aws:acm:us-west-2:123456789012:certificate/abcdef01-2345-6789-abcd-ef0123456789)"
+  OIDCDiscoveryURL:
+    Type: String
+    AllowedPattern: '^https?:\/\/.*'
+    ConstraintDescription: A valid URL
+    Description: "The URL of your OIDC provider's well-known discovery URL (Example: https://auth.example.com/.well-known/openid-configuration)"
   OIDCClientId:
-    Description: The client ID that your OIDC provider issues you for your Mozdef instance.
     Type: String
-    Default: lGsSlYNdiV6f5tF05pWN3EbQoDPHx44k
+    Description: The client ID that your OIDC provider issues you for your Mozdef instance.
   OIDCClientSecret:
     Type: String
     Description: The secret that your OIDC provider issues you for your Mozdef instance.
     NoEcho: true
-  OIDCDiscoveryURL:
+  S3TemplateLocation:
     Type: String
-    Default: https://auth.mozilla.auth0.com/.well-known/openid-configuration
-    Description: The URL of your OIDC provider's well-known discovery URL
+    AllowedPattern: '^https?:\/\/.*\.amazonaws\.com\/.*'
+    ConstraintDescription: A valid amazonaws.com S3 URL
+    Description: "The URL to the S3 bucket used to fetch the nested stack templates (Example: https://s3-us-west-2.amazonaws.com/example-bucket-name/cloudformation/path/)"
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
     Properties:
+      Parameters:
+        VpcId: !Ref VpcId
       Tags:
         - Key: application
           Value: mozdef
@@ -98,6 +137,8 @@ Resources:
         OIDCClientSecret: !Ref OIDCClientSecret
         OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
+        MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
+        DomainName: !Ref DomainName
       Tags:
         - Key: application
           Value: mozdef
@@ -124,8 +165,8 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        VPCID0: !Ref VpcId
-        Subnet: !Join [ ',', !Ref PublicSubnetIds ]
+        VpcId: !Ref VpcId
+        SubnetList: !Join [ ',', !Ref PublicSubnetIds ]
         NumberOfSubnets: !GetAtt NumberOfSubnets.Length
         MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
       Tags:

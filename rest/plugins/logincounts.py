@@ -9,7 +9,7 @@ import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, RangeMatch, Aggregation, ExistsMatch
+from mozdef_util.query_models import SearchQuery, RangeMatch, Aggregation, ExistsMatch, PhraseMatch
 from mozdef_util.utilities.toUTC import toUTC
 
 
@@ -36,12 +36,12 @@ class message(object):
 
         self.registration = ['logincounts']
         self.priority = 5
-        self.name = "auth0LoginCounts"
+        self.name = "loginCounts"
         self.description = "count failures/success logins"
 
         # set my own conf file
         # relative path to the rest index.py file
-        self.configfile = './plugins/auth0_logincounts.conf'
+        self.configfile = './plugins/logincounts.conf'
         self.options = None
         if os.path.exists(self.configfile):
             sys.stdout.write('found conf file {0}\n'.format(self.configfile))
@@ -54,7 +54,11 @@ class message(object):
 
         '''
         # an ES query/facet to count success/failed logins
-        # oriented to the data sent via auth02mozdef.py
+        # oriented to the data having
+        # category: authentication
+        # details.success marked true/false for success/failed auth
+        # details.username as the user
+
         begindateUTC=None
         enddateUTC=None
         resultsList = list()
@@ -70,10 +74,10 @@ class message(object):
         # a query to tally users with failed logins
         date_range_match = RangeMatch('utctimestamp', begindateUTC, enddateUTC)
         search_query.add_must(date_range_match)
-        search_query.add_must(TermMatch('tags', 'auth0'))
-        search_query.add_must(QueryStringMatch('failed'))
+        search_query.add_must(PhraseMatch('category', 'authentication'))
+        search_query.add_must(PhraseMatch('details.success','false'))
         search_query.add_must(ExistsMatch('details.username'))
-        search_query.add_aggregation(Aggregation('details.type'))
+        search_query.add_aggregation(Aggregation('details.success'))
         search_query.add_aggregation(Aggregation('details.username'))
 
         results = search_query.execute(es_client, indices=['events','events-previous'])
@@ -93,17 +97,17 @@ class message(object):
 
             details_query = SearchQuery()
             details_query.add_must(date_range_match)
-            details_query.add_must(TermMatch('tags', 'auth0'))
-            details_query.add_must(TermMatch('details.username', username))
-            details_query.add_aggregation(Aggregation('details.type'))
+            details_query.add_must(PhraseMatch('category', 'authentication'))
+            details_query.add_must(PhraseMatch('details.username', username))
+            details_query.add_aggregation(Aggregation('details.success'))
 
-            results = details_query.execute(es_client)
-            # details.type is usually "Success Login" or "Failed Login"
-            for t in results['aggregations']['details.type']['terms']:
-                if 'success' in t['key'].lower():
-                    success = t['count']
-                if 'fail' in t['key'].lower():
-                    failures = t['count']
+            details_results = details_query.execute(es_client)
+            # details.success is boolean. As an aggregate is an int (0/1)
+            for details_term in details_results['aggregations']['details.success']['terms']:
+                if details_term['key'] == 1:
+                    success = details_term['count']
+                if details_term['key'] == 0:
+                    failures = details_term['count']
             resultsList.append(
                 dict(
                     username=username,

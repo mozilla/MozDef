@@ -22,7 +22,6 @@ session_su['eventsource'] = 'systemlogs'
 session_su['hostname'] = 'syslog1.private.scl3.mozilla.com'
 session_su['mozdefhostname'] = 'mozdef4.private.scl3.mozilla.com'
 session_su['details'] = {}
-session_su['details']['Random'] = '9'
 session_su['details']['program'] = 'su'
 session_su['details']['hostname'] = 'irc1.dmz.scl3.mozilla.com'
 

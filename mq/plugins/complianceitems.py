@@ -4,8 +4,6 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import hashlib
-import sys
-import os
 from mozdef_util.utilities.logger import logger
 
 

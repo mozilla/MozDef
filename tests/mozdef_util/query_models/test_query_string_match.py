@@ -1,8 +1,6 @@
 from positive_test_suite import PositiveTestSuite
 from negative_test_suite import NegativeTestSuite
 
-import os
-import sys
 from mozdef_util.query_models import QueryStringMatch
 
 
