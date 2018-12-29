@@ -19,10 +19,10 @@ body{
 	/*gradient*/
 
     background: rgb(177, 177, 179); /* Old browsers */
-    background: -moz-radial-gradient(ellipse, rgb(177, 177, 179) 0%, rgb(138,138,141) 100%); /* FF3.6+ */
-    background: -webkit-radial-gradient(ellipse, rgb(177, 177, 179) 0%, rgb(138,138,141) 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-radial-gradient(ellipse, rgba(177, 177, 179) 0%,rgba(138,138,141) 100%); /* Opera 11.10+ */
-    background: radial-gradient(ellipse, rgb(177, 177, 179) 0%, rgb(138,138,141) 100%); /* W3C */
+    background: -moz-radial-gradient(ellipse, rgb(142, 147, 153) 0%, rgb(64,59,84) 100%); /* FF3.6+ */
+    background: -webkit-radial-gradient(ellipse, rgb(142, 147, 153) 0%, rgb(64,59,84) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-radial-gradient(ellipse, rgba(142, 147, 153) 0%, rgba(64,59,84) 100%); /* Opera 11.10+ */
+    background: radial-gradient(ellipse, rgb(142, 147, 153) 0%, rgb(64,59,84) 100%); /* W3C */
     filter: 'progid:DXImageTransform.Microsoft.gradient(startColorstr="#b1b1b3",endColorstr="#8a8a8d",GradientType=1)'; /* IE6-9 fallback on horizontal gradient */
 
     font-family: "Zilla Slab",sans-serif;
@@ -94,6 +94,7 @@ caption, legend {
   height: 13px;
   line-height: 13px;
 }
+
 
 .attackshoverboard {
     /*width: 500px;*/
@@ -375,7 +376,7 @@ nav.main-menu.expanded {
 }
 
 .main-menu {
-  background: #b1b1b3;
+  background: #403B54;
   border-right: 1px solid #e5e5e5;
   position: absolute;
   top: 0;
@@ -410,7 +411,7 @@ nav.main-menu li.active>a,
 .no-touch .dashboard-page nav.dashboard-menu ul li:hover a,
 .dashboard-page nav.dashboard-menu ul li.active a {
   color: #fff;
-  background-color: #ff694f;
+  background-color: #8DADAD;
 }
 
 .main-menu li ul,
@@ -419,7 +420,7 @@ nav.main-menu li.active>a,
   height: auto;
   min-width: 120px;
   margin: 0;
-  background: rgb(124, 123, 123);
+  background: #403B54;
   opacity: 0;
   visibility: hidden;
   transition: all 300ms linear;
@@ -432,7 +433,7 @@ nav.main-menu li.active>a,
   /* == */
   left:200px;
   top: 0px;
-  border-left: 4px solid #ff694f;
+  border-left: 4px solid #8DADAD;
   /* == */
 }
 
@@ -447,7 +448,7 @@ nav.main-menu li.active>a,
   /* == */
   top: 25px;
   left: -9px;
-  border-right: 5px solid #ff694f;
+  border-right: 5px solid #8DADAD;
   border-bottom: 5px solid transparent;
   border-top: 5px solid transparent;
   /* == */
@@ -488,7 +489,7 @@ nav.main-menu li.active>a,
   left: 200px;
   top: 0;
   border: 0;
-  border-left: 4px solid #ff694f;
+  border-left: 4px solid #8DADAD;
 }
 
 .main-menu li ul li ul:before {
@@ -499,7 +500,7 @@ nav.main-menu li.active>a,
   /* == */
   left: -9px;
   /* == */
-  border-right: 5px solid #ff694f;
+  border-right: 5px solid #8DADAD;
   border-bottom: 5px solid transparent;
   border-top: 5px solid transparent;
 }
