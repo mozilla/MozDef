@@ -451,7 +451,7 @@ nav.main-menu li.active>a,
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;*/
   /* == */
-  top: 25px;
+  top: 10px;
   left: -9px;
   border-right: 5px solid #97b4b4;
   border-bottom: 5px solid transparent;
@@ -527,7 +527,7 @@ nav.main-menu li.active>a,
   text-decoration: none;
   -webkit-transform: translateZ(0) scale(1, 1);
   -webkit-transition: all .1s linear;
-  transition: all .1s linear;
+  transition: all .3s linear;
 }
 
 .main-menu .nav-icon {
