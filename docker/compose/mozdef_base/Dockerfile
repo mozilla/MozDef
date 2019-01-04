@@ -58,4 +58,7 @@ WORKDIR /opt/mozdef/envs/mozdef
 
 VOLUME /opt/mozdef/envs/mozdef/data
 
+# Automatically source into python virtual environment
+ENV PATH=/opt/mozdef/envs/python/bin:$PATH
+
 USER root
