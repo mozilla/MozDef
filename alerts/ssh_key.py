@@ -56,7 +56,7 @@ class SSHKey(AlertTask):
                 self._whitelist.append({
                     'hostre': entry[:pindex],
                     'path': entry[pindex + 1:]
-                    })
+                })
 
     # Return false if the key path is present in the whitelist, otherwise return
     # true

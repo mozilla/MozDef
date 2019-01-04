@@ -11,10 +11,10 @@ from datetime import datetime, timedelta
 from time import sleep
 from configlib import getConfig
 import json
+import time
 
 from elasticsearch.exceptions import ConnectionError
 
-import sys
 import os
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
@@ -39,6 +39,8 @@ event_index_name = current_date.strftime("events-%Y%m%d")
 previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
 weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
+kibana_index_name = '.kibana'
+kibana_version = '5.6.7'
 
 index_settings_str = ''
 with open(args.default_mapping_file) as data_file:
@@ -78,6 +80,7 @@ index_settings['settings'] = {
     }
 }
 
+# Create initial indices
 if event_index_name not in all_indices:
     print "Creating " + event_index_name
     client.create_index(event_index_name, index_config=index_settings)
@@ -96,3 +99,25 @@ client.create_alias('alerts', alert_index_name)
 if weekly_index_alias not in all_indices:
     print "Creating " + weekly_index_alias
     client.create_alias_multiple_indices(weekly_index_alias, [event_index_name, previous_event_index_name])
+
+if kibana_index_name not in all_indices:
+    print "Creating " + kibana_index_name
+    client.create_index(kibana_index_name)
+    # Create index patterns and assign default index mapping
+    time.sleep(1)
+    index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
+    listing = os.listdir(index_mappings_path)
+    for infile in listing:
+        json_file_path = os.path.join(index_mappings_path, infile)
+        with open(json_file_path) as json_data:
+            mapping_data = json.load(json_data)
+            print "Creating {0} index mapping".format(mapping_data['title'])
+            client.save_object(body=mapping_data, index='.kibana', doc_type='index-pattern', doc_id=mapping_data['title'])
+
+    # Assign default index to 'events'
+    client.flush('.kibana')
+    default_mapping_data = {
+        "defaultIndex": 'events'
+    }
+    print "Assigning events as default index mapping"
+    client.save_object(default_mapping_data, '.kibana', 'config', kibana_version)

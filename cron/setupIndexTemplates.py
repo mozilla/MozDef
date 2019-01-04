@@ -9,7 +9,6 @@
 # You only need to run it once, it will setup the templates
 # used as future indexes are created
 
-import requests
 import sys
 import os
 from configlib import getConfig, OptionParser
@@ -23,17 +22,17 @@ def initConfig():
         'esservers',
         'http://localhost:9200',
         options.configfile).split(',')
-        )
+    )
     options.templatenames = list(getConfig(
         'templatenames',
         'defaulttemplate',
         options.configfile).split(',')
-        )
+    )
     options.templatefiles = list(getConfig(
         'templatefiles',
         '',
         options.configfile).split(',')
-        )
+    )
 
 
 if __name__ == '__main__':

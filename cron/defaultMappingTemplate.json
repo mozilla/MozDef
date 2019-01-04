@@ -120,7 +120,7 @@
               },
               "requestparameters" : {
                 "properties" : {
-                  "logStreamName": {
+                  "logstreamname": {
                     "properties": {
                       "raw_value": {
                         "type" : "keyword"

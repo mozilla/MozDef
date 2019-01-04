@@ -8,7 +8,7 @@
 # This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class TraceAudit(AlertTask):
@@ -32,12 +32,12 @@ class TraceAudit(AlertTask):
         severity = 'WARNING'
         tags = ['audit']
 
-        summary = ('{0} instances of Strace or Ptrace executed on a system by {1}'.format(aggreg['count'], aggreg['value'], ))
-        hostnames = self.mostCommon(aggreg['allevents'],'_source.hostname')
-        #did they modify more than one host?
-        #or just modify an existing configuration more than once?
-        if len(hostnames) > 1:
-            for i in hostnames[:5]:
-                summary += ' on {0} ({1} hosts)'.format(i[0], i[1])
+        hosts = set([event['_source']['hostname'] for event in aggreg['events']])
+
+        summary = '{0} instances of Strace or Ptrace executed by {1} on {2}'.format(
+            aggreg['count'],
+            aggreg['value'],
+            ','.join(hosts)
+        )
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

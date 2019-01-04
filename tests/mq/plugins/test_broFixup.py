@@ -134,7 +134,6 @@ class TestBroFixup(object):
             "eventsource": "systemslogs",
             "details": {
                 "processid": "21233",
-                "Random": 2,
                 "sourceipv4address": "10.22.74.208",
                 "hostname": "hostname1.subdomain.domain.com",
                 "program": "sshd",
@@ -157,7 +156,7 @@ class TestBroFixup(object):
                 "audisp-json",
                 "2.1.1",
                 "audit"
-                ],
+            ],
             "summary": "Execve: sh -c sudo bro nsm /usr/lib64/nagios/plugins/custom/check_auditd.sh",
             "processname": "audisp-json",
             "details": {

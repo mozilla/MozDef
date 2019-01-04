@@ -19,12 +19,17 @@ class TestWriteAudit(AlertTestSuite):
         "_type": "auditd",
         "_source": {
             "category": "write",
-            "summary": "Write: /etc/audit/",
+            "summary": "Write: /etc/audit/plugins.d/temp-file.conf",
             "hostname": "exhostname",
-            "tags": ["audisp-json","2.1.0", "audit"],
+            "tags": [
+                "audisp-json",
+                "2.1.0",
+                "audit"
+            ],
             "details": {
                 "processname": "vi",
                 "originaluser": "randomjoe",
+                "user": "root",
                 "auditkey": "audit",
             }
         }
@@ -34,9 +39,8 @@ class TestWriteAudit(AlertTestSuite):
     default_alert = {
         "category": "write",
         "severity": "WARNING",
-        "summary": "5 Filesystem write(s) to an auditd path by randomjoe",
+        "summary": "5 Filesystem write(s) to an auditd path (/etc/audit/plugins.d/temp-file.conf) by root (randomjoe)",
         "tags": ['audit'],
-        "notify_mozdefbot": True,
     }
 
     test_cases = []
@@ -51,23 +55,15 @@ class TestWriteAudit(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['summary'] = 'Write: /etc/audit/rules.d/.audit.rules.swp'
+        event['_source']['details']['originaluser'] = 'user1'
+    expected_alert = AlertTestSuite.create_alert(default_alert)
+    expected_alert['severity'] = 'NOTICE'
+    expected_alert['summary'] = "5 Filesystem write(s) to an auditd path (/etc/audit/plugins.d/temp-file.conf) by root (user1)"
     test_cases.append(
         PositiveAlertTestCase(
-            description="Positive test with events with a summary of 'Write: /etc/audit/rules.d/.audit.rules.swp'",
+            description="Positive test with expected downgraded severity",
             events=events,
-            expected_alert=default_alert
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 5)
-    for event in events:
-        event['_source']['summary'] = 'Write: /etc/audit/rules.d/'
-    test_cases.append(
-        PositiveAlertTestCase(
-            description="Positive test with events with a summary of 'Write: /etc/audit/rules.d/'",
-            events=events,
-            expected_alert=default_alert
+            expected_alert=expected_alert
         )
     )
 

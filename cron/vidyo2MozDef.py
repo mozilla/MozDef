@@ -8,21 +8,13 @@
 import copy
 import os
 import sys
-import re
 import json
-import csv
-import string
 import ConfigParser
-import tempfile
-import logging
 import socket
-import hashlib
 import MySQLdb
 from requests import Session
 from optparse import OptionParser
 from datetime import datetime
-from os import stat
-from os.path import exists, getsize
 
 
 class MozDefError(Exception):
@@ -108,7 +100,7 @@ class MozDefEvent():
             raise MozDefError('Summary is a required field')
 
         try:
-            r = self.httpsession.post(self.url, json.dumps(log_msg, encoding='utf-8'), verify=self.verify_certificate)
+            self.httpsession.post(self.url, json.dumps(log_msg, encoding='utf-8'), verify=self.verify_certificate)
 
         except Exception as e:
             if not self.fire_and_forget_mode:
@@ -123,7 +115,7 @@ def main():
     mdEvent.debug = True
     mdEvent.fire_and_forget_mode = False
 
-    #connect to mysql
+    # connect to mysql
     db=MySQLdb.connect(host=options.hostname, user=options.username,passwd=options.password,db=options.database)
     c=db.cursor(MySQLdb.cursors.DictCursor)
 
@@ -146,7 +138,7 @@ def main():
             duration = call['LeaveTime'] - call['JoinTime']
             call['CallDuration'] = duration.seconds
 
-        #fix up the data for json
+        # fix up the data for json
         for k in call.keys():
             # convert datetime objects to isoformat for json serialization
             if isinstance(call[k], datetime):
@@ -157,7 +149,7 @@ def main():
                 call[k] = call[k].decode('utf-8','ignore').encode('ascii','ignore')
 
         mdEvent.send(timestamp=call['JoinTime'],
-                     summary='Vidyo call status for '+call['UniqueCallID'].encode('ascii', 'ignore'),
+                     summary='Vidyo call status for ' + call['UniqueCallID'].encode('ascii', 'ignore'),
                      tags=['vidyo'],
                      details=call,
                      category='vidyo',

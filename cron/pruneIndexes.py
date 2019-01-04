@@ -18,14 +18,14 @@ from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
 
-import sys
-import os
+from logging.handlers import SysLogHandler
+
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.WARNING
+logger.level = logging.WARNING
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
@@ -47,10 +47,10 @@ def esPruneIndexes():
                 if pruning != '0':
                     index_to_prune = index
                     if rotation == 'daily':
-                        idate = date.strftime(toUTC(datetime.now()) - timedelta(days=int(pruning)),'%Y%m%d')
+                        idate = date.strftime(toUTC(datetime.now()) - timedelta(days=int(pruning)), '%Y%m%d')
                         index_to_prune += '-%s' % idate
                     elif rotation == 'monthly':
-                        idate = date.strftime(datetime.utcnow() - timedelta(days=31*int(pruning)),'%Y%m')
+                        idate = date.strftime(datetime.utcnow() - timedelta(days=31 * int(pruning)), '%Y%m')
                         index_to_prune += '-%s' % idate
 
                     if index_to_prune in indices:
@@ -62,7 +62,7 @@ def esPruneIndexes():
                 logger.error("Unhandled exception while deleting %s, terminating: %r" % (index_to_prune, e))
 
     except Exception as e:
-        logger.error("Unhandled exception, terminating: %r"%e)
+        logger.error("Unhandled exception, terminating: %r" % e)
 
 
 def initConfig():
@@ -71,43 +71,43 @@ def initConfig():
         'output',
         'stdout',
         options.configfile
-        )
+    )
     # syslog hostname
     options.sysloghostname = getConfig(
         'sysloghostname',
         'localhost',
         options.configfile
-        )
+    )
     options.syslogport = getConfig(
         'syslogport',
         514,
         options.configfile
-        )
+    )
     options.esservers = list(getConfig(
         'esservers',
         'http://localhost:9200',
         options.configfile).split(',')
-        )
+    )
     options.indices = list(getConfig(
         'backup_indices',
         'events,alerts,.kibana',
         options.configfile).split(',')
-        )
+    )
     options.dobackup = list(getConfig(
         'backup_dobackup',
         '1,1,1',
         options.configfile).split(',')
-        )
+    )
     options.rotation = list(getConfig(
         'backup_rotation',
         'daily,monthly,none',
         options.configfile).split(',')
-        )
+    )
     options.pruning = list(getConfig(
         'backup_pruning',
         '20,0,0',
         options.configfile).split(',')
-        )
+    )
 
 
 if __name__ == '__main__':

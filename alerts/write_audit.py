@@ -8,12 +8,12 @@
 # This code alerts on every successfully opened session on any of the host from a given list
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 
 class WriteAudit(AlertTask):
     def main(self):
-        self.parse_config('write_audit.conf', ['skipprocess'])
+        self.parse_config('write_audit.conf', ['skipprocess', 'expectedusers'])
         search_query = SearchQuery(minutes=15)
 
         search_query.add_must([
@@ -33,10 +33,25 @@ class WriteAudit(AlertTask):
         severity = 'WARNING'
         tags = ['audit']
 
-        summary = ('{0} Filesystem write(s) to an auditd path by {1}'.format(aggreg['count'], aggreg['value'], ))
-        hostnames = self.mostCommon(aggreg['allevents'],'_source.hostname')
-        #did they modify more than one host?
-        #or just modify an existing configuration more than once?
+        users = set()
+        paths = set()
+        for event in aggreg['events']:
+            users.add(event['_source']['details']['user'])
+            paths.add(event['_source']['summary'].split(' ')[1])
+
+        summary = '{0} Filesystem write(s) to an auditd path ({1}) by {2} ({3})'.format(
+            aggreg['count'],
+            ', '.join(paths),
+            ', '.join(users),
+            aggreg['value']
+        )
+
+        if aggreg['value'] in self.config.expectedusers.split(' '):
+            severity = 'NOTICE'
+
+        hostnames = self.mostCommon(aggreg['allevents'], '_source.hostname')
+        # did they modify more than one host?
+        # or just modify an existing configuration more than once?
         if len(hostnames) > 1:
             for i in hostnames[:5]:
                 summary += ' on {0} ({1} hosts)'.format(i[0], i[1])

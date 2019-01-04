@@ -2,7 +2,9 @@ ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PARENTDIR       := $(realpath ../)
 AWS_REGION	:= us-west-2
 STACK_NAME	:= mozdef-aws-nested
-STACK_PARAMS	:= file://aws_parameters.json
+STACK_PARAMS_FILENAME	:= aws_parameters.json
+# For more information on the rationale behind the code in STACK_PARAMS see https://github.com/aws/aws-cli/issues/2429#issuecomment-441133480
+STACK_PARAMS	:= $(shell test -e $(STACK_PARAMS_FILENAME) && python -c 'import json,sys;f=open(sys.argv[1]);print(" ".join([",".join(["%s=\\\"%s\\\""%(k,v) for k,v in x.items()]) for x in json.load(f)]));f.close()' $(STACK_PARAMS_FILENAME))
 # MozDef uses a nested CF stack, the mozdef-parent.yml will tie all child stacks together and load them from S3
 # See also mozdef.infosec.mozilla.org bucket
 S3_BUCKET_NAME  := mozdef.infosec.allizom.org
@@ -28,9 +30,9 @@ create-stack: test ## Create everything you need for a fresh new stack!
 	@echo "Make sure you have an environment variable OIDC_CLIENT_SECRET set."
 	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
-	  --parameters $(STACK_PARAMS) \
 	  --parameters ParameterKey=S3TemplateLocation,ParameterValue=$(S3_STACK_URI) \
-	               ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET) \
+	               $(OIDC_CLIENT_SECRET_PARAM_ARG) \
+	               $(STACK_PARAMS) \
 	  --output text
 
 .PHONY: create-s3-bucket

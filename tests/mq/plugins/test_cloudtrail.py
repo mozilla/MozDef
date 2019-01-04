@@ -43,7 +43,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'iamInstanceProfile': 'astringvalue',
+                    'iaminstanceprofile': 'astringvalue',
                 }
             }
         }
@@ -53,7 +53,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'iamInstanceProfile': {
+                    'iaminstanceprofile': {
                         'raw_value': 'astringvalue',
                     }
                 }
@@ -295,7 +295,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'ebsOptimized': 'astringvalue',
+                    'ebsoptimized': 'astringvalue',
                 }
             }
         }
@@ -305,7 +305,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'ebsOptimized': {
+                    'ebsoptimized': {
                         'raw_value': 'astringvalue',
                     }
                 }
@@ -319,7 +319,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'responseelements': {
-                    'securityGroups': 'astringvalue',
+                    'securitygroups': 'astringvalue',
                 }
             }
         }
@@ -329,7 +329,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'responseelements': {
-                    'securityGroups': {
+                    'securitygroups': {
                         'raw_value': 'astringvalue',
                     }
                 }
@@ -343,7 +343,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'disableApiTermination': 'astringvalue'
+                    'disableapitermination': 'astringvalue'
                 }
             }
         }
@@ -353,7 +353,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'disableApiTermination': {
+                    'disableapitermination': {
                         'raw_value': 'astringvalue'
                     }
                 }
@@ -367,7 +367,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'responseelements': {
-                    'lastModified': 'astringvalue'
+                    'lastmodified': 'astringvalue'
                 }
             }
         }
@@ -377,7 +377,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'responseelements': {
-                    'lastModified': {
+                    'lastmodified': {
                         'raw_value': 'astringvalue'
                     }
                 }
@@ -393,7 +393,7 @@ class TestCloudtrailPlugin():
                 'responseelements': {
                     'findings': {
                         'service': {
-                            'additionalInfo': {
+                            'additionalinfo': {
                                 'unusual': 'astringvalue'
                             }
                         }
@@ -409,7 +409,7 @@ class TestCloudtrailPlugin():
                 'responseelements': {
                     'findings': {
                         'service': {
-                            'additionalInfo': {
+                            'additionalinfo': {
                                 'unusual': {
                                     'raw_value': 'astringvalue'
                                 }

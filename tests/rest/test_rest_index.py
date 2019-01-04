@@ -96,13 +96,13 @@ class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
             assert json_resp == []
 
 
-class TestLdapLoginsRoute(RestTestSuite):
+class TestLoginCountsRoute(RestTestSuite):
 
     routes = ['/logincounts', '/logincounts/']
     status_code = 200
 
     def setup(self):
-        super(TestLdapLoginsRoute, self).setup()
+        super(TestLoginCountsRoute, self).setup()
 
         # ttesterson test events
         for count in range(10):
@@ -114,10 +114,12 @@ class TestLdapLoginsRoute(RestTestSuite):
                     "auth0"
                 ],
                 "timestamp": timestamp,
+                "category": "authentication",
                 "summary": "Failed login from ttesterson@mozilla.com srcIP=1.1.1.1",
                 "details": {
                     "username": "ttesterson@mozilla.com",
                     "type": "Failed Login",
+                    "success": False,
                 }
             }
             self.populate_test_event(event)
@@ -130,10 +132,12 @@ class TestLdapLoginsRoute(RestTestSuite):
                     "auth0"
                 ],
                 "timestamp": timestamp,
+                "category": "authentication",
                 "summary": "Success Login for ttesterson@mozilla.com srcIP=1.1.1.1",
                 "details": {
                     "username": "ttesterson@mozilla.com",
                     "type": "Success Login",
+                    "success": True,
                 }
             }
             self.populate_test_event(event)
@@ -148,10 +152,12 @@ class TestLdapLoginsRoute(RestTestSuite):
                     "auth0"
                 ],
                 "timestamp": timestamp,
+                "category": "authentication",
                 "summary": "Failed Login from ttester@mozilla.com srcIP=1.1.1.1",
                 "details": {
                     "username": "ttester@mozilla.com",
                     "type": "Failed Login",
+                    "success": False,
                 }
             }
             self.populate_test_event(event)
@@ -164,10 +170,12 @@ class TestLdapLoginsRoute(RestTestSuite):
                     "auth0"
                 ],
                 "timestamp": timestamp,
+                "category": "authentication",
                 "summary": "Success Login for ttester@mozilla.com srcIP=1.1.1.1",
                 "details": {
                     "username": "ttester@mozilla.com",
                     "type": "Success Login",
+                    "success": True,
                 }
             }
             self.populate_test_event(event)
@@ -182,10 +190,12 @@ class TestLdapLoginsRoute(RestTestSuite):
                     "auth0"
                 ],
                 "timestamp": timestamp,
+                "category": "authentication",
                 "summary": "Failed Login from qwerty@mozillafoundation.org srcIP=1.1.1.1",
                 "details": {
                     "username": "qwerty@mozillafoundation.org",
                     "type": "Failed Login",
+                    "success": False,
                 }
             }
             self.populate_test_event(event)
@@ -198,10 +208,12 @@ class TestLdapLoginsRoute(RestTestSuite):
                     "auth0"
                 ],
                 "timestamp": timestamp,
+                "category": "authentication",
                 "summary": "Success Login for qwerty@mozillafoundation.org",
                 "details": {
                     "username": "qwerty@mozillafoundation.org",
                     "type": "Success Login",
+                    "success": True,
                 }
             }
             self.populate_test_event(event)
@@ -215,10 +227,12 @@ class TestLdapLoginsRoute(RestTestSuite):
                     "auth0"
                 ],
                 "timestamp": timestamp,
+                "category": "authentication",
                 "summary": "Success Login for qwerty@mozillafoundation.org",
                 "details": {
                     "username": "qwerty@mozillafoundation.org",
                     "type": "Success Login",
+                    "success": True,
                 }
             }
             self.populate_test_event(event)

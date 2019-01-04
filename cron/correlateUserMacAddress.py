@@ -7,7 +7,6 @@
 
 import json
 import logging
-import os
 import re
 import sys
 from datetime import datetime
@@ -15,8 +14,6 @@ from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
 from hashlib import md5
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
@@ -63,7 +60,7 @@ def readOUIFile(ouifilename):
     for i in ouifile.readlines()[0::]:
         i=i.strip()
         if '(hex)' in i:
-            #print(i)
+            # print(i)
             fields=i.split('\t')
             macprefix=fields[0][0:8].replace('-',':').lower()
             entity=fields[2]

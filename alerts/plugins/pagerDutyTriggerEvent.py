@@ -65,7 +65,7 @@ class message(object):
                     }
                 ]
             })
-            r = requests.post(
+            requests.post(
                 'https://events.pagerduty.com/generic/2010-04-15/create_event.json',
                 headers=headers,
                 data=payload,

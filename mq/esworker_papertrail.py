@@ -10,7 +10,6 @@
 
 
 import json
-import os
 import kombu
 import sys
 import socket
@@ -149,8 +148,8 @@ def keyMapping(aDict):
             if k in ('syslogseverity', 'severity', 'severityvalue', 'level'):
                 returndict[u'severity'] = toUnicode(v).upper()
 
-            if k in ('facility', 'syslogfacility'):
-                returndict[u'facility'] = toUnicode(v)
+            if k in ('facility', 'syslogfacility','source'):
+                returndict[u'source'] = toUnicode(v)
 
             if k in ('pid', 'processid'):
                 returndict[u'processid'] = toUnicode(v)
@@ -256,6 +255,8 @@ class taskConsumer(object):
                         event['summary'] = event['details']['message']
                     if 'severity' in event['details']:
                         event['severity'] = event['details']['severity']
+                    if 'source_ip' in event['details']:
+                        event['sourceipaddress'] = event['details']['source_ip']
                     else:
                         event['severity'] = 'INFO'
                     event['category'] = 'syslog'
