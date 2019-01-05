@@ -118,6 +118,8 @@ Change the TermMatch line to
 and you will get alerts for syslog labeled messages.
 Ideally you should edit your test to match, but it's not strictly necessary.
 
+Scheduling your alert
+---------------------
 Next we will need to enable the log and to schedule it. At time of writing this is a bit annoying.
 Open the file
 ::
