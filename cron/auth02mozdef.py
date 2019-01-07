@@ -263,6 +263,9 @@ def process_msg(mozmsg, msg):
     See also https://auth0.com/docs/api/management/v2#!/Logs/get_logs
     """
     details = DotDict({})
+    # defaults
+    details.username = "UNKNOWN"
+    details.userid = "UNKNNOWN"
 
     # key words used to set category and success/failure markers
     authentication_words = ['Login', 'Logout', 'Auth']
@@ -298,7 +301,7 @@ def process_msg(mozmsg, msg):
         pass
 
     try:
-        mozmsg.useragent = msg.user_agent
+        details['useragent'] = msg.user_agent
     except KeyError:
         pass
 
