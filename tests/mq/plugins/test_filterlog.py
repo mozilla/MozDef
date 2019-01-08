@@ -45,11 +45,9 @@ class TestFilterlog():
                 'sourceipaddress': '175.41.7.2',
                 'sub_rule_number': '',
                 'trackor': '1000000103',
-                'udp': {
-                    'data_length': '72',
-                    'destination_port': '33443',
-                    'source_port': '57434'
-                }
+                'data_length': '72',
+                'destination_port': '33443',
+                'source_port': '57434'
             },
             'summary': '9,,,1000000103,igb0,match,block,in,4,0x0,,6,60624,0,DF,17,udp,92,175.41.7.2,21.143.56.109,57434,33443,72'
         }
