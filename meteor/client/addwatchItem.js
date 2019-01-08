@@ -29,7 +29,7 @@ if (Meteor.isClient) {
                         Session.set('errorMessage','watch item failure & ' + JSON.stringify(err));
                     }
                 });
-            Router.go('/watchitem');
+            Router.go('/watchlist');
         }
     });
 
