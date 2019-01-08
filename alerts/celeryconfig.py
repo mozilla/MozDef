@@ -66,7 +66,7 @@ for alert_namespace in CELERYBEAT_SCHEDULE:
         alert_module = import_module(alert_module_name)
         alert_class = getattr(alert_module, alert_classname)
         app.register_task(alert_class())
-    except Exception e:
+    except Exception as e:
         print "Error addding alert"
         print e
 
