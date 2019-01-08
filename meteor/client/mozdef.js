@@ -96,7 +96,7 @@ if (Meteor.isClient) {
 
     isHostname=function(entry) {
         var blocks = entry.split(".");
-        if(blocks.length >= 3 && blocks.length <= 5) {
+        if(blocks.length >= 3 && blocks.length <= 6) {
           return blocks.every(function(block){
             return /^(\w+.)+$/.test(block) && !/^(\d+.)+$/.test(block);
           });
