@@ -178,16 +178,6 @@ def ipintel():
     return response
 
 
-@route('/ipsearch', methods=['POST'])
-@route('/ipsearch/', methods=['POST'])
-def ipsearch():
-    '''send an IP address to a Kibana search'''
-    response.status = 200
-
-    sendMessgeToPlugins(request, response, 'ipsearch')
-    return response
-
-
 @post('/ipdshieldquery', methods=['POST'])
 @post('/ipdshieldquery/', methods=['POST'])
 @enable_cors
