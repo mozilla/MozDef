@@ -549,15 +549,15 @@ def getWatchlist():
         # connect to mongo
         client = MongoClient(options.mongohost, options.mongoport)
         mozdefdb = client.meteor
-        watchlist = mozdefdb['watchlist']
+        watchlistentries = mozdefdb['watchlist']
 
         # Log the entries we are removing to maintain an audit log
-        expired = watchlist.find({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
+        expired = watchlistentries.find({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
         for entry in expired:
             sys.stdout.write('Deleting entry {0} from watchlist /n'.format(entry))
 
         # delete any that expired
-        watchlist.delete_many({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
+        watchlistentries.delete_many({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
 
         # Lastly, export the combined watchlist
         watchCursor=mozdefdb['watchlist'].aggregate([
@@ -571,7 +571,6 @@ def getWatchlist():
              },
             {"$project":{"watchcontent":1}},
         ])
-        WatchList=[]
         for content in watchCursor:
             WatchList.append(
                 content['watchcontent']
