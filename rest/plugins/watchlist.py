@@ -145,13 +145,11 @@ class message(object):
                     sys.stderr.write('{0} does not meet requirements. Not added. \n'.format(watchcontent))
 
                 else:
-                    watchlisted = False
-                    if watchlisted is False:
-                        self.watchItem(str(watchcontent),
-                                       comment,
-                                       duration,
-                                       referenceID,
-                                       userid)
+                    self.watchItem(str(watchcontent),
+                                   comment,
+                                   duration,
+                                   referenceID,
+                                   userid)
 
         except Exception as e:
             sys.stderr.write('Error handling request.json %r \n'% (e))

@@ -19,7 +19,7 @@ if (Meteor.isClient) {
     //select an incident for editing
     Template.watchlist.events({
         "click .watchedadd": function(e,t){
-            //clear any leftover ip session val
+            //clear any leftover session val
             Session.set('watchItemwatchcontent','');
             $('#modalWatchItemWindow').modal();
         },

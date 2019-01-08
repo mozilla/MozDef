@@ -72,7 +72,6 @@ def status():
     return response
 
 
-# placeholder for future watchlist request #
 @route('/getwatchlist')
 @route('/getwatchlist/')
 def status():
@@ -83,7 +82,6 @@ def status():
     response.status = 200
     response.content_type = "application/json"
     response.body = getWatchlist()
-    sendMessgeToPlugins(request, response, 'getwatchlist')
     return response
 
 

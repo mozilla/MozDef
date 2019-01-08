@@ -20,7 +20,6 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 
 class AlertWatchList(AlertTask):
     def main(self):
-        global watchterm
         self.parse_config('get_watchlist.conf', ['api_url', 'jwt_secret'])
 
         jwt_token = JWTAuth(self.config.jwt_secret)
@@ -37,7 +36,7 @@ class AlertWatchList(AlertTask):
             while index < len(terms_list):
                 term = terms_list[index]
                 term = '"{}"'.format(term)
-                watchterm = term
+                self.watchterm = term
                 index += 1
                 self.process_alert(term)
         else:
@@ -61,6 +60,8 @@ class AlertWatchList(AlertTask):
         user = ''
         sourceipaddress = ''
         hostname = ''
+        source_data = ''
+        user_data = ''
 
         # If the event severity is below what we want, just ignore
         # the event.
@@ -70,8 +71,6 @@ class AlertWatchList(AlertTask):
             if 'sourceipaddress' in ev['details']:
                 sourceipaddress = ev['details']['sourceipaddress']
                 source_data = 'from {}'.format(sourceipaddress)
-            else:
-                source_data = 'from unknown source IP'
             if 'username' in ev['details'] or 'originaluser' in ev['details'] or 'user' in ev['details']:
                 if 'username' in ev['details']:
                     user = ev['details']['username']
@@ -82,12 +81,10 @@ class AlertWatchList(AlertTask):
                 elif 'user' in ev['details']:
                     user = ev['details']['user']
                     user_data = 'by {}'.format(user)
-                else:
-                    user_data = 'by an unidentified user'
             if 'hostname' in ev:
                 hostname = ev['hostname']
             else:
                 return None
 
-        summary = 'Watchlist term {} detected {} {} on {}'.format(watchterm, user_data, source_data, hostname)
+        summary = 'Watchlist term {} detected {} {} on {}'.format(self.watchterm, user_data, source_data, hostname)
         return self.createAlertDict(summary, category, tags, [event], severity)
