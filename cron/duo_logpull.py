@@ -132,7 +132,6 @@ def initConfig():
     options.SKEY = getConfig('SKEY', '', options.configfile)
     options.URL = getConfig('URL', '', options.configfile)
     options.MOZDEF_URL = getConfig('MOZDEF_URL', '', options.configfile)
-    options.MOZDEF_URL = getConfig('MOZDEF_URL', '', options.configfile)
     options.DEBUG = getConfig('DEBUG', True, options.configfile)
     options.statepath = getConfig('statepath', '', options.configfile)
     options.update_tags = getConfig('addtag', '', options.configfile)
