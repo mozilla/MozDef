@@ -7,7 +7,7 @@ Cloud based MozDef is an opinionated deployment of the MozDef services created i
 ingest cloudtrail, guardduty, and provide security services.
 
 .. image:: images/cloudformation-launch-stack.png
-   :target: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/mozdef.infosec.allizom.org/cf/mozdef-parent.yml
+   :target: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/mozdef-parent.yml
 
 
 Feedback
