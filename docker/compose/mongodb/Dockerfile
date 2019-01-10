@@ -10,7 +10,7 @@ RUN \
   rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
   rpm -qi gpg-pubkey-f4a80eb5 | $gpg | grep 0x24C6A8A7F4A80EB5 && \
   rpmkeys --import https://www.mongodb.org/static/pgp/server-3.4.asc && \
-  rpm -qi gpg-pubkey-f4a80eb5 | $gpg | grep 0x24C6A8A7F4A80EB5 && \
+  rpm -qi gpg-pubkey-a15703c6 | $gpg | grep 0xBC711F9BA15703C6 && \
   yum install -y mongodb-org && \
   yum clean all
 
