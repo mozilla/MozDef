@@ -13,6 +13,7 @@ from configlib import getConfig
 import json
 import time
 import os
+import sys
 
 from elasticsearch.exceptions import ConnectionError
 
@@ -105,7 +106,16 @@ if kibana_index_name not in all_indices:
     print "Creating " + kibana_index_name
     client.create_index(kibana_index_name)
 
-time.sleep(1)
+# Wait for .kibana index to be ready
+num_times = 0
+while not client.index_exists('.kibana'):
+    if num_times < 3:
+        print("Waiting for .kibana index to be ready")
+        time.sleep(1)
+        num_times += 1
+    else:
+        print(".kibana index not created...exiting")
+        sys.exit(1)
 
 # Check to see if index patterns exist in .kibana
 query = SearchQuery()
