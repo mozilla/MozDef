@@ -70,7 +70,7 @@ upload-templates:
 	@export AWS_REGION=$(AWS_REGION)
 	aws s3 sync cloudformation/ $(S3_BUCKET_URI) --acl public-read --exclude="*" --include="*.yml"
 
-.PHONY: upload-templates
+.PHONY: publish-templates
 publish-templates:
 	@export AWS_REGION=$(AWS_REGION)
 	aws s3 sync cloudformation/ $(S3_PUBLISHED_BUCKET_URI) --exclude="*" --include="*.yml"

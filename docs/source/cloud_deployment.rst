@@ -80,3 +80,9 @@ Using MozDef
 
 Refer back to our other docs on how to use MozDef for general guidance.  Cloud specific instructions will evolve here.
 If you saw something about MozDef for AWS at re: Invent 2018 and you want to contribute we'd love your PRs.
+
+AWS re:invent 2018 SEC403 Presentation
+---------------------------------------
+
+* `Watch our presentation on MozDef in AWS <https://www.youtube.com/watch?v=M5yQpegaYF8&feature=youtu.be&t=2471>`_  at AWS re:Invent 2018
+* `Read the slides <https://www.slideshare.net/AmazonWebServices/five-new-security-automations-using-aws-security-services-open-source-sec403-aws-reinvent-2018/65>`_
