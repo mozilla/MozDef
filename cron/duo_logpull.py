@@ -128,6 +128,10 @@ def main():
         # API v1 uses normal timestamps in seconds instead
         state = {'administration': 0, 'authentication': 1547000000000, 'telephony': 0}
 
+    # Convert v1 (sec) timestamp to v2 (ms)...
+    if state['authentication'] < 1547000000000:
+        state['authentication'] = int(str(state['authentication']) + '000')
+
     duo = duo_client.Admin(ikey=options.IKEY, skey=options.SKEY, host=options.URL)
     mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
     mozmsg.tags = ['duosecurity']
@@ -142,7 +146,7 @@ def main():
     # This will process events for all 3 log types and send them to MozDef. the state stores the last position in the
     # log when this script was last called.
     state = process_events(mozmsg, duo.get_administrator_log(mintime=state['administration'] + 1), 'administration', state)
-    ## TODO Should use `next_offset` instead of mintime in the future (for api v2) as its more efficient
+    # TODO Should use `next_offset` instead of mintime in the future (for api v2) as its more efficient
     state = process_events(mozmsg, duo.get_authentication_log(api_version=2, mintime=state['authentication'] + 1), 'authentication', state)
     state = process_events(mozmsg, duo.get_telephony_log(mintime=state['telephony'] + 1), 'telephony', state)
 
