@@ -1,0 +1,20 @@
+---
+version: '3.7'
+services:
+  sampledata:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_sampledata/Dockerfile
+    restart: always
+    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && /opt/mozdef/envs/mozdef/examples/demo/sampleevents.sh'
+    links:
+      - elasticsearch
+    depends_on:
+      - loginput
+      - elasticsearch
+      - mongodb
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - ../../examples:/opt/mozdef/envs/mozdef/examples
