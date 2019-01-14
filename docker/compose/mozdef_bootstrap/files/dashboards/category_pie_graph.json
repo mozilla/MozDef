@@ -1,0 +1,17 @@
+{
+  "_index": ".kibana",
+  "_type": "visualization",
+  "_id": "AWg6F1PFk1EXv5E12DRN",
+  "_version": 1,
+  "_score": 1,
+  "_source": {
+    "title": "Category Pie Graph",
+    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{},\"schema\":\"metric\",\"type\":\"count\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"field\":\"category\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"segment\",\"type\":\"terms\"}],\"listeners\":{},\"params\":{\"addLegend\":true,\"addTooltip\":true,\"isDonut\":false,\"legendPosition\":\"right\",\"type\":\"pie\"},\"title\":\"Category Pie Graph\",\"type\":\"pie\"}",
+    "uiStateJSON": "{}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"events-weekly\",\"query\":{\"match_all\":{}},\"filter\":[]}"
+    }
+  }
+}

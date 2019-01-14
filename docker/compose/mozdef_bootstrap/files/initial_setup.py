@@ -139,3 +139,21 @@ if len(results['hits']) == 0:
     }
     print "Assigning events as default index mapping"
     client.save_object(default_mapping_data, '.kibana', 'config', kibana_version)
+
+
+# Check to see if dashboards already exist in .kibana
+query = SearchQuery()
+query.add_must(TermMatch('_type', 'dashboard'))
+results = query.execute(client, indices=['.kibana'])
+if len(results['hits']) == 0:
+    dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
+    listing = os.listdir(dashboards_path)
+    for infile in listing:
+        json_file_path = os.path.join(dashboards_path, infile)
+        with open(json_file_path) as json_data:
+            mapping_data = json.load(json_data)
+            print("Creating {0} {1}".format(
+                mapping_data['_source']['title'],
+                mapping_data['_type']
+            ))
+            client.save_object(body=mapping_data['_source'], index='.kibana', doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])
