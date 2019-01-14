@@ -59,12 +59,16 @@ app.config_from_object('celeryconfig', force=True)
 # As a result of celery 3 to celery 4, we need to dynamically
 # register all of the alert tasks specifically
 for alert_namespace in CELERYBEAT_SCHEDULE:
-    alert_tokens = alert_namespace.split('.')
-    alert_module_name = alert_tokens[0]
-    alert_classname = alert_tokens[1]
-    alert_module = import_module(alert_module_name)
-    alert_class = getattr(alert_module, alert_classname)
-    app.register_task(alert_class())
+    try:
+        alert_tokens = alert_namespace.split('.')
+        alert_module_name = alert_tokens[0]
+        alert_classname = alert_tokens[1]
+        alert_module = import_module(alert_module_name)
+        alert_class = getattr(alert_module, alert_classname)
+        app.register_task(alert_class())
+    except Exception as e:
+        print "Error addding alert"
+        print e
 
 if __name__ == '__main__':
     app.start()

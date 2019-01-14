@@ -112,6 +112,8 @@ Change the TermMatch line to
 and you will create alerts for events marked with the category of 'syslog'.
 Ideally you should edit your test to match, but it's not strictly necessary.
 
+Scheduling your alert
+---------------------
 Next we will need to enable the alert. Alerts in MozDef are scheduled via the celery task scheduler. The schedule
 passed to celery is in the config.py file:
 

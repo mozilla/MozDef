@@ -48,6 +48,15 @@ def normalize(details):
 
 
 def process_events(mozmsg, duo_events, etype, state):
+    """
+    Data format of duo_events in api_version == 2 (str):
+    duo_events.metadata = {u'total_objects': 49198, u'next_offset': [u'1547244648000', u'4da7180c-b1e5-47b4-9f4d-ee10dc3b5ac8']}
+    duo_events.authlogs = [{...}, {...}, ...]
+    authlogs entry = {u'access_device': {u'ip': u'a.b.c.d', u'location': {u'city': None, u'state': u'Anhui', u'country':
+    u'China'}}, u'event_type': u'authentication', u'timestamp': 1547244800, u'factor': u'not_available', u'reason':
+    u'deny_unenrolled_user', u'txid': u'68b33dd3-d341-46c6-a985-0640592fb7b0', u'application': {u'name': u'Integration
+    Name Here', u'key': u'SOME KEY HERE'}, u'host': u'api-blah.duosecurity.com', u'result': u'denied', u'eventtype': u'authentication', u'auth_device': {u'ip': None, u'location': {u'city': None, u'state': None, u'country': None}, u'name': None}, u'user': {u'name': u'root', u'key': None}}
+    """
     # There are some key fields that we use as MozDef fields, those are set to "noconsume"
     # After processing these fields, we just pour everything into the "details" fields of Mozdef, except for the
     # noconsume fields.
@@ -60,6 +69,13 @@ def process_events(mozmsg, duo_events, etype, state):
         noconsume = ['timestamp', 'host', 'eventtype']
     else:
         return
+
+    # Care for API v2
+    if isinstance(duo_events, dict) and 'authlogs' in duo_events.keys():
+        duo_events = duo_events['authlogs']
+        api_version = 2
+    else:
+        api_version = 1
 
     for e in duo_events:
         details = {}
@@ -87,7 +103,10 @@ def process_events(mozmsg, duo_events, etype, state):
         elif etype == 'telephony':
             mozmsg.summary = e['context']
         elif etype == 'authentication':
-            mozmsg.summary = e['eventtype'] + ' ' + e['result'] + ' for ' + e['username']
+            if (api_version == 1):
+                mozmsg.summary = e['eventtype'] + ' ' + e['result'] + ' for ' + e['username']
+            else:
+                mozmsg.summary = e['eventtype'] + ' ' + e['result'] + ' for ' + e['user']['name']
 
         mozmsg.send()
 
@@ -105,7 +124,13 @@ def main():
         state = pickle.load(open(options.statepath, 'rb'))
     except IOError:
         # Oh, you're new.
-        state = {'administration': 0, 'authentication': 0, 'telephony': 0}
+        # Note API v2 expect full, correct and within range timestamps in millisec so we start recently
+        # API v1 uses normal timestamps in seconds instead
+        state = {'administration': 0, 'authentication': 1547000000000, 'telephony': 0}
+
+    # Convert v1 (sec) timestamp to v2 (ms)...
+    if state['authentication'] < 1547000000000:
+        state['authentication'] = int(str(state['authentication']) + '000')
 
     duo = duo_client.Admin(ikey=options.IKEY, skey=options.SKEY, host=options.URL)
     mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
@@ -121,7 +146,8 @@ def main():
     # This will process events for all 3 log types and send them to MozDef. the state stores the last position in the
     # log when this script was last called.
     state = process_events(mozmsg, duo.get_administrator_log(mintime=state['administration'] + 1), 'administration', state)
-    state = process_events(mozmsg, duo.get_authentication_log(mintime=state['authentication'] + 1), 'authentication', state)
+    # TODO Should use `next_offset` instead of mintime in the future (for api v2) as its more efficient
+    state = process_events(mozmsg, duo.get_authentication_log(api_version=2, mintime=state['authentication'] + 1), 'authentication', state)
     state = process_events(mozmsg, duo.get_telephony_log(mintime=state['telephony'] + 1), 'telephony', state)
 
     pickle.dump(state, open(options.statepath, 'wb'))

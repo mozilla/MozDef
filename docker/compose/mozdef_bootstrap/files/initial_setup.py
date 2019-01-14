@@ -12,11 +12,13 @@ from time import sleep
 from configlib import getConfig
 import json
 import time
+import os
+import sys
 
 from elasticsearch.exceptions import ConnectionError
 
-import os
 from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.query_models import SearchQuery, TermMatch
 
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
@@ -103,8 +105,24 @@ if weekly_index_alias not in all_indices:
 if kibana_index_name not in all_indices:
     print "Creating " + kibana_index_name
     client.create_index(kibana_index_name)
+
+# Wait for .kibana index to be ready
+num_times = 0
+while not client.index_exists('.kibana'):
+    if num_times < 3:
+        print("Waiting for .kibana index to be ready")
+        time.sleep(1)
+        num_times += 1
+    else:
+        print(".kibana index not created...exiting")
+        sys.exit(1)
+
+# Check to see if index patterns exist in .kibana
+query = SearchQuery()
+query.add_must(TermMatch('_type', 'index-pattern'))
+results = query.execute(client, indices=['.kibana'])
+if len(results['hits']) == 0:
     # Create index patterns and assign default index mapping
-    time.sleep(1)
     index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
     listing = os.listdir(index_mappings_path)
     for infile in listing:

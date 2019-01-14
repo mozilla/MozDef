@@ -8,12 +8,12 @@ bottle==0.12.4
 bugzilla==1.0.0
 celery==4.1.0
 cffi==1.9.1
-configlib==2.0.2
+configlib==2.0.3
 configparser==3.5.0b2
 cryptography==2.3.1
 dnspython==1.15.0
 docutils==0.14
-duo-client==3.0
+duo-client==4.1
 elasticsearch==5.5.2
 elasticsearch-dsl==5.4.0
 enum34==1.1.6
