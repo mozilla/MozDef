@@ -15,8 +15,4 @@ COPY docker/compose/tester/files/tests_config.conf /opt/mozdef/envs/mozdef/tests
 COPY docker/compose/tester/files/loginput_index.conf /opt/mozdef/envs/mozdef/tests/loginput/index.conf
 COPY docker/compose/tester/files/rest_index.conf /opt/mozdef/envs/mozdef/tests/rest/index.conf
 
-USER root
-
-RUN \
-  source /opt/mozdef/envs/python/bin/activate && \
-  pip install -r /opt/mozdef/envs/mozdef/tests/requirements_tests.txt
+RUN pip install -r /opt/mozdef/envs/mozdef/tests/requirements_tests.txt
