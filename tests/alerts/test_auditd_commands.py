@@ -40,11 +40,10 @@ class TestAlertAuditdCommands(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['category'] = "someother"
-    event['_source']['tags'] = ["audit", "othervalue"]
+    event['_source']['category'] = "execve"
     test_cases.append(
         PositiveAlertTestCase(
-            description="Positive test case with audit in tags",
+            description="Positive test case with execve as the category",
             events=[event],
             expected_alert=default_alert
         )
