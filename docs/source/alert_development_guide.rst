@@ -62,7 +62,7 @@ Alerts in MozDef are mini python programs. Most of the work is done by the alert
 - main - This is where the alert defines the criteria for the types of events that will trigger the alert.
 - onAggregation/onEvent - This is where the alert defines what happens when it sees those events, such as post processing of events and making them into a useful summary to emit as an alert.
 
-In both cases the alert is simple python, and you have all the facility of python at your disposal including any of the thousands of python libraries you might want to add to the project.
+In both cases the alert is simple python, and you have all the facility of python at your disposal including any of the python libraries you might want to add to the project.
 
 It's important to note that when you iterate on the alert to regularly test to ensure that the alert is still firing.  Should you run into a situation where it's not firing, the best way to approach this is to backout the most recent change and review the alert and tests to ensure that the expectations are still in sync.
 
@@ -102,7 +102,7 @@ Here's the head of the auto generated class.
         ])
         ...
 
-In essence this code will tell MozDef to query the collection of events for messages timestamped within 20 minutes (from time of query execution) and to look for events which are of category "helloworld" which also have a source IP address.
+This code tells MozDef to query the collection of events for messages timestamped within 20 minutes from time of query execution which are of category "helloworld" and also have a source IP address.
 If you're pumping events into MozDef odds are you don't have any which will be tagged as "helloworld". You can of course create those events, but lets assume that you have events tagged as "syslog" for the moment.
 Change the TermMatch line to
 ::
@@ -135,8 +135,8 @@ and add your new foo alert to the others with a crontab style schedule
     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
   }
 
-The format is 'pythonfilename.classname': {'schedule': crontab(timeunit='*/x')} and you can use any celery time unit (minute, hour) and any schedule that makes sense for your environment.
-Alerts don't take much resource to execute, typically sub second so it's easiest to start by running them every minute.
+The format is 'pythonfilename.classname': {'schedule': crontab(timeunit='*/x')} and you can use any celery time unit (minute, hour) along with any schedule that makes sense for your environment.
+Alerts don't take many resources to execute, typically finishing in sub second times, so it's easiest to start by running them every minute.
 
 How to run the alert in the docker containers
 ----------------------------------------------
@@ -162,7 +162,7 @@ To use a live, iterative environment via docker-compose:
 
   docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-alerts.yml -p mozdef up
 
-This will start up all the containers for a mozdef environment and allow you an adhoc alerts container to work in that loads the /alerts directory as a volume in the container.
+This will start up all the containers for a mozdef environment and in addition will allow you an adhoc alerts container to work in that loads the /alerts directory as a volume in the container.
 To run the alert you are developing you will need to edit the alerts/files/config.py file as detailed above to schedule your alert. You will also need to edit it to reference the container environment as follows
 ::
 
