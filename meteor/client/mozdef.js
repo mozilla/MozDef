@@ -298,7 +298,7 @@ if (Meteor.isClient) {
         var words=anelement.text().split(' ');
         words.forEach(function(w){
             //clean up potential interference chars
-            w=w.replace(/,|:|;/g,'')
+            w=w.replace(/,|:|;|\[|\]/g,'')
             if ( isIPv4(w) ){
                     //console.log(w);
                 anelement.
