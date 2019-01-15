@@ -35,6 +35,7 @@ class message(object):
             'details.requestparameters.instancetype',
             'details.requestparameters.logstreamname',
             'details.requestparameters.source',
+            'details.responseelements',
             'details.responseelements.role',
             'details.requestparameters.rule',
             'details.responseelements.subnets',
