@@ -16,3 +16,5 @@ services:
       - bootstrap
     networks:
       - default
+    volumes:
+      - ../../examples:/opt/mozdef/envs/mozdef/examples
