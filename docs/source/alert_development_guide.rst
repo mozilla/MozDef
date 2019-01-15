@@ -141,6 +141,39 @@ and add your new foo alert to the others with a crontab style schedule
 
 Restart your MozDef instance and you should begin seeing alerts on the alerts page.
 
+Customizing the alert summary
+-----------------------------
+On the alerts page of the MozDef web UI each alert is given a quick summary and for many alerts it is useful to have contextual information displayed here. Looking at the example foo alert we see
+::
+  def onAggregation(self, aggreg):
+          # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
+          # aggreg['value']: value of the aggregation field, ex: toto@example.com
+          # aggreg['events']: list of events in the aggregation
+          category = 'My first alert!'
+          tags = ['Foo']
+          severity = 'NOTICE'
+          summary = "Foo alert"
+
+          # Create the alert object based on these properties
+          return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+
+This is where the alert object gets created and returned. In the above code the summary will simply be "Foo Alert", but say we want to know how many log entries were collected in the alert? The aggreg object is here to help.
+::
+  summary = "Foo alert " +  aggreg['count']
+
+Gives us an alert with a count. Similarly
+::
+  summary = "Foo alert " +  aggreg['value']
+
+Will append the aggregation field to the summary text. The final list aggreg['events'] contains the full log entries of all logs collected and is in general the most useful. Suppose we want one string if the tag 'foo' exists on these logs and another otherwise
+::
+  if 'foo' in aggreg['events'][0]['_source']['tags']:
+    summary = "Foo alert"
+  else:
+    summary = "Bar alert"
+
+All source log data is held within the ['_source'].
+
 Questions?
 ----------
 
