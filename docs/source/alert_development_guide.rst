@@ -224,7 +224,7 @@ Will append the aggregation field to the summary text. The final list aggreg['ev
   else:
     summary = "Bar alert"
 
-All source log data is held within the ['_source'].
+All source log data is held within the ['_source'] and [0] represents the first log found. Beware that no specific ordering of the logs is guaranteed and so [0] may be first, last, or otherwise chronologically.
 
 Questions?
 ----------
