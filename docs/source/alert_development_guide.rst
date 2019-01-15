@@ -165,7 +165,7 @@ To use a live, iterative environment via docker-compose:
   docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-alerts.yml -p mozdef up
 
 This will start up all the containers for a mozdef environment and in addition will allow you an adhoc alerts container to work in that loads the /alerts directory as a volume in the container.
-To run the alert you are developing you will need to edit the alerts/files/config.py file as detailed above to schedule your alert. You will also need to edit it to reference the container environment as follows
+To run the alert you are developing you will need to edit the alerts/lib/config.py file as detailed above to schedule your alert. You will also need to edit it to reference the container environment as follows
 ::
 
   RABBITMQ = {
@@ -179,9 +179,9 @@ Once you've reference the containers, you can shell into the alerts container:
 ::
   docker exec -it mozdef_alerts_1 bash
 
-Next, source the environment and start celery
+Next, start celery
 ::
-  source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat
+  celery -A celeryconfig worker --loglevel=info --beat
 
 If you need to send in adhoc events you can usually do it via curl as follows:
 ::
