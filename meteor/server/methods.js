@@ -19,6 +19,7 @@ if (Meteor.isServer) {
         'ipwhois': ipwhois,
         'ipdshield': ipdshield,
         'ipintel': ipintel,
+        'ipsearch': ipsearch,
         'verisstats': verisstats,
         'logincounts': logincounts,
         'getplugins': getplugins,
@@ -106,6 +107,19 @@ if (Meteor.isServer) {
         } else {
             //console.log(ipdshieldResponse);
             return ipdshieldResponse;
+        }
+    }
+
+    function ipsearch(ipaddress){
+        //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipwhois/');
+        var ipsearchResponse = HTTP.post(mozdef.rootAPI + '/ipsearch/',{data: {'ipaddress':ipaddress}});
+
+        if ( typeof ipsearchResponse == 'undefined') {
+            console.log("ipsearch: no response from server")
+            return "";
+        } else {
+            //console.log(ipdshieldResponse);
+            return ipsearchResponse;
         }
     }
 
