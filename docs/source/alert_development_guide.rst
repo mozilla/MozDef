@@ -8,15 +8,15 @@ This guide is for someone seeking to write a MozDef alert.
 Starting a feature branch
 -------------------------
 
-Before you do anything else, start with checking out the MozDef repo and starting a feature branch::
+Before you do anything else, start by checking out the MozDef repo and starting a feature branch::
 
   git clone git@github.com:mozilla/MozDef.git
   cd MozDef
   git checkout -b name_of_alert_you_want_to_create
 
 
-How to start your alert
------------------------
+How to start developing your new alert
+--------------------------------------
 
 Run::
 
@@ -24,8 +24,8 @@ Run::
 
 This will prompt for information and create two things:
 
-- The new alert file
-- The new alert test file
+- <The new alert file>
+- <The new alert test file>
 
 You can now edit these files in place, but it is recommended that you run unit-tests on the new alert to make sure it passes before editing (instructions below).
 
@@ -35,7 +35,7 @@ How to run tests on your alert
 Requirements:
 
 - Make sure you have the latest version of docker installed.
-- Known Issue: docker's overlayfs has a known issue, so you will need to go to Docker => Preferences => Daemon => Advanced and add the following key pair ("storage-driver" : "aufs")
+- Known Issues: docker's overlayfs has a known issue with tar files, so you will need to go to Docker => Preferences => Daemon => Advanced and add the following key pair ("storage-driver" : "aufs"). You may also need to allow more than 2GB for docker depending on which containers you run.
 
 ::
 
@@ -53,24 +53,18 @@ At this point, begin development and periodically run your unit-tests locally wi
 Background on concepts
 ----------------------
 
-- Logs - These are individual log line that are emitted from systems, like an Apache log
-- Events - These logs parsed into a JSON format, which exist in MozDef and used with the ELK stack
-- Alerts - These are effectively either a 1:1 events to alerts (this thing happens and alert) or a M:1 events to alerts (N of these things happen and alert).
+- Logs - These are individual log entries that are typically emitted from systems, like an Apache log
+- Events - The entry point into MozDef, a log parsed into JSON by some log shipper (syslog-ng, nxlog) or a native JSON data source like GuardDuty, CloudTrail, most SaaS systems, etc.
+- Alerts - These are either a 1:1 events to alerts (this thing happens and alert) or a M:1 events to alerts (N of these things happen and alert).
 
-When writing alerts, it's important to keep the above concepts in mind.
+Alerts in MozDef are mini python programs. Most of the work is done by the alert library so the portions you will need to code fall into two functions:
 
-Each alert tends to have two different blocks of code:
-
-- main - This is where the alert defines the criteria for the types of events it wants to look at
+- main - This is where the alert defines the criteria for the types of events that will trigger the alert.
 - onAggregation/onEvent - This is where the alert defines what happens when it sees those events, such as post processing of events and making them into a useful summary to emit as an alert.
 
-In both cases, because the alert is simple Python, you will find that getting started writing alerts is pretty easy.  It's important to note that when you iterate on the alert to regularly test to ensure that the alert is still firing.  Should you run into a space where it's not firing, the best way to approach this is to backout the recent change and review the alert and tests to ensure that the expectations are still in sync.
+In both cases the alert is simple python, and you have all the facility of python at your disposal including any of the python libraries you might want to add to the project.
 
-
-How to get the alert in MozDef?
--------------------------------
-
-The best way to get your alert into MozDef (once it's completed) is to propose a pull request and ask for a review from a MozDef developer.  They will be able to help you get the most out of the alert and help point out pitfalls.  Once the alert is accepted into MozDef master, there is a process by which MozDef installations can make use or 'enable' that alert.  It's best to work with that MozDef instance's maintainer to enable any new alerts.
+It's important to note that when you iterate on the alert to regularly test to ensure that the alert is still firing.  Should you run into a situation where it's not firing, the best way to approach this is to backout the most recent change and review the alert and tests to ensure that the expectations are still in sync.
 
 
 Example first alert
@@ -108,19 +102,21 @@ Here's the head of the auto generated class.
         ])
         ...
 
-In essence this code will tell MozDef to query the collection of logs for messages timestamped within 20 minutes (from time of query execution) and to look for messages which are of category "helloworld" which also have a source IP address.
-If you're pumping logs into MozDef odds are you don't have any which will be tagged as "helloworld". You can of course create those logs, but lets assume that you have logs tagged as "syslog" for the moment.
+This code tells MozDef to query the collection of events for messages timestamped within 20 minutes from time of query execution which are of category "helloworld" and also have a source IP address.
+If you're pumping events into MozDef odds are you don't have any which will be tagged as "helloworld". You can of course create those events, but lets assume that you have events tagged as "syslog" for the moment.
 Change the TermMatch line to
 ::
 
   TermMatch('category', 'syslog'),
 
-and you will get alerts for syslog labeled messages.
+and you will create alerts for events marked with the category of 'syslog'.
 Ideally you should edit your test to match, but it's not strictly necessary.
 
 Scheduling your alert
 ---------------------
-Next we will need to enable the log and to schedule it. At time of writing this is a bit annoying.
+Next we will need to enable the alert. Alerts in MozDef are scheduled via the celery task scheduler. The schedule
+passed to celery is in the config.py file:
+
 Open the file
 ::
 
@@ -141,15 +137,66 @@ and add your new foo alert to the others with a crontab style schedule
     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
   }
 
-Restart your MozDef instance and you should begin seeing alerts on the alerts page.
+The format is 'pythonfilename.classname': {'schedule': crontab(timeunit='*/x')} and you can use any celery time unit (minute, hour) along with any schedule that makes sense for your environment.
+Alerts don't take many resources to execute, typically finishing in sub second times, so it's easiest to start by running them every minute.
+
+How to run the alert in the docker containers
+----------------------------------------------
+Once you've got your alert passing tests, you'd probably like to send in events in a docker environment to further refine, test, etc.
+
+
+There are two ways to go about integration testing this with docker:
+1) Use 'make run' to rebuild the containers each time you iterate on an alert
+2) Use docker-compose with overlays to instantiate a docker environment with a live container you can use to iterate your alert
+
+In general, the 'make run' approach is simpler, but can take 5-10mins each iteration to rebuild the containers (even if cached).
+
+To use the 'make run' approach, you edit your alert. Add it to the docker/compose/mozdef_alerts/files/config.py file for scheduling as discussed above and simply:
+::
+  make run
+
+This will rebuild any container that needs it, use cache for any that haven't changed and restart mozdef with your alert.
+
+
+
+To use a live, iterative environment via docker-compose:
+::
+
+  docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-alerts.yml -p mozdef up
+
+This will start up all the containers for a mozdef environment and in addition will allow you an adhoc alerts container to work in that loads the /alerts directory as a volume in the container.
+To run the alert you are developing you will need to edit the alerts/files/config.py file as detailed above to schedule your alert. You will also need to edit it to reference the container environment as follows
+::
+
+  RABBITMQ = {
+      'mqserver': 'rabbitmq',
+  ...
+  ES = {
+    'servers': ['http://elasticsearch:9200']
+  }
+
+Once you've reference the containers, you can shell into the alerts container:
+::
+  docker exec -it mozdef_alerts_1 bash
+
+Next, source the environment and start celery
+::
+  source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat
+
+If you need to send in adhoc events you can usually do it via curl as follows:
+::
+  curl -v --header "Content-Type: application/json" --request POST --data '{"tags": ["test"],"category": "helloworld","details":{"sourceipaddress":"1.2.3.4"}}' http://loginput:8080/events
+
+
+How to get the alert in a release of MozDef?
+--------------------------------------------
+
+If you'd like your alert included in the release version of Mozdef, the best way is to propose a pull request and ask for a review from a MozDef developer.  They will be able to help you get the most out of the alert and help point out pitfalls.  Once the alert is accepted into MozDef master, there is a process by which MozDef installations can make use or 'enable' that alert.  It's best to work with that MozDef instance's maintainer to enable any new alerts.
 
 Questions?
 ----------
 
-This guide is not intended to teach you how to develop in Python, there are good resources below to help you get more experience with Python.  However, should you have questions or run into problems trying to write an alert, we would like to hear from you (in IRC/Slack) so we can:
-
-- help you get what you want to get done
-- make it easier for anyone to contribue alerts
+Feel free to file a github issue in this repository if you find yourself with a question not answered here. Likely the answer will help someone else and will help us improve the docs.
 
 
 Resources
