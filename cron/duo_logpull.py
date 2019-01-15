@@ -46,8 +46,10 @@ def normalize(details):
         normalized[f] = details[f]
 
     if 'user' in normalized and type(normalized['user']) is dict:
-        normalized['username'] = normalized['user']['name']
-        normalized['userkey'] = normalized['user']['key']
+        if 'name' in normalized['user']:
+            normalized['username'] = normalized['user']['name']
+        if 'key' in normalized['user']:
+            normalized['userkey'] = normalized['user']['key']
         del(normalized['user'])
 
     return normalized
