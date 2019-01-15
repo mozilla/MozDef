@@ -1,0 +1,22 @@
+---
+version: '3.0'
+services:
+  cron:
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_cron/Dockerfile
+    restart: always
+    command: bash -c 'sleep 90 && crond -n'
+    volumes:
+      - ../../cron:/opt/mozdef/envs/mozdef/cron
+      - geolite_db:/opt/mozdef/envs/mozdef/data/
+    depends_on:
+      - base
+      - rabbitmq
+      - elasticsearch
+      - mongodb
+      - bootstrap
+    networks:
+      - default
+    stdin_open: true
+    tty: true
