@@ -39,7 +39,7 @@ def normalize(details):
             normalized["sourceipaddress"] = details[f]
             continue
         if f == "result":
-            if details[f] == "SUCCESS":
+            if details[f].lower() == "success":
                 normalized["success"] = True
             else:
                 normalized["success"] = False
