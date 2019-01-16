@@ -2,14 +2,7 @@ import netaddr
 import os
 
 from mozdef_util.geo_ip import GeoIP
-
-
-def is_ip(ip):
-    try:
-        netaddr.IPNetwork(ip)
-        return True
-    except Exception:
-        return False
+from mozdef_util.utilities.is_ip import is_ip
 
 
 def ip_location(ip):

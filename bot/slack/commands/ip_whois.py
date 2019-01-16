@@ -1,13 +1,7 @@
 import netaddr
 from ipwhois import IPWhois
 
-
-def is_ip(ip):
-    try:
-        netaddr.IPNetwork(ip)
-        return True
-    except Exception:
-        return False
+from mozdef_util.utilities.is_ip import is_ip
 
 
 class Command():
