@@ -114,7 +114,7 @@ class SlackBot():
             thread_ts=thread_ts
         )
 
-    def post_attachment(self, message, channel, color):
+    def _post_attachment(self, message, channel, color):
         if channel is None:
             message_channels = self.channels
         else:
@@ -143,19 +143,19 @@ class SlackBot():
             self.bot.post_unknown_severity_message(formatted_alert, channel)
 
     def post_welcome_message(self, message, channel=None):
-        self.post_attachment(message, channel, '#36a64f')
+        self._post_attachment(message, channel, '#36a64f')
 
     def post_info_message(self, message, channel=None):
-        self.post_attachment(message, channel, '#99ccff')
+        self._post_attachment(message, channel, '#99ccff')
 
     def post_critical_message(self, message, channel=None):
-        self.post_attachment(message, channel, '#ff0000')
+        self._post_attachment(message, channel, '#ff0000')
 
     def post_warning_message(self, message, channel=None):
-        self.post_attachment(message, channel, '#e6e600')
+        self._post_attachment(message, channel, '#e6e600')
 
     def post_notice_message(self, message, channel=None):
-        self.post_attachment(message, channel, '#a64dff')
+        self._post_attachment(message, channel, '#a64dff')
 
     def post_unknown_severity_message(self, message, channel=None):
-        self.post_attachment(message, channel, '#000000')
+        self._post_attachment(message, channel, '#000000')
