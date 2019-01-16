@@ -35,7 +35,10 @@ class SlackBot():
 
     def load_commands(self):
         plugin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
-        self.plugin_set = BotPluginSet(plugin_dir)
+        plugin_set = BotPluginSet(plugin_dir)
+        self.plugins = {}
+        for plugin in plugin_set:
+            self.plugins[plugin['command_name']] = plugin
 
     def run(self):
         if self.slack_client.rtm_connect():
@@ -55,22 +58,18 @@ class SlackBot():
 
         if command == '!help':
             response = "\nHelp is on it's way...try these:\n"
-            for plugin in self.plugin_set.enabled_plugins:
+            for command_name, plugin in self.plugins.iteritems():
                 response += "\n{0} -- {1}".format(
-                    plugin['command_name'],
+                    command_name,
                     plugin['help_text']
                 )
         else:
-            # Loop through plugins and send message to it
-            plugin_command_found = False
-            for plugin in self.plugin_set.enabled_plugins:
-                if command == plugin['command_name']:
-                    plugin_command_found = True
-                    response += "\n" + plugin['plugin_class'].handle_command(parameters)
-                    continue
-
-            if plugin_command_found is False:
+            if command not in self.plugins:
                 response = "Unknown command: " + command + ". Try !help"
+            else:
+                plugin = self.plugins[command]
+                response += "\n" + plugin['plugin_class'].handle_command(parameters)
+
         return response
 
     def parse_command(self, content):
