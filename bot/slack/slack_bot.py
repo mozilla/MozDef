@@ -18,7 +18,7 @@ greetings = [
 ]
 
 
-def formatAlert(alert_dict):
+def format_alert(alert_dict):
     summary = alert_dict['summary']
     if 'category' in alert_dict.keys():
         summary = "_{0}_: {1}".format(alert_dict['category'], summary)
@@ -130,7 +130,7 @@ class SlackBot():
 
     def post_alert_message(self, alert_dict, channel):
         severity = alert_dict['severity'].upper()
-        formatted_alert = formatAlert(alert_dict)
+        formatted_alert = format_alert(alert_dict)
         if severity == 'CRITICAL':
             self.post_critical_message(formatted_alert, channel)
         elif severity == 'WARNING':
