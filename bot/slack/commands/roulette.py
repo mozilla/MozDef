@@ -1,7 +1,7 @@
 import random
 
 
-class command():
+class Command():
     def __init__(self):
         self.command_name = '!r'
         self.help_text = 'Play a game of Russian Roulette'

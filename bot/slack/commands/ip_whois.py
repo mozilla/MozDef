@@ -10,7 +10,7 @@ def is_ip(ip):
         return False
 
 
-class command():
+class Command():
     def __init__(self):
         self.command_name = '!ipwhois'
         self.help_text = 'Perform a whois lookup on an ip address'

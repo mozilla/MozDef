@@ -30,7 +30,7 @@ def ip_location(ip):
     return location
 
 
-class command():
+class Command():
     def __init__(self):
         self.command_name = '!ipinfo'
         self.help_text = 'Perform a geoip lookup on an ip address'
