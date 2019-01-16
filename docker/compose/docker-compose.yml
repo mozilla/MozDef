@@ -158,7 +158,7 @@ services:
   #       # This is either 'irc', or 'slack'
   #       BOT_TYPE: slack
   #   restart: always
-  #   command: bash -c 'sleep 90 && python mozdefbot.py -c mozdefbot.conf'
+  #   command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/rabbitmq/5672";do sleep 1;done && python mozdefbot.py -c mozdefbot.conf'
   #   depends_on:
   #     - base
   #     - rabbitmq
