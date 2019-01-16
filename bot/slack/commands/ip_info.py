@@ -40,7 +40,7 @@ class Command():
         for ip_token in parameters:
             if is_ip(ip_token):
                 ip = netaddr.IPNetwork(ip_token)[0]
-                if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
+                if not (ip.is_loopback() or ip.is_private() or ip.is_reserved()):
                     response += "{0} location: {1}\n".format(ip_token, ip_location(ip_token))
                 else:
                     response += "{0}: hrm...loopback? private ip?\n".format(ip_token)
