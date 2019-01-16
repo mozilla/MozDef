@@ -17,14 +17,14 @@ def ip_location(ip):
     try:
         geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../data/GeoLite2-City.mmdb")
         geoip = GeoIP(geoip_data_dir)
-        geoDict = geoip.lookup_ip(ip)
-        if geoDict is not None:
-            if 'error' in geoDict:
-                return geoDict['error']
-            location = geoDict['country_name']
-            if geoDict['country_code'] in ('US'):
-                if geoDict['metro_code']:
-                    location = location + '/{0}'.format(geoDict['metro_code'])
+        geo_dict = geoip.lookup_ip(ip)
+        if geo_dict is not None:
+            if 'error' in geo_dict:
+                return geo_dict['error']
+            location = geo_dict['country_name']
+            if geo_dict['country_code'] in ('US'):
+                if geo_dict['metro_code']:
+                    location = location + '/{0}'.format(geo_dict['metro_code'])
     except Exception:
         location = ""
     return location
