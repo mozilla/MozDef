@@ -12,7 +12,7 @@ def is_ip(ip):
         return False
 
 
-def ipLocation(ip):
+def ip_location(ip):
     location = ""
     try:
         geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../data/GeoLite2-City.mmdb")
@@ -41,7 +41,7 @@ class command():
             if is_ip(ip_token):
                 ip = netaddr.IPNetwork(ip_token)[0]
                 if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
-                    response += "{0} location: {1}\n".format(ip_token, ipLocation(ip_token))
+                    response += "{0} location: {1}\n".format(ip_token, ip_location(ip_token))
                 else:
                     response += "{0}: hrm...loopback? private ip?\n".format(ip_token)
             else:
