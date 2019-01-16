@@ -2,7 +2,6 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV PYTHON_VERSION 2.7.11
 ENV TZ UTC
 
 RUN \
@@ -34,28 +33,25 @@ COPY cron/update_geolite_db.py /opt/mozdef/envs/mozdef/cron/update_geolite_db.py
 COPY cron/update_geolite_db.conf /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
 COPY cron/update_geolite_db.sh /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
 
+COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
+
 RUN chown -R mozdef:mozdef /opt/mozdef/
+
 USER mozdef
 RUN \
   virtualenv /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
-  pip install -r /opt/mozdef/envs/mozdef/requirements.txt
-
-# Local copy for dev
-COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
-USER root
-RUN \
-  source /opt/mozdef/envs/python/bin/activate && \
+  pip install -r /opt/mozdef/envs/mozdef/requirements.txt && \
   cd /opt/mozdef/envs/mozdef/mozdef_util && \
   pip install -e .
-RUN chown -R mozdef:mozdef /opt/mozdef/
-
-USER mozdef
 
 RUN mkdir /opt/mozdef/envs/mozdef/data
 
 WORKDIR /opt/mozdef/envs/mozdef
 
 VOLUME /opt/mozdef/envs/mozdef/data
+
+# Automatically source into python virtual environment
+ENV PATH=/opt/mozdef/envs/python/bin:$PATH
 
 USER root

@@ -94,6 +94,17 @@ if (Meteor.isClient) {
       return false;
     };
 
+    isHostname=function(entry) {
+        var blocks = entry.split(".");
+        if(blocks.length >= 3 && blocks.length <= 6) {
+          return blocks.every(function(block){
+            return /^(\w+.)+$/.test(block) && !/^(\d+.)+$/.test(block);
+          });
+        }else{
+             return false;
+        }
+  };
+
     isURL=function(astring){
         return validator.isURL(astring);
     };
@@ -287,7 +298,7 @@ if (Meteor.isClient) {
         var words=anelement.text().split(' ');
         words.forEach(function(w){
             //clean up potential interference chars
-            w=w.replace(/,|:|;/g,'')
+            w=w.replace(/,|:|;|\[|\]/g,'')
             if ( isIPv4(w) ){
                     //console.log(w);
                 anelement.
@@ -295,6 +306,13 @@ if (Meteor.isClient) {
                             {wordsOnly:false,
                             element: "em",
                             className:"ipaddress"});
+            } else if ( isHostname(w) ){
+                //console.log(w);
+                anelement.
+                highlight(  w,
+                            {wordsOnly:false,
+                            element: "em",
+                            className:"hostname"});
             }
           });
         //add a drop down menu to any .ipaddress
@@ -312,15 +330,25 @@ if (Meteor.isClient) {
             whoisitem=$("<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>");
             dshielditem=$("<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>");
             intelitem=$("<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>");
+            searchitem=$("<li><a class='ipmenu-search' data-ipaddress='" + iptext + "'href='#'>search kibana</a></li>");
             if ( isFeature('blockip') ){
                 blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
             }else{
                 blockIPitem=$();
             }
 
-            ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,blockIPitem);
+            ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,searchitem,blockIPitem);
 
             $(this).parent().parent().append(ipmenu);
+        });
+
+        anelement.children( '.hostname').each(function( index ){
+            hosttext=$(this).text();
+            $(this).append('<b></b>');
+            var searchDomain=getSetting('kibanaURL');
+            searchPath="#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-1h,mode:quick,to:now))&_a=(columns:!(_source),index:events-weekly,interval:auto,query:(query_string:(analyze_wildcard:!t,query:'hostname:"+hosttext+"')),sort:!(utctimestamp,desc))"
+            searchURL=searchDomain+searchPath;
+            $(this).wrap("<a href="+searchURL+" target='_blank'></a>" );
         });
         //return raw html, consume as {{{ ipDecorate fieldname }}} in a meteor template
         return anelement.prop('outerHTML');

@@ -7,9 +7,14 @@ STACK_PARAMS_FILENAME	:= aws_parameters.json
 STACK_PARAMS	:= $(shell test -e $(STACK_PARAMS_FILENAME) && python -c 'import json,sys;f=open(sys.argv[1]);print(" ".join([",".join(["%s=\\\"%s\\\""%(k,v) for k,v in x.items()]) for x in json.load(f)]));f.close()' $(STACK_PARAMS_FILENAME))
 # MozDef uses a nested CF stack, the mozdef-parent.yml will tie all child stacks together and load them from S3
 # See also mozdef.infosec.mozilla.org bucket
-S3_BUCKET_NAME  := mozdef.infosec.allizom.org
+S3_BUCKET_NAME	:= mozdef.infosec.allizom.org
 S3_BUCKET_PATH	:= cf
 S3_BUCKET_URI	:= s3://$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)
+# Location to publish templates for public consumption
+S3_PUBLISHED_BUCKET_NAME	:= public.us-west-2.infosec.mozilla.org
+S3_PUBLISHED_BUCKET_PATH	:= mozdef/cf
+S3_PUBLISHED_BUCKET_URI	:= s3://$(S3_PUBLISHED_BUCKET_NAME)/$(S3_PUBLISHED_BUCKET_PATH)
+
 S3_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_BUCKET_NAME)/$(S3_BUCKET_PATH)/
 # OIDC_CLIENT_SECRET is set in an environment variable by running "source aws_parameters.sh"
 OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET)")
@@ -63,4 +68,9 @@ stack-status: ## Output current CloudFormation stack status
 .PHONY: upload-templates
 upload-templates:
 	@export AWS_REGION=$(AWS_REGION)
-	aws s3 sync cloudformation/ $(S3_BUCKET_URI) --acl public-read
+	aws s3 sync cloudformation/ $(S3_BUCKET_URI) --acl public-read --exclude="*" --include="*.yml"
+
+.PHONY: publish-templates
+publish-templates:
+	@export AWS_REGION=$(AWS_REGION)
+	aws s3 sync cloudformation/ $(S3_PUBLISHED_BUCKET_URI) --exclude="*" --include="*.yml"

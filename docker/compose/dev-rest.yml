@@ -6,7 +6,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_rest/Dockerfile
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    command: bash -c 'python index.py -c index.conf'
     depends_on:
       - base
       - elasticsearch
