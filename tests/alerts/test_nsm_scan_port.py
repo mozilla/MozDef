@@ -17,13 +17,13 @@ class TestNSMScanPort(AlertTestSuite):
     default_event = {
         "_source": {
             "category": "bro",
-            "summary": "Scan::Port_Scan source 10.99.88.77 destination unknown port unknown",
-            "hostname": "your.friendly.nsm.sensor",
+            "summary": "Scan::Port_Scan source 10.251.34.228 destination unknown port unknown",
+            "hostname": "nsm1-sfo1.private.sfo1.mozilla.com",
             "tags": ["bro"],
+            "source": "notice",
             "details": {
-                "sourceipaddress": "10.99.88.77",
-                "indicators": "10.99.88.77",
-                "source": "notice",
+                "sourceipaddress": "10.251.34.228",
+                "indicators": "10.251.34.228",
                 "note": "Scan::Port_Scan",
             }
         }
@@ -33,7 +33,7 @@ class TestNSMScanPort(AlertTestSuite):
     default_alert = {
         "category": "nsm",
         "severity": "WARNING",
-        "summary": "Port scan from 10.99.88.77 (mock.mozilla.org)",
+        "summary": "Port scan from 10.251.34.228 (mock.mozilla.org)",
         "tags": ['nsm', 'bro', 'portscan'],
     }
 
@@ -71,10 +71,10 @@ class TestNSMScanPort(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['details']['source'] = 'intel'
+        event['_source']['source'] = 'intel'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with a different details.source",
+            description="Negative test case with a different source",
             events=events,
         )
     )
