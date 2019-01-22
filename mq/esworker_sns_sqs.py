@@ -23,8 +23,7 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-from commmon import get_aws_credentials
-
+from lib.aws import get_aws_credentials
 from lib.plugins import sendEventToPlugins, registerPlugins
 from lib.sqs import connect_sqs
 

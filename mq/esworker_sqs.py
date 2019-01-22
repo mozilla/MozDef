@@ -29,8 +29,7 @@ from mozdef_util.utilities.is_cef import isCEF
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-from common import get_aws_credentials
-
+from lib.aws import get_aws_credentials
 from lib.plugins import sendEventToPlugins, registerPlugins
 from lib.sqs import connect_sqs
 
