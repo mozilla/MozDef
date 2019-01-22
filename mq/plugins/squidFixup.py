@@ -2,12 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2018 Mozilla Corporation
+# http://www.squid-cache.org/Doc/config/logformat/
+# https://wiki.squid-cache.org/Features/LogFormat
 
-import netaddr
-import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from platform import node
 from mozdef_util.utilities.toUTC import toUTC
+import tldextract
+from netaddr import valid_ipv4
 
 
 class message(object):
@@ -25,6 +27,39 @@ class message(object):
             self.mozdefhostname = 'failed to fetch mozdefhostname'
             pass
 
+    def isIPv4(self, ip):
+        try:
+            return valid_ipv4(ip)
+        except:
+            return False
+
+    def create_int(self, field):
+        if field == "-":
+            field = 0
+        return field
+    
+    def tokenize_url(self, field):
+        field = field.strip()
+        tokens = field.split(':')
+
+        offset = 0
+        if tokens[0] == 'http':
+            offset = 1
+            dstport = 80
+            if len(tokens) > 2:
+                inttokens = tokens[2].split('/')
+                dstport = int(inttokens[0])
+        elif tokens[0] == 'https':
+            dstport = 443
+        else:
+            if tokens[-1] is not None:
+                dstport = int(tokens[-1])
+
+        tld = tldextract.extract(tokens[offset])
+        fqdn = '.'.join(part for part in tld if part)
+
+        return (fqdn, dstport)
+
     def onMessage(self, message, metadata):
 
         # make sure I really wanted to see this message
@@ -36,7 +71,7 @@ class message(object):
         if message['category'] != 'proxy':
             return message, metadata
 
-        # set the doc type to nsm
+        # Reuse the NSM doc type
         # to avoid data type conflicts with other doc types
         # (int v string, etc)
         # index holds documents of type 'type'
@@ -46,7 +81,7 @@ class message(object):
         # move Squid specific fields under 'details' while preserving metadata
         newmessage = dict()
 
-        # import pdb;pdb.set_trace()
+        newmessage[u'mozdefhostname'] = self.mozdefhostname
         newmessage['details'] = {}
 
         # move some fields that are expected at the event 'root' where they belong
@@ -56,34 +91,50 @@ class message(object):
             newmessage['tags'] = message['tags']
         if 'category' in message:
             newmessage['category'] = message['category']
+        newmessage[u'customendpoint'] = message['customendpoint']
         newmessage[u'source'] = u'unknown'
         if 'source' in message:
             newmessage[u'source'] = message['source']
-        logtype = newmessage['source']
-        newmessage[u'event_type'] = u'unknown'
+
+            if newmessage['source'] == 'access':
+                # http://www.squid-cache.org/Doc/config/logformat/
+                # https://wiki.squid-cache.org/Features/LogFormat
+                # logformat squid %ts.%03tu %6tr %>a %>p %<a %<p %Ss %<Hs %>st %<st %rm %ru %>rs %<A %mt
+                line = message['MESSAGE'].strip()
+                tokens = line.split()
+
+                newmessage[u'details'][u'duration'] = float(tokens[1])/1000.0
+                newmessage[u'details'][u'sourceipaddress'] = tokens[2]
+                newmessage[u'details'][u'sourceport'] = int(self.create_int(tokens[3]))
+                if self.isIPv4(tokens[4]):
+                    newmessage[u'details'][u'destinationipaddress'] = tokens[4]
+                else:
+                    newmessage[u'details'][u'destinationipaddress'] = '0.0.0.0'
+                newmessage[u'details'][u'proxyaction'] = tokens[6]
+                if newmessage[u'details'][u'proxyaction'] != 'TCP_DENIED':
+                    newmessage[u'details'][u'destinationport'] = int(tokens[5])
+                    newmessage[u'details'][u'host'] = tokens[13]
+                else:
+                    (fqdn, dstport) = self.tokenize_url(tokens[11])
+                    newmessage[u'details'][u'destinationport'] = dstport
+                    newmessage[u'details'][u'host'] = fqdn
+                newmessage[u'details'][u'status'] = tokens[7]
+                newmessage[u'details'][u'requestsize'] = int(tokens[8])
+                newmessage[u'details'][u'responsesize'] = int(tokens[9])
+                method = tokens[10]
+                newmessage[u'details'][u'method'] = method
+                newmessage[u'details'][u'destination'] = tokens[11]
+                proto = tokens[12]
+                if proto == '-' and method == 'CONNECT':
+                    proto = 'ssl'
+                newmessage[u'details'][u'proto'] = proto
+                newmessage[u'details'][u'mimetype'] = tokens[14]
+                newmessage[u'utctimestamp'] = (toUTC(float(tokens[0])) - timedelta(milliseconds=float(tokens[1]))).isoformat()
+                newmessage[u'timestamp'] = (toUTC(float(tokens[0])) - timedelta(milliseconds=float(tokens[1]))).isoformat()
 
         # add mandatory fields
-        if 'PROGRAM' in message:
-            newmessage[u'utctimestamp'] = toUTC(float(message['PROGRAM'])).isoformat()
-            newmessage[u'timestamp'] = toUTC(float(message['PROGRAM'])).isoformat()
-        else:
-            # a malformed message somehow managed to crawl to us, let's put it somewhat together
-            newmessage[u'utctimestamp'] = toUTC(datetime.now()).isoformat()
-            newmessage[u'timestamp'] = toUTC(datetime.now()).isoformat()
-
         newmessage[u'receivedtimestamp'] = toUTC(datetime.now()).isoformat()
         newmessage[u'eventsource'] = u'squid'
         newmessage[u'severity'] = u'INFO'
-        newmessage[u'mozdefhostname'] = self.mozdefhostname
-
-        # Error checking, anyone??
-        line = message['MESSAGE'].strip()
-        tokens = line.split()
-
-        newmessage[u'details'][u'sourceipaddress'] = tokens[1]
-        newmessage[u'details'][u'proxyaction'] = tokens[2]
-        newmessage[u'details'][u'tcpaction'] = tokens[4]
-        newmessage[u'details'][u'destination'] = tokens[5]
-        newmessage[u'details'][u'mimetype'] = tokens[8]
-
+        
         return (newmessage, metadata)
