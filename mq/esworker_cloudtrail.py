@@ -29,6 +29,7 @@ from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 
+from lib.aws import get_aws_credentials
 from lib.plugins import sendEventToPlugins, registerPlugins
 from lib.sqs import connect_sqs
 
@@ -125,19 +126,6 @@ class RoleManager:
             'aws_access_key_id': credential.access_key,
             'aws_secret_access_key': credential.secret_key,
             'security_token': credential.session_token} if credential else {}
-
-
-def get_aws_credentials(region=None, accesskey=None, secretkey=None, security_token=None):
-    result = {}
-    if region not in ['', '<add_region>', None]:
-        result['region_name'] = region
-    if accesskey not in ['', '<add_accesskey>', None]:
-        result['aws_access_key_id'] = accesskey
-    if secretkey not in ['', '<add_secretkey>', None]:
-        result['aws_secret_access_key'] = secretkey
-    if security_token not in [None]:
-        result['security_token'] = security_token
-    return result
 
 
 def keyMapping(aDict):
