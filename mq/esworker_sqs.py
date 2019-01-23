@@ -173,11 +173,6 @@ class taskConsumer(object):
         self.esConnection = esConnection
         self.taskQueue = taskQueue
 
-        if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
-            # to prevent events from sticking around an idle worker
-            self.esConnection.start_bulk_timer()
-
     def run(self):
         # Boto expects base64 encoded messages - but if the writer is not boto it's not necessarily base64 encoded
         # Thus we've to detect that and decode or not decode accordingly

@@ -224,11 +224,6 @@ class taskConsumer(object):
         self.lastRequestTime = toUTC(datetime.now()) - timedelta(seconds=options.ptinterval) - \
             timedelta(seconds=options.ptbackoff)
 
-        if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
-            # to prevent events from sticking around an idle worker
-            self.esConnection.start_bulk_timer()
-
     def run(self):
         while True:
             try:

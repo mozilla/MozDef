@@ -295,12 +295,6 @@ class taskConsumer(object):
         # This value controls how long we sleep
         # between reauthenticating and getting a new set of creds
         self.flush_wait_time = 1800
-
-        if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
-            # to prevent events from sticking around an idle worker
-            self.esConnection.start_bulk_timer()
-
         self.authenticate()
 
         # Run thread to flush s3 credentials
@@ -537,6 +531,10 @@ if __name__ == '__main__':
 
     try:
         main()
+    except KeyboardInterrupt as e:
+        logger.info("Exiting worker")
+        if options.esbulksize != 0:
+            es.finish_bulk()
     except Exception as e:
         if options.esbulksize != 0:
             es.finish_bulk()

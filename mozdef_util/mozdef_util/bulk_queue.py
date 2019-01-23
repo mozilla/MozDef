@@ -1,4 +1,5 @@
-from threading import Timer
+from threading import Thread
+import time
 
 
 class BulkQueue():
@@ -8,23 +9,23 @@ class BulkQueue():
         self.threshold = threshold
         self.list = list()
         self.flush_time = flush_time
-        self.time_thread = Timer(self.flush_time, self.timer_over)
+        self.flush_thread = Thread(target=self.flush_periodically)
+        self.flush_thread.daemon = True
         self.running = False
 
-    def timer_over(self):
-        self.flush()
-        self.time_thread = Timer(self.flush_time, self.timer_over)
-        self.start_timer()
-
-    def start_timer(self):
-        """ Start timer thread that flushes queue every X seconds """
-        self.time_thread.start()
+    def start_thread(self):
+        self.stopping_thread = False
         self.running = True
+        self.flush_thread.start()
 
-    def stop_timer(self):
-        """ Stop timer thread """
-        self.time_thread.cancel()
+    def stop_thread(self):
+        self.stopping_thread = True
         self.running = False
+
+    def flush_periodically(self):
+        while True and not self.stopping_thread:
+            time.sleep(self.flush_time)
+            self.flush()
 
     def started(self):
         return self.running
