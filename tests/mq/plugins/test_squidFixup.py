@@ -197,13 +197,6 @@ class TestSquidFixup(object):
         assert toUTC(result['receivedtimestamp']).isoformat() == result['receivedtimestamp']
         assert result['severity'] == 'INFO'
 
-    # also test what happens if someone does curl host:port curl host:port/url
-    # test for host vs host/url for both denies and allows
-    #def test_access_ssl_deny_log(self):
-    #def test_access_http_deny_log(self):
-    #def test_access_ssl_allow_log(self):
-    #event['MESSAGE'] = "1547953357.127   1690 192.168.97.135 58306 185.53.177.31 443 TCP_TUNNEL - 86 4700 CONNECT test.com:443 - test.com -"
-
     def test_access_http_allow_custom_port_log(self):
         event = {
             "tags":"squid",
@@ -224,8 +217,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        #assert toUTC(result['timestamp']).isoformat() == result['timestamp']
-        #assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
         assert result['details']['sourceipaddress'] == '192.168.97.135'
         assert result['details']['destinationipaddress'] == '185.53.177.31'
         assert result['details']['sourceport'] == 58322
@@ -270,8 +261,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        #assert toUTC(result['timestamp']).isoformat() == result['timestamp']
-        #assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
         assert result['details']['sourceipaddress'] == '192.168.97.135'
         assert result['details']['destinationipaddress'] == '185.53.177.31'
         assert result['details']['sourceport'] == 58322
@@ -316,8 +305,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        #assert toUTC(result['timestamp']).isoformat() == result['timestamp']
-        #assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
         assert result['details']['sourceipaddress'] == '192.168.97.135'
         assert result['details']['destinationipaddress'] == '185.53.177.31'
         assert result['details']['sourceport'] == 58322
@@ -362,8 +349,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        #assert toUTC(result['timestamp']).isoformat() == result['timestamp']
-        #assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
         assert result['details']['sourceipaddress'] == '192.168.97.135'
         assert result['details']['destinationipaddress'] == '185.53.177.31'
         assert result['details']['sourceport'] == 58322
@@ -408,8 +393,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        #assert toUTC(result['timestamp']).isoformat() == result['timestamp']
-        #assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
         assert result['details']['sourceipaddress'] == '192.168.97.135'
         assert result['details']['destinationipaddress'] == '185.53.177.31'
         assert result['details']['sourceport'] == 58318
@@ -454,8 +437,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        #assert toUTC(result['timestamp']).isoformat() == result['timestamp']
-        #assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
         assert result['details']['sourceipaddress'] == '192.168.97.135'
         assert result['details']['destinationipaddress'] == '0.0.0.0'
         assert result['details']['sourceport'] == 58332
@@ -500,8 +481,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        #assert toUTC(result['timestamp']).isoformat() == result['timestamp']
-        #assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
         assert result['details']['sourceipaddress'] == '192.168.97.135'
         assert result['details']['destinationipaddress'] == '0.0.0.0'
         assert result['details']['sourceport'] == 58328
@@ -546,8 +525,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        #assert toUTC(result['timestamp']).isoformat() == result['timestamp']
-        #assert toUTC(result['utctimestamp']).isoformat() == result['utctimestamp']
         assert result['details']['sourceipaddress'] == '192.168.97.135'
         assert result['details']['destinationipaddress'] == '0.0.0.0'
         assert result['details']['sourceport'] == 58328
