@@ -313,9 +313,14 @@ Resources:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
-      - Type: forward
-        TargetGroupArn:
-          Ref: MozDefElasticLoadBalancingV2TargetGroup
+      - Type: redirect
+        RedirectConfig:
+          Host: '#{host}'
+          Path: '/#{path}'
+          Protocol: HTTPS
+          Query: '#{query}'
+          Port: '443'
+          StatusCode: HTTP_301
       LoadBalancerArn:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
       Port: 80
