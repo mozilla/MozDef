@@ -34,7 +34,7 @@ class BotPluginSet():
             module_obj = pynsive.import_module(found_module)
             reload(module_obj)
             plugin_class_obj = module_obj.Command()
-            logger.info('[*] plugin {0} registered to receive command with {1}'.format(module_name, plugin_class_obj.command_name))
+            logger.info('Plugin {0} registered to receive command with {1}'.format(module_name, plugin_class_obj.command_name))
             plugins.append(
                 {
                     'plugin_class': plugin_class_obj,

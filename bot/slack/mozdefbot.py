@@ -11,33 +11,34 @@
 import json
 import sys
 import time
-from configlib import getConfig, OptionParser
+from configlib import OptionParser
+from configlib import getConfig as get_config
 from datetime import datetime
 from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
+from threading import Thread
 
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger
 
-from run_async import run_async
 from slack_bot import SlackBot
 
 
-class alertConsumer(ConsumerMixin):
+class AlertConsumer(ConsumerMixin):
 
-    def __init__(self, mqAlertsConnection, alertQueue, alertExchange, bot):
-        self.connection = mqAlertsConnection  # default connection for the kombu mixin
-        self.alertsConnection = mqAlertsConnection
-        self.alertQueue = alertQueue
-        self.alertExchange = alertExchange
+    def __init__(self, mq_alerts_connection, alert_queue, alert_exchange, bot):
+        self.connection = mq_alerts_connection  # default connection for the kombu mixin
+        self.alertsConnection = mq_alerts_connection
+        self.alert_queue = alert_queue
+        self.alert_exchange = alert_exchange
         self.bot = bot
         self.lastalert = None
-        self.bot.mqConsumer = self
+        self.bot.mq_consumer = self
 
     def get_consumers(self, Consumer, channel):
         consumer = Consumer(
-            self.alertQueue,
+            self.alert_queue,
             callbacks=[self.on_message],
             accept=['json'])
         consumer.qos(prefetch_count=options.prefetch)
@@ -47,10 +48,10 @@ class alertConsumer(ConsumerMixin):
         try:
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
-                bodyDict = body
+                body_dict = body
             elif isinstance(body, str) or isinstance(body, unicode):
                 try:
-                    bodyDict = json.loads(body)  # lets assume it's json
+                    body_dict = json.loads(body)  # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
                     logger.exception("mozdefbot_slack exception: unknown body type received %r" % body)
@@ -59,7 +60,7 @@ class alertConsumer(ConsumerMixin):
                 logger.exception("mozdefbot_slack exception: unknown body type received %r" % body)
                 return
 
-            if 'notify_mozdefbot' in bodyDict and bodyDict['notify_mozdefbot'] is False:
+            if 'notify_mozdefbot' in body_dict and body_dict['notify_mozdefbot'] is False:
                 # If the alert tells us to not notify, then don't post message
                 message.ack()
                 return
@@ -67,93 +68,97 @@ class alertConsumer(ConsumerMixin):
             # process valid message
             # see where we send this alert
             channel = options.default_alert_channel
-            if 'ircchannel' in bodyDict.keys():
-                if bodyDict['ircchannel'] in options.channels:
-                    channel = bodyDict['ircchannel']
+            if 'ircchannel' in body_dict.keys():
+                if body_dict['ircchannel'] in options.channels:
+                    channel = body_dict['ircchannel']
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
             if self.lastalert is not None:
                 delta = toUTC(datetime.now()) - self.lastalert
-                sys.stdout.write('new alert, delta since last is {}\n'.format(delta))
+                logger.info('new alert, delta since last is {}\n'.format(delta))
                 if delta.seconds < 2:
-                    sys.stdout.write('throttling before writing next alert\n')
+                    logger.info('throttling before writing next alert\n')
                     time.sleep(1)
             self.lastalert = toUTC(datetime.now())
-            if len(bodyDict['summary']) > 450:
-                sys.stdout.write('alert is more than 450 bytes, truncating\n')
-                bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
+            if len(body_dict['summary']) > 450:
+                logger.info('alert is more than 450 bytes, truncating\n')
+                body_dict['summary'] = body_dict['summary'][:450] + ' truncated...'
 
-            self.bot.post_alert_message(bodyDict, channel)
+            logger.info("Posting alert: {0}".format(body_dict['summary']))
+            self.bot.post_alert_message(body_dict, channel)
             message.ack()
         except ValueError as e:
             logger.exception("mozdefbot_slack exception while processing events queue %r" % e)
 
 
-@run_async
-def consumeAlerts(bot):
+def consume_alerts(bot):
     # connect and declare the message queue/kombu objects.
     # server/exchange/queue
-    mqConnString = 'amqp://{0}:{1}@{2}:{3}//'.format(
-        options.mquser,
-        options.mqpassword,
-        options.mqalertserver,
-        options.mqport
+    mq_conn_str = 'amqp://{0}:{1}@{2}:{3}//'.format(
+        options.mq_user,
+        options.mq_password,
+        options.mq_alert_server,
+        options.mq_port
     )
-    mqAlertConn = Connection(mqConnString)
+    mq_alert_conn = Connection(mq_conn_str)
 
     # Exchange for alerts we pass to plugins
-    alertExchange = Exchange(name=options.alertExchange,
-                             type='topic',
-                             durable=True,
-                             delivery_mode=1)
+    alert_exchange = Exchange(
+        name=options.alert_exchange,
+        type='topic',
+        durable=True,
+        delivery_mode=1
+    )
 
-    alertExchange(mqAlertConn).declare()
+    alert_exchange(mq_alert_conn).declare()
 
     # Queue for the exchange
-    alertQueue = Queue(options.queueName,
-                       exchange=alertExchange,
-                       routing_key=options.alerttopic,
-                       durable=False,
-                       no_ack=(not options.mqack))
-    alertQueue(mqAlertConn).declare()
+    alert_queue = Queue(
+        options.queue_name,
+        exchange=alert_exchange,
+        routing_key=options.alerttopic,
+        durable=False,
+        no_ack=(not options.mq_ack)
+    )
+    alert_queue(mq_alert_conn).declare()
 
     # consume our alerts.
-    alertConsumer(mqAlertConn, alertQueue, alertExchange, bot).run()
+    AlertConsumer(mq_alert_conn, alert_queue, alert_exchange, bot).run()
 
 
-def initConfig():
-    options.slack_token = getConfig('slack_token', '<CHANGE ME>', options.configfile)
-    options.name = getConfig('name', 'mozdef', options.configfile)
-    options.channels = getConfig('channels', 'general', options.configfile).split(',')
-    options.default_alert_channel = getConfig('default_alert_channel', 'mozdef', options.configfile)
+def init_config():
+    options.slack_token = get_config('slack_token', '<CHANGE ME>', options.configfile)
+    options.name = get_config('name', 'mozdef', options.configfile)
+    options.channels = get_config('channels', 'general', options.configfile).split(',')
+    options.default_alert_channel = get_config('default_alert_channel', 'mozdef', options.configfile)
 
     # queue exchange name
-    options.alertExchange = getConfig(
+    options.alert_exchange = get_config(
         'alertexchange',
         'alerts',
         options.configfile)
 
     # queue name
-    options.queueName = getConfig(
+    options.queue_name = get_config(
         'alertqueuename',
-        'alertBot',
+        '',
         options.configfile)
 
     # queue topic
-    options.alerttopic = getConfig(
+    options.alerttopic = get_config(
         'alerttopic',
         'mozdef.*',
         options.configfile)
 
     # how many messages to ask for at once
-    options.prefetch = getConfig('prefetch', 50, options.configfile)
-    options.mqalertserver = getConfig('mqalertserver', 'localhost', options.configfile)
-    options.mquser = getConfig('mquser', 'guest', options.configfile)
-    options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
-    options.mqport = getConfig('mqport', 5672, options.configfile)
+    options.prefetch = get_config('prefetch', 50, options.configfile)
+    options.mq_alert_server = get_config('mqalertserver', 'localhost', options.configfile)
+    options.mq_user = get_config('mquser', 'guest', options.configfile)
+    options.mq_password = get_config('mqpassword', 'guest', options.configfile)
+    options.mq_port = get_config('mqport', 5672, options.configfile)
     # mqack=True sets persistant delivery, False sets transient delivery
-    options.mqack = getConfig('mqack', True, options.configfile)
+    options.mq_ack = get_config('mqack', True, options.configfile)
 
 
 if __name__ == "__main__":
@@ -163,7 +168,10 @@ if __name__ == "__main__":
         default=sys.argv[0].replace('.py', '.conf'),
         help="configuration file to use")
     (options, args) = parser.parse_args()
-    initConfig()
+    init_config()
 
-    theBot = SlackBot(options.slack_token, options.channels, options.name, consumeAlerts)
-    theBot.run()
+    bot = SlackBot(options.slack_token, options.channels, options.name)
+    monitor_alerts_thread = Thread(target=consume_alerts, args=[bot])
+    monitor_alerts_thread.daemon = True
+    monitor_alerts_thread.start()
+    bot.run()

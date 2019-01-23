@@ -21,36 +21,38 @@ greetings = [
 def format_alert(alert_dict):
     summary = alert_dict['summary']
     if 'category' in alert_dict.keys():
-        summary = "_{0}_: {1}".format(alert_dict['category'], summary)
+        summary = "{0} _{1}_: {2}".format(
+            alert_dict['severity'],
+            alert_dict['category'],
+            summary
+        )
     return summary
 
 
 class SlackBot():
-    def __init__(self, api_key, channels, bot_name, async_func):
+    def __init__(self, api_key, channels, bot_name):
         self.slack_client = SlackClient(api_key)
         self.channels = channels
         self.bot_name = bot_name
-        self.async_func = async_func
         self.load_commands()
 
     def load_commands(self):
         plugin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'commands'))
         plugin_set = BotPluginSet(plugin_dir)
         self.plugins = {}
-        for plugin in plugin_set:
+        for plugin in plugin_set.enabled_plugins:
             self.plugins[plugin['command_name']] = plugin
 
     def run(self):
         if self.slack_client.rtm_connect():
             logger.info("Bot connected to slack")
             self.post_welcome_message(random.choice(greetings))
-            self.async_func(self)
             self.listen_for_messages()
         else:
             logger.error("Unable to connect to slack")
             sys.exit(1)
 
-    def handle_command(self, message_text):
+    def delegate_command(self, message_text):
         response = ""
         message_tokens = message_text.split()
         command = message_tokens[0]
@@ -68,6 +70,7 @@ class SlackBot():
                 response = "Unknown command: " + command + ". Try !help"
             else:
                 plugin = self.plugins[command]
+                logger.info("Sending to {0}".format(plugin['plugin_class'].__module__))
                 response += "\n" + plugin['plugin_class'].handle_command(parameters)
 
         return response
@@ -88,7 +91,7 @@ class SlackBot():
         content = message['content']
         command = self.parse_command(content)
 
-        response = self.handle_command(command)
+        response = self.delegate_command(command)
         if response is not "":
             self.post_thread_message(
                 text=response,
@@ -101,6 +104,7 @@ class SlackBot():
             for slack_message in self.slack_client.rtm_read():
                 message_type = slack_message.get('type')
                 if message_type == 'desktop_notification':
+                    logger.info("Received message: {0}".format(slack_message['content']))
                     self.handle_message(slack_message)
             time.sleep(1)
 
@@ -139,7 +143,7 @@ class SlackBot():
         elif severity == 'NOTICE':
             self.post_notice_message(formatted_alert, channel)
         else:
-            self.bot.post_unknown_severity_message(formatted_alert, channel)
+            self.post_unknown_severity_message(formatted_alert, channel)
 
     def post_welcome_message(self, message, channel=None):
         self._post_attachment(message, channel, '#36a64f')
