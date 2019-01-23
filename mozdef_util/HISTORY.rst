@@ -6,3 +6,8 @@ History
 ------------------
 
 * First release on PyPI.
+
+1.0.4 (2019-01-23)
+------------------
+
+* Replaced timer with threads for cleaner bulk importing
