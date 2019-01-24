@@ -39,6 +39,10 @@ def sendEventToPlugins(anevent, metadata, pluginList):
                 logger.error('TypeError on set intersection for dict {0}'.format(anevent))
                 return (anevent, metadata)
         if send:
+            if 'plugins' not in anevent:
+                anevent['plugins'] = []
+            plugin_name = plugin[0].__module__.replace('plugins.', '')
+            anevent['plugins'].append(plugin_name)
             (anevent, metadata) = plugin[0].onMessage(anevent, metadata)
             if anevent is None:
                 # plug-in is signalling to drop this message
