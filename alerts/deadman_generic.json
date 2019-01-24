@@ -2,7 +2,7 @@
     "alerts": [
         {
             "search_query": "ABC12345436",
-            "time_window": "1",
+            "time_window": "5",
             "description": "Basic deadman"
         },
         {

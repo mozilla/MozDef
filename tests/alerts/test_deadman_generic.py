@@ -12,10 +12,7 @@ class TestDeadman_Generic(AlertTestSuite):
     alert_classname = "AlertDeadman_Generic"
     deadman = True
 
-    # This event is the default positive event that will cause the
-    # alert to trigger
     default_event = {
-        "_type": "event",
         "_source": {
             "category": "helloworld",
             "details": {
@@ -24,50 +21,77 @@ class TestDeadman_Generic(AlertTestSuite):
         }
     }
 
-    # This alert is the expected result from running this task
-    default_alert = {
+    test_cases = []
+
+    matched_event_second = {
+        "_source": {
+            "summary": "anotherterm",
+        }
+    }
+    unmatched_first_alert = {
         "category": "deadman",
         "tags": ['deadman'],
         "severity": "ERROR",
         "summary": 'Deadman check failed for \'Basic deadman\'',
     }
-
-    test_cases = []
-
     test_cases.append(
         PositiveAlertTestCase(
-            description="Positive test with default events and default alert expected",
-            events=AlertTestSuite.create_events(default_event, 1),
-            expected_alert=default_alert
+            description="Positive test that causes first alert configuration to throw",
+            events=[AlertTestSuite.create_event(matched_event_second)],
+            expected_alert=unmatched_first_alert
         )
     )
 
-    # events = AlertTestSuite.create_events(default_event, 10)
-    # for event in events:
-    #     event['_source']['category'] = 'bad'
-    # test_cases.append(
-    #     NegativeAlertTestCase(
-    #         description="Negative test case with events with incorrect category",
-    #         events=events,
-    #     )
-    # )
+    matched_event_first = {
+        "_source": {
+            "summary": "ABC12345436",
+        }
+    }
+    unmatched_second_alert = {
+        "category": "deadman",
+        "tags": ['deadman'],
+        "severity": "ERROR",
+        "summary": 'Deadman check failed for \'Another deadman\'',
+    }
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test that causes second alert configuration to throw",
+            events=[AlertTestSuite.create_event(matched_event_first)],
+            expected_alert=unmatched_second_alert
+        )
+    )
 
-    # events = AlertTestSuite.create_events(default_event, 10)
-    # for event in events:
-    #     event['_source']['details']['sourceipaddress'] = None
-    # test_cases.append(
-    #     NegativeAlertTestCase(
-    #         description="Negative test case with events with non-existent sourceipaddress",
-    #         events=events,
-    #     )
-    # )
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test case with events with incorrect category",
+            events=[AlertTestSuite.create_event(matched_event_first), AlertTestSuite.create_event(matched_event_second)]
+        )
+    )
 
-    # for event in events:
-    #     event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 21})
-    #     event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 21})
-    # test_cases.append(
-    #     NegativeAlertTestCase(
-    #         description="Negative test case with old timestamp",
-    #         events=events,
-    #     )
-    # )
+    events = [
+        AlertTestSuite.create_event(matched_event_first),
+        AlertTestSuite.create_event(matched_event_second)
+    ]
+    events[0]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 6})
+    events[0]['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 6})
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with events matching first alert configuration but are old",
+            events=events,
+            expected_alert=unmatched_first_alert
+        )
+    )
+
+    events = [
+        AlertTestSuite.create_event(matched_event_first),
+        AlertTestSuite.create_event(matched_event_second)
+    ]
+    events[1]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 21})
+    events[1]['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 21})
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with events matching second alert configuration but are old",
+            events=events,
+            expected_alert=unmatched_second_alert
+        )
+    )
