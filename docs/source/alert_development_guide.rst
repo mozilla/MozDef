@@ -137,7 +137,7 @@ and add your new foo alert to the others with a crontab style schedule
     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
   }
 
-The format is 'pythonfilename.classname': {'schedule': crontab(timeunit='*/x')} and you can use any celery time unit (minute, hour) along with any schedule that makes sense for your environment.
+The format is `'pythonfilename.classname': {'schedule': crontab(timeunit='*/x')}` and you can use any celery time unit (minute, hour) along with any schedule that makes sense for your environment.
 Alerts don't take many resources to execute, typically finishing in sub second times, so it's easiest to start by running them every minute.
 
 How to run the alert in the docker containers
@@ -153,6 +153,7 @@ In general, the 'make run' approach is simpler, but can take 5-10mins each itera
 
 To use the 'make run' approach, you edit your alert. Add it to the docker/compose/mozdef_alerts/files/config.py file for scheduling as discussed above and simply:
 ::
+
   make run
 
 This will rebuild any container that needs it, use cache for any that haven't changed and restart mozdef with your alert.
@@ -177,14 +178,17 @@ To run the alert you are developing you will need to edit the alerts/lib/config.
 
 Once you've reference the containers, you can shell into the alerts container:
 ::
+
   docker exec -it mozdef_alerts_1 bash
 
 Next, start celery
 ::
+
   celery -A celeryconfig worker --loglevel=info --beat
 
 If you need to send in adhoc events you can usually do it via curl as follows:
 ::
+
   curl -v --header "Content-Type: application/json" --request POST --data '{"tags": ["test"],"category": "helloworld","details":{"sourceipaddress":"1.2.3.4"}}' http://loginput:8080/events
 
 
@@ -197,28 +201,32 @@ Customizing the alert summary
 -----------------------------
 On the alerts page of the MozDef web UI each alert is given a quick summary and for many alerts it is useful to have contextual information displayed here. Looking at the example foo alert we see
 ::
-  def onAggregation(self, aggreg):
-          # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
-          # aggreg['value']: value of the aggregation field, ex: toto@example.com
-          # aggreg['events']: list of events in the aggregation
-          category = 'My first alert!'
-          tags = ['Foo']
-          severity = 'NOTICE'
-          summary = "Foo alert"
 
-          # Create the alert object based on these properties
-          return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+  def onAggregation(self, aggreg):
+      # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
+      # aggreg['value']: value of the aggregation field, ex: toto@example.com
+      # aggreg['events']: list of events in the aggregation
+      category = 'My first alert!'
+      tags = ['Foo']
+      severity = 'NOTICE'
+      summary = "Foo alert"
+
+      # Create the alert object based on these properties
+      return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
 
 This is where the alert object gets created and returned. In the above code the summary will simply be "Foo Alert", but say we want to know how many log entries were collected in the alert? The aggreg object is here to help.
 ::
+
   summary = "Foo alert " +  aggreg['count']
 
 Gives us an alert with a count. Similarly
 ::
+
   summary = "Foo alert " +  aggreg['value']
 
 Will append the aggregation field to the summary text. The final list aggreg['events'] contains the full log entries of all logs collected and is in general the most useful. Suppose we want one string if the tag 'foo' exists on these logs and another otherwise
 ::
+
   if 'foo' in aggreg['events'][0]['_source']['tags']:
     summary = "Foo alert"
   else:
