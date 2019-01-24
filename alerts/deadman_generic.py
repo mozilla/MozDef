@@ -19,8 +19,11 @@ class AlertDeadman_Generic(AlertTask):
         for alert_cfg in self._config['alerts']:
             try:
                 self.process_alert(alert_cfg)
-            except Exception:
-                logger.error("Processing rule file {} failed".format(alert_cfg.__str__()))
+            except Exception as e:
+                logger.exception("Exception received when processing deadman alert ({0}):\n{1}".format(
+                    e,
+                    alert_cfg.__str__())
+                )
 
     def process_alert(self, alert_config):
         search_query = SearchQuery(minutes=int(alert_config['time_window']))
