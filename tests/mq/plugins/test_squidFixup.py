@@ -1,12 +1,9 @@
+import mock
 import os
 import sys
 from mozdef_util.utilities.toUTC import toUTC
-
-import mock
-import json
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
 from squidFixup import message
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
 
 
 class TestSquidFixup(object):

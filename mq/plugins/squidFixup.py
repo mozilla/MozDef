@@ -37,7 +37,7 @@ class message(object):
         if field == "-":
             field = 0
         return field
-    
+
     def tokenize_url(self, field):
         field = field.strip()
         tokens = field.split(':')
@@ -85,10 +85,10 @@ class message(object):
         newmessage['details'] = {}
 
         # move some fields that are expected at the event 'root' where they belong
-        if 'host_from' in message:
-            newmessage['hostname'] = message['host_from']
-        if 'tags' in message:
-            newmessage['tags'] = message['tags']
+        if 'HOST_FROM' in message:
+            newmessage['hostname'] = message['HOST_FROM']
+        if 'TAGS' in message:
+            newmessage['TAGS'] = message['tags']
         if 'category' in message:
             newmessage['category'] = message['category']
         newmessage[u'customendpoint'] = message['customendpoint']
@@ -103,13 +103,13 @@ class message(object):
                 line = message['MESSAGE'].strip()
                 tokens = line.split()
 
-                newmessage[u'details'][u'duration'] = float(tokens[1])/1000.0
+                newmessage[u'details'][u'duration'] = float(tokens[1]) / 1000.0
                 newmessage[u'details'][u'sourceipaddress'] = tokens[2]
                 newmessage[u'details'][u'sourceport'] = int(self.create_int(tokens[3]))
                 if self.isIPv4(tokens[4]):
                     newmessage[u'details'][u'destinationipaddress'] = tokens[4]
                 else:
-                    newmessage[u'details'][u'destinationipaddress'] = '0.0.0.0'
+                    newmessage[u'details'][u'destinationipaddress'] = u'0.0.0.0'
                 newmessage[u'details'][u'proxyaction'] = tokens[6]
                 if newmessage[u'details'][u'proxyaction'] != 'TCP_DENIED':
                     newmessage[u'details'][u'destinationport'] = int(tokens[5])
@@ -136,5 +136,6 @@ class message(object):
         newmessage[u'receivedtimestamp'] = toUTC(datetime.now()).isoformat()
         newmessage[u'eventsource'] = u'squid'
         newmessage[u'severity'] = u'INFO'
-        
+        print(newmessage)
+
         return (newmessage, metadata)
