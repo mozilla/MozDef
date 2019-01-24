@@ -2,7 +2,7 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV ES_VERSION 5.6.8
+ENV ES_VERSION 5.6.14
 ENV ES_JAVA_VERSION 1.8.0
 
 RUN \
