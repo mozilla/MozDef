@@ -33,7 +33,7 @@ MozDef requires the following:
 
   - Mozilla Uses Auth0 but you can use any OIDC provider you like: Shibboleth,
     KeyCloak, AWS Cognito, Okta, Ping (etc)
-  - You will need to configure the redirect URI of `/redirect_uri` as allowed in
+  - You will need to configure the redirect URI of ``/redirect_uri`` as allowed in
     your OIDC provider
 - An ACM Certificate in the deployment region for your DNS name
 - A VPC with three public subnets available.
@@ -96,15 +96,25 @@ Troubleshooting
 To view logs on the ec2 instance
 
 1. Determine the name/IP of the autoscaled EC2 instance via the command line or web console
-2. SSH into that EC2 instance as the `ec2-user` user using the SSH keypair that you
-   set as the `KeyName` parameter in CloudFormation
-3. List out all the containers with `sudo docker container ls`
-4. Tail logs from the container you'd like to examine with `sudo docker logs --follow NAME_OF_CONTAINER`
-   where `NAME_OF_CONTAINER` is the container name or ID that you found in the
+2. SSH into that EC2 instance as the ``ec2-user`` user using the SSH keypair that you
+   set as the ``KeyName`` parameter in CloudFormation
+3. List out all the containers with
+   ::
+
+     sudo docker container ls
+4. Tail logs from the container you'd like to examine with
+   ::
+
+     sudo docker logs --follow NAME_OF_CONTAINER
+
+   where ``NAME_OF_CONTAINER`` is the container name or ID that you found in the
    step above
-5. To enter the environment for that container run `sudo docker exec --interactive --tty NAME_OF_CONTAINER /bin/bash`
+5. To enter the environment for that container run
+   ::
+
+     sudo docker exec --interactive --tty NAME_OF_CONTAINER /bin/bash
 6. To view the environment variables being made available to the containers view
-   the file `/opt/mozdef/docker/compose/cloudy_mozdef.env`
+   the file ``/opt/mozdef/docker/compose/cloudy_mozdef.env``
 
 Using MozDef
 -------------
