@@ -2,8 +2,8 @@ import mock
 import os
 import sys
 from mozdef_util.utilities.toUTC import toUTC
-from squidFixup import message
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
+from squidFixup import message
 
 
 class TestSquidFixup(object):
@@ -228,7 +228,6 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
-        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -272,7 +271,6 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
-        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -316,7 +314,6 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
-        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -360,7 +357,6 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
-        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -404,7 +400,6 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'ssl'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == '-'
-        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -448,7 +443,6 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'ssl'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
-        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -492,7 +486,6 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
-        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -536,7 +529,6 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
-        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
