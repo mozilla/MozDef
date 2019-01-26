@@ -25,7 +25,6 @@ body{
     background: radial-gradient(ellipse, rgb(142, 147, 153) 0%, rgb(79, 74, 76) 100%); /* W3C */
     filter: 'progid:DXImageTransform.Microsoft.gradient(startColorstr="#b1b1b3",endColorstr="#8a8a8d",GradientType=1)'; /* IE6-9 fallback on horizontal gradient */
 
-    font-family: "Zilla Slab",sans-serif;
     font-size: 14px;
     /*margin: 0;*/
     /*min-width: 990px;*/
@@ -522,7 +521,7 @@ nav.main-menu li.active>a,
   border-collapse: collapse;
   border-spacing: 0;
   color: rgb(255, 255, 255);
-  font-family: arial;
+  font-family: "Zilla Slab",sans-serif;
   font-size: 14px;
   text-decoration: none;
   -webkit-transform: translateZ(0) scale(1, 1);

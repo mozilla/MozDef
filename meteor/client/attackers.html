@@ -11,12 +11,12 @@ Copyright (c) 2014 Mozilla Corporation
 sidenav
 {
     position: fixed;
-    left: -25em;
+    right: -25em;
     top: 0;
     bottom: 0;
     /*background-color: #654;*/
     background-color: #444444;
-    border-right: 15px solid #765;
+    border-left: 15px solid #765;
     box-shadow: 4px 0 5px rgba(0,0,0,0.2);
     z-index: 1;
 
@@ -36,11 +36,11 @@ sidenav:after
     content: ' ';
     width: 0;
     height: 0;
-    right: -75px;
+    right: 342px;
     top: 50%;
-    border-width: 30px 30px;
-    border-style: solid;
-    border-color: transparent transparent transparent #765;
+    border-top: 30px solid transparent;
+    border-bottom: 30px solid transparent;
+    border-right: 30px solid #765;
 }
 
 sidenav ul
@@ -57,7 +57,7 @@ sidenav div{
 
 sidenav:hover
 {
-    left: 0;
+    right: 0;
 }
 
 sidenav .filters-col .row {
