@@ -24,7 +24,7 @@ MozDef is in production at Mozilla where we are using it to process over 300 mil
 
 ## Give MozDef a Try in AWS:
 
-[![Launch MozDef](docs/source/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/mozdef.infosec.allizom.org/cf/mozdef-parent.yml)
+[![Launch MozDef](docs/source/images/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/mozdef-parent.yml)
 
 ## Documentation:
 

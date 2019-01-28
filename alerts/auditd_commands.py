@@ -15,7 +15,7 @@ class AlertAuditdCommands(AlertTask):
         search_query = SearchQuery(minutes=30)
 
         auditd_match = TermMatch('category', 'auditd')
-        auditd_match |= TermMatch('tags', 'audit')
+        auditd_match |= TermMatch('category', 'execve')
         search_query.add_must(auditd_match)
 
         command_names_matcher = None

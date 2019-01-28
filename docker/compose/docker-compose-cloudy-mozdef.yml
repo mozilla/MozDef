@@ -40,7 +40,7 @@ services:
     image: mozdef/mozdef_bootstrap
     env_file:
       - cloudy_mozdef.env
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
+    command: bash -c 'python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
     depends_on:
       - base
     networks:
@@ -58,7 +58,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python alert_worker.py -c alert_worker.conf'
+    command: bash -c 'python alert_worker.py -c alert_worker.conf'
     depends_on:
       - base
       - alerts
@@ -72,7 +72,7 @@ services:
     volumes:
       - /opt/mozdef/docker/compose/mozdef_alerts/files/config.py:/opt/mozdef/envs/mozdef/alerts/lib/config.py
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && celery -A celeryconfig worker --loglevel=info --beat'
+    command: bash -c 'celery -A celeryconfig worker --loglevel=info --beat'
     depends_on:
       - base
       - bootstrap
@@ -97,7 +97,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    command: bash -c 'python index.py -c index.conf'
     depends_on:
       - base
       - bootstrap
@@ -124,7 +124,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python index.py -c index.conf'
+    command: bash -c 'python index.py -c index.conf'
     depends_on:
       - base
       - mongodb
@@ -160,7 +160,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_eventtask.py -c esworker_eventtask.conf'
+    command: bash -c 'python esworker_eventtask.py -c esworker_eventtask.conf'
     scale: 1
     depends_on:
       - base
@@ -177,7 +177,7 @@ services:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_cloudtrail.env
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_cloudtrail.py -c esworker_cloudtrail.conf'
+    command: bash -c 'python esworker_cloudtrail.py -c esworker_cloudtrail.conf'
     scale: 1
     depends_on:
       - base
@@ -194,7 +194,7 @@ services:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_sns_sqs.env
     restart: always
-    command: bash -c 'source /opt/mozdef/envs/python/bin/activate && python esworker_sns_sqs.py -c esworker_sns_sqs.conf'
+    command: bash -c 'python esworker_sns_sqs.py -c esworker_sns_sqs.conf'
     scale: 1
     depends_on:
       - base

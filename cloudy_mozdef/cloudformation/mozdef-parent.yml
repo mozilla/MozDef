@@ -90,9 +90,10 @@ Parameters:
     NoEcho: true
   S3TemplateLocation:
     Type: String
-    AllowedPattern: '^https?:\/\/.*\.amazonaws\.com\/.*'
+    AllowedPattern: '^https?:\/\/.*\.amazonaws\.com\/.*\/'
     ConstraintDescription: A valid amazonaws.com S3 URL
     Description: "The URL to the S3 bucket used to fetch the nested stack templates (Example: https://s3-us-west-2.amazonaws.com/example-bucket-name/cloudformation/path/)"
+    Default: https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack

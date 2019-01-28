@@ -2,7 +2,9 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV KIBANA_VERSION 5.6.7
+# When changing kibana version remember to edit
+# docker/compose/mozdef_bootstrap/files/initial_setup.py accordingly
+ENV KIBANA_VERSION 5.6.14
 
 RUN \
     curl -s -L https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C / -xz && \

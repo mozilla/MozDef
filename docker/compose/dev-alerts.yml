@@ -1,0 +1,24 @@
+---
+version: '3.7'
+services:
+  alerts:
+    image: mozdef/mozdef_alerts
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_alerts/Dockerfile
+      cache_from:
+        - mozdef/mozdef_alerts
+        - mozdef_alerts:latest
+    restart: always
+    command: bash -c 'python -i'
+    stdin_open: true
+    tty: true
+    depends_on:
+      - base
+      - elasticsearch
+      - rabbitmq
+      - bootstrap
+    networks:
+      - default
+    volumes:
+      - ../../alerts:/opt/mozdef/envs/mozdef/alerts
