@@ -50,13 +50,3 @@ services:
   tester:
     env_file:
       - $ENV_FILE
-
-volumes:
-  elasticsearch:
-  rabbitmq:
-  mongodb:
-  cron:
-  geolite_db:
-
-networks:
-  default:
