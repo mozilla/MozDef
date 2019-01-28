@@ -12,7 +12,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, P
 class NSMScanPort(AlertTask):
     def __init__(self):
         AlertTask.__init__(self)
-        self._config = self.parse_json_alert_config('nsm_scan_port.json')    
+        self._config = self.parse_json_alert_config('nsm_scan_port.json')
 
     def main(self):
         search_query = SearchQuery(minutes=2)
