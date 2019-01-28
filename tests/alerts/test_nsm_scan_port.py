@@ -20,10 +20,10 @@ class TestNSMScanPort(AlertTestSuite):
             "summary": "Scan::Port_Scan source 10.99.88.77 destination unknown port unknown",
             "hostname": "your.friendly.nsm.sensor",
             "tags": ["bro"],
+            "source": "notice",
             "details": {
                 "sourceipaddress": "10.99.88.77",
                 "indicators": "10.99.88.77",
-                "source": "notice",
                 "note": "Scan::Port_Scan",
             }
         }
@@ -71,10 +71,10 @@ class TestNSMScanPort(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['details']['source'] = 'intel'
+        event['_source']['source'] = 'intel'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with a different details.source",
+            description="Negative test case with a different source",
             events=events,
         )
     )
@@ -92,7 +92,7 @@ class TestNSMScanPort(AlertTestSuite):
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
         event['_source']['details']['sourceipaddress'] = '10.54.65.234'
-        event['_source']['details']['indicators'] = '1.2.3.4'
+        event['_source']['details']['indicators'] = '10.54.65.234'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with an excluded IP address",
