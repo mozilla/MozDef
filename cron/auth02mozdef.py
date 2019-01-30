@@ -265,7 +265,7 @@ def process_msg(mozmsg, msg):
     details = DotDict({})
     # defaults
     details.username = "UNKNOWN"
-    details.userid = "UNKNNOWN"
+    details.userid = "UNKNOWN"
 
     # key words used to set category and success/failure markers
     authentication_words = ['Login', 'Logout', 'Auth']

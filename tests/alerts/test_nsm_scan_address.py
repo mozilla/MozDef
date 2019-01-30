@@ -20,6 +20,7 @@ class TestNSMScanAddress(AlertTestSuite):
             "summary": "Scan::Address_Scan source 10.252.25.90 destination unknown port unknown",
             "hostname": "your.friendly.nsm.sensor",
             "tags": ["bro"],
+            "source": "notice",
             "details": {
                 "sourceipaddress": "10.99.88.77",
                 "indicators": "10.99.88.77",
@@ -72,7 +73,7 @@ class TestNSMScanAddress(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 5)
     for event in events:
-        event['_source']['details']['source'] = 'intel'
+        event['_source']['source'] = 'intel'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with a different details.source",
