@@ -1,0 +1,2 @@
+bugzilla==1.0.0
+KitnIRC==0.2.6
