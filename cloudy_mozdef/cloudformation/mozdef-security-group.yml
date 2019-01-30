@@ -46,6 +46,11 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
+        - Description: Allow 80 inbound from everywhere for redirection
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
         - Description: Allow 9090 inbound from everywhere
           IpProtocol: tcp
           FromPort: 9090

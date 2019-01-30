@@ -23,6 +23,7 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
+from lib.aws import get_aws_credentials
 from lib.plugins import sendEventToPlugins, registerPlugins
 from lib.sqs import connect_sqs
 
@@ -38,19 +39,6 @@ except ImportError as e:
 def esConnect():
     '''open or re-open a connection to elastic search'''
     return ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)), options.esbulksize)
-
-
-def get_aws_credentials(region=None, accesskey=None, secretkey=None, security_token=None):
-    result = {}
-    if region not in ['', '<add_region>', None]:
-        result['region_name'] = region
-    if accesskey not in ['', '<add_accesskey>', None]:
-        result['aws_access_key_id'] = accesskey
-    if secretkey not in ['', '<add_secretkey>', None]:
-        result['aws_secret_access_key'] = secretkey
-    if security_token not in [None]:
-        result['security_token'] = security_token
-    return result
 
 
 class taskConsumer(object):

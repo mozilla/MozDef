@@ -42,7 +42,7 @@ previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-
 weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
 kibana_index_name = '.kibana'
-kibana_version = '5.6.7'
+kibana_version = '5.6.14'
 
 index_settings_str = ''
 with open(args.default_mapping_file) as data_file:

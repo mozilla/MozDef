@@ -6,8 +6,10 @@
 
 import sys
 from datetime import datetime, timedelta, tzinfo
+
 try:
     from datetime import timezone
+
     utc = timezone.utc
 except ImportError:
     # Hi there python2 user
@@ -20,6 +22,7 @@ except ImportError:
 
         def dst(self, dt):
             return timedelta(0)
+
     utc = UTC()
 from configlib import getConfig, OptionParser
 import json
@@ -45,12 +48,12 @@ def normalize(details):
                 normalized["success"] = False
         normalized[f] = details[f]
 
-    if 'user' in normalized and type(normalized['user']) is dict:
-        if 'name' in normalized['user']:
-            normalized['username'] = normalized['user']['name']
-        if 'key' in normalized['user']:
-            normalized['userkey'] = normalized['user']['key']
-        del(normalized['user'])
+    if "user" in normalized and type(normalized["user"]) is dict:
+        if "name" in normalized["user"]:
+            normalized["username"] = normalized["user"]["name"]
+        if "key" in normalized["user"]:
+            normalized["userkey"] = normalized["user"]["key"]
+        del (normalized["user"])
 
     return normalized
 
@@ -69,18 +72,21 @@ def process_events(mozmsg, duo_events, etype, state):
     # After processing these fields, we just pour everything into the "details" fields of Mozdef, except for the
     # noconsume fields.
 
-    if etype == 'administration':
-        noconsume = ['timestamp', 'host', 'action']
-    elif etype == 'telephony':
-        noconsume = ['timestamp', 'host', 'context']
-    elif etype == 'authentication':
-        noconsume = ['timestamp', 'host', 'eventtype']
+    if etype == "administration":
+        noconsume = ["timestamp", "host", "action"]
+    elif etype == "telephony":
+        noconsume = ["timestamp", "host", "context"]
+    elif etype == "authentication":
+        noconsume = ["timestamp", "host", "eventtype"]
     else:
         return
 
     # Care for API v2
-    if isinstance(duo_events, dict) and 'authlogs' in duo_events.keys():
-        duo_events = duo_events['authlogs']
+    if isinstance(duo_events, dict) and "authlogs" in duo_events.keys():
+        offset = duo_events["metadata"]["next_offset"]
+        if offset is not None:
+            state["{}_offset".format(etype)] = offset
+        duo_events = duo_events["authlogs"]
         api_version = 2
     else:
         api_version = 1
@@ -89,15 +95,15 @@ def process_events(mozmsg, duo_events, etype, state):
         details = {}
         # Timestamp format: http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
         # Duo logs come as a UTC timestamp
-        dt = datetime.utcfromtimestamp(e['timestamp'])
+        dt = datetime.utcfromtimestamp(e["timestamp"])
         mozmsg.timestamp = dt.replace(tzinfo=utc).isoformat()
-        mozmsg.log['hostname'] = e['host']
+        mozmsg.log["hostname"] = e["host"]
         for i in e:
             if i in noconsume:
                 continue
 
             # Duo client doesn't translate inner dicts to dicts for some reason - its just a string, so we have to process and parse it
-            if e[i] is not None and type(e[i]) == str and e[i].startswith('{'):
+            if e[i] is not None and type(e[i]) == str and e[i].startswith("{"):
                 j = json.loads(e[i])
                 for x in j:
                     details[x] = j[x]
@@ -106,21 +112,21 @@ def process_events(mozmsg, duo_events, etype, state):
             details[i] = e[i]
         mozmsg.set_category(etype)
         mozmsg.details = normalize(details)
-        if etype == 'administration':
-            mozmsg.summary = e['action']
-        elif etype == 'telephony':
-            mozmsg.summary = e['context']
-        elif etype == 'authentication':
-            if (api_version == 1):
-                mozmsg.summary = e['eventtype'] + ' ' + e['result'] + ' for ' + e['username']
+        if etype == "administration":
+            mozmsg.summary = e["action"]
+        elif etype == "telephony":
+            mozmsg.summary = e["context"]
+        elif etype == "authentication":
+            if api_version == 1:
+                mozmsg.summary = e["eventtype"] + " " + e["result"] + " for " + e["username"]
             else:
-                mozmsg.summary = e['eventtype'] + ' ' + e['result'] + ' for ' + e['user']['name']
+                mozmsg.summary = e["eventtype"] + " " + e["result"] + " for " + e["user"]["name"]
 
         mozmsg.send()
 
     # last event timestamp record is stored and returned so that we can save our last position in the log.
     try:
-        state[etype] = e['timestamp']
+        state[etype] = e["timestamp"]
     except UnboundLocalError:
         # duo_events was empty, no new event
         pass
@@ -129,55 +135,73 @@ def process_events(mozmsg, duo_events, etype, state):
 
 def main():
     try:
-        state = pickle.load(open(options.statepath, 'rb'))
+        state = pickle.load(open(options.statepath, "rb"))
     except IOError:
         # Oh, you're new.
         # Note API v2 expect full, correct and within range timestamps in millisec so we start recently
         # API v1 uses normal timestamps in seconds instead
-        state = {'administration': 0, 'authentication': 1547000000000, 'telephony': 0}
+        state = {
+            "administration": 0,
+            "administration_offset": None,
+            "authentication": 1547000000000,
+            "authentication_offset": None,
+            "telephony": 0,
+            "telephony_offset": None,
+        }
 
     # Convert v1 (sec) timestamp to v2 (ms)...
-    if state['authentication'] < 1547000000000:
-        state['authentication'] = int(str(state['authentication']) + '000')
+    if state["authentication"] < 1547000000000:
+        state["authentication"] = int(str(state["authentication"]) + "000")
 
     duo = duo_client.Admin(ikey=options.IKEY, skey=options.SKEY, host=options.URL)
     mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
-    mozmsg.tags = ['duosecurity']
-    if options.update_tags != '':
+    mozmsg.tags = ["duosecurity"]
+    if options.update_tags != "":
         mozmsg.tags.append(options.update_tags)
-    mozmsg.set_category('authentication')
-    mozmsg.source = 'DuoSecurityAPI'
+    mozmsg.set_category("authentication")
+    mozmsg.source = "DuoSecurityAPI"
     if options.DEBUG:
         mozmsg.debug = options.DEBUG
         mozmsg.set_send_to_syslog(True, only_syslog=True)
 
     # This will process events for all 3 log types and send them to MozDef. the state stores the last position in the
     # log when this script was last called.
-    state = process_events(mozmsg, duo.get_administrator_log(mintime=state['administration'] + 1), 'administration', state)
-    # TODO Should use `next_offset` instead of mintime in the future (for api v2) as its more efficient
-    state = process_events(mozmsg, duo.get_authentication_log(api_version=2, mintime=state['authentication'] + 1), 'authentication', state)
-    state = process_events(mozmsg, duo.get_telephony_log(mintime=state['telephony'] + 1), 'telephony', state)
+    # NOTE: If administration and telephone logs support a "v2" API in the future it will most likely need to have the
+    # same code with `next_offset` as authentication uses.
+    state = process_events(
+        mozmsg, duo.get_administrator_log(mintime=state["administration"] + 1), "administration", state
+    )
+    state = process_events(
+        mozmsg,
+        duo.get_authentication_log(
+            api_version=2,
+            limit="1000",
+            sort="ts:asc",
+            mintime=state["authentication"] + 1,
+            next_offset=state["authentication_offset"],
+        ),
+        "authentication",
+        state,
+    )
+    state = process_events(mozmsg, duo.get_telephony_log(mintime=state["telephony"] + 1), "telephony", state)
 
-    pickle.dump(state, open(options.statepath, 'wb'))
+    pickle.dump(state, open(options.statepath, "wb"))
 
 
 def initConfig():
-    options.IKEY = getConfig('IKEY', '', options.configfile)
-    options.SKEY = getConfig('SKEY', '', options.configfile)
-    options.URL = getConfig('URL', '', options.configfile)
-    options.MOZDEF_URL = getConfig('MOZDEF_URL', '', options.configfile)
-    options.DEBUG = getConfig('DEBUG', True, options.configfile)
-    options.statepath = getConfig('statepath', '', options.configfile)
-    options.update_tags = getConfig('addtag', '', options.configfile)
+    options.IKEY = getConfig("IKEY", "", options.configfile)
+    options.SKEY = getConfig("SKEY", "", options.configfile)
+    options.URL = getConfig("URL", "", options.configfile)
+    options.MOZDEF_URL = getConfig("MOZDEF_URL", "", options.configfile)
+    options.DEBUG = getConfig("DEBUG", True, options.configfile)
+    options.statepath = getConfig("statepath", "", options.configfile)
+    options.update_tags = getConfig("addtag", "", options.configfile)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = OptionParser()
-    defaultconfigfile = sys.argv[0].replace('.py', '.conf')
-    parser.add_option("-c",
-                      dest='configfile',
-                      default=defaultconfigfile,
-                      help="configuration file to use")
+    defaultconfigfile = sys.argv[0].replace(".py", ".conf")
+    parser.add_option("-c", dest="configfile", default=defaultconfigfile, help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
     main()
