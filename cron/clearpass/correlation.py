@@ -122,7 +122,7 @@ class UsernameNetResolve:
         )
         mac = compile("([a-fA-F0-9]{2}[:|\-]?){6}")
 
-        search_query = SearchQuery(hours=8)
+        search_query = SearchQuery(hours=24)
         search_query.add_must(
             [
                 TermMatch("category", "syslog"),
@@ -132,20 +132,24 @@ class UsernameNetResolve:
         )
         for de in self.options.dhcpexclude.split(" "):
             search_query.add_must_not([TermMatch("hostname", de)])
-        events = search_query.execute(self.esClient, indices=["events-weekly"])
+        # events = search_query.execute(self.esClient, indices=["events-weekly"])
+        events = search_query.execute(self.esClient, indices=["events"])
 
+        print(len(events["hits"]))
         for event in events["hits"]:
             try:
                 match_ip = ip.search(event["_source"]["summary"]).group()
+                print(match_ip)
             except:
                 pass
             try:
                 match_mac = mac.search(event["_source"]["summary"]).group()
+                print(match_mac)
             except:
                 pass
             self.logger.debug("%s <- %s", match_ip, match_mac)
             if match_ip + match_mac in self.seenRing.get():
-                return
+                continue
             else:
                 self.seenRing.append(match_ip + match_mac)
             self.find_username_by_mac(match_mac, match_ip)
@@ -172,7 +176,7 @@ class UsernameNetResolve:
             ]
             self.logger.debug("found vendor in the out.txt")
 
-        search_query = SearchQuery(hours=8)
+        search_query = SearchQuery(hours=24)
         search_query.add_must(
             [
                 TermMatch("category", "syslog"),
@@ -180,7 +184,8 @@ class UsernameNetResolve:
                 QueryStringMatch("summary: " + mac_bare_str),
             ]
         )
-        events = search_query.execute(self.esClient, indices=["events-weekly"])
+        # events = search_query.execute(self.esClient, indices=["events-weekly"])
+        events = search_query.execute(self.esClient, indices=["events"])
         for event in events["hits"]:
             message = event["_source"]["summary"]
         self.logger.debug("Found %s Radius events", len(events["hits"]))
