@@ -10,8 +10,12 @@ from netaddr import EUI, mac_bare, NotRegisteredError
 from datetime import datetime
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, SearchQuery, QueryStringMatch
+from mozdef_util.utilities.logger import logger, initLogger
 from configlib import getConfig, OptionParser
 from logging.handlers import SysLogHandler
+from socket import gethostname
+from hashlib import md5
+import json
 
 # https://community.arubanetworks.com/t5/AAA-NAC-Guest-Access-BYOD/ClearPass-Error-Codes/ta-p/260799
 
@@ -30,35 +34,21 @@ class RingBuffer:
 
 class UsernameNetResolve:
     def __init__(self):
-        self.logger = logging.getLogger(sys.argv[0])
         self.initParser()
         self.initConfig()
-        self.initLogger()
+        initLogger(self.options)
         self.initYap()
         self.macassignments = self.readOUIFile()
         self.esClient = ElasticsearchClient(self.options.esreadurl)
-        self.logger.debug("started")
-        self.seenRing = RingBuffer(100)
+        self.es = ElasticsearchClient(self.options.eswriteurl)
+        logger.info("started")
+        self.seenRing = RingBuffer(1000)
+        self.mypid = os.getpid()
+        self.myname = "correlation.py"
+        self.hostname = gethostname()
 
     def loggerTimeStamp(self, record, datefmt=None):
         return toUTC(datetime.now()).isoformat()
-
-    def initLogger(self):
-        self.logger.level = logging.DEBUG
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
-        formatter.formatTime = self.loggerTimeStamp
-        if self.options.output == "syslog":
-            self.logger.addHandler(
-                SysLogHandler(
-                    address=(self.options.sysloghostname, self.options.syslogport)
-                )
-            )
-        else:
-            sh = logging.StreamHandler(sys.stderr)
-            sh.setFormatter(formatter)
-            self.logger.addHandler(sh)
 
     def initConfig(self):
         self.options.output = getConfig("output", "stdout", self.options.configfile)
@@ -110,9 +100,7 @@ class UsernameNetResolve:
                     macprefix = fields[0][0:8].replace("-", ":").lower()
                     entity = fields[2]
                     macassignments[macprefix] = entity
-        self.logger.debug(
-            "The MAC OUI database loaded - %s entries", len(macassignments)
-        )
+        logger.info("The MAC OUI database loaded - %s entries", len(macassignments))
         return macassignments
 
     def find_mac_by_ip(self):
@@ -122,7 +110,7 @@ class UsernameNetResolve:
         )
         mac = compile("([a-fA-F0-9]{2}[:|\-]?){6}")
 
-        search_query = SearchQuery(hours=24)
+        search_query = SearchQuery(hours=8)
         search_query.add_must(
             [
                 TermMatch("category", "syslog"),
@@ -132,29 +120,25 @@ class UsernameNetResolve:
         )
         for de in self.options.dhcpexclude.split(" "):
             search_query.add_must_not([TermMatch("hostname", de)])
-        # events = search_query.execute(self.esClient, indices=["events-weekly"])
         events = search_query.execute(self.esClient, indices=["events"])
 
-        print(len(events["hits"]))
         for event in events["hits"]:
             try:
                 match_ip = ip.search(event["_source"]["summary"]).group()
-                print(match_ip)
             except:
                 pass
             try:
                 match_mac = mac.search(event["_source"]["summary"]).group()
-                print(match_mac)
             except:
                 pass
-            self.logger.debug("%s <- %s", match_ip, match_mac)
+            logger.debug("%s <- %s", match_ip, match_mac)
             if match_ip + match_mac in self.seenRing.get():
                 continue
             else:
                 self.seenRing.append(match_ip + match_mac)
             self.find_username_by_mac(match_mac, match_ip)
 
-        self.logger.debug("Found %s DHCP events", len(events["hits"]))
+        logger.info("Found %s DHCP events", len(events["hits"]))
 
     def find_username_by_mac(self, match_mac, match_ip):
         newmessage = {}
@@ -165,7 +149,7 @@ class UsernameNetResolve:
             oui = macobj.oui
             newmessage["details"]["hwvendor"] = oui.registration().org
         except NotRegisteredError as e:
-            self.logger.debug("netaddr failed as usual - %s", e)
+            logger.info("netaddr failed as usual - %s", e)
             pass
         macobj.dialect = mac_bare
         mac_bare_str = str(macobj)
@@ -174,9 +158,9 @@ class UsernameNetResolve:
             newmessage["details"]["hwvendor"] = self.macassignments[
                 match_mac[0:8].lower()
             ]
-            self.logger.debug("found vendor in the out.txt")
+            logger.info("found vendor in the out.txt")
 
-        search_query = SearchQuery(hours=24)
+        search_query = SearchQuery(hours=8)
         search_query.add_must(
             [
                 TermMatch("category", "syslog"),
@@ -184,11 +168,10 @@ class UsernameNetResolve:
                 QueryStringMatch("summary: " + mac_bare_str),
             ]
         )
-        # events = search_query.execute(self.esClient, indices=["events-weekly"])
         events = search_query.execute(self.esClient, indices=["events"])
         for event in events["hits"]:
             message = event["_source"]["summary"]
-        self.logger.debug("Found %s Radius events", len(events["hits"]))
+        logger.info("Found %s Radius events", len(events["hits"]))
 
         if len(events["hits"]) == 0:
             return
@@ -225,21 +208,60 @@ class UsernameNetResolve:
 
         return
 
+    def getDocID(self, usermacaddress):
+        # create a hash to use as the ES doc id // Thanks Jeff!!
+        hash = md5()
+        hash.update("{0}.mozdefintel.usernamemacaddress".format(usermacaddress))
+        return hash.hexdigest()
+
     def createevent(self, newmessage):
-        self.logger.debug("%s", newmessage)
+        # logger.info("%s", newmessage)
 
-        mozmsg = mozdef.MozDefEvent(self.options.eswriteurl)
-        mozmsg.tags = ["authentication", "clearpass", "dhcp"]
-        mozmsg.set_category("authentication")
+        event = dict()
+        event[u"utctimestamp"] = toUTC(
+            newmessage["details"]["radiustimestamp"]
+        ).isoformat()
+        event[u"timestamp"] = toUTC(
+            newmessage["details"]["radiustimestamp"]
+        ).isoformat()
+        event[u"receivedtimestamp"] = toUTC(datetime.now()).isoformat()
+        event[u"mozdefhostname"] = self.hostname
+        event[u"hostname"] = self.hostname
+        event[u"processid"] = self.mypid
+        event[u"processname"] = self.myname
+        event[u"category"] = u"authentication"
+        event[u"tags"] = [u"authentication", u"clearpass", u"dhcp"]
+        event[u"source"] = u"clearpass"
+        event[u"severity"] = u"INFO"
+        event[u"details"] = newmessage["details"]
 
-        mozmsg.timestamp = toUTC(newmessage["details"]["radiustimestamp"]).isoformat()
+        # logger.info("%s", event)
 
-        mozmsg.details = newmessage["details"]
-        mozmsg.summary = "%s <- %s".format(
-            newmessage["details"]["username"], newmessage["details"]["eventipaddress"]
-        )
+        # doc_type="usernamemacaddress",
+        try:
+            self.es.save_object(
+                index="intelligence",
+                doc_id=self.getDocID(event),
+                doc_type="event",
+                body=json.dumps(event),
+            )
+        except Exception as e:
+            logger.error("Exception %r when posting correlation " % e)
 
-        mozmsg.send()
+        # mozmsg = mozdef.MozDefEvent(self.options.eswriteurl)
+        # mozmsg.tags = ["authentication", "clearpass", "dhcp"]
+        # mozmsg.set_category("authentication")
+
+
+#
+# mozmsg.timestamp = toUTC(newmessage["details"]["radiustimestamp"]).isoformat()
+#
+# mozmsg.details = newmessage["details"]
+# mozmsg.summary = "%s <- %s".format(
+#    newmessage["details"]["username"], newmessage["details"]["eventipaddress"]
+# )
+
+# mozmsg.send()
 
 
 def main():
