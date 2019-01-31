@@ -147,8 +147,18 @@ services:
     networks:
       - default
   # bot:
+  #   image: mozdef/mozdef_bot
+  #   build:
+  #     context: ../../
+  #     dockerfile: docker/compose/mozdef_bot/Dockerfile
+  #     cache_from:
+  #       - mozdef/mozdef_bot
+  #       - mozdef_bot:latest
+  #     args:
+  #       # This is either 'irc', or 'slack'
+  #       BOT_TYPE: slack
   #   restart: always
-  #   command: bash -c 'sleep 90 && python mozdefbot.py -c mozdefbot.conf'
+  #   command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/rabbitmq/5672";do sleep 1;done && python mozdefbot.py -c mozdefbot.conf'
   #   depends_on:
   #     - base
   #     - rabbitmq

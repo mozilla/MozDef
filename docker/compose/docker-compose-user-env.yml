@@ -1,0 +1,52 @@
+---
+version: '3.7'
+services:
+  nginx:
+    env_file:
+      - $ENV_FILE
+  mongodb:
+    env_file:
+      - $ENV_FILE
+  kibana:
+    env_file:
+      - $ENV_FILE
+  elasticsearch:
+    env_file:
+      - $ENV_FILE
+  rabbitmq:
+    env_file:
+      - $ENV_FILE
+  # MozDef Specific Containers
+  base:
+    env_file:
+      - $ENV_FILE
+  bootstrap:
+    env_file:
+      - $ENV_FILE
+  alertplugins:
+    env_file:
+      - $ENV_FILE
+  alerts:
+    env_file:
+      - $ENV_FILE
+  cron:
+    env_file:
+      - $ENV_FILE
+  loginput:
+    env_file:
+      - $ENV_FILE
+  mq_worker:
+    env_file:
+      - $ENV_FILE
+  meteor:
+    env_file:
+      - $ENV_FILE
+  rest:
+    env_file:
+      - $ENV_FILE
+  syslog:
+    env_file:
+      - $ENV_FILE
+  tester:
+    env_file:
+      - $ENV_FILE
