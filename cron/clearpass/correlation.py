@@ -37,14 +37,15 @@ class UsernameNetResolve:
         self.initParser()
         self.initConfig()
         initLogger(self.options)
+        logger.info("started")
         self.initYap()
         self.macassignments = self.readOUIFile()
         self.esClient = ElasticsearchClient(self.options.esreadurl)
         self.es = ElasticsearchClient(self.options.eswriteurl)
-        logger.info("started")
+        es.create_index("intelligence", ignore_fail=True)
         self.seenRing = RingBuffer(1000)
         self.mypid = os.getpid()
-        self.myname = "correlation.py"
+        self.myname = sys.argv[0]
         self.hostname = gethostname()
 
     def initConfig(self):
@@ -212,7 +213,7 @@ class UsernameNetResolve:
         return hash.hexdigest()
 
     def createevent(self, newmessage):
-         logger.debug("%s", newmessage)
+        logger.debug("%s", newmessage)
 
         event = dict()
         event[u"utctimestamp"] = toUTC(
