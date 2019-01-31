@@ -47,9 +47,6 @@ class UsernameNetResolve:
         self.myname = "correlation.py"
         self.hostname = gethostname()
 
-    def loggerTimeStamp(self, record, datefmt=None):
-        return toUTC(datetime.now()).isoformat()
-
     def initConfig(self):
         self.options.output = getConfig("output", "stdout", self.options.configfile)
         self.options.esreadurl = getConfig(
@@ -138,7 +135,7 @@ class UsernameNetResolve:
                 self.seenRing.append(match_ip + match_mac)
             self.find_username_by_mac(match_mac, match_ip)
 
-        logger.info("Found %s DHCP events", len(events["hits"]))
+        logger.debug("Found %s DHCP events", len(events["hits"]))
 
     def find_username_by_mac(self, match_mac, match_ip):
         newmessage = {}
@@ -149,7 +146,7 @@ class UsernameNetResolve:
             oui = macobj.oui
             newmessage["details"]["hwvendor"] = oui.registration().org
         except NotRegisteredError as e:
-            logger.info("netaddr failed as usual - %s", e)
+            logger.debug("netaddr failed as usual - %s", e)
             pass
         macobj.dialect = mac_bare
         mac_bare_str = str(macobj)
@@ -158,7 +155,7 @@ class UsernameNetResolve:
             newmessage["details"]["hwvendor"] = self.macassignments[
                 match_mac[0:8].lower()
             ]
-            logger.info("found vendor in the out.txt")
+            logger.debug("found vendor in the out.txt")
 
         search_query = SearchQuery(hours=8)
         search_query.add_must(
@@ -171,7 +168,7 @@ class UsernameNetResolve:
         events = search_query.execute(self.esClient, indices=["events"])
         for event in events["hits"]:
             message = event["_source"]["summary"]
-        logger.info("Found %s Radius events", len(events["hits"]))
+        logger.debug("Found %s Radius events", len(events["hits"]))
 
         if len(events["hits"]) == 0:
             return
@@ -215,7 +212,7 @@ class UsernameNetResolve:
         return hash.hexdigest()
 
     def createevent(self, newmessage):
-        # logger.info("%s", newmessage)
+         logger.debug("%s", newmessage)
 
         event = dict()
         event[u"utctimestamp"] = toUTC(
@@ -235,9 +232,10 @@ class UsernameNetResolve:
         event[u"severity"] = u"INFO"
         event[u"details"] = newmessage["details"]
 
-        # logger.info("%s", event)
+        logger.debug("%s", event)
 
-        # doc_type="usernamemacaddress",
+        # XXX: doc_type="usernamemacaddress"
+        # XXX: try to create index
         try:
             self.es.save_object(
                 index="intelligence",
@@ -247,21 +245,6 @@ class UsernameNetResolve:
             )
         except Exception as e:
             logger.error("Exception %r when posting correlation " % e)
-
-        # mozmsg = mozdef.MozDefEvent(self.options.eswriteurl)
-        # mozmsg.tags = ["authentication", "clearpass", "dhcp"]
-        # mozmsg.set_category("authentication")
-
-
-#
-# mozmsg.timestamp = toUTC(newmessage["details"]["radiustimestamp"]).isoformat()
-#
-# mozmsg.details = newmessage["details"]
-# mozmsg.summary = "%s <- %s".format(
-#    newmessage["details"]["username"], newmessage["details"]["eventipaddress"]
-# )
-
-# mozmsg.send()
 
 
 def main():
