@@ -12,6 +12,7 @@ class AlertTestCase(object):
         # we need to copy each event so that other tests dont
         # mess with the same instance in memory
         self.events = AlertTestSuite.copy(events)
+        assert any(isinstance(i, list) for i in self.events) is False
         self.events_type = events_type
         self.expected_alert = expected_alert
         self.full_events = []
