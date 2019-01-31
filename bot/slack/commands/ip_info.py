@@ -8,7 +8,7 @@ from mozdef_util.utilities.is_ip import is_ip
 def ip_location(ip):
     location = ""
     try:
-        geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../data/GeoLite2-City.mmdb")
+        geoip_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../data/GeoLite2-City.mmdb")
         geoip = GeoIP(geoip_data_dir)
         geo_dict = geoip.lookup_ip(ip)
         if geo_dict is not None:
