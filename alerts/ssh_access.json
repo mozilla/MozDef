@@ -1,0 +1,6 @@
+{
+    "watchlist": [
+        {"hostname": "nagios1.small.corp.com", "ipaddress": "11.22.33.44"},
+        {"hostname": "nagios2.super.corp.com", "ipaddress": "11.22.33.45"}
+    ]
+}
