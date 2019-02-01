@@ -71,7 +71,11 @@ class SlackBot():
             else:
                 plugin = self.plugins[command]
                 logger.info("Sending to {0}".format(plugin['plugin_class'].__module__))
-                response += "\n" + plugin['plugin_class'].handle_command(parameters)
+                try:
+                    response = "\n" + plugin['plugin_class'].handle_command(parameters)
+                except Exception as e:
+                    response = "\nReceived an error when processing your request."
+                    logger.exception(e)
 
         return response
 
