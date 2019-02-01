@@ -136,6 +136,8 @@ class SlackBot():
         formatted_alert = format_alert(alert_dict)
         if severity == 'CRITICAL':
             self.post_critical_message(formatted_alert, channel)
+        elif severity == 'ERROR':
+            self.post_error_message(formatted_alert, channel)
         elif severity == 'WARNING':
             self.post_warning_message(formatted_alert, channel)
         elif severity == 'INFO':
@@ -149,16 +151,19 @@ class SlackBot():
         self._post_attachment(message, channel, '#36a64f')
 
     def post_info_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#99ccff')
+        self._post_attachment(message, channel, '#cccccc')
 
     def post_critical_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#ff0000')
+        self._post_attachment(message, channel, '#d04437')
 
     def post_warning_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#e6e600')
+        self._post_attachment(message, channel, '#ffd351')
 
     def post_notice_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#a64dff')
+        self._post_attachment(message, channel, '#4a6785')
+
+    def post_error_message(self, message, channel=None):
+        self._post_attachment(message, channel, '#d04437')
 
     def post_unknown_severity_message(self, message, channel=None):
         self._post_attachment(message, channel, '#000000')
