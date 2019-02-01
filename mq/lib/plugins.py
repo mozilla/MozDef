@@ -43,9 +43,9 @@ def sendEventToPlugins(anevent, metadata, pluginList):
         if send:
             if 'plugins' not in anevent:
                 anevent['plugins'] = []
+            (anevent, metadata) = plugin[0].onMessage(anevent, metadata)
             plugin_name = plugin[0].__module__.replace('plugins.', '')
             anevent['plugins'].append(plugin_name)
-            (anevent, metadata) = plugin[0].onMessage(anevent, metadata)
             if anevent is None:
                 # plug-in is signalling to drop this message
                 # early exit
