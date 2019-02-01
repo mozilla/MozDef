@@ -33,9 +33,11 @@ run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy
 
 .PHONY: run-env-mozdef
 run-env-mozdef: ## Run the MozDef containers with a user specified env file. Run with make 'run-env-mozdef -e ENV=my.env'
-	$(shell test -f $(ENV) || touch $(ENV))
-	ENV_FILE=$(abspath $(ENV))
-	docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-user-env.yml -p $(NAME) up -d
+ifneq ("$(wildcard $(ENV))","") #Check for existence of ENV
+	ENV_FILE=$(abspath $(ENV)) docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-user-env.yml -p $(NAME) up -d
+else
+	@echo $(ENV) not found.
+endif
 
 restart-cloudy-mozdef:
 	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart
