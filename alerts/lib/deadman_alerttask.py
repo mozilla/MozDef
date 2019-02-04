@@ -2,8 +2,6 @@ from alerttask import AlertTask
 
 
 class DeadmanAlertTask(AlertTask):
-    def __init__(self):
-        self.deadman = True
 
     def executeSearchEventsSimple(self):
         # We override this method to specify the size as 1
