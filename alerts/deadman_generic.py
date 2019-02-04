@@ -6,12 +6,12 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 
-from lib.alerttask import AlertTask
+from lib.deadman_alerttask import DeadmanAlertTask
 from mozdef_util.query_models import SearchQuery, QueryStringMatch
 from mozdef_util.utilities.logger import logger
 
 
-class AlertDeadman_Generic(AlertTask):
+class AlertDeadman_Generic(DeadmanAlertTask):
 
     def main(self):
         self._config = self.parse_json_alert_config('deadman_generic.json')
