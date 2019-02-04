@@ -11,7 +11,7 @@ from mozdef_util.query_models import SearchQuery, QueryStringMatch
 from mozdef_util.utilities.logger import logger
 
 
-class AlertDeadman_Generic(DeadmanAlertTask):
+class AlertDeadmanGeneric(DeadmanAlertTask):
 
     def main(self):
         self._config = self.parse_json_alert_config('deadman_generic.json')

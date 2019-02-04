@@ -7,9 +7,9 @@ from negative_alert_test_case import NegativeAlertTestCase
 from alert_test_suite import AlertTestSuite
 
 
-class TestDeadman_Generic(AlertTestSuite):
+class TestDeadmanGeneric(AlertTestSuite):
     alert_filename = "deadman_generic"
-    alert_classname = "AlertDeadman_Generic"
+    alert_classname = "AlertDeadmanGeneric"
     deadman = True
 
     default_event = {
