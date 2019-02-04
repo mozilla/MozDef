@@ -248,12 +248,18 @@ class AlertTask(Task):
 
         self.main_query = query
 
+    def executeSearchEventsSimple(self):
+        """
+        Execute the search for simple events
+        """
+        return self.main_query.execute(self.es, indices=self.event_indices)
+
     def searchEventsSimple(self):
         """
         Search events matching filters, store events in self.events
         """
         try:
-            results = self.main_query.execute(self.es, indices=self.event_indices)
+            results = self.executeSearchEventsSimple()
             self.events = results['hits']
             self.log.debug(self.events)
         except Exception as e:
