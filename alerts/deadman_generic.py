@@ -26,7 +26,8 @@ class AlertDeadman_Generic(AlertTask):
                 )
 
     def process_alert(self, alert_config):
-        search_query = SearchQuery(minutes=int(alert_config['time_window']))
+        self.current_alert_time_window = int(alert_config['time_window'])
+        search_query = SearchQuery(minutes=self.current_alert_time_window)
         search_query.add_must(QueryStringMatch(str(alert_config['search_query'])))
         self.filtersManual(search_query)
         self.searchEventsSimple()
@@ -39,5 +40,5 @@ class AlertDeadman_Generic(AlertTask):
         tags = ['deadman']
         severity = 'ERROR'
 
-        summary = "Deadman check failed for '{0}'".format(description)
+        summary = "Deadman check failed for '{0}' the past {1} minutes".format(description, self.current_alert_time_window)
         return self.createAlertDict(summary, category, tags, [], severity=severity)

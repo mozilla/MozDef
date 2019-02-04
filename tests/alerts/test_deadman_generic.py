@@ -32,7 +32,7 @@ class TestDeadman_Generic(AlertTestSuite):
         "category": "deadman",
         "tags": ['deadman'],
         "severity": "ERROR",
-        "summary": 'Deadman check failed for \'Basic deadman\'',
+        "summary": 'Deadman check failed for \'Basic deadman\' the past 5 minutes',
     }
     test_cases.append(
         PositiveAlertTestCase(
@@ -51,7 +51,7 @@ class TestDeadman_Generic(AlertTestSuite):
         "category": "deadman",
         "tags": ['deadman'],
         "severity": "ERROR",
-        "summary": 'Deadman check failed for \'Another deadman\'',
+        "summary": 'Deadman check failed for \'Another deadman\' the past 20 minutes',
     }
     test_cases.append(
         PositiveAlertTestCase(
