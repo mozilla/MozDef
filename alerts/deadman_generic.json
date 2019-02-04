@@ -1,0 +1,14 @@
+{
+    "alerts": [
+        {
+            "search_query": "ABC12345436",
+            "time_window": "5",
+            "description": "Basic deadman"
+        },
+        {
+            "search_query": "anotherterm",
+            "time_window": "20",
+            "description": "Another deadman"
+        }
+    ]
+}
