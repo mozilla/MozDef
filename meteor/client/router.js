@@ -19,7 +19,7 @@ Router.configure({
     }
 });
 
-Router.map(function () {
+Router.map(function() {
     this.route('home', {
         path: '/',
         template: 'hello',
@@ -31,6 +31,17 @@ Router.map(function () {
         template: 'about',
         layoutTemplate: 'layout'
     });
+
+    this.route('preferences', {
+        path: '/preferences',
+        template: 'preferences',
+        layoutTemplate: 'layout',
+        data: function() {
+            if (Meteor.user()) {
+                return preferences.findOne({ 'userId': Meteor.user().profile.email });
+            }
+        },
+    }, { where: 'client' });
 
     this.route('alertssummary', {
         path: '/alerts',
@@ -44,9 +55,9 @@ Router.map(function () {
         waitOn: function() {
             Session.set('alertID', this.params.alert_id);
             return Meteor.subscribe('alerts-details', Session.get('alertID'))
-            },
+        },
         data: function() {
-          return alerts.findOne({'esmetadata.id':Session.get('alertID')});
+            return alerts.findOne({ 'esmetadata.id': Session.get('alertID') });
         },
         layoutTemplate: 'layout'
     });
@@ -86,7 +97,7 @@ Router.map(function () {
         waitOn: function() {
             Session.set('investigationID', this.params._id);
             return Meteor.subscribe('investigation-details', Session.get('investigationID'))
-            },
+        },
         data: function() {
             return investigations.findOne(this.params._id);
         },
@@ -117,7 +128,7 @@ Router.map(function () {
         waitOn: function() {
             Session.set('incidentID', this.params._id);
             return Meteor.subscribe('incident-details', Session.get('incidentID'))
-            },
+        },
         data: function() {
             return incidents.findOne(this.params._id);
         },
@@ -138,9 +149,9 @@ Router.map(function () {
         waitOn: function() {
             Session.set('attackerID', this.params.attackerid);
             return Meteor.subscribe('attacker-details', Session.get('attackerID'))
-            },
+        },
         data: function() {
-          return attackers.findOne({'_id':Session.get('attackerID')});
+            return attackers.findOne({ '_id': Session.get('attackerID') });
         },
         layoutTemplate: 'layout'
     });
@@ -192,19 +203,19 @@ Router.map(function () {
         }
     });
 
-    this.route('ipintel',{
+    this.route('ipintel', {
         path: '/ipintel/:_ipaddress',
         template: 'ipintel',
-        data: function(){
-            Session.set('ipintelipaddress',this.params._ipaddress)
+        data: function() {
+            Session.set('ipintelipaddress', this.params._ipaddress)
         }
 
     });
 
-    this.route('veris',{
-       path: '/veris',
-       template:'veristags',
-       layoutTemplate: 'layout'
+    this.route('veris', {
+        path: '/veris',
+        template: 'veristags',
+        layoutTemplate: 'layout'
     });
 
 });
