@@ -53,6 +53,8 @@ import '/client/mozdefhealth.js';
 import '/client/nameplate.html';
 import '/client/nameplate.js';
 import '/client/verisTags.html';
+import '/client/preferences.html';
+import '/client/preferences.js'
 import '/client/router.js';
 import '/client/mozdef.js';
 
