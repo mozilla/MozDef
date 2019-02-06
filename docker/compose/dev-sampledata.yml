@@ -6,7 +6,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_sampledata/Dockerfile
     restart: always
-    command: bash -c '/opt/mozdef/envs/mozdef/examples/demo/sampleevents.sh'
+    command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && /opt/mozdef/envs/mozdef/examples/demo/sampleevents.sh'
     links:
       - elasticsearch
     depends_on:
