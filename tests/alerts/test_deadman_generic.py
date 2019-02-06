@@ -32,7 +32,7 @@ class TestDeadmanGeneric(AlertTestSuite):
         "category": "deadman",
         "tags": ['deadman'],
         "severity": "ERROR",
-        "summary": 'Deadman check failed for \'Basic deadman\'',
+        "summary": 'Deadman check failed for \'Sample Alert 1\' the past 5 minutes',
     }
     test_cases.append(
         PositiveAlertTestCase(
@@ -51,7 +51,7 @@ class TestDeadmanGeneric(AlertTestSuite):
         "category": "deadman",
         "tags": ['deadman'],
         "severity": "ERROR",
-        "summary": 'Deadman check failed for \'Another deadman\'',
+        "summary": 'Deadman check failed for \'Sample Alert 2\' the past 20 hours',
     }
     test_cases.append(
         PositiveAlertTestCase(
@@ -86,8 +86,8 @@ class TestDeadmanGeneric(AlertTestSuite):
         AlertTestSuite.create_event(matched_event_first),
         AlertTestSuite.create_event(matched_event_second)
     ]
-    events[1]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 21})
-    events[1]['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'minutes': 21})
+    events[1]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'hours': 21})
+    events[1]['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda(date_timedelta={'hours': 21})
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with events matching second alert configuration but are old",
