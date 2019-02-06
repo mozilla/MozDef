@@ -7,11 +7,10 @@ Copyright (c) 2014 Mozilla Corporation
 
 <head>
     <meta name="viewport" content="width=1024">
-    <link rel="shortcut icon" type="image/svg" href="/images/favicon.ico"/>
-    <link href="/css/mozdef.css" rel="stylesheet" media="screen,projection,tv">
-    <link href="/css/dropdowns.css" rel="stylesheet" media="screen,projection,tv">
-<title>mozdef::mozilla defense platform</title>
+    <link rel="shortcut icon" type="image/svg" href="/images/favicon.ico" />
+    <title>mozdef::mozilla defense platform</title>
 </head>
+
 <body>
 
 </body>
@@ -20,31 +19,31 @@ Copyright (c) 2014 Mozilla Corporation
 <template name="layout">
     {{> menu}}
 
-        {{#if loggingIn}}
-                <div class="row center">
-                    <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
-                       <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                       <strong>loading</strong>
-                   </div>
-                </div>
-        {{else}}
-            {{#if currentUser}}
-                {{>yield}}
-            {{else}}
-                <div class="row center">
-                    <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
-                       <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                       <strong>Please login</strong>
-                   </div>
-                </div>
-            {{/if}}
-        {{/if}}
+    {{#if loggingIn}}
+    <div class="row center">
+        <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <strong>loading</strong>
+        </div>
+    </div>
+    {{else}}
+    {{#if currentUser}}
+    {{>yield}}
+    {{else}}
+    <div class="row center">
+        <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <strong>Please login</strong>
+        </div>
+    </div>
+    {{/if}}
+    {{/if}}
 
-{{>whoismodal}}
-{{>dshieldmodal}}
-{{>blockIPModal}}
-{{>intelmodal}}
-{{>blockFQDNModal}}
+    {{>whoismodal}}
+    {{>dshieldmodal}}
+    {{>blockIPModal}}
+    {{>intelmodal}}
+    {{>blockFQDNModal}}
 
 </template>
 
