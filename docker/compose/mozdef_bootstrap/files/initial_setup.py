@@ -95,7 +95,7 @@ client.create_alias('events-previous', previous_event_index_name)
 
 if alert_index_name not in all_indices:
     print "Creating " + alert_index_name
-    client.create_index(alert_index_name)
+    client.create_index(alert_index_name, index_config=index_settings)
 client.create_alias('alerts', alert_index_name)
 
 if weekly_index_alias not in all_indices:
@@ -104,7 +104,7 @@ if weekly_index_alias not in all_indices:
 
 if kibana_index_name not in all_indices:
     print "Creating " + kibana_index_name
-    client.create_index(kibana_index_name)
+    client.create_index(kibana_index_name, index_config=index_settings)
 
 # Wait for .kibana index to be ready
 num_times = 0
