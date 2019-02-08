@@ -28,6 +28,7 @@ def sendEventToPlugins(anevent, metadata, pluginList):
 
     # expecting tuple of module,criteria,priority in pluginList
     # sort the plugin list by priority
+    executed_plugins = []
     for plugin in sorted(pluginList, key=itemgetter(2), reverse=False):
         # assume we don't run this event through the plugin
         send = False
@@ -46,11 +47,10 @@ def sendEventToPlugins(anevent, metadata, pluginList):
                 # plug-in is signalling to drop this message
                 # early exit
                 return (anevent, metadata)
-            # Tag the event stating that this plugin has run on it
-            if 'plugins' not in anevent:
-                anevent['plugins'] = []
             plugin_name = plugin[0].__module__.replace('plugins.', '')
-            anevent['plugins'].append(plugin_name)
+            executed_plugins.append(plugin_name)
+    # Tag all events with what plugins ran on it
+    anevent['plugins'] = executed_plugins
 
     return (anevent, metadata)
 
