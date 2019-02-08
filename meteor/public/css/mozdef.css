@@ -308,7 +308,7 @@ input[type="search"] {
 
 .center {
     margin: 0 auto;
-    float: nonefocus
+    float: none;
 }
 
 .table-striped tbody > tr:nth-child(odd) > td,
