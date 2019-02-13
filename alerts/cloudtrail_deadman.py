@@ -6,11 +6,11 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 
-from lib.alerttask import AlertTask
+from lib.deadman_alerttask import DeadmanAlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch
 
 
-class AlertCloudtrailDeadman(AlertTask):
+class AlertCloudtrailDeadman(DeadmanAlertTask):
     def main(self):
         search_query = SearchQuery(hours=1)
 

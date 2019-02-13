@@ -71,7 +71,8 @@ class TestEsworkerSNSSQS(UnitTestSuite):
             u'summary': u'DHCPREQUEST of 1.2.3.4 on eth0 to 5.6.7.8 port 67 (xid=0x123456)',
             u'tags': [u'example-logs-mozdef'],
             u'timestamp': u'2017-05-25T07:14:15+00:00',
-            u'utctimestamp': u'2017-05-25T07:14:15+00:00'
+            u'utctimestamp': u'2017-05-25T07:14:15+00:00',
+            u'plugins': []
         }
         self.search_and_verify_event(expected_event)
 
@@ -140,6 +141,7 @@ class TestEsworkerSNSSQS(UnitTestSuite):
             u'summary': u'UNKNOWN',
             u'tags': [u'example-logs-mozdef'],
             u'timestamp': u'2018-04-26T00:11:23.479771+00:00',
-            u'utctimestamp': u'2018-04-26T00:11:23.479771+00:00'
+            u'utctimestamp': u'2018-04-26T00:11:23.479771+00:00',
+            u'plugins': []
         }
         self.search_and_verify_event(expected_event)

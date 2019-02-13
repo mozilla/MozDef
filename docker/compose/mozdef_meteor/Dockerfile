@@ -16,6 +16,8 @@ RUN \
   mkdir -p /opt/mozdef/envs/mozdef && \
   cd /opt/mozdef && \
   chown -R mozdef:mozdef /opt/mozdef && \
+  curl -sL https://rpm.nodesource.com/setup_8.x | bash - && \
+  yum makecache fast && \
   yum install -y \
                 wget \
                 make \
@@ -24,11 +26,9 @@ RUN \
                 gcc-c++ \
                 libstdc++ \
                 libffi-devel \
-                zlib-devel
-
-RUN \
-    curl -sL https://rpm.nodesource.com/setup_8.x | bash - && \
-    yum -y install nodejs
+                zlib-devel \
+                nodejs && \
+  yum clean all
 
 RUN mkdir /opt/mozdef/meteor
 RUN curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz

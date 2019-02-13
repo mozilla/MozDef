@@ -28,12 +28,15 @@ def sendEventToPlugins(anevent, metadata, pluginList):
 
     # expecting tuple of module,criteria,priority in pluginList
     # sort the plugin list by priority
+    executed_plugins = []
     for plugin in sorted(pluginList, key=itemgetter(2), reverse=False):
         # assume we don't run this event through the plugin
         send = False
         if isinstance(plugin[1], list):
             try:
-                if (set(plugin[1]).intersection([e for e in dict2List(anevent)])):
+                plugin_matching_keys = set([item.lower() for item in plugin[1]])
+                event_tokens = [e for e in dict2List(anevent)]
+                if plugin_matching_keys.intersection(event_tokens):
                     send = True
             except TypeError:
                 logger.error('TypeError on set intersection for dict {0}'.format(anevent))
@@ -44,6 +47,10 @@ def sendEventToPlugins(anevent, metadata, pluginList):
                 # plug-in is signalling to drop this message
                 # early exit
                 return (anevent, metadata)
+            plugin_name = plugin[0].__module__.replace('plugins.', '')
+            executed_plugins.append(plugin_name)
+    # Tag all events with what plugins ran on it
+    anevent['plugins'] = executed_plugins
 
     return (anevent, metadata)
 
