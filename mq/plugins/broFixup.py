@@ -267,14 +267,14 @@ class message(object):
                     return (newmessage, metadata)
 
                 if logtype == 'ssh':
-                    if 'auth_success' not in newmessage['details']:
-                        newmessage['details'][u'auth_success'] = u'unknown'
-                    newmessage[u'summary'] = (
+                    summary = (
                         u'SSH: {sourceipaddress} -> '
                         u'{destinationipaddress}:'
-                        u'{destinationport} '
-                        u'success {auth_success}'
+                        u'{destinationport}'
                     ).format(**newmessage['details'])
+                    if 'auth_success' in newmessage['details']:
+                        summary += u' success {0}'.format(newmessage['details']['auth_success'])
+                    newmessage[u'summary'] = summary
                     return (newmessage, metadata)
 
                 if logtype == 'tunnel':

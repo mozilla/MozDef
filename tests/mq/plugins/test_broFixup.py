@@ -902,12 +902,68 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'auth_success' not in result['details']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'SSH: 63.245.214.162 -> 192.30.255.112:22'
+
+    def test_ssh_log_auth_true(self):
+        event = {
+            'category': 'bro',
+            'SOURCE': 'bro_ssh',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
+            "ts":1505703601.393284,
+            "id.orig_h":"63.245.214.162",
+            "id.orig_p":22418,
+            "id.resp_h":"192.30.255.112",
+            "id.resp_p":22,
+            "auth_success": True
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert 'auth_success' in result['details']
         for key in MESSAGE.keys():
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
-        assert result['summary'] == 'SSH: 63.245.214.162 -> 192.30.255.112:22 success unknown'
+        assert result['summary'] == 'SSH: 63.245.214.162 -> 192.30.255.112:22 success True'
+
+    def test_ssh_log_auth_false(self):
+        event = {
+            'category': 'bro',
+            'SOURCE': 'bro_ssh',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
+            "ts":1505703601.393284,
+            "id.orig_h":"63.245.214.162",
+            "id.orig_p":22418,
+            "id.resp_h":"192.30.255.112",
+            "id.resp_p":22,
+            "auth_success": False
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'auth_success' in result['details']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == 'SSH: 63.245.214.162 -> 192.30.255.112:22 success False'
 
     def test_tunnel_log(self):
         event = {
