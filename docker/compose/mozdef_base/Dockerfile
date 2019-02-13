@@ -22,6 +22,7 @@ RUN \
                     python \
                     python-devel \
                     python-pip && \
+  yum clean all && \
   pip install virtualenv && \
   mkdir /opt/mozdef/envs/mozdef && \
   mkdir /opt/mozdef/envs/mozdef/cron

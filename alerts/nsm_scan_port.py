@@ -18,7 +18,7 @@ class NSMScanPort(AlertTask):
         search_query = SearchQuery(minutes=2)
         search_query.add_must([
             TermMatch('category', 'bro'),
-            TermMatch('details.source', 'notice'),
+            TermMatch('source', 'notice'),
             PhraseMatch('details.note', 'Scan::Port_Scan'),
             QueryStringMatch('details.sourceipaddress: {}'.format(self._config['sourcemustmatch']))
         ])
