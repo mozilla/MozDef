@@ -15,7 +15,7 @@ class BulkQueueTest(UnitTestSuite):
         super(BulkQueueTest, self).setup()
 
     def num_objects_saved(self):
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
         search_query = SearchQuery()
         search_query.add_must(ExistsMatch('keyname'))
         results = search_query.execute(self.es_client)
