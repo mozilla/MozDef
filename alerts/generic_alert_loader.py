@@ -9,8 +9,9 @@
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch
+from mozdef_util.utilities.dot_dict import DotDict
+from mozdef_util.utilities.logger import logger
 import hjson
-import logging
 import sys
 import traceback
 import glob
@@ -54,23 +55,6 @@ from os.path import basename
         'alert_url': 'https://mozilla.org'
     }
 '''
-
-
-logger = logging.getLogger()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-
-class DotDict(dict):
-    '''dict.item notation for dict()'s'''
-    __getattr__ = dict.__getitem__
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __init__(self, dct):
-        for key, value in dct.items():
-            if hasattr(value, 'keys'):
-                value = DotDict(value)
-            self[key] = value
 
 
 class AlertGenericLoader(AlertTask):
