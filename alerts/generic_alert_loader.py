@@ -15,6 +15,7 @@ import sys
 import traceback
 import glob
 import os
+from os.path import basename
 
 # Minimum data needed for an alert (this is an example alert json)
 '''
@@ -103,11 +104,16 @@ class AlertGenericLoader(AlertTask):
                 try:
                     cfg = DotDict(hjson.load(fd))
                     self.validate_alert(cfg)
+                    # We set the alert name to the filename (excluding .json)
+                    alert_name = basename(f).replace('.json', '')
+                    cfg['custom_alert_name'] = alert_name
                     self.configs.append(cfg)
                 except Exception:
                     logger.error("Loading rule file {} failed".format(f))
 
     def process_alert(self, alert_config):
+        # Set instance variable to populate event attributes about an alert
+        self.custom_alert_name = "{0}:{1}".format(self.classname(), alert_config['custom_alert_name'])
         search_query = SearchQuery(minutes=int(alert_config.time_window))
         terms = []
         for i in alert_config.filters:
