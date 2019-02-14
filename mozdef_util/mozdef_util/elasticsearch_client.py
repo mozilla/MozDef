@@ -88,6 +88,9 @@ class ElasticsearchClient():
     def flush(self, index_name):
         self.es_connection.indices.flush(index=index_name)
 
+    def refresh(self, index_name):
+        self.es_connection.indices.refresh(index=index_name)
+
     def search(self, search_query, indices, size, request_timeout):
         results = []
         try:

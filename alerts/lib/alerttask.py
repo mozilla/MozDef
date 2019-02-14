@@ -453,6 +453,8 @@ class AlertTask(Task):
                 event['_source']['alert_names'].append(self.determine_alert_classname())
 
                 self.es.save_event(index=event['_index'], doc_type=event['_type'], body=event['_source'], doc_id=event['_id'])
+            # We refresh here to ensure our changes to the events will show up for the next search query results
+            self.es.refresh(event['_index'])
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 
