@@ -8,7 +8,24 @@ Copyright (c) 2014 Mozilla Corporation
 /*base css */
 @import url('https://fonts.googleapis.com/css?family=Zilla+Slab+Highlight');
 @import url('https://fonts.googleapis.com/css?family=Zilla+Slab');
-@import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+@import url('https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css');
+
+:root {
+  --primary-bg-color: #2a2f35;
+  --secondary-focus-color: #3b89ee;
+  --secondary-color: #2d5fa0;
+  --row-color-odd: #2a2f35;
+  --row-color-even: #636c85;
+  --ack-edit-color: #a2a9b2;
+  --ack-edit-border-color: #adadad;
+  --ack-edit-focus-color: #557750;
+  --ack-edit-disabled-color: #557750;
+  --arm-color: #e69006;
+  --arm-focus-color: #d58512;
+  --font-main: #fff;
+  --font-focus: #000;
+  --a-link-color: #a2a9b2;
+}
 
 html{
 	background: none;
@@ -18,18 +35,18 @@ html{
 body{
 	/*gradient*/
 
-    background: rgb(81,76,99); /* Old browsers */
-    background: -moz-radial-gradient(ellipse, rgb(142, 147, 153) 0%, rgb(79, 74, 76) 100%); /* FF3.6+ */
-    background: -webkit-radial-gradient(ellipse, rgb(142, 147, 153) 0%, rgb(79, 74, 76) 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-radial-gradient(ellipse, rgba(142, 147, 153) 0%, rgba(79, 74, 76) 100%); /* Opera 11.10+ */
-    background: radial-gradient(ellipse, rgb(142, 147, 153) 0%, rgb(79, 74, 76) 100%); /* W3C */
-    filter: 'progid:DXImageTransform.Microsoft.gradient(startColorstr="#b1b1b3",endColorstr="#8a8a8d",GradientType=1)'; /* IE6-9 fallback on horizontal gradient */
+    background: rgb(42, 47, 53); /* Old browsers */
+    background: -moz-radial-gradient(ellipse, rgb(99, 108, 118) 0%, rgb(42, 47, 53) 100%); /* FF3.6+ */
+    background: -webkit-radial-gradient(ellipse, rgb(99, 108, 118) 0%, rgb(42, 47, 53) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-radial-gradient(ellipse, rgba(99, 108, 118, 1) 0%, rgb(42, 47, 53) 100%); /* Opera 11.10+ */
+    background: radial-gradient(ellipse, rgb(99, 108, 118) 0%, rgb(42, 47, 53) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#636c76",endColorstr="#2a2f35",GradientType=1); /* IE6-9 fallback on horizontal gradient */
 
     font-size: 14px;
     /*margin: 0;*/
     /*min-width: 990px;*/
     padding: 0;
-    color: #000;
+    color: var(--font-main);
     line-height: normal;
     text-align: left;
 }
@@ -40,12 +57,12 @@ body{
 
 /*mozdef custom */
 .upperwhite {
-    color: #FFF;
+    color: var(--font-main);
     text-transform: uppercase;
 }
 
 caption, legend {
-    color: #FFF;
+    color: var(--font-main);
 }
 
 .shadow {
@@ -53,7 +70,7 @@ caption, legend {
 }
 
 .ipaddress {
-  color: #FFF;
+  color: var(--font-main);
   font-style: normal;
   font-weight: normal;
 
@@ -75,7 +92,7 @@ caption, legend {
 }
 
 #bottom-toolbar {
-  background: #444444;
+  background: #636c76;
   width: 100%;
   height: 40px;
   padding-left: 5px;
@@ -84,7 +101,7 @@ caption, legend {
   bottom: 0;
   z-index: 2;
   font-size: 13px;
-  color: #fff;
+  color: var(--font-main);
 }
 
 #bottom-toolbar .button {
@@ -122,11 +139,15 @@ caption, legend {
     width: 120px;
     height: 160px;
     box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
+    opacity: .5;
+    background: black;
     border: 1px solid rgba(127,255,255,0.25);
     text-align: center;
     cursor: default;
     z-index: 99;
 }
+
+
 
 .attackercallout .id {
     font-size: 12px;
@@ -199,7 +220,7 @@ caption, legend {
 }
 
 .alert-row a{
-    color: wheat;
+    color: var(--a-link-color);
 }
 
 .row {
@@ -214,13 +235,70 @@ caption, legend {
 .btn {
   border: 1px outset;
   border-radius: 4px;
+  color: var(--font-main);
+  background-color: var(--arm-color);
 }
 
+.btn-warning.active,
+.btn-warning:active,
+.btn-warning:hover,
+.open > .dropdown-toggle.btn-warning {
+  color: var(--font-focus);
+  background-color: var(--arm-focus-color);
+  border-color: var(--arm-color);
+}
+
+.btn-notice {
+  border: 1px outset;
+  border-radius: 4px;
+  color: var(--font-focus);
+  background-color: var(--ack-edit-color);
+}
+
+.btn-notice.active,
+.btn-notice:active,
+.btn-notice:hover,
+.open > .dropdown-toggle.btn-notice {
+  color: var(--font-main);
+  background-color: var(--ack-edit-focus-color);
+  border-color: var(--ack-edit-border-color);
+}
+
+.btn-notice:disabled, button[disabled] {
+  color: var(--font-main);
+  background-color: var(--ack-edit-disabled-color);
+  border-color: var(--ack-edit-border-color);
+}
+
+.btn-generic {
+  border: 1px outset;
+  border-radius: 4px;
+  color: var(--font-focus);
+  background-color: var(--ack-edit-color);
+}
+
+.btn-generic:focus {
+  color: var(--font-main);
+  background-color: #286090;
+  border-color: #204d74;
+}
+
+.btn-generic.active,
+.btn-generic:active,
+.btn-genric:hover,
+.open > .dropdown-toggle.btn-generic {
+  color: var(--font-focus);
+  background-color: var(--ack-edit-focus-color);
+  border-color: var(--ack-edit-border-color);
+}
+
+.btn-primary {
+  height: 30px;
+}
 
 input[type="search"] {
   border-radius: 15px;
 }
-
 
 [class*="span"].centerspan {
     margin: 0 auto;
@@ -234,18 +312,23 @@ input[type="search"] {
 
 .table-striped tbody > tr:nth-child(odd) > td,
 .table-striped tbody > tr:nth-child(odd) > th {
-  background-color: rgba(79, 74, 76, 0.7);
+  background-color: var(--row-color-odd);
+}
+
+.table-striped > tbody > tr:nth-of-type(2n+1) {
+  background-color: var(--row-color-even);
 }
 
 .table-hover tbody tr:hover > td,
-.table-hover tbody tr:hover > th {
-  background-color: rgba(79, 74, 76, 0.3);
+.table-hover tbody tr:hover > th,
+.table-hover > tbody > tr:hover {
+  background-color: #9a9ea5;
+  color: var(--font-focus);
 }
 
 td{
-  color:white;
+  color: var(--font-main);
 }
-
 
 .welcome {
     text-align: center;
@@ -256,7 +339,7 @@ td{
 }
 
 .tabnav a{
-    color: wheat;
+    color: #5f6e81;
 }
 
 /* uncomment this login ui css to hide the local account/password signup options
@@ -303,17 +386,17 @@ td{
 }
 
 circle:hover{
-  fill: white;
+  fill: var(--font-main);
 }
 
 .node {
-    stroke: black;
+    stroke: var(--font-focus);
     stroke-width: 1.5px;
 }
 
 .textlabel{
     stroke-width: .2px;
-    stroke: black;
+    stroke: var(--font-focus);
 }
 
 .vtagholders {
@@ -327,7 +410,7 @@ circle:hover{
 }
 
 #header a.mozdef{
-    color:white;
+    color: var(--font-main);
     text-shadow: #000 5px 3px 3px;
     text-align: center;
     font-size: large;
@@ -348,18 +431,18 @@ circle:hover{
     cursor: pointer;
 }
 
-.fa-2x {
-  font-size: 2em;
+.fa-xs {
+  font-size: .75em;
 }
 
-.fa {
+.fa-lg {
   position: relative;
   display: table-cell;
   width: 60px;
   height: 36px;
   text-align: center;
   vertical-align: middle;
-  font-size: 20px;
+  font-size: 1.33333em;
 }
 
 .moz {
@@ -379,8 +462,8 @@ nav.main-menu.expanded {
 }
 
 .main-menu {
-  background: #4f4a4c;
-  border-right: 1px solid #e5e5e5;
+  background: var(--primary-bg-color);
+  border-right: 1px solid var(--secondary-color);
   position: fixed;
   top: 0;
   bottom: 0;
@@ -414,7 +497,8 @@ nav.main-menu li.active>a,
 .no-touch .dashboard-page nav.dashboard-menu ul li:hover a,
 .dashboard-page nav.dashboard-menu ul li.active a {
   color: rgb(0, 0, 0);
-  background-color: #97b4b4;
+  text-decoration: none;
+  background-color: var(--secondary-focus-color);
 }
 
 .main-menu li ul,
@@ -423,7 +507,7 @@ nav.main-menu li.active>a,
   height: auto;
   min-width: 120px;
   margin: 0;
-  background: #4f4a4c;
+  background: var(--primary-bg-color);
   opacity: 0;
   visibility: hidden;
   transition: all 300ms linear;
@@ -436,7 +520,7 @@ nav.main-menu li.active>a,
   /* == */
   left:200px;
   top: 0px;
-  border-left: 5px solid #97b4b4;
+  border-left: 5px solid var(--secondary-focus-color);
   /* == */
 }
 
@@ -451,7 +535,7 @@ nav.main-menu li.active>a,
   /* == */
   top: 10px;
   left: -9px;
-  border-right: 5px solid #97b4b4;
+  border-right: 5px solid var(--secondary-focus-color);
   border-bottom: 5px solid transparent;
   border-top: 5px solid transparent;
   /* == */
@@ -466,6 +550,7 @@ nav.main-menu li.active>a,
   /*top: 100px;*/
   /* == */
   left:228px;
+  text-decoration: none;
   /* == */
 }
 
@@ -493,7 +578,7 @@ nav.main-menu li.active>a,
   left: 200px;
   top: 0;
   border: 0;
-  border-left: 4px solid #97b4b4;
+  border-left: 4px solid var(--secondary-color);
 }
 
 .main-menu li ul li ul:before {
@@ -504,7 +589,7 @@ nav.main-menu li.active>a,
   /* == */
   left: -9px;
   /* == */
-  border-right: 5px solid #97b4b4;
+  border-right: 5px solid var(--secondary-color);
   border-bottom: 5px solid transparent;
   border-top: 5px solid transparent;
 }
@@ -579,26 +664,6 @@ nav li {
   outline: 0;
   margin: 0;
   padding: 0;
-}
-
-/*.sub-nav-content {
-    cursor:auto;
-    color:#000;
-    background-color:#fff;
-    display:none;
-    position:absolute;
-    min-width:100px;
-    margin:0;
-    padding:0;
-    z-index:1
-}
-*/
-
-.area {
-  float: left;
-  background: #e2e2e2;
-  width: 100%;
-  height: 100%;
 }
 
 @font-face {

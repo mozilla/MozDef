@@ -14,9 +14,8 @@ sidenav
     right: -25em;
     top: 0;
     bottom: 0;
-    /*background-color: #654;*/
-    background-color: #444444;
-    border-left: 15px solid #765;
+    background-color: #22262f;
+    border-left: 15px solid var(--secondary-color);
     box-shadow: 4px 0 5px rgba(0,0,0,0.2);
     z-index: 1;
 
@@ -27,6 +26,7 @@ sidenav
     height: 100%;
     margin: 0em;
     line-height: normal;
+    padding-top: 10px;
 }
 
 /*pull out triangle*/
@@ -38,9 +38,9 @@ sidenav:after
     height: 0;
     right: 342px;
     top: 50%;
-    border-top: 30px solid transparent;
-    border-bottom: 30px solid transparent;
-    border-right: 30px solid #765;
+    border-top: 45px solid transparent;
+    border-bottom: 45px solid transparent;
+    border-right: 45px solid var(--secondary-color);
 }
 
 sidenav ul
@@ -106,12 +106,12 @@ sidenav
         </div>
         <div class="form-group">
             <div class="col-xs-8 col-xs-offset-2">
-                <button class="btn btn-xs attackerssearch">search</button>
+                <button class="btn-generic btn-primary btn-xs attackerssearch">search</button>
             </div>
         </div>
     </form>
     <div class="row reset-filter">
-        <button id="btnResetFilter" class="btn">Reset Filters</button>
+        <button id="btnResetFilter" class="btn-generic btn-primary">Reset Filters</button>
     </div>
     <div class="col-md-6 filters-col">
           <div class="row">
@@ -135,8 +135,8 @@ sidenav
     <div id="bottom-toolbar">
         <center>
         <ul class="list-inline">
-            <li><button id="btnReset" class="btn btn-primary">Reset Layout</button></li>
-            <li><button id="btnWireFrame" class="btn btn-primary">WireFrame</button></li>
+            <li><button id="btnReset" class="btn-generic btn-primary">Reset Layout</button></li>
+            <li><button id="btnWireFrame" class="btn-generic btn-primary">WireFrame</button></li>
         </ul>
         </center>
     </div>

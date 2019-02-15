@@ -8,7 +8,7 @@ Copyright (c) 2014 Mozilla Corporation
 <template name="alertssummary">
 <div class="container">
     <div class="row col-xs-10">
-        <div class="col-xs-1"><button class="btn btn-default btn-xs" data-toggle="collapse" data-target="#alertSearch">search</button></div>
+        <div class="col-xs-1"><button class="btn-notice btn-default btn-xs" data-toggle="collapse" data-target="#alertSearch">search</button></div>
         <div class="col-xs-9">
             <div id='alertSearch' class="collapse">
                 <form class="form-horizontal">
@@ -45,7 +45,7 @@ Copyright (c) 2014 Mozilla Corporation
                     </div>
                     <div class="form-group">
                         <div class="col-xs-8 col-xs-offset-2">
-                            <button class="btn btn-default btn-xs alertssearch">search</button>
+                            <button class="btn-notice btn-default btn-xs alertssearch">search</button>
                         </div>
 
                     </div>
@@ -62,7 +62,7 @@ Copyright (c) 2014 Mozilla Corporation
             <div id="ringChart-severity" class="col-xs-3 text-center"><h5 class="upperwhite" id="Severity">Severity: <span class="filter"></span></h5></div>
     </div>
     <div class="row col-xs-10">
-        <div class="col-xs-1"><button class="btn btn-default btn-xs reset">reset filters</button></div>
+        <div class="col-xs-1"><button class="btn-notice btn-default btn-xs reset">reset filters</button></div>
         <div class="col-xs-4 record-count">
             <span id="displayCount"></span>{{displayedAlerts}} displayed/total: <span id="totalAlerts">{{totalAlerts}}</span>
         </div>
@@ -106,10 +106,10 @@ Copyright (c) 2014 Mozilla Corporation
         <td>
             {{#if acknowledged}}
                 <span class="tooltip-wrapper" title="Ack by: {{acknowledgedby}}" data-toggle="tooltip">
-                    <button class="btn btn-xs btn-warning btnAlertAck" disabled data-target="{{_id}}">acked</button>
+                    <button class="btn-notice btn-xs btn-warning btnAlertAck" disabled data-target="{{_id}}">acked</button>
                 </span>
             {{else}}
-                <button class="btn btn-xs btn-warning btnAlertAck" data-target="{{_id}}">ack</button>
+                <button class="btn-notice btn-xs btn-warning btnAlertAck" data-target="{{_id}}">ack</button>
             {{/if}}
         </td>
     </tr>
