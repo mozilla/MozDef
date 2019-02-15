@@ -225,17 +225,17 @@ class message(object):
         try:
             for i in request.json:
                 # were we checked?
-                if self.name in i.keys():
+                if self.name in i:
                     blockip = i.values()[0]
-                if 'ipaddress' in i.keys():
+                if 'ipaddress' in i:
                     ipaddress = i.values()[0]
-                if 'duration' in i.keys():
+                if 'duration' in i:
                     duration = i.values()[0]
-                if 'comment' in i.keys():
+                if 'comment' in i:
                     comment = i.values()[0]
-                if 'referenceid' in i.keys():
+                if 'referenceid' in i:
                     referenceID = i.values()[0]
-                if 'userid' in i.keys():
+                if 'userid' in i:
                     userid = i.values()[0]
 
             if blockip and ipaddress is not None:

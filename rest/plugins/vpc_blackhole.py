@@ -165,9 +165,9 @@ class message(object):
         try:
             for i in request.json:
                 # were we checked?
-                if self.name in i.keys():
+                if self.name in i:
                     sendToBHVPC = i.values()[0]
-                if 'ipaddress' in i.keys():
+                if 'ipaddress' in i:
                     ipaddress = i.values()[0]
 
             # are we configured?

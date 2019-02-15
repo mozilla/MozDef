@@ -68,7 +68,7 @@ class AlertConsumer(ConsumerMixin):
             # process valid message
             # see where we send this alert
             channel = options.default_alert_channel
-            if 'ircchannel' in body_dict.keys():
+            if 'ircchannel' in body_dict:
                 if body_dict['ircchannel'] in options.channels:
                     channel = body_dict['ircchannel']
 
