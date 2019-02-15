@@ -119,6 +119,24 @@ class TestNoResultsFound(ElasticsearchClientTest):
         results = search_query.execute(self.es_client)
         assert results['hits'] == []
 
+class TestCloseIndex(ElasticsearchClientTest):
+
+    def test_index_close(self):
+        if pytest.config.option.delete_indexes:
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        indices = self.es_client.index_close('test_index')
+        assert indices is True
+
+class TestOpenIndex(ElasticsearchClientTest):
+
+    def test_index_open(self):
+        if pytest.config.option.delete_indexes:
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        self.es_client.index_close('test_index')
+        indices = self.es_client.index_open('test_index')
+        assert indices is True
 
 class TestWithBadIndex(ElasticsearchClientTest):
 
