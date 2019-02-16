@@ -142,7 +142,7 @@ def init_config():
     # queue name
     options.queue_name = get_config(
         'alertqueuename',
-        '',
+        'alertBot',
         options.configfile)
 
     # queue topic

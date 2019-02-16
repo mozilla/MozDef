@@ -8,11 +8,11 @@
 # a collection of alerts looking for the lack of events
 # to alert on a dead input source.
 
-from lib.alerttask import AlertTask
+from lib.deadman_alerttask import DeadmanAlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 
-class broNSM(AlertTask):
+class broNSM(DeadmanAlertTask):
     def main(self):
         self.parse_config('deadman.conf', ['url', 'hosts'])
 
