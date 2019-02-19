@@ -119,6 +119,7 @@ class TestNoResultsFound(ElasticsearchClientTest):
         results = search_query.execute(self.es_client)
         assert results['hits'] == []
 
+
 class TestCloseIndex(ElasticsearchClientTest):
 
     def test_index_close(self):
@@ -127,6 +128,7 @@ class TestCloseIndex(ElasticsearchClientTest):
         time.sleep(1)
         indices = self.es_client.index_close('test_index')
         assert indices is True
+
 
 class TestOpenIndex(ElasticsearchClientTest):
 
@@ -137,6 +139,7 @@ class TestOpenIndex(ElasticsearchClientTest):
         self.es_client.index_close('test_index')
         indices = self.es_client.index_open('test_index')
         assert indices is True
+
 
 class TestWithBadIndex(ElasticsearchClientTest):
 

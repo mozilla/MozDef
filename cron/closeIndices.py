@@ -16,8 +16,6 @@ import logging
 from datetime import datetime, date, timedelta
 from configlib import getConfig, OptionParser
 
-import sys
-import os
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
@@ -25,6 +23,7 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient
 logger = logging.getLogger(sys.argv[0])
 logger.level=logging.WARNING
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+
 
 def esCloseIndices():
     if options.output == 'syslog':
@@ -41,7 +40,6 @@ def esCloseIndices():
         indices = es.get_indices()
         print(indices)
         # calc dates for use in index names events-YYYYMMDD, alerts-YYYYMM, etc.
-        odate_day = date.strftime(toUTC(datetime.now()) - timedelta(days=int(options.index_age)), '%Y%m%d')
         odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=int(options.index_age)), '%Y%m')
         # examine each index in the .conf file
         # for rotation settings
@@ -55,7 +53,7 @@ def esCloseIndices():
                 else:
                     index_to_close = index
                     print "Index: %s will be closed." % (index_to_close)
-                    #es.index_close(index_to_close)
+                    es.index_close(index_to_close)
                     options.index_age = int(options.index_age) + 1
     except Exception as e:
         logger.error("Unhandled exception while closing %s, terminating: %r" % (index_to_close, e))
@@ -64,30 +62,30 @@ def esCloseIndices():
 def initConfig():
     # output our log to stdout or syslog
     options.output = getConfig(
-        'output',
-        'stdout',
-        options.configfile
-        )
+                               'output',
+                               'stdout',
+                               options.configfile
+                               )
     # syslog hostname
     options.sysloghostname = getConfig(
-        'sysloghostname',
-        'localhost',
-        options.configfile
-        )
+                                       'sysloghostname',
+                                       'localhost',
+                                       options.configfile
+                                       )
     options.syslogport = getConfig(
-        'syslogport',
-        514,
-        options.configfile
-        )
+                                   'syslogport',
+                                   514,
+                                   options.configfile
+                                   )
     options.esservers = list(getConfig(
-        'esservers',
-        'http://localhost:9200',
-        options.configfile).split(',')
-        )
+                                       'esservers',
+                                       'http://localhost:9200',
+                                       options.configfile).split(',')
+                                       )
     options.index_age = getConfig(
-        'index_age',
-        '15',
-        options.configfile)
+                                  'index_age',
+                                  '15',
+                                  options.configfile)
 
 
 if __name__ == '__main__':
