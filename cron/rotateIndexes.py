@@ -86,6 +86,12 @@ def esRotateIndexes():
                                     "mapping.total_fields.limit": options.mapping_total_fields_limit
                                 }
                             }
+                        elif 'alerts' in newindex:
+                            index_settings = {
+                                "index": {
+                                    "number_of_shards": 1
+                                }
+                            }
                         default_mapping_contents['settings'] = index_settings
                         logger.debug('Creating %s index' % newindex)
                         es.create_index(newindex, default_mapping_contents)
