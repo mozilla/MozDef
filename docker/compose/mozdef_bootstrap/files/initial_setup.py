@@ -71,7 +71,7 @@ slowlog_threshold_query_warn = getConfig('slowlog_threshold_query_warn', '5s', a
 slowlog_threshold_fetch_warn = getConfig('slowlog_threshold_fetch_warn', '5s', args.backup_conf_file)
 mapping_total_fields_limit = getConfig('mapping_total_fields_limit', '1000', args.backup_conf_file)
 
-index_settings['settings'] = {
+index_options = {
     "index": {
         "refresh_interval": refresh_interval,
         "number_of_shards": number_of_shards,
@@ -81,6 +81,7 @@ index_settings['settings'] = {
         "mapping.total_fields.limit": mapping_total_fields_limit
     }
 }
+index_settings['settings'] = index_options
 
 # Create initial indices
 if event_index_name not in all_indices:
@@ -104,7 +105,7 @@ if weekly_index_alias not in all_indices:
 
 if kibana_index_name not in all_indices:
     print "Creating " + kibana_index_name
-    client.create_index(kibana_index_name, index_config=index_settings)
+    client.create_index(kibana_index_name, index_config={"settings": index_options})
 
 # Wait for .kibana index to be ready
 num_times = 0
