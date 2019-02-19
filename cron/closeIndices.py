@@ -15,6 +15,7 @@ import sys
 import logging
 from datetime import datetime, date, timedelta
 from configlib import getConfig, OptionParser
+from logging.handlers import SysLogHandler
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
