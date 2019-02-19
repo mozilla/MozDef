@@ -31,23 +31,26 @@ class PluginSet(object):
                 # this allows us to specify no specific plugins and get all of them
                 continue
 
-            module_obj = pynsive.import_module(found_module)
-            reload(module_obj)
-            plugin_class_obj = module_obj.message()
+            try:
+                module_obj = pynsive.import_module(found_module)
+                reload(module_obj)
+                plugin_class_obj = module_obj.message()
 
-            if 'priority' in dir(plugin_class_obj):
-                priority = plugin_class_obj.priority
-            else:
-                priority = 100
+                if 'priority' in dir(plugin_class_obj):
+                    priority = plugin_class_obj.priority
+                else:
+                    priority = 100
 
-            logger.info('[*] plugin {0} registered to receive messages with {1}'.format(module_name, plugin_class_obj.registration))
-            plugins.append(
-                {
-                    'plugin_class': plugin_class_obj,
-                    'registration': plugin_class_obj.registration,
-                    'priority': priority
-                }
-            )
+                logger.info('[*] plugin {0} registered to receive messages with {1}'.format(module_name, plugin_class_obj.registration))
+                plugins.append(
+                    {
+                        'plugin_class': plugin_class_obj,
+                        'registration': plugin_class_obj.registration,
+                        'priority': priority
+                    }
+                )
+            except Exception as e:
+                logger.exception('Received exception when loading {0} plugins\n{1}'.format(module_name, e.message))
         return plugins
 
     @property
@@ -80,7 +83,7 @@ class PluginSet(object):
                 try:
                     (message, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message, metadata=metadata)
                 except Exception as e:
-                    logger.error('Received exception in {0}: message: {1}\n{2}'.format(plugin['plugin_class'], message, e.message))
+                    logger.exception('Received exception in {0}: message: {1}\n{2}'.format(plugin['plugin_class'], message, e.message))
                 if message is None:
                     return (message, metadata)
         return (message, metadata)
