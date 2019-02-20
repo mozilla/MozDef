@@ -2,6 +2,7 @@ import random
 import sys
 import os
 import time
+import websocket
 
 from slackclient import SlackClient
 
@@ -94,11 +95,15 @@ class SlackBot():
 
     def listen_for_messages(self):
         while True:
-            for slack_message in self.slack_client.rtm_read():
-                message_type = slack_message.get('type')
-                if message_type == 'desktop_notification':
-                    logger.info("Received message: {0}".format(slack_message['content']))
-                    self.handle_message(slack_message)
+            try:
+                for slack_message in self.slack_client.rtm_read():
+                    message_type = slack_message.get('type')
+                    if message_type == 'desktop_notification':
+                        logger.info("Received message: {0}".format(slack_message['content']))
+                        self.handle_message(slack_message)
+            except websocket.WebSocketConnectionClosedException:
+                logger.info("Received WebSocketConnectionClosedException exception...reconnecting")
+                time.sleep(3)
             time.sleep(1)
 
     def post_thread_message(self, text, channel, thread_ts):
