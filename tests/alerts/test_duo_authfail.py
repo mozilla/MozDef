@@ -22,7 +22,7 @@ class TestAlertDuoAuthFail(AlertTestSuite):
             "details": {
                 "sourceipaddress": "1.2.3.4",
                 "username": "you@somewhere.com",
-                "result": "FRAUD",
+                "result": "fraud",
             }
         }
     }
