@@ -12,28 +12,28 @@ from mozdef_util.query_models import QueryStringMatch, SearchQuery, TermMatch
 
 class AlertProxyDropExecutable(AlertTask):
     def main(self):
-        self.parse_config('proxy_drop_executable.conf', ['extensions'])
+        self.parse_config("proxy_drop_executable.conf", ["extensions"])
 
         search_query = SearchQuery(minutes=20)
 
-        search_query.add_must([
-            TermMatch('category', 'squid'),
-            TermMatch('tags', 'squid'),
-            TermMatch('details.proxyaction', 'TCP_DENIED/-')
-        ])
+        search_query.add_must(
+            [
+                TermMatch("category", "proxy"),
+                TermMatch("details.proxyaction", "TCP_DENIED"),
+            ]
+        )
 
         # Only notify on certain file extensions from config
-        filename_regex = "/.*\.({0})/".format(
-            self.config.extensions.replace(',', '|'))
-        search_query.add_must([
-            QueryStringMatch('details.destination: {}'.format(filename_regex))
-        ])
+        filename_regex = "/.*\.({0})/".format(self.config.extensions.replace(",", "|"))
+        search_query.add_must(
+            [QueryStringMatch("details.destination: {}".format(filename_regex))]
+        )
 
         self.filtersManual(search_query)
 
         # Search aggregations on field 'hostname', keep X samples of
         # events at most
-        self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
+        self.searchEventsAggregated("details.sourceipaddress", samplesLimit=10)
         # alert when >= X matching events in an aggregation
         # I think it makes sense to alert every time here
         self.walkAggregations(threshold=1)
@@ -43,18 +43,17 @@ class AlertProxyDropExecutable(AlertTask):
         # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
         # aggreg['value']: value of the aggregation field, ex: toto@example.com
         # aggreg['events']: list of events in the aggregation
-        category = 'squid'
-        tags = ['squid', 'proxy']
-        severity = 'WARNING'
+        category = "squid"
+        tags = ["squid", "proxy"]
+        severity = "WARNING"
 
         dropped_urls = set()
-        for event in aggreg['allevents']:
-            dropped_urls.add(event['_source']['details']['destination'])
+        for event in aggreg["allevents"]:
+            dropped_urls.add(event["_source"]["details"]["destination"])
 
-        summary = 'Suspicious Proxy DROP event(s) detected from {0} to the following executable file destination(s): {1}'.format(
-            aggreg['value'],
-            ",".join(sorted(dropped_urls))
+        summary = "Suspicious Proxy DROP event(s) detected from {0} to the following executable file destination(s): {1}".format(
+            aggreg["value"], ",".join(sorted(dropped_urls))
         )
 
         # Create the alert object based on these properties
-        return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+        return self.createAlertDict(summary, category, tags, aggreg["events"], severity)
