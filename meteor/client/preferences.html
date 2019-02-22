@@ -2,6 +2,7 @@
     <div class="container">
         <div id="preferences">
             <div class="row col-xs-12">
+                <p><span class="col-xs-offset-3" id="saveMessage"></span><br></p>
                 <div class="col-xs-9">
                     <form id="preferences" class="form-horizontal  col-xs-10 col-xs-offset-2">
                         <div class="form-group">
@@ -18,14 +19,16 @@
                                 <i class="fa fa-info-circle" data-toggle="tooltip" title="Your email"></i>
                             </label>
                             <div class="col-xs-10">
-                                <input id="email" name="email" placeholder="someone@email.com :id" class="contact form-control"
-                                    disabled type="text" value="{{currentUser.profile.email}}">
+                                <input id="email" name="email" placeholder="someone@email.com :id"
+                                    class="contact form-control" disabled type="text"
+                                    value="{{currentUser.profile.email}}">
                             </div>
                         </div>
                         <!-- Theme -->
                         <div class="form-group">
                             <label class="col-xs-2 control-label" for="theme">Theme:
-                                <i class="fa fa-info-circle" data-toggle="tooltip" title="The Look and Feel you prefer"></i>
+                                <i class="fa fa-info-circle" data-toggle="tooltip"
+                                    title="The Look and Feel you prefer"></i>
                             </label>
                             <div class="col-xs-10">
                                 <select id="theme" name="theme" class="form-control">
@@ -36,7 +39,7 @@
                             </div>
                         </div>
                     </form>
-                    <span class="col-xs-offset-2 col-xs-5" id="saveMessage"></span>
+
                 </div>
             </div>
         </div>
