@@ -28,6 +28,13 @@ class AlertProxyDropIP(AlertTask):
         search_query.add_must(
             [QueryStringMatch("details.destination: {}".format(ip_regex))]
         )
+        https: // www.programcreek.com / python / example / 57082 / netaddr.IPNetwork
+        >>> ip = ipaddr.IPAddress("onet.pl")
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/Users/michalpurzynski/.pyenv/versions/mozdef/lib/python2.7/site-packages/ipaddr.py", line 78, in IPAddress
+    address)
+ValueError: 'onet.pl' does not appear to be an IPv4 or IPv6 address
 
         self.filtersManual(search_query)
         self.searchEventsAggregated("details.sourceipaddress", samplesLimit=10)
