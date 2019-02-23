@@ -378,7 +378,7 @@ circle:hover{
 #nav-main li.hover a,
 #nav-main li.hover a:link,
 #nav-main li.hover a:visited {
-    padding-bottom: 28px;
+    padding-bottom: 27px;
     outline: 0px none;
     background-color:#eee;
     box-shadow: none;
