@@ -482,6 +482,8 @@ if ( Meteor.isClient ) {
                     console.log( 'client found preferences', preferenceRecord );
                     if ( preferenceRecord.theme == 'Dark' ) {
                         require( '/imports/themes/dark/mozdef.css' );
+                    } else if ( preferenceRecord.theme == 'Light' ) {
+                        require( '/imports/themes/light/mozdef.css' )
                     } else {
                         require( '/imports/themes/classic/mozdef.css' );
                     }
