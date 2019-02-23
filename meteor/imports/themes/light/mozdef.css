@@ -311,7 +311,7 @@ circle:hover{
 
 #header a.mozdef{
     color:black;
-    text-shadow: #000 5px 3px 3px;
+    text-shadow: #aaa 3px 2px 2px;
     text-align: center;
     font-size: large;
     margin-top: -.25em;
