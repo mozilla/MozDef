@@ -99,9 +99,14 @@ caption, legend {
   padding-top: 5px;
   position: fixed;
   bottom: 0;
+  opacity: .3;
   z-index: 2;
   font-size: 13px;
   color: var(--font-main);
+}
+
+#bottom-toolbar:hover {
+  opacity: 1;
 }
 
 #bottom-toolbar .button {
