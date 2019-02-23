@@ -26,6 +26,11 @@ Copyright (c) 2014 Mozilla Corporation
       transition: width .05s linear;
       -webkit-transform: translateZ(0) scale(1, 1);
       z-index: 3;
+      -webkit-transition: all 400ms ease;
+      -moz-transition: all 400ms ease;
+      -ms-transition: all 400ms ease;
+      -o-transition: all 400ms ease;
+      transition: all 400ms ease;
     }
 
     /*pull out triangle*/
@@ -67,14 +72,6 @@ Copyright (c) 2014 Mozilla Corporation
         margin-top: 20px;
     }
 
-    .sidenav {
-        -webkit-transition: all 400ms ease;
-        -moz-transition: all 400ms ease;
-        -ms-transition: all 400ms ease;
-        -o-transition: all 400ms ease;
-        transition: all 400ms ease;
-    }
-
     .form-horizontal .form-group {
       margin-left: 5px;
       margin-right: 5px;
@@ -100,18 +97,12 @@ Copyright (c) 2014 Mozilla Corporation
         transition: width .05s linear;
         -webkit-transform: translateZ(0) scale(1, 1);
         z-index: 3;
+        -webkit-transition: all 400ms ease;
+        -moz-transition: all 400ms ease;
+        -ms-transition: all 400ms ease;
+        -o-transition: all 400ms ease;
+        transition: all 400ms ease;
       }
-      .sidenav:after {
-        position: absolute;
-        content: ' ';
-        width: 0;
-        height: 0;
-        right: 230px;
-        top: 45%;
-        border-top: 45px solid transparent;
-        border-bottom: 45px solid transparent;
-        border-right: 45px solid var(--secondary-color);
-       }
     .sidenav ul {
         width: 14em;
         list-style-type: none;
