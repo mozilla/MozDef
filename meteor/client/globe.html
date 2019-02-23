@@ -7,18 +7,9 @@ Copyright (c) 2014 Mozilla Corporation
 
 <template name="globe">
     <style type="text/css">
-        html {
-            height: 100%;
-        }
-
         body {
-            margin: 0;
-            padding: 0;
             background: #000000 url(/images/globe-loading.gif) center center no-repeat;
             color: #ffffff;
-            font-size: 13px;
-            line-height: 20px;
-            height: 100%;
         }
 
         #info {
@@ -45,8 +36,8 @@ Copyright (c) 2014 Mozilla Corporation
             position: absolute;
             left: 10px;
             top: 63px;
-            background-color: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.4);
+            background-color: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
             padding: 10px;
         }
 
@@ -55,8 +46,8 @@ Copyright (c) 2014 Mozilla Corporation
             position: absolute;
             left: 10px;
             top: 103px;
-            background-color: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.4);
+            background-color: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
             padding: 10px;
         }
 
@@ -65,9 +56,9 @@ Copyright (c) 2014 Mozilla Corporation
             position: absolute;
             left: 10px;
             bottom: 0px;
-            background-color: rgba(0,0,0,0.2);
-            border-top: 1px solid rgba(255,255,255,0.4);
-            border-right: 1px solid rgba(255,255,255,0.4);
+            background-color: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            border-right: 1px solid rgba(255, 255, 255, 0.4);
             padding: 10px;
             font-size: 12px;
             color: rgba(255, 255, 255, 0.9);
@@ -98,13 +89,16 @@ Copyright (c) 2014 Mozilla Corporation
             transition: all 0.1s ease-out;
         }
 
-        .campaign:hover, .campaign.active, .time:hover, .time.active {
+        .campaign:hover,
+        .campaign.active,
+        .time:hover,
+        .time.active {
             font-size: 14px;
             color: #fff;
         }
     </style>
 
-<div id="container"></div>
+    <div id="container"></div>
     <div id="info">
         Controls:
         <ul>
