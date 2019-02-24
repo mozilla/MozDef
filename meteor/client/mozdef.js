@@ -472,14 +472,14 @@ if ( Meteor.isClient ) {
     };
 
     Accounts.onLogin( function( loginDetails ) {
-        console.log( 'loginDetails', loginDetails, Meteor.user() );
+        //console.log( 'loginDetails', loginDetails, Meteor.user() );
         Meteor.subscribe( "preferences",
             onReady = function() {
                 var preferenceRecord = preferences.findOne( { 'userId': Meteor.user().profile.email } )
                 if ( preferenceRecord == undefined ) {
                     console.log( 'client could not find preferences record' );
                 } else {
-                    console.log( 'client found preferences', preferenceRecord );
+                    // console.log( 'client found preferences', preferenceRecord );
                     if ( preferenceRecord.theme == 'Dark' ) {
                         require( '/imports/themes/dark/mozdef.css' );
                     } else if ( preferenceRecord.theme == 'Light' ) {
