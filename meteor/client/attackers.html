@@ -22,8 +22,6 @@ Copyright (c) 2014 Mozilla Corporation
       padding-top: 1em;
       display: inline-block;
       line-height: normal;
-      -webkit-transition: width .05s linear;
-      transition: width .05s linear;
       -webkit-transform: translateZ(0) scale(1, 1);
       z-index: 3;
       -webkit-transition: all 400ms ease;
@@ -93,8 +91,6 @@ Copyright (c) 2014 Mozilla Corporation
         padding-top: 1em;
         display: inline-block;
         line-height: normal;
-        -webkit-transition: width .05s linear;
-        transition: width .05s linear;
         -webkit-transform: translateZ(0) scale(1, 1);
         z-index: 3;
         -webkit-transition: all 400ms ease;
@@ -102,6 +98,13 @@ Copyright (c) 2014 Mozilla Corporation
         -ms-transition: all 400ms ease;
         -o-transition: all 400ms ease;
         transition: all 400ms ease;
+      }
+      .sidenav:after {
+        right: 230px;
+        border-top: 0;
+        border-bottom: 0;
+        border-right: 0;
+        content: none;
       }
     .sidenav ul {
         width: 14em;
