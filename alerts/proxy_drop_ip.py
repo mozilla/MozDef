@@ -8,7 +8,7 @@
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import QueryStringMatch, SearchQuery, TermMatch
-import re
+import netaddr
 
 
 class AlertProxyDropIP(AlertTask):
@@ -22,19 +22,11 @@ class AlertProxyDropIP(AlertTask):
             ]
         )
 
-        # Match on 1.1.1.1, http://1.1.1.1, or https://1.1.1.1
-        # This will over-match on short 3-char domains like foo.bar.baz.com, but will get weeded out below
-        ip_regex = "/.*\..{1,3}\..{1,3}\..{1,3}(:.*|\/.*)/"
-        search_query.add_must(
-            [QueryStringMatch("details.destination: {}".format(ip_regex))]
-        )
-        https: // www.programcreek.com / python / example / 57082 / netaddr.IPNetwork
-        >>> ip = ipaddr.IPAddress("onet.pl")
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-  File "/Users/michalpurzynski/.pyenv/versions/mozdef/lib/python2.7/site-packages/ipaddr.py", line 78, in IPAddress
-    address)
-ValueError: 'onet.pl' does not appear to be an IPv4 or IPv6 address
+        # Match on everything that looks like the first octet of either the IPv4 or the IPv6 address
+        # This will over-match, but will get weeded out below
+        ip_regex = "/[0-9a-fA-F]{1,4}.*/"
+
+        search_query.add_must([QueryStringMatch("details.host: {}".format(ip_regex))])
 
         self.filtersManual(search_query)
         self.searchEventsAggregated("details.sourceipaddress", samplesLimit=10)
@@ -46,22 +38,33 @@ ValueError: 'onet.pl' does not appear to be an IPv4 or IPv6 address
         tags = ["squid", "proxy"]
         severity = "WARNING"
 
-        # Lucene search has a slight potential for overmatches, so we'd double-check
-        # with this pattern to ensure it's truely an IP before we add dest to our dropped list
-        pattern = r"^(http:\/\/|https:\/\/|)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
-
         dropped_destinations = set()
+        final_aggr = {}
+        final_aggr["value"] = aggreg["value"]
+        final_aggr["allevents"] = []
 
+        i = 0
         for event in aggreg["allevents"]:
-            if re.search(pattern, event["_source"]["details"]["destination"]):
-                dropped_destinations.add(event["_source"]["details"]["destination"])
+            ip = None
+            try:
+                ip = netaddr.IPAddress(event["_source"]["details"]["host"])
+            except (netaddr.core.AddrFormatError, ValueError):
+                pass
+            if ip is not None:
+                dropped_destinations.add(event["_source"]["details"]["host"])
+                final_aggr["allevents"].append(event)
+                final_aggr["events"].append(event)
+                i += i
+        final_aggr["count"] = i
 
         # If it's all over-matches, don't throw the alert
         if len(dropped_destinations) == 0:
             return None
 
         summary = "Suspicious Proxy DROP event(s) detected from {0} to the following IP-based destination(s): {1}".format(
-            aggreg["value"], ",".join(sorted(dropped_destinations))
+            final_aggr["value"], ",".join(sorted(dropped_destinations))
         )
 
-        return self.createAlertDict(summary, category, tags, aggreg["events"], severity)
+        return self.createAlertDict(
+            summary, category, tags, final_aggr["allevents"], severity
+        )
