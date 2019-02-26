@@ -7,7 +7,7 @@
 
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import QueryStringMatch, SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch
 
 
 class AlertProxyDropNonStandardPort(AlertTask):
