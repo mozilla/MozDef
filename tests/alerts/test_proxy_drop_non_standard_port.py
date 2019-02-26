@@ -23,7 +23,7 @@ class TestAlertProxyDropNonStandardPort(AlertTestSuite):
                 "destination": "evil.com:1337",
                 "destinationport": "1337",
                 "proxyaction": "TCP_DENIED",
-                "tcpaction": "CONNECT",
+                "method": "CONNECT",
             },
         },
     }

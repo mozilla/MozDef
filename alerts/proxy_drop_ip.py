@@ -42,6 +42,7 @@ class AlertProxyDropIP(AlertTask):
         final_aggr = {}
         final_aggr["value"] = aggreg["value"]
         final_aggr["allevents"] = []
+        final_aggr["events"] = []
 
         i = 0
         for event in aggreg["allevents"]:
