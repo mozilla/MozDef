@@ -146,7 +146,7 @@ class AlertTestSuite(UnitTestSuite):
             test_case.full_events.append(merged_event)
             self.populate_test_event(merged_event['_source'])
 
-        self.flush('events')
+        self.refresh('events')
 
         with mock.patch("socket.gethostbyaddr", side_effect=mock_add_hostname_to_ip):
             alert_task = test_case.run(alert_filename=self.alert_filename, alert_classname=self.alert_classname)
@@ -218,8 +218,8 @@ class AlertTestSuite(UnitTestSuite):
         assert alert_task.classname() == self.alert_classname, 'Alert classname did not match expected name'
         if test_case.expected_test_result is True:
             assert len(alert_task.alert_ids) is not 0, 'Alert did not fire as expected'
-            self.flush('alerts')
-            self.flush('events')
+            self.refresh('alerts')
+            self.refresh('events')
             for alert_id in alert_task.alert_ids:
                 found_alert = self.es_client.get_alert_by_id(alert_id)
                 self.verify_expected_alert(found_alert, test_case)

@@ -242,11 +242,19 @@ class AlertTask(Task):
 
         """
         # Don't fire on already alerted events
-        duplicate_matcher = TermMatch('alert_names', self.classname())
+        duplicate_matcher = TermMatch('alert_names', self.determine_alert_classname())
         if duplicate_matcher not in query.must_not:
             query.add_must_not(duplicate_matcher)
 
         self.main_query = query
+
+    def determine_alert_classname(self):
+        alert_name = self.classname()
+        # Allow alerts like the generic alerts (one python alert but represents many 'alerts')
+        # can customize the alert name
+        if hasattr(self, 'custom_alert_name'):
+            alert_name = self.custom_alert_name
+        return alert_name
 
     def executeSearchEventsSimple(self):
         """
@@ -442,9 +450,11 @@ class AlertTask(Task):
 
                 if 'alert_names' not in event['_source']:
                     event['_source']['alert_names'] = []
-                event['_source']['alert_names'].append(self.classname())
+                event['_source']['alert_names'].append(self.determine_alert_classname())
 
                 self.es.save_event(index=event['_index'], doc_type=event['_type'], body=event['_source'], doc_id=event['_id'])
+            # We refresh here to ensure our changes to the events will show up for the next search query results
+            self.es.refresh(event['_index'])
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 
