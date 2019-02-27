@@ -270,7 +270,6 @@ services:
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/rabbitmq/5672";do sleep 1;done && /usr/sbin/syslog-ng --no-caps -F'
     depends_on:
       - loginput
-      - mq_worker
     ports:
       - 514:514/udp
       - 514:514
