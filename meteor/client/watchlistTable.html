@@ -1,0 +1,54 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+-->
+
+<!--a striped table of our ip blocks-->
+<template name="watchlist">
+    <div class="watchlist container">
+        <div class="fluid center">
+            <table class="table table-striped table-hover table-condensed">
+                <caption><p class="lead">Watch List</p></caption>
+                <thead>
+                    <tr>
+                        <td><button class="btn btn-xs btn-default watchedadd">add</button></td>
+                        <td>Content</td>
+                        <td>Added</td>
+                        <td>Expiring</td>
+                        <td>Comment</td>
+                        <td>By</td>
+                        <td>Reference</td>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#each watched}}
+                    {{>each_watched}}
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>
+
+<!--each individual watchitem -->
+<template name="each_watched">
+
+    <tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateAdded}}" data-toggle="tooltip">
+        <td></td>
+        <td>{{{watchcontent}}}</td>
+        <td>{{dateAdded}}</td>
+        <td>{{dateExpiring}}</td>
+        <td>{{comment}}</td>
+        <td>{{creator}}</td>
+        <td>{{reference}}</td>
+        <td>
+            <button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#delete{{_id}}">arm delete</button>
+            <div id="delete{{_id}}" class="collapse">
+                <button class="btn btn-xs btn-danger watcheddelete" data-watchedid={{_id}}>delete</button>
+            </div>
+        </td>
+    </tr>
+
+</template>

@@ -46,6 +46,7 @@ pynsive==0.2.6
 pyparsing==2.1.10
 python-dateutil==2.6.1
 pytz==2017.3
+requests-jwt==0.5.3
 requests==2.20.0
 requests-futures==0.9.7
 rsa==3.1.4

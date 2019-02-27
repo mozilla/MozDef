@@ -14,7 +14,7 @@ import requests
 import sys
 import socket
 from bottle import route, run, response, request, default_app, post
-from datetime import datetime
+from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
 from operator import itemgetter
@@ -69,6 +69,19 @@ def status():
     response.content_type = "application/json"
     response.body = json.dumps(dict(status='ok', service='restapi'))
     sendMessgeToPlugins(request, response, 'status')
+    return response
+
+
+@route('/getwatchlist')
+@route('/getwatchlist/')
+def status():
+    '''endpoint for grabbing watchlist contents'''
+    if request.body:
+        request.body.read()
+        request.body.close()
+    response.status = 200
+    response.content_type = "application/json"
+    response.body = getWatchlist()
     return response
 
 
@@ -129,6 +142,15 @@ def index():
 def index():
     '''will receive a call to block an ip address'''
     sendMessgeToPlugins(request, response, 'blockfqdn')
+    return response
+
+
+@post('/watchitem', methods=['POST'])
+@post('/watchitem/', methods=['POST'])
+@enable_cors
+def index():
+    '''will receive a call to watchlist a specific term'''
+    sendMessgeToPlugins(request, response, 'watchitem')
     return response
 
 
@@ -519,6 +541,43 @@ def kibanaDashboards():
         sys.stderr.write('Kibana dashboard received error: {0}\n'.format(e))
 
     return json.dumps(resultsList)
+
+
+def getWatchlist():
+    WatchList = []
+    try:
+        # connect to mongo
+        client = MongoClient(options.mongohost, options.mongoport)
+        mozdefdb = client.meteor
+        watchlistentries = mozdefdb['watchlist']
+
+        # Log the entries we are removing to maintain an audit log
+        expired = watchlistentries.find({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
+        for entry in expired:
+            sys.stdout.write('Deleting entry {0} from watchlist /n'.format(entry))
+
+        # delete any that expired
+        watchlistentries.delete_many({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
+
+        # Lastly, export the combined watchlist
+        watchCursor=mozdefdb['watchlist'].aggregate([
+            {"$sort": {"dateAdded": -1}},
+            {"$match": {"watchcontent": {"$exists": True}}},
+            {"$match":
+                {"$or":[
+                    {"dateExpiring": {"$gte": datetime.utcnow()}},
+                    {"dateExpiring": {"$exists": False}},
+                ]},
+             },
+            {"$project":{"watchcontent":1}},
+        ])
+        for content in watchCursor:
+            WatchList.append(
+                content['watchcontent']
+            )
+        return json.dumps(WatchList)
+    except ValueError as e:
+        sys.stderr.write('Exception {0} collecting watch list\n'.format(e))
 
 
 def getWhois(ipaddress):
