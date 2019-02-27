@@ -85,7 +85,7 @@ def main():
         if r.status_code == 200:
             oktaevents = json.loads(r.text)
             for event in oktaevents:
-                if 'published' in event.keys():
+                if 'published' in event:
                     if toUTC(event['published']) > toUTC(state.data['lastrun']):
                         try:
                             mozdefEvent = dict()
@@ -93,7 +93,7 @@ def main():
                             mozdefEvent['receivedtimestamp']=toUTC(datetime.now()).isoformat()
                             mozdefEvent['category'] = 'okta'
                             mozdefEvent['tags'] = ['okta']
-                            if 'action' in event.keys() and 'message' in event['action'].keys():
+                            if 'action' in event and 'message' in event['action']:
                                 mozdefEvent['summary'] = event['action']['message']
                             mozdefEvent['details'] = event
                             # Actor parsing
@@ -102,14 +102,14 @@ def main():
                             # This means the last instance of each attribute in all actors will be recorded in mozdef
                             # while others will be discarded
                             # Which ends up working out well in Okta's case.
-                            if 'actors' in event.keys():
+                            if 'actors' in event:
                                 for actor in event['actors']:
-                                    if 'ipAddress' in actor.keys():
+                                    if 'ipAddress' in actor:
                                         if netaddr.valid_ipv4(actor['ipAddress']):
                                             mozdefEvent['details']['sourceipaddress'] = actor['ipAddress']
-                                    if 'login' in actor.keys():
+                                    if 'login' in actor:
                                         mozdefEvent['details']['username'] = actor['login']
-                                    if 'requestUri' in actor.keys():
+                                    if 'requestUri' in actor:
                                         mozdefEvent['details']['source_uri'] = actor['requestUri']
 
                             # We are renaming action to activity because there are

@@ -18,8 +18,8 @@ class message(object):
         self.regex = re.compile(r'(?P<alert_type>\S+): \[(?P<source_host>\S+)\] \[(?P<entity_type>\S+)\] \[(?P<entity>.*)\] (?P<alert_message>.*)')
 
     def onMessage(self, message, metadata):
-        if 'details' in message.keys():
-            if 'program' in message['details'].keys():
+        if 'details' in message:
+            if 'program' in message['details']:
                 if 'Observium' == message['details']['program']:
                     msg_unparsed = message['summary']
                     search = re.search(self.regex, msg_unparsed)
@@ -30,7 +30,7 @@ class message(object):
                         message['details']['entity'] = search.group('entity')
                         message['details']['alert_message'] = search.group('alert_message')
                         # tag the message
-                        if 'tags' in message.keys() and isinstance(message['tags'], list):
+                        if 'tags' in message and isinstance(message['tags'], list):
                             message['tags'].append('alert')
                         else:
                             message['tags'] = ['alert']

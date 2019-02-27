@@ -179,13 +179,13 @@ class AlertTask(Task):
         try:
             # cherry pick items from the alertDict to send to the alerts messageQueue
             mqAlert = dict(severity='INFO', category='')
-            if 'severity' in alertDict.keys():
+            if 'severity' in alertDict:
                 mqAlert['severity'] = alertDict['severity']
-            if 'category' in alertDict.keys():
+            if 'category' in alertDict:
                 mqAlert['category'] = alertDict['category']
-            if 'utctimestamp' in alertDict.keys():
+            if 'utctimestamp' in alertDict:
                 mqAlert['utctimestamp'] = alertDict['utctimestamp']
-            if 'eventtimestamp' in alertDict.keys():
+            if 'eventtimestamp' in alertDict:
                 mqAlert['eventtimestamp'] = alertDict['eventtimestamp']
             mqAlert['summary'] = alertDict['summary']
             self.log.debug(mqAlert)
@@ -441,7 +441,7 @@ class AlertTask(Task):
         """
         try:
             for event in events:
-                if 'alerts' not in event['_source'].keys():
+                if 'alerts' not in event['_source']:
                     event['_source']['alerts'] = []
                 event['_source']['alerts'].append({
                     'index': alertResultES['_index'],

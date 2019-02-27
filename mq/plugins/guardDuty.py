@@ -65,14 +65,14 @@ class message(object):
         message = DotDict(message)
         # pull out the likely source IP address
         for ipaddress_key in self.ipaddress_keys:
-            if 'sourceipaddress' not in message['details'].keys():
+            if 'sourceipaddress' not in message['details']:
                 if key_exists(ipaddress_key, message):
                     message.details.sourceipaddress = message.get(
                         ipaddress_key)
 
         # if we still haven't found what we are looking for #U2
         # sometimes it's in a list
-        if 'sourceipaddress' not in message['details'].keys():
+        if 'sourceipaddress' not in message['details']:
             if key_exists('details.finding.action.portprobeaction.portprobedetails', message) \
                     and isinstance(message.details.finding.action.portprobeaction.portprobedetails, list):
 

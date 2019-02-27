@@ -168,7 +168,7 @@ def index():
     except ValueError:
         response.status = 500
 
-    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
+    if 'ipaddress' in requestDict and isIPv4(requestDict['ipaddress']):
         response.content_type = "application/json"
         response.body = getWhois(requestDict['ipaddress'])
     else:
@@ -191,7 +191,7 @@ def ipintel():
         requestDict = json.loads(arequest)
     except ValueError:
         response.status = 500
-    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
+    if 'ipaddress' in requestDict and isIPv4(requestDict['ipaddress']):
         response.content_type = "application/json"
     else:
         response.status = 500
@@ -217,7 +217,7 @@ def index():
     except ValueError:
         response.status = 500
         return
-    if 'ipaddress' in requestDict.keys() and isIPv4(requestDict['ipaddress']):
+    if 'ipaddress' in requestDict and isIPv4(requestDict['ipaddress']):
         url="https://isc.sans.edu/api/ip/"
 
         headers = {

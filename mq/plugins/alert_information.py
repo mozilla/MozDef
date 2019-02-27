@@ -15,7 +15,7 @@ class message(object):
         self.priority = 20
 
     def onMessage(self, message, metadata):
-        if 'details' in message.keys() and type(message['details']) == dict:
+        if 'details' in message and type(message['details']) == dict:
             if 'alert_information' in message['details'] and type(message['details']['alert_information']) == dict:
                 if 'summary' in message['details']['alert_information']:
                     message['summary'] = message['details']['alert_information']['summary']
