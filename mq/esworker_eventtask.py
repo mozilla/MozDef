@@ -169,10 +169,6 @@ class taskConsumer(ConsumerMixin):
             self.muleid = uwsgi.mule_id()
         else:
             self.muleid = 0
-        if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
-            # to prevent events from sticking around an idle worker
-            self.esConnection.start_bulk_timer()
 
     def get_consumers(self, Consumer, channel):
         consumer = Consumer(self.taskQueue, callbacks=[self.on_message], accept=['json', 'text/plain'], no_ack=(not options.mqack))

@@ -24,3 +24,9 @@ Update Geolite db location
 ------------------
 
 Add is_ip utility function
+
+
+1.0.4 (2019-01-23)
+------------------
+
+* Replaced timer with threads for cleaner bulk importing

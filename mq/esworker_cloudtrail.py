@@ -17,11 +17,11 @@ import boto.s3
 from boto.sqs.message import RawMessage
 import gzip
 from StringIO import StringIO
-from threading import Timer
 import re
 import time
 import kombu
 from ssl import SSLEOFError, SSLError
+from threading import Thread
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
@@ -283,16 +283,12 @@ class taskConsumer(object):
         # This value controls how long we sleep
         # between reauthenticating and getting a new set of creds
         self.flush_wait_time = 1800
-
-        if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
-            # to prevent events from sticking around an idle worker
-            self.esConnection.start_bulk_timer()
-
         self.authenticate()
-        # This cycles the role manager creds every 30 minutes
-        # or else we would be getting errors after a while
-        Timer(self.flush_wait_time, self.flush_s3_creds).start()
+
+        # Run thread to flush s3 credentials
+        reauthenticate_thread = Thread(target=self.reauth_timer)
+        reauthenticate_thread.daemon = True
+        reauthenticate_thread.start()
 
     def authenticate(self):
         if options.cloudtrail_arn not in ['<cloudtrail_arn>', 'cloudtrail_arn']:
@@ -306,10 +302,11 @@ class taskConsumer(object):
             role_creds = {}
         self.s3_connection = boto.connect_s3(**role_creds)
 
-    def flush_s3_creds(self):
-        logger.debug('Recycling credentials and reassuming role')
-        self.authenticate()
-        Timer(self.flush_wait_time, self.flush_s3_creds).start()
+    def reauth_timer(self):
+        while True:
+            time.sleep(self.flush_wait_time)
+            logger.debug('Recycling credentials and reassuming role')
+            self.authenticate()
 
     def process_file(self, s3file):
         logger.debug("Fetching %s" % s3file.name)
