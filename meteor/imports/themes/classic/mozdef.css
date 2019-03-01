@@ -6,6 +6,29 @@ Copyright (c) 2014 Mozilla Corporation
 */
 
 /*base css */
+:root {
+    --bg-primary-color: rgb(32,87,153);
+    --bg-secondary-color: #444444;
+    --txt-primary-color: #fff;
+    --txt-secondary-color: #000;
+    --txt-shadow-color:  #000;
+    --txt-highlight-color: rgba(165, 170, 172, 0.904);
+    --a-link-color:  rgb(245, 222, 179);
+
+    --secondary-focus-color: #3b89ee;
+    --secondary-color: #2d5fa0;
+    --row-color-odd: rgba(30,87,153,.7);
+    --row-color-even: #636c85;
+    --ack-edit-color: #a2a9b2;
+    --ack-edit-border-color: #adadad;
+    --ack-edit-focus-color: #557750;
+    --ack-edit-disabled-color: #557750;
+    --arm-color: #e69006;
+    --arm-focus-color: #d58512;
+
+
+  }
+
 html{
 	background: none;
 	min-height: 100%;
@@ -23,7 +46,7 @@ body{
     background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
     background: linear-gradient(to bottom, rgba(30,87,153,1) 0%,rgba(32,124,202,1) 43%,rgba(41,137,216,1) 62%,rgba(41,150,217,1) 100%); /* W3C */
     padding: 0;
-    color: #000;
+    color: var(--txt-primary-color);
     line-height: normal;
     text-align: left;
 }
@@ -31,20 +54,20 @@ body{
 
 /*mozdef custom */
 .upperwhite {
-    color: #FFF;
+    color: var(--txt-primary-color);
     text-transform: uppercase;
 }
 
 caption, legend {
-    color: #FFF;
+    color: var(--txt-primary-color);
 }
 
 .shadow {
-    text-shadow: #000 .7px .7px .7px;
+    text-shadow: var(--txt-shadow-color) .7px .7px .7px;
 }
 
 .ipaddress {
-  color: #FFF;
+  color:var(--txt-primary-color);
   font-style: normal;
   font-weight: normal;
 
@@ -75,7 +98,7 @@ caption, legend {
   bottom: 0;
   z-index: 2;
   font-size: 13px;
-  color: #fff;
+  color: var(--txt-primary-color);
 }
 
 #bottom-toolbar .button {
@@ -132,7 +155,7 @@ caption, legend {
 }
 
 .attackercallout .blockip{
-    color: #FFF;
+    color: var(--txt-primary-color);
     text-transform: uppercase;
     margin-top: 20px;
 }
@@ -162,27 +185,27 @@ caption, legend {
 /*alerts screen alert color scheme*/
 .alert.alert-NOTICE {
     --alert-bg-color: #4a6785;
-    --alert-color: white;
+    --alert-txt-color: white;
   }
 .alert.alert-WARNING {
     --alert-bg-color: #ffd351;
-    --alert-color: black;
+    --alert-txt-color: black;
   }
 .alert.alert-CRITICAL {
     --alert-bg-color: #d04437;
-    --alert-color: white;
+    --alert-txt-color: white;
   }
 .alert.alert-INFO {
     --alert-bg-color: #cccccc;
-    --alert-color: black;
+    --alert-txt-color: black;
   }
 .alert.alert-ERROR {
     --alert-bg-color: #d04437;
-    --alert-color: white;
+    --alert-txt-color: white;
   }
 
 .alert  {
-    color: var(--alert-color);
+    color: var(--alert-txt-color);
     background-color: var(--alert-bg-color);
     text-transform: uppercase;
     display: table-cell;
@@ -190,17 +213,20 @@ caption, legend {
   }
 
 .alert-row a{
-    color: wheat;
+    color: var(--a-link-color);
 }
 
 .row {
-    color: white;
+    color: var(--txt-primary-color);
 }
 
 .modal-body .row {
-    color: black;
+    color: var(--txt-secondary-color);
 }
 /*bootstrap overrides*/
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    color: var(--txt-secondary-color);
+}
 
 .btn {
   border: 1px outset;
@@ -212,6 +238,9 @@ input[type="search"] {
   border-radius: 15px;
 }
 
+.modal-body label {
+  color: var(--txt-secondary-color);
+}
 
 [class*="span"].centerspan {
     margin: 0 auto;
@@ -225,18 +254,21 @@ input[type="search"] {
 
 .table-striped tbody > tr:nth-child(odd) > td,
 .table-striped tbody > tr:nth-child(odd) > th {
-  background-color: rgba(30,87,153,.7);
+  background-color: var(--row-color-odd);
 }
 
 .table-hover tbody tr:hover > td,
 .table-hover tbody tr:hover > th {
-  background-color: rgba(30,87,153,.5);
+  /*background-color: rgba(30,87,153,.5);*/
+  background-color: var(--txt-highlight-color);
+}
+.table-striped > tbody > tr:nth-of-type(2n+1) {
+  background-color: var(--row-color-even);
 }
 
 td{
-  color:white;
+  color: var(--txt-primary-color);
 }
-
 
 .welcome {
     text-align: center;
@@ -247,28 +279,9 @@ td{
 }
 
 .tabnav a{
-    color: lightblue;
+    color: rgb(173, 216, 230);
 }
 
-/* uncomment this login ui css to hide the local account/password signup options
-.logins-wrapper .svgtextlabel {
-  font-size: 20px;
-  color: white;
-}
-
-.loginButtons {
-  text-align: right;
-  color:white;
-}
-
-.login-password-form{
-  display:none;
-}
-
-.or {
-  display: none;
-}
-*/
 /* don't float the 'create account' link*/
 #login-buttons #signup-link{
     float: none;
@@ -318,8 +331,8 @@ circle:hover{
 }
 
 #header a.mozdef{
-    color:white;
-    text-shadow: #000 5px 3px 3px;
+    color: var(--txt-primary-color);
+    text-shadow: var(--txt-shadow-color) 5px 3px 3px;
     text-align: center;
     font-size: large;
     margin-top: -.25em;
@@ -368,7 +381,7 @@ circle:hover{
 #nav-main li a:visited,
 #nav-main li span {
     border-color: #3a3c46;
-    color: #fff;
+    color: var(--txt-primary-color);
     padding: 8px 10px 10px 10px;
     height: 25px;
     display: block;
