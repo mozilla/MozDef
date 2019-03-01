@@ -223,6 +223,27 @@ caption, legend {
 .modal-body .row {
     color: var(--txt-secondary-color);
 }
+
+/* incident/investigation styles */
+.daterangepicker, .daterangepicker td {
+    color: var(--txt-secondary-color);
+}
+
+.tabcontent {
+    display: none;
+}
+
+.tabcontent.active {
+    display: block;
+}
+
+textarea {
+    overflow: auto;
+    vertical-align: top;
+    /* Improves readability, alignment */
+}
+
+
 /*bootstrap overrides*/
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     color: var(--txt-secondary-color);
@@ -287,7 +308,7 @@ td{
     float: none;
 }
 
-/* d3 circle styles */
+/* d3 circle styles for the logincounts visualization */
 .successcircle{
     /*
     fill: rgb(217,206,178);
@@ -346,6 +367,103 @@ circle:hover{
     display: inherit;
     cursor: auto;
     margin:.5em;
+}
+
+/* attacker side nav pull out styling */
+/* http://www.sitepoint.com/css3-sliding-menu/ */
+sidenav
+{
+    position: fixed;
+    left: -25em;
+    top: 0;
+    bottom: 0;
+    background-color: var(--bg-secondary-color);
+    border-right: 15px solid #765;
+    box-shadow: 4px 0 5px rgba(0,0,0,0.2);
+    z-index: 1;
+
+
+    text-align: left;
+    font-weight: bolder;
+    display: inline-block;
+    height: 100%;
+    margin: 0em;
+    line-height: normal;
+}
+
+/*pull out triangle */
+sidenav:after
+{
+    position: absolute;
+    content: ' ';
+    width: 0;
+    height: 0;
+    right: -75px;
+    top: 50%;
+    border-width: 30px 30px;
+    border-style: solid;
+    border-color: transparent transparent transparent #765;
+}
+
+sidenav ul
+{
+    width: 14em;
+    list-style-type: none;
+    margin: auto;
+    padding: 1em;
+}
+
+sidenav div{
+    margin:auto;
+}
+
+sidenav:hover
+{
+    left: 0;
+}
+
+sidenav .filters-col .row {
+    margin-top: 45px;
+    padding: 0 0.5em;
+}
+
+sidenav .reset-filter {
+    text-align: center;
+    margin-top: 20px;
+}
+
+sidenav
+{
+    -webkit-transition: all 400ms ease;
+    -moz-transition: all 400ms ease;
+    -ms-transition: all 400ms ease;
+    -o-transition: all 400ms ease;
+    transition: all 400ms ease;
+}
+
+/*veris tag styling*/
+
+.veristagform{
+    padding: 10px;
+    font-size: 95%;
+    background: #999;
+    color: var(--txt-primary-color);
+}
+
+.veristagform .dropdown {
+    margin: 10px 0;
+}
+.tag{
+    cursor: pointer;
+    text-align: left;
+    word-wrap: break-word;
+}
+.veristagform li {
+    cursor: pointer;
+    color: var(--txt-secondary-color);
+}
+.veristagform .label{
+    cursor: pointer;
 }
 
 /*menu styling*/
