@@ -11,6 +11,8 @@ import '/imports/models.js';
 if (Meteor.isServer) {
 
     Meteor.startup(function () {
+        // Since we only connect to localhost or to ourselves, adding a hack to bypass cert validation
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         // We don't use websockets, turn 'em off to make for a faster startup
         process.env.DISABLE_WEBSOCKETS = "1";
         console.log("MozDef starting")
