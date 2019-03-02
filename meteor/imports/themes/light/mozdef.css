@@ -5,17 +5,28 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 
-/*base css */
+/* variables */
+:root {
+    --bg-primary-color: rgba(255,255,255,.5);
+    --bg-secondary-color: #444444;
+    --txt-primary-color: #000;
+    --txt-secondary-color: #fff;
+    --txt-shadow-color:  #aaa;
+    --txt-highlight-color: rgba(165, 170, 172, 0.904);
+    --a-link-color:  rgb(245, 222, 179);
+    --row-color-odd: rgba(30,87,153,.1);
+    --row-color-even: #636c85;
+  }
+
 html{
 	background: none;
 	min-height: 100%;
 }
 
 body{
-	/*gradient*/
-    background: rgba(255,255,255,1);
+    background: var(--bg-primary-color);
     padding: 0;
-    color: #fff;
+    color: var(--txt-primary-color);
     line-height: normal;
     text-align: left;
 }
@@ -23,20 +34,20 @@ body{
 
 /*mozdef custom */
 .upperwhite {
-    color: #000;
+    color: var(--txt-secondary-color);
     text-transform: uppercase;
 }
 
 caption, legend {
-    color: #000;
+    color: var(--txt-secondary-color);;
 }
 
 .shadow {
-    text-shadow: #FFF .7px .7px .7px;
+    text-shadow: var(--txt-shadow-color) .7px .7px .7px;
 }
 
 .ipaddress {
-  color: #000;
+  color:var(--txt-primary-color);
   font-style: normal;
   font-weight: normal;
 
@@ -58,7 +69,7 @@ caption, legend {
 }
 
 #bottom-toolbar {
-  background: #444444;
+  background: var(--bg-secondary-color);
   width: 100%;
   height: 40px;
   padding-left: 5px;
@@ -67,7 +78,7 @@ caption, legend {
   bottom: 0;
   z-index: 2;
   font-size: 13px;
-  color: #000;
+  color: var(--txt-secondary-color);
 }
 
 #bottom-toolbar .button {
@@ -124,7 +135,7 @@ caption, legend {
 }
 
 .attackercallout .blockip{
-    color: #FFF;
+    color: var(--txt-primary-color);;
     text-transform: uppercase;
     margin-top: 20px;
 }
@@ -182,17 +193,40 @@ caption, legend {
   }
 
 .alert-row a{
-    color: wheat;
+    color: var(--a-link-color);
 }
 
 .row {
-    color: black;
+    color: var(--txt-primary-color);
 }
 
 .modal-body .row {
-    color: black;
+    color: var(--txt-secondary-color);
 }
+
+/* incident/investigation styles */
+.daterangepicker, .daterangepicker td {
+    color: var(--txt-secondary-color);
+}
+
+.tabcontent {
+    display: none;
+}
+
+.tabcontent.active {
+    display: block;
+}
+
+textarea {
+    overflow: auto;
+    vertical-align: top;
+    /* Improves readability, alignment */
+}
+
 /*bootstrap overrides*/
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    color: var(--txt-secondary-color);
+}
 
 .btn {
   border: 1px outset;
@@ -204,6 +238,9 @@ input[type="search"] {
   border-radius: 15px;
 }
 
+.modal-body label {
+    color: var(--txt-primary-color);
+}
 
 [class*="span"].centerspan {
     margin: 0 auto;
@@ -217,18 +254,17 @@ input[type="search"] {
 
 .table-striped tbody > tr:nth-child(odd) > td,
 .table-striped tbody > tr:nth-child(odd) > th {
-  background-color: rgba(30,87,153,.7);
+  background-color: var(--row-color-odd);
 }
 
 .table-hover tbody tr:hover > td,
 .table-hover tbody tr:hover > th {
-  background-color: rgba(30,87,153,.5);
+  background-color: var(--txt-highlight-color);
 }
 
 td{
-  color:black;
+  color: var(--txt-primary-color);
 }
-
 
 .welcome {
     text-align: center;
@@ -242,25 +278,6 @@ td{
     color: lightblue;
 }
 
-/* uncomment this login ui css to hide the local account/password signup options
-.logins-wrapper .svgtextlabel {
-  font-size: 20px;
-  color: white;
-}
-
-.loginButtons {
-  text-align: right;
-  color:white;
-}
-
-.login-password-form{
-  display:none;
-}
-
-.or {
-  display: none;
-}
-*/
 /* don't float the 'create account' link*/
 #login-buttons #signup-link{
     float: none;
@@ -310,8 +327,8 @@ circle:hover{
 }
 
 #header a.mozdef{
-    color:black;
-    text-shadow: #aaa 3px 2px 2px;
+    color: var(--txt-primary-color);
+    text-shadow: var(--txt-shadow-color) 3px 2px 2px;
     text-align: center;
     font-size: large;
     margin-top: -.25em;
@@ -325,6 +342,103 @@ circle:hover{
     display: inherit;
     cursor: auto;
     margin:.5em;
+}
+
+/* attacker side nav pull out styling */
+/* http://www.sitepoint.com/css3-sliding-menu/ */
+sidenav
+{
+    position: fixed;
+    left: -25em;
+    top: 0;
+    bottom: 0;
+    background-color: var(--bg-secondary-color);
+    border-right: 15px solid #765;
+    box-shadow: 4px 0 5px rgba(0,0,0,0.2);
+    z-index: 1;
+
+
+    text-align: left;
+    font-weight: bolder;
+    display: inline-block;
+    height: 100%;
+    margin: 0em;
+    line-height: normal;
+}
+
+/*pull out triangle */
+sidenav:after
+{
+    position: absolute;
+    content: ' ';
+    width: 0;
+    height: 0;
+    right: -75px;
+    top: 50%;
+    border-width: 30px 30px;
+    border-style: solid;
+    border-color: transparent transparent transparent #765;
+}
+
+sidenav ul
+{
+    width: 14em;
+    list-style-type: none;
+    margin: auto;
+    padding: 1em;
+}
+
+sidenav div{
+    margin:auto;
+}
+
+sidenav:hover
+{
+    left: 0;
+}
+
+sidenav .filters-col .row {
+    margin-top: 45px;
+    padding: 0 0.5em;
+}
+
+sidenav .reset-filter {
+    text-align: center;
+    margin-top: 20px;
+}
+
+sidenav
+{
+    -webkit-transition: all 400ms ease;
+    -moz-transition: all 400ms ease;
+    -ms-transition: all 400ms ease;
+    -o-transition: all 400ms ease;
+    transition: all 400ms ease;
+}
+
+/*veris tag styling*/
+
+.veristagform{
+    padding: 10px;
+    font-size: 95%;
+    background: #999;
+    color: var(--txt-primary-color);
+}
+
+.veristagform .dropdown {
+    margin: 10px 0;
+}
+.tag{
+    cursor: pointer;
+    text-align: left;
+    word-wrap: break-word;
+}
+.veristagform li {
+    cursor: pointer;
+    color: var(--txt-primary-color);
+}
+.veristagform .label{
+    cursor: pointer;
 }
 
 /*menu styling*/
