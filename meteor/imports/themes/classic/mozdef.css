@@ -5,7 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 
-/*base css */
+/* variables */
 :root {
     --bg-primary-color: rgb(32,87,153);
     --bg-secondary-color: #444444;
@@ -14,19 +14,8 @@ Copyright (c) 2014 Mozilla Corporation
     --txt-shadow-color:  #000;
     --txt-highlight-color: rgba(165, 170, 172, 0.904);
     --a-link-color:  rgb(245, 222, 179);
-
-    --secondary-focus-color: #3b89ee;
-    --secondary-color: #2d5fa0;
     --row-color-odd: rgba(30,87,153,.7);
     --row-color-even: #636c85;
-    --ack-edit-color: #a2a9b2;
-    --ack-edit-border-color: #adadad;
-    --ack-edit-focus-color: #557750;
-    --ack-edit-disabled-color: #557750;
-    --arm-color: #e69006;
-    --arm-focus-color: #d58512;
-
-
   }
 
 html{
@@ -89,7 +78,7 @@ caption, legend {
 }
 
 #bottom-toolbar {
-  background: #444444;
+  background: var(--bg-secondary-color);
   width: 100%;
   height: 40px;
   padding-left: 5px;
@@ -280,11 +269,7 @@ input[type="search"] {
 
 .table-hover tbody tr:hover > td,
 .table-hover tbody tr:hover > th {
-  /*background-color: rgba(30,87,153,.5);*/
   background-color: var(--txt-highlight-color);
-}
-.table-striped > tbody > tr:nth-of-type(2n+1) {
-  background-color: var(--row-color-even);
 }
 
 td{
