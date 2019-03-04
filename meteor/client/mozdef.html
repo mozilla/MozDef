@@ -20,23 +20,25 @@ Copyright (c) 2014 Mozilla Corporation
     {{> menu}}
 
     {{#if loggingIn}}
-    <div class="row center">
-        <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            <strong>loading</strong>
+        <div class="row center">
+            <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <strong>loading</strong>
+            </div>
         </div>
-    </div>
     {{else}}
-    {{#if currentUser}}
-    {{>yield}}
-    {{else}}
-    <div class="row center">
-        <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            <strong>Please login</strong>
-        </div>
-    </div>
-    {{/if}}
+        {{#if currentUser}}
+            {{>yield}}
+        {{else}}
+            <div class="row center">
+                <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <strong>Please login</strong>
+                </div>
+            </div>
+        {{/if}}
     {{/if}}
 
     {{>whoismodal}}
@@ -52,7 +54,7 @@ Copyright (c) 2014 Mozilla Corporation
 <template name="hello">
     <div class="container">
         <div class="row center">
-            <p class="welcome">{{greeting}}<br>hand made by Mozilla</p>
+            <p class="welcome">{{greeting}}<br>Hand made by Mozilla</p>
         </div>
     </div>
 </template>
