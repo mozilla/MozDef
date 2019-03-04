@@ -13,7 +13,7 @@ Copyright (c) 2014 Mozilla Corporation
     --txt-secondary-color: #fff;
     --txt-shadow-color:  #aaa;
     --txt-highlight-color: rgba(165, 170, 172, 0.904);
-    --a-link-color:  rgb(245, 222, 179);
+    --a-link-color:  rgb(49, 130, 189);
     --row-color-odd: rgba(30,87,153,.1);
     --row-color-even: #636c85;
   }
@@ -34,7 +34,7 @@ body{
 
 /*mozdef custom */
 .upperwhite {
-    color: var(--txt-secondary-color);
+    color: var(--txt-primary-color);
     text-transform: uppercase;
 }
 
@@ -200,13 +200,25 @@ caption, legend {
     color: var(--txt-primary-color);
 }
 
-.modal-body .row {
-    color: var(--txt-secondary-color);
+.modal-body .row,
+.modal-header h1,
+.modal-header h2,
+.modal-header h3,
+.modal-header h4,
+.modal-header h5,
+.modal-header h6,
+.modal-header .h1,
+.modal-header .h2,
+.modal-header .h3,
+.modal-header .h4,
+.modal-header .h5,
+.modal-header .h6 {
+    color: var(--txt-primary-color);
 }
 
 /* incident/investigation styles */
 .daterangepicker, .daterangepicker td {
-    color: var(--txt-secondary-color);
+    color: var(--txt-primary-color);
 }
 
 .tabcontent {
@@ -439,6 +451,98 @@ sidenav
 }
 .veristagform .label{
     cursor: pointer;
+}
+
+/* globe styling */
+.globe-container  {
+    background: #000000;
+    color: #ffffff;
+}
+
+.globe-info {
+    font-size: 11px;
+    position: absolute;
+    bottom: 5px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 3px;
+    right: 10px;
+    padding: 10px;
+    color: var(--txt-secondary-color);
+}
+
+.globe-container a {
+    color: #aaa;
+    text-decoration: none;
+}
+
+.globe-container a:hover {
+    text-decoration: underline;
+}
+
+.globe-campaigns {
+    width: 270px;
+    position: absolute;
+    left: 10px;
+    top: 63px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px;
+}
+
+.globe-time {
+    width: 400px;
+    position: absolute;
+    left: 10px;
+    top: 103px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px;
+}
+
+.globe-facts {
+    width: 300px;
+    position: absolute;
+    left: 10px;
+    bottom: 0px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border-right: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    display: none;
+}
+
+.globe-campaigns .campaign{
+    font-size: 12px;
+    line-height: 26px;
+    height: 30px;
+    text-align: center;
+    float: left;
+    width: 60px;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.1s ease-out;
+}
+
+.globe-time .time{
+    font-size: 12px;
+    line-height: 26px;
+    height: 30px;
+    text-align: center;
+    float: left;
+    width: 90px;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.1s ease-out;
+}
+
+.globe-campaigns .campaign:hover,
+.globe-campaigns .campaign.active,
+.globe-time .time:hover,
+.globe-time .time.active {
+    font-size: 14px;
+    color: #fff;
 }
 
 /*menu styling*/
