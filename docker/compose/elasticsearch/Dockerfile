@@ -2,29 +2,26 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV ES_VERSION 5.6.14
+ENV ES_VERSION 6.6.2
 ENV ES_JAVA_VERSION 1.8.0
 
+
+#https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.6.2.rpm
+
 RUN \
-  useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   yum install -y java-$ES_JAVA_VERSION && \
   mkdir -p /opt/mozdef/envs && \
-  curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
-  mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch && \
-  chown -R mozdef:mozdef /opt/mozdef && \
-  mkdir /var/log/elasticsearch && \
-  chown -R mozdef:mozdef /var/log/elasticsearch && \
-  mkdir /var/lib/elasticsearch && \
-  chown -R mozdef:mozdef /var/lib/elasticsearch && \
+  curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.6.2.rpm -o elasticsearch.rpm && \
+  rpm -i elasticsearch.rpm && \
   yum clean all
 
-COPY docker/compose/elasticsearch/files/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
-COPY docker/compose/elasticsearch/files/jvm.options /opt/mozdef/envs/elasticsearch/config/
+USER elasticsearch
 
-WORKDIR /opt/mozdef/envs/elasticsearch
+COPY docker/compose/elasticsearch/files/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+COPY docker/compose/elasticsearch/files/jvm.options /etc/elasticsearch/jvm.options
 
 VOLUME /var/lib/elasticsearch
 
-EXPOSE 9200
+WORKDIR /usr/share/elasticsearch
 
-USER mozdef
+EXPOSE 9200
