@@ -48,7 +48,7 @@ def initLogger():
 def getFrontendStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
-        TermMatch('_type', 'mozdefhealth'),
+        TermMatch('type', 'mozdefhealth'),
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'latest'),
     ])
@@ -71,7 +71,7 @@ def writeFrontendStats(data, mongo):
 def getSqsStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
-        TermMatch('_type', 'mozdefhealth'),
+        TermMatch('type', 'mozdefhealth'),
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'sqs-latest'),
     ])

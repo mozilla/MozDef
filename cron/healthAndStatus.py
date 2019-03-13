@@ -90,6 +90,7 @@ def main():
             severity='INFO',
             summary='mozdef health/status',
             category='mozdef',
+            type='mozdefhealth',
             source='mozdef',
             tags=[],
             details=[])
