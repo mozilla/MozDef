@@ -5,7 +5,7 @@
   ],
   "settings": {},
   "mappings": {
-    "events": {
+    "_doc": {
       "dynamic_templates": [
         {
           "string_fields": {
