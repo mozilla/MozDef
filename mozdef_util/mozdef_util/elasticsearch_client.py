@@ -126,10 +126,11 @@ class ElasticsearchClient():
         self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
 
     def __save_document(self, index, doc_type, body, doc_id=None, bulk=False):
+        body['type'] = doc_type
         if bulk:
-            self.__bulk_save_document(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+            self.__bulk_save_document(index=index, doc_type='_doc', body=body, doc_id=doc_id)
         else:
-            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=body)
+            return self.es_connection.index(index=index, doc_type='_doc', id=doc_id, body=body)
 
     def __parse_document(self, body, doc_type):
         if type(body) is str:
