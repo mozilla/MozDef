@@ -495,7 +495,6 @@ class AlertTask(Task):
         Helper function to parse an alert config file
         """
         alert_dir = os.path.join(os.path.dirname(__file__), '..')
-        #config_file_path = os.path.join(alert_dir, config_file)
         config_file_path = os.path.abspath(os.path.join(alert_dir, config_file))
         json_obj = {}
         with open(config_file_path, "r") as fd:
