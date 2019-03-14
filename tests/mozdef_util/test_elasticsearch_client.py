@@ -28,11 +28,11 @@ class ElasticsearchClientTest(UnitTestSuite):
     def get_num_events(self):
         self.flush('events')
         search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', 'event'))
-        search_query.add_aggregation(Aggregation('_type'))
+        search_query.add_must(TermMatch('type', 'event'))
+        search_query.add_aggregation(Aggregation('type'))
         results = search_query.execute(self.es_client)
-        if len(results['aggregations']['_type']['terms']) != 0:
-            return results['aggregations']['_type']['terms'][0]['count']
+        if len(results['aggregations']['type']['terms']) != 0:
+            return results['aggregations']['type']['terms'][0]['count']
         else:
             return 0
 
@@ -47,7 +47,7 @@ class MockTransportClass:
         self.original_function = orig_function
 
     def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):
-        if url == '/_bulk' or url == '/events/event':
+        if url == '/_bulk' or url == '/events/_doc':
             self.request_counts += 1
         return self.original_function(method, url, params=params, body=body)
 
@@ -91,20 +91,21 @@ class TestWriteWithRead(ElasticsearchClientTest):
                 'bro',
                 'correlated'
             ],
+            'type': 'alert',
             'url': 'https://mozilla.org',
             'utctimestamp': '2016-08-19T16:40:57.851092+00:00'
         }
-        self.saved_alert = self.es_client.save_alert(body=self.alert)
+        self.saved_alert_result = self.es_client.save_alert(body=self.alert)
         self.flush('alerts')
 
     def test_saved_type(self):
-        assert self.saved_alert['_type'] == 'alert'
+        assert self.saved_alert_result['_type'] == '_doc'
 
     def test_saved_index(self):
-        assert self.saved_alert['_index'] == self.alert_index_name
+        assert self.saved_alert_result['_index'] == self.alert_index_name
 
     def test_alert_source(self):
-        self.fetched_alert = self.es_client.get_alert_by_id(self.saved_alert['_id'])
+        self.fetched_alert = self.es_client.get_alert_by_id(self.saved_alert_result['_id'])
         assert self.fetched_alert['_source'] == self.alert
 
     def test_bad_id(self):
@@ -162,9 +163,10 @@ class TestSimpleWrites(ElasticsearchClientTest):
         results = query.execute(self.es_client)
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         assert results['hits'][0]['_source']['key'] == 'example value for string of json test'
+        assert results['hits'][0]['_source']['type'] == 'event'
 
         assert len(results['hits']) == 1
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_type'] == '_doc'
 
     def test_writing_dot_fieldname(self):
         event = json.dumps({"key.othername": "example value for string of json test"})
@@ -181,7 +183,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         assert results['hits'][0]['_source']['key.othername'] == 'example value for string of json test'
 
         assert len(results['hits']) == 1
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_type'] == '_doc'
 
     def test_writing_event_defaults(self):
         query = SearchQuery()
@@ -228,7 +230,8 @@ class TestSimpleWrites(ElasticsearchClientTest):
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_type'] == 'example'
+        assert results['hits'][0]['_type'] == '_doc'
+        assert results['hits'][0]['_source']['type'] == 'example'
         assert results['hits'][0]['_source']['summary'] == 'Test summary'
         assert results['hits'][0]['_source']['details'] == {"note": "Example note"}
 
@@ -250,7 +253,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_type'] == '_doc'
 
 
 class BulkTest(ElasticsearchClientTest):
@@ -467,11 +470,14 @@ class TestBulkInvalidFormatProblem(BulkTest):
 
         mapping = {
             "mappings": {
-                "event": {
+                "_doc": {
                     "properties": {
                         "utcstamp": {
                             "type": "date",
                             "format": "dateOptionalTime"
+                        },
+                        "type": {
+                            "type": "keyword"
                         }
                     }
                 }
@@ -495,8 +501,8 @@ class TestBulkInvalidFormatProblem(BulkTest):
             "utcstamp": "abc",
         }
 
-        self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
-        self.es_client.save_object(index='events', doc_type='event', body=malformed_event, bulk=True)
+        self.es_client.save_event(body=event, bulk=True)
+        self.es_client.save_event(body=malformed_event, bulk=True)
         self.flush(self.event_index_name)
         time.sleep(5)
         assert self.get_num_events() == 1

@@ -138,6 +138,7 @@ class ElasticsearchClient():
 
         if '_type' in body:
             doc_type = body['_type']
+            del(body['_type'])
 
         doc_body = body
         if '_source' in body:
