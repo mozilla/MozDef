@@ -182,13 +182,13 @@ class AlertTask(Task):
         try:
             # cherry pick items from the alertDict to send to the alerts messageQueue
             mqAlert = dict(severity='INFO', category='')
-            if 'severity' in alertDict.keys():
+            if 'severity' in alertDict:
                 mqAlert['severity'] = alertDict['severity']
-            if 'category' in alertDict.keys():
+            if 'category' in alertDict:
                 mqAlert['category'] = alertDict['category']
-            if 'utctimestamp' in alertDict.keys():
+            if 'utctimestamp' in alertDict:
                 mqAlert['utctimestamp'] = alertDict['utctimestamp']
-            if 'eventtimestamp' in alertDict.keys():
+            if 'eventtimestamp' in alertDict:
                 mqAlert['eventtimestamp'] = alertDict['eventtimestamp']
             mqAlert['summary'] = alertDict['summary']
             self.log.debug(mqAlert)
@@ -245,18 +245,32 @@ class AlertTask(Task):
 
         """
         # Don't fire on already alerted events
-        duplicate_matcher = TermMatch('alert_names', self.classname())
+        duplicate_matcher = TermMatch('alert_names', self.determine_alert_classname())
         if duplicate_matcher not in query.must_not:
             query.add_must_not(duplicate_matcher)
 
         self.main_query = query
+
+    def determine_alert_classname(self):
+        alert_name = self.classname()
+        # Allow alerts like the generic alerts (one python alert but represents many 'alerts')
+        # can customize the alert name
+        if hasattr(self, 'custom_alert_name'):
+            alert_name = self.custom_alert_name
+        return alert_name
+
+    def executeSearchEventsSimple(self):
+        """
+        Execute the search for simple events
+        """
+        return self.main_query.execute(self.es, indices=self.event_indices)
 
     def searchEventsSimple(self):
         """
         Search events matching filters, store events in self.events
         """
         try:
-            results = self.main_query.execute(self.es, indices=self.event_indices)
+            results = self.executeSearchEventsSimple()
             self.events = results['hits']
             self.log.debug(self.events)
         except Exception as e:
@@ -443,7 +457,7 @@ class AlertTask(Task):
         """
         try:
             for event in events:
-                if 'alerts' not in event['_source'].keys():
+                if 'alerts' not in event['_source']:
                     event['_source']['alerts'] = []
                 event['_source']['alerts'].append({
                     'index': alertResultES['_index'],
@@ -452,9 +466,11 @@ class AlertTask(Task):
 
                 if 'alert_names' not in event['_source']:
                     event['_source']['alert_names'] = []
-                event['_source']['alert_names'].append(self.classname())
+                event['_source']['alert_names'].append(self.determine_alert_classname())
 
                 self.es.save_event(index=event['_index'], doc_type=event['_type'], body=event['_source'], doc_id=event['_id'])
+            # We refresh here to ensure our changes to the events will show up for the next search query results
+            self.es.refresh(event['_index'])
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 
@@ -479,7 +495,8 @@ class AlertTask(Task):
         Helper function to parse an alert config file
         """
         alert_dir = os.path.join(os.path.dirname(__file__), '..')
-        config_file_path = os.path.join(alert_dir, config_file)
+        #config_file_path = os.path.join(alert_dir, config_file)
+        config_file_path = os.path.abspath(os.path.join(alert_dir, config_file))
         json_obj = {}
         with open(config_file_path, "r") as fd:
             try:
