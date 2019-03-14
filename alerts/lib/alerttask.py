@@ -18,11 +18,14 @@ from datetime import datetime
 from collections import Counter
 from celery import Task
 from celery.utils.log import get_task_logger
-from config import RABBITMQ, ES
+from config import RABBITMQ, ES, ALERT_PLUGINS
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+from lib.alert_plugin_set import AlertPluginSet
 
 
 # utility functions used by AlertTask.mostCommon
@@ -179,13 +182,13 @@ class AlertTask(Task):
         try:
             # cherry pick items from the alertDict to send to the alerts messageQueue
             mqAlert = dict(severity='INFO', category='')
-            if 'severity' in alertDict:
+            if 'severity' in alertDict.keys():
                 mqAlert['severity'] = alertDict['severity']
-            if 'category' in alertDict:
+            if 'category' in alertDict.keys():
                 mqAlert['category'] = alertDict['category']
-            if 'utctimestamp' in alertDict:
+            if 'utctimestamp' in alertDict.keys():
                 mqAlert['utctimestamp'] = alertDict['utctimestamp']
-            if 'eventtimestamp' in alertDict:
+            if 'eventtimestamp' in alertDict.keys():
                 mqAlert['eventtimestamp'] = alertDict['eventtimestamp']
             mqAlert['summary'] = alertDict['summary']
             self.log.debug(mqAlert)
@@ -242,32 +245,18 @@ class AlertTask(Task):
 
         """
         # Don't fire on already alerted events
-        duplicate_matcher = TermMatch('alert_names', self.determine_alert_classname())
+        duplicate_matcher = TermMatch('alert_names', self.classname())
         if duplicate_matcher not in query.must_not:
             query.add_must_not(duplicate_matcher)
 
         self.main_query = query
-
-    def determine_alert_classname(self):
-        alert_name = self.classname()
-        # Allow alerts like the generic alerts (one python alert but represents many 'alerts')
-        # can customize the alert name
-        if hasattr(self, 'custom_alert_name'):
-            alert_name = self.custom_alert_name
-        return alert_name
-
-    def executeSearchEventsSimple(self):
-        """
-        Execute the search for simple events
-        """
-        return self.main_query.execute(self.es, indices=self.event_indices)
 
     def searchEventsSimple(self):
         """
         Search events matching filters, store events in self.events
         """
         try:
-            results = self.executeSearchEventsSimple()
+            results = self.main_query.execute(self.es, indices=self.event_indices)
             self.events = results['hits']
             self.log.debug(self.events)
         except Exception as e:
@@ -337,6 +326,7 @@ class AlertTask(Task):
                 if alert:
                     alert = self.tagBotNotify(alert)
                     self.log.debug(alert)
+                    alert = self.alertPlugins(alert)
                     alertResultES = self.alertToES(alert)
                     self.tagEventsAlert([i], alertResultES)
                     self.alertToMessageQueue(alert)
@@ -366,6 +356,7 @@ class AlertTask(Task):
                     if alert:
                         alert = self.tagBotNotify(alert)
                         self.log.debug(alert)
+                        alert = self.alertPlugins(alert)
                         alertResultES = self.alertToES(alert)
                         # even though we only sample events in the alert
                         # tag all events as alerted to avoid re-alerting
@@ -373,6 +364,17 @@ class AlertTask(Task):
                         self.tagEventsAlert(aggregation['allevents'], alertResultES)
                         self.alertToMessageQueue(alert)
                         self.saveAlertID(alertResultES)
+
+    def alertPlugins(self, alert):
+        """
+        Send alerts through a plugin system
+        """
+
+        plugin_dir = os.path.join(os.path.dirname(__file__), '../plugins')
+        plugin_set = AlertPluginSet(plugin_dir, ALERT_PLUGINS)
+        alertDict = plugin_set.run_plugins(alert)[0]
+
+        return alertDict
 
     def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None, ircchannel=None):
         """
@@ -441,7 +443,7 @@ class AlertTask(Task):
         """
         try:
             for event in events:
-                if 'alerts' not in event['_source']:
+                if 'alerts' not in event['_source'].keys():
                     event['_source']['alerts'] = []
                 event['_source']['alerts'].append({
                     'index': alertResultES['_index'],
@@ -450,11 +452,9 @@ class AlertTask(Task):
 
                 if 'alert_names' not in event['_source']:
                     event['_source']['alert_names'] = []
-                event['_source']['alert_names'].append(self.determine_alert_classname())
+                event['_source']['alert_names'].append(self.classname())
 
                 self.es.save_event(index=event['_index'], doc_type=event['_type'], body=event['_source'], doc_id=event['_id'])
-            # We refresh here to ensure our changes to the events will show up for the next search query results
-            self.es.refresh(event['_index'])
         except Exception as e:
             self.log.error('Error while updating events in ES: {0}'.format(e))
 
@@ -479,7 +479,7 @@ class AlertTask(Task):
         Helper function to parse an alert config file
         """
         alert_dir = os.path.join(os.path.dirname(__file__), '..')
-        config_file_path = os.path.abspath(os.path.join(alert_dir, config_file))
+        config_file_path = os.path.join(alert_dir, config_file)
         json_obj = {}
         with open(config_file_path, "r") as fd:
             try:
