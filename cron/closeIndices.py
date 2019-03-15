@@ -43,7 +43,6 @@ def esCloseIndices():
                 index_date_str = index_date_obj.strftime('%Y%m%d')
                 try:
                     if int(month_ago_str) > int(index_date_str):
-                        print '{} is bigger than {}'.format(month_ago_str, index_date_str)
                         index_to_close = index
                         logger.debug("Index: %s will be closed." % (index_to_close))
                         es.index_close(index_to_close)
