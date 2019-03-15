@@ -29,7 +29,6 @@ def esCloseIndices():
     except Exception as e:
         logger.error("Unhandled exception while connecting to ES, terminating: %r" % (e))
 
-
     # examine each index pulled from get_indice
     # to determine if it meets aging criteria
     for index in indices:
