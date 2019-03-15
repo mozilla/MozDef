@@ -12,52 +12,46 @@
 # Create a starter .conf file with backupDiscover.py
 
 import sys
-import logging
 from datetime import datetime, date, timedelta
 from configlib import getConfig, OptionParser
-from logging.handlers import SysLogHandler
 
+from mozdef_util.utilities.logger import logger
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
-logger = logging.getLogger(sys.argv[0])
-logger.level=logging.WARNING
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
-
-
 def esCloseIndices():
-    if options.output == 'syslog':
-        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
     index_to_close = ''
     logger.debug('started')
     try:
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
-
         indices = es.get_indices()
-        print(indices)
-        # calc dates for use in index names events-YYYYMMDD, alerts-YYYYMM, etc.
-        odate_month = date.strftime(toUTC(datetime.now()) - timedelta(days=int(options.index_age)), '%Y%m')
-        # examine each index in the .conf file
-        # for rotation settings
-        for index in indices:
-            if index.find('events') == -1:
-                print "Index: %s will not be closed." % (index)
-            else:
-                odate = str(odate_month)
-                if index.find(odate) == -1:
-                    print "Index: %s doesn't meet aging requirements and will not be closed" % (index)
-                else:
-                    index_to_close = index
-                    print "Index: %s will be closed." % (index_to_close)
-                    es.index_close(index_to_close)
-                    options.index_age = int(options.index_age) + 1
     except Exception as e:
-        logger.error("Unhandled exception while closing %s, terminating: %r" % (index_to_close, e))
+        logger.error("Unhandled exception while connecting to ES, terminating: %r" % (e))
+
+
+    # examine each index pulled from get_indice
+    # to determine if it meets aging criteria
+    for index in indices:
+        if 'events' in index:
+            index_date = index.rsplit('-', 1)[1]
+            logger.debug("Checking to see if Index: %s can be closed." % (index))
+            month_ago_date = toUTC(datetime.now()) - timedelta(days=options.index_age)
+            point_of_close = month_ago_date.strftime('%Y%m%d')
+            if len(index_date) == 8:
+                month_ago_str = point_of_close
+                index_date_obj = datetime.strptime(index_date, '%Y%m%d')
+                index_date_str = index_date_obj.strftime('%Y%m%d')
+                try:
+                    if int(month_ago_str) > int(index_date_str):
+                        print '{} is bigger than {}'.format(month_ago_str, index_date_str)
+                        index_to_close = index
+                        logger.debug("Index: %s will be closed." % (index_to_close))
+                        es.index_close(index_to_close)
+                    else:
+                        logger.debug("Index: %s  does not meet aging criteria and will not be closed." % (index_date_str))
+                except Exception as e:
+                    logger.error("Unhandled exception while closing indices, terminating: %r" % (e))
 
 
 def initConfig():
