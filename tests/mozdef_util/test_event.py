@@ -49,6 +49,7 @@ class TestEvent(object):
         assert self.event['severity'] == 'UNKNOWN'
         assert self.event['source'] == 'UNKNOWN'
         assert self.event['summary'] == 'example summary'
+        assert self.event['type'] == 'event'
         assert self.event['tags'] == []
         assert self.event['details'] == {}
 
@@ -65,6 +66,7 @@ class TestEvent(object):
             'severity': 'HIGH',
             'source': '/var/log/syslog/mozdef.log',
             'summary': 'example summary',
+            'type': 'example',
             'tags': ['example'],
             'details': {
                 'firstkey': 'firstvalue',
@@ -83,5 +85,6 @@ class TestEvent(object):
         assert event['severity'] == 'HIGH'
         assert event['source'] == '/var/log/syslog/mozdef.log'
         assert event['summary'] == 'example summary'
+        assert event['type'] == 'example'
         assert event['tags'] == ['example']
         assert event['details'] == {'firstkey': 'firstvalue'}

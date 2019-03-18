@@ -10,6 +10,7 @@ class Event(dict):
     # create an alert around these, and know when events
     # have to use defaults
     DEFAULT_STRING = 'UNKNOWN'
+    DEFAULT_TYPE = 'event'
 
     def add_required_fields(self):
         if 'receivedtimestamp' not in self:
@@ -36,6 +37,8 @@ class Event(dict):
             self['source'] = self.DEFAULT_STRING
         if 'summary' not in self:
             self['summary'] = self.DEFAULT_STRING
+        if 'type' not in self:
+            self['type'] = self.DEFAULT_TYPE
         if 'plugins' not in self:
             self['plugins'] = []
         if 'details' not in self:
