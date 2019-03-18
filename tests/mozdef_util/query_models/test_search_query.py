@@ -151,35 +151,38 @@ class TestExecute(SearchQueryUnitTest):
 
         assert sorted_hits[0].keys() == ['_score', '_type', '_id', '_source', '_index']
         assert type(sorted_hits[0]['_id']) == unicode
-        assert sorted_hits[0]['_type'] == 'event'
+        assert sorted_hits[0]['_type'] == '_doc'
 
         assert sorted_hits[0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
         assert sorted_hits[0]['_source']['ip'] == '1.2.3.4'
         assert sorted_hits[0]['_source']['summary'] == 'Test Summary'
+        assert sorted_hits[0]['_source']['type'] == 'event'
 
         assert sorted_hits[0]['_source']['details'].keys() == ['information']
         assert sorted_hits[0]['_source']['details']['information'] == 'Example information'
 
         assert sorted_hits[1].keys() == ['_score', '_type', '_id', '_source', '_index']
         assert type(sorted_hits[1]['_id']) == unicode
-        assert sorted_hits[1]['_type'] == 'event'
+        assert sorted_hits[1]['_type'] == '_doc'
 
         assert sorted_hits[1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
         assert sorted_hits[1]['_source']['ip'] == '1.2.3.4'
         assert sorted_hits[1]['_source']['summary'] == 'Test Summary'
+        assert sorted_hits[1]['_source']['type'] == 'event'
 
         assert sorted_hits[1]['_source']['details'].keys() == ['information']
         assert sorted_hits[1]['_source']['details']['information'] == 'Example information'
 
         assert type(sorted_hits[2]['_id']) == unicode
-        assert sorted_hits[2]['_type'] == 'event'
+        assert sorted_hits[2]['_type'] == '_doc'
 
         assert sorted_hits[2]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
         assert sorted_hits[2]['_source']['ip'] == '127.0.0.1'
         assert sorted_hits[2]['_source']['summary'] == 'Test Summary'
+        assert sorted_hits[2]['_source']['type'] == 'event'
 
         assert sorted_hits[2]['_source']['details'].keys() == ['information']
         assert sorted_hits[2]['_source']['details']['information'] == 'Example information'
@@ -229,24 +232,26 @@ class TestExecute(SearchQueryUnitTest):
 
         assert results['hits'][0].keys() == ['_score', '_type', '_id', '_source', '_index']
         assert type(results['hits'][0]['_id']) == unicode
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_type'] == '_doc'
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
         assert results['hits'][0]['_source']['note'] == 'Example note'
         assert results['hits'][0]['_source']['summary'] == 'Test Summary'
+        assert results['hits'][0]['_source']['type'] == 'event'
 
         assert results['hits'][0]['_source']['details'].keys() == ['information']
         assert results['hits'][0]['_source']['details']['information'] == 'Example information'
 
         assert results['hits'][1].keys() == ['_score', '_type', '_id', '_source', '_index']
         assert type(results['hits'][1]['_id']) == unicode
-        assert results['hits'][1]['_type'] == 'event'
+        assert results['hits'][1]['_type'] == '_doc'
 
         assert results['hits'][1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
         assert results['hits'][1]['_source']['note'] == 'Example note'
         assert results['hits'][1]['_source']['summary'] == 'Test Summary'
+        assert results['hits'][1]['_source']['type'] == 'event'
 
         assert results['hits'][1]['_source']['details'].keys() == ['information']
         assert results['hits'][1]['_source']['details']['information'] == 'Example information'
@@ -278,12 +283,13 @@ class TestExecute(SearchQueryUnitTest):
 
         assert results['hits'][0].keys() == ['_score', '_type', '_id', '_source', '_index']
         assert type(results['hits'][0]['_id']) == unicode
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_type'] == '_doc'
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
         assert results['hits'][0]['_source']['note'] == 'Example note'
         assert results['hits'][0]['_source']['summary'] == 'Test Summary'
+        assert results['hits'][0]['_source']['type'] == 'event'
 
         assert results['hits'][0]['_source']['details'].keys() == ['information']
         assert results['hits'][0]['_source']['details']['information'] == 'Example information'
