@@ -11,9 +11,11 @@ DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap moz
 BUILD_MODE	:= build  ## Pass `pull` in order to pull images instead of building them
 NAME		:= mozdef
 VERSION		:= 0.1
+BRANCH		:= master
 NO_CACHE	:= ## Pass `--no-cache` in order to disable Docker cache
 GITHASH		:= latest  ## Pass `$(git rev-parse --short HEAD`) to tag docker hub images as latest git-hash instead
 TEST_CASE	:= tests  ## Run all (`tests`) or a specific test case (ex `tests/alerts/tests/alerts/test_proxy_drop_exfil_domains.py`)
+TMPDIR      := $(shell mktemp -d )
 
 .PHONY:all
 all:
@@ -57,9 +59,15 @@ run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make 
 rebuild-run-tests: build-tests run-tests
 
 
-.PHONY: build
-build:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
+.PHONY: build-cwd
+build-from-cwd:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
+
+.PHONY: build-github
+build-from-github:  ## Build local MozDef images from the github branch (use make NO_CACHE=--no-cache build to disable caching)
+	@echo "Performing a build from the github branch using $(TMPDIR) for BRANCH=$(BRANCH)"
+	cd $(TMPDIR) && git clone https://github.com/mozilla/MozDef.git && cd MozDef && git checkout $(BRANCH) && make build-from-cwd
+	rm -rf $(TMPDIR)
 
 .PHONY: build-tests
 build-tests:  ## Build end-to-end test environment only
@@ -78,6 +86,28 @@ hub: ## Upload locally built MozDef images tagged as the current git head (hub.d
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) push
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) push
 
+.PHONY: docker-push-tagged docker-get hub hub-get
+docker-push-tagged: hub-tagged
+hub-tagged: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef).
+	docker login
+	docker tag mozdef/mozdef_meteor:latest mozdef/mozdef_meteor:$(BRANCH) && docker push mozdef/mozdef_meteor:$(BRANCH)
+	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH) && docker push mozdef/mozdef_base:$(BRANCH)
+	docker tag mozdef/mozdef_tester:latest mozdef/mozdef_tester:$(BRANCH) && docker push mozdef/mozdef_tester:$(BRANCH)
+	docker tag mozdef/mozdef_mq_worker:latest mozdef/mozdef_mq_worker:$(BRANCH) && docker push mozdef/mozdef_mq_worker:$(BRANCH)
+	docker tag mozdef/mozdef_kibana:latest mozdef/mozdef_kibana:$(BRANCH) && docker push mozdef/mozdef_kibana:$(BRANCH)
+	docker tag mozdef/mozdef_syslog:latest mozdef/mozdef_syslog:$(BRANCH) && docker push mozdef/mozdef_syslog:$(BRANCH)
+	docker tag mozdef/mozdef_cron:latest mozdef/mozdef_cron:$(BRANCH) && docker push mozdef/mozdef_cron:$(BRANCH)
+	docker tag mozdef/mozdef_elasticsearch:latest mozdef/mozdef_elasticsearch:$(BRANCH) && docker push mozdef/mozdef_elasticsearch:$(BRANCH)
+	docker tag mozdef/mozdef_loginput:latest mozdef/mozdef_loginput:$(BRANCH) && docker push mozdef/mozdef_loginput:$(BRANCH)
+	docker tag mozdef/mozdef_mongodb:latest mozdef/mozdef_mongodb:$(BRANCH) && docker push mozdef/mozdef_mongodb:$(BRANCH)
+	docker tag mozdef/mozdef_bootstrap:latest mozdef/mozdef_bootstrap:$(BRANCH) && docker push mozdef/mozdef_bootstrap:$(BRANCH) 
+	docker tag mozdef/mozdef_alerts:latest mozdef/mozdef_alerts:$(BRANCH) && docker push mozdef/mozdef_alerts:$(BRANCH)
+	docker tag mozdef/mozdef_nginx:latest mozdef/mozdef_nginx:$(BRANCH) && docker push mozdef/mozdef_nginx:$(BRANCH)
+	docker tag mozdef/mozdef_alertplugins:latest mozdef/mozdef_alertplugins:$(BRANCH) && docker push mozdef/mozdef_alertplugins:$(BRANCH)
+	docker tag mozdef/mozdef_rabbitmq:latest mozdef/mozdef_rabbitmq:$(BRANCH) && docker push mozdef/mozdef_rabbitmq:$(BRANCH)
+	docker tag mozdef/mozdef_rest:latest mozdef/mozdef_rest:$(BRANCH) && docker push mozdef/mozdef_rest:$(BRANCH)
+	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH) && docker push mozdef/mozdef_base:$(BRANCH)
+
 docker-get: hub-get
 hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) pull
@@ -87,9 +117,10 @@ hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
 clean: ## Cleanup all docker volumes and shutdown all related services
 	-docker-compose -f docker/compose/docker-compose.yml -p $(NAME) down -v --remove-orphans
 	-docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) down -v --remove-orphans
+
 # Shorthands
 .PHONY: rebuild
-rebuild: clean build
+rebuild: clean build-cwd
 
 .PHONY: new-alert
 new-alert: ## Create an example alert and working alert unit test
