@@ -3,4 +3,14 @@ path.data: /var/lib/elasticsearch
 http.host: 0.0.0.0
 discovery.type: single-node
 action.destructive_requires_name: true
+
+# Disable auto creation unless these indexes
 action.auto_create_index:  .watches,.triggered_watches,.watcher-history-*
+
+# Add these to prevent requiring a user/pass and termination of ES when looking for "ingest" assignments.
+# The watcher directive allows for the deletion of failed watcher indices as they sometimes get created with glitches.
+xpack.security.enabled: false
+xpack.monitoring.exporters.my_local:
+  type: local
+  use_ingest: false
+xpack.watcher.index.rest.direct_access: true
