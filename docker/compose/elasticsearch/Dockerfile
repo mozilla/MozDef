@@ -6,12 +6,10 @@ ENV ES_VERSION 6.6.2
 ENV ES_JAVA_VERSION 1.8.0
 
 
-#https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.6.2.rpm
-
 RUN \
   yum install -y java-$ES_JAVA_VERSION && \
   mkdir -p /opt/mozdef/envs && \
-  curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.6.2.rpm -o elasticsearch.rpm && \
+  curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ES_VERSION.rpm -o elasticsearch.rpm && \
   rpm -i elasticsearch.rpm && \
   yum clean all
 
