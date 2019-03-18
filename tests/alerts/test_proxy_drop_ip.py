@@ -14,37 +14,28 @@ class TestAlertProxyDropIP(AlertTestSuite):
     default_event = {
         "_type": "event",
         "_source": {
-            "category": "squid",
-            "tags": ["squid"],
+            "category": "proxy",
             "details": {
                 "sourceipaddress": "1.2.3.4",
-                "destination": "http://1.2.3.5/",
-                "proxyaction": "TCP_DENIED/-",
-            }
-        }
+                "host": "1.2.3.5",
+                "proxyaction": "TCP_DENIED",
+            },
+        },
     }
-
-    # This event is an alternate destination that we'd want to aggregate
-    default_event2 = AlertTestSuite.copy(default_event)
-    default_event2["_source"]["details"]["destination"] = "1.2.3.5:1337"
-
-    # This event is the default negative event that will not cause the
-    # alert to trigger
-    default_negative_event = AlertTestSuite.copy(default_event)
-    default_negative_event["_source"]["details"]["destination"] = "http://foo.mozilla.com"
 
     # This alert is the expected result from running this task
     default_alert = {
         "category": "squid",
-        "tags": ['squid', 'proxy'],
+        "tags": ["squid", "proxy"],
         "severity": "WARNING",
-        "summary": 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following IP-based destination(s): http://1.2.3.5/',
+        "summary": "Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following IP-based destination(s): 1.2.3.5",
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
-        "summary"] = 'Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following IP-based destination(s): 1.2.3.5:1337,http://1.2.3.5/'
+        "summary"
+    ] = "Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following IP-based destination(s): 1.2.3.5"
 
     test_cases = []
 
@@ -52,7 +43,7 @@ class TestAlertProxyDropIP(AlertTestSuite):
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
             events=AlertTestSuite.create_events(default_event, 1),
-            expected_alert=default_alert
+            expected_alert=default_alert,
         )
     )
 
@@ -60,30 +51,32 @@ class TestAlertProxyDropIP(AlertTestSuite):
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected - dedup",
             events=AlertTestSuite.create_events(default_event, 2),
-            expected_alert=default_alert
-        )
-    )
-
-    events1 = AlertTestSuite.create_events(default_event, 1)
-    events2 = AlertTestSuite.create_events(default_event2, 1)
-    test_cases.append(
-        PositiveAlertTestCase(
-            description="Positive test with default events and default alert expected - different dests",
-            events=events1 + events2,
-            expected_alert=default_alert_aggregated
-        )
-    )
-
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test with default negative event",
-            events=AlertTestSuite.create_events(default_negative_event, 1),
+            expected_alert=default_alert,
         )
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['category'] = 'bad'
+        event["_source"]["details"]["host"] = "idonotexist.com"
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test with default negative event", events=events
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event["_source"]["details"]["host"] = "1.idonotexist.com"
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test with a negative event for an FQDN with starting with a number",
+            events=events,
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event["_source"]["category"] = "bad"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with incorrect category",
@@ -93,32 +86,14 @@ class TestAlertProxyDropIP(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['tags'] = 'bad tag example'
+        event["_source"][
+            "utctimestamp"
+        ] = AlertTestSuite.subtract_from_timestamp_lambda({"minutes": 241})
+        event["_source"][
+            "receivedtimestamp"
+        ] = AlertTestSuite.subtract_from_timestamp_lambda({"minutes": 241})
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with events with incorrect tags",
-            events=events,
-        )
-    )
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
-        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({
-                                                                                         'minutes': 241})
-        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({
-                                                                                              'minutes': 241})
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with old timestamp",
-            events=events,
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
-        event['_source']['details']['destination'] = 'http://evil.com/evil.pdf'
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with events with non blacklisted extension",
-            events=events,
+            description="Negative test case with old timestamp", events=events
         )
     )

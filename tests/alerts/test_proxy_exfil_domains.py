@@ -16,36 +16,40 @@ class TestProxyExfilDomains(AlertTestSuite):
     default_event = {
         "_type": "event",
         "_source": {
-            "category": "squid",
-            "tags": ["squid"],
-            "details": {
-                "sourceipaddress": "1.2.3.4",
-                "destination": "https://pastebin.com",
-            }
-        }
+            "category": "proxy",
+            "details": {"sourceipaddress": "1.2.3.4", "host": "pastebin.com"},
+        },
     }
 
     # This event is an alternate destination that we'd want to aggregate
     default_event2 = AlertTestSuite.copy(default_event)
-    default_event2["_source"]["details"]["destination"] = "http://www.sendspace.com"
+    default_event2["_source"]["details"]["host"] = "www.sendspace.com"
 
     # This event is the default negative event that will not cause the
     # alert to trigger
     default_negative_event = AlertTestSuite.copy(default_event)
-    default_negative_event["_source"]["details"]["destination"] = "foo.mozilla.com"
+    default_negative_event["_source"]["details"]["host"] = "foo.mozilla.com"
 
     # This alert is the expected result from running this task
     default_alert = {
         "category": "squid",
-        "tags": ['squid', 'proxy'],
+        "tags": ["squid", "proxy"],
         "severity": "WARNING",
-        "summary": 'Suspicious Proxy event(s) detected from 1.2.3.4 to the following exfil domain(s): pastebin.com',
+        "summary": "Suspicious Proxy event(s) detected from 1.2.3.4 to the following exfil domain(s): pastebin.com",
+    }
+
+    default_alert2 = {
+        "category": "squid",
+        "tags": ["squid", "proxy"],
+        "severity": "WARNING",
+        "summary": "Suspicious Proxy event(s) detected from 1.2.3.4 to the following exfil domain(s): www.sendspace.com",
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
-        "summary"] = 'Suspicious Proxy event(s) detected from 1.2.3.4 to the following exfil domain(s): pastebin.com,www.sendspace.com'
+        "summary"
+    ] = "Suspicious Proxy event(s) detected from 1.2.3.4 to the following exfil domain(s): pastebin.com,www.sendspace.com"
 
     test_cases = []
 
@@ -53,7 +57,7 @@ class TestProxyExfilDomains(AlertTestSuite):
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
             events=AlertTestSuite.create_events(default_event, 1),
-            expected_alert=default_alert
+            expected_alert=default_alert,
         )
     )
 
@@ -61,7 +65,15 @@ class TestProxyExfilDomains(AlertTestSuite):
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected - dedup",
             events=AlertTestSuite.create_events(default_event, 2),
-            expected_alert=default_alert
+            expected_alert=default_alert,
+        )
+    )
+
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test with default events and default alert expected - dedup",
+            events=AlertTestSuite.create_events(default_event2, 2),
+            expected_alert=default_alert2,
         )
     )
 
@@ -71,7 +83,7 @@ class TestProxyExfilDomains(AlertTestSuite):
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected - different destinations",
             events=events1 + events2,
-            expected_alert=default_alert_aggregated
+            expected_alert=default_alert_aggregated,
         )
     )
 
@@ -84,7 +96,7 @@ class TestProxyExfilDomains(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['category'] = 'bad'
+        event["_source"]["category"] = "bad"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with events with incorrect category",
@@ -94,22 +106,14 @@ class TestProxyExfilDomains(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event['_source']['tags'] = 'bad tag example'
+        event["_source"][
+            "utctimestamp"
+        ] = AlertTestSuite.subtract_from_timestamp_lambda({"minutes": 241})
+        event["_source"][
+            "receivedtimestamp"
+        ] = AlertTestSuite.subtract_from_timestamp_lambda({"minutes": 241})
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with events with incorrect tags",
-            events=events,
-        )
-    )
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
-        event['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({
-                                                                                         'minutes': 241})
-        event['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({
-                                                                                              'minutes': 241})
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with old timestamp",
-            events=events,
+            description="Negative test case with old timestamp", events=events
         )
     )

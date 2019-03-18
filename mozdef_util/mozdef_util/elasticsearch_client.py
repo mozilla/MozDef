@@ -85,8 +85,8 @@ class ElasticsearchClient():
     def get_alias(self, alias_name):
         return self.es_connection.indices.get_alias(index='*', name=alias_name).keys()
 
-    def flush(self, index_name):
-        self.es_connection.indices.flush(index=index_name)
+    def refresh(self, index_name):
+        self.es_connection.indices.refresh(index=index_name)
 
     def search(self, search_query, indices, size, request_timeout):
         results = []
@@ -118,15 +118,13 @@ class ElasticsearchClient():
         except BulkIndexError as e:
             logger.error("Error bulk indexing: " + str(e))
 
-    def start_bulk_timer(self):
-        if not self.bulk_queue.started():
-            self.bulk_queue.start_timer()
-
     def finish_bulk(self):
-        self.bulk_queue.stop_timer()
+        self.bulk_queue.flush()
+        self.bulk_queue.stop_thread()
 
     def __bulk_save_document(self, index, doc_type, body, doc_id=None):
-        self.start_bulk_timer()
+        if not self.bulk_queue.started():
+            self.bulk_queue.start_thread()
         self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
 
     def __save_document(self, index, doc_type, body, doc_id=None, bulk=False):

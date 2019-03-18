@@ -41,9 +41,9 @@ class AlertMultipleIntelHits(AlertTask):
 
         summary += ' sample hosts that hit it: '
         for e in aggreg['events'][:3]:
-            if 'details' in e['_source'].keys() \
-               and 'sourceipaddress' in e['_source']['details'].keys() \
-               and 'seenwhere' in e['_source']['details'].keys():
+            if 'details' in e['_source'] \
+               and 'sourceipaddress' in e['_source']['details'] \
+               and 'seenwhere' in e['_source']['details']:
                 interestingaddres = ''
                 # someone talking to a bad guy, I want to know who
                 # someone resolving bad guy's domain name, I want to know who

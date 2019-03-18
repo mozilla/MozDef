@@ -40,7 +40,7 @@ class message(object):
             return (message, metadata)
         # drop non-relevant messages
         if message['eventsource'] in ('Fxa-customsMozSvc', 'FxaContentWebserver', 'FxaAuthWebserver', 'FxaOauthWebserver', 'FxaAuth', 'fxa-auth-server'):
-            if 'details' in message.keys():
+            if 'details' in message:
                 if 'status' in message['details']:
                     if message['details']['status'] == 200:
                         # normal 200 returns for web content
@@ -56,24 +56,24 @@ class message(object):
                         return(None, metadata)
 
         # tag the message
-        if 'tags' in message.keys() and isinstance(message['tags'], list):
+        if 'tags' in message and isinstance(message['tags'], list):
             message['tags'].append('firefoxaccounts')
         else:
             message['tags'] = ['firefoxaccounts']
 
         # fix various fields
-        if 'details' in message.keys() and isinstance(message['details'], dict):
+        if 'details' in message and isinstance(message['details'], dict):
             # elastic search needs valid IPs for ip fields.
-            if 'http_x_forwarded_for' in message['details'].keys():
+            if 'http_x_forwarded_for' in message['details']:
                 if message['details']['http_x_forwarded_for'] == '-':
                     message['details']['http_x_forwarded_for'] = '0.0.0.0'
 
-            if 'upstream_response_time' in message['details'].keys():
+            if 'upstream_response_time' in message['details']:
                 if message['details']['upstream_response_time'] == '-':
                     message['details']['upstream_response_time'] = 0
 
             # category fixes
-            if 'name' in message['details'].keys():
+            if 'name' in message['details']:
                 if message['details']['name'] == 'fxa-auth-server':
                     message['category'] = 'fxa-auth-server'
 
@@ -81,7 +81,7 @@ class message(object):
                 if message['category'] == 'logfile':
                     message['category'] = 'weblog'
 
-            if 'remoteaddresschain' in message['details'].keys():
+            if 'remoteaddresschain' in message['details']:
                 if isinstance(message['details']['remoteaddresschain'], list):
                     sourceIP = message['details']['remoteaddresschain'][0]
                     if isIP(sourceIP):
@@ -102,7 +102,7 @@ class message(object):
                             message['details']['sourceipaddress'] = sourceIP
 
             # fxacustoms sends source ip as just 'ip'
-            if 'ip' in message['details'].keys():
+            if 'ip' in message['details']:
                 if isIP(message['details']['ip']):
                     message['details']['sourceipaddress'] = message['details']['ip']
 

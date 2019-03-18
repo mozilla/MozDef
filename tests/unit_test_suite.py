@@ -67,8 +67,8 @@ class UnitTestSuite(object):
         self.es_client.delete_index(self.alert_index_name, True)
         self.es_client.delete_index('alerts', True)
 
-    def flush(self, index_name):
-        self.es_client.flush(index_name)
+    def refresh(self, index_name):
+        self.es_client.refresh(index_name)
 
     def random_ip(self):
         return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
