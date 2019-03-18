@@ -78,6 +78,19 @@ class TestAdd(BulkQueueTest):
         assert self.queue.size() == 1
         assert self.queue.started() is False
 
+    def test_doc_types(self):
+        for num in range(0, 20):
+            self.queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+        assert self.queue.size() == 0
+        assert self.num_objects_saved() == 20
+        search_query = SearchQuery()
+        search_query.add_must(ExistsMatch('keyname'))
+        results = search_query.execute(self.es_client)
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert results['hits'][0]['_source'].keys() == ['keyname', 'type']
+        assert results['hits'][0]['_source']['type'] == 'event'
+        assert results['hits'][0]['_type'] == '_doc'
+
 
 class TestTimer(BulkQueueTest):
 
