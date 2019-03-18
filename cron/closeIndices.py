@@ -12,7 +12,7 @@
 # Create a starter .conf file with backupDiscover.py
 
 import sys
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 
 from mozdef_util.utilities.logger import logger
@@ -55,31 +55,31 @@ def esCloseIndices():
 def initConfig():
     # output our log to stdout or syslog
     options.output = getConfig(
-                              'output',
-                              'stdout',
-                              options.configfile
-                              )
+        'output',
+        'stdout',
+        options.configfile
+    )
     # syslog hostname
     options.sysloghostname = getConfig(
-                                      'sysloghostname',
-                                      'localhost',
-                                      options.configfile
-                                      )
+        'sysloghostname',
+        'localhost',
+        options.configfile
+    )
     options.syslogport = getConfig(
-                                  'syslogport',
-                                  514,
-                                  options.configfile
-                                  )
+        'syslogport',
+        514,
+        options.configfile
+    )
     options.esservers = list(getConfig(
-                                      'esservers',
-                                      'http://localhost:9200',
-                                      options.configfile).split(',')
-                                      )
+        'esservers',
+        'http://localhost:9200',
+        options.configfile).split(',')
+    )
     options.index_age = getConfig(
-                                 'index_age',
-                                 '15',
-                                 options.configfile
-                                 )
+        'index_age',
+        '15',
+        options.configfile
+    )
 
 
 if __name__ == '__main__':
