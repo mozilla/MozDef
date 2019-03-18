@@ -2,6 +2,7 @@ ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PARENTDIR       := $(realpath ../)
 AWS_REGION	:= us-west-2
 STACK_NAME	:= mozdef-aws-nested
+BRANCH := master
 DEV_STACK_PARAMS_FILENAME	:= aws_parameters.dev.json
 # For more information on the rationale behind the code in STACK_PARAMS see https://github.com/aws/aws-cli/issues/2429#issuecomment-441133480
 DEV_STACK_PARAMS	:= $(shell test -e $(DEV_STACK_PARAMS_FILENAME) && python -c 'import json,sys;f=open(sys.argv[1]);print(" ".join([",".join(["%s=\\\"%s\\\""%(k,v) for k,v in x.items()]) for x in json.load(f)]));f.close()' $(DEV_STACK_PARAMS_FILENAME))
@@ -28,7 +29,8 @@ all:
 # Note: This requires AWS access
 .PHONY: packer-build
 packer-build: ## Build the base AMI with packer
-	cd packer && packer build packer.json
+	@echo "Branch based build triggered for $(BRANCH)..."
+	cd packer && packer -machine-readable build -var github_branch=${BRANCH} packer.json
 
 .PHONY: create-prod-stack
 create-dev-stack: test ## Create everything you need for a fresh new stack!
