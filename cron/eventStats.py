@@ -6,40 +6,21 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import json
-import logging
 import os
 import sys
 from datetime import datetime
 from configlib import getConfig, OptionParser
-from logging.handlers import SysLogHandler
 from time import sleep
 import socket
 
+from mozdef_util.utilities.logger import logger
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, Aggregation
 
-logger = logging.getLogger(sys.argv[0])
-
 
 def loggerTimeStamp(self, record, datefmt=None):
     return toUTC(datetime.now()).isoformat()
-
-
-def initLogger():
-    logger.level = logging.INFO
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    formatter.formatTime = loggerTimeStamp
-    if options.output == 'syslog':
-        logger.addHandler(
-            SysLogHandler(address=(options.sysloghostname,
-                                   options.syslogport)))
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
-
 
 def esSearch(es):
     search_query = SearchQuery(minutes=options.aggregationminutes)
@@ -50,6 +31,7 @@ def esSearch(es):
     mozdefstats['category'] = 'stats'
     mozdefstats['hostname'] = socket.gethostname()
     mozdefstats['mozdefhostname'] = mozdefstats['hostname']
+    mozdefstats['type'] = 'mozdefstats'
     mozdefstats['severity'] = 'INFO'
     mozdefstats['source'] = 'mozdef'
     mozdefstats['tags'] = ['mozdef', 'stats']
@@ -86,7 +68,7 @@ def main():
         if es.index_exists(index):
             # post to elastic search servers directly without going through
             # message queues in case there is an availability issue
-            es.save_event(index=index, body=json.dumps(stats), doc_type='mozdefstats')
+            es.save_event(index=index, body=json.dumps(stats), doc_type='_doc')
 
     except Exception as e:
         logger.error("Exception %r when gathering statistics " % e)
@@ -131,5 +113,4 @@ if __name__ == '__main__':
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    initLogger()
     main()
