@@ -37,6 +37,19 @@ class ElasticsearchClientTest(UnitTestSuite):
             return 0
 
 
+class BulkTest(ElasticsearchClientTest):
+
+    def setup(self):
+        super(BulkTest, self).setup()
+        self.mock_class = MockTransportClass()
+        self.mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
+        self.es_client.es_connection.transport.perform_request = self.mock_class.perform_request
+
+    def teardown(self):
+        self.es_client.finish_bulk()
+        super(BulkTest, self).teardown()
+
+
 class MockTransportClass:
 
     def __init__(self):
@@ -95,7 +108,7 @@ class TestWriteWithRead(ElasticsearchClientTest):
             'url': 'https://mozilla.org',
             'utctimestamp': '2016-08-19T16:40:57.851092+00:00'
         }
-        self.saved_alert = self.es_client.save_alert(body=self.alert)
+        self.saved_alert_result = self.es_client.save_alert(body=self.alert)
         self.refresh('alerts')
 
     def test_saved_type(self):
@@ -254,19 +267,6 @@ class TestSimpleWrites(ElasticsearchClientTest):
         assert len(results['hits']) == 1
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         assert results['hits'][0]['_type'] == '_doc'
-
-
-class BulkTest(ElasticsearchClientTest):
-
-    def setup(self):
-        super(BulkTest, self).setup()
-        self.mock_class = MockTransportClass()
-        self.mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
-        self.es_client.es_connection.transport.perform_request = self.mock_class.perform_request
-
-    def teardown(self):
-        self.es_client.finish_bulk()
-        super(BulkTest, self).teardown()
 
 
 class TestBulkWrites(BulkTest):

@@ -110,10 +110,6 @@ class ElasticsearchClient():
 
     def save_documents(self, documents):
         try:
-            for document in documents:
-                if '_type' in document:
-                    document['_source']['type'] = document['_type']
-                    document['_type'] = '_doc'
             bulk(self.es_connection, documents)
         except BulkIndexError as e:
             logger.error("Error bulk indexing: " + str(e))
