@@ -53,34 +53,34 @@ class TestAdd(BulkQueueTest):
 
     def test_basic_add(self):
         assert self.queue.size() == 0
-        self.queue.add(index='events', doc_type='event', body={'keyname', 'valuename'})
+        self.queue.add(index='events', doc_type='_doc', body={'keyname', 'valuename'})
         assert self.queue.size() == 1
         assert self.queue.started() is False
 
     def test_add_exact_threshold(self):
         for num in range(0, 20):
-            self.queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+            self.queue.add(index='events', doc_type='_doc', body={'keyname': 'value' + str(num)})
         assert self.queue.size() == 0
         assert self.num_objects_saved() == 20
         assert self.queue.started() is False
 
     def test_add_over_threshold(self):
         for num in range(0, 21):
-            self.queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+            self.queue.add(index='events', doc_type='_doc', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 20
         assert self.queue.size() == 1
         assert self.queue.started() is False
 
     def test_add_multiple_thresholds(self):
         for num in range(0, 201):
-            self.queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+            self.queue.add(index='events', doc_type='_doc', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 200
         assert self.queue.size() == 1
         assert self.queue.started() is False
 
     def test_doc_types(self):
         for num in range(0, 20):
-            self.queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+            self.queue.add(index='events', doc_type='_doc', body={'keyname': 'value' + str(num)})
         assert self.queue.size() == 0
         assert self.num_objects_saved() == 20
         search_query = SearchQuery()
@@ -88,7 +88,6 @@ class TestAdd(BulkQueueTest):
         results = search_query.execute(self.es_client)
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
         assert results['hits'][0]['_source'].keys() == ['keyname', 'type']
-        assert results['hits'][0]['_source']['type'] == 'event'
         assert results['hits'][0]['_type'] == '_doc'
 
 
@@ -99,7 +98,7 @@ class TestTimer(BulkQueueTest):
         assert queue.started() is False
         queue.start_timer()
         assert queue.started() is True
-        queue.add(index='events', doc_type='event', body={'keyname': 'valuename'})
+        queue.add(index='events', doc_type='_doc', body={'keyname': 'valuename'})
         assert queue.size() == 1
         time.sleep(3)
         assert queue.size() == 0
@@ -110,7 +109,7 @@ class TestTimer(BulkQueueTest):
         queue = BulkQueue(self.es_client, flush_time=3, threshold=10)
         queue.start_timer()
         for num in range(0, 201):
-            queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+            queue.add(index='events', doc_type='_doc', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 200
         assert queue.size() == 1
         time.sleep(4)
@@ -122,14 +121,14 @@ class TestTimer(BulkQueueTest):
         queue = BulkQueue(self.es_client, flush_time=3, threshold=10)
         queue.start_timer()
         for num in range(0, 201):
-            queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+            queue.add(index='events', doc_type='_doc', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 200
         assert queue.size() == 1
         time.sleep(3)
         assert self.num_objects_saved() == 201
         assert queue.size() == 0
         for num in range(0, 201):
-            queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+            queue.add(index='events', doc_type='_doc', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 401
         time.sleep(3)
         assert self.num_objects_saved() == 402
@@ -142,7 +141,7 @@ class TestTimer(BulkQueueTest):
         for num_rounds in range(0, 10):
             for num in range(0, 20):
                 total_events += 1
-                queue.add(index='events', doc_type='event', body={'keyname': 'value' + str(num)})
+                queue.add(index='events', doc_type='_doc', body={'keyname': 'value' + str(num)})
             assert self.num_objects_saved() == total_events
         assert queue.size() == 0
         queue.stop_timer()
