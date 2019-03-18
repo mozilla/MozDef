@@ -21,7 +21,6 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 def esCloseIndices():
-    index_to_close = ''
     logger.debug('started')
     try:
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
@@ -43,9 +42,8 @@ def esCloseIndices():
                 index_date_str = index_date_obj.strftime('%Y%m%d')
                 try:
                     if int(month_ago_str) > int(index_date_str):
-                        index_to_close = index
-                        logger.debug("Index: %s will be closed." % (index_to_close))
-                        es.index_close(index_to_close)
+                        logger.debug("Index: %s will be closed." % (index))
+                        es.index_close(index)
                     else:
                         logger.debug("Index: %s  does not meet aging criteria and will not be closed." % (index_date_str))
                 except Exception as e:
