@@ -64,7 +64,7 @@ build-from-cwd:  ## Build local MozDef images (use make NO_CACHE=--no-cache buil
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
 
 .PHONY: build-github
-build-from-github:  ## Build local MozDef images from the github branch (use make NO_CACHE=--no-cache build to disable caching)
+build-from-github:  ## Build local MozDef images from the github branch (use make NO_CACHE=--no-cache build to disable caching).
 	@echo "Performing a build from the github branch using $(TMPDIR) for BRANCH=$(BRANCH)"
 	cd $(TMPDIR) && git clone https://github.com/mozilla/MozDef.git && cd MozDef && git checkout $(BRANCH) && make build-from-cwd
 	rm -rf $(TMPDIR)
@@ -88,7 +88,7 @@ hub: ## Upload locally built MozDef images tagged as the current git head (hub.d
 
 .PHONY: docker-push-tagged docker-get hub hub-get
 docker-push-tagged: hub-tagged
-hub-tagged: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef).
+hub-tagged: ## Upload locally built MozDef images tagged as the BRANCH.  Branch and tagged release are interchangeable here.
 	docker login
 	docker tag mozdef/mozdef_meteor:latest mozdef/mozdef_meteor:$(BRANCH) && docker push mozdef/mozdef_meteor:$(BRANCH)
 	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH) && docker push mozdef/mozdef_base:$(BRANCH)
