@@ -189,8 +189,7 @@ class ElasticsearchClient():
             "title": title,
             "dashboard": json.dumps(dashboardjson)
         }
-
-        return self.es_connection.index(index='.kibana', doc_type='dashboard', body=dashboarddata, id=dashid)
+        return self.save_object(index='.kibana', doc_type='dashboard', body=dashboarddata, doc_id=dashid)
 
     def get_cluster_health(self):
         health_dict = self.es_connection.cluster.health()
