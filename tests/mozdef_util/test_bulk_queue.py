@@ -87,7 +87,7 @@ class TestAdd(BulkQueueTest):
         search_query.add_must(ExistsMatch('keyname'))
         results = search_query.execute(self.es_client)
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_source'].keys() == ['keyname', 'type']
+        assert results['hits'][0]['_source'].keys() == ['keyname']
         assert results['hits'][0]['_type'] == '_doc'
 
 
