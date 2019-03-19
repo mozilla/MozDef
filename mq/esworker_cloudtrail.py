@@ -257,6 +257,9 @@ def keyMapping(aDict):
         if 'utctimestamp' not in returndict:
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
+        if 'type' not in returndict:
+            # default replacement for old _type subcategory.
+            returndict['type'] = 'cloudtrail'
     except Exception as e:
         logger.exception(e)
         logger.error('Malformed message: %r' % aDict)
@@ -369,7 +372,6 @@ class taskConsumer(object):
             # default elastic search metadata for an event
             metadata = {
                 'index': 'events',
-                'doc_type': 'cloudtrail',
                 'id': None
             }
             # just to be safe..check what we were sent.
@@ -416,7 +418,6 @@ class taskConsumer(object):
                 self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
-                    doc_type=metadata['doc_type'],
                     body=jbody,
                     bulk=bulk
                 )
