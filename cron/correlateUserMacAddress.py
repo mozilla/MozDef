@@ -10,7 +10,6 @@ import re
 import sys
 from datetime import datetime
 from configlib import getConfig, OptionParser
-from logging.handlers import SysLogHandler
 from hashlib import md5
 
 from mozdef_util.utilities.logger import logger
