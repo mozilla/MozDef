@@ -1,0 +1,10 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo -n 'There are no installations to perform.'
+  build:
+    commands:
+      - mkdir -p serverless-functions/build/python/lib/python3.6/site-packages
+      - bash ci/deploy
