@@ -2,12 +2,14 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV RABBITMQ_VERSION 3.3.5
+ENV RABBITMQ_VERSION 3.7.13
+
+COPY docker/compose/rabbitmq/files/rabbitmq-server.repo /etc/yum.repos.d/rabbitmq-server.repo
+COPY docker/compose/rabbitmq/files/erlang.repo /etc/yum.repos.d/erlang.repo
 
 RUN \
-  yum makecache fast && \
+  yum -q makecache -y fast && \
   yum install -y epel-release && \
-  rpm --import https://www.rabbitmq.com/rabbitmq-release-signing-key.asc && \
   yum install -y rabbitmq-server-$RABBITMQ_VERSION && \
   yum clean all
 

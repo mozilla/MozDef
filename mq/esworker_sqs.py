@@ -66,7 +66,7 @@ def keyMapping(aDict):
             if k in ('message', 'summary'):
                 returndict[u'summary'] = toUnicode(v)
 
-            if k in ('payload') and 'summary' not in aDict.keys():
+            if k in ('payload') and 'summary' not in aDict:
                 # special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
                 returndict[u'summary'] = toUnicode(v)
             elif k in ('payload'):
@@ -132,12 +132,12 @@ def keyMapping(aDict):
                     returndict[u'details'][unicode(newName)] = toUnicode(v)
 
         # nxlog windows log handling
-        if 'Domain' in aDict.keys() and 'SourceModuleType' in aDict.keys():
+        if 'Domain' in aDict and 'SourceModuleType' in aDict:
             # nxlog parses all windows event fields very well
             # copy all fields to details
             returndict[u'details'][k] = v
 
-        if 'utctimestamp' not in returndict.keys():
+        if 'utctimestamp' not in returndict:
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
@@ -160,11 +160,6 @@ class taskConsumer(object):
         self.connection = mqConnection
         self.esConnection = esConnection
         self.taskQueue = taskQueue
-
-        if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
-            # to prevent events from sticking around an idle worker
-            self.esConnection.start_bulk_timer()
 
     def run(self):
         # Boto expects base64 encoded messages - but if the writer is not boto it's not necessarily base64 encoded
@@ -264,7 +259,7 @@ class taskConsumer(object):
                 # message.ack()
                 return
 
-            if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
+            if 'customendpoint' in bodyDict and bodyDict['customendpoint']:
                 # custom document
                 # send to plugins to allow them to modify it if needed
                 (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
@@ -274,7 +269,7 @@ class taskConsumer(object):
                 normalizedDict = keyMapping(bodyDict)
 
                 # send to plugins to allow them to modify it if needed
-                if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
+                if normalizedDict is not None and isinstance(normalizedDict, dict):
                     (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
 
             # drop the message if a plug in set it to None
@@ -289,7 +284,7 @@ class taskConsumer(object):
             if isCEF(normalizedDict):
                 # cef records are set to the 'deviceproduct' field value.
                 metadata['doc_type'] = 'cef'
-                if 'details' in normalizedDict.keys() and 'deviceproduct' in normalizedDict['details'].keys():
+                if 'details' in normalizedDict and 'deviceproduct' in normalizedDict['details']:
                     # don't create strange doc types..
                     if ' ' not in normalizedDict['details']['deviceproduct'] and '.' not in normalizedDict['details']['deviceproduct']:
                         metadata['doc_type'] = normalizedDict['details']['deviceproduct']

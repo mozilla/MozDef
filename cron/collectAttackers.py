@@ -275,7 +275,7 @@ def broadcastAttacker(attacker):
         # generate an 'alert' structure for this attacker:
         mqAlert = dict(severity='NOTICE', category='attacker')
 
-        if 'datecreated' in attacker.keys():
+        if 'datecreated' in attacker:
             mqAlert['utctimestamp'] = attacker['datecreated'].isoformat()
 
         mqAlert['summary'] = 'New Attacker: {0} events: {1}, alerts: {2}'.format(attacker['indicators'], attacker['eventscount'], attacker['alertscount'])
@@ -336,7 +336,7 @@ def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
     #     "continent": "EU"
     # }
     # logger.debug(eventDictionary)
-    if 'details' in eventDictionary.keys():
+    if 'details' in eventDictionary:
         if 'sourceipgeolocation' in eventDictionary['details']:
             attackers=mozdefdb['attackers']
             attacker = attackers.find_one({'_id': attackerID})
@@ -344,11 +344,11 @@ def updateAttackerGeoIP(mozdefdb, attackerID, eventDictionary):
                 attacker['geocoordinates'] = dict(countrycode='',
                                                   longitude=0,
                                                   latitude=0)
-                if 'country_code' in eventDictionary['details']['sourceipgeolocation'].keys():
+                if 'country_code' in eventDictionary['details']['sourceipgeolocation']:
                     attacker['geocoordinates']['countrycode'] = eventDictionary['details']['sourceipgeolocation']['country_code']
-                if 'longitude' in eventDictionary['details']['sourceipgeolocation'].keys():
+                if 'longitude' in eventDictionary['details']['sourceipgeolocation']:
                     attacker['geocoordinates']['longitude'] = eventDictionary['details']['sourceipgeolocation']['longitude']
-                if 'latitude' in eventDictionary['details']['sourceipgeolocation'].keys():
+                if 'latitude' in eventDictionary['details']['sourceipgeolocation']:
                     attacker['geocoordinates']['latitude'] = eventDictionary['details']['sourceipgeolocation']['latitude']
                 attackers.save(attacker)
     else:

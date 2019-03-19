@@ -118,22 +118,22 @@ def makeEvents():
             for event in events[target:target + 1]:
                 event['timestamp'] = pytz.timezone('UTC').localize(datetime.utcnow()).isoformat()
                 # remove stored times
-                if 'utctimestamp' in event.keys():
+                if 'utctimestamp' in event:
                     del event['utctimestamp']
-                if 'receivedtimestamp' in event.keys():
+                if 'receivedtimestamp' in event:
                     del event['receivedtimestamp']
 
                 # add demo to the tags so it's clear it's not real data.
-                if 'tags' not in event.keys():
+                if 'tags' not in event:
                     event['tags'] = list()
 
                 event['tags'].append('demodata')
 
                 # replace potential <randomipaddress> with a random ip address
-                if 'summary' in event.keys() and '<randomipaddress>' in event['summary']:
+                if 'summary' in event and '<randomipaddress>' in event['summary']:
                     randomIP = genRandomIPv4()
                     event['summary'] = event['summary'].replace("<randomipaddress>", randomIP)
-                    if 'details' not in event.keys():
+                    if 'details' not in event:
                         event['details'] = dict()
                     event['details']['sourceipaddress'] = randomIP
                     event['details']['sourceipv4address'] = randomIP
@@ -182,28 +182,28 @@ def makeAlerts():
             for event in events[target:target + 1]:
                 event['timestamp'] = pytz.timezone('UTC').localize(datetime.utcnow()).isoformat()
                 # remove stored times
-                if 'utctimestamp' in event.keys():
+                if 'utctimestamp' in event:
                     del event['utctimestamp']
-                if 'receivedtimestamp' in event.keys():
+                if 'receivedtimestamp' in event:
                     del event['receivedtimestamp']
 
                 # add demo to the tags so it's clear it's not real data.
-                if 'tags' not in event.keys():
+                if 'tags' not in event:
                     event['tags'] = list()
 
                 event['tags'].append('demodata')
                 event['tags'].append('demoalert')
 
                 # replace potential <randomipaddress> with a random ip address
-                if 'summary' in event.keys() and '<randomipaddress>' in event['summary']:
+                if 'summary' in event and '<randomipaddress>' in event['summary']:
                     randomIP = genRandomIPv4()
                     event['summary'] = event['summary'].replace("<randomipaddress>", randomIP)
-                    if 'details' not in event.keys():
+                    if 'details' not in event:
                         event['details'] = dict()
                     event['details']['sourceipaddress'] = randomIP
                     event['details']['sourceipv4address'] = randomIP
 
-                if 'duplicate' in event.keys():
+                if 'duplicate' in event:
                     # send this event multiple times to trigger an alert
                     for x in range(0, int(event['duplicate'])):
                         logcache.put(json.dumps(event))
@@ -252,28 +252,28 @@ def makeAttackers():
             for event in events[target:target + 1]:
                 event['timestamp'] = pytz.timezone('UTC').localize(datetime.utcnow()).isoformat()
                 # remove stored times
-                if 'utctimestamp' in event.keys():
+                if 'utctimestamp' in event:
                     del event['utctimestamp']
-                if 'receivedtimestamp' in event.keys():
+                if 'receivedtimestamp' in event:
                     del event['receivedtimestamp']
 
                 # add demo to the tags so it's clear it's not real data.
-                if 'tags' not in event.keys():
+                if 'tags' not in event:
                     event['tags'] = list()
 
                 event['tags'].append('demodata')
                 event['tags'].append('demoalert')
 
                 # replace potential <randomipaddress> with a random ip address
-                if 'summary' in event.keys() and '<randomipaddress>' in event['summary']:
+                if 'summary' in event and '<randomipaddress>' in event['summary']:
                     randomIP = genAttackerIPv4()
                     event['summary'] = event['summary'].replace("<randomipaddress>", randomIP)
-                    if 'details' not in event.keys():
+                    if 'details' not in event:
                         event['details'] = dict()
                     event['details']['sourceipaddress'] = randomIP
                     event['details']['sourceipv4address'] = randomIP
 
-                if 'duplicate' in event.keys():
+                if 'duplicate' in event:
                     # send this event multiple times to trigger an alert
                     for x in range(0, int(event['duplicate'])):
                         logcache.put(json.dumps(event))

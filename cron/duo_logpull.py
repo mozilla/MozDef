@@ -82,7 +82,7 @@ def process_events(mozmsg, duo_events, etype, state):
         return
 
     # Care for API v2
-    if isinstance(duo_events, dict) and "authlogs" in duo_events.keys():
+    if isinstance(duo_events, dict) and "authlogs" in duo_events:
         offset = duo_events["metadata"]["next_offset"]
         if offset is not None:
             state["{}_offset".format(etype)] = offset
