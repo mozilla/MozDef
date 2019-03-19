@@ -7,43 +7,20 @@
 
 import collections
 import json
-import logging
 import random
 import netaddr
 import sys
 from bson.son import SON
 from datetime import datetime
 from configlib import getConfig, OptionParser
-from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 from collections import Counter
 from kombu import Connection, Exchange
 
+from mozdef_util.utilities.logger import logger
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, PhraseMatch
-
-
-logger = logging.getLogger(sys.argv[0])
-
-
-def loggerTimeStamp(self, record, datefmt=None):
-    return toUTC(datetime.now()).isoformat()
-
-
-def initLogger():
-    logger.level = logging.INFO
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    formatter.formatTime = loggerTimeStamp
-    if options.output == 'syslog':
-        logger.addHandler(
-            SysLogHandler(
-                address=(options.sysloghostname, options.syslogport)))
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
 
 
 def isIPv4(ip):
@@ -494,5 +471,4 @@ if __name__ == '__main__':
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    initLogger()
     main()
