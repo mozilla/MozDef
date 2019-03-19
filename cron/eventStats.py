@@ -19,9 +19,6 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, Aggregation
 
 
-def loggerTimeStamp(self, record, datefmt=None):
-    return toUTC(datetime.now()).isoformat()
-
 def esSearch(es):
     search_query = SearchQuery(minutes=options.aggregationminutes)
     search_query.add_aggregation(Aggregation('category'))

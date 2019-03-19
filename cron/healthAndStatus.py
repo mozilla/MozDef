@@ -19,10 +19,6 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
-def loggerTimeStamp(self, record, datefmt=None):
-    return toUTC(datetime.now()).isoformat()
-
-
 def getDocID(servername):
     # create a hash to use as the ES doc id
     # hostname plus salt as doctype.latest
