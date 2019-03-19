@@ -21,7 +21,7 @@ if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
 	then
 		echo "Building a release from the edge of master branch."
         echo "C|_| This may take a bit.  Might as well grab a coffee."
-        make build-from-github
+        make build-from-cwd
         make hub-login 
         cd cloudy_mozdef
         make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
@@ -30,7 +30,7 @@ elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(pre|testing
 	then
 		echo "Building a release from a pre-release tag."
         echo "C|_| This may take a bit.  Might as well grab a coffee."
-        make build-from-github
+        make build-from-cwd
         make hub-login 
         cd cloudy_mozdef
         make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
@@ -40,7 +40,7 @@ elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(prod))?$ ]]
 		echo "echo Building a production release from a tag."
         echo "C|_| This may take a bit.  Might as well grab a coffee."
         echo "Congrats on the release! --~~~=:>[XXXXXXXXX]>"
-        make build-from-github
+        make build-from-cwd
         make hub-login 
         cd cloudy_mozdef
         make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
@@ -50,7 +50,7 @@ elif [[ "branch/march_swarm" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
 	then
 		echo "Building a release from the march_swarm branch."
         echo "C|_| This may take a bit.  Might as well grab a coffee."
-        make build-from-github
+        make build-from-cwd
         make hub-login 
         cd cloudy_mozdef
         make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
