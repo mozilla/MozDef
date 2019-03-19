@@ -25,6 +25,9 @@
     "run_volume_tags": {
       "app": "packer-builder-mozdef"
     },
+    "snapshot_tags": {
+      "app": "packer-builder-mozdef"
+    },
     "tags": {
       "github:Branch": "{{ user `github_branch`}}",
       "buildTimestamp": "{{timestamp}}",
