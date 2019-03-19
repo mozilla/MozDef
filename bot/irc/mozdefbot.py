@@ -137,11 +137,11 @@ def formatAlert(jsonDictIn):
     severity = 'INFO'
     summary = ''
     category = ''
-    if 'severity' in jsonDictIn.keys():
+    if 'severity' in jsonDictIn:
         severity = jsonDictIn['severity']
-    if 'summary' in jsonDictIn.keys():
+    if 'summary' in jsonDictIn:
         summary = jsonDictIn['summary']
-    if 'category' in jsonDictIn.keys():
+    if 'category' in jsonDictIn:
         category = jsonDictIn['category']
 
     return colorify('{0}: {1} {2}'.format(
@@ -184,7 +184,7 @@ class mozdefBot():
                 if not options.join:
                     return
                 for chan in options.join.split(","):
-                    if chan in options.channelkeys.keys():
+                    if chan in options.channelkeys:
                         client.join(chan, options.channelkeys[chan])
                     else:
                         client.join(chan)
@@ -311,7 +311,7 @@ class alertConsumer(ConsumerMixin):
             # process valid message
             # see where we send this alert
             ircchannel = options.alertircchannel
-            if 'ircchannel' in bodyDict.keys():
+            if 'ircchannel' in bodyDict:
                 if bodyDict['ircchannel'] in options.join.split(","):
                     ircchannel = bodyDict['ircchannel']
 

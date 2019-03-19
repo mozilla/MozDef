@@ -84,10 +84,10 @@ class message(object):
             return(None, metadata)
 
         # fix auid from long to int
-        if 'details' in message.keys() and isinstance(message['details'], dict):
-            if 'auid' in message['details'].keys() and message['details']['auid'] == "4294967295":
+        if 'details' in message and isinstance(message['details'], dict):
+            if 'auid' in message['details'] and message['details']['auid'] == "4294967295":
                     message['details']['auid'] = '-1'
-            if 'ses' in message['details'].keys() and message['details']['ses'] == "4294967295":
+            if 'ses' in message['details'] and message['details']['ses'] == "4294967295":
                     message['details']['ses'] = '-1'
             # fix '(null)' string records to fit in a long
             for k, v in message['details'].iteritems():
@@ -95,8 +95,8 @@ class message(object):
                     message['details'][k] = -1
 
         # fix occasional gid errant parsing
-        if 'details' in message.keys() and isinstance(message['details'], dict):
-            if 'gid' in message['details'].keys() and ',' in message['details']['gid']:
+        if 'details' in message and isinstance(message['details'], dict):
+            if 'gid' in message['details'] and ',' in message['details']['gid']:
                 # gid didn't parse right, should just be an integer
                 # move it to a new field to not trigger errors in ES indexing
                 # as it tries to convert gid to long
@@ -104,14 +104,14 @@ class message(object):
                 del message['details']['gid']
 
         # fix details.dhost to be hostname
-        if 'details' in message.keys() and isinstance(message['details'], dict):
-            if 'dhost' in message['details'].keys():
+        if 'details' in message and isinstance(message['details'], dict):
+            if 'dhost' in message['details']:
                 # details.dhost is the host that the auditd event is happening on.
                 message['hostname'] = message['details']['dhost']
                 del message['details']['dhost']
 
         # add category
-        if 'category' not in message.keys():
+        if 'category' not in message:
             message['category'] = 'auditd'
 
         # set doctype

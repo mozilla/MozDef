@@ -18,12 +18,12 @@ class message(object):
         self.priority = 10
 
         with open(os.path.join(os.path.dirname(__file__), 'github_mapping.yml'), 'r') as f:
-            map = f.read()
+            mapping_map = f.read()
 
-        yap = yaml.load(map)
+        yap = yaml.safe_load(mapping_map)
         self.eventtypes = yap.keys()
         self.yap = yap
-        del(map)
+        del(mapping_map)
 
     def onMessage(self, message, metadata):
 

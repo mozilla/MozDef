@@ -36,7 +36,7 @@ class TestEsworkerSNSSQS(UnitTestSuite):
         self.consumer = taskConsumer(mq_conn, task_queue, es_connection, options)
 
     def search_and_verify_event(self, expected_event):
-        self.flush('events')
+        self.refresh('events')
         search_query = SearchQuery(minutes=5)
         search_query.add_must(ExistsMatch('tags'))
         results = search_query.execute(self.es_client)

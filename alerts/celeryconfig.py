@@ -38,9 +38,9 @@ for alert in ALERTS.keys():
         'options': {'queue': 'celery-default', "exchange": "celery-default"},
     }
     # add optional parameters:
-    if 'args' in ALERTS[alert].keys():
+    if 'args' in ALERTS[alert]:
         CELERYBEAT_SCHEDULE[alert]['args']=ALERTS[alert]['args']
-    if 'kwargs' in ALERTS[alert].keys():
+    if 'kwargs' in ALERTS[alert]:
         CELERYBEAT_SCHEDULE[alert]['kwargs']=ALERTS[alert]['kwargs']
 
 # Load logging config

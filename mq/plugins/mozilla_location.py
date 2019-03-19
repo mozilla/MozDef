@@ -23,7 +23,7 @@ class message(object):
         self.offices_code_list = getConfig('offices_code_list', '', config_location).split(',')
 
     def onMessage(self, message, metadata):
-        if 'details' in message.keys() and 'hostname' in message['details'].keys():
+        if 'details' in message and 'hostname' in message['details']:
             hostnamesplit = str.lower(message['details']['hostname'].encode('ascii', 'ignore')).split('.')
             if len(hostnamesplit) == 5:
                 if 'mozilla' == hostnamesplit[-2]:
@@ -34,7 +34,7 @@ class message(object):
                         message['details']['sitetype'] = 'office'
                     else:
                         message['details']['sitetype'] = 'unknown'
-        elif 'hostname' in message.keys():
+        elif 'hostname' in message:
             hostnamesplit = str.lower(message['hostname'].encode('ascii', 'ignore')).split('.')
             if len(hostnamesplit) == 5:
                 if 'mozilla' == hostnamesplit[-2]:
