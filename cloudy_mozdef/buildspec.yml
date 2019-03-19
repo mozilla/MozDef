@@ -7,4 +7,4 @@ phases:
   build:
     commands:
       - mkdir -p serverless-functions/build/python/lib/python3.6/site-packages
-      - bash ci/deploy
+      - bash deploy
