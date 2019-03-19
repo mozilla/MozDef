@@ -42,22 +42,18 @@ class MozDefEvent():
     log['severity'] = 'INFO'
     log['summary'] = None
     log['category'] = 'event'
-    log['source'] = 'vidyo'
     log['tags'] = list()
     log['details'] = dict()
 
-
-    def __init__(self, url='http://localhost/events', summary=None, category='event', severity='INFO', source='vidyo', tags=[], details={}):
+    def __init__(self, url='http://localhost/events', summary=None, category='event', severity='INFO', tags=[], details={}):
         self.summary = summary
         self.category = category
         self.severity = severity
-        self.source = source
         self.tags = tags
         self.details = details
         self.url = url
 
-
-    def send(self, timestamp=None, summary=None, category=None, severity=None, source=None, tags=None, details=None, hostname=None):
+    def send(self, timestamp=None, summary=None, category=None, severity=None, tags=None, details=None, hostname=None):
         log_msg = copy.copy(self.log)
 
         if timestamp is None:
@@ -75,11 +71,6 @@ class MozDefEvent():
             log_msg['category'] = self.category
         else:
             log_msg['category'] = category
-        
-        if source is None:
-            log_msg['source'] = self.source
-        else:
-            log_msg['source'] = source
 
         if severity is None:
             log_msg['severity'] = self.severity
