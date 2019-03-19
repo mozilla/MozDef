@@ -12,6 +12,7 @@ echo "Begin build / test of the MozDef codebase."
 # docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./" 
 # the input device is not a TTY 
 # make: *** [run-tests] Error 1 
+# Then again we probably do not need to run the test suite here because it has been run three times to get the code here.
 
 echo "Tests complete.  Now reasoning about the webhook event."
 
