@@ -31,7 +31,7 @@ all:
 .PHONY: packer-build-github
 packer-build-github: ## Build the base AMI with packer
 	@echo "Branch based build triggered for $(BRANCH)."
-	ci/pack_and_copy ${BRANCH}
+	ci/pack_and_copy $(BRANCH)
 
 .PHONY: create-prod-stack
 create-dev-stack: test ## Create everything you need for a fresh new stack!
