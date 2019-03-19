@@ -27,10 +27,11 @@ all:
 	@echo 'Run ./dmake <target> in order to run the Makefile targets in Docker'
 
 # Note: This requires AWS access
-.PHONY: packer-build
-packer-build: ## Build the base AMI with packer
-	@echo "Branch based build triggered for $(BRANCH)..."
-	cd packer && packer -machine-readable build -var github_branch=${BRANCH} packer.json
+# https://blog.gruntwork.io/locating-aws-ami-owner-id-and-image-name-for-packer-builds-7616fe46b49a
+.PHONY: packer-build-github
+packer-build-github: ## Build the base AMI with packer
+	@echo "Branch based build triggered for $(BRANCH)."
+	ci/pack_and_copy ${BRANCH}
 
 .PHONY: create-prod-stack
 create-dev-stack: test ## Create everything you need for a fresh new stack!
@@ -48,7 +49,7 @@ create-dev-s3-bucket:
 	@export AWS_REGION=$(AWS_REGION)
 	aws s3api create-bucket --bucket $(S3_DEV_BUCKET_NAME) --acl public-read --create-bucket-configuration LocationConstraint=$(AWS_REGION)
 
-.PHONY: updated-dev-stack
+.PHONY: update-dev-stack
 update-dev-stack: test ## Updates the nested stack on AWS
 	@export AWS_REGION=$(AWS_REGION)
 	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
