@@ -8,54 +8,64 @@
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import QueryStringMatch, SearchQuery, TermMatch
-import re
+import netaddr
 
 
 class AlertProxyDropIP(AlertTask):
     def main(self):
         search_query = SearchQuery(minutes=20)
 
-        search_query.add_must([
-            TermMatch('category', 'squid'),
-            TermMatch('tags', 'squid'),
-            TermMatch('details.proxyaction', 'TCP_DENIED/-')
-        ])
+        search_query.add_must(
+            [
+                TermMatch("category", "proxy"),
+                TermMatch("details.proxyaction", "TCP_DENIED"),
+            ]
+        )
 
-        # Match on 1.1.1.1, http://1.1.1.1, or https://1.1.1.1
-        # This will over-match on short 3-char domains like foo.bar.baz.com, but will get weeded out below
-        ip_regex = '/.*\..{1,3}\..{1,3}\..{1,3}(:.*|\/.*)/'
-        search_query.add_must([
-            QueryStringMatch('details.destination: {}'.format(ip_regex))
-        ])
+        # Match on everything that looks like the first octet of either the IPv4 or the IPv6 address
+        # This will over-match, but will get weeded out below
+        ip_regex = "/[0-9a-fA-F]{1,4}.*/"
+
+        search_query.add_must([QueryStringMatch("details.host: {}".format(ip_regex))])
 
         self.filtersManual(search_query)
-        self.searchEventsAggregated('details.sourceipaddress', samplesLimit=10)
+        self.searchEventsAggregated("details.sourceipaddress", samplesLimit=10)
         self.walkAggregations(threshold=1)
 
     # Set alert properties
     def onAggregation(self, aggreg):
-        category = 'squid'
-        tags = ['squid', 'proxy']
-        severity = 'WARNING'
-
-        # Lucene search has a slight potential for overmatches, so we'd double-check
-        # with this pattern to ensure it's truely an IP before we add dest to our dropped list
-        pattern = r'^(http:\/\/|https:\/\/|)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+        category = "squid"
+        tags = ["squid", "proxy"]
+        severity = "WARNING"
 
         dropped_destinations = set()
+        final_aggr = {}
+        final_aggr["value"] = aggreg["value"]
+        final_aggr["allevents"] = []
+        final_aggr["events"] = []
 
-        for event in aggreg['allevents']:
-            if re.search(pattern, event['_source']['details']['destination']):
-                dropped_destinations.add(
-                    event['_source']['details']['destination'])
+        i = 0
+        for event in aggreg["allevents"]:
+            ip = None
+            try:
+                ip = netaddr.IPAddress(event["_source"]["details"]["host"])
+            except (netaddr.core.AddrFormatError, ValueError):
+                pass
+            if ip is not None:
+                dropped_destinations.add(event["_source"]["details"]["host"])
+                final_aggr["allevents"].append(event)
+                final_aggr["events"].append(event)
+                i += i
+        final_aggr["count"] = i
 
         # If it's all over-matches, don't throw the alert
         if len(dropped_destinations) == 0:
             return None
 
-        summary = 'Suspicious Proxy DROP event(s) detected from {0} to the following IP-based destination(s): {1}'.format(
-            aggreg['value'],
-            ",".join(sorted(dropped_destinations))
+        summary = "Suspicious Proxy DROP event(s) detected from {0} to the following IP-based destination(s): {1}".format(
+            final_aggr["value"], ",".join(sorted(dropped_destinations))
         )
 
-        return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
+        return self.createAlertDict(
+            summary, category, tags, final_aggr["allevents"], severity
+        )

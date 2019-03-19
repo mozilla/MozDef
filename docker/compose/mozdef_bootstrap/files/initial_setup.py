@@ -134,7 +134,7 @@ if len(results['hits']) == 0:
             client.save_object(body=mapping_data, index='.kibana', doc_type='index-pattern', doc_id=mapping_data['title'])
 
     # Assign default index to 'events'
-    client.flush('.kibana')
+    client.refresh('.kibana')
     default_mapping_data = {
         "defaultIndex": 'events'
     }

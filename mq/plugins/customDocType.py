@@ -18,7 +18,7 @@ class message(object):
         # set the doc type
         # to avoid data type conflicts with other doc types
         # (int vs string, etc)
-        if 'endpoint' in message.keys() and 'customendpoint' in message.keys():
+        if 'endpoint' in message and 'customendpoint' in message:
             if message['customendpoint']:
                 if isinstance(message['endpoint'], str) or \
                    isinstance(message['endpoint'], unicode):

@@ -437,7 +437,7 @@ def fetch_auth0_logs(config, headers, fromid):
     ret = r.json()
 
     # Sometimes API give us the requested totals.. sometimes not.
-    if (type(ret) is dict) and ('logs' in ret.keys()):
+    if type(ret) is dict and 'logs' in ret:
         have_totals = True
         all_msgs = ret['logs']
     else:

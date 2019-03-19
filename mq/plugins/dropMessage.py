@@ -26,7 +26,7 @@ class message(object):
     def onMessage(self, message, metadata):
         # criteria for dropping messages
         # early exit by setting message = None and return
-        if 'details' in message.keys():
+        if 'details' in message:
             # drop disabled for now
             # if 'signatureid' in message['details']:
                 # if message['details'].lower() == 'execve' and \

@@ -45,9 +45,9 @@ class message(object):
     def onMessage(self, message):
         # here is where you do something with the incoming alert message
         doclink = 'unknown'
-        if message['category'] in self.options.docs.keys():
+        if message['category'] in self.options.docs:
             doclink = self.options.docs[message['category']]
-        if 'summary' in message.keys():
+        if 'summary' in message:
             headers = {
                 'Content-type': 'application/json',
             }

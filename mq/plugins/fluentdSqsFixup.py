@@ -18,7 +18,7 @@ def isIPv4(ip):
 
 def addError(message, error):
     '''add an error note to a message'''
-    if 'errors' not in message.keys():
+    if 'errors' not in message:
         message['errors'] = list()
     if isinstance(message['errors'], list):
         message['errors'].append(error)
@@ -69,9 +69,9 @@ class message(object):
             if tmp.startswith('ip-'):
                 ipText = tmp.split('ip-')[1].replace('-', '.')
                 if isIPv4(ipText):
-                    if 'destinationipaddress' not in message.keys():
+                    if 'destinationipaddress' not in message:
                         message['details']['destinationipaddress'] = ipText
-                    if 'destinationipv4address' not in message.keys():
+                    if 'destinationipv4address' not in message:
                         message['details']['destinationipv4address'] = ipText
                 else:
                     message['details']['destinationipaddress'] = '0.0.0.0'
@@ -86,13 +86,13 @@ class message(object):
 
         # All messages with __tag 'ec2.forward*' are actually syslog forwarded
         # messages, so classify as such
-        if '__tag' in message.keys():
+        if '__tag' in message:
             tmp = message['__tag']
             if tmp.startswith('ec2.forward'):
                 message['category'] = 'syslog'
                 message['source'] = 'syslog'
 
-        if 'ident' in message.keys():
+        if 'ident' in message:
             tmp = message['ident']
             message['details']['program'] = tmp
             if 'processname' not in message and 'program' in message['details']:
@@ -107,7 +107,7 @@ class message(object):
 
         # We already have the time of event stored in 'timestamp' so we don't
         # need 'time'
-        if 'time' in message.keys():
+        if 'time' in message:
             message.pop('time')
 
         # Any remaining keys which aren't mandatory fields should be moved
