@@ -19,6 +19,12 @@
     "ami_groups": [
       "all"
     ],
+    "run_tags": {
+      "app": "packer-builder-mozdef"
+    },
+    "run_volume_tags": {
+      "app": "packer-builder-mozdef"
+    },
     "tags": {
       "github:Branch": "{{ user `github_branch`}}",
       "buildTimestamp": "{{timestamp}}",
@@ -39,7 +45,7 @@
         "sudo systemctl enable docker",
         "sudo mkdir -p /opt/mozdef/",
         "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
-        "cd /opt/mozdef && sudo git checkout -b {{ user `github_branch`}}",
+        "cd /opt/mozdef && sudo git checkout {{ user `github_branch`}}",
         "rm -rf /home/ec2-user/.ssh/authorized_keys",
         "rm -rf /home/ec2-user/.ssh/known_hosts",
         "sudo rm -rf /tmp/*",
