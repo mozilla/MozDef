@@ -409,7 +409,7 @@ class AlertTask(Task):
         for e in events:
             alert['events'].append({
                 'documentindex': e['_index'],
-                'documenttype': e['_type'],
+                'documenttype': e['type'],
                 'documentsource': e['_source'],
                 'documentid': e['_id']})
         self.log.debug(alert)
@@ -461,14 +461,14 @@ class AlertTask(Task):
                     event['_source']['alerts'] = []
                 event['_source']['alerts'].append({
                     'index': alertResultES['_index'],
-                    'type': alertResultES['_type'],
+                    'type': alertResultES['type'],
                     'id': alertResultES['_id']})
 
                 if 'alert_names' not in event['_source']:
                     event['_source']['alert_names'] = []
                 event['_source']['alert_names'].append(self.determine_alert_classname())
 
-                self.es.save_event(index=event['_index'], doc_type=event['_type'], body=event['_source'], doc_id=event['_id'])
+                self.es.save_event(index=event['_index'], body=event['_source'], doc_id=event['_id'])
             # We refresh here to ensure our changes to the events will show up for the next search query results
             self.es.refresh(event['_index'])
         except Exception as e:
