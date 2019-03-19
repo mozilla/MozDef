@@ -58,7 +58,6 @@ run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make 
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 rebuild-run-tests: build-tests run-tests
 
-
 .PHONY: build-cwd
 build-from-cwd:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
@@ -112,6 +111,10 @@ docker-get: hub-get
 hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) pull
 	docker-compose -f docker/compose/docker-compose-test.yml -p test-$(NAME) pull
+
+docker-login: hub-login
+hub-login: ## Login as the MozDef CI user in order to perform a release of the containers.
+	@docker login -u mozdefci --password $(shell aws ssm get-parameter --name '/mozdef/ci/dockerhubpassword' --with-decrypt | jq .Parameter.Value)
 
 .PHONY: clean
 clean: ## Cleanup all docker volumes and shutdown all related services
