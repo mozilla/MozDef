@@ -109,7 +109,7 @@ def main():
 
         # post to elastic search servers directly without going through
         # message queues in case there is an availability issue
-        es.save_event(index=index, doc_type='_doc', body=json.dumps(healthlog))
+        es.save_event(index=index, body=json.dumps(healthlog))
         # post another doc with a static docid and tag
         # for use when querying for the latest status
         healthlog['tags'] = ['mozdef', 'status', 'latest']

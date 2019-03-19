@@ -46,6 +46,7 @@ class MozDefEvent():
     log['tags'] = list()
     log['details'] = dict()
 
+
     def __init__(self, url='http://localhost/events', summary=None, category='event', severity='INFO', source='vidyo', tags=[], details={}):
         self.summary = summary
         self.category = category
@@ -54,6 +55,7 @@ class MozDefEvent():
         self.tags = tags
         self.details = details
         self.url = url
+
 
     def send(self, timestamp=None, summary=None, category=None, severity=None, source=None, tags=None, details=None, hostname=None):
         log_msg = copy.copy(self.log)
