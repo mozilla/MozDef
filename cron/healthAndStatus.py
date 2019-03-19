@@ -6,7 +6,6 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import json
-import logging
 import os
 import requests
 import sys
@@ -14,32 +13,10 @@ from datetime import datetime
 from hashlib import md5
 from requests.auth import HTTPBasicAuth
 from configlib import getConfig, OptionParser
-from logging.handlers import SysLogHandler
 
+from mozdef_util.utilities.logger import logger
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-
-
-logger = logging.getLogger(sys.argv[0])
-
-
-def loggerTimeStamp(self, record, datefmt=None):
-    return toUTC(datetime.now()).isoformat()
-
-
-def initLogger():
-    logger.level = logging.INFO
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    formatter.formatTime = loggerTimeStamp
-    if options.output == 'syslog':
-        logger.addHandler(
-            SysLogHandler(address=(options.sysloghostname,
-                                   options.syslogport)))
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
 
 
 def getDocID(servername):
@@ -90,6 +67,7 @@ def main():
             severity='INFO',
             summary='mozdef health/status',
             category='mozdef',
+            type='mozdefhealth',
             source='mozdef',
             tags=[],
             details=[])
@@ -131,11 +109,11 @@ def main():
 
         # post to elastic search servers directly without going through
         # message queues in case there is an availability issue
-        es.save_event(index=index, doc_type='mozdefhealth', body=json.dumps(healthlog))
+        es.save_event(index=index, doc_type='_doc', body=json.dumps(healthlog))
         # post another doc with a static docid and tag
         # for use when querying for the latest status
         healthlog['tags'] = ['mozdef', 'status', 'latest']
-        es.save_event(index=index, doc_type='mozdefhealth', doc_id=getDocID(server), body=json.dumps(healthlog))
+        es.save_event(index=index, doc_id=getDocID(server), body=json.dumps(healthlog))
 
 
 def initConfig():
@@ -178,5 +156,4 @@ if __name__ == '__main__':
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    initLogger()
     main()
