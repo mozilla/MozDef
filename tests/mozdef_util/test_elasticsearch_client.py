@@ -227,13 +227,13 @@ class TestSimpleWrites(ElasticsearchClientTest):
     def test_writing_with_type(self):
         query = SearchQuery()
         default_event = {
-            "_type": "example",
             "_source": {
                 "receivedtimestamp": UnitTestSuite.current_timestamp(),
                 "summary": "Test summary",
                 "details": {
                     "note": "Example note",
-                }
+                },
+                "type": "example"
             }
         }
         self.populate_test_event(default_event)
@@ -300,7 +300,7 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
         event_length = 1995
         events = []
         for num in range(event_length):
-            events.append({"key": "value" + str(num)})
+            events.append({"key": "value" + str(num), "type": "event"})
 
         for event in events:
             self.es_client.save_object(index='events', body=event, bulk=True)
@@ -326,13 +326,13 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
 class TestBulkWritesWithLessThanThreshold(BulkTest):
 
     def test_bulk_writing_less_threshold(self):
-        self.es_client.save_event(body={'key': 'value'}, bulk=True)
+        self.es_client.save_event(body={'key': 'value', "type": "event"}, bulk=True)
         assert self.get_num_events() == 0
         assert self.mock_class.request_counts == 0
 
         event_length = 5
         for num in range(event_length):
-            self.es_client.save_event(body={"key": "value" + str(num)}, bulk=True)
+            self.es_client.save_event(body={"key": "value" + str(num), "type": "event"}, bulk=True)
 
         assert self.get_num_events() == 0
 
@@ -495,14 +495,14 @@ class TestBulkInvalidFormatProblem(BulkTest):
 
     def test_bulk_problems(self):
         event = {
-            "utcstamp": "2016-11-08T14:13:01.250631+00:00"
+            "utcstamp": "2016-11-08T14:13:01.250631+00:00",
         }
         malformed_event = {
             "utcstamp": "abc",
         }
 
-        self.es_client.save_object(index='events', body=event, bulk=True)
-        self.es_client.save_object(index='events', body=malformed_event, bulk=True)
+        self.es_client.save_event(body=event, bulk=True)
+        self.es_client.save_event(body=malformed_event, bulk=True)
         self.refresh(self.event_index_name)
         time.sleep(5)
         assert self.get_num_events() == 1
