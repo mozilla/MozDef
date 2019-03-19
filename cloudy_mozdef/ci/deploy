@@ -14,6 +14,7 @@ echo "Begin build / test of the MozDef codebase."
 # make: *** [run-tests] Error 1 
 # Then again we probably do not need to run the test suite here because it has been run three times to get the code here.
 
+
 echo "Tests complete.  Now reasoning about the webhook event."
 
 if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
