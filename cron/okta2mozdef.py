@@ -105,7 +105,7 @@ def main():
                             mozdefEvent['details'].pop('action')
 
                             jbody=json.dumps(mozdefEvent)
-                            res = es.save_event(doc_type='_doc',body=jbody)
+                            res = es.save_event(body=jbody)
                             logger.debug(res)
                         except Exception as e:
                             logger.error('Error handling log record {0} {1}'.format(r, e))

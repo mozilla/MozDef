@@ -65,7 +65,7 @@ def main():
         if es.index_exists(index):
             # post to elastic search servers directly without going through
             # message queues in case there is an availability issue
-            es.save_event(index=index, body=json.dumps(stats), doc_type='_doc')
+            es.save_event(index=index, body=json.dumps(stats))
 
     except Exception as e:
         logger.error("Exception %r when gathering statistics " % e)

@@ -100,11 +100,11 @@ def getQueueSizes():
         qcounter -= 1
     # post to elasticsearch servers directly without going through
     # message queues in case there is an availability issue
-    es.save_event(index=options.index, doc_type='_doc', body=json.dumps(healthlog))
+    es.save_event(index=options.index, body=json.dumps(healthlog))
     # post another doc with a static docid and tag
     # for use when querying for the latest sqs status
     healthlog['tags'] = ['mozdef', 'status', 'sqs-latest']
-    es.save_event(index=options.index, doc_type='_doc', doc_id=getDocID(sqsid), body=json.dumps(healthlog))
+    es.save_event(index=options.index, doc_id=getDocID(sqsid), body=json.dumps(healthlog))
 #    except Exception as e:
 #        logger.error("Exception %r when gathering health and status " % e)
 

@@ -113,7 +113,7 @@ def main():
         # post another doc with a static docid and tag
         # for use when querying for the latest status
         healthlog['tags'] = ['mozdef', 'status', 'latest']
-        es.save_event(index=index, doc_type='_doc', doc_id=getDocID(server), body=json.dumps(healthlog))
+        es.save_event(index=index, doc_id=getDocID(server), body=json.dumps(healthlog))
 
 
 def initConfig():
