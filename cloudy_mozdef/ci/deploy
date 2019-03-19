@@ -23,8 +23,8 @@ if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
         make build-from-github
         make hub-login 
         cd cloudy_mozdef
-        BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` make packer-build-github 
-        cd ../ && BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` make hub-tagged 
+        make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
+        cd ../ && make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` hub-tagged 
 elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(pre|testing))?$ ]]
 	then
 		echo "Building a release from a pre-release tag."
@@ -32,8 +32,8 @@ elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(pre|testing
         make build-from-github
         make hub-login 
         cd cloudy_mozdef
-        BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` make packer-build-github 
-        cd ../ && BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` make hub-tagged 
+        make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
+        cd ../ && make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` hub-tagged 
 elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(prod))?$ ]]
 	then
 		echo "echo Building a production release from a tag."
@@ -42,8 +42,8 @@ elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(prod))?$ ]]
         make build-from-github
         make hub-login 
         cd cloudy_mozdef
-        BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` make packer-build-github 
-        cd ../ && BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` make hub-tagged 
+        make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
+        cd ../ && make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` hub-tagged 
 # Temporary inclusion for march swarm.  Remove after march 23 2019
 elif [[ "branch/march_swarm" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
 	then
@@ -52,8 +52,8 @@ elif [[ "branch/march_swarm" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
         make build-from-github
         make hub-login 
         cd cloudy_mozdef
-        BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` make packer-build-github 
-        cd ../ && BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` make hub-tagged 
+        make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
+        cd ../ && make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` hub-tagged 
 fi
 
 echo "End build / test of the MozDef codebase."
