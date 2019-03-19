@@ -129,7 +129,7 @@ class ElasticsearchClient():
         else:
             return self.es_connection.index(index=index, doc_type='_doc', id=doc_id, body=body)
 
-    def __parse_document(self, body, doc_type):
+    def __parse_document(self, body):
         if type(body) is str:
             body = json.loads(body)
         doc_body = body
