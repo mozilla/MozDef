@@ -28,9 +28,9 @@ all:
 
 # Note: This requires AWS access
 # https://blog.gruntwork.io/locating-aws-ami-owner-id-and-image-name-for-packer-builds-7616fe46b49a
-.PHONY: packer-build
-packer-build: ## Build the base AMI with packer
-	@echo "Branch based build triggered for $(BRANCH)..."
+.PHONY: packer-build-github
+packer-build-github: ## Build the base AMI with packer
+	@echo "Branch based build triggered for $(BRANCH)."
 	ci/pack_and_copy ${BRANCH}
 
 .PHONY: create-prod-stack
