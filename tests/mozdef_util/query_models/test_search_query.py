@@ -454,7 +454,7 @@ class TestExecute(SearchQueryUnitTest):
             }
         }
 
-        self.populate_test_object(default_event)
+        self.populate_test_event(default_event)
         self.refresh(self.event_index_name)
 
         results = query.execute(self.es_client)

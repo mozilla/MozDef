@@ -303,7 +303,7 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
             events.append({"key": "value" + str(num)})
 
         for event in events:
-            self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
+            self.es_client.save_object(index='events', body=event, bulk=True)
 
         self.refresh(self.event_index_name)
 
@@ -501,8 +501,8 @@ class TestBulkInvalidFormatProblem(BulkTest):
             "utcstamp": "abc",
         }
 
-        self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
-        self.es_client.save_object(index='events', doc_type='event', body=malformed_event, bulk=True)
+        self.es_client.save_object(index='events', body=event, bulk=True)
+        self.es_client.save_object(index='events', body=malformed_event, bulk=True)
         self.refresh(self.event_index_name)
         time.sleep(5)
         assert self.get_num_events() == 1
