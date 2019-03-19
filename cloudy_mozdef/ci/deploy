@@ -1,4 +1,31 @@
 #!/bin/bash
 
-echo -n 'I am running in the sky'
+echo -n 'Welcome github webhook to the CodeBuild Job of MozDef.'
+echo -n 'It's dangerous to go alone.  Take one of these: <%%%%|==========> '
+
+echo -n "Begin build / test of the MozDef codebase."
+
+echo -n "But first a quick run of the test suite."
+make tests
+echo -n "Tests complete.  Now reasoning about the webhook event."
+
+if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
+	then
+		echo -n "Building a release from the edge of master branch."
+        echo -n "C|_| This may take a bit.  Might as well grab a coffee."
+
+elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(pre|testing))?$ ]]
+	then
+		echo "Building a release from a pre-release tag."
+        echo -n "C|_| This may take a bit.  Might as well grab a coffee."
+
+elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(prod))?$ ]]
+	then
+		echo "echo Building a production release from a tag."
+        echo -n "C|_| This may take a bit.  Might as well grab a coffee."
+        echo -n "Congrats on the release! --~~~=:>[XXXXXXXXX]>"
+fi
+
+echo "End build / test of the MozDef codebase."
+
 
