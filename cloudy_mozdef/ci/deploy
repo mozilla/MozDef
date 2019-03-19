@@ -6,6 +6,7 @@ echo "It's dangerous to go alone.  Take one of these: <%%%%|==========>"
 echo "Begin build / test of the MozDef codebase."
 
 echo "But first a quick run of the test suite."
+export COMPOSE_INTERACTIVE_NO_CLI=1
 make tests
 echo "Tests complete.  Now reasoning about the webhook event."
 
@@ -13,18 +14,27 @@ if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
 	then
 		echo "Building a release from the edge of master branch."
         echo "C|_| This may take a bit.  Might as well grab a coffee."
-
+        make hub-login 
+        cd cloudy_mozdef
+        make packer-build-github BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
+        cd ../ && make hub-tagged BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
 elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(pre|testing))?$ ]]
 	then
 		echo "Building a release from a pre-release tag."
         echo "C|_| This may take a bit.  Might as well grab a coffee."
-
+        make hub-login 
+        cd cloudy_mozdef
+        make packer-build-github BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
+        cd ../ && make hub-tagged BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
 elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(prod))?$ ]]
 	then
 		echo "echo Building a production release from a tag."
         echo "C|_| This may take a bit.  Might as well grab a coffee."
         echo "Congrats on the release! --~~~=:>[XXXXXXXXX]>"
-
+        make hub-login 
+        cd cloudy_mozdef
+        make packer-build-github BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
+        cd ../ && make hub-tagged BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
 # Temporary inclusion for march swarm.  Remove after march 23 2019
 elif [[ "branch/march_swarm" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
 	then
@@ -33,6 +43,7 @@ elif [[ "branch/march_swarm" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
         make hub-login 
         cd cloudy_mozdef
         make packer-build-github BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
+        cd ../ && make hub-tagged BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
 fi
 
 echo "End build / test of the MozDef codebase."
