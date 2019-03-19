@@ -23,6 +23,11 @@ ami_name=$(AWS_DEFAULT_REGION="${ami_source_region}" aws ec2 describe-images \
     --query 'Images[0].Name' \
     --output text)
 
+echo "Fetching tags for ${ami_source_id}"
+AWS_DEFAULT_REGION="${ami_source_region}" aws ec2 describe-tags \
+    --filters Name=resource-id,Values=${ami_source_id} \
+    --query 'Tags[*].{Key: Key, Value: Value}' > "${TMPDIR}/tags.json"
+
 echo "Copying ${ami_source_id} from ${ami_source_region} to ${ami_dest_region}"
 ami_dest_id=$(AWS_DEFAULT_REGION="${ami_dest_region}" aws ec2 copy-image \
     --name "${ami_name}" \
@@ -36,9 +41,14 @@ echo "Waiting for copy of ${ami_source_id} to complete"
 AWS_DEFAULT_REGION="${ami_dest_region}" aws ec2 wait image-available \
 --image-ids "${ami_dest_id}"
 
+echo "Applying tags to ${ami_dest_id}"
+AWS_DEFAULT_REGION="${ami_dest_region}" aws ec2 create-tags \
+    --resources ${ami_dest_id} \
+    --tags file://${TMPDIR}/tags.json
+
 echo "Sharing ${ami_dest_id} in ${ami_dest_region} with ${aws_marketplace_account_id}"
 AWS_DEFAULT_REGION="${ami_dest_region}" aws ec2 modify-image-attribute \
---image-id "${ami_dest_id}" \
---launch-permission "Add=[{UserId=${aws_marketplace_account_id}}]"
+    --image-id "${ami_dest_id}" \
+    --launch-permission "Add=[{UserId=${aws_marketplace_account_id}}]"
 
 rm -rf "${TMPDIR}"
