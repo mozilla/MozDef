@@ -32,7 +32,7 @@ elif [[ "branch/march_swarm" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
         echo "C|_| This may take a bit.  Might as well grab a coffee."
         make hub-login 
         cd cloudy_mozdef
-        make packer-build-github
+        make packer-build-github BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`
 fi
 
 echo "End build / test of the MozDef codebase."
