@@ -393,7 +393,6 @@ class AlertTask(Task):
         for e in events:
             alert['events'].append({
                 'documentindex': e['_index'],
-                'documenttype': e['type'],
                 'documentsource': e['_source'],
                 'documentid': e['_id']})
         self.log.debug(alert)
@@ -445,7 +444,6 @@ class AlertTask(Task):
                     event['_source']['alerts'] = []
                 event['_source']['alerts'].append({
                     'index': alertResultES['_index'],
-                    'type': alertResultES['type'],
                     'id': alertResultES['_id']})
 
                 if 'alert_names' not in event['_source']:
