@@ -12,6 +12,11 @@ ami_source_id=$(awk -F "," '($4 == "0") && ($5 == "id") {print $6}' "${TMPDIR}/p
 ami_dest_region="us-east-1"
 aws_marketplace_account_id="679593333241"
 
+if [ -z "${ami_source_id}" -o -z "${ami_source_region}" ]; then
+    echo "Packer output did not provide AMI ID or region. Exiting"
+    exit 1
+fi
+
 echo "Sharing ${ami_source_id} in ${ami_source_region} with ${aws_marketplace_account_id}"
 AWS_DEFAULT_REGION="${ami_source_region}" aws ec2 modify-image-attribute \
     --image-id "${ami_source_id}" \
