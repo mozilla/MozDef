@@ -1,0 +1,23 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+
+## [v1.37] - 2019-03-01
+### Added
+- Watchlist - use the UI to quickly add a term (username, IP, command, etc.) that MozDef alerts on
+- Generic Deadman - use a simple config file to validate that expected events are appearing in a given time window (and alert an Error when they do not)
+
+### Changed
+- Improve error handling on Slack bot
+- Improve Slack bot alert format for better readibility
+- Minor UI adjustments
+
+### Fixed
+- Some Duo events were not correctly displaying the source IP address. It is now always the access device IP
+- Fixed defaults for Slack bot to ensure more consistency each time it loads
+- Added checks on sending SQS messages to only accept intra-account messages
+- Improved docker performance and disk space requirements
+
+[Unreleased Changes]: https://github.com/mozilla/MozDef/compare/v1.37...HEAD
+[Releases prior to v1.37](https://github.com/mozilla/MozDef/releases)
