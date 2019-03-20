@@ -27,7 +27,7 @@ services:
     networks:
       - default
   mongodb:
-    image: mozdef/mozdef_mongodb
+    image: mozdef/mozdef_mongodb:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -37,7 +37,7 @@ services:
     networks:
       - default
   bootstrap:
-    image: mozdef/mozdef_bootstrap
+    image: mozdef/mozdef_bootstrap:latest
     env_file:
       - cloudy_mozdef.env
     command: bash -c 'python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf'
@@ -47,14 +47,14 @@ services:
       - default
   # MozDef Specific Containers
   base:
-    image: mozdef/mozdef_base
+    image: mozdef/mozdef_base:latest
     env_file:
       - cloudy_mozdef.env
     command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data
   alertplugins:
-    image: mozdef/mozdef_alertplugins
+    image: mozdef/mozdef_alertplugins:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -66,7 +66,7 @@ services:
     networks:
       - default
   alerts:
-    image: mozdef/mozdef_alerts
+    image: mozdef/mozdef_alerts:latest
     env_file:
       - cloudy_mozdef.env
     volumes:
@@ -79,7 +79,7 @@ services:
     networks:
       - default
   cron:
-    image: mozdef/mozdef_cron
+    image: mozdef/mozdef_cron:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -93,7 +93,7 @@ services:
     networks:
       - default
   loginput:
-    image: mozdef/mozdef_loginput
+    image: mozdef/mozdef_loginput:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -106,7 +106,7 @@ services:
     networks:
       - default
   meteor:
-    image: mozdef/mozdef_meteor
+    image: mozdef/mozdef_meteor:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -120,7 +120,7 @@ services:
     networks:
       - default
   rest:
-    image: mozdef/mozdef_rest
+    image: mozdef/mozdef_rest:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -132,7 +132,7 @@ services:
     networks:
       - default
   syslog:
-    image: mozdef/mozdef_syslog
+    image: mozdef/mozdef_syslog:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -145,7 +145,7 @@ services:
     networks:
       - default
   rabbitmq:
-    image: mozdef/mozdef_rabbitmq
+    image: mozdef/mozdef_rabbitmq:latest
     restart: always
     command: rabbitmq-server
     ports:
@@ -156,7 +156,7 @@ services:
     networks:
       - default
   mq_eventtask:
-    image: mozdef/mozdef_mq_worker
+    image: mozdef/mozdef_mq_worker:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -172,7 +172,7 @@ services:
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data/
   mq_cloudtrail:
-    image: mozdef/mozdef_mq_worker
+    image: mozdef/mozdef_mq_worker:latest
     env_file:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_cloudtrail.env
@@ -189,7 +189,7 @@ services:
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data/
   mq_sqs:
-    image: mozdef/mozdef_mq_worker
+    image: mozdef/mozdef_mq_worker:latest
     env_file:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_sns_sqs.env

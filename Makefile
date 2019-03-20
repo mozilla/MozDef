@@ -88,7 +88,6 @@ hub: ## Upload locally built MozDef images tagged as the current git head (hub.d
 .PHONY: docker-push-tagged docker-get hub hub-get
 docker-push-tagged: hub-tagged
 hub-tagged: ## Upload locally built MozDef images tagged as the BRANCH.  Branch and tagged release are interchangeable here.
-	docker login
 	docker tag mozdef/mozdef_meteor:latest mozdef/mozdef_meteor:$(BRANCH) && docker push mozdef/mozdef_meteor:$(BRANCH)
 	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH) && docker push mozdef/mozdef_base:$(BRANCH)
 	docker tag mozdef/mozdef_tester:latest mozdef/mozdef_tester:$(BRANCH) && docker push mozdef/mozdef_tester:$(BRANCH)
@@ -128,3 +127,7 @@ rebuild: clean build-cwd
 .PHONY: new-alert
 new-alert: ## Create an example alert and working alert unit test
 	python tests/alert_templater.py
+
+.PHONY: set-version-and-fetch-docker-container
+set-version-and-fetch-docker-container: build-cwd hub-tagged # Lock the release of MozDef by pulling the docker containers on AMI build and caching replace all instances of latest in the compose override with the BRANCH
+	sed s/latest/$(BRANCH)/g docker/compose/docker-compose-cloudy-mozdef.yml
