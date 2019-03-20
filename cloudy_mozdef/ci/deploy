@@ -9,54 +9,28 @@ echo "Begin build / test of the MozDef codebase."
 # export COMPOSE_INTERACTIVE_NO_CLI=1 make tests
 # The above does not currently work in a non-interactive TTY.
 # Fails with error
-# docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./" 
-# the input device is not a TTY 
-# make: *** [run-tests] Error 1 
+# docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
+# the input device is not a TTY
+# make: *** [run-tests] Error 1
 # Then again we probably do not need to run the test suite here because it has been run three times to get the code here.
 
 
 echo "Tests complete.  Now reasoning about the webhook event."
 
-if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
-	then
-		echo "Building a release from the edge of master branch."
-        echo "C|_| This may take a bit.  Might as well grab a coffee."
-        make build-from-cwd
-        make hub-login 
-        cd cloudy_mozdef
-        make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
-        cd ../ && make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` hub-tagged 
-elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(pre|testing))?$ ]]
-	then
-		echo "Building a release from a pre-release tag."
-        echo "C|_| This may take a bit.  Might as well grab a coffee."
-        make build-from-cwd
-        make hub-login 
-        cd cloudy_mozdef
-        make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
-        cd ../ && make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` hub-tagged 
-elif [[ "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(prod))?$ ]]
-	then
-		echo "echo Building a production release from a tag."
-        echo "C|_| This may take a bit.  Might as well grab a coffee."
-        echo "Congrats on the release! --~~~=:>[XXXXXXXXX]>"
-        make build-from-cwd
-        make hub-login 
-        cd cloudy_mozdef
-        make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
-        cd ../ && make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` hub-tagged 
-# Temporary inclusion for march swarm.  Remove after march 23 2019
-elif [[ "branch/march_swarm" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]
-	then
-		echo "Building a release from the march_swarm branch."
-        echo "C|_| This may take a bit.  Might as well grab a coffee."
-        make build-from-cwd
-        make hub-login 
-        cd cloudy_mozdef
-        make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` packer-build-github 
-        cd ../ && make BRANCH=`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2` hub-tagged 
+if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
+        || "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(pre|testing))?$ \
+        || "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/[0-9]\.[0-9]\.[0-9](\-(prod))?$ \
+        || "branch/march_swarm" == "$CODEBUILD_WEBHOOK_TRIGGER" ]]; then
+    echo "Building a release"
+    echo "C|_| This may take a bit.  Might as well grab a coffee."
+    make build-from-cwd
+    make hub-login
+    cd cloudy_mozdef
+    BRANCH="`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`"
+    make BRANCH=${BRANCH} packer-build-github
+    make publish-versioned-templates
+    cd ../ && make BRANCH={{ user `github_branch`}} set-version-and-fetch-docker-container
+    cd ../ && make BRANCH=${BRANCH} hub-tagged
 fi
 
 echo "End build / test of the MozDef codebase."
-
-
