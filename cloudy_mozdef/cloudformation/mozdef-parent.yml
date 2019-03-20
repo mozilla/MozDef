@@ -13,7 +13,6 @@ Metadata:
       Parameters:
       - InstanceType
       - KeyName
-      - AMIImageId
       - SSHIngressCIDR
     - Label:
         default: Certificate
@@ -38,8 +37,6 @@ Metadata:
         default: EC2 Instance Type
       KeyName:
         default: EC2 SSH Key Name
-      AMIImageId:
-        default: EC2 AMI Image ID
       SSHIngressCIDR:
         default: Inbound SSH allowed IP address CIDR
       DomainName:
@@ -68,10 +65,6 @@ Parameters:
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: Name of an existing EC2 KeyPair to enable SSH access to the web server
-  AMIImageId:
-    Type: AWS::EC2::Image::Id
-    Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-073434079b0366251
   SSHIngressCIDR:
     Type: String
     AllowedPattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'
@@ -102,6 +95,11 @@ Parameters:
     ConstraintDescription: A valid amazonaws.com S3 URL
     Description: "The URL to the S3 bucket used to fetch the nested stack templates (Example: https://s3-us-west-2.amazonaws.com/example-bucket-name/cloudformation/path/)"
     Default: https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/
+# A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
+Mappings:
+  RegionMap:
+    us-west-2:
+      HVM64: ami-0b5ac7ded4f6d62f9
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
@@ -135,7 +133,7 @@ Resources:
         KeyName: !Ref KeyName
         IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
         AutoScaleGroupSubnetIds: !Join [ ',', !Ref PublicSubnetIds ]
-        AMIImageId: !Ref AMIImageId
+        AMIImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', HVM64 ]
         EFSID: !GetAtt MozDefEFS.Outputs.EFSID
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
