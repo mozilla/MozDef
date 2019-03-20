@@ -69,6 +69,7 @@ services:
     image: mozdef/mozdef_alerts:latest
     env_file:
       - cloudy_mozdef.env
+      - rabbitmq.env
     volumes:
       - /opt/mozdef/docker/compose/mozdef_alerts/files/config.py:/opt/mozdef/envs/mozdef/alerts/lib/config.py
     restart: always
@@ -146,6 +147,8 @@ services:
       - default
   rabbitmq:
     image: mozdef/mozdef_rabbitmq:latest
+    env_file:
+      - rabbitmq.env
     restart: always
     command: rabbitmq-server
     ports:
