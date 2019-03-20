@@ -53,12 +53,12 @@ services:
     command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data
-  alertplugins:
-    image: mozdef/mozdef_alertplugins
+  alertactions:
+    image: mozdef/mozdef_alertactions
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'python alert_worker.py -c alert_worker.conf'
+    command: bash -c 'python alert_actions_worker.py -c alert_actions_worker.conf'
     depends_on:
       - base
       - alerts
