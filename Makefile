@@ -5,7 +5,7 @@
 #
 
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
+DKR_IMAGES	:= mozdef_alertactions mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
 		   mozdef_mq_worker mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
 		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq mozdef_kibana
 BUILD_MODE	:= build  ## Pass `pull` in order to pull images instead of building them
