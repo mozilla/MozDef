@@ -3,6 +3,7 @@ PARENTDIR       := $(realpath ../)
 AWS_REGION	:= us-west-2
 STACK_NAME	:= mozdef-aws-nested
 BRANCH := master
+AMI_MAP_TEMP_FILE	:= /tmp/mozdef-ami-map.txt
 DEV_STACK_PARAMS_FILENAME	:= aws_parameters.dev.json
 # For more information on the rationale behind the code in STACK_PARAMS see https://github.com/aws/aws-cli/issues/2429#issuecomment-441133480
 DEV_STACK_PARAMS	:= $(shell test -e $(DEV_STACK_PARAMS_FILENAME) && python -c 'import json,sys;f=open(sys.argv[1]);print(" ".join([",".join(["%s=\\\"%s\\\""%(k,v) for k,v in x.items()]) for x in json.load(f)]));f.close()' $(DEV_STACK_PARAMS_FILENAME))
@@ -31,7 +32,7 @@ all:
 .PHONY: packer-build-github
 packer-build-github: ## Build the base AMI with packer
 	@echo "Branch based build triggered for $(BRANCH)."
-	ci/pack_and_copy $(BRANCH)
+	ci/pack_and_copy $(BRANCH) $(AMI_MAP_TEMP_FILE)
 
 .PHONY: create-prod-stack
 create-dev-stack: test ## Create everything you need for a fresh new stack!
@@ -78,6 +79,11 @@ publish-dev-templates:
 publish-prod-templates:
 	@export AWS_REGION=$(AWS_REGION)
 	aws s3 sync cloudformation/ $(S3_PROD_BUCKET_URI) --exclude="*" --include="*.yml"
+
+.PHONY: publish-versioned-templates
+publish-versioned-templates:
+	@export AWS_REGION=$(AWS_REGION)
+	ci/publish_versioned_templates $(BRANCH) $(S3_PROD_BUCKET_URI) $(S3_PROD_STACK_URI) $(AMI_MAP_TEMP_FILE)
 
 .PHONY: diff-dev-templates
 diff-dev-templates:
