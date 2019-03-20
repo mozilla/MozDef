@@ -259,6 +259,7 @@ def keyMapping(aDict):
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
         if 'type' not in returndict:
             # default replacement for old _type subcategory.
+            # to preserve filtering capabilities
             returndict['type'] = 'cloudtrail'
     except Exception as e:
         logger.exception(e)
