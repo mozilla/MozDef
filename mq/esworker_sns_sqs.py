@@ -85,7 +85,6 @@ class taskConsumer(object):
             # default elastic search metadata for an event
             metadata = {
                 'index': 'events',
-                'doc_type': 'event',
                 'id': None
             }
             event = {}
@@ -106,7 +105,10 @@ class taskConsumer(object):
                     try:
                         message_json = json.loads(message_value)
                         for inside_message_key, inside_message_value in message_json.iteritems():
-                            if inside_message_key in ('processid', 'pid'):
+                            if inside_message_key in ('type', 'category'):
+                                event['category'] = inside_message_value
+                                event['type'] = 'event'
+                            elif inside_message_key in ('processid', 'pid'):
                                 processid = str(inside_message_value)
                                 processid = processid.replace('[', '')
                                 processid = processid.replace(']', '')
@@ -118,10 +120,8 @@ class taskConsumer(object):
                             elif inside_message_key in ('time', 'timestamp'):
                                 event['timestamp'] = toUTC(inside_message_value).isoformat()
                                 event['utctimestamp'] = toUTC(event['timestamp']).astimezone(pytz.utc).isoformat()
-                            elif inside_message_key in ('type', 'category'):
-                                event['category'] = inside_message_value
                             elif inside_message_key in ('summary','payload', 'message'):
-                                event['summary'] = inside_message_value
+                                event['summary'] = inside_message_value.lstrip()
                             elif inside_message_key in ('source'):
                                 event['source'] = inside_message_value
                             elif inside_message_key in ('fields', 'details'):
@@ -162,7 +162,6 @@ class taskConsumer(object):
                 self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
-                    doc_type=metadata['doc_type'],
                     body=jbody,
                     bulk=bulk
                 )
