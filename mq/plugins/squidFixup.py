@@ -15,8 +15,10 @@ from netaddr import valid_ipv4
 class message(object):
     def __init__(self):
         """
-        takes an incoming bro message
-        and sets the doc_type
+        takes an incoming squid event
+        and parses the message to extract 
+        data points, and sets the type 
+        field
         """
 
         self.registration = ["squid"]
@@ -71,15 +73,11 @@ class message(object):
         if message["category"] != "proxy":
             return message, metadata
 
-        # Reuse the NSM doc type
-        # to avoid data type conflicts with other doc types
-        # (int v string, etc)
-        # index holds documents of type 'type'
-        # index -> type -> doc
-        metadata["doc_type"] = "nsm"
-
         # move Squid specific fields under 'details' while preserving metadata
         newmessage = dict()
+
+        # Set NSM as type for categorical filtering of events.
+        newmessage["type"] = "nsm"
 
         newmessage[u"mozdefhostname"] = self.mozdefhostname
         newmessage["details"] = {}

@@ -58,17 +58,21 @@ class message(object):
             The complianceitems plugin is called when an event
             is posted with a doctype 'complianceitems'.
             Compliance items are stored in the complianceitems
-            index, with doctype last_known_state
+            index, with a type of last_known_state. The doc_type
+            is overwritten with _doc.
         """
         if not self.validate(message['details']):
             logger.error('Invalid format for complianceitem {0}'.format(message))
             return (None, None)
+        if 'type' not in message:
+            # add type subcategory for filtering
+            message['type'] = 'last_known_state'
+
         item = self.cleanup_item(message['details'])
         docidstr = 'complianceitems'
         docidstr += item['check']['ref']
         docidstr += item['check']['test']['value']
         docidstr += item['target']
         metadata['id'] = hashlib.md5(docidstr).hexdigest()
-        metadata['doc_type'] = 'last_known_state'
         metadata['index'] = 'complianceitems'
         return (item, metadata)

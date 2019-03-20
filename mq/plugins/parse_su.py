@@ -13,8 +13,8 @@ class message(object):
 
     def __init__(self):
         '''
-        takes an incoming sshd message
-        and sets the doc_type
+        takes an incoming su message
+        and parses it to extract data points
         '''
 
         self.registration = ['sshd']

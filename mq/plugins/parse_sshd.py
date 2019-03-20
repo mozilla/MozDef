@@ -11,7 +11,7 @@ class message(object):
     def __init__(self):
         '''
         takes an incoming sshd message
-        and sets the doc_type
+        and parses the message for data points
         '''
 
         self.registration = ['sshd']
