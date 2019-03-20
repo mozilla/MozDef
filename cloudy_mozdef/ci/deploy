@@ -30,7 +30,7 @@ if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
     make BRANCH=${BRANCH} packer-build-github
     make publish-versioned-templates
     cd ../ && make BRANCH={{ user `github_branch`}} set-version-and-fetch-docker-container
-    cd ../ && make BRANCH=${BRANCH} hub-tagged
+    cd ../ && make BRANCH=${BRANCH} docker-push-tagged
 fi
 
 echo "End build / test of the MozDef codebase."
