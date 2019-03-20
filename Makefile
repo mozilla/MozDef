@@ -130,6 +130,6 @@ new-alert: ## Create an example alert and working alert unit test
 
 .PHONY: set-version-and-fetch-docker-container
 set-version-and-fetch-docker-container: # Lock the release of MozDef by pulling the docker containers on AMI build and caching replace all instances of latest in the compose override with the BRANCH
-	make $(BRANCH) build-cwd
-	make $(BRANCH) hub-tagged
+	make BRANCH=$(BRANCH) build-cwd
+	make BRANCH=$(BRANCH) hub-tagged
 	sed -i s/latest/$(BRANCH)/g docker/compose/docker-compose-cloudy-mozdef.yml
