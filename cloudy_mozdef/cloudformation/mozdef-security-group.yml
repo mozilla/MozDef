@@ -4,6 +4,11 @@ Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
     Description: The VPC ID of the VPC to deploy in
+  SSHIngressCIDR:
+    Type: String
+    AllowedPattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'
+    ConstraintDescription: A valid CIDR (e.g. 203.0.113.0/24)
+    Description: The CIDR of IP addresses from which to allow inbound SSH connections
 Resources:
   MozDefSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -16,7 +21,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: 22
         ToPort: 22
-        CidrIp: 0.0.0.0/0
+        CidrIp: !Ref SSHIngressCIDR
       - IpProtocol: tcp
         FromPort: 80
         ToPort: 80
