@@ -43,7 +43,8 @@ class message(object):
     def __init__(self):
         '''
         takes an incoming bro message
-        and sets the doc_type
+        and parses it to extract data
+        points and sets the type field
         '''
 
         self.registration = ['bro']
@@ -67,15 +68,12 @@ class message(object):
         if message['category'] != 'bro':
             return message, metadata
 
-        # set the doc type to bro
-        # to avoid data type conflicts with other doc types
-        # (int v string, etc)
-        # index holds documents of type 'type'
-        # index -> type -> doc
-        metadata['doc_type']= 'nsm'
-
         # move Bro specific fields under 'details' while preserving metadata
         newmessage = dict()
+
+        # default replacement for old _type subcategory.
+        # to preserve filtering capabilities
+        newmessage['type']= 'nsm'
 
         try:
             newmessage['details'] = json.loads(message['MESSAGE'])

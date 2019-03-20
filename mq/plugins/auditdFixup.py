@@ -114,7 +114,4 @@ class message(object):
         if 'category' not in message:
             message['category'] = 'auditd'
 
-        # set doctype
-        metadata['doc_type'] = 'auditd'
-
         return (message, metadata)

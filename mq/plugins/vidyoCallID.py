@@ -14,14 +14,12 @@ class message(object):
         '''
 
         # this plugin
-        # sets a static document ID
-        # for a particular event to allow you to have an event that just updates
-        # current status
+        # sets the type field
         self.registration = ['uniquecallid']
         self.priority = 5
 
     def onMessage(self, message, metadata):
         docid = hashlib.md5('vidyouniquecallid' + message['details']['uniquecallid']).hexdigest()
         metadata['id'] = docid
-        metadata['doc_type'] = 'vidyo'
+        message['type'] = 'vidyo'
         return (message, metadata)
