@@ -85,26 +85,46 @@ hub: ## Upload locally built MozDef images tagged as the current git head (hub.d
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) push
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) push
 
+.PHONY: tag-images
+tag-images:
+	docker tag mozdef/mozdef_meteor:latest mozdef/mozdef_meteor:$(BRANCH)
+	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH)
+	docker tag mozdef/mozdef_tester:latest mozdef/mozdef_tester:$(BRANCH)
+	docker tag mozdef/mozdef_mq_worker:latest mozdef/mozdef_mq_worker:$(BRANCH)
+	docker tag mozdef/mozdef_kibana:latest mozdef/mozdef_kibana:$(BRANCH)
+	docker tag mozdef/mozdef_syslog:latest mozdef/mozdef_syslog:$(BRANCH)
+	docker tag mozdef/mozdef_cron:latest mozdef/mozdef_cron:$(BRANCH)
+	docker tag mozdef/mozdef_elasticsearch:latest mozdef/mozdef_elasticsearch:$(BRANCH)
+	docker tag mozdef/mozdef_loginput:latest mozdef/mozdef_loginput:$(BRANCH)
+	docker tag mozdef/mozdef_mongodb:latest mozdef/mozdef_mongodb:$(BRANCH)
+	docker tag mozdef/mozdef_bootstrap:latest mozdef/mozdef_bootstrap:$(BRANCH)
+	docker tag mozdef/mozdef_alerts:latest mozdef/mozdef_alerts:$(BRANCH)
+	docker tag mozdef/mozdef_nginx:latest mozdef/mozdef_nginx:$(BRANCH)
+	docker tag mozdef/mozdef_alertplugins:latest mozdef/mozdef_alertplugins:$(BRANCH)
+	docker tag mozdef/mozdef_rabbitmq:latest mozdef/mozdef_rabbitmq:$(BRANCH)
+	docker tag mozdef/mozdef_rest:latest mozdef/mozdef_rest:$(BRANCH)
+	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH)
+
 .PHONY: docker-push-tagged docker-get hub hub-get
-docker-push-tagged: hub-tagged
+docker-push-tagged: tag-images hub-tagged
 hub-tagged: ## Upload locally built MozDef images tagged as the BRANCH.  Branch and tagged release are interchangeable here.
-	docker tag mozdef/mozdef_meteor:latest mozdef/mozdef_meteor:$(BRANCH) && docker push mozdef/mozdef_meteor:$(BRANCH)
-	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH) && docker push mozdef/mozdef_base:$(BRANCH)
-	docker tag mozdef/mozdef_tester:latest mozdef/mozdef_tester:$(BRANCH) && docker push mozdef/mozdef_tester:$(BRANCH)
-	docker tag mozdef/mozdef_mq_worker:latest mozdef/mozdef_mq_worker:$(BRANCH) && docker push mozdef/mozdef_mq_worker:$(BRANCH)
-	docker tag mozdef/mozdef_kibana:latest mozdef/mozdef_kibana:$(BRANCH) && docker push mozdef/mozdef_kibana:$(BRANCH)
-	docker tag mozdef/mozdef_syslog:latest mozdef/mozdef_syslog:$(BRANCH) && docker push mozdef/mozdef_syslog:$(BRANCH)
-	docker tag mozdef/mozdef_cron:latest mozdef/mozdef_cron:$(BRANCH) && docker push mozdef/mozdef_cron:$(BRANCH)
-	docker tag mozdef/mozdef_elasticsearch:latest mozdef/mozdef_elasticsearch:$(BRANCH) && docker push mozdef/mozdef_elasticsearch:$(BRANCH)
-	docker tag mozdef/mozdef_loginput:latest mozdef/mozdef_loginput:$(BRANCH) && docker push mozdef/mozdef_loginput:$(BRANCH)
-	docker tag mozdef/mozdef_mongodb:latest mozdef/mozdef_mongodb:$(BRANCH) && docker push mozdef/mozdef_mongodb:$(BRANCH)
-	docker tag mozdef/mozdef_bootstrap:latest mozdef/mozdef_bootstrap:$(BRANCH) && docker push mozdef/mozdef_bootstrap:$(BRANCH) 
-	docker tag mozdef/mozdef_alerts:latest mozdef/mozdef_alerts:$(BRANCH) && docker push mozdef/mozdef_alerts:$(BRANCH)
-	docker tag mozdef/mozdef_nginx:latest mozdef/mozdef_nginx:$(BRANCH) && docker push mozdef/mozdef_nginx:$(BRANCH)
-	docker tag mozdef/mozdef_alertplugins:latest mozdef/mozdef_alertplugins:$(BRANCH) && docker push mozdef/mozdef_alertplugins:$(BRANCH)
-	docker tag mozdef/mozdef_rabbitmq:latest mozdef/mozdef_rabbitmq:$(BRANCH) && docker push mozdef/mozdef_rabbitmq:$(BRANCH)
-	docker tag mozdef/mozdef_rest:latest mozdef/mozdef_rest:$(BRANCH) && docker push mozdef/mozdef_rest:$(BRANCH)
-	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH) && docker push mozdef/mozdef_base:$(BRANCH)
+	docker push mozdef/mozdef_meteor:$(BRANCH)
+	docker push mozdef/mozdef_base:$(BRANCH)
+	docker push mozdef/mozdef_tester:$(BRANCH)
+	docker push mozdef/mozdef_mq_worker:$(BRANCH)
+	docker push mozdef/mozdef_kibana:$(BRANCH)
+	docker push mozdef/mozdef_syslog:$(BRANCH)
+	docker push mozdef/mozdef_cron:$(BRANCH)
+	docker push mozdef/mozdef_elasticsearch:$(BRANCH)
+	docker push mozdef/mozdef_loginput:$(BRANCH)
+	docker push mozdef/mozdef_mongodb:$(BRANCH)
+	docker push mozdef/mozdef_bootstrap:$(BRANCH) 
+	docker push mozdef/mozdef_alerts:$(BRANCH)
+	docker push mozdef/mozdef_nginx:$(BRANCH)
+	docker push mozdef/mozdef_alertplugins:$(BRANCH)
+	docker push mozdef/mozdef_rabbitmq:$(BRANCH)
+	docker push mozdef/mozdef_rest:$(BRANCH)
+	docker push mozdef/mozdef_base:$(BRANCH)
 
 docker-get: hub-get
 hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
@@ -129,5 +149,5 @@ new-alert: ## Create an example alert and working alert unit test
 	python tests/alert_templater.py
 
 .PHONY: set-version-and-fetch-docker-container
-set-version-and-fetch-docker-container: build-from-cwd hub-tagged # Lock the release of MozDef by pulling the docker containers on AMI build and caching replace all instances of latest in the compose override with the BRANCH
+set-version-and-fetch-docker-container: build-from-cwd tag-images # Lock the release of MozDef by pulling the docker containers on AMI build and caching replace all instances of latest in the compose override with the BRANCH
 	sed -i s/latest/$(BRANCH)/g docker/compose/docker-compose-cloudy-mozdef.yml
