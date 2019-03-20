@@ -43,6 +43,7 @@
         "sudo yum install -y mysql-devel python python-devel python-pip",
         "sudo yum install -y git",
         "sudo yum install -y docker",
+        "sudo yum install -y python3",
         "sudo pip install virtualenv ",
         "sudo pip install docker-compose",
         "sudo systemctl enable docker",
