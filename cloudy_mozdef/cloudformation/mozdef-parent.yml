@@ -95,6 +95,7 @@ Parameters:
     ConstraintDescription: A valid amazonaws.com S3 URL
     Description: "The URL to the S3 bucket used to fetch the nested stack templates (Example: https://s3-us-west-2.amazonaws.com/example-bucket-name/cloudformation/path/)"
     Default: https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/
+# A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
 Mappings:
   RegionMap:
     us-west-2:
