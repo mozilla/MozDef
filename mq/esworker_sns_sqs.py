@@ -107,6 +107,8 @@ class taskConsumer(object):
                         for inside_message_key, inside_message_value in message_json.iteritems():
                             if inside_message_key in ('type', 'category'):
                                 event['category'] = inside_message_value
+                                # add type subcategory for filtering after
+                                # original type field is rewritten as category
                                 event['type'] = 'event'
                             elif inside_message_key in ('processid', 'pid'):
                                 processid = str(inside_message_value)

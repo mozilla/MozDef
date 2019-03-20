@@ -203,7 +203,8 @@ def keyMapping(aDict):
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
         if 'type' not in returndict:
-            # add type subcategory for filtering
+            # default replacement for old _type subcategory.
+            # to preserve filtering capabilities
             returndict['type'] = 'event'
 
     except Exception as e:
