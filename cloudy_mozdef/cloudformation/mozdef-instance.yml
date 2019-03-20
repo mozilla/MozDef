@@ -113,6 +113,8 @@ Resources:
             - amazon-efs-utils
           write_files:
             - content: |
+                # Cloudy MozDef env file as imported by docker compose.
+                # Drives the configuration of variables for a variety of containers.
                 OPTIONS_ESSERVERS=${ESURL}
                 OPTIONS_KIBANAURL=${KibanaURL}
                 # The OPTIONS_METEOR_KIBANAURL uses the reserved word "relative" which triggers MozDef
@@ -120,6 +122,7 @@ Resources:
                 OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
                 OPTIONS_METEOR_ROOTURL=https://${DomainName}
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
+                # Future support will be added for cognito backed authentication.
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
                 discovery_url=${OIDCDiscoveryURL}
@@ -127,6 +130,8 @@ Resources:
                 redirect_uri_path=/redirect_uri
                 httpsredir=no
                 # Meteor settings
+                # Mongo is discovered through the local docker-compose network.
+                # These are not typos.
                 MONGO_URL=mongodb://mongodb:3002/meteor
                 ROOT_URL=http://localhost
                 OPTIONS_METEOR_PORT=3000
@@ -141,6 +146,10 @@ Resources:
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
             - content: |
                 #!/usr/bin/env python
+
+                # config.py file drives the alert worker container consuming messages from rabbitmq
+                # This is slated for future refactor to config and code that drives celery
+
                 # This Source Code Form is subject to the terms of the Mozilla Public
                 # License, v. 2.0. If a copy of the MPL was not distributed with this
                 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -222,6 +231,9 @@ Resources:
                 logging.Formatter.converter = time.gmtime
               path: /opt/mozdef/docker/compose/mozdef_alerts/files/config.py
             - content: |
+                # Cloudy MozDef env file as imported by docker compose for the kibana reverse proxy
+                # Cloudy MozDef uses managed elasticsearch and proxies connections to that using the LUA proxy
+                # This will support cognito backed authentication in the future
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
                 discovery_url=${OIDCDiscoveryURL}
@@ -231,9 +243,11 @@ Resources:
                 cookiename=seskibana
               path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
             - content: |
+                # This configures the worker that pulls in CloudTrail logs
                 OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
             - content: |
+                # This is the additional worker reserved for future use
                 OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
           runcmd:
