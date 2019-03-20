@@ -24,10 +24,6 @@ Metadata:
         - OIDCDiscoveryURL
         - OIDCClientId
         - OIDCClientSecret
-    - Label:
-        default: Template Location
-      Parameters:
-        - S3TemplateLocation
     ParameterLabels:
       VpcId:
         default: VPC ID
@@ -49,8 +45,6 @@ Metadata:
         default: OIDC Client ID
       OIDCClientSecret:
         default: OIDC Client Secret
-      S3TemplateLocation:
-        default: S3 Template Location URL
 Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
@@ -89,17 +83,8 @@ Parameters:
     Type: String
     Description: The secret that your OIDC provider issues you for your Mozdef instance.
     NoEcho: true
-  S3TemplateLocation:
-    Type: String
-    AllowedPattern: '^https?:\/\/.*\.amazonaws\.com\/.*\/'
-    ConstraintDescription: A valid amazonaws.com S3 URL
-    Description: "The URL to the S3 bucket used to fetch the nested stack templates (Example: https://s3-us-west-2.amazonaws.com/example-bucket-name/cloudformation/path/)"
-    Default: https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/
 # A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
-Mappings:
-  RegionMap:
-    us-west-2:
-      HVM64: ami-0b5ac7ded4f6d62f9
+# INSERT MAPPING HERE : This template does not work in this state. The mapping is replaced with a working AWS region to AMI ID mapping as well as a variable map with the S3TemplateLocationPrefix by cloudy_mozdef/ci/publish_versioned_templates. The resulting functioning CloudFormation template is uploaded to S3 for the version being built.
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
@@ -110,7 +95,7 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-security-group.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-security-group.yml ] ]
   MozDefIAMRoleAndInstanceProfile:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -123,7 +108,7 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, base-iam.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], base-iam.yml ] ]
   MozDefInstance:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -152,7 +137,7 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-instance.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-instance.yml ] ]
   MozDefES:
     Type: AWS::CloudFormation::Stack
     DependsOn: MozDefIAMRoleAndInstanceProfile
@@ -168,7 +153,7 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-es.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-es.yml ] ]
   MozDefEFS:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -182,7 +167,7 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-efs.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-efs.yml ] ]
   MozDefSQS:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -191,7 +176,7 @@ Resources:
         Value: mozdef
       - Key: stack
         Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-sqs.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-sqs.yml ] ]
   MozDefCloudTrail:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -200,7 +185,7 @@ Resources:
         Value: mozdef
       - Key: stack
         Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-cloudtrail.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-cloudtrail.yml ] ]
   CloudFormationLambdaIAMRole:
     Type: AWS::IAM::Role
     Properties:
