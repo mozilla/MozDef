@@ -64,7 +64,7 @@ Resources:
         - Sid: AllowSNSToSendToSQS
           Effect: Allow
           Principal:
-            AWS: !Join [ '', [ 'arn:', 'aws:', 'iam::', !Ref 'AWS::AccountId', ':root' ] ]
+            AWS: '*'
           Action: sqs:SendMessage
           Resource: !GetAtt MozDefCloudTrailSQSQueue.Arn
           Condition:
