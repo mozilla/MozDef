@@ -2,7 +2,7 @@
 version: '2.2'
 services:
   nginx:
-    image: mozillaiam/mozilla.oidc.accessproxy
+    image: mozillaiam/mozilla.oidc.accessproxy:8334f96
     env_file:
       - cloudy_mozdef.env
     restart: always
