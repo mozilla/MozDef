@@ -19,8 +19,12 @@ COPY docker/compose/mozdef_cron/files/healthToMongo.conf /opt/mozdef/envs/mozdef
 COPY docker/compose/mozdef_cron/files/syncAlertsToMongo.conf /opt/mozdef/envs/mozdef/cron/syncAlertsToMongo.conf
 
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/cron
+# https://stackoverflow.com/a/48651061/168874
+
+COPY docker/compose/mozdef_cron/files/launch_cron /launch_cron
 
 USER mozdef
 RUN crontab /cron_entries.txt
 
 USER root
+CMD ['/launch_cron']
