@@ -102,6 +102,11 @@ Resources:
       IamInstanceProfile: !Ref IamInstanceProfile
       ImageId: !Ref AMIImageId
       InstanceType: !Ref InstanceType
+      BlockDeviceMappings:
+        - DeviceName: "/dev/xvda"
+          Ebs:
+            VolumeSize: 14
+            VolumeType: gp2
       KeyName: !Ref KeyName
       SecurityGroups:
         - !Ref MozDefSecurityGroupId
@@ -264,9 +269,9 @@ Resources:
             - for i in 1 2 3 4 5 6; do mount --verbose --all --types efs defaults && break || sleep 15; done
             - cd /opt/mozdef && git pull origin master
             - make -C /opt/mozdef -f /opt/mozdef/Makefile  run-cloudy-mozdef
-            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec rabbitmq rabbitmqctl add_user mozdef $RABBITMQ_PASSWORD
-            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec rabbitmq rabbitmqctl set_user_tags mozdef administrator
-            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec rabbitmq rabbitmqctl set_permissions -p / mozdef ".*" ".*" ".*"
+            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef \$RABBITMQ_PASSWORD
+            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_user_tags mozdef administrator
+            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_permissions -p / mozdef ".*" ".*" ".*"
   MozDefAutoScaleGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
