@@ -18,11 +18,14 @@ from datetime import datetime
 from collections import Counter
 from celery import Task
 from celery.utils.log import get_task_logger
-from config import RABBITMQ, ES
+from config import RABBITMQ, ES, ALERT_PLUGINS
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
+from lib.alert_plugin_set import AlertPluginSet
 
 
 # utility functions used by AlertTask.mostCommon
@@ -337,6 +340,7 @@ class AlertTask(Task):
                 if alert:
                     alert = self.tagBotNotify(alert)
                     self.log.debug(alert)
+                    alert = self.alertPlugins(alert)
                     alertResultES = self.alertToES(alert)
                     self.tagEventsAlert([i], alertResultES)
                     self.alertToMessageQueue(alert)
@@ -366,6 +370,7 @@ class AlertTask(Task):
                     if alert:
                         alert = self.tagBotNotify(alert)
                         self.log.debug(alert)
+                        alert = self.alertPlugins(alert)
                         alertResultES = self.alertToES(alert)
                         # even though we only sample events in the alert
                         # tag all events as alerted to avoid re-alerting
@@ -373,6 +378,17 @@ class AlertTask(Task):
                         self.tagEventsAlert(aggregation['allevents'], alertResultES)
                         self.alertToMessageQueue(alert)
                         self.saveAlertID(alertResultES)
+
+    def alertPlugins(self, alert):
+        """
+        Send alerts through a plugin system
+        """
+
+        plugin_dir = os.path.join(os.path.dirname(__file__), '../plugins')
+        plugin_set = AlertPluginSet(plugin_dir, ALERT_PLUGINS)
+        alertDict = plugin_set.run_plugins(alert)[0]
+
+        return alertDict
 
     def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None, ircchannel=None):
         """
