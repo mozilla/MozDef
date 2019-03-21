@@ -111,16 +111,16 @@ services:
       - ES_URL=http://localhost:9200
     networks:
       - default
-  alertplugins:
-    image: mozdef/mozdef_alertplugins
+  alertactions:
+    image: mozdef/mozdef_alertactions
     build:
       context: ../../
-      dockerfile: docker/compose/mozdef_alertplugins/Dockerfile
+      dockerfile: docker/compose/mozdef_alertactions/Dockerfile
       cache_from:
-        - mozdef/mozdef_alertplugins
-        - mozdef_alertplugins:latest
+        - mozdef/mozdef_alertactions
+        - mozdef_alertactions:latest
     restart: always
-    command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && python alert_worker.py -c alert_worker.conf'
+    command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && python alert_actions_worker.py -c alert_actions_worker.conf'
     depends_on:
       - base
       - elasticsearch
