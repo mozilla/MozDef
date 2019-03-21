@@ -34,14 +34,13 @@ packer-build-github: ## Build the base AMI with packer
 	@echo "Branch based build triggered for $(BRANCH)."
 	ci/pack_and_copy $(BRANCH) $(AMI_MAP_TEMP_FILE)
 
-.PHONY: create-prod-stack
+.PHONY: create-dev-stack
 create-dev-stack: test ## Create everything you need for a fresh new stack!
 	@export AWS_REGION=$(AWS_REGION)
 	@echo "Make sure you have an environment variable OIDC_CLIENT_SECRET set."
 	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
-	  --parameters ParameterKey=S3TemplateLocation,ParameterValue=$(S3_DEV_STACK_URI) \
-	               $(OIDC_CLIENT_SECRET_PARAM_ARG) \
+	  --parameters $(OIDC_CLIENT_SECRET_PARAM_ARG) \
 	               $(DEV_STACK_PARAMS) \
 	  --output text
 
