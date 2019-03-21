@@ -30,7 +30,7 @@ run: build ## Run all MozDef containers
 run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy-mozdef`). This is used by the CloudFormation-initiated setup.
 	$(shell test -f docker/compose/cloudy_mozdef.env || touch docker/compose/cloudy_mozdef.env)
 	$(shell test -f docker/compose/cloudy_mozdef_kibana.env || touch docker/compose/cloudy_mozdef_kibana.env)
-	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) pull
+	# docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) pull  # Images are now in the local packer build AMI and no docker pull is needed
 	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) up -d
 
 .PHONY: run-env-mozdef
@@ -118,7 +118,7 @@ hub-tagged: ## Upload locally built MozDef images tagged as the BRANCH.  Branch 
 	docker push mozdef/mozdef_elasticsearch:$(BRANCH)
 	docker push mozdef/mozdef_loginput:$(BRANCH)
 	docker push mozdef/mozdef_mongodb:$(BRANCH)
-	docker push mozdef/mozdef_bootstrap:$(BRANCH) 
+	docker push mozdef/mozdef_bootstrap:$(BRANCH)
 	docker push mozdef/mozdef_alerts:$(BRANCH)
 	docker push mozdef/mozdef_nginx:$(BRANCH)
 	docker push mozdef/mozdef_alertplugins:$(BRANCH)
