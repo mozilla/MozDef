@@ -102,6 +102,11 @@ Resources:
       IamInstanceProfile: !Ref IamInstanceProfile
       ImageId: !Ref AMIImageId
       InstanceType: !Ref InstanceType
+      BlockDeviceMappings:
+        - DeviceName: "/dev/xvda"
+          Ebs:
+            VolumeSize: 14
+            VolumeType: gp2
       KeyName: !Ref KeyName
       SecurityGroups:
         - !Ref MozDefSecurityGroupId
