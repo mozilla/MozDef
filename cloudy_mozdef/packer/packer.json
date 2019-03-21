@@ -11,7 +11,7 @@
     "secret_key": "{{user `aws_secret_key`}}",
     "token": "{{user `aws_security_token`}}",
     "source_ami": "ami-0d1000aff9a9bad89",
-    "instance_type": "t2.large",
+    "instance_type": "m5.large",
     "ssh_pty" : "true",
     "ssh_username": "ec2-user",
     "ami_name": "mozdef_{{timestamp}}",
