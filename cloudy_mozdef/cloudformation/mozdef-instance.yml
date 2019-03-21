@@ -251,7 +251,7 @@ Resources:
                 OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
           runcmd:
-            - echo RABBITMQ_PASSWORD=`python3 -c 'import secrets; s = secrets.token_hex(); print(s)'` > rabbitmq.env
+            - echo RABBITMQ_PASSWORD=`python3 -c 'import secrets; s = secrets.token_hex(); print(s)'` > /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
