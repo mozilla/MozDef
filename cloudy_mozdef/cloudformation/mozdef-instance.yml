@@ -255,7 +255,7 @@ Resources:
             - chmod --verbose 600 /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
-            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
             - mkdir --verbose --parents ${EFSMountPoint}
             - echo '*.* @@127.0.0.1:514' >> /etc/rsyslog.conf
             - systemctl enable rsyslog
