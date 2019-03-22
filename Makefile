@@ -58,6 +58,9 @@ run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make 
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 rebuild-run-tests: build-tests run-tests
 
+.PHONY: build
+build: build-from-cwd
+
 .PHONY: build-from-cwd
 build-from-cwd:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
