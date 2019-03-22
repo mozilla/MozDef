@@ -30,7 +30,6 @@ if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
     make BRANCH=${BRANCH} packer-build-github
     make BRANCH=${BRANCH} publish-versioned-templates
     cd ..
-    make BRANCH=${BRANCH} set-version-and-fetch-docker-container
     make BRANCH=${BRANCH} docker-push-tagged
 fi
 
