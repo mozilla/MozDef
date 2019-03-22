@@ -58,6 +58,9 @@ run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make 
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 rebuild-run-tests: build-tests run-tests
 
+.PHONY: build
+build: build-from-cwd
+
 .PHONY: build-from-cwd
 build-from-cwd:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
@@ -150,4 +153,4 @@ new-alert: ## Create an example alert and working alert unit test
 
 .PHONY: set-version-and-fetch-docker-container
 set-version-and-fetch-docker-container: build-from-cwd tag-images # Lock the release of MozDef by pulling the docker containers on AMI build and caching replace all instances of latest in the compose override with the BRANCH
-	sed -i s/latest/$(BRANCH)/g docker/compose/docker-compose-cloudy-mozdef.yml
+	sed -i 's;\image: mozdef/\(.*\):latest$;image: mozdef/\1:$(BRANCH);g' docker/compose/docker-compose-cloudy-mozdef.yml
