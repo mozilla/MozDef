@@ -54,8 +54,7 @@ update-dev-stack: test ## Updates the nested stack on AWS
 	@export AWS_REGION=$(AWS_REGION)
 	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
-	  --parameters ParameterKey=S3TemplateLocation,ParameterValue=$(S3_DEV_STACK_URI) \
-	               $(OIDC_CLIENT_SECRET_PARAM_ARG) \
+	  --parameters $(OIDC_CLIENT_SECRET_PARAM_ARG) \
 	               $(DEV_STACK_PARAMS) \
 	  --output text
 
