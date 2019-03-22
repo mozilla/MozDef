@@ -24,12 +24,12 @@ if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
     echo "Building a release"
     echo "C|_| This may take a bit.  Might as well grab a coffee."
     make build-from-cwd
-    make hub-login
     cd cloudy_mozdef
     BRANCH="`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`"
     make BRANCH=${BRANCH} packer-build-github
     make BRANCH=${BRANCH} publish-versioned-templates
     cd ..
+    make hub-login
     make BRANCH=${BRANCH} docker-push-tagged
 fi
 
