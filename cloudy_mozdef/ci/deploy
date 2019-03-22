@@ -28,7 +28,7 @@ if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
     cd cloudy_mozdef
     BRANCH="`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`"
     make BRANCH=${BRANCH} packer-build-github
-    make publish-versioned-templates
+    make BRANCH=${BRANCH} publish-versioned-templates
     cd ..
     make BRANCH=${BRANCH} set-version-and-fetch-docker-container
     make BRANCH=${BRANCH} docker-push-tagged
