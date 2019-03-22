@@ -84,7 +84,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'crond -n'
+    command: bash -c 'cd / && bash launch_cron'
     volumes:
       - cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
