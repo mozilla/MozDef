@@ -15,6 +15,13 @@
     "ssh_pty" : "true",
     "ssh_username": "ec2-user",
     "ami_name": "mozdef_{{timestamp}}",
+    "launch_block_device_mappings": [
+      {
+      "delete_on_termination": true,
+      "device_name": "/dev/xvda",
+      "volume_size": 14
+      }
+    ],
     "ami_description": "An automated build of MozDef triggered via the makefile.",
     "ami_groups": [
       "all"
@@ -52,6 +59,7 @@
         "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
         "cd /opt/mozdef && sudo git checkout {{ user `github_branch`}}",
         "cd /opt/mozdef && sudo git rev-parse HEAD",
+        "cd /opt/mozdef && sudo touch docker/compose/cloudy_mozdef.env docker/compose/rabbitmq.env docker/compose/cloudy_mozdef_mq_cloudtrail.env docker/compose/cloudy_mozdef_mq_sns_sqs.env docker/compose/cloudy_mozdef_kibana.env",
         "cd /opt/mozdef && sudo make BRANCH={{ user `github_branch`}} set-version-and-fetch-docker-container",
         "cd /opt/mozdef && sudo docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p mozdef pull",
         "rm -rf /home/ec2-user/.ssh/authorized_keys",
