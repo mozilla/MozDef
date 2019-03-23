@@ -51,6 +51,7 @@
         "sudo mkdir -p /opt/mozdef/",
         "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
         "cd /opt/mozdef && sudo git checkout {{ user `github_branch`}}",
+        "cd /opt/mozdef && sudo git rev-parse HEAD",
         "cd /opt/mozdef && sudo make BRANCH={{ user `github_branch`}} set-version-and-fetch-docker-container",
         "sudo docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p mozdef pull",
         "rm -rf /home/ec2-user/.ssh/authorized_keys",
