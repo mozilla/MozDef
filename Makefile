@@ -26,7 +26,7 @@ all:
 run: build ## Run all MozDef containers
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
-.PHONY: run-cloudy-mozdef restart-cloudy-mozdef
+.PHONY: run-cloudy-mozdef
 run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy-mozdef`). This is used by the CloudFormation-initiated setup.
 	$(shell test -f docker/compose/cloudy_mozdef.env || touch docker/compose/cloudy_mozdef.env)
 	$(shell test -f docker/compose/cloudy_mozdef_kibana.env || touch docker/compose/cloudy_mozdef_kibana.env)
@@ -41,21 +41,34 @@ else
 	@echo $(ENV) not found.
 endif
 
+.PHONY: restart-cloudy-mozdef
 restart-cloudy-mozdef:
 	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart
 
-.PHONY: tests run-tests-resources run-tests-resources-external run-tests
+.PHONY: test
 test: build-tests run-tests
+
+.PHONY: tests
 tests: build-tests run-tests  ## Run all tests (getting/building images as needed)
+
+.PHONY: run-tests-resources-external
 run-tests-resources-external: ## Just spin up external resources for tests and have them listen externally
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 9200:9200 -d elasticsearch
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 5672:5672 -d rabbitmq
+
+.PHONY: run-tests-resources
 run-tests-resources:  ## Just run the external resources required for tests
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) up -d
-run-test:
+
+.PHONY: run-test
+run-test: run-tests
+
+.PHONY: run-test
 run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
+
+.PHONY: rebuild-run-tests
 rebuild-run-tests: build-tests run-tests
 
 .PHONY: build
@@ -75,14 +88,18 @@ build-from-github:  ## Build local MozDef images from the github branch (use mak
 build-tests:  ## Build end-to-end test environment only
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) $(NO_CACHE) $(BUILD_MODE)
 
-.PHONY: stop down
+.PHONY: stop
 stop: down
+
+.PHONY: down
 down: ## Shutdown all services we started with docker-compose
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) stop
 	docker-compose -f docker/compose/docker-compose.yml -p test-$(NAME) stop
 
-.PHONY: docker-push docker-get hub hub-get
+.PHONY: docker-push
 docker-push: hub
+
+.PHONY: hub
 hub: ## Upload locally built MozDef images tagged as the current git head (hub.docker.com/mozdef).
 	docker login
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) push
@@ -108,8 +125,10 @@ tag-images:
 	docker tag mozdef/mozdef_rest:latest mozdef/mozdef_rest:$(BRANCH)
 	docker tag mozdef/mozdef_base:latest mozdef/mozdef_base:$(BRANCH)
 
-.PHONY: docker-push-tagged docker-get hub hub-get
+.PHONY: docker-push-tagged
 docker-push-tagged: tag-images hub-tagged
+
+.PHONY: hub-tagged
 hub-tagged: ## Upload locally built MozDef images tagged as the BRANCH.  Branch and tagged release are interchangeable here.
 	docker push mozdef/mozdef_meteor:$(BRANCH)
 	docker push mozdef/mozdef_base:$(BRANCH)
@@ -129,12 +148,18 @@ hub-tagged: ## Upload locally built MozDef images tagged as the BRANCH.  Branch 
 	docker push mozdef/mozdef_rest:$(BRANCH)
 	docker push mozdef/mozdef_base:$(BRANCH)
 
+.PHONY: docker-get
 docker-get: hub-get
+
+.PHONY: hub-get
 hub-get: ## Download all pre-built images (hub.docker.com/mozdef)
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) pull
 	docker-compose -f docker/compose/docker-compose-test.yml -p test-$(NAME) pull
 
+.PHONY: docker-login
 docker-login: hub-login
+
+.PHONY: hub-login
 hub-login: ## Login as the MozDef CI user in order to perform a release of the containers.
 	@docker login -u mozdefci --password $(shell aws ssm get-parameter --name '/mozdef/ci/dockerhubpassword' --with-decrypt | jq .Parameter.Value)
 
@@ -145,7 +170,7 @@ clean: ## Cleanup all docker volumes and shutdown all related services
 
 # Shorthands
 .PHONY: rebuild
-rebuild: clean build-cwd
+rebuild: clean build-from-cwd
 
 .PHONY: new-alert
 new-alert: ## Create an example alert and working alert unit test

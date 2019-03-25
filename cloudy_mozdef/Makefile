@@ -22,6 +22,7 @@ S3_PROD_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_PROD_BUCKET_NAM
 # OIDC_CLIENT_SECRET is set in an environment variable by running "source aws_parameters.sh"
 OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET)")
 
+.PHONY:all
 all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]\.PHONY.*].*:' Makefile
@@ -58,8 +59,10 @@ update-dev-stack: test ## Updates the nested stack on AWS
 	               $(DEV_STACK_PARAMS) \
 	  --output text
 
-.PHONY: cfn-lint test
+.PHONY: test
 test: cfn-lint
+
+.PHONY: cfn-lint
 cfn-lint: ## Verify the CloudFormation template pass linting tests
 	-cfn-lint cloudformation/*.yml
 
