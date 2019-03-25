@@ -57,7 +57,7 @@ class ElasticsearchClient():
             {
               "mappings":{}
             }'''
-        self.es_connection.indices.create(index=index_name, update_all_types='true', body=index_config)
+        self.es_connection.indices.create(index=index_name, body=index_config)
 
     def create_alias(self, alias, index):
         actions = []
