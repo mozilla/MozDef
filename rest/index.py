@@ -526,7 +526,7 @@ def kibanaDashboards():
 
         for dashboard in results['hits']:
             resultsList.append({
-                'name': dashboard['_source']['dashboard']['title'],
+                'name': dashboard['_source']['title'],
                 'url': "%s#/%s/%s" % (
                     options.kibanaurl,
                     "dashboard",
