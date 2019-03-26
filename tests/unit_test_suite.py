@@ -10,6 +10,7 @@ from dateutil.parser import parse
 
 import random
 import pytest
+import sys
 
 from mozdef_util.utilities import toUTC
 
@@ -44,6 +45,9 @@ class UnitTestSuite(object):
             self.reset_elasticsearch()
         if pytest.config.option.delete_queues:
             self.reset_rabbitmq()
+        # Remove any leftover plugin module as a result of loading
+        if 'plugins' in sys.modules:
+            del sys.modules['plugins']
 
     def populate_test_event(self, event, event_type='event'):
         self.es_client.save_event(body=event, doc_type=event_type)

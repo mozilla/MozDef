@@ -30,3 +30,8 @@ Add is_ip utility function
 ------------------
 
 * Replaced timer with threads for cleaner bulk importing
+
+1.0.5 (2019-03-06)
+------------------
+
+* Replace elasticsearch flush with refresh

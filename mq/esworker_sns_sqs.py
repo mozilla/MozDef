@@ -121,7 +121,7 @@ class taskConsumer(object):
                             elif inside_message_key in ('type', 'category'):
                                 event['category'] = inside_message_value
                             elif inside_message_key in ('summary','payload', 'message'):
-                                event['summary'] = inside_message_value
+                                event['summary'] = inside_message_value.lstrip()
                             elif inside_message_key in ('source'):
                                 event['source'] = inside_message_value
                             elif inside_message_key in ('fields', 'details'):

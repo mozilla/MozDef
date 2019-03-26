@@ -1,5 +1,5 @@
 [Unit]
-Description=uWSGI MozDef Alert Plugins Service
+Description=uWSGI MozDef Alert Actions Service
 After=rabbitmq-server.service
 
 [Service]
@@ -9,7 +9,7 @@ ExecStartPre=-/usr/bin/mkdir -p /var/run/mozdef-alerts
 ExecStartPre=/usr/bin/chown -R mozdef:mozdef /var/run/mozdef-alerts
 User=mozdef
 Group=mozdef
-ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/alerts; source /opt/mozdef/envs/python/bin/activate; uwsgi --ini alert_plugins.ini'
+ExecStart=/bin/bash -c 'cd /opt/mozdef/envs/mozdef/alerts; source /opt/mozdef/envs/python/bin/activate; uwsgi --ini alert_actions.ini'
 Restart=always
 KillSignal=SIGQUIT
 Type=notify
@@ -18,4 +18,4 @@ NotifyAccess=all
 
 [Install]
 WantedBy=multi-user.target
-Alias=alertplugins
+Alias=alertactions

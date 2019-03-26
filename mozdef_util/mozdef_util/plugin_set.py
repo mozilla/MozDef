@@ -51,6 +51,7 @@ class PluginSet(object):
                 )
             except Exception as e:
                 logger.exception('Received exception when loading {0} plugins\n{1}'.format(module_name, e.message))
+        plugin_manager.destroy()
         return plugins
 
     @property

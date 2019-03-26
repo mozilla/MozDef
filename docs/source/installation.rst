@@ -370,7 +370,7 @@ you can start the restapi and loginput processes from within your venv via::
 Supervisord
 ***********
 
-We use supervisord to run the alerts and alertplugins. If you plan on starting services manually, you can skip this step.
+We use supervisord to run the alerts and alertactions. If you plan on starting services manually, you can skip this step.
 
 To install supervisord perform the following as the user mozdef::
 
@@ -381,7 +381,7 @@ To install supervisord perform the following as the user mozdef::
 
 Within the alerts directory there is a supervisord_alerts.ini which is preconfigured.
 If you've changed any directory paths for this installation then modify it to reflect your pathing changes.
-There are systemd files in the systemdfiles directory that you can use to start the mozdefalerts and mozdefalertplugins processes which we cover near the end of this tutorial.
+There are systemd files in the systemdfiles directory that you can use to start the mozdefalerts and mozdefalertactions processes which we cover near the end of this tutorial.
 
 
 ElasticSearch
@@ -473,7 +473,7 @@ Ensure it has root file permissions so that systemd can start it::
   cp /opt/mozdef/systemdfiles/consumer/mworker-eventtask.service /etc/systemd/system/
   cp /opt/mozdef/systemdfiles/alert/mozdefalerts.service /etc/systemd/system/
   cp /opt/mozdef/systemdfiles/alert/mozdefbot.service /etc/systemd/system/
-  cp /opt/mozdef/systemdfiles/alert/mozdefalertplugins.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/alert/mozdefalertactions.service /etc/systemd/system/
 
 Then you will need to enable them::
 
@@ -483,7 +483,7 @@ Then you will need to enable them::
   systemctl enable mworker-eventtask.service
   systemctl enable mozdefalerts.service
   systemctl enable mozdefbot.service
-  systemctl enable mozdefalertplugins.service
+  systemctl enable mozdefalertactions.service
   systemctl enable mongod.service
 
 Reload systemd::
@@ -499,7 +499,7 @@ Now you can start your services::
   systemctl start mozdefrestapi
   systemctl start mozdefweb
   systemctl start mworker-eventtask
-  systemctl start mozdefalertplugins
+  systemctl start mozdefalertactions
 
 
 Alternatively you can start the following services manually in this way from inside the venv as mozdef::
