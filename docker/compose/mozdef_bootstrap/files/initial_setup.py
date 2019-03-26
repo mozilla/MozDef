@@ -109,7 +109,7 @@ if kibana_index_name not in all_indices:
 
 # Wait for .kibana index to be ready
 num_times = 0
-while not client.index_exists('.kibana'):
+while not client.index_exists(kibana_index_name):
     if num_times < 3:
         print("Waiting for .kibana index to be ready")
         time.sleep(1)
@@ -121,7 +121,7 @@ while not client.index_exists('.kibana'):
 # Check to see if index patterns exist in .kibana
 query = SearchQuery()
 query.add_must(TermMatch('_type', 'index-pattern'))
-results = query.execute(client, indices=['.kibana'])
+results = query.execute(client, indices=[kibana_index_name])
 if len(results['hits']) == 0:
     # Create index patterns and assign default index mapping
     index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
@@ -131,7 +131,7 @@ if len(results['hits']) == 0:
         with open(json_file_path) as json_data:
             mapping_data = json.load(json_data)
             print "Creating {0} index mapping".format(mapping_data['title'])
-            client.save_object(body=mapping_data, index='.kibana', doc_type='index-pattern', doc_id=mapping_data['title'])
+            client.save_object(body=mapping_data, index=kibana_index_name, doc_type='index-pattern', doc_id=mapping_data['title'])
 
     # Assign default index to 'events'
     client.refresh('.kibana')
@@ -145,7 +145,7 @@ if len(results['hits']) == 0:
 # Check to see if dashboards already exist in .kibana
 query = SearchQuery()
 query.add_must(TermMatch('_type', 'dashboard'))
-results = query.execute(client, indices=['.kibana'])
+results = query.execute(client, indices=[kibana_index_name])
 if len(results['hits']) == 0:
     dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
     listing = os.listdir(dashboards_path)
@@ -157,4 +157,4 @@ if len(results['hits']) == 0:
                 mapping_data['_source']['title'],
                 mapping_data['_type']
             ))
-            client.save_object(body=mapping_data['_source'], index='.kibana', doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])
+            client.save_object(body=mapping_data['_source'], index=kibana_index_name, doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])
