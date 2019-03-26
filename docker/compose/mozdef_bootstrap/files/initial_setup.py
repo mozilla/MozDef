@@ -16,6 +16,7 @@ import os
 import sys
 
 from elasticsearch.exceptions import ConnectionError
+import requests
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch
@@ -25,6 +26,7 @@ parser = argparse.ArgumentParser(description='Create the correct indexes and ali
 parser.add_argument('esserver', help='Elasticsearch server (ex: http://elasticsearch:9200)')
 parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultMappingTemplate.json)')
 parser.add_argument('backup_conf_file', help='The relative path to backup.conf file (ex: cron/backup.conf)')
+parser.add_argument('kibana_url', help='The URL of the kibana endpoint (ex: http://kibana:5601)')
 args = parser.parse_args()
 
 
@@ -35,6 +37,7 @@ esserver = esserver.strip('/')
 print "Connecting to " + esserver
 client = ElasticsearchClient(esserver)
 
+kibana_url = os.environ.get('OPTIONS_KIBANAURL', args.kibana_url)
 
 current_date = datetime.now()
 event_index_name = current_date.strftime("events-%Y%m%d")
@@ -42,7 +45,6 @@ previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-
 weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
 kibana_index_name = '.kibana'
-kibana_version = '5.6.14'
 
 index_settings_str = ''
 with open(args.default_mapping_file) as data_file:
@@ -140,12 +142,13 @@ if len(results['hits']) == 0:
             client.save_object(body=mapping_data, index=kibana_index_name, doc_type='index-pattern', doc_id=mapping_data['title'])
 
     # Assign default index to 'events'
-    client.refresh('.kibana')
-    default_mapping_data = {
-        "defaultIndex": 'events'
-    }
     print "Assigning events as default index mapping"
-    client.save_object(default_mapping_data, '.kibana', 'config', kibana_version)
+    index_name = 'events'
+    url = '{}/api/kibana/settings/defaultIndex'.format(kibana_url)
+    data = {'value': index_name}
+    r = requests.post(url, json=data, headers={'kbn-xsrf': "true"})
+    if not r.ok:
+        print("Failed to set defaultIndex to events : {} {}".format(r.status_code, r.content))
 
 
 # Check to see if dashboards already exist in .kibana
