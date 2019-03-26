@@ -20,7 +20,7 @@ from hashlib import md5
 import boto.sqs
 
 from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
@@ -98,6 +98,7 @@ def getQueueSizes():
             messages_inflight=inflight)
         healthlog['details']['queues'].append(queueinfo)
         qcounter -= 1
+    healthlog['type'] = 'mozdefhealth'
     # post to elasticsearch servers directly without going through
     # message queues in case there is an availability issue
     es.save_event(index=options.index, body=json.dumps(healthlog))
