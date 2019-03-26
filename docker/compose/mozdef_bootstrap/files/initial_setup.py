@@ -55,6 +55,12 @@ total_num_tries = 15
 for attempt in range(total_num_tries):
     try:
         all_indices = client.get_indices()
+        index_alias_map = client.es_connection.indices.get_alias(
+            'events,events-previous,alerts,events-weekly')
+        all_aliases = [
+            alias for sublist in
+            [index_alias_map[x]['aliases'].keys() for x in index_alias_map]
+            for alias in sublist]
     except ConnectionError:
         print 'Unable to connect to Elasticsearch...retrying'
         sleep(5)
@@ -99,7 +105,7 @@ if alert_index_name not in all_indices:
     client.create_index(alert_index_name, index_config=index_settings)
 client.create_alias('alerts', alert_index_name)
 
-if weekly_index_alias not in all_indices:
+if weekly_index_alias not in all_aliases:
     print "Creating " + weekly_index_alias
     client.create_alias_multiple_indices(weekly_index_alias, [event_index_name, previous_event_index_name])
 
