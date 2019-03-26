@@ -23,7 +23,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
 parser.add_argument('esserver', help='Elasticsearch server (ex: http://elasticsearch:9200)')
-parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultTemplateMapping.json)')
+parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultMappingTemplate.json)')
 parser.add_argument('backup_conf_file', help='The relative path to backup.conf file (ex: cron/backup.conf)')
 args = parser.parse_args()
 
