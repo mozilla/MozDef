@@ -30,22 +30,20 @@ def esCloseIndices():
 
     # examine each index pulled from get_indice
     # to determine if it meets aging criteria
+    month_ago_date = toUTC(datetime.now()) - timedelta(days=int(options.index_age))
+    month_ago_date = month_ago_date.replace(tzinfo=None)
     for index in indices:
         if 'events' in index:
             index_date = index.rsplit('-', 1)[1]
             logger.debug("Checking to see if Index: %s can be closed." % (index))
-            month_ago_date = toUTC(datetime.now()) - timedelta(days=options.index_age)
-            point_of_close = month_ago_date.strftime('%Y%m%d')
             if len(index_date) == 8:
-                month_ago_str = point_of_close
                 index_date_obj = datetime.strptime(index_date, '%Y%m%d')
-                index_date_str = index_date_obj.strftime('%Y%m%d')
                 try:
-                    if int(month_ago_str) > int(index_date_str):
+                    if month_ago_date > index_date_obj:
                         logger.debug("Index: %s will be closed." % (index))
-                        es.index_close(index)
+                        es.close_index(index)
                     else:
-                        logger.debug("Index: %s  does not meet aging criteria and will not be closed." % (index_date_str))
+                        logger.debug("Index: %s  does not meet aging criteria and will not be closed." % (index))
                 except Exception as e:
                     logger.error("Unhandled exception while closing indices, terminating: %r" % (e))
 
@@ -75,7 +73,7 @@ def initConfig():
     )
     options.index_age = getConfig(
         'index_age',
-        '15',
+        15,
         options.configfile
     )
 

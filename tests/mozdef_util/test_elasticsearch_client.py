@@ -127,7 +127,7 @@ class TestCloseIndex(ElasticsearchClientTest):
         if pytest.config.option.delete_indexes:
             self.es_client.delete_index('test_index')
 
-    def test_writing_to_closed_index(self):
+    def test_close_index(self):
         if not self.es_client.index_exists('test_index'):
             self.es_client.create_index('test_index')
         time.sleep(1)
