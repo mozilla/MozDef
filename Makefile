@@ -5,7 +5,7 @@
 #
 
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-DKR_IMAGES	:= mozdef_alertplugins mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
+DKR_IMAGES	:= mozdef_alertactions mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
 		   mozdef_mq_worker mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
 		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq mozdef_kibana
 BUILD_MODE	:= build  ## Pass `pull` in order to pull images instead of building them
@@ -33,9 +33,11 @@ run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy
 
 .PHONY: run-env-mozdef
 run-env-mozdef: ## Run the MozDef containers with a user specified env file. Run with make 'run-env-mozdef -e ENV=my.env'
-	$(shell test -f $(ENV) || touch $(ENV))
-	$(eval ENV_FILE:=$(abspath $(ENV)))
-	docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-user-env.yml -p $(NAME) up -d
+ifneq ("$(wildcard $(ENV))","") #Check for existence of ENV
+	ENV_FILE=$(abspath $(ENV)) docker-compose -f docker/compose/docker-compose.yml -f docker/compose/docker-compose-user-env.yml -p $(NAME) up -d
+else
+	@echo $(ENV) not found.
+endif
 
 restart-cloudy-mozdef:
 	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart

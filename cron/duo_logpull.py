@@ -82,7 +82,7 @@ def process_events(mozmsg, duo_events, etype, state):
         return
 
     # Care for API v2
-    if isinstance(duo_events, dict) and "authlogs" in duo_events.keys():
+    if isinstance(duo_events, dict) and "authlogs" in duo_events:
         offset = duo_events["metadata"]["next_offset"]
         if offset is not None:
             state["{}_offset".format(etype)] = offset
@@ -112,15 +112,22 @@ def process_events(mozmsg, duo_events, etype, state):
             details[i] = e[i]
         mozmsg.set_category(etype)
         mozmsg.details = normalize(details)
+        if "access_device" in details:
+            if "ip" in details["access_device"]:
+                mozmsg.details["sourceipaddress"] = details["access_device"]["ip"]
         if etype == "administration":
             mozmsg.summary = e["action"]
         elif etype == "telephony":
             mozmsg.summary = e["context"]
         elif etype == "authentication":
             if api_version == 1:
-                mozmsg.summary = e["eventtype"] + " " + e["result"] + " for " + e["username"]
+                mozmsg.summary = (
+                    e["eventtype"] + " " + e["result"] + " for " + e["username"]
+                )
             else:
-                mozmsg.summary = e["eventtype"] + " " + e["result"] + " for " + e["user"]["name"]
+                mozmsg.summary = (
+                    e["eventtype"] + " " + e["result"] + " for " + e["user"]["name"]
+                )
 
         mozmsg.send()
 
@@ -169,7 +176,10 @@ def main():
     # NOTE: If administration and telephone logs support a "v2" API in the future it will most likely need to have the
     # same code with `next_offset` as authentication uses.
     state = process_events(
-        mozmsg, duo.get_administrator_log(mintime=state["administration"] + 1), "administration", state
+        mozmsg,
+        duo.get_administrator_log(mintime=state["administration"] + 1),
+        "administration",
+        state,
     )
     state = process_events(
         mozmsg,
@@ -183,7 +193,12 @@ def main():
         "authentication",
         state,
     )
-    state = process_events(mozmsg, duo.get_telephony_log(mintime=state["telephony"] + 1), "telephony", state)
+    state = process_events(
+        mozmsg,
+        duo.get_telephony_log(mintime=state["telephony"] + 1),
+        "telephony",
+        state,
+    )
 
     pickle.dump(state, open(options.statepath, "wb"))
 
@@ -201,7 +216,12 @@ def initConfig():
 if __name__ == "__main__":
     parser = OptionParser()
     defaultconfigfile = sys.argv[0].replace(".py", ".conf")
-    parser.add_option("-c", dest="configfile", default=defaultconfigfile, help="configuration file to use")
+    parser.add_option(
+        "-c",
+        dest="configfile",
+        default=defaultconfigfile,
+        help="configuration file to use",
+    )
     (options, args) = parser.parse_args()
     initConfig()
     main()

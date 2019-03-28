@@ -10,6 +10,7 @@ Copyright (c) 2014 Mozilla Corporation
         {{#if haveFeatures }}
         <div id="header" class="row center">
             <span id="nav-main">
+
                 <ul>
                     <li><img class="mozillalogo" src="/images/mozilla.svg"></li>
                     <li><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></li>
@@ -24,10 +25,12 @@ Copyright (c) 2014 Mozilla Corporation
                         </ul>
                     </li>
                     {{/if}}
-
                     {{#if isFeature "alerts"}}
                     <li><a href="/alerts/">Alerts</a>
                         <ul>
+                            {{#if isFeature "watchlist"}}
+                            <li><a href="/watchlist">watchlist</a></li>
+                            {/if}}
                             {{#if isFeature "ipblocklist"}}
                             <li><a href="/ipblocklist">ip blocklist</a></li>
                             {{/if}}
@@ -96,3 +99,4 @@ Copyright (c) 2014 Mozilla Corporation
         <a target=" _blank" href="{{url}}">{{name}}</a>
     </li>
 </template>
+

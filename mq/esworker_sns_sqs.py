@@ -47,15 +47,8 @@ class taskConsumer(object):
         self.connection = mqConnection
         self.esConnection = esConnection
         self.taskQueue = taskQueue
-
         self.pluginList = registerPlugins()
-
         self.options = options
-
-        if self.options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
-            # to prevent events from sticking around an idle worker
-            self.esConnection.start_bulk_timer()
 
     def run(self):
         self.taskQueue.set_message_class(RawMessage)
@@ -128,7 +121,7 @@ class taskConsumer(object):
                             elif inside_message_key in ('type', 'category'):
                                 event['category'] = inside_message_value
                             elif inside_message_key in ('summary','payload', 'message'):
-                                event['summary'] = inside_message_value
+                                event['summary'] = inside_message_value.lstrip()
                             elif inside_message_key in ('source'):
                                 event['source'] = inside_message_value
                             elif inside_message_key in ('fields', 'details'):

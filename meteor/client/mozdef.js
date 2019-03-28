@@ -34,6 +34,7 @@ if ( Meteor.isClient ) {
         Session.set( 'attackersearchIP', '' );
         Session.set( 'blockIPipaddress', '' );
         Session.set( 'blockFQDN', '' );
+        Session.set('watchItemwatchcontent','');
         getAllPlugins();
         // use a default theme, overridden later by login per user
         require( '/imports/themes/classic/mozdef.css' );
@@ -337,13 +338,17 @@ if ( Meteor.isClient ) {
             dshielditem = $( "<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>" );
             intelitem = $( "<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>" );
             searchitem = $( "<li><a class='ipmenu-search' data-ipaddress='" + iptext + "'href='#'>search kibana</a></li>" );
-            if ( isFeature( 'blockip' ) ) {
-                blockIPitem = $( "<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>" );
-            } else {
-                blockIPitem = $();
+            if ( isFeature('watchItem') ){
+            watchItemitem=$("<li><a class='ipmenu-watchitem' data-ipaddress='" + iptext + "'href='#'>watch</a></li>");
+            }else{
+            watchItemitem=$();
             }
-
-            ipmenu.append( copyitem, whoisitem, dshielditem, intelitem, searchitem, blockIPitem );
+            if ( isFeature('blockip') ){
+                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
+            }else{
+                blockIPitem=$();
+            }
+            ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,searchitem,watchItemitem,blockIPitem);
 
             $( this ).parent().parent().append( ipmenu );
         } );

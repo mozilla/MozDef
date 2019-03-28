@@ -5,8 +5,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
-# Alert Worker to listen for alerts and call python plugins
-# for user-controlled reaction to alerts.
+# Alert Worker to listen for alerts and call python actions
+# for a user-controlled reaction to alerts.
+# This worker receives a copy of an alert.
 
 import json
 import os
@@ -16,15 +17,15 @@ from kombu import Connection, Queue, Exchange
 from kombu.mixins import ConsumerMixin
 
 from lib.alert_plugin_set import AlertPluginSet
-from lib.config import ALERT_PLUGINS
+from lib.config import ALERT_ACTIONS
 
 from mozdef_util.utilities.logger import logger, initLogger
 
 
 class alertConsumer(ConsumerMixin):
     '''read in alerts,
-       compare them to plugins
-       and send alerts to plugins as requested
+       compare them to actions
+       and send alerts to actions as requested
        '''
 
     def __init__(self, mqAlertsConnection, alertQueue, alertExchange):
@@ -57,7 +58,7 @@ class alertConsumer(ConsumerMixin):
                 logger.exception("alertworker exception: unknown body type received %r" % body)
                 return
             # process valid message
-            bodyDict = plugin_set.run_plugins(bodyDict)
+            bodyDict = action_set.run_plugins(bodyDict)
 
             message.ack()
         except ValueError as e:
@@ -75,7 +76,7 @@ def main():
     )
     mqAlertConn = Connection(mqConnString)
 
-    # Exchange for alerts we pass to plugins
+    # Exchange for alerts we pass to actions
     alertExchange = Exchange(name=options.alertExchange,
                              type='topic',
                              durable=True,
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     initConfig()
     initLogger(options)
-    plugin_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'plugins'))
-    plugin_set = AlertPluginSet(plugin_dir, ALERT_PLUGINS)
+    action_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'actions'))
+    action_set = AlertPluginSet(action_dir, ALERT_ACTIONS)
 
     main()

@@ -74,6 +74,12 @@ Router.map(function() {
         layoutTemplate: 'layout'
     });
 
+    this.route('watchlist', {
+        path: '/watchlist',
+        template: 'watchlist',
+        layoutTemplate: 'layout'
+    }); 
+
     this.route('investigations', {
         path: '/investigations',
         template: 'investigations',
@@ -186,6 +192,14 @@ Router.map(function() {
         layoutTemplate: 'layout'
     });
 
+    this.route('watchitem', {
+        path: '/watchitem/:_watchcontent',
+        template: 'watchItemform',
+        data: function() {
+            Session.set('watchItem', this.params._watchcontent);
+        },
+        layoutTemplate: 'layout'
+    });
 
     this.route('ipwhois', {
         path: '/ipwhois/:_ipaddress',

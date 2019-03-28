@@ -2,7 +2,7 @@ import json
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../alerts/plugins"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../alerts/actions"))
 from dashboard_geomodel import message
 
 

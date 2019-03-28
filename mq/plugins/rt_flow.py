@@ -19,8 +19,8 @@ class message(object):
         self.create_regex = re.compile(r'%-RT_FLOW_SESSION_CREATE: session created (?P<src>([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+))/(?P<srcport>[0-9]+)->(?P<dst>([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+))/(?P<dstport>[0-9]+) (?P<service>\S+) (?P<src2>([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+))/(?P<srcport2>[0-9]+)->(?P<dst2>([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+))/(?P<dstport2>[0-9]+) (?P<srcnatrule>\S+) (?P<dstnatrule>\S+) (?P<protocol>\S+) (?P<policy>\S+) (?P<srczone>\S+) (?P<dstzone>\S+) (?P<sessionid>\S+) N/A\(N/A\) (?P<interface>\S+)(\n)?')
 
     def onMessage(self, message, metadata):
-        if 'details' in message.keys():
-            if 'program' in message['details'].keys():
+        if 'details' in message:
+            if 'program' in message['details']:
                 if 'RT_FLOW' == message['details']['program']:
                     msg_unparsed = message['summary']
                     if msg_unparsed.startswith('%-RT_FLOW_SESSION_DENY:'):

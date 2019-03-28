@@ -27,6 +27,7 @@ Meteor.startup(() => {
     userActivity = new Meteor.Collection("userActivity");
     ipblocklist = new Meteor.Collection("ipblocklist");
     fqdnblocklist = new Meteor.Collection("fqdnblocklist");
+    watchlist = new Meteor.Collection("watchlist");
     preferences = new Meteor.Collection("preferences");
 
 
@@ -298,6 +299,10 @@ Meteor.startup(() => {
             return preferences.find({}, { limit: 0 });
         })
 
+        Meteor.publish("watchlist", function () {
+            return watchlist.find({},{limit:0});
+        })
+
         //access rules from clients
         //barebones to allow you to specify rules
 
@@ -388,6 +393,22 @@ Meteor.startup(() => {
                 return (userId);
             },
             fetch: ['creator']
+        });
+
+        watchlist.allow({
+        insert: function (userId, doc) {
+            // the user must be logged in
+            return (userId);
+        },
+        update: function (userId, doc, fields, modifier) {
+            // the user must be logged in
+            return (userId);
+        },
+        remove: function (userId, doc) {
+            // the user must be logged in
+            return (userId);
+        },
+        fetch: ['creator']
         });
 
         // since we store email from oidc calls in the profile
