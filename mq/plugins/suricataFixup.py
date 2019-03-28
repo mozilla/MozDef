@@ -13,8 +13,8 @@ class message(object):
     def __init__(self):
         '''
         takes an incoming suricata event
-        and parses the message to extract 
-        data points, and sets the type 
+        and parses the message to extract
+        data points, and sets the type
         field
         '''
 

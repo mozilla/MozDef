@@ -21,7 +21,6 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
-from mozdef_util.utilities.is_cef import isCEF
 
 from lib.plugins import sendEventToPlugins, registerPlugins
 
