@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [v1.38] - 2019-03-28
+### Added
+- Create alert plugins with ability to modify alerts in pipeline
+
+### Changed
+- Renamed existing alertplugin service to alertactions
+- Updated rabbitmq docker container to 3.7
+
+### Fixed
+- Resolved sshd mq plugin to handle more types of events
+
+
 ## [v1.37] - 2019-03-01
 ### Added
 - Watchlist - use the UI to quickly add a term (username, IP, command, etc.) that MozDef alerts on
