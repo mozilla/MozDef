@@ -1,0 +1,22 @@
+#!/bin/bash
+
+action="${1}"
+branch="${2}"
+
+for name in mozdef_meteor mozdef_base mozdef_tester mozdef_mq_worker mozdef_kibana \
+        mozdef_syslog mozdef_cron mozdef_elasticsearch mozdef_loginput mozdef_mongodb \
+        mozdef_bootstrap mozdef_alerts mozdef_nginx mozdef_alertactions mozdef_rabbitmq \
+        mozdef_rest mozdef_base ; do
+    if [ "${action}" == "tag" ]; then
+        if [ "${branch}" == "master" ]; then
+            docker tag mozdef/${name}:latest mozdef/${name}:${branch}
+        else
+            docker tag mozdef/${name}:${branch}
+        fi
+    elif [ "${action}" == "push" ]; then
+        docker push mozdef/${name}:${branch}
+        if [ "${branch}" == "master" ]; then
+            docker push mozdef/${name}:latest
+        fi
+    fi
+done
