@@ -59,7 +59,7 @@ class message(object):
         # reformat the date fields to iosformat
         for date_key in self.date_keys:
             if key_exists(date_key, message):
-                if message.get(date_key) == None:
+                if message.get(date_key) is None:
                     continue
                 else:
                     message = self.convert_key_date_format(date_key, message)
