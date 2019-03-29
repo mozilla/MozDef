@@ -85,6 +85,9 @@ class ElasticsearchClient():
     def get_alias(self, alias_name):
         return self.es_connection.indices.get_alias(index='*', name=alias_name).keys()
 
+    def get_aliases(self):
+        return self.es_connection.cat.stats()['indices'].keys()
+
     def refresh(self, index_name):
         self.es_connection.indices.refresh(index=index_name)
 

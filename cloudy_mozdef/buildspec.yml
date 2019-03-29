@@ -1,0 +1,14 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo 'Codebuild is ubuntu 14.04 installing packer to compensate Someone should build a ci docker container \;).'
+      - wget -nv https://releases.hashicorp.com/packer/1.3.5/packer_1.3.5_linux_amd64.zip
+      - unzip packer_1.3.5_linux_amd64.zip
+      - chmod +x packer
+      - mv packer /usr/bin/
+  build:
+    commands:
+      - mkdir -p serverless-functions/build/python/lib/python3.6/site-packages
+      - bash cloudy_mozdef/ci/deploy
