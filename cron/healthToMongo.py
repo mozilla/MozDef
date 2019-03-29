@@ -6,43 +6,18 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 
-import logging
 import requests
 import sys
 from datetime import datetime
 from configlib import getConfig, OptionParser
-from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
+from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch
 
 logger = logging.getLogger(sys.argv[0])
-
-
-def loggerTimeStamp(self, record, datefmt=None):
-    return toUTC(datetime.now()).isoformat()
-
-
-def initLogger():
-    logger.level = logging.INFO
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    formatter.formatTime = loggerTimeStamp
-    if options.output == 'syslog':
-        logger.addHandler(
-            SysLogHandler(
-                address=(
-                    options.sysloghostname,
-                    options.syslogport
-                )
-            )
-        )
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
 
 
 def getFrontendStats(es):
@@ -102,12 +77,6 @@ def getEsNodesStats():
     jsonobj = r.json()
     results = []
     for nodeid in jsonobj['nodes']:
-        # Skip non masters and non data nodes since it won't have full stats
-        if ('attributes' in jsonobj['nodes'][nodeid] and
-                jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
-                jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
-            continue
-
         load_average = jsonobj['nodes'][nodeid]['os']['cpu']['load_average']
         load_str = "{0},{1},{2}".format(load_average['1m'], load_average['5m'], load_average['15m'])
         hostname = nodeid
