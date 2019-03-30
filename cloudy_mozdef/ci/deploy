@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e  # Exit immediately if a command exits with a non-zero status.
+
 echo 'Welcome github webhook to the CodeBuild Job of MozDef.'
 echo "It's dangerous to go alone.  Take one of these: <%%%%|==========>"
 
