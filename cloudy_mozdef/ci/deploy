@@ -2,12 +2,10 @@
 
 set -e  # Exit immediately if a command exits with a non-zero status.
 
-echo 'Welcome github webhook to the CodeBuild Job of MozDef.'
+echo 'Welcome GitHub webhook to the CodeBuild Job of MozDef.'
 echo "It's dangerous to go alone.  Take one of these: <%%%%|==========>"
 
-echo "Begin build / test of the MozDef codebase."
-
-# echo "But first a quick run of the test suite."
+# echo "Begin test of the MozDef codebase."
 # export COMPOSE_INTERACTIVE_NO_CLI=1 make tests
 # The above does not currently work in a non-interactive TTY.
 # Fails with error
@@ -15,9 +13,9 @@ echo "Begin build / test of the MozDef codebase."
 # the input device is not a TTY
 # make: *** [run-tests] Error 1
 # Then again we probably do not need to run the test suite here because it has been run three times to get the code here.
+# echo "Tests complete.
 
-
-echo "Tests complete.  Now reasoning about the webhook event."
+echo "Processing webhook event for ${CODEBUILD_WEBHOOK_TRIGGER}."
 
 if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
         || "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/v[0-9]\.[0-9]\.[0-9](\-(prod|pre|testing))?$ ]]; then
@@ -33,4 +31,4 @@ if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
     make BRANCH=${BRANCH} docker-push-tagged
 fi
 
-echo "End build / test of the MozDef codebase."
+echo "End build of the MozDef codebase."
