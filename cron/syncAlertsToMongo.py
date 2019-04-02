@@ -60,7 +60,6 @@ def updateMongo(mozdefdb, esAlerts):
             mrecord['esmetadata'] = dict()
             mrecord['esmetadata']['id'] = a['_id']
             mrecord['esmetadata']['index'] = a['_index']
-            mrecord['esmetadata']['type'] = a['type']
             alerts.insert(mrecord)
 
 
