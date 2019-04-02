@@ -7,20 +7,14 @@
 
 import sys
 from configlib import getConfig, OptionParser
-import logging
-from logging.handlers import SysLogHandler
 import json
 from datetime import datetime
 import requests
 import netaddr
 
+from mozdef_util.utilities.logger import logger
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-
-
-logger = logging.getLogger(sys.argv[0])
-logger.level = logging.INFO
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
 class State:
@@ -56,13 +50,6 @@ class State:
 
 
 def main():
-    if options.output=='syslog':
-        logger.addHandler(SysLogHandler(address=(options.sysloghostname,options.syslogport)))
-    else:
-        sh=logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
-
     logger.debug('started')
     # logger.debug(options)
     try:
@@ -118,7 +105,7 @@ def main():
                             mozdefEvent['details'].pop('action')
 
                             jbody=json.dumps(mozdefEvent)
-                            res = es.save_event(doc_type='okta',body=jbody)
+                            res = es.save_event(body=jbody)
                             logger.debug(res)
                         except Exception as e:
                             logger.error('Error handling log record {0} {1}'.format(r, e))
