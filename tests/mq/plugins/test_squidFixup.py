@@ -236,6 +236,7 @@ class TestSquidFixup(object):
         assert 'FILE_NAME' not in result
         assert 'FACILITY' not in result
         assert 'DATE' not in result
+        assert 'TAGS' not in result
 
     def test_access_http_allow_without_uri_log(self):
         event = {
@@ -247,7 +248,7 @@ class TestSquidFixup(object):
             "SOURCEIP":"127.0.0.1",
             "SOURCE":"access_src",
             "PRIORITY":"notice",
-            "MESSAGE":"1548043032.187    412 192.168.97.135 58322 185.53.177.31 80 TCP_MISS 403 158 453 GET http://test.com/ http test.com text/html",
+            "MESSAGE":"1548043032.187 412 192.168.97.135 58322 185.53.177.31 80 TCP_MISS 403 158 453 GET http://test.com/ http test.com text/html",
             "HOST_FROM":"localhost",
             "HOST":"localhost",
             "FILE_NAME":"/etc/syslog-ng/access.log.local",
@@ -271,6 +272,7 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
+        assert result['tags'] == 'squid'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -279,6 +281,7 @@ class TestSquidFixup(object):
         assert 'FILE_NAME' not in result
         assert 'FACILITY' not in result
         assert 'DATE' not in result
+        assert 'TAGS' not in result
 
     def test_access_http_allow_with_uri_log(self):
         event = {
@@ -290,7 +293,7 @@ class TestSquidFixup(object):
             "SOURCEIP":"127.0.0.1",
             "SOURCE":"access_src",
             "PRIORITY":"notice",
-            "MESSAGE":"1548043032.187    412 192.168.97.135 58322 185.53.177.31 80 TCP_MISS 403 158 453 GET http://test.com/3something.bin http test.com text/html",
+            "MESSAGE":"1548043032.187 412 192.168.97.135 58322 185.53.177.31 80 TCP_MISS 403 158 453 GET http://test.com/3something.bin http test.com text/html",
             "HOST_FROM":"localhost",
             "HOST":"localhost",
             "FILE_NAME":"/etc/syslog-ng/access.log.local",
@@ -314,6 +317,7 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
+        assert result['tags'] == 'squid'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -322,6 +326,7 @@ class TestSquidFixup(object):
         assert 'FILE_NAME' not in result
         assert 'FACILITY' not in result
         assert 'DATE' not in result
+        assert 'TAGS' not in result
 
     def test_access_http_allow_with_uri_custom_port_log(self):
         event = {
@@ -357,6 +362,7 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
+        assert result['tags'] == 'squid'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -365,6 +371,7 @@ class TestSquidFixup(object):
         assert 'FILE_NAME' not in result
         assert 'FACILITY' not in result
         assert 'DATE' not in result
+        assert 'TAGS' not in result
 
     def test_access_ssl_allow(self):
         event = {
@@ -400,6 +407,7 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'ssl'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == '-'
+        assert result['tags'] == 'squid'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -408,6 +416,7 @@ class TestSquidFixup(object):
         assert 'FILE_NAME' not in result
         assert 'FACILITY' not in result
         assert 'DATE' not in result
+        assert 'TAGS' not in result
 
     def test_access_ssl_deny(self):
         event = {
@@ -443,6 +452,7 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'ssl'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
+        assert result['tags'] == 'squid'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -451,6 +461,7 @@ class TestSquidFixup(object):
         assert 'FILE_NAME' not in result
         assert 'FACILITY' not in result
         assert 'DATE' not in result
+        assert 'TAGS' not in result
 
     def test_access_http_deny_log(self):
         event = {
@@ -486,6 +497,8 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
+        assert result['tags'] == 'squid'
+        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -529,6 +542,8 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
+        assert result['tags'] == 'squid'
+        assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result

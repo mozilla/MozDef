@@ -88,7 +88,7 @@ class message(object):
         if "HOST_FROM" in message:
             newmessage["hostname"] = message["HOST_FROM"]
         if "TAGS" in message:
-            newmessage["tags"] = message["TAGS"]
+            newmessage["tags"] = message["tags"]
         if "category" in message:
             newmessage["category"] = message["category"]
         newmessage[u"customendpoint"] = message["customendpoint"]
