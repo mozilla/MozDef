@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Export all root users environment variables, filtering out non custom variables and write them into /env
+declare -p | egrep -v ' HOSTNAME=| LS_COLORS=| TERM=| PATH=| PWD=| TZ=| SHLVL=| HOME=| LESSOPEN=| _=| affinity:container=| BASHOPTS=| BASH_VERSINFO=| EUID=| PPID=| SHELLOPTS=| UID=' > /env
+crond -n -x ext

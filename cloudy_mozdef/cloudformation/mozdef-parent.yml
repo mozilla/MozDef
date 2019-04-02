@@ -13,7 +13,7 @@ Metadata:
       Parameters:
       - InstanceType
       - KeyName
-      - AMIImageId
+      - SSHIngressCIDR
     - Label:
         default: Certificate
       Parameters:
@@ -24,10 +24,6 @@ Metadata:
         - OIDCDiscoveryURL
         - OIDCClientId
         - OIDCClientSecret
-    - Label:
-        default: Template Location
-      Parameters:
-        - S3TemplateLocation
     ParameterLabels:
       VpcId:
         default: VPC ID
@@ -37,8 +33,8 @@ Metadata:
         default: EC2 Instance Type
       KeyName:
         default: EC2 SSH Key Name
-      AMIImageId:
-        default: EC2 AMI Image ID
+      SSHIngressCIDR:
+        default: Inbound SSH allowed IP address CIDR
       DomainName:
         default: FQDN to host MozDef at
       ACMCertArn:
@@ -49,8 +45,6 @@ Metadata:
         default: OIDC Client ID
       OIDCClientSecret:
         default: OIDC Client Secret
-      S3TemplateLocation:
-        default: S3 Template Location URL
 Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
@@ -65,10 +59,11 @@ Parameters:
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: Name of an existing EC2 KeyPair to enable SSH access to the web server
-  AMIImageId:
-    Type: AWS::EC2::Image::Id
-    Description: The AMI Image ID to use of the EC2 instance
-    Default: ami-073434079b0366251
+  SSHIngressCIDR:
+    Type: String
+    AllowedPattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'
+    ConstraintDescription: A valid CIDR (e.g. 203.0.113.0/24)
+    Description: The CIDR of IP addresses from which to allow inbound SSH connections
   DomainName:
     Type: String
     Description: The fully qualified DNS name you will host CloudyMozDef at.
@@ -88,22 +83,19 @@ Parameters:
     Type: String
     Description: The secret that your OIDC provider issues you for your Mozdef instance.
     NoEcho: true
-  S3TemplateLocation:
-    Type: String
-    AllowedPattern: '^https?:\/\/.*\.amazonaws\.com\/.*\/'
-    ConstraintDescription: A valid amazonaws.com S3 URL
-    Description: "The URL to the S3 bucket used to fetch the nested stack templates (Example: https://s3-us-west-2.amazonaws.com/example-bucket-name/cloudformation/path/)"
-    Default: https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/
+# A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
+# INSERT MAPPING HERE : This template does not work in this state. The mapping is replaced with a working AWS region to AMI ID mapping as well as a variable map with the S3TemplateLocationPrefix by cloudy_mozdef/ci/publish_versioned_templates. The resulting functioning CloudFormation template is uploaded to S3 for the version being built.
 Resources:
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         VpcId: !Ref VpcId
+        SSHIngressCIDR: !Ref SSHIngressCIDR
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-security-group.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-security-group.yml ] ]
   MozDefIAMRoleAndInstanceProfile:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -116,7 +108,7 @@ Resources:
       Tags:
         - Key: application
           Value: mozdef
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, base-iam.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], base-iam.yml ] ]
   MozDefInstance:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -126,7 +118,7 @@ Resources:
         KeyName: !Ref KeyName
         IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
         AutoScaleGroupSubnetIds: !Join [ ',', !Ref PublicSubnetIds ]
-        AMIImageId: !Ref AMIImageId
+        AMIImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', HVM64 ]
         EFSID: !GetAtt MozDefEFS.Outputs.EFSID
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
@@ -145,7 +137,7 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-instance.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-instance.yml ] ]
   MozDefES:
     Type: AWS::CloudFormation::Stack
     DependsOn: MozDefIAMRoleAndInstanceProfile
@@ -161,7 +153,7 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-es.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-es.yml ] ]
   MozDefEFS:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -175,7 +167,7 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-efs.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-efs.yml ] ]
   MozDefSQS:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -184,7 +176,7 @@ Resources:
         Value: mozdef
       - Key: stack
         Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-sqs.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-sqs.yml ] ]
   MozDefCloudTrail:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -193,7 +185,7 @@ Resources:
         Value: mozdef
       - Key: stack
         Value: !Ref AWS::StackName
-      TemplateURL: !Join [ '', [ !Ref S3TemplateLocation, mozdef-cloudtrail.yml ] ]
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-cloudtrail.yml ] ]
   CloudFormationLambdaIAMRole:
     Type: AWS::IAM::Role
     Properties:

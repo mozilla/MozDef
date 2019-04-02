@@ -31,7 +31,7 @@ jmespath==0.9.3
 kombu==4.1.0
 meld3==1.0.2
 mozdef-client==1.0.11
-mozdef-util==1.0.5
+mozdef-util==1.0.6
 MySQL-python==1.2.5
 netaddr==0.7.1
 nose==1.3.7

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -e  # Exit immediately if a command exits with a non-zero status.
+
+echo 'Welcome GitHub webhook to the CodeBuild Job of MozDef.'
+echo "It's dangerous to go alone.  Take one of these: <%%%%|==========>"
+
+# echo "Begin test of the MozDef codebase."
+# export COMPOSE_INTERACTIVE_NO_CLI=1 make tests
+# The above does not currently work in a non-interactive TTY.
+# Fails with error
+# docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
+# the input device is not a TTY
+# make: *** [run-tests] Error 1
+# Then again we probably do not need to run the test suite here because it has been run three times to get the code here.
+# echo "Tests complete.
+
+echo "Processing webhook event for ${CODEBUILD_WEBHOOK_TRIGGER}."
+
+if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
+        || "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/v[0-9]+\.[0-9]+\.[0-9]+(\-(prod|pre|testing))?$ ]]; then
+    echo "Building a release"
+    echo "C|_| This may take a bit.  Might as well grab a coffee."
+    make build-from-cwd
+    cd cloudy_mozdef
+    BRANCH="`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`"
+    make BRANCH=${BRANCH} packer-build-github
+    make BRANCH=${BRANCH} publish-versioned-templates
+    cd ..
+    make hub-login
+    make BRANCH=${BRANCH} docker-push-tagged
+fi
+
+echo "End build of the MozDef codebase."
