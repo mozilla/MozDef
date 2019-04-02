@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v1.38.3] - 2019-04-01
+### Fixed
+- AWS CodeBuild tag semver regex
+
 ## [v1.38.2] - 2019-03-29
 ### Fixed
 - Remaining references to old alertplugins container
@@ -47,7 +51,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased]: https://github.com/mozilla/MozDef/compare/v1.38.2...HEAD
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v1.38.3...HEAD
+[v1.38.3]: https://github.com/mozilla/MozDef/compare/v1.38.2...v1.38.3
 [v1.38.2]: https://github.com/mozilla/MozDef/compare/v1.38.1...v1.38.2
 [v1.38.1]: https://github.com/mozilla/MozDef/compare/v1.38...v1.38.1
 [v1.38]: https://github.com/mozilla/MozDef/compare/v1.37...v1.38

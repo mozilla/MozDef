@@ -18,7 +18,7 @@ echo "It's dangerous to go alone.  Take one of these: <%%%%|==========>"
 echo "Processing webhook event for ${CODEBUILD_WEBHOOK_TRIGGER}."
 
 if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
-        || "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/v[0-9]\.[0-9]\.[0-9](\-(prod|pre|testing))?$ ]]; then
+        || "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/v[0-9]+\.[0-9]+\.[0-9]+(\-(prod|pre|testing))?$ ]]; then
     echo "Building a release"
     echo "C|_| This may take a bit.  Might as well grab a coffee."
     make build-from-cwd
