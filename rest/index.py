@@ -521,7 +521,7 @@ def kibanaDashboards():
     try:
         es_client = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', 'dashboard'))
+        search_query.add_must(TermMatch('type', 'dashboard'))
         results = search_query.execute(es_client, indices=['.kibana'])
 
         for dashboard in results['hits']:
