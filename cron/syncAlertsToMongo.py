@@ -15,7 +15,7 @@ from pymongo import MongoClient
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-from mozdef_util.query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, ExistsMatch
 
 
 def genMeteorID():
@@ -24,7 +24,7 @@ def genMeteorID():
 
 def getESAlerts(es):
     search_query = SearchQuery(minutes=50)
-    search_query.add_must(TermMatch('type', 'alert'))
+    search_query.add_must(ExistsMatch('summary'))
     results = search_query.execute(es, indices=['alerts'], size=10000)
     return results
 
