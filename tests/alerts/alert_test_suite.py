@@ -34,6 +34,7 @@ def mock_add_hostname_to_ip(ip):
 class AlertTestSuite(UnitTestSuite):
     def teardown(self):
         os.chdir(self.orig_path)
+        super(AlertTestSuite, self).teardown()
 
     def setup(self):
         self.orig_path = os.getcwd()

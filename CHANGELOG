@@ -3,6 +3,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased]
+
+## [v1.38.3] - 2019-04-01
+### Fixed
+- AWS CodeBuild tag semver regex
+
+## [v1.38.2] - 2019-03-29
+### Fixed
+- Remaining references to old alertplugins container
+
+## [v1.38.1] - 2019-03-29
+### Added
+- Enable CI/CD with AWS CodeBuild
+- Create AMIs of MozDef, replicate and share them
+- Link everything (container images, AMIs, templates) together by MozDef version
+
+### Changed
+- Publish versioned CloudFormation templates
+- RabbitMQ configured to use a real password
+
+## [v1.38] - 2019-03-28
+### Added
+- Create alert plugins with ability to modify alerts in pipeline
+
+### Changed
+- Renamed existing alertplugin service to alertactions
+- Updated rabbitmq docker container to 3.7
+
+### Fixed
+- Resolved sshd mq plugin to handle more types of events
+
+
 ## [v1.37] - 2019-03-01
 ### Added
 - Watchlist - use the UI to quickly add a term (username, IP, command, etc.) that MozDef alerts on
@@ -10,7 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Changed
 - Improve error handling on Slack bot
-- Improve Slack bot alert format for better readibility
+- Improve Slack bot alert format for better readability
 - Minor UI adjustments
 
 ### Fixed
@@ -19,5 +51,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased Changes]: https://github.com/mozilla/MozDef/compare/v1.37...HEAD
-[Releases prior to v1.37](https://github.com/mozilla/MozDef/releases)
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v1.38.3...HEAD
+[v1.38.3]: https://github.com/mozilla/MozDef/compare/v1.38.2...v1.38.3
+[v1.38.2]: https://github.com/mozilla/MozDef/compare/v1.38.1...v1.38.2
+[v1.38.1]: https://github.com/mozilla/MozDef/compare/v1.38...v1.38.1
+[v1.38]: https://github.com/mozilla/MozDef/compare/v1.37...v1.38
+[v1.37]: https://github.com/mozilla/MozDef/releases/tag/v1.37

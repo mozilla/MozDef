@@ -2,8 +2,6 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-# When changing kibana version remember to edit
-# docker/compose/mozdef_bootstrap/files/initial_setup.py accordingly
 ENV KIBANA_VERSION 5.6.14
 
 RUN \

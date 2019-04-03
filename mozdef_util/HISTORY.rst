@@ -35,3 +35,9 @@ Add is_ip utility function
 ------------------
 
 * Replace elasticsearch flush with refresh
+
+
+1.0.6 (2019-03-29)
+------------------
+
+* Add get_aliases function to elasticsearch client
