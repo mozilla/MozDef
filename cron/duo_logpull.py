@@ -111,10 +111,12 @@ def process_events(mozmsg, duo_events, etype, state):
 
             details[i] = e[i]
         mozmsg.set_category(etype)
-        mozmsg.details = normalize(details)
-        if "access_device" in details:
-            if "ip" in details["access_device"]:
-                mozmsg.details["sourceipaddress"] = details["access_device"]["ip"]
+        localdetails = normalize(details)
+        if "access_device" in localdetails:
+            if "ip" in localdetails["access_device"]:
+                localdetails["sourceipaddress"] = localdetails["access_device"]["ip"]
+        mozmsg.details = localdetails
+        del(localdetails)
         if etype == "administration":
             mozmsg.summary = e["action"]
         elif etype == "telephony":
