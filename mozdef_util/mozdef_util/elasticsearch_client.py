@@ -141,19 +141,19 @@ class ElasticsearchClient():
             doc_body = body['_source']
         return doc_body, doc_type
 
-    def save_object(self, body, index, doc_type, doc_id=None, bulk=False):
+    def save_object(self, body, index, doc_type='_doc', doc_id=None, bulk=False):
         doc_body, doc_type = self.__parse_document(body, doc_type)
         return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
 
-    def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):
+    def save_alert(self, body, index='alerts', doc_id=None, bulk=False):
         doc_body, doc_type = self.__parse_document(body, doc_type)
-        return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, doc_type='_doc', body=doc_body, doc_id=doc_id, bulk=bulk)
 
-    def save_event(self, body, index='events', doc_type='event', doc_id=None, bulk=False):
+    def save_event(self, body, index='events', doc_id=None, bulk=False):
         doc_body, doc_type = self.__parse_document(body, doc_type)
         event = Event(doc_body)
         event.add_required_fields()
-        return self.__save_document(index=index, doc_type=doc_type, body=event, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, doc_type='_doc', body=event, doc_id=doc_id, bulk=bulk)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)
