@@ -112,7 +112,7 @@ class message(object):
                     newmessage[u"details"][u"destinationipaddress"] = u"0.0.0.0"
                 newmessage[u"details"][u"proxyaction"] = tokens[6]
                 if newmessage[u"details"][u"proxyaction"] != "TCP_DENIED":
-                    newmessage[u"details"][u"destinationport"] = int(tokens[5])
+                    newmessage[u"details"][u"destinationport"] = int(self.create_int(tokens[5]))
                     newmessage[u"details"][u"host"] = tokens[13]
                 else:
                     (fqdn, dstport) = self.tokenize_url(tokens[11])
