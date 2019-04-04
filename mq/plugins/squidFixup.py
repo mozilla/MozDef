@@ -95,6 +95,8 @@ class message(object):
         newmessage[u"source"] = u"unknown"
         if "source" in message:
             newmessage[u"source"] = message["source"]
+        if "MESSAGE" in message:
+            newmessage[u"summary"] = message["MESSAGE"]
 
             if newmessage["source"] == "access":
                 # http://www.squid-cache.org/Doc/config/logformat/
