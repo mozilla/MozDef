@@ -28,6 +28,7 @@ accept_message['details']['sourceipv4address'] = '10.22.74.208'
 accept_message['details']['hostname'] = 'mysuperhost.somewhere.com'
 accept_message['details']['program'] = 'sshd'
 accept_message['details']['sourceipaddress'] = '10.22.74.208'
+accept_message['details']['sourceport'] = '37486'
 
 
 # Short username, RSA fpr present
@@ -211,7 +212,7 @@ class TestSSHDPostponedMessageV3():
 
         self.msgobj = message()
         self.msg = copy.deepcopy(accept_message)
-        self.msg['summary'] = 'Postponed publickey for user1@somewhere.com from 10.22.75.209 port 37486 ssh2 [preauth]'
+        self.msg['summary'] = 'Postponed publickey for user1@somewhere.com from 10.22.74.208 port 37486 ssh2 [preauth]'
 
     def test_onMessage(self):
         metadata = {}
@@ -268,3 +269,102 @@ class TestSSHDStartingSessionV2():
         assert retmessage['details']['sourceipaddress'] == '10.22.252.6'
         assert retmessage['details']['sourceport'] == '59983'
         assert retmessage['details']['device'] == 'pts/0'
+
+
+# Invalid User - complex username
+class TestSSHDUnauthorizedUserV1():
+    def setup(self):
+
+        self.msgobj = message()
+        self.msg = copy.deepcopy(accept_message)
+        self.msg['summary'] = 'Invalid user user@loftydreams.com from 10.22.75.209'
+
+    def test_onMessage(self):
+        metadata = {}
+        metadata['doc_type'] = 'event'
+
+        (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
+
+        assert retmessage is not None
+        assert retmeta is not None
+        assert retmessage['details']['username'] == 'user@loftydreams.com'
+        assert retmessage['details']['sourceipaddress'] == '10.22.75.209'
+
+
+# Input Userauth Request
+class TestSSHDUnauthorizedUsertV2():
+    def setup(self):
+
+        self.msgobj = message()
+        self.msg = copy.deepcopy(accept_message)
+        self.msg['summary'] = 'input_userauth_request: invalid user user1 [preauth]'
+
+    def test_onMessage(self):
+        metadata = {}
+        metadata['doc_type'] = 'event'
+
+        (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
+
+        assert retmessage is not None
+        assert retmeta is not None
+        assert retmessage['details']['username'] == 'user1'
+
+
+# SSH Disconnect - Bye Bye
+class TestSSHDReceivedDisconnectV1():
+    def setup(self):
+
+        self.msgobj = message()
+        self.msg = copy.deepcopy(accept_message)
+        self.msg['summary'] = 'Received disconnect from 10.22.75.209: 2103: Bye Bye [preauth]'
+
+    def test_onMessage(self):
+        metadata = {}
+        metadata['doc_type'] = 'event'
+
+        (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
+
+        assert retmessage is not None
+        assert retmeta is not None
+        assert retmessage['details']['sourceipaddress'] == '10.22.75.209'
+        assert retmessage['details']['sourceport'] == '2103'
+
+
+# SSH Disconnect - normal shutdown
+class TestSSHDReceivedDisconnectV2():
+    def setup(self):
+
+        self.msgobj = message()
+        self.msg = copy.deepcopy(accept_message)
+        self.msg['summary'] = 'Received disconnect from 10.22.75.209: 2103: Normal Shutdown, Thank you for playing [preauth]'
+
+    def test_onMessage(self):
+        metadata = {}
+        metadata['doc_type'] = 'event'
+
+        (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
+
+        assert retmessage is not None
+        assert retmeta is not None
+        assert retmessage['details']['sourceipaddress'] == '10.22.75.209'
+        assert retmessage['details']['sourceport'] == '2103'
+
+
+# SSH Disconnect
+class TestSSHDReceivedDisconnectV3():
+    def setup(self):
+
+        self.msgobj = message()
+        self.msg = copy.deepcopy(accept_message)
+        self.msg['summary'] = 'Received disconnect from 10.22.75.209: 2103:  [preauth]'
+
+    def test_onMessage(self):
+        metadata = {}
+        metadata['doc_type'] = 'event'
+
+        (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
+
+        assert retmessage is not None
+        assert retmeta is not None
+        assert retmessage['details']['sourceipaddress'] == '10.22.75.209'
+        assert retmessage['details']['sourceport'] == '2103'

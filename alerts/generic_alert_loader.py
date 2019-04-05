@@ -9,12 +9,14 @@
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch
+from mozdef_util.utilities.dot_dict import DotDict
+from mozdef_util.utilities.logger import logger
 import hjson
-import logging
 import sys
 import traceback
 import glob
 import os
+from os.path import basename
 
 # Minimum data needed for an alert (this is an example alert json)
 '''
@@ -55,23 +57,6 @@ import os
 '''
 
 
-logger = logging.getLogger()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-
-class DotDict(dict):
-    '''dict.item notation for dict()'s'''
-    __getattr__ = dict.__getitem__
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __init__(self, dct):
-        for key, value in dct.items():
-            if hasattr(value, 'keys'):
-                value = DotDict(value)
-            self[key] = value
-
-
 class AlertGenericLoader(AlertTask):
     required_fields = [
         "search_string",
@@ -103,11 +88,16 @@ class AlertGenericLoader(AlertTask):
                 try:
                     cfg = DotDict(hjson.load(fd))
                     self.validate_alert(cfg)
+                    # We set the alert name to the filename (excluding .json)
+                    alert_name = basename(f).replace('.json', '')
+                    cfg['custom_alert_name'] = alert_name
                     self.configs.append(cfg)
                 except Exception:
                     logger.error("Loading rule file {} failed".format(f))
 
     def process_alert(self, alert_config):
+        # Set instance variable to populate event attributes about an alert
+        self.custom_alert_name = "{0}:{1}".format(self.classname(), alert_config['custom_alert_name'])
         search_query = SearchQuery(minutes=int(alert_config.time_window))
         terms = []
         for i in alert_config.filters:

@@ -26,7 +26,7 @@ class ElasticsearchClientTest(UnitTestSuite):
         self.es_client = ElasticsearchClient(self.options.esservers, bulk_refresh_time=3)
 
     def get_num_events(self):
-        self.flush('events')
+        self.refresh('events')
         search_query = SearchQuery()
         search_query.add_must(TermMatch('_type', 'event'))
         search_query.add_aggregation(Aggregation('_type'))
@@ -95,7 +95,7 @@ class TestWriteWithRead(ElasticsearchClientTest):
             'utctimestamp': '2016-08-19T16:40:57.851092+00:00'
         }
         self.saved_alert = self.es_client.save_alert(body=self.alert)
-        self.flush('alerts')
+        self.refresh('alerts')
 
     def test_saved_type(self):
         assert self.saved_alert['_type'] == 'alert'
@@ -193,7 +193,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
             self.es_client.save_event(body=event)
 
         assert mock_class.request_counts == 100
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
         num_events = self.get_num_events()
         assert num_events == 100
 
@@ -201,7 +201,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         event = json.dumps({"key": "example value for string of json test"})
         self.es_client.save_event(body=event)
 
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
         num_events = self.get_num_events()
         assert num_events == 1
 
@@ -218,7 +218,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         event = json.dumps({"key.othername": "example value for string of json test"})
         self.es_client.save_event(body=event)
 
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
         num_events = self.get_num_events()
         assert num_events == 1
 
@@ -235,7 +235,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query = SearchQuery()
         default_event = {}
         self.populate_test_event(default_event)
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
 
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
@@ -270,7 +270,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
             }
         }
         self.populate_test_event(default_event)
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
 
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
@@ -292,7 +292,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
             }
         }
         self.populate_test_event(default_event)
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
 
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
@@ -326,7 +326,7 @@ class TestBulkWrites(BulkTest):
         for event in events:
             self.es_client.save_event(body=event, bulk=True)
 
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
         time.sleep(1)
 
         # We encountered a weird bug in travis
@@ -350,21 +350,21 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
         for event in events:
             self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
 
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
 
         # We encountered a weird bug in travis
         # that would sometimes cause the number
         # of requests sent to ES to fluctuate.
         # As a result, we're checking within 5 requests
         # from 20, to verify we are still using bulk
-        non_flushed_request_count = self.mock_class.request_counts
+        non_refreshed_request_count = self.mock_class.request_counts
         assert self.mock_class.request_counts <= 25 and self.mock_class.request_counts >= 15
         assert self.get_num_events() == 1900
         time.sleep(5)
         # All we want to check here is that during the sleep
         # we purged the queue and sent the remaining events to ES
-        assert self.mock_class.request_counts > non_flushed_request_count
-        self.flush(self.event_index_name)
+        assert self.mock_class.request_counts > non_refreshed_request_count
+        self.refresh(self.event_index_name)
         assert self.get_num_events() == 1995
 
 
@@ -381,7 +381,7 @@ class TestBulkWritesWithLessThanThreshold(BulkTest):
 
         assert self.get_num_events() == 0
 
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
         time.sleep(5)
         assert self.get_num_events() == 6
 
@@ -404,7 +404,7 @@ class TestWriteWithIDExists(ElasticsearchClientTest):
         event['new_key'] = 'updated_value'
         saved_event = self.es_client.save_event(body=event, doc_id=event_id)
         assert saved_event['_id'] == event_id
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
         self.es_client.get_event_by_id(event_id)
 
 
@@ -545,6 +545,6 @@ class TestBulkInvalidFormatProblem(BulkTest):
 
         self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
         self.es_client.save_object(index='events', doc_type='event', body=malformed_event, bulk=True)
-        self.flush(self.event_index_name)
+        self.refresh(self.event_index_name)
         time.sleep(5)
         assert self.get_num_events() == 1

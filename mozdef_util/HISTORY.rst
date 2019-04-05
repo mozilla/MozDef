@@ -24,3 +24,20 @@ Update Geolite db location
 ------------------
 
 Add is_ip utility function
+
+
+1.0.4 (2019-01-23)
+------------------
+
+* Replaced timer with threads for cleaner bulk importing
+
+1.0.5 (2019-03-06)
+------------------
+
+* Replace elasticsearch flush with refresh
+
+
+1.0.6 (2019-03-29)
+------------------
+
+* Add get_aliases function to elasticsearch client

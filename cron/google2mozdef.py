@@ -137,7 +137,7 @@ def main():
 
         # fix up the event craziness to a flatter format
         events=[]
-        if 'items' in response.keys():
+        if 'items' in response:
             for i in response['items']:
                 # flatten the sub dict/lists to pull out the good parts
                 event=dict(category='google')
@@ -157,17 +157,17 @@ def main():
 
                 # find important keys
                 # and adjust their location/name
-                if 'ipaddress' in details.keys():
+                if 'ipaddress' in details:
                     # it's the source ip
                     details['sourceipaddress']=details['ipaddress']
                     del details['ipaddress']
 
-                if 'id_time' in details.keys():
+                if 'id_time' in details:
                     event['timestamp']=details['id_time']
                     event['utctimestamp']=details['id_time']
-                if 'events_name' in details.keys():
+                if 'events_name' in details:
                     event['summary']+= details['events_name'] + ' '
-                if 'actor_email' in details.keys():
+                if 'actor_email' in details:
                     event['summary']+= details['actor_email'] + ' '
 
                 event['details']=details

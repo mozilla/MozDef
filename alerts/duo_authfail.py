@@ -16,7 +16,7 @@ class AlertDuoAuthFail(AlertTask):
             TermMatch('category', 'authentication'),
             ExistsMatch('details.sourceipaddress'),
             ExistsMatch('details.username'),
-            PhraseMatch('details.result', 'FRAUD')
+            PhraseMatch('details.result', 'fraud')
         ])
 
         self.filtersManual(search_query)

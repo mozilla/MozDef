@@ -18,6 +18,10 @@ ALERT_PLUGINS = [
     # 'relative pythonfile name (exclude the .py) - EX: sso_dashboard',
 ]
 
+ALERT_ACTIONS = [
+    # 'relative pythonfile name (exclude the .py) - EX: sso_dashboard',
+]
+
 RABBITMQ = {
     'mqserver': 'localhost',
     'mquser': 'guest',

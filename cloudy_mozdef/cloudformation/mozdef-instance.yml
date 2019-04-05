@@ -102,6 +102,11 @@ Resources:
       IamInstanceProfile: !Ref IamInstanceProfile
       ImageId: !Ref AMIImageId
       InstanceType: !Ref InstanceType
+      BlockDeviceMappings:
+        - DeviceName: "/dev/xvda"
+          Ebs:
+            VolumeSize: 14
+            VolumeType: gp2
       KeyName: !Ref KeyName
       SecurityGroups:
         - !Ref MozDefSecurityGroupId
@@ -113,6 +118,8 @@ Resources:
             - amazon-efs-utils
           write_files:
             - content: |
+                # Cloudy MozDef env file as imported by docker compose.
+                # Drives the configuration of variables for a variety of containers.
                 OPTIONS_ESSERVERS=${ESURL}
                 OPTIONS_KIBANAURL=${KibanaURL}
                 # The OPTIONS_METEOR_KIBANAURL uses the reserved word "relative" which triggers MozDef
@@ -120,6 +127,7 @@ Resources:
                 OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
                 OPTIONS_METEOR_ROOTURL=https://${DomainName}
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
+                # Future support will be added for cognito backed authentication.
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
                 discovery_url=${OIDCDiscoveryURL}
@@ -127,6 +135,8 @@ Resources:
                 redirect_uri_path=/redirect_uri
                 httpsredir=no
                 # Meteor settings
+                # Mongo is discovered through the local docker-compose network.
+                # These are not typos.
                 MONGO_URL=mongodb://mongodb:3002/meteor
                 ROOT_URL=http://localhost
                 OPTIONS_METEOR_PORT=3000
@@ -141,15 +151,24 @@ Resources:
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
             - content: |
                 #!/usr/bin/env python
+
+                # config.py file drives the alert worker container consuming messages from rabbitmq
+                # This is slated for future refactor to config and code that drives celery
+
                 # This Source Code Form is subject to the terms of the Mozilla Public
                 # License, v. 2.0. If a copy of the MPL was not distributed with this
                 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
                 # Copyright (c) 2014 Mozilla Corporation
-
-                from celery.schedules import crontab, timedelta
-                import time
                 import logging
+                import time
 
+                from celery.schedules import crontab
+                from celery.schedules import timedelta
+                from os import getenv
+
+                logger = logging.getLogger(__name__)
+
+                # XXX TBD find a way to make this configurable outside of deploys.
                 ALERTS = {
                     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
                     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
@@ -162,10 +181,11 @@ Resources:
                     # 'relative pythonfile name (exclude the .py) - EX: sso_dashboard',
                 ]
 
+                # Rabbit MQ Password now comes from the docker environment per host.
                 RABBITMQ = {
                     'mqserver': 'rabbitmq',
-                    'mquser': 'guest',
-                    'mqpassword': 'guest',
+                    'mquser': 'mozdef',
+                    'mqpassword': getenv('RABBITMQ_PASSWORD'),
                     'mqport': 5672,
                     'alertexchange': 'alerts',
                     'alertqueue': 'mozdef.alert'
@@ -216,6 +236,9 @@ Resources:
                 logging.Formatter.converter = time.gmtime
               path: /opt/mozdef/docker/compose/mozdef_alerts/files/config.py
             - content: |
+                # Cloudy MozDef env file as imported by docker compose for the kibana reverse proxy
+                # Cloudy MozDef uses managed elasticsearch and proxies connections to that using the LUA proxy
+                # This will support cognito backed authentication in the future
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
                 discovery_url=${OIDCDiscoveryURL}
@@ -225,15 +248,19 @@ Resources:
                 cookiename=seskibana
               path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
             - content: |
+                # This configures the worker that pulls in CloudTrail logs
                 OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
             - content: |
+                # This is the additional worker reserved for future use
                 OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
           runcmd:
+            - echo RABBITMQ_PASSWORD=`python3 -c 'import secrets; s = secrets.token_hex(); print(s)'` > /opt/mozdef/docker/compose/rabbitmq.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
-            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
             - mkdir --verbose --parents ${EFSMountPoint}
             - echo '*.* @@127.0.0.1:514' >> /etc/rsyslog.conf
             - systemctl enable rsyslog
@@ -242,6 +269,9 @@ Resources:
             - for i in 1 2 3 4 5 6; do mount --verbose --all --types efs defaults && break || sleep 15; done
             - cd /opt/mozdef && git pull origin master
             - make -C /opt/mozdef -f /opt/mozdef/Makefile  run-cloudy-mozdef
+            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef \$RABBITMQ_PASSWORD
+            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_user_tags mozdef administrator
+            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_permissions -p / mozdef ".*" ".*" ".*"
   MozDefAutoScaleGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:

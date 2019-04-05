@@ -18,17 +18,6 @@ greetings = [
 ]
 
 
-def format_alert(alert_dict):
-    summary = alert_dict['summary']
-    if 'category' in alert_dict.keys():
-        summary = "{0} _{1}_: {2}".format(
-            alert_dict['severity'],
-            alert_dict['category'],
-            summary
-        )
-    return summary
-
-
 class SlackBot():
     def __init__(self, api_key, channels, bot_name):
         self.slack_client = SlackClient(api_key)
@@ -71,7 +60,11 @@ class SlackBot():
             else:
                 plugin = self.plugins[command]
                 logger.info("Sending to {0}".format(plugin['plugin_class'].__module__))
-                response += "\n" + plugin['plugin_class'].handle_command(parameters)
+                try:
+                    response = "\n" + plugin['plugin_class'].handle_command(parameters)
+                except Exception as e:
+                    response = "\nReceived an error when processing your request."
+                    logger.exception(e)
 
         return response
 
@@ -117,7 +110,7 @@ class SlackBot():
             thread_ts=thread_ts
         )
 
-    def _post_attachment(self, message, channel, color):
+    def _post_attachment(self, message, channel, color, sub_fields=None):
         if channel is None:
             message_channels = self.channels
         else:
@@ -127,38 +120,47 @@ class SlackBot():
             attachment = {
                 'fallback': message,
                 'text': message,
-                'color': color
+                'color': color,
             }
+            if sub_fields is not None:
+                attachment['fields'] = sub_fields
+
             self.slack_client.api_call("chat.postMessage", channel=message_channel, attachments=[attachment], as_user=True)
 
     def post_alert_message(self, alert_dict, channel):
         severity = alert_dict['severity'].upper()
-        formatted_alert = format_alert(alert_dict)
+        message_text = alert_dict['summary']
+        # Default to black if severity isn't known
+        message_color = "#000000"
         if severity == 'CRITICAL':
-            self.post_critical_message(formatted_alert, channel)
+            message_color = "#d04437"
+        elif severity == 'ERROR':
+            message_color = "#d04437"
         elif severity == 'WARNING':
-            self.post_warning_message(formatted_alert, channel)
+            message_color = "#ffd351"
         elif severity == 'INFO':
-            self.post_info_message(formatted_alert, channel)
+            message_color = "#cccccc"
         elif severity == 'NOTICE':
-            self.post_notice_message(formatted_alert, channel)
-        else:
-            self.post_unknown_severity_message(formatted_alert, channel)
+            message_color = "#4a6785"
+
+        sub_fields = [
+            {
+                "title": "Severity",
+                "value": severity,
+                "short": True
+            },
+            {
+                "title": "Category",
+                "value": alert_dict['category'],
+                "short": True
+            }
+        ]
+        self._post_attachment(
+            message=message_text,
+            channel=channel,
+            color=message_color,
+            sub_fields=sub_fields
+        )
 
     def post_welcome_message(self, message, channel=None):
         self._post_attachment(message, channel, '#36a64f')
-
-    def post_info_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#99ccff')
-
-    def post_critical_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#ff0000')
-
-    def post_warning_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#e6e600')
-
-    def post_notice_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#a64dff')
-
-    def post_unknown_severity_message(self, message, channel=None):
-        self._post_attachment(message, channel, '#000000')

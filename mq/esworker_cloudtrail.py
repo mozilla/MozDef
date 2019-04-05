@@ -17,11 +17,11 @@ import boto.s3
 from boto.sqs.message import RawMessage
 import gzip
 from StringIO import StringIO
-from threading import Timer
 import re
 import time
 import kombu
 from ssl import SSLEOFError, SSLError
+from threading import Thread
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
@@ -179,7 +179,7 @@ def keyMapping(aDict):
             elif k in ('message', 'summary'):
                 returndict[u'summary'] = toUnicode(v)
 
-            elif k in ('payload') and 'summary' not in aDict.keys():
+            elif k in ('payload') and 'summary' not in aDict:
                 # special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
                 returndict[u'summary'] = toUnicode(v)
             elif k in ('payload'):
@@ -193,7 +193,7 @@ def keyMapping(aDict):
                 returndict[u'hostname'] = toUnicode(v)
 
             elif k in ('tags'):
-                if 'tags' not in returndict.keys():
+                if 'tags' not in returndict:
                     returndict[u'tags'] = []
                 if type(v) == list:
                     returndict[u'tags'] += v
@@ -238,7 +238,7 @@ def keyMapping(aDict):
                 newName = k.replace('fields.', '')
                 newName = newName.lower().replace('details.', '')
                 # add a dict to hold the details if it doesn't exist
-                if 'details' not in returndict.keys():
+                if 'details' not in returndict:
                     returndict[u'details'] = dict()
                 # add field with a special case for shippers that
                 # don't send details
@@ -254,7 +254,7 @@ def keyMapping(aDict):
             else:
                 returndict[u'details'][k] = v
 
-        if 'utctimestamp' not in returndict.keys():
+        if 'utctimestamp' not in returndict:
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
     except Exception as e:
@@ -283,16 +283,12 @@ class taskConsumer(object):
         # This value controls how long we sleep
         # between reauthenticating and getting a new set of creds
         self.flush_wait_time = 1800
-
-        if options.esbulksize != 0:
-            # if we are bulk posting enable a timer to occasionally flush the bulker even if it's not full
-            # to prevent events from sticking around an idle worker
-            self.esConnection.start_bulk_timer()
-
         self.authenticate()
-        # This cycles the role manager creds every 30 minutes
-        # or else we would be getting errors after a while
-        Timer(self.flush_wait_time, self.flush_s3_creds).start()
+
+        # Run thread to flush s3 credentials
+        reauthenticate_thread = Thread(target=self.reauth_timer)
+        reauthenticate_thread.daemon = True
+        reauthenticate_thread.start()
 
     def authenticate(self):
         if options.cloudtrail_arn not in ['<cloudtrail_arn>', 'cloudtrail_arn']:
@@ -306,10 +302,11 @@ class taskConsumer(object):
             role_creds = {}
         self.s3_connection = boto.connect_s3(**role_creds)
 
-    def flush_s3_creds(self):
-        logger.debug('Recycling credentials and reassuming role')
-        self.authenticate()
-        Timer(self.flush_wait_time, self.flush_s3_creds).start()
+    def reauth_timer(self):
+        while True:
+            time.sleep(self.flush_wait_time)
+            logger.debug('Recycling credentials and reassuming role')
+            self.authenticate()
 
     def process_file(self, s3file):
         logger.debug("Fetching %s" % s3file.name)
@@ -339,7 +336,7 @@ class taskConsumer(object):
 
                     message_json = json.loads(event['Message'])
 
-                    if 's3ObjectKey' not in message_json.keys():
+                    if 's3ObjectKey' not in message_json:
                         logger.error('Invalid message format, expecting an s3ObjectKey in Message')
                         logger.error('Malformed Message: %r' % body_message)
                         continue
@@ -389,7 +386,7 @@ class taskConsumer(object):
                 logger.error("Unknown body type received %r\n" % body)
                 return
 
-            if 'customendpoint' in bodyDict.keys() and bodyDict['customendpoint']:
+            if 'customendpoint' in bodyDict and bodyDict['customendpoint']:
                 # custom document
                 # send to plugins to allow them to modify it if needed
                 (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
@@ -399,7 +396,7 @@ class taskConsumer(object):
                 normalizedDict = keyMapping(bodyDict)
 
                 # send to plugins to allow them to modify it if needed
-                if normalizedDict is not None and isinstance(normalizedDict, dict) and normalizedDict.keys():
+                if normalizedDict is not None and isinstance(normalizedDict, dict):
                     (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
 
             # drop the message if a plug in set it to None

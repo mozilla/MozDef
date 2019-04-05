@@ -59,20 +59,23 @@ class message(object):
         # reformat the date fields to iosformat
         for date_key in self.date_keys:
             if key_exists(date_key, message):
-                message = self.convert_key_date_format(date_key, message)
+                if message.get(date_key) is None:
+                    continue
+                else:
+                    message = self.convert_key_date_format(date_key, message)
 
         # convert the dict to a dot dict for saner deep key/value processing
         message = DotDict(message)
         # pull out the likely source IP address
         for ipaddress_key in self.ipaddress_keys:
-            if 'sourceipaddress' not in message['details'].keys():
+            if 'sourceipaddress' not in message['details']:
                 if key_exists(ipaddress_key, message):
                     message.details.sourceipaddress = message.get(
                         ipaddress_key)
 
         # if we still haven't found what we are looking for #U2
         # sometimes it's in a list
-        if 'sourceipaddress' not in message['details'].keys():
+        if 'sourceipaddress' not in message['details']:
             if key_exists('details.finding.action.portprobeaction.portprobedetails', message) \
                     and isinstance(message.details.finding.action.portprobeaction.portprobedetails, list):
 

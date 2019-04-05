@@ -16,6 +16,8 @@ RUN \
   mkdir -p /opt/mozdef/envs/mozdef && \
   cd /opt/mozdef && \
   chown -R mozdef:mozdef /opt/mozdef && \
+  curl -sL https://rpm.nodesource.com/setup_8.x | bash - && \
+  yum makecache fast && \
   yum install -y \
                 wget \
                 make \
@@ -24,18 +26,15 @@ RUN \
                 gcc-c++ \
                 libstdc++ \
                 libffi-devel \
-                zlib-devel
-
-RUN \
-    curl -sL https://rpm.nodesource.com/setup_8.x | bash - && \
-    yum -y install nodejs
-
-RUN mkdir /opt/mozdef/meteor
-RUN curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz
-RUN tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor
-RUN mv /opt/mozdef/meteor/.meteor /opt/mozdef
-RUN rm -r /opt/mozdef/meteor
-RUN cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
+                zlib-devel \
+                nodejs && \
+  yum clean all && \
+  mkdir /opt/mozdef/meteor && \
+  curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
+  tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
+  mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
+  rm -r /opt/mozdef/meteor && \
+  cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
 
 COPY meteor /opt/mozdef/envs/mozdef/meteor
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor

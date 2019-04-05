@@ -102,13 +102,13 @@ def main():
         healthlog['details']['total_messages_ready'] = 0
         healthlog['tags'] = ['mozdef', 'status']
         for m in mq:
-            if 'message_stats' in m.keys() and isinstance(m['message_stats'], dict):
-                if 'messages_ready' in m.keys():
+            if 'message_stats' in m and isinstance(m['message_stats'], dict):
+                if 'messages_ready' in m:
                     mready = m['messages_ready']
                     healthlog['details']['total_messages_ready'] += m['messages_ready']
                 else:
                     mready = 0
-                if 'messages_unacknowledged' in m.keys():
+                if 'messages_unacknowledged' in m:
                     munack = m['messages_unacknowledged']
                 else:
                     munack = 0
@@ -118,13 +118,13 @@ def main():
                     messages_ready=mready,
                     messages_unacknowledged=munack)
 
-                if 'deliver_details' in m['message_stats'].keys():
+                if 'deliver_details' in m['message_stats']:
                     queueinfo['deliver_eps'] = round(m['message_stats']['deliver_details']['rate'], 2)
                     healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_details']['rate'], 2)
-                if 'deliver_no_ack_details' in m['message_stats'].keys():
+                if 'deliver_no_ack_details' in m['message_stats']:
                     queueinfo['deliver_eps'] = round(m['message_stats']['deliver_no_ack_details']['rate'], 2)
                     healthlog['details']['total_deliver_eps'] += round(m['message_stats']['deliver_no_ack_details']['rate'], 2)
-                if 'publish_details' in m['message_stats'].keys():
+                if 'publish_details' in m['message_stats']:
                     queueinfo['publish_eps'] = round(m['message_stats']['publish_details']['rate'], 2)
                     healthlog['details']['total_publish_eps'] += round(m['message_stats']['publish_details']['rate'], 2)
                 healthlog['details']['queues'].append(queueinfo)

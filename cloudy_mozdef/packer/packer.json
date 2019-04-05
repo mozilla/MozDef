@@ -15,9 +15,31 @@
     "ssh_pty" : "true",
     "ssh_username": "ec2-user",
     "ami_name": "mozdef_{{timestamp}}",
+    "launch_block_device_mappings": [
+      {
+      "delete_on_termination": true,
+      "device_name": "/dev/xvda",
+      "volume_size": 14
+      }
+    ],
+    "ami_description": "An automated build of MozDef triggered via the makefile.",
     "ami_groups": [
       "all"
-    ]
+    ],
+    "run_tags": {
+      "app": "packer-builder-mozdef"
+    },
+    "run_volume_tags": {
+      "app": "packer-builder-mozdef"
+    },
+    "snapshot_tags": {
+      "app": "packer-builder-mozdef"
+    },
+    "tags": {
+      "github:Branch": "{{ user `github_branch`}}",
+      "buildTimestamp": "{{timestamp}}",
+      "app": "mozdef"
+    }
   }],
  "provisioners": [
    {  "type": "shell",
@@ -28,12 +50,23 @@
         "sudo yum install -y mysql-devel python python-devel python-pip",
         "sudo yum install -y git",
         "sudo yum install -y docker",
+        "sudo yum install -y python3",
         "sudo pip install virtualenv ",
         "sudo pip install docker-compose",
         "sudo systemctl enable docker",
+        "sudo systemctl start docker",
         "sudo mkdir -p /opt/mozdef/",
         "sudo git clone https://github.com/mozilla/MozDef /opt/mozdef",
-        "cd /opt/mozdef && sudo git checkout master"
+        "cd /opt/mozdef && sudo git checkout {{ user `github_branch`}}",
+        "cd /opt/mozdef && sudo git rev-parse HEAD",
+        "cd /opt/mozdef && sudo touch docker/compose/cloudy_mozdef.env docker/compose/rabbitmq.env docker/compose/cloudy_mozdef_mq_cloudtrail.env docker/compose/cloudy_mozdef_mq_sns_sqs.env docker/compose/cloudy_mozdef_kibana.env",
+        "cd /opt/mozdef && sudo make BRANCH={{ user `github_branch`}} set-version-and-fetch-docker-container",
+        "cd /opt/mozdef && sudo docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p mozdef pull",
+        "rm -rf /home/ec2-user/.ssh/authorized_keys",
+        "rm -rf /home/ec2-user/.ssh/known_hosts",
+        "sudo rm -rf /tmp/*",
+        "sudo rm -rf /home/ec2-user/.bash_history",
+        "sudo rm -rf /root/.ssh"
       ]}
  ]
 }

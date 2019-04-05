@@ -2,7 +2,10 @@ FROM mozdef/mozdef_base
 
 LABEL maintainer="mozdef@mozilla.com"
 
-RUN yum install -y cronie
+RUN \
+  yum makecache fast && \
+  yum install -y cronie && \
+  yum clean all
 
 COPY cron /opt/mozdef/envs/mozdef/cron
 COPY docker/compose/mozdef_cron/files/cron_entries.txt /cron_entries.txt
@@ -17,7 +20,12 @@ COPY docker/compose/mozdef_cron/files/syncAlertsToMongo.conf /opt/mozdef/envs/mo
 
 RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/cron
 
+# https://stackoverflow.com/a/48651061/168874
+COPY docker/compose/mozdef_cron/files/launch_cron /launch_cron
+
 USER mozdef
 RUN crontab /cron_entries.txt
 
 USER root
+WORKDIR /
+CMD ['./launch_cron']

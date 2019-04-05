@@ -63,7 +63,8 @@ Resources:
         Statement:
         - Sid: AllowSNSToSendToSQS
           Effect: Allow
-          Principal: '*'
+          Principal:
+            AWS: '*'
           Action: sqs:SendMessage
           Resource: !GetAtt MozDefCloudTrailSQSQueue.Arn
           Condition:
