@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v1.38.4] - 2019-04-07
+### Added
+- Elasticsearch Client abstraction API to mozdef-util for opening or closing indices.
+- Cron to close indices older than a specific number of days.
+
 ## [v1.38.3] - 2019-04-01
 ### Fixed
 - AWS CodeBuild tag semver regex
@@ -33,7 +38,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 - Resolved sshd mq plugin to handle more types of events
-
 
 ## [v1.37] - 2019-03-01
 ### Added
