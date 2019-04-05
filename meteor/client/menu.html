@@ -10,74 +10,71 @@ Copyright (c) 2014 Mozilla Corporation
         {{#if haveFeatures }}
         <div id="header" class="row center">
             <span id="nav-main">
-
                 <ul>
                     <li><img class="mozillalogo" src="/images/mozilla.svg"></li>
                     <li><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></li>
                     {{#if isFeature "kibana"}}
-                    <li> <a target="_blank" href={{ resolveKibanaURL mozdef.kibanaURL }}>Kibana</a>
-                        <ul>
-                            <li>
-                                {{#each kibanadashboards as item}}
-                                {{>kibanaDashboardItem}}
-                                {{/each}}
-                            </li>
-                        </ul>
-                    </li>
+                        <li> <a target="_blank" href={{ resolveKibanaURL mozdef.kibanaURL }}>Kibana</a>
+                            <ul>
+                                <li>
+                                    {{#each kibanadashboards as item}}
+                                        {{>kibanaDashboardItem}}
+                                    {{/each}}
+                                </li>
+                            </ul>
+                        </li>
                     {{/if}}
                     {{#if isFeature "alerts"}}
-                    <li><a href="/alerts/">Alerts</a>
-                        <ul>
-                            {{#if isFeature "watchlist"}}
-                            <li><a href="/watchlist">watchlist</a></li>
-                            {/if}}
-                            {{#if isFeature "ipblocklist"}}
-                            <li><a href="/ipblocklist">ip blocklist</a></li>
-                            {{/if}}
-                            {{#if isFeature "fqdnblocklist"}}
-                            <li><a href="/fqdnblocklist">fqdn blocklist</a></li>
-                            {{/if}}
-                        </ul>
-                    </li>
+                        <li><a href="/alerts/">Alerts</a>
+                            <ul>
+                                {{#if isFeature "watchlist"}}
+                                    <li><a href="/watchlist">watchlist</a></li>
+                                {{/if}}
+                                {{#if isFeature "ipblocklist"}}
+                                    <li><a href="/ipblocklist">ip blocklist</a></li>
+                                {{/if}}
+                                {{#if isFeature "fqdnblocklist"}}
+                                    <li><a href="/fqdnblocklist">fqdn blocklist</a></li>
+                                {{/if}}
+                            </ul>
+                        </li>
                     {{/if}}
                     {{#if isFeature "investigations"}}
-                    <li><a href="/investigations">Investigations</a>
-                        <ul>
-                            <li><a href="/investigation/new/">new investigation</a></li>
-                        </ul>
-                    </li>
+                        <li><a href="/investigations">Investigations</a>
+                            <ul>
+                                <li><a href="/investigation/new/">new investigation</a></li>
+                            </ul>
+                        </li>
                     {{/if}}
                     {{#if isFeature "incidents"}}
-                    <li><a href="/incidents">Incidents</a>
-                        <ul>
-
-                            <li><a href="/incident/new/">new incident</a></li>
-                            <li><a href="/incidents/veris/">veris stats</a></li>
-                        </ul>
-                    </li>
+                        <li><a href="/incidents">Incidents</a>
+                            <ul>
+                                <li><a href="/incident/new/">new incident</a></li>
+                                <li><a href="/incidents/veris/">veris stats</a></li>
+                            </ul>
+                        </li>
                     {{/if}}
                     {{#if isFeature "visualizations"}}
-                    <li><a href="#">Visualizations</a>
-                        <ul>
-                            {{#if isFeature "logincounts"}}
-                            <li><a href="/logincounts/">logincounts</a></li>
-                            {{/if}}
-                            {{#if isFeature "attackers"}}
-                            <li><a href="/attackers">attackers</a></li>
-                            {{/if}}
-                            {{#if isFeature "globe"}}
-                            <li><a href="/globe">globe</a></li>
-                            {{/if}}
-                        </ul>
-                    </li>
+                        <li><a href="#">Visualizations</a>
+                            <ul>
+                                {{#if isFeature "logincounts"}}
+                                    <li><a href="/logincounts/">logincounts</a></li>
+                                {{/if}}
+                                {{#if isFeature "attackers"}}
+                                    <li><a href="/attackers">attackers</a></li>
+                                {{/if}}
+                                {{#if isFeature "globe"}}
+                                    <li><a href="/globe">globe</a></li>
+                                {{/if}}
+                            </ul>
+                        </li>
                     {{/if}}
                     {{#if isFeature "about"}}
-                    <li><a href="/about">About</a>
-                        <ul>
-                            <li><a href="/preferences">Preferences</a></li>
-                        </ul>
-                    </li>
-
+                        <li><a href="/about">About</a>
+                            <ul>
+                                <li><a href="/preferences">Preferences</a></li>
+                            </ul>
+                        </li>
                     {{/if}}
                 </ul>
                 <label>
