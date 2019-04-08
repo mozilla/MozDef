@@ -8,14 +8,13 @@ for name in mozdef_meteor mozdef_base mozdef_tester mozdef_mq_worker mozdef_kiba
         mozdef_bootstrap mozdef_alerts mozdef_nginx mozdef_alertactions mozdef_rabbitmq \
         mozdef_rest mozdef_base ; do
     if [ "${action}" == "tag" ]; then
-        if [ "${branch}" == "master" ]; then
-            docker tag mozdef/${name}:latest mozdef/${name}:${branch}
-        else
-            docker tag mozdef/${name}:${branch}
-        fi
+        echo "Tagging local image mozdef/${name}:latest as mozdef/${name}:${branch}"
+        docker tag mozdef/${name}:latest mozdef/${name}:${branch}
     elif [ "${action}" == "push" ]; then
+        echo "Pushing local image mozdef/${name}:${branch} to DockerHub"
         docker push mozdef/${name}:${branch}
         if [ "${branch}" == "master" ]; then
+            echo "Pushing local image mozdef/${name}:latest to DockerHub"
             docker push mozdef/${name}:latest
         fi
     fi
