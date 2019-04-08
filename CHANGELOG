@@ -8,9 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ## [v1.38.4] - 2019-04-08
 ### Fixed
 - Docker image tagging for git version tag builds
+- Correctly propagate the source ip address to the details.sourceipaddress in Duo logpull
+- Invalid literal in squidFixup.py destionationport field
+- Lowercase TAGS in squidFixup.py
+- Adding check for None type object in date fields to address GuardDuty null date
 
 ### Added
 - Documentation on the CI/CD process
+- A summary to squidFixup.py
+- Tags assertions to tests
 
 ## [v1.38.3] - 2019-04-01
 ### Fixed
