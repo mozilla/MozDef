@@ -104,6 +104,7 @@ class SlackBot():
             except websocket.WebSocketConnectionClosedException:
                 logger.info("Received WebSocketConnectionClosedException exception...reconnecting")
                 time.sleep(3)
+                self.slack_client.rtm_connect()
             time.sleep(1)
 
     def post_thread_message(self, text, channel, thread_ts):
