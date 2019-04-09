@@ -17,8 +17,6 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch
 
-logger = logging.getLogger(sys.argv[0])
-
 
 def getFrontendStats(es):
     search_query = SearchQuery(minutes=15)
