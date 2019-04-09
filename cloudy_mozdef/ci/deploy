@@ -15,20 +15,20 @@ echo "It's dangerous to go alone.  Take one of these: <%%%%|==========>"
 # Then again we probably do not need to run the test suite here because it has been run three times to get the code here.
 # echo "Tests complete.
 
-echo "Processing webhook event for ${CODEBUILD_WEBHOOK_TRIGGER}."
+echo "Processing webhook event for '${CODEBUILD_WEBHOOK_TRIGGER}'."
 
 if [[ "branch/master" == "$CODEBUILD_WEBHOOK_TRIGGER" \
         || "$CODEBUILD_WEBHOOK_TRIGGER" =~ ^tag\/v[0-9]+\.[0-9]+\.[0-9]+(\-(prod|pre|testing))?$ ]]; then
     echo "Building a release"
     echo "C|_| This may take a bit.  Might as well grab a coffee."
-    make build-from-cwd
-    cd cloudy_mozdef
     BRANCH="`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`"
+    make build-from-cwd
+    make hub-login
+    make BRANCH=${BRANCH} docker-push-tagged
+    cd cloudy_mozdef
     make BRANCH=${BRANCH} packer-build-github
     make BRANCH=${BRANCH} publish-versioned-templates
     cd ..
-    make hub-login
-    make BRANCH=${BRANCH} docker-push-tagged
 fi
 
 echo "End build of the MozDef codebase."
