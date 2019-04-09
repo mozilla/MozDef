@@ -14,7 +14,7 @@ import os
 import sys
 
 from mozdef_util.query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
-from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex, TMP_DOC_TYPE
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
@@ -28,7 +28,7 @@ class ElasticsearchClientTest(UnitTestSuite):
     def get_num_events(self):
         self.refresh('events')
         search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', 'event'))
+        search_query.add_must(TermMatch('_type', TMP_DOC_TYPE))
         search_query.add_aggregation(Aggregation('_type'))
         results = search_query.execute(self.es_client)
         if len(results['aggregations']['_type']['terms']) != 0:
@@ -47,7 +47,7 @@ class MockTransportClass:
         self.original_function = orig_function
 
     def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):
-        if url == '/_bulk' or url == '/events/event':
+        if url == '/_bulk' or url == '/events/' + TMP_DOC_TYPE:
             self.request_counts += 1
         return self.original_function(method, url, params=params, body=body)
 
@@ -98,7 +98,7 @@ class TestWriteWithRead(ElasticsearchClientTest):
         self.refresh('alerts')
 
     def test_saved_type(self):
-        assert self.saved_alert['_type'] == 'alert'
+        assert self.saved_alert['_type'] == TMP_DOC_TYPE
 
     def test_saved_index(self):
         assert self.saved_alert['_index'] == self.alert_index_name
@@ -164,7 +164,8 @@ class TestSimpleWrites(ElasticsearchClientTest):
         assert results['hits'][0]['_source']['key'] == 'example value for string of json test'
 
         assert len(results['hits']) == 1
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
+        assert results['hits'][0]['_source']['type'] == 'event'
 
     def test_writing_dot_fieldname(self):
         event = json.dumps({"key.othername": "example value for string of json test"})
@@ -181,7 +182,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         assert results['hits'][0]['_source']['key.othername'] == 'example value for string of json test'
 
         assert len(results['hits']) == 1
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
 
     def test_writing_event_defaults(self):
         query = SearchQuery()
@@ -212,7 +213,6 @@ class TestSimpleWrites(ElasticsearchClientTest):
     def test_writing_with_type(self):
         query = SearchQuery()
         default_event = {
-            "_type": "example",
             "_source": {
                 "receivedtimestamp": UnitTestSuite.current_timestamp(),
                 "summary": "Test summary",
@@ -228,7 +228,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_type'] == 'example'
+        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
         assert results['hits'][0]['_source']['summary'] == 'Test summary'
         assert results['hits'][0]['_source']['details'] == {"note": "Example note"}
 
@@ -250,7 +250,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
 
 
 class BulkTest(ElasticsearchClientTest):
@@ -300,7 +300,7 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
             events.append({"key": "value" + str(num)})
 
         for event in events:
-            self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
+            self.es_client.save_object(index='events', body=event, bulk=True)
 
         self.refresh(self.event_index_name)
 
@@ -495,8 +495,8 @@ class TestBulkInvalidFormatProblem(BulkTest):
             "utcstamp": "abc",
         }
 
-        self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
-        self.es_client.save_object(index='events', doc_type='event', body=malformed_event, bulk=True)
+        self.es_client.save_object(index='events', body=event, bulk=True)
+        self.es_client.save_object(index='events', body=malformed_event, bulk=True)
         self.refresh(self.event_index_name)
         time.sleep(5)
         assert self.get_num_events() == 1
