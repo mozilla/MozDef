@@ -77,7 +77,7 @@ class message(object):
         newmessage = dict()
 
         # Set NSM as type for categorical filtering of events.
-        newmessage["type"] = "nsm"
+        newmessage["type"] = "squid"
 
         newmessage[u"mozdefhostname"] = self.mozdefhostname
         newmessage["details"] = {}

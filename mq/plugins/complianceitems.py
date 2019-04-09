@@ -64,9 +64,8 @@ class message(object):
         if not self.validate(message['details']):
             logger.error('Invalid format for complianceitem {0}'.format(message))
             return (None, None)
-        if 'type' not in message:
-            # add type subcategory for filtering
-            message['type'] = 'last_known_state'
+        # add type subcategory for filtering
+        message['type'] = 'last_known_state'
 
         item = self.cleanup_item(message['details'])
         docidstr = 'complianceitems'

@@ -221,6 +221,7 @@ def keyMapping(aDict):
 
             elif k in ('type', 'eventtype', 'category'):
                 returndict[u'category'] = toUnicode(v)
+                returndict[u'type'] = 'cloudtrail'
 
             # custom fields as a list/array
             elif k in ('fields', 'details'):
@@ -257,10 +258,7 @@ def keyMapping(aDict):
         if 'utctimestamp' not in returndict:
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
-        if 'type' not in returndict:
-            # default replacement for old _type subcategory.
-            # to preserve filtering capabilities
-            returndict['type'] = 'cloudtrail'
+
     except Exception as e:
         logger.exception(e)
         logger.error('Malformed message: %r' % aDict)
