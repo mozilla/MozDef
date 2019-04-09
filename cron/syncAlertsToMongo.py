@@ -8,7 +8,6 @@
 import calendar
 import random
 import sys
-from datetime import datetime
 from configlib import getConfig, OptionParser
 from pymongo import MongoClient
 
