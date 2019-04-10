@@ -270,7 +270,7 @@ def fetch_auth0_logs(config, headers, fromid):
     lastid = fromid
 
     r = requests.get(
-        "{url}?take={reqnr}&sort=date:1&per_page={reqnr}&include_totals=true&from={fromid}".format(
+        "{url}?take={reqnr}&sort=date:1&per_page={reqnr}&from={fromid}&include_totals=true".format(
             url=config.auth0.url, reqnr=config.auth0.reqnr, fromid=fromid
         ),
         headers=headers,
@@ -282,6 +282,12 @@ def fetch_auth0_logs(config, headers, fromid):
     ret = r.json()
 
     # Sometimes API give us the requested totals.. sometimes not.
+    # To be clear; totals are now only returned when using `page=..` and not using `from=..` parameters
+    # The issue is that when using `page`, auth0 internally splices the log by page, which is extremely slow and the
+    # call takes 10-20s to return each time.
+    # When using `from` auth0 queries the index for that location which is fast, so we use `from`
+    # this means we can't properly page results, so we have to "try to fetch" until no more logs are returned
+    # Finally note that when using `from` the `sort` ordering is not guaranteed to work according to the API docs
     if type(ret) is dict and "logs" in ret:
         have_totals = True
         all_msgs = ret["logs"]
@@ -315,7 +321,7 @@ def fetch_auth0_logs(config, headers, fromid):
     if have_totals:
         return (int(ret["total"]), int(ret["start"]), int(ret["length"]), lastid)
     else:
-        return (0, 0, 0, lastid)
+        return (-1, -1, -1, lastid)
 
 
 def main():
@@ -341,6 +347,11 @@ def main():
     # Fetch until we've gotten all messages
     while totals > start + length:
         (totals, start, length, lastid) = fetch_auth0_logs(config, headers, fromid)
+
+        if totals == -1:
+            if fromid == lastid:
+                # We got everything, we're done!
+                break
         fromid = lastid
 
     save_state(config.state_file, lastid)
