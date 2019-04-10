@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v1.38.5] - 2019-04-09
+### Added
+- Support for CSS themes
+
+### Changed
+- The CI/CD order to now build docker images in CodeBuild, upload them
+  to DockerHub and then pull them down in the packer instance. Updated docs.
+- Assert TravisCI Python version in advance of change of Travis default to 3.6
+
+### Fixed
+- Dashboard error on docker spinup
+
+
 ## [v1.38.4] - 2019-04-08
 ### Fixed
 - Docker image tagging for git version tag builds
@@ -64,7 +77,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased]: https://github.com/mozilla/MozDef/compare/v1.38.4...HEAD
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v1.38.5...HEAD
+[v1.38.5]: https://github.com/mozilla/MozDef/compare/v1.38.4...v1.38.5
 [v1.38.4]: https://github.com/mozilla/MozDef/compare/v1.38.3...v1.38.4
 [v1.38.3]: https://github.com/mozilla/MozDef/compare/v1.38.2...v1.38.3
 [v1.38.2]: https://github.com/mozilla/MozDef/compare/v1.38.1...v1.38.2

@@ -78,9 +78,9 @@ _________________________________________
 The Build Sequence
 __________________
 
-* A branch is merged into `master` in the GitHub repo
-* GitHub emits a webhook event to AWS CodeBuild indicating that a commit was
-  pushed to `master`
+* A branch is merged into `master` in the GitHub repo or a version git tag is
+  applied to a commit
+* GitHub emits a webhook event to AWS CodeBuild indicating this
 * AWS CodeBuild reads the
   `buildspec.yml <https://github.com/mozilla/MozDef/blob/master/cloudy_mozdef/buildspec.yml>`_
   file to know what to do
@@ -98,8 +98,28 @@ __________________
   target of the `Makefile` which calls `docker-compose build` on the
   `docker-compose.yml <https://github.com/mozilla/MozDef/blob/master/docker/compose/docker-compose.yml>`_
   file, building the docker images in the AWS CodeBuild environment. These are
-  built so they can be uploaded later to DockerHub for use by developers and
-  the community.
+  built both so they can be consumed later in the build by packer and also
+  for use by developers and the community.
+* `deploy` then calls the
+  `docker-push-tagged <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/Makefile#L113>`_
+  make target which calls
+
+  * the tag-images_
+    make target which calls the
+    `cloudy_mozdef/ci/docker_tag_or_push tag <https://github.com/mozilla/MozDef/blob/master/cloudy_mozdef/ci/docker_tag_or_push>`_
+    script which applies a docker image tag to the local image that was just
+    built by AWS CodeBuild.
+  * the
+    `hub-tagged <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/Makefile#L116-L117>`_
+    make target which calls the
+    `cloudy_mozdef/ci/docker_tag_or_push push <https://github.com/mozilla/MozDef/blob/master/cloudy_mozdef/ci/docker_tag_or_push>`_
+    script which
+
+    * Uploads the local image that was just built by AWS CodeBuild to DockerHub.
+      If the branch being built is `master` then the image is uploaded both with
+      a tag of `master` as well as with a tag of `latest`
+    * If the branch being built is from a version tag (e.g. `v1.2.3`) then the
+      image is uploaded with only that version tag applied
 * The `deploy` script next calls the
   `packer-build-github <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/cloudy_mozdef/Makefile#L34-L36>`_
   make target in the
@@ -124,31 +144,14 @@ __________________
   * Within this ec2 instance, packer `clones the MozDef GitHub repo and checks
     out the branch that triggered this build
     <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/cloudy_mozdef/packer/packer.json#L59-L60>`_
-  * packer calls the `set-version-and-fetch-docker-container <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/Makefile#L148-L149>`_
-    target of the `Makefile` which
-
-    * Calls the
-      `build-from-cwd <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/Makefile#L78-L79>`_
-      target of the `Makefile` which calls `docker-compose build` on the
-      `docker-compose.yml <https://github.com/mozilla/MozDef/blob/master/docker/compose/docker-compose.yml>`_
-      file, building the docker images in the packer ec2 environment
-    * Calls the tag-images_
-      make target which calls the `cloudy_mozdef/ci/docker_tag_or_push tag <https://github.com/mozilla/MozDef/blob/master/cloudy_mozdef/ci/docker_tag_or_push>`_
-      script.
-
-      * This applies a docker image tag to the local image that was just built
-        by packer. This tag will be referenced by the
-        `docker-compose-cloudy-mozdef.yml` file when the MozDef ec2 instance is
-        launched from the AMI.
-
-    * Replaces all instances of the word `latest` in the
-      `docker-compose-cloudy-mozdef.yml <https://github.com/mozilla/MozDef/blob/master/docker/compose/docker-compose-cloudy-mozdef.yml>`_
-      file with either the branch `master` or the version tag (e.g. `v1.2.3`)
-
+  * packer replaces all instances of the word `latest` in the
+    `docker-compose-cloudy-mozdef.yml <https://github.com/mozilla/MozDef/blob/master/docker/compose/docker-compose-cloudy-mozdef.yml>`_
+    file with either the branch `master` or the version tag (e.g. `v1.2.3`)
   * packer runs `docker-compose pull` on the
     `docker-compose-cloudy-mozdef.yml <https://github.com/mozilla/MozDef/blob/master/docker/compose/docker-compose-cloudy-mozdef.yml>`_
-    file to pull down any remaining non MozDef container images that weren't
-    just built in preceding packer steps
+    file to pull down both the docker images that were just built by AWS
+    CodeBuild and uploaded to Dockerhub as well as other non MozDef docker
+    images
 
 * After packer completes executing the steps laid out in `packer.json` inside
   the ec2 instance, it generates an AMI from that instance and continues with
@@ -167,27 +170,6 @@ __________________
     specific branch of code.
   * uploads the CloudFormation templates to S3 in a directory either called
     `master` or the tag version that was built (e.g. `v1.2.3`)
-
-* `deploy` then calls the
-  `docker-push-tagged <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/Makefile#L113>`_
-  make target which calls
-
-  * the tag-images_
-    make target which calls the
-    `cloudy_mozdef/ci/docker_tag_or_push tag <https://github.com/mozilla/MozDef/blob/master/cloudy_mozdef/ci/docker_tag_or_push>`_
-    script which applies a docker image tag to the local image that was just
-    built by AWS CodeBuild.
-  * the
-    `hub-tagged <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/Makefile#L116-L117>`_
-    make target which calls the
-    `cloudy_mozdef/ci/docker_tag_or_push push <https://github.com/mozilla/MozDef/blob/master/cloudy_mozdef/ci/docker_tag_or_push>`_
-    script which
-
-    * Uploads the local image that was just built by AWS CodeBuild to DockerHub.
-      If the branch being built is `master` then the image is uploaded both with
-      a tag of `master` as well as with a tag of `latest`
-    * If the branch being built is from a version tag (e.g. `v1.2.3`) then the
-      image is uploaded with only that version tag applied
 
 .. _docker/compose/docker-compose-tests.yml: https://github.com/mozilla/MozDef/blob/master/docker/compose/docker-compose-tests.yml
 .. _tag-images: https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/Makefile#L109-L110
