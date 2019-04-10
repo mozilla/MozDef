@@ -6,9 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ## [Unreleased]
 
 ## [v1.38.5] - 2019-04-09
+### Added
+- Support for CSS themes
+
 ### Changed
-- Changed the CI/CD order to now build docker images in CodeBuild, upload them
+- The CI/CD order to now build docker images in CodeBuild, upload them
   to DockerHub and then pull them down in the packer instance. Updated docs.
+- Assert TravisCI Python version in advance of change of Travis default to 3.6
+
+### Fixed
+- Dashboard error on docker spinup
+
 
 ## [v1.38.4] - 2019-04-08
 ### Fixed
