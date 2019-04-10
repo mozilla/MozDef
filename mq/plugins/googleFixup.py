@@ -8,7 +8,7 @@ class message(object):
     def __init__(self):
         '''
         takes an incoming message
-        and sets the doc_type
+        and sets the type
         '''
 
         self.registration = ['google']
@@ -26,6 +26,6 @@ class message(object):
             if 'etag' in message['details']:
                 message['details']['etag'] = message['details']['etag'].replace('"', '')
 
-            metadata['doc_type'] = 'google'
+            message['type'] = 'google'
 
         return (message, metadata)
