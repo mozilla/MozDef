@@ -41,3 +41,9 @@ Add is_ip utility function
 ------------------
 
 * Add get_aliases function to elasticsearch client
+
+
+1.0.7 (2019-04-07)
+------------------
+
+* Add close_index and open_index functions to elasticsearch client
