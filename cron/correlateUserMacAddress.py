@@ -8,12 +8,10 @@
 import json
 import re
 import sys
-from datetime import datetime
 from configlib import getConfig, OptionParser
 from hashlib import md5
 
 from mozdef_util.utilities.logger import logger
-from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 

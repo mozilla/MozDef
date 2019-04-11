@@ -8,12 +8,10 @@
 
 import requests
 import sys
-from datetime import datetime
 from configlib import getConfig, OptionParser
 from pymongo import MongoClient
 
 from mozdef_util.utilities.logger import logger
-from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch
 
