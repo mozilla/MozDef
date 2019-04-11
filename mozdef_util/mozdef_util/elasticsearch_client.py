@@ -40,11 +40,16 @@ class ElasticsearchClient():
         self.es_connection.ping()
         self.bulk_queue = BulkQueue(self, threshold=bulk_amount, flush_time=bulk_refresh_time)
 
+    def close_index(self, index_name):
+        return self.es_connection.indices.close(index=index_name)
+
+    def open_index(self, index_name):
+        return self.es_connection.indices.open(index=index_name)
+
     def delete_index(self, index_name, ignore_fail=False):
         ignore_codes = []
         if ignore_fail is True:
             ignore_codes = [400, 404]
-
         self.es_connection.indices.delete(index=index_name, ignore=ignore_codes)
 
     def get_indices(self):
@@ -86,6 +91,9 @@ class ElasticsearchClient():
 
     def get_alias(self, alias_name):
         return self.es_connection.indices.get_alias(index='*', name=alias_name).keys()
+
+    def get_aliases(self):
+        return self.es_connection.cat.stats()['indices'].keys()
 
     def refresh(self, index_name):
         self.es_connection.indices.refresh(index=index_name)

@@ -86,13 +86,15 @@ class message(object):
         if "HOST_FROM" in message:
             newmessage["hostname"] = message["HOST_FROM"]
         if "TAGS" in message:
-            newmessage["TAGS"] = message["tags"]
+            newmessage["tags"] = message["tags"]
         if "category" in message:
             newmessage["category"] = message["category"]
         newmessage[u"customendpoint"] = message["customendpoint"]
         newmessage[u"source"] = u"unknown"
         if "source" in message:
             newmessage[u"source"] = message["source"]
+        if "MESSAGE" in message:
+            newmessage[u"summary"] = message["MESSAGE"]
 
             if newmessage["source"] == "access":
                 # http://www.squid-cache.org/Doc/config/logformat/
@@ -110,7 +112,7 @@ class message(object):
                     newmessage[u"details"][u"destinationipaddress"] = u"0.0.0.0"
                 newmessage[u"details"][u"proxyaction"] = tokens[6]
                 if newmessage[u"details"][u"proxyaction"] != "TCP_DENIED":
-                    newmessage[u"details"][u"destinationport"] = int(tokens[5])
+                    newmessage[u"details"][u"destinationport"] = int(self.create_int(tokens[5]))
                     newmessage[u"details"][u"host"] = tokens[13]
                 else:
                     (fqdn, dstport) = self.tokenize_url(tokens[11])

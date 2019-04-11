@@ -120,6 +120,54 @@ class TestNoResultsFound(ElasticsearchClientTest):
         assert results['hits'] == []
 
 
+class TestCloseIndex(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestCloseIndex, self).teardown()
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('test_index')
+
+    def test_close_index(self):
+        if not self.es_client.index_exists('test_index'):
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        closed = self.es_client.close_index('test_index')
+        assert closed == {'acknowledged': True}
+
+
+class TestWritingToClosedIndex(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestWritingToClosedIndex, self).teardown()
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('test_index')
+
+    def test_writing_to_closed_index(self):
+        if not self.es_client.index_exists('test_index'):
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        self.es_client.close_index('test_index')
+        event = json.dumps({"key": "example value for string of json test"})
+        with pytest.raises(Exception):
+            self.es_client.save_event(index='test_index', body=event)
+
+
+class TestOpenIndex(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestOpenIndex, self).teardown()
+        if pytest.config.option.delete_indexes:
+            self.es_client.delete_index('test_index')
+
+    def test_index_open(self):
+        if not self.es_client.index_exists('test_index'):
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        self.es_client.close_index('test_index')
+        opened = self.es_client.open_index('test_index')
+        assert opened == {'acknowledged': True}
+
+
 class TestWithBadIndex(ElasticsearchClientTest):
 
     def test_search_nonexisting_index(self):

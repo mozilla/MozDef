@@ -20,8 +20,8 @@
     "UsePreviousValue": false
   },
   {
-    "ParameterKey": "AMIImageId",
-    "ParameterValue": "ami-0c3705bb3b43ad51f",
+    "ParameterKey": "SSHIngressCIDR",
+    "ParameterValue": "0.0.0.0/0",
     "UsePreviousValue": false
   },
   {
@@ -42,11 +42,6 @@
   {
     "ParameterKey": "OIDCClientSecret",
     "ParameterValue": "secret-value-goes-here",
-    "UsePreviousValue": false
-  },
-  {
-    "ParameterKey": "S3TemplateLocation",
-    "ParameterValue": "https://s3-us-west-2.amazonaws.com/example-bucket-name/cloudformation/path/",
     "UsePreviousValue": false
   }
 ]

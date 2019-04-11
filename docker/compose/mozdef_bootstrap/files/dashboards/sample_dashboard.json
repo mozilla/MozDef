@@ -6,12 +6,10 @@
   "_score": 1,
   "_source": {
     "title": "Sample Dashboard",
-    "hits": 0,
     "description": "A sample dashboard for playing around.",
     "panelsJSON": "[{\"col\":7,\"id\":\"AWg6F1PFk1EXv5E12DRN\",\"panelIndex\":1,\"row\":1,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"AWg-LWqElDhKjHVbouwZ\",\"panelIndex\":2,\"row\":4,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"AWg-LfEalDhKjHVbouwc\",\"panelIndex\":3,\"row\":4,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"size_x\":6,\"size_y\":3,\"panelIndex\":4,\"type\":\"visualization\",\"id\":\"AWg-MFyzlDhKjHVbouwj\",\"col\":1,\"row\":1}]",
     "optionsJSON": "{\"darkTheme\":false}",
     "uiStateJSON": "{}",
-    "version": 1,
     "timeRestore": false,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[{\"query\":{\"match_all\":{}}}],\"highlightAll\":true,\"version\":true}"

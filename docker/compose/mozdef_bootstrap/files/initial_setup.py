@@ -16,6 +16,7 @@ import os
 import sys
 
 from elasticsearch.exceptions import ConnectionError
+import requests
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch
@@ -23,8 +24,9 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
 parser.add_argument('esserver', help='Elasticsearch server (ex: http://elasticsearch:9200)')
-parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultTemplateMapping.json)')
+parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultMappingTemplate.json)')
 parser.add_argument('backup_conf_file', help='The relative path to backup.conf file (ex: cron/backup.conf)')
+parser.add_argument('kibana_url', help='The URL of the kibana endpoint (ex: http://kibana:5601)')
 args = parser.parse_args()
 
 
@@ -35,6 +37,7 @@ esserver = esserver.strip('/')
 print "Connecting to " + esserver
 client = ElasticsearchClient(esserver)
 
+kibana_url = os.environ.get('OPTIONS_KIBANAURL', args.kibana_url)
 
 current_date = datetime.now()
 event_index_name = current_date.strftime("events-%Y%m%d")
@@ -42,7 +45,6 @@ previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-
 weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
 kibana_index_name = '.kibana'
-kibana_version = '5.6.14'
 
 index_settings_str = ''
 with open(args.default_mapping_file) as data_file:
@@ -109,7 +111,7 @@ if kibana_index_name not in all_indices:
 
 # Wait for .kibana index to be ready
 num_times = 0
-while not client.index_exists('.kibana'):
+while not client.index_exists(kibana_index_name):
     if num_times < 3:
         print("Waiting for .kibana index to be ready")
         time.sleep(1)
@@ -121,7 +123,7 @@ while not client.index_exists('.kibana'):
 # Check to see if index patterns exist in .kibana
 query = SearchQuery()
 query.add_must(TermMatch('_type', 'index-pattern'))
-results = query.execute(client, indices=['.kibana'])
+results = query.execute(client, indices=[kibana_index_name])
 if len(results['hits']) == 0:
     # Create index patterns and assign default index mapping
     index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
@@ -131,21 +133,22 @@ if len(results['hits']) == 0:
         with open(json_file_path) as json_data:
             mapping_data = json.load(json_data)
             print "Creating {0} index mapping".format(mapping_data['title'])
-            client.save_object(body=mapping_data, index='.kibana', doc_type='index-pattern', doc_id=mapping_data['title'])
+            client.save_object(body=mapping_data, index=kibana_index_name, doc_type='index-pattern', doc_id=mapping_data['title'])
 
     # Assign default index to 'events'
-    client.refresh('.kibana')
-    default_mapping_data = {
-        "defaultIndex": 'events'
-    }
     print "Assigning events as default index mapping"
-    client.save_object(default_mapping_data, '.kibana', 'config', kibana_version)
+    index_name = 'events'
+    url = '{}/api/kibana/settings/defaultIndex'.format(kibana_url)
+    data = {'value': index_name}
+    r = requests.post(url, json=data, headers={'kbn-xsrf': "true"})
+    if not r.ok:
+        print("Failed to set defaultIndex to events : {} {}".format(r.status_code, r.content))
 
 
 # Check to see if dashboards already exist in .kibana
 query = SearchQuery()
 query.add_must(TermMatch('_type', 'dashboard'))
-results = query.execute(client, indices=['.kibana'])
+results = query.execute(client, indices=[kibana_index_name])
 if len(results['hits']) == 0:
     dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
     listing = os.listdir(dashboards_path)
@@ -157,4 +160,4 @@ if len(results['hits']) == 0:
                 mapping_data['_source']['title'],
                 mapping_data['_type']
             ))
-            client.save_object(body=mapping_data['_source'], index='.kibana', doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])
+            client.save_object(body=mapping_data['_source'], index=kibana_index_name, doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])

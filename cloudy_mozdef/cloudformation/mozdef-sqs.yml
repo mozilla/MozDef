@@ -17,7 +17,8 @@ Resources:
         Statement:
         - Sid: AllowThisAccountSendToSQS
           Effect: Allow
-          Principal: !Join [ '', 'arn:', 'aws:', 'iam:', !Ref AWS::AccountId, ':root' ]
+          Principal:
+            AWS: !Join [ '', [ 'arn:', 'aws:', 'iam::', !Ref 'AWS::AccountId', ':root' ] ]
           Action: sqs:SendMessage
           Resource: !GetAtt MozDefSQSQueue.Arn
       Queues:
