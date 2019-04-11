@@ -139,7 +139,7 @@ def keyMapping(aDict):
         if 'utctimestamp' not in returndict:
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
-        
+
         if 'type' not in returndict:
             # default replacement for old _type subcategory.
             # to preserve filtering capabilities
