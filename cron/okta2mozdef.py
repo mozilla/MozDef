@@ -103,6 +103,7 @@ def main():
                             # currently mapping problems with the details.action field
                             mozdefEvent['details']['activity'] = mozdefEvent['details']['action']
                             mozdefEvent['details'].pop('action')
+                            mozdefEvent['type'] = 'okta'
 
                             jbody=json.dumps(mozdefEvent)
                             res = es.save_event(body=jbody)
