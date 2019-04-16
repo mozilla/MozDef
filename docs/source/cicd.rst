@@ -143,7 +143,7 @@ __________________
 
   * Within this ec2 instance, packer `clones the MozDef GitHub repo and checks
     out the branch that triggered this build
-    <https://github.com/mozilla/MozDef/blob/cfeafb77f9d4d4d8df02117a0ffca0ec9379a7d5/cloudy_mozdef/packer/packer.json#L59-L60>`_
+    <https://github.com/mozilla/MozDef/blob/c7a166f2e29dde8e5d71853a279fb0c47a48e1b2/cloudy_mozdef/packer/packer.json#L58-L60>`_
   * packer replaces all instances of the word `latest` in the
     `docker-compose-cloudy-mozdef.yml <https://github.com/mozilla/MozDef/blob/master/docker/compose/docker-compose-cloudy-mozdef.yml>`_
     file with either the branch `master` or the version tag (e.g. `v1.2.3`)
