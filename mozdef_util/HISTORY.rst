@@ -31,6 +31,7 @@ Add is_ip utility function
 
 * Replaced timer with threads for cleaner bulk importing
 
+
 1.0.5 (2019-03-06)
 ------------------
 
@@ -47,3 +48,9 @@ Add is_ip utility function
 ------------------
 
 * Add close_index and open_index functions to elasticsearch client
+
+
+1.0.8 (2019-04-16)
+------------------
+
+* Transition away from custom _type for elasticsearch documents
