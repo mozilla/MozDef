@@ -31,7 +31,9 @@ Copyright (c) 2014 Mozilla Corporation
                         {{#each documents}}
                             {{>each_fqdnblock}}
                         {{else}}
-                            <tr><td colspan="7"><p class="alert alert-warning">Nothing found for {{query}}..</p></td></tr>
+                            {{#if query}}
+                                <tr><td colspan="7"><p class="alert alert-warning">Nothing found for {{query}}..</p></td></tr>
+                            {{/if}}
                         {{/each}}
                     </tbody>
 
