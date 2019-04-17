@@ -35,6 +35,14 @@ Meteor.startup( () => {
 
 
     if ( Meteor.isServer ) {
+        //Indexes
+        fqdnblocklist.rawCollection().dropIndexes();
+        fqdnblocklist.rawCollection().createIndex( {
+            fqdn: "text",
+            comment: "text",
+            reference: "text"
+        } );
+
         //Publishing setups
         Meteor.publish( "mozdefsettings", function() {
             return mozdefsettings.find();
@@ -294,9 +302,7 @@ Meteor.startup( () => {
             return ipblocklist.find( {}, { limit: 0 } );
         } )
 
-        Meteor.publish( "fqdnblocklist", function() {
-            return fqdnblocklist.find( {}, { limit: 0 } );
-        } )
+        publishPagination( fqdnblocklist );
 
         Meteor.publish( "preferences", function() {
             return preferences.find( {}, { limit: 0 } );
