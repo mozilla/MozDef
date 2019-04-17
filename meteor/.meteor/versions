@@ -49,6 +49,8 @@ iron:middleware-stack@1.1.0
 iron:router@1.1.2
 iron:url@1.1.0
 jquery@1.11.11
+kurounin:pagination@1.2.0
+kurounin:pagination-blaze@1.0.6
 launch-screen@1.1.1
 less@2.8.0
 livedata@1.0.18
