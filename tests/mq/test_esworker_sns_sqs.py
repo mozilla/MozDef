@@ -72,7 +72,8 @@ class TestEsworkerSNSSQS(UnitTestSuite):
             u'tags': [u'example-logs-mozdef'],
             u'timestamp': u'2017-05-25T07:14:15+00:00',
             u'utctimestamp': u'2017-05-25T07:14:15+00:00',
-            u'plugins': []
+            u'plugins': [],
+            u'type': 'event'
         }
         self.search_and_verify_event(expected_event)
 
@@ -142,6 +143,7 @@ class TestEsworkerSNSSQS(UnitTestSuite):
             u'tags': [u'example-logs-mozdef'],
             u'timestamp': u'2018-04-26T00:11:23.479771+00:00',
             u'utctimestamp': u'2018-04-26T00:11:23.479771+00:00',
-            u'plugins': []
+            u'plugins': [],
+            u'type': 'event'
         }
         self.search_and_verify_event(expected_event)

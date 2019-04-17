@@ -12,8 +12,10 @@ from mozdef_util.utilities.toUTC import toUTC
 class message(object):
     def __init__(self):
         '''
-        takes an incoming bro message
-        and sets the doc_type
+        takes an incoming suricata event
+        and parses the message to extract
+        data points, and sets the type
+        field
         '''
 
         self.registration = ['suricata']
@@ -35,15 +37,11 @@ class message(object):
         if message['category'] != 'suricata':
             return message, metadata
 
-        # set the doc type to nsm
-        # to avoid data type conflicts with other doc types
-        # (int v string, etc)
-        # index holds documents of type 'type'
-        # index -> type -> doc
-        metadata['doc_type']= 'nsm'
-
         # move Suricata specific fields under 'details' while preserving metadata
         newmessage = dict()
+
+        # Set NSM as type for categorical filtering of events.
+        newmessage["type"] = "nsm"
 
         try:
             newmessage['details'] = json.loads(message['message'])
