@@ -43,6 +43,13 @@ Meteor.startup( () => {
             reference: "text"
         } );
 
+        watchlist.rawCollection().dropIndexes();
+        watchlist.rawCollection().createIndex( {
+            watchcontent: "text",
+            comment: "text",
+            reference: "text"
+        } );
+
         //Publishing setups
         Meteor.publish( "mozdefsettings", function() {
             return mozdefsettings.find();
@@ -303,13 +310,10 @@ Meteor.startup( () => {
         } )
 
         publishPagination( fqdnblocklist );
+        publishPagination( watchlist );
 
         Meteor.publish( "preferences", function() {
             return preferences.find( {}, { limit: 0 } );
-        } )
-
-        Meteor.publish( "watchlist", function() {
-            return watchlist.find( {}, { limit: 0 } );
         } )
 
         //access rules from clients
