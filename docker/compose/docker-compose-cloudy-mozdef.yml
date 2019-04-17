@@ -40,7 +40,7 @@ services:
     image: mozdef/mozdef_bootstrap:latest
     env_file:
       - cloudy_mozdef.env
-    command: bash -c 'python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf http://kibana:5601'
+    command: bash -c 'python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/mozdefStateDefaultMappingTemplate.json cron/backup.conf http://kibana:5601'
     depends_on:
       - base
     networks:
