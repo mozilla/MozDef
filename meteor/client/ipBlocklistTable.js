@@ -9,10 +9,20 @@ if ( Meteor.isClient ) {
 
     //return all items
     Template.ipblocklist.helpers( {
-        ipblock: function() {
-            return ipblocklist.find( {}, {
-                sort: { dateExpiring: -1 }
-            } );
+        isReady: function() {
+            return Template.instance().pagination.ready();
+        },
+
+        templatePagination: function() {
+            return Template.instance().pagination;
+        },
+
+        documents: function() {
+            return Template.instance().pagination.getPage();
+        },
+
+        query() {
+            return Template.instance().searchQuery.get();
         }
     } );
 
@@ -27,14 +37,47 @@ if ( Meteor.isClient ) {
         "click .ipblockdelete": function( e, t ) {
             ipblocklist.remove( this._id );
             Session.set( 'displayMessage', 'Deleted ipblock for & ' + this.address );
+        },
+
+        "keyup #search"( event, template ) {
+            let value = event.target.value.trim();
+
+            if ( value !== '' && event.keyCode === 13 ) {
+                template.searchQuery.set( value );
+            }
+
+            if ( value === '' || event.keyCode == 27 ) {
+                template.searchQuery.set( '' );
+                event.target.value = '';
+            }
         }
     } );
 
-    Template.ipblocklist.rendered = function() {
-        Deps.autorun( function() {
-            Meteor.subscribe( "ipblocklist" );
+    Template.ipblocklist.onCreated( function() {
+        this.pagination = new Meteor.Pagination( ipblocklist, {
+            sort: {
+                dateExpiring: -1
+            },
+            perPage: 5,
+
         } );
 
-    };
+        Template.instance().searchQuery = new ReactiveVar();
 
-}
+        Tracker.autorun( () => {
+            const filter_Text = this.searchQuery.get();
+
+            if ( filter_Text && filter_Text.length > 0 ) {
+                this.pagination.filters( { $text: { $search: filter_Text } } );
+            } else {
+                this.pagination.filters( {} );
+            }
+
+        } );
+    } );
+
+    Template.ipblocklist.onRendered( function() {
+        this.$( '#search' ).focus();
+    } );
+
+};
