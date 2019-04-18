@@ -40,18 +40,30 @@ if ( Meteor.isClient ) {
         }
     } );
 
-
-    //return all incidents
     Template.incidents.helpers( {
-        incident: function() {
-            return incidents.find( {}, {
-                sort: { dateOpened: -1 }
-            } );
+        isReady: function() {
+            return Template.instance().pagination.ready();
+        },
+
+        templatePagination: function() {
+            return Template.instance().pagination;
+        },
+
+        documents: function() {
+            return Template.instance().pagination.getPage();
+        },
+
+        query() {
+            return Template.instance().searchQuery.get();
         }
     } );
 
     //select an incident for editing
     Template.incidents.events( {
+        "click .incidentadd": function( e, t ) {
+            Router.go( '/incident/new' );
+        },
+
         "click .incidentedit": function( e, t ) {
             if ( this._id != undefined ) {
                 //Session.set('displayMessage','Starting edit for incident._id: ' + this._id);
@@ -68,15 +80,55 @@ if ( Meteor.isClient ) {
             $( '[data-toggle="tooltip"]' ).tooltip( {
                 'placement': 'top'
             } );
+        },
+
+        "keyup #search"( event, template ) {
+            let value = event.target.value.trim();
+
+            if ( value !== '' && event.keyCode === 13 ) {
+                template.searchQuery.set( value );
+            }
+
+            if ( value === '' || event.keyCode == 27 ) {
+                template.searchQuery.set( '' );
+                event.target.value = '';
+            }
         }
     } );
 
-    Template.incidents.rendered = function() {
-        Deps.autorun( function() {
-            Meteor.subscribe( "incidents-summary" );
+    Template.incidents.onCreated( function() {
+        this.pagination = new Meteor.Pagination( incidents, {
+            fields: {
+                _id: 1,
+                summary: 1,
+                phase: 1,
+                dateOpened: 1,
+                dateClosed: 1,
+                creator: 1
+            },
+            sort: {
+                dateOpened: -1
+            },
+            perPage: 5,
         } );
 
-    };
+        Template.instance().searchQuery = new ReactiveVar();
+
+        Tracker.autorun( () => {
+            const filter_Text = this.searchQuery.get();
+
+            if ( filter_Text && filter_Text.length > 0 ) {
+                this.pagination.filters( { $text: { $search: filter_Text } } );
+            } else {
+                this.pagination.filters( {} );
+            }
+
+        } );
+    } );
+
+    Template.incidents.onRendered( function() {
+        this.$( '#search' ).focus();
+    } );
 
     //edit events
     Template.editincidentform.events( {
