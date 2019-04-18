@@ -57,6 +57,13 @@ Meteor.startup( () => {
             reference: "text"
         } );
 
+        incidents.rawCollection().dropIndexes();
+        incidents.rawCollection().createIndex( {
+            summary: "text",
+            description: "text",
+            creator: "text"
+        } );
+
         //Publishing setups
         Meteor.publish( "mozdefsettings", function() {
             return mozdefsettings.find();
@@ -199,18 +206,6 @@ Meteor.startup( () => {
             } );
         } );
 
-        //publish the last X event/alerts
-        //using document index instead of date
-        //    Meteor.publish("attacker-details",function(attackerid){
-        //       return attackers.find({'_id': attackerid},
-        //                             {fields: {
-        //                                events:{$slice: 20,
-        //                                        $sort: { documentindex: -1 }},
-        //                                alerts:{$slice: -10}
-        //                             }}
-        //                             );
-        //    });
-
         Meteor.publish( "attacker-details", function( attackerid ) {
             return attackers.find( { '_id': attackerid },
                 {
@@ -223,8 +218,6 @@ Meteor.startup( () => {
                 }
             );
         } );
-
-
 
         Meteor.publish( "attackers-summary", function() {
             //limit to the last 100 records by default
@@ -258,22 +251,6 @@ Meteor.startup( () => {
 
         Meteor.publish( "investigation-details", function( investigationid ) {
             return investigations.find( { '_id': investigationid } );
-        } );
-
-        Meteor.publish( "incidents-summary", function() {
-            return incidents.find( {},
-                {
-                    fields: {
-                        _id: 1,
-                        summary: 1,
-                        phase: 1,
-                        dateOpened: 1,
-                        dateClosed: 1,
-                        creator: 1
-                    },
-                    sort: { dateOpened: -1 },
-                    limit: 100
-                } );
         } );
 
         Meteor.publish( "incident-details", function( incidentid ) {
@@ -312,6 +289,7 @@ Meteor.startup( () => {
             return userActivity.find( {}, { sort: { userID: 1 }, limit: 100 } );
         } );
 
+        publishPagination( incidents );
         publishPagination( ipblocklist );
         publishPagination( fqdnblocklist );
         publishPagination( watchlist );
