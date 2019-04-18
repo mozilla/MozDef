@@ -50,6 +50,13 @@ Meteor.startup( () => {
             reference: "text"
         } );
 
+        ipblocklist.rawCollection().dropIndexes();
+        ipblocklist.rawCollection().createIndex( {
+            address: "text",
+            comment: "text",
+            reference: "text"
+        } );
+
         //Publishing setups
         Meteor.publish( "mozdefsettings", function() {
             return mozdefsettings.find();
@@ -305,10 +312,7 @@ Meteor.startup( () => {
             return userActivity.find( {}, { sort: { userID: 1 }, limit: 100 } );
         } );
 
-        Meteor.publish( "ipblocklist", function() {
-            return ipblocklist.find( {}, { limit: 0 } );
-        } )
-
+        publishPagination( ipblocklist );
         publishPagination( fqdnblocklist );
         publishPagination( watchlist );
 
