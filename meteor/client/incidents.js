@@ -78,7 +78,8 @@ if ( Meteor.isClient ) {
         "mouseenter .info-row": function( e, t ) {
             //toggle the bootstrap tooltip
             $( '[data-toggle="tooltip"]' ).tooltip( {
-                'placement': 'top'
+                'placement': 'top',
+                container: ".tooltip-wrapper"
             } );
         },
 
@@ -101,6 +102,7 @@ if ( Meteor.isClient ) {
             fields: {
                 _id: 1,
                 summary: 1,
+                description: 1,
                 phase: 1,
                 dateOpened: 1,
                 dateClosed: 1,
@@ -122,7 +124,7 @@ if ( Meteor.isClient ) {
             } else {
                 this.pagination.filters( {} );
             }
-
+            $( '[data-toggle="tooltip"]' ).tooltip( { 'placement': 'top' } );
         } );
     } );
 

@@ -48,7 +48,7 @@ Copyright (c) 2014 Mozilla Corporation
 <!--each individual incident -->
 <template name="each_incident">
 
-			<tr class="tooltip-wrapper info-row" title="{{creator}} at {{dateOpened}}" data-toggle="tooltip">
+			<tr class="info-row tooltip-wrapper" title="{{creator}} at {{dateOpened}}" data-toggle="tooltip" data-placement="top">
                 <td><button class="btn btn-xs btn-default incidentedit" data-incidentid={{_id}}>edit</button></td>
 				<td>{{summary}}</td>
                 <td>{{phase}}</td>
