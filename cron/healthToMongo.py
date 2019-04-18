@@ -8,12 +8,10 @@
 
 import requests
 import sys
-from datetime import datetime
 from configlib import getConfig, OptionParser
 from pymongo import MongoClient
 
-from mozdef_util.utilities.logger import logger, initLogger
-from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch
 
@@ -21,7 +19,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 def getFrontendStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
-        TermMatch('_type', 'mozdefhealth'),
+        TermMatch('type', 'mozdefhealth'),
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'latest'),
     ])
@@ -44,7 +42,7 @@ def writeFrontendStats(data, mongo):
 def getSqsStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
-        TermMatch('_type', 'mozdefhealth'),
+        TermMatch('type', 'mozdefhealth'),
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'sqs-latest'),
     ])
@@ -155,5 +153,4 @@ if __name__ == '__main__':
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    initLogger()
     main()

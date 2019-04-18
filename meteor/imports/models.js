@@ -10,36 +10,37 @@ import uuid from "uuid";
 //data models
 //and creation functions
 
-var today=new Date();
+var today = new Date();
 
-models={
+models = {
 
     investigation: function() {
         return {
-            summary:"",
+            summary: "",
             description: "",
             dateOpened: today,
-            dateClosed:"",
+            dateClosed: "",
             creator: Meteor.user().profile.email,
             indicators: [],
             evidence: [],
-            theories:[],
-            notes:[],
-            tags:[],
-            references:[],
-            lessons:[],
-            mitigations:[],
-            timestamps:[],
-            phase:"Identification",
-            timeline: { dateBegin:"",
-                        dateEnd:""
-                      }
+            theories: [],
+            notes: [],
+            tags: [],
+            references: [],
+            lessons: [],
+            mitigations: [],
+            timestamps: [],
+            phase: "Identification",
+            timeline: {
+                dateBegin: "",
+                dateEnd: ""
+            }
         };
     },
 
     incident: function() {
         return {
-            summary:"",
+            summary: "",
             description: "",
             dateOpened: today,
             dateClosed: "",
@@ -48,14 +49,14 @@ models={
             dateMitigated: "",
             dateContained: "",
             creator: Meteor.user().profile.email,
-            theories:[],
-            notes:[],
-            tags:[],
-            references:[],
-            lessons:[],
-            mitigations:[],
-            timestamps:[],
-            phase:"Identification"
+            theories: [],
+            notes: [],
+            tags: [],
+            references: [],
+            lessons: [],
+            mitigations: [],
+            timestamps: [],
+            phase: "Identification"
         };
     },
 
@@ -142,17 +143,17 @@ models={
             '_id': uuid(),
             'lastseentimestamp': today,
             'firstseentimestamp': '',
-            'events':[],
-            'eventscount':0,
-            'alerts':[],
-            'alertscount':0,
-            'category':'unknown',
-            'score':0,
-            'geocoordinates':{'countrycode':'','longitude':0,'lattitude':0},
-            'tags':[],
-            'notes':[],
-            'indicators':[],
-            'attackphase':'unknown',
+            'events': [],
+            'eventscount': 0,
+            'alerts': [],
+            'alertscount': 0,
+            'category': 'unknown',
+            'score': 0,
+            'geocoordinates': { 'countrycode': '', 'longitude': 0, 'lattitude': 0 },
+            'tags': [],
+            'notes': [],
+            'indicators': [],
+            'attackphase': 'unknown',
             'datecreated': today,
             'creator': '',
             'lastModifier': ''
@@ -168,21 +169,30 @@ models={
         };
     },
 
-    userAction: function(){
+    userAction: function() {
         return {
             '_id': uuid(),
-            'userId':Meteor.user().profile.email,
-            'path':'',
-            'itemId':'',
+            'userId': Meteor.user().profile.email,
+            'path': '',
+            'itemId': '',
             'dateCreated': today
         };
     },
-    feature: function(){
+    feature: function() {
         return {
             '_id': uuid(),
-            'name':'',
-            'url':'',
-            'enabled':true
+            'name': '',
+            'url': '',
+            'enabled': true
+        };
+    },
+    preference: function() {
+        return {
+            '_id': uuid(),
+            'userId': Meteor.user().profile.email,
+            'name': '',
+            'theme': 'classic',
+            'dateCreated': today
         };
     },
 

@@ -11,40 +11,41 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
 -->
 
 <template name="ipwhois">
-<body>
+
+    <body>
 
 
-<div class="container">
-    <div class="well">
-        whois: {{whois.status}} {{whois.error}}
-    </div>
-    <div class="row"><a class="showmodal" href=#>click me for modal</a></div>
-    <div class="row center">
-        <ul class="unstyled">
-            {{#each objKeyValue whois.data}}
+        <div class="container">
+            <div class="well">
+                whois: {{whois.status}} {{whois.error}}
+            </div>
+            <div class="row"><a class="showmodal" href=#>click me for modal</a></div>
+            <div class="row center">
+                <ul class="unstyled">
+                    {{#each objKeyValue whois.data}}
                     {{#if isNotEqual value null}}
-                        <li>{{key}}: {{value}}</li>
+                    <li>{{key}}: {{value}}</li>
                     {{/if}}
-            {{/each}}
-        </ul>
-        <ul class="unstyled">
-            {{#each whois.data.nets}}
-                {{#each objKeyValue this}}
-                        <li>{{key}}: {{value}}</li>
-                {{/each}}
-            {{/each}}
+                    {{/each}}
+                </ul>
+                <ul class="unstyled">
+                    {{#each whois.data.nets}}
+                    {{#each objKeyValue this}}
+                    <li>{{key}}: {{value}}</li>
+                    {{/each}}
+                    {{/each}}
 
-        </ul>
-    </div>
-    <div class="row center">
-        <span>raw json:</span>
-        <span class="unstyled">
-                {{whois.content}}
-        </span>
-    </div>
-    {{>whoismodal}}
-</div>
-</body>
+                </ul>
+            </div>
+            <div class="row center">
+                <span>raw json:</span>
+                <span class="unstyled">
+                    {{whois.content}}
+                </span>
+            </div>
+            {{>whoismodal}}
+        </div>
+    </body>
 </template>
 
 <template name="whoismodal">
@@ -52,8 +53,8 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                   <button type="button" class="close" data-dismiss="modal">&times;</button>
-                   <h4>Whois Results</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4>Whois Results</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row center">
@@ -64,21 +65,22 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
                     <div class="row  center">
                         <ul class="list-unstyled">
                             {{#each objKeyValue whois.data false}}
-                                    {{#if isNotEqual value null}}
-                                        <li>{{key}}: {{value}}</li>
-                                    {{/if}}
+                            {{#if isNotEqual value null}}
+                            <li>{{key}}: {{value}}</li>
+                            {{/if}}
                             {{/each}}
                         </ul>
                         <ul class="list-unstyled">
                             {{#each whois.data.nets}}
-                                {{#each objKeyValue this}}
-                                        <li>{{key}}: {{value}}</li>
-                                {{/each}}
+                            {{#each objKeyValue this}}
+                            <li>{{key}}: {{value}}</li>
+                            {{/each}}
                             {{/each}}
 
                         </ul>
                     </div>
-                    <div class="col-xs-1"><button class="btn btn-xs" data-toggle="collapse" data-target="#rawwhoisjson">raw json</button></div>
+                    <div class="col-xs-1"><button class="btn btn-default btn-xs" data-toggle="collapse"
+                            data-target="#rawwhoisjson">raw json</button></div>
                     <div class="col-xs-7 col-xs-offset-1">
                         <div id='rawwhoisjson' class="collapse">
                             <pre>{{whois.content}}</pre>
@@ -86,9 +88,9 @@ modal: for  Session.set('ipwhoisipaddress','1,2.3.4') then
                     </div>
                 </div>
                 <div class="modal-footer">
-                  <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+                    <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
                 </div>
-          </div>
+            </div>
         </div>
     </div>
 </template>
