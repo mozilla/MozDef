@@ -73,6 +73,12 @@ def getEsNodesStats():
     jsonobj = r.json()
     results = []
     for nodeid in jsonobj['nodes']:
+        # Skip non masters and non data nodes since it won't have full stats
+        if ('attributes' in jsonobj['nodes'][nodeid] and
+                jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
+                jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
+            continue
+
         load_average = jsonobj['nodes'][nodeid]['os']['cpu']['load_average']
         load_str = "{0},{1},{2}".format(load_average['1m'], load_average['5m'], load_average['15m'])
         hostname = nodeid
