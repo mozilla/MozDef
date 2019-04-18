@@ -124,7 +124,6 @@ if ( Meteor.isClient ) {
             } else {
                 this.pagination.filters( {} );
             }
-            $( '[data-toggle="tooltip"]' ).tooltip( { 'placement': 'top' } );
         } );
     } );
 
