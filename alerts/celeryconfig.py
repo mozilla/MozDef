@@ -69,7 +69,7 @@ for alert_namespace in CELERYBEAT_SCHEDULE:
     except ImportError as e:
         print "Error importing {}".format(alert_namespace)
         print e
-        pass 
+        pass
     except Exception as e:
         print "Error addding alert"
         print e
