@@ -64,6 +64,13 @@ Meteor.startup( () => {
             creator: "text"
         } );
 
+        investigations.rawCollection().dropIndexes();
+        investigations.rawCollection().createIndex( {
+            summary: "text",
+            description: "text",
+            creator: "text"
+        } );
+
         //Publishing setups
         Meteor.publish( "mozdefsettings", function() {
             return mozdefsettings.find();
@@ -233,22 +240,6 @@ Meteor.startup( () => {
                 } );
         } );
 
-        Meteor.publish( "investigations-summary", function() {
-            return investigations.find( {},
-                {
-                    fields: {
-                        _id: 1,
-                        summary: 1,
-                        phase: 1,
-                        dateOpened: 1,
-                        dateClosed: 1,
-                        creator: 1
-                    },
-                    sort: { dateOpened: -1 },
-                    limit: 100
-                } );
-        } );
-
         Meteor.publish( "investigation-details", function( investigationid ) {
             return investigations.find( { '_id': investigationid } );
         } );
@@ -290,6 +281,7 @@ Meteor.startup( () => {
         } );
 
         publishPagination( incidents );
+        publishPagination( investigations );
         publishPagination( ipblocklist );
         publishPagination( fqdnblocklist );
         publishPagination( watchlist );

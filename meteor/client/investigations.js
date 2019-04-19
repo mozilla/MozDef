@@ -22,17 +22,30 @@ if ( Meteor.isClient ) {
     var evidence = null;
     var timestamp = null;
 
-    //return all investigations
     Template.investigations.helpers( {
-        investigation: function() {
-            return investigations.find( {}, {
-                sort: { dateOpened: -1 }
-            } );
+        isReady: function() {
+            return Template.instance().pagination.ready();
+        },
+
+        templatePagination: function() {
+            return Template.instance().pagination;
+        },
+
+        documents: function() {
+            return Template.instance().pagination.getPage();
+        },
+
+        query() {
+            return Template.instance().searchQuery.get();
         }
     } );
 
     //select an investigation for editing
     Template.investigations.events( {
+        "click .investigationadd": function( e, t ) {
+            Router.go( '/investigation/new' );
+        },
+
         "click .investigationedit": function( e, t ) {
             if ( this._id != undefined ) {
                 //Session.set('displayMessage','Starting edit for investigation._id: ' + this._id);
@@ -50,14 +63,54 @@ if ( Meteor.isClient ) {
                 'placement': 'top',
                 container: ".tooltip-wrapper"
             } );
+        },
+
+        "keyup #search"( event, template ) {
+            let value = event.target.value.trim();
+
+            if ( value !== '' && event.keyCode === 13 ) {
+                template.searchQuery.set( value );
+            }
+
+            if ( value === '' || event.keyCode == 27 ) {
+                template.searchQuery.set( '' );
+                event.target.value = '';
+            }
         }
     } );
 
+    Template.investigations.onCreated( function() {
+        this.pagination = new Meteor.Pagination( investigations, {
+            fields: {
+                _id: 1,
+                summary: 1,
+                description: 1,
+                phase: 1,
+                dateOpened: 1,
+                dateClosed: 1,
+                creator: 1
+            },
+            sort: {
+                dateOpened: -1
+            },
+            perPage: 5,
+        } );
+
+        Template.instance().searchQuery = new ReactiveVar();
+
+        Tracker.autorun( () => {
+            const filter_Text = this.searchQuery.get();
+
+            if ( filter_Text && filter_Text.length > 0 ) {
+                this.pagination.filters( { $text: { $search: filter_Text } } );
+            } else {
+                this.pagination.filters( {} );
+            }
+        } );
+    } );
 
     Template.investigations.rendered = function() {
-        Deps.autorun( function() {
-            Meteor.subscribe( "investigations-summary" );
-        } );
+        this.$( '#search' ).focus();
     };
 
 
