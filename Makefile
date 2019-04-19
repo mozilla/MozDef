@@ -26,13 +26,6 @@ all:
 run: build ## Run all MozDef containers
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
 
-.PHONY: run-cloudy-mozdef
-run-cloudy-mozdef: ## Run the MozDef containers necessary to run in AWS (`cloudy-mozdef`). This is used by the CloudFormation-initiated setup.
-	$(shell test -f docker/compose/cloudy_mozdef.env || touch docker/compose/cloudy_mozdef.env)
-	$(shell test -f docker/compose/cloudy_mozdef_kibana.env || touch docker/compose/cloudy_mozdef_kibana.env)
-	# docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) pull  # Images are now in the local packer build AMI and no docker pull is needed
-	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) up -d
-
 .PHONY: run-env-mozdef
 run-env-mozdef: ## Run the MozDef containers with a user specified env file. Run with make 'run-env-mozdef -e ENV=my.env'
 ifneq ("$(wildcard $(ENV))","") #Check for existence of ENV
@@ -40,10 +33,6 @@ ifneq ("$(wildcard $(ENV))","") #Check for existence of ENV
 else
 	@echo $(ENV) not found.
 endif
-
-.PHONY: restart-cloudy-mozdef
-restart-cloudy-mozdef:
-	docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p $(NAME) restart
 
 .PHONY: test
 test: build-tests run-tests
