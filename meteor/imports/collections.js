@@ -285,6 +285,7 @@ Meteor.startup( () => {
         publishPagination( ipblocklist );
         publishPagination( fqdnblocklist );
         publishPagination( watchlist );
+        publishPagination( alerts );
 
         Meteor.publish( "preferences", function() {
             return preferences.find( {}, { limit: 0 } );
