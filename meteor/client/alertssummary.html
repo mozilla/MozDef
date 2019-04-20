@@ -81,11 +81,12 @@ Copyright (c) 2014 Mozilla Corporation
                 </tr>
                 </thead>
                 <tbody>
-                    {{#each selectedalerts}}
+                    {{#each documents}}
                         {{>alertTableItem}}
                     {{/each}}
                 </tbody>
             </table>
+            {{> defaultBootstrapPaginator pagination=templatePagination limit=5 containerClass="text-center"}}
         </div>
     </div>
 </div>
