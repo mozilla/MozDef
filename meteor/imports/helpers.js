@@ -8,26 +8,29 @@ Copyright (c) 2014 Mozilla Corporation
 import { _ } from 'meteor/underscore';
 
 // helper functions
-getSetting=function (settingKey){
+getSetting = function( settingKey ) {
 
     // prefer Meteor.settings.public.mozdef
     // then the subscribed collection
-    if ( _.has(Meteor.settings.public.mozdef,settingKey) ){
+    if ( _.has( Meteor.settings.public.mozdef, settingKey ) ) {
         return Meteor.settings.public.mozdef[settingKey];
-    }else{
-        if ( mozdefsettings.findOne({ key : settingKey }) ){
-            return mozdefsettings.findOne({ key : settingKey }).value;
-        }else{
+    } else {
+        if ( mozdefsettings.findOne( { key: settingKey } ) ) {
+            return mozdefsettings.findOne( { key: settingKey } ).value;
+        } else {
             return '';
         }
     }
 };
 
-isFeature = function(featureName){
-    if ( features.findOne({'name':featureName}) ){
-        return features.findOne({'name':featureName}).enabled;
-    }else{
+isFeature = function( featureName ) {
+    if ( features.findOne( { 'name': featureName } ) ) {
+        return features.findOne( { 'name': featureName } ).enabled;
+    } else {
         return true;
     }
 };
 
+prefs = function() {
+    return preferences.findOne( { 'userId': Meteor.user().profile.email } );
+}
