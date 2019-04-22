@@ -62,10 +62,19 @@ if ( Meteor.isClient ) {
 
         "click .btnAlertAck": function( e, t ) {
             id = $( e.target ).attr( 'data-target' );
-            //acknowledge the alert
+            // acknowledge the alert
             alerts.update( id, { $set: { 'acknowledged': new Date() } } );
             alerts.update( id, { $set: { 'acknowledgedby': Meteor.user().profile.email } } );
 
+        },
+
+        "dblclick .btnAlertAcked": function( e, t ) {
+            // mouse over causes the tooltip to show.. remove any remaining tooltips
+            $( ".tooltip" ).remove();
+            id = $( e.target ).attr( 'data-target' );
+            // unacknowledge the alert
+            alerts.update( id, { $unset: { 'acknowledged': "" } } );
+            alerts.update( id, { $unset: { 'acknowledgedby': "" } } );
         },
 
         "keyup #alertsfiltertext": function( e, t ) {
