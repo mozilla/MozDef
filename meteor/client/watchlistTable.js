@@ -57,7 +57,7 @@ if ( Meteor.isClient ) {
             sort: {
                 dateExpiring: -1
             },
-            perPage: 5,
+            perPage: prefs().pageSize,
 
         } );
 

@@ -111,7 +111,7 @@ if ( Meteor.isClient ) {
             sort: {
                 dateOpened: -1
             },
-            perPage: 5,
+            perPage: prefs().pageSize,
         } );
 
         Template.instance().searchQuery = new ReactiveVar();
