@@ -34,7 +34,7 @@ if ( Meteor.isClient ) {
         Session.set( 'attackersearchIP', '' );
         Session.set( 'blockIPipaddress', '' );
         Session.set( 'blockFQDN', '' );
-        Session.set('watchItemwatchcontent','');
+        Session.set( 'watchItemwatchcontent', '' );
         getAllPlugins();
         // use a default theme, overridden later by login per user
         require( '/imports/themes/classic/mozdef.css' );
@@ -338,17 +338,17 @@ if ( Meteor.isClient ) {
             dshielditem = $( "<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>" );
             intelitem = $( "<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>" );
             searchitem = $( "<li><a class='ipmenu-search' data-ipaddress='" + iptext + "'href='#'>search kibana</a></li>" );
-            if ( isFeature('watchItem') ){
-            watchItemitem=$("<li><a class='ipmenu-watchitem' data-ipaddress='" + iptext + "'href='#'>watch</a></li>");
-            }else{
-            watchItemitem=$();
+            if ( isFeature( 'watchItem' ) ) {
+                watchItemitem = $( "<li><a class='ipmenu-watchitem' data-ipaddress='" + iptext + "'href='#'>watch</a></li>" );
+            } else {
+                watchItemitem = $();
             }
-            if ( isFeature('blockip') ){
-                blockIPitem=$("<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>");
-            }else{
-                blockIPitem=$();
+            if ( isFeature( 'blockip' ) ) {
+                blockIPitem = $( "<li><a class='ipmenu-blockip' data-ipaddress='" + iptext + "'href='#'>block</a></li>" );
+            } else {
+                blockIPitem = $();
             }
-            ipmenu.append(copyitem,whoisitem,dshielditem,intelitem,searchitem,watchItemitem,blockIPitem);
+            ipmenu.append( copyitem, whoisitem, dshielditem, intelitem, searchitem, watchItemitem, blockIPitem );
 
             $( this ).parent().parent().append( ipmenu );
         } );
@@ -369,6 +369,12 @@ if ( Meteor.isClient ) {
         //template access to isURL function
         return isURL( astring );
     } );
+
+    UI.registerHelper( 'prefs', function() {
+        if ( Meteor.user() ) {
+            return preferences.findOne( { 'userId': Meteor.user().profile.email } );
+        }
+    } )
 
     //Notify messages for the UI
     Deps.autorun( function() {
@@ -482,9 +488,14 @@ if ( Meteor.isClient ) {
             onReady = function() {
                 var preferenceRecord = preferences.findOne( { 'userId': Meteor.user().profile.email } )
                 if ( preferenceRecord == undefined ) {
-                    console.log( 'client could not find preferences record' );
+                    //console.log( 'client could not find preferences record, creating one' );
+                    newPreferenceRecord = models( preference )
+                    newid = preferences.insert( newPreferenceRecord );
+
                 } else {
-                    // console.log( 'client found preferences', preferenceRecord );
+                    //console.log( 'client found preferences', preferenceRecord );
+
+                    // import the preferred theme elements
                     if ( preferenceRecord.theme == 'Dark' ) {
                         require( '/imports/themes/dark/mozdef.css' );
                     } else if ( preferenceRecord.theme == 'Light' ) {
