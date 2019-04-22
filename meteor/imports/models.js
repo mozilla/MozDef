@@ -192,7 +192,8 @@ models = {
             'userId': Meteor.user().profile.email,
             'name': '',
             'theme': 'classic',
-            'dateCreated': today
+            'dateCreated': today,
+            'pageSize': 25
         };
     },
 
