@@ -18,12 +18,10 @@ import { tooltip } from 'meteor/twbs:bootstrap';
 if ( Meteor.isClient ) {
     var currentSearch = null;
     Session.set( 'alertsSearch', null );
-    Session.set( 'alertsDisplayed', 0 );
 
     Template.alertssummary.helpers( {
         totalAlerts: function() {
             //how many alerts in the database?
-            //return alertsCount.findOne().count;
             if ( alertsCount && alertsCount.findOne() ) {
                 return alertsCount.findOne().count;
             } else {
@@ -32,40 +30,8 @@ if ( Meteor.isClient ) {
         },
 
         displayedAlerts: function() {
-            //how many alerts displayed in the table
-            return Session.get( 'alertsDisplayed' );
-        },
-
-        selectedalerts: function() {
-            //console.log(moment().format(),Session.get('alertsSearch'));
-
-            Session.set( 'alertsDisplayed',
-                alerts.find( Session.get( 'alertsSearch' ),
-                    {
-                        limit: Session.get( 'alertsrecordlimit' ),
-                        reactive: false
-                    } ).count()
-            );
-
-            //return just what's needed for the summary table
-            return alerts.find( Session.get( 'alertsSearch' ),
-                {
-                    fields: {
-                        _id: 1,
-                        esmetadata: 1,
-                        utctimestamp: 1,
-                        utcepoch: 1,
-                        summary: 1,
-                        severity: 1,
-                        category: 1,
-                        acknowledged: 1,
-                        acknowledgedby: 1,
-                        url: 1
-                    },
-                    sort: { utcepoch: -1 },
-                    limit: Session.get( 'alertsrecordlimit' ),
-                    reactive: true
-                } )
+            //how many alerts displayed in the paginator
+            return Template.instance().pagination.totalItems()
         },
 
         isReady: function() {
@@ -159,6 +125,19 @@ if ( Meteor.isClient ) {
             } else {
                 this.pagination.filters( {} );
             }
+            //subscribe to the number of alerts
+            //and to the summary of alerts
+            Meteor.subscribe( "alerts-summary", Session.get( 'alertssearchtext' ), Session.get( 'alertssearchtime' ), Session.get( 'alertsrecordlimit' ), onReady = function() {
+                //console.log('alerts-summary ready');
+                drawAlertsCharts();
+                hookAlertsCount();
+            } );
+            //get the real total count of alerts
+            Meteor.subscribe( "alerts-count" );
+            $( '#searchTime' ).val( Session.get( 'alertssearchtime' ) );
+            $( '#alertsfiltertext' ).val( Session.get( 'alertsfiltertext' ) );
+            $( '#alertssearchtext' ).val( Session.get( 'alertssearchtext' ) );
+            $( '#recordLimit' ).val( Session.get( 'alertsrecordlimit' ) );
         } );
     } );
 
@@ -582,23 +561,6 @@ if ( Meteor.isClient ) {
                         }
                     } );
         };
-
-        this.autorun( function() {
-            //subscribe to the number of alerts
-            //and to the summary of alerts
-            Meteor.subscribe( "alerts-summary", Session.get( 'alertssearchtext' ), Session.get( 'alertssearchtime' ), Session.get( 'alertsrecordlimit' ), onReady = function() {
-                //console.log('alerts-summary ready');
-                drawAlertsCharts();
-                hookAlertsCount();
-            } );
-            //get the real total count of alerts
-            Meteor.subscribe( "alerts-count" );
-            $( '#searchTime' ).val( Session.get( 'alertssearchtime' ) );
-            $( '#alertsfiltertext' ).val( Session.get( 'alertsfiltertext' ) );
-            $( '#alertssearchtext' ).val( Session.get( 'alertssearchtext' ) );
-            $( '#recordLimit' ).val( Session.get( 'alertsrecordlimit' ) );
-        } ); //end deps.autorun
-
     };
 
     Template.alertssummary.destroyed = function() {
