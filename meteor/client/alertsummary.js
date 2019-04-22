@@ -121,7 +121,7 @@ if ( Meteor.isClient ) {
             sort: {
                 utcepoch: -1
             },
-            perPage: 5,
+            perPage: prefs().pageSize,
         } );
 
         Template.instance().searchQuery = new ReactiveVar( Session.get( 'alertsSearch' ) );
