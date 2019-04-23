@@ -30,7 +30,3 @@ isFeature = function( featureName ) {
         return true;
     }
 };
-
-prefs = function() {
-    return preferences.findOne( { 'userId': Meteor.user().profile.email } );
-}

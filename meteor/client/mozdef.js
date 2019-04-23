@@ -40,6 +40,10 @@ if ( Meteor.isClient ) {
         require( '/imports/themes/classic/mozdef.css' );
     } );
 
+    prefs = function() {
+        return preferences.findOne( { 'userId': Meteor.user().profile.email } );
+    }
+
     //find plugins registered for a
     //specific endpoint
     pluginsForEndPoint = function( endpoint ) {
