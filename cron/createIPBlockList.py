@@ -7,14 +7,12 @@
 
 import boto
 import boto.s3
-import logging
 import netaddr
 import random
 import sys
 from datetime import datetime
 from datetime import timedelta
 from configlib import getConfig, OptionParser
-from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
 from mozdef_util.utilities.toUTC import toUTC
@@ -226,5 +224,4 @@ if __name__ == '__main__':
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    initLogger()
     main()
