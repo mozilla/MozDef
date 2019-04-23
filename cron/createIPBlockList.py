@@ -18,28 +18,7 @@ from logging.handlers import SysLogHandler
 from pymongo import MongoClient
 
 from mozdef_util.utilities.toUTC import toUTC
-
-
-logger = logging.getLogger(sys.argv[0])
-
-
-def loggerTimeStamp(self, record, datefmt=None):
-    return toUTC(datetime.now()).isoformat()
-
-
-def initLogger():
-    logger.level = logging.INFO
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    formatter.formatTime = loggerTimeStamp
-    if options.output == 'syslog':
-        logger.addHandler(
-            SysLogHandler(
-                address=(options.sysloghostname, options.syslogport)))
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
+from mozdef_util.utilities.logger import logger
 
 
 def genMeteorID():
