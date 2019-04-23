@@ -15,7 +15,6 @@ from datetime import timedelta
 from configlib import getConfig, OptionParser
 from pymongo import MongoClient
 
-from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger
 
 
