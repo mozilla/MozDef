@@ -84,7 +84,7 @@ def mostCommon(listofdicts,dictkeypath):
 def searchESForBROAttackers(es, threshold):
     search_query = SearchQuery(hours=2)
     search_query.add_must([
-        PhraseMatch('category', 'bronotice'),
+        PhraseMatch('category', 'bro'),
         PhraseMatch('details.note', 'MozillaHTTPErrors::Excessive_HTTP_Errors_Attacker')
     ])
     full_results = search_query.execute(es)
