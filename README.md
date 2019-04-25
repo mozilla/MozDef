@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/mozilla/MozDef.svg?branch=master)](https://travis-ci.org/mozilla/MozDef)
 [![Documentation Status](https://readthedocs.org/projects/mozdef/badge/?version=latest)](http://mozdef.readthedocs.io/en/latest/?badge=latest)
 
-# MozDef: The Mozilla Defense Platform
+# MozDef: Mozilla Enterprise Defense Platform
 
 ## Why?
 
