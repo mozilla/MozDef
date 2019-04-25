@@ -21,12 +21,8 @@ import json
 
 import os
 from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-
-
-logger = logging.getLogger(sys.argv[0])
-logger.level = logging.WARNING
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
 
 def daterange(start_date, end_date):
@@ -35,13 +31,6 @@ def daterange(start_date, end_date):
 
 
 def esRotateIndexes():
-    if options.output == 'syslog':
-        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
-
     logger.debug('started')
     with open(options.default_mapping_file, 'r') as mapping_file:
         default_mapping_contents = json.loads(mapping_file.read())

@@ -6,16 +6,14 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 
-from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, QueryStringMatch
 import requests
 import json
-import logging
-from requests_jwt import JWTAuth
 import sys
 
-logger = logging.getLogger()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+from lib.alerttask import AlertTask
+from requests_jwt import JWTAuth
+from mozdef_util.utilities.logger import logger
+from mozdef_util.query_models import SearchQuery, QueryStringMatch
 
 
 class AlertWatchList(AlertTask):
@@ -40,7 +38,7 @@ class AlertWatchList(AlertTask):
                 index += 1
                 self.process_alert(term)
         else:
-            sys.stderr.write('The watchlist request failed. Status {0}.\n'.format(status))
+            logger.error('The watchlist request failed. Status {0}.\n'.format(status))
 
     def process_alert(self, term):
         search_query = SearchQuery(minutes=20)
