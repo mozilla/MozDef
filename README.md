@@ -1,13 +1,13 @@
 [![Build Status](https://travis-ci.org/mozilla/MozDef.svg?branch=master)](https://travis-ci.org/mozilla/MozDef)
 [![Documentation Status](https://readthedocs.org/projects/mozdef/badge/?version=latest)](http://mozdef.readthedocs.io/en/latest/?badge=latest)
 
-# MozDef: The Mozilla Defense Platform
+# MozDef: The Mozilla Enterprise Defense Platform
 
 ## Why?
 
 The inspiration for MozDef comes from the large arsenal of tools available to attackers. Suites like metasploit, armitage, lair, dradis and others are readily available to help attackers coordinate, share intelligence and finely tune their attacks in real time. Defenders are usually limited to wikis, ticketing systems and manual tracking databases attached to the end of a Security Information Event Management (SIEM) system.
 
-The Mozilla Defense Platform (MozDef) seeks to automate the security incident handling process and facilitate the real-time activities of incident handlers.
+The Mozilla Enterprise Defense Platform (MozDef) seeks to automate the security incident handling process and facilitate the real-time activities of incident handlers.
 
 ## Goals:
 
