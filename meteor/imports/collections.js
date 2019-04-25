@@ -35,40 +35,45 @@ Meteor.startup( () => {
 
 
     if ( Meteor.isServer ) {
-        //Indexes
-        fqdnblocklist.rawCollection().dropIndexes();
-        fqdnblocklist.rawCollection().createIndex( {
-            fqdn: "text",
-            comment: "text",
-            reference: "text"
+        // Indexes, as promises to properly drop, then create
+        fqdnblocklist.rawCollection().dropIndexes().then( ( value ) => {
+            fqdnblocklist.rawCollection().createIndex( {
+                fqdn: "text",
+                comment: "text",
+                reference: "text"
+            } );
         } );
 
-        watchlist.rawCollection().dropIndexes();
-        watchlist.rawCollection().createIndex( {
-            watchcontent: "text",
-            comment: "text",
-            reference: "text"
+        watchlist.rawCollection().dropIndexes().then( ( value ) => {
+            watchlist.rawCollection().createIndex( {
+                watchcontent: "text",
+                comment: "text",
+                reference: "text"
+            } );
         } );
 
-        ipblocklist.rawCollection().dropIndexes();
-        ipblocklist.rawCollection().createIndex( {
-            address: "text",
-            comment: "text",
-            reference: "text"
+        ipblocklist.rawCollection().dropIndexes().then( ( value ) => {
+            ipblocklist.rawCollection().createIndex( {
+                address: "text",
+                comment: "text",
+                reference: "text"
+            } );
         } );
 
-        incidents.rawCollection().dropIndexes();
-        incidents.rawCollection().createIndex( {
-            summary: "text",
-            description: "text",
-            creator: "text"
+        incidents.rawCollection().dropIndexes().then( ( value ) => {
+            incidents.rawCollection().createIndex( {
+                summary: "text",
+                description: "text",
+                creator: "text"
+            } );
         } );
 
-        investigations.rawCollection().dropIndexes();
-        investigations.rawCollection().createIndex( {
-            summary: "text",
-            description: "text",
-            creator: "text"
+        investigations.rawCollection().dropIndexes().then( ( value ) => {
+            investigations.rawCollection().createIndex( {
+                summary: "text",
+                description: "text",
+                creator: "text"
+            } );
         } );
 
         //Publishing setups
