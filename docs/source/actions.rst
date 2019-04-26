@@ -1,7 +1,7 @@
 Actions
 =======
 
-Actions are supported in the end of the alert pipeline currently.
+Actions are currently supported at the end of the alert pipeline.
 
 Alert Action Processing
 -----------------------
