@@ -1,0 +1,13 @@
+# The threat management team will be the default owners for everything in the
+# repo. Unless a later match takes precedence, these users will be requested for
+# review when someone opens a pull request.
+*                @pwnbus @mpurzynski @Phrozyn @tristanweir
+
+# Allow review by Gene or Andrew for cloudy MozDef code
+/cloudy_mozdef/  @gene1wood @andrewkrug
+
+# Anyone in EIS can review documentation
+# https://github.com/orgs/mozilla/teams/enterprise-information-security/members
+/README.md       @mozilla/enterprise-information-security
+/CHANGELOG       @mozilla/enterprise-information-security
+/docs/           @mozilla/enterprise-information-security
