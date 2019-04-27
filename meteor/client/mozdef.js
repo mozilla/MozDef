@@ -14,8 +14,7 @@ import '/client/js/jquery.highlight.js';
 import PNotify from 'pnotify';
 import 'pnotify/dist/pnotify.css';
 import './mozdef.html';
-import './menu.html';
-import './menu.js';
+// import './menu.js';
 import '/client/layout.js';
 import '/public/css/dropdowns.css';
 
@@ -36,8 +35,6 @@ if ( Meteor.isClient ) {
         Session.set( 'blockFQDN', '' );
         Session.set( 'watchItemwatchcontent', '' );
         getAllPlugins();
-        // use a default theme, overridden later by login per user
-        require( '/imports/themes/classic/mozdef.css' );
     } );
 
     prefs = function() {
@@ -182,14 +179,6 @@ if ( Meteor.isClient ) {
         'click': function() {
             // template data, if any, is available in 'this'
             Session.set( 'displayMessage', 'Welcome &amp; to mozdef.' )
-        }
-    } );
-
-    // loads kibana dashboards
-    Template.menu.helpers( {
-        kibanadashboards: function() {
-            Meteor.call( 'loadKibanaDashboards' );
-            return kibanadashboards.find();
         }
     } );
 
@@ -504,6 +493,8 @@ if ( Meteor.isClient ) {
                         require( '/imports/themes/dark/mozdef.css' );
                     } else if ( preferenceRecord.theme == 'Light' ) {
                         require( '/imports/themes/light/mozdef.css' )
+                    } else if ( preferenceRecord.theme == 'Dark Side Nav' ) {
+                        require( '/imports/themes/side_nav_dark/mozdef.css' )
                     } else {
                         require( '/imports/themes/classic/mozdef.css' );
                     }
@@ -511,4 +502,10 @@ if ( Meteor.isClient ) {
             } );
 
     } );
+
+    // finally, load the default starting point
+    // use a default theme, overridden later by login per user
+    require( '/imports/themes/none/mozdef.css' );
+    require( '/imports/themes/none/menu.html' );
+    require( './menu.js' );
 }
