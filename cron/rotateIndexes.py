@@ -11,8 +11,6 @@
 # Create a starter .conf file with backupDiscover.py
 
 import sys
-import logging
-from logging.handlers import SysLogHandler
 from datetime import datetime
 from datetime import date
 from datetime import timedelta

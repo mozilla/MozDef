@@ -12,13 +12,10 @@
 # Create a starter .conf file with backupDiscover.py
 
 import sys
-import logging
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
-
-from logging.handlers import SysLogHandler
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger

@@ -8,7 +8,6 @@
 
 import requests
 import json
-import sys
 
 from lib.alerttask import AlertTask
 from requests_jwt import JWTAuth
