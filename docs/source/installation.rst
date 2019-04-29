@@ -429,7 +429,7 @@ You should now be able to access to Marvel at http://any-server-in-cluster:9200/
 Kibana
 ******
 
-`Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data::
+`Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data
 
 Create the Repo in /etc/yum/repos.d/kibana.repo::
 

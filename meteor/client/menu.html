@@ -7,11 +7,11 @@ Copyright (c) 2014 Mozilla Corporation
 
 <template name="menu">
     <div class="container headercontainer">
-       {{#if haveFeatures }}
-            <div id="header"  class="row center">
-                <span id="nav-main">
+        {{#if haveFeatures }}
+        <div id="header" class="row center">
+            <span id="nav-main">
                 <ul>
-                    <li><img class="mozillalogo" src="/images/mozilla.svg" ></li>
+                    <li><img class="mozillalogo" src="/images/mozilla.svg"></li>
                     <li><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></li>
                     {{#if isFeature "kibana"}}
                         <li> <a target="_blank" href={{ resolveKibanaURL mozdef.kibanaURL }}>Kibana</a>
@@ -49,14 +49,13 @@ Copyright (c) 2014 Mozilla Corporation
                     {{#if isFeature "incidents"}}
                         <li><a href="/incidents">Incidents</a>
                             <ul>
-
                                 <li><a href="/incident/new/">new incident</a></li>
                                 <li><a href="/incidents/veris/">veris stats</a></li>
                             </ul>
                         </li>
                     {{/if}}
                     {{#if isFeature "visualizations"}}
-                        <li class="first"><a href="#">Visualizations</a>
+                        <li><a href="#">Visualizations</a>
                             <ul>
                                 {{#if isFeature "logincounts"}}
                                     <li><a href="/logincounts/">logincounts</a></li>
@@ -71,19 +70,24 @@ Copyright (c) 2014 Mozilla Corporation
                         </li>
                     {{/if}}
                     {{#if isFeature "about"}}
-                        <li><a href="/about">About</a></li>
+                        <li><a href="/about">About</a>
+                            <ul>
+                                <li><a target="_blank" href="https://mozdef.readthedocs.io/en/latest/index.html">Documentation</a></li>
+                                <li><a href="/preferences">Preferences</a></li>
+                            </ul>
+                        </li>
                     {{/if}}
                 </ul>
                 <label>
                     {{#if loggingIn}}
-                            loading
+                    loading
                     {{/if}}
                     {{> loginButtons align="right"}}
                 </label>
 
-                </span>
+            </span>
 
-            </div>
+        </div>
         {{/if}}
     </div>
 </template>
@@ -93,3 +97,4 @@ Copyright (c) 2014 Mozilla Corporation
         <a target=" _blank" href="{{url}}">{{name}}</a>
     </li>
 </template>
+

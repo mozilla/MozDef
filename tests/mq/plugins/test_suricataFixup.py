@@ -115,7 +115,8 @@ class TestSuricataFixup(object):
         assert result['category'] == 'suricata'
         assert result['source'] == 'eve-log'
         assert result['event_type'] == 'unknown'
-        assert metadata['doc_type'] is 'nsm'
+        assert result['type'] is 'nsm'
+        assert metadata['doc_type'] is 'event'
 
     def test_suricata_wrongtype_log(self):
         metadata = {
@@ -133,7 +134,8 @@ class TestSuricataFixup(object):
         assert result['category'] == 'suricata'
         assert result['source'] == 'eve-log'
         assert result['event_type'] == 'alamakota'
-        assert metadata['doc_type'] is 'nsm'
+        assert result['type'] is 'nsm'
+        assert metadata['doc_type'] is 'event'
 
     def test_suricata_nosource_log(self):
         event = {

@@ -17,7 +17,7 @@ class message(object):
         # this plugin inspects messages for whitelist stuff that
         # should be dropped and not processed any further.
         rdict = dict()
-        rdict['_type'] = 'auditd'
+        rdict['type'] = 'auditd'
         rdict['details'] = dict()
         rdict['details']['http_user_agent'] = 'ELB-HealthChecker/1.0'
         self.registration = rdict

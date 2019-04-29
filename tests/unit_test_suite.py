@@ -49,11 +49,11 @@ class UnitTestSuite(object):
         if 'plugins' in sys.modules:
             del sys.modules['plugins']
 
-    def populate_test_event(self, event, event_type='event'):
-        self.es_client.save_event(body=event, doc_type=event_type)
+    def populate_test_event(self, event):
+        self.es_client.save_event(body=event)
 
-    def populate_test_object(self, event, event_type='event'):
-        self.es_client.save_object(index='events', body=event, doc_type=event_type)
+    def populate_test_object(self, event):
+        self.es_client.save_object(index='events', body=event)
 
     def setup_elasticsearch(self):
         self.es_client.create_index(self.event_index_name, index_config=self.mapping_options)

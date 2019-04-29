@@ -9,6 +9,7 @@ action.auto_create_index:  .watches,.triggered_watches,.watcher-history-*
 
 # Add these to prevent requiring a user/pass and termination of ES when looking for "ingest" assignments.
 # The watcher directive allows for the deletion of failed watcher indices as they sometimes get created with glitches.
+xpack.license.self_generated.type: basic
 xpack.security.enabled: false
 xpack.monitoring.exporters.my_local:
   type: local

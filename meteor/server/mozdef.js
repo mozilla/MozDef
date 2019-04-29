@@ -10,7 +10,7 @@ import '/imports/models.js';
 
 if (Meteor.isServer) {
 
-    Meteor.startup(function () {
+    Meteor.startup(function() {
         // Since we only connect to localhost or to ourselves, adding a hack to bypass cert validation
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         // We don't use websockets, turn 'em off to make for a faster startup
@@ -30,12 +30,12 @@ if (Meteor.isServer) {
             return item.trim();
         });
         console.log(featuresRemoved);
-        featuresObject.forEach(function (featureItem) {
+        featuresObject.forEach(function(featureItem) {
             feature = models.feature();
             feature.name = featureItem.split(" ")[0];
             feature.url = featureItem.split(" ")[1]
-            if ( featuresRemoved.includes(feature.name) ){
-                feature.enabled=false;
+            if (featuresRemoved.includes(feature.name)) {
+                feature.enabled = false;
             }
             features.insert(feature);
         });
@@ -87,6 +87,18 @@ if (Meteor.isServer) {
 
         registerLoginMethod();
 
+        Accounts.onLogin(function(loginDetails) {
+            console.log('loginDetails', loginDetails);
+            var preferenceRecord = preferences.findOne({ 'userId': loginDetails.user.profile.email })
+            if (preferenceRecord == undefined) {
+                preferenceRecord = models.preference();
+                preferences.insert(preferenceRecord);
+                console.log('inserted', preferenceRecord);
+            } else {
+                console.log('found', preferenceRecord);
+            }
+        })
+
         //update veris if missing:
         console.log("checking the veris framework reference enumeration");
         console.log('tags: ' + veris.find().count());
@@ -94,7 +106,7 @@ if (Meteor.isServer) {
             console.log("updating the veris collection");
             var verisFile = Assets.getText("veris.dotformat.txt");
             var verisObject = verisFile.split("\n");
-            verisObject.forEach(function (verisItem) {
+            verisObject.forEach(function(verisItem) {
                 veris.insert({ tag: verisItem });
             });
         }
@@ -125,7 +137,7 @@ function registerLoginMethod() {
 function registerLoginViaPassword() {
     console.log("Setting up Password Authentication");
     // We need to attach the users email address to the user.profile
-    Accounts.onCreateUser(function (options, user) {
+    Accounts.onCreateUser(function(options, user) {
         if (user.emails.count <= 0) {
             console.log("No user emails")
             return user;
@@ -135,9 +147,9 @@ function registerLoginViaPassword() {
         if (typeof (email) === "undefined") {
             console.log("User Email address not defined.")
             return user;
-        }else{
+        } else {
             // set the username to the primary email
-            user.username=email;
+            user.username = email;
         }
 
         if (typeof (user.profile) === "undefined") {
@@ -155,13 +167,12 @@ function registerLoginViaPassword() {
 
         // set any other profile information here.
 
-
         return user
     });
 }
 
 function registerLoginViaHeader() {
-    Accounts.registerLoginHandler("headerLogin", function (loginRequest) {
+    Accounts.registerLoginHandler("headerLogin", function(loginRequest) {
         // there are multiple login handlers in meteor.
         // a login request goes through all these handlers to find it's login hander
         // in our login handler, we only consider login requests which are via a header
@@ -203,7 +214,6 @@ function registerLoginViaHeader() {
                 createdAt: new Date()
             });
         }
-
         // per https://github.com/meteor/meteor/blob/devel/packages/accounts-base/accounts_server.js#L263
         // generating and storing the stamped login token is optional
         // so we just return the userId and let the accounts module do it's thing

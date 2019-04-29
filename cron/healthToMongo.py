@@ -8,12 +8,10 @@
 
 import requests
 import sys
-from datetime import datetime
 from configlib import getConfig, OptionParser
 from pymongo import MongoClient
 
-from mozdef_util.utilities.logger import logger, initLogger
-from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch
 
@@ -21,7 +19,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 def getFrontendStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
-        TermMatch('_type', 'mozdefhealth'),
+        TermMatch('type', 'mozdefhealth'),
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'latest'),
     ])
@@ -44,7 +42,7 @@ def writeFrontendStats(data, mongo):
 def getSqsStats(es):
     search_query = SearchQuery(minutes=15)
     search_query.add_must([
-        TermMatch('_type', 'mozdefhealth'),
+        TermMatch('type', 'mozdefhealth'),
         TermMatch('category', 'mozdef'),
         TermMatch('tags', 'sqs-latest'),
     ])
@@ -75,6 +73,12 @@ def getEsNodesStats():
     jsonobj = r.json()
     results = []
     for nodeid in jsonobj['nodes']:
+        # Skip non masters and non data nodes since it won't have full stats
+        if ('attributes' in jsonobj['nodes'][nodeid] and
+                jsonobj['nodes'][nodeid]['attributes']['master'] == 'false' and
+                jsonobj['nodes'][nodeid]['attributes']['data'] == 'false'):
+            continue
+
         load_average = jsonobj['nodes'][nodeid]['os']['cpu']['load_average']
         load_str = "{0},{1},{2}".format(load_average['1m'], load_average['5m'], load_average['15m'])
         hostname = nodeid
@@ -155,5 +159,4 @@ if __name__ == '__main__':
         help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    initLogger()
     main()

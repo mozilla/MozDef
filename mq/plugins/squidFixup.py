@@ -15,8 +15,10 @@ from netaddr import valid_ipv4
 class message(object):
     def __init__(self):
         """
-        takes an incoming bro message
-        and sets the doc_type
+        takes an incoming squid event
+        and parses the message to extract
+        data points, and sets the type
+        field
         """
 
         self.registration = ["squid"]
@@ -71,15 +73,11 @@ class message(object):
         if message["category"] != "proxy":
             return message, metadata
 
-        # Reuse the NSM doc type
-        # to avoid data type conflicts with other doc types
-        # (int v string, etc)
-        # index holds documents of type 'type'
-        # index -> type -> doc
-        metadata["doc_type"] = "nsm"
-
         # move Squid specific fields under 'details' while preserving metadata
         newmessage = dict()
+
+        # Set NSM as type for categorical filtering of events.
+        newmessage["type"] = "squid"
 
         newmessage[u"mozdefhostname"] = self.mozdefhostname
         newmessage["details"] = {}
@@ -88,13 +86,15 @@ class message(object):
         if "HOST_FROM" in message:
             newmessage["hostname"] = message["HOST_FROM"]
         if "TAGS" in message:
-            newmessage["TAGS"] = message["tags"]
+            newmessage["tags"] = message["tags"]
         if "category" in message:
             newmessage["category"] = message["category"]
         newmessage[u"customendpoint"] = message["customendpoint"]
         newmessage[u"source"] = u"unknown"
         if "source" in message:
             newmessage[u"source"] = message["source"]
+        if "MESSAGE" in message:
+            newmessage[u"summary"] = message["MESSAGE"]
 
             if newmessage["source"] == "access":
                 # http://www.squid-cache.org/Doc/config/logformat/
@@ -112,7 +112,7 @@ class message(object):
                     newmessage[u"details"][u"destinationipaddress"] = u"0.0.0.0"
                 newmessage[u"details"][u"proxyaction"] = tokens[6]
                 if newmessage[u"details"][u"proxyaction"] != "TCP_DENIED":
-                    newmessage[u"details"][u"destinationport"] = int(tokens[5])
+                    newmessage[u"details"][u"destinationport"] = int(self.create_int(tokens[5]))
                     newmessage[u"details"][u"host"] = tokens[13]
                 else:
                     (fqdn, dstport) = self.tokenize_url(tokens[11])

@@ -103,7 +103,7 @@ services:
       cache_from:
         - mozdef/mozdef_bootstrap
         - mozdef_bootstrap:latest
-    command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/backup.conf http://kibana:5601'
+    command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/mozdefStateDefaultMappingTemplate.json cron/backup.conf http://kibana:5601'
     depends_on:
       - base
       - elasticsearch
