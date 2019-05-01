@@ -33,6 +33,12 @@ Resources:
           FromPort: 443
           ToPort: 443
           SourceSecurityGroupId: !Ref MozDefInstanceSecurityGroup
+        -
+          Description: Allow 80 inbound from the MozDef EC2 SG currently required for MozDef crons
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref MozDefInstanceSecurityGroup
       Tags:
         - Key: application
           Value: mozdef
