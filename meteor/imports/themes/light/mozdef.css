@@ -5,7 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 
-/* variables */
+/* light theme variables */
 :root {
     --bg-primary-color: rgba(255,255,255,.5);
     --bg-secondary-color: #444444;
@@ -608,6 +608,17 @@ sidenav
 
 /* Second-level Menu Items */
 
+#nav-main li:hover ul,
+.js #nav-main li.hover ul {
+    margin-top: 2.5em;
+    left: 0;
+    opacity: 1;
+    -moz-transition: opacity 0.2s ease-in-out;
+    -webkit-transition: opacity 0.2s ease-in-out;
+    -o-transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out;
+}
+
 #nav-main ul ul,
 #nav-main ul ul li {
     height: auto;
@@ -641,7 +652,7 @@ sidenav
 #nav-main ul ul a:link,
 #nav-main ul ul a:visited {
     overflow: hidden;
-    color: #fff;
+    color: #000;
     padding: 3px 10px;
     margin: 0px;
     height: auto;
@@ -656,10 +667,64 @@ sidenav
 #nav-main ul ul a:hover,
 #nav-main ul ul a:focus,
 #nav-main ul ul a:active {
-    color: #fff;
+    color: #000;
     background: rgb(227,235,244);
     background: rgba(241,248,254,0.2);
 
+}
+/* Currently active menu items */
+#nav-main ul li.current span,
+#nav-main ul li.current a,
+#nav-main ul li.current a:link,
+#nav-main ul li.current a:visited {
+    border-bottom-width: 1px;
+    -moz-border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
+    border-radius: 0 0 4px 4px;
+    background: #fbfdff;
+    background: -moz-linear-gradient(top, rgba(255,255,255,0.4) 0%,
+                                     rgba(255,255,255,0.8) 100%);
+    box-shadow:
+        rgba(152,178,201,0.2) 0 0px 0px,
+        inset rgba(152,178,201,0.3) 0 -2px 0,
+        inset rgba(255,255,255,0.8) 0 -6px 6px 4px;
+    -moz-box-shadow:
+        rgba(152,178,201,0.2) 0 0px 0px,
+        inset rgba(152,178,201,0.3) 0 -2px 0,
+        inset rgba(255,255,255,0.8) 0 -6px 6px 4px;
+    -webkit-box-shadow:
+        rgba(152,178,201,0.2) 0 0px 0px,
+        inset rgba(152,178,201,0.3) 0 -2px 0,
+        inset rgba(255,255,255,0.8) 0 -6px 6px 4px;
+    padding-right: 30px;
+    padding-bottom: 15px;
+}
+
+#nav-main ul li.current:hover a,
+#nav-main ul li.current.hover a,
+#nav-main ul li.current a:hover,
+#nav-main ul li.current a:focus,
+#nav-main ul li.current a:active,
+.js #nav-main ul li.current a:focus {
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webbkit-box-shadow: none;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    border-bottom: 0;
+}
+
+#nav-main ul li.current ul span,
+#nav-main ul li.current ul a,
+#nav-main ul li.current ul a:link,
+#nav-main ul li.current ul a:visited {
+    background: none;
+    height: auto;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    padding: 8px 10px;
 }
 
 

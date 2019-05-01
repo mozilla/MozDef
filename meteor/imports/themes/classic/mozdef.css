@@ -5,7 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 
-/* variables */
+/* classic theme variables */
 :root {
     --bg-primary-color: rgb(32,87,153);
     --bg-secondary-color: #444444;

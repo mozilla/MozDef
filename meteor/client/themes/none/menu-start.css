@@ -1,0 +1,25 @@
+/* default start/login css */
+:root {
+    --bg-primary-color: rgb(32,87,153);
+    --bg-secondary-color: #444444;
+    --txt-primary-color: #fff;
+    --txt-secondary-color: #000;
+    --txt-shadow-color:  #000;
+    --txt-highlight-color: rgba(165, 170, 172, 0.904);
+    --a-link-color:  rgb(245, 222, 179);
+    --row-color-odd: rgba(30,87,153,.7);
+    --row-color-even: #636c85;
+  }
+
+html{
+	background: none;
+	min-height: 100%;
+}
+
+body{
+    background: var(--bg-primary-color);
+    padding: 0;
+    color: var(--txt-primary-color);
+    line-height: normal;
+    text-align: left;
+}
