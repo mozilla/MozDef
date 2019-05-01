@@ -17,52 +17,27 @@ Copyright (c) 2014 Mozilla Corporation
 <!--begin layout templates-->
 <!--the main, simple layout for the router to target-->
 <template name="layout">
-    {{> menu}}
-
     {{#if loggingIn}}
         <div class="row center">
-            <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
-                <button type="button" class="close" data-dismiss="alert">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only">Close</span>
-                </button>
+            <div class="col-xs-5 col-xs-offset-3 alert alert-info" role="alert">
                 <strong>loading</strong>
             </div>
         </div>
     {{else}}
         {{#if currentUser}}
-            {{>yield}}
+            {{> Template.dynamic template=menuName }}
+            {{> yield }}
+            {{> whoismodal}}
+            {{> dshieldmodal}}
+            {{> blockIPModal}}
+            {{> intelmodal}}
+            {{> blockFQDNModal}}
+            {{> watchItemModal}}
         {{else}}
-            <div class="row center">
-                <div class="col-xs-5 col-xs-offset-3 alert alert-info alert-dismissible" role="alert">
-                    <button type="button" class="close" data-dismiss="alert">
-                        <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Close</span>
-                    </button>
-                    <strong>Please login</strong>
-                </div>
-            </div>
+            {{> loginmenu}}
         {{/if}}
     {{/if}}
-
-    {{>whoismodal}}
-    {{>dshieldmodal}}
-    {{>blockIPModal}}
-    {{>intelmodal}}
-    {{>blockFQDNModal}}
-    {{>watchItemModal}}
-
 </template>
 
-<!--a nice greeting-->
-<template name="hello">
-    <div class="container">
-        <div class="row center">
-            <p class="welcome">{{greeting}}<br>Hand made by Mozilla</p>
-        </div>
-    </div>
-</template>
 
-<template name='loading'>
-    loading...
-</template>
+
