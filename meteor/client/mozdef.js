@@ -5,18 +5,13 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor';
-import { Template } from 'meteor/templating';
 import validator from 'validator';
-import '/imports/collections.js';
-import '/imports/settings.js';
-import '/imports/helpers.js';
-import '/client/js/jquery.highlight.js';
-import PNotify from 'pnotify';
 import 'pnotify/dist/pnotify.css';
-import './mozdef.html';
+import PNotify from 'pnotify';
+// import './mozdef.html';
 // import './menu.js';
-import '/client/layout.js';
-import '/public/css/dropdowns.css';
+//import '/client/layout.js';
+
 
 
 
@@ -34,7 +29,9 @@ if ( Meteor.isClient ) {
         Session.set( 'blockIPipaddress', '' );
         Session.set( 'blockFQDN', '' );
         Session.set( 'watchItemwatchcontent', '' );
+        Session.set( 'menuname', 'menu' );
         getAllPlugins();
+
     } );
 
     prefs = function() {
@@ -166,21 +163,6 @@ if ( Meteor.isClient ) {
         }
         return result
     };
-
-    Template.hello.helpers( {
-        greeting: function() {
-            if ( typeof console !== 'undefined' )
-                console.log( "mozdef starting" );
-            return "MozDef: The Mozilla Defense Platform";
-        }
-    } );
-
-    Template.hello.events( {
-        'click': function() {
-            // template data, if any, is available in 'this'
-            Session.set( 'displayMessage', 'Welcome &amp; to mozdef.' )
-        }
-    } );
 
     UI.registerHelper( 'isFeature', function( featureName ) {
         return isFeature( featureName );
@@ -369,6 +351,10 @@ if ( Meteor.isClient ) {
         }
     } )
 
+    UI.registerHelper( 'menuName', function() {
+        return Session.get( 'menuname' );
+    } )
+
     //Notify messages for the UI
     Deps.autorun( function() {
         //set Session.set('displayMessage','title&text')
@@ -487,14 +473,18 @@ if ( Meteor.isClient ) {
 
                 } else {
                     //console.log( 'client found preferences', preferenceRecord );
-
                     // import the preferred theme elements
+                    // html must be 'imported' from somewhere other than the 'import'
+                    // directory (hence the duplicate themes directory)
                     if ( preferenceRecord.theme == 'Dark' ) {
                         require( '/imports/themes/dark/mozdef.css' );
                     } else if ( preferenceRecord.theme == 'Light' ) {
                         require( '/imports/themes/light/mozdef.css' )
                     } else if ( preferenceRecord.theme == 'Dark Side Nav' ) {
-                        require( '/imports/themes/side_nav_dark/mozdef.css' )
+                        require( '/client/themes/side_nav_dark/menu.html' )
+                        require( '/imports/themes/side_nav_dark/menu.js' )
+                        Session.set( 'menuname', 'side_nav_menu' );
+                        require( '/imports/themes/side_nav_dark/mozdef.css' );
                     } else {
                         require( '/imports/themes/classic/mozdef.css' );
                     }
@@ -503,9 +493,10 @@ if ( Meteor.isClient ) {
 
     } );
 
-    // finally, load the default starting point
-    // use a default theme, overridden later by login per user
-    require( '/imports/themes/none/mozdef.css' );
-    require( '/imports/themes/none/menu.html' );
-    require( './menu.js' );
+    // finally,load the default starting point
+    // use a default theme and menu, overridden later by login per user preference
+    require( '/client/themes/none/menu-start.html' );
+    require( '/client/themes/none/menu-start.css' );
+    require( '/client/menu.html' );
+    require( '/client/menu.js' );
 }
