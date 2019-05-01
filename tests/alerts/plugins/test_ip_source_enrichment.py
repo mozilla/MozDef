@@ -1,12 +1,10 @@
-import json
+import os
 import sys
-
 
 plugin_path = os.path.join(os.path.dirname(__file__), '../../../alerts/plugins')
 sys.path.append(plugin_path)
 
 from ip_source_enrichment import enrich
-
 
 known_ips = [
     {
@@ -64,30 +62,25 @@ class TestIPSourceEnrichment(object):
 
         assert '255.0.1.2 known' in enriched['summary']
 
-    
     def test_ipv6_addrs_enriched(self):
         enriched = enrich(alert_with_ipv6, known_ips)
 
         assert 'a02b:0db8:beef:32cc:4122:0000 known' in enriched['summary']
-
 
     def test_ipv4_addrs_in_summary_enriched(self):
         enriched = enrich(alert_with_ipv4_in_summary, known_ips)
 
         assert '255.0.1.232 known' in enriched['summary']
 
-
     def test_ipv6_addrs_in_summary_enriched(self):
         enriched = enrich(alert_with_ipv6_in_summary, known_ips)
 
         assert 'a02b:0db8:beef:32cc:4122:0000 known' in enriched['summary']
 
-
     def test_unrecognized_ipv4_addrs_not_enriched(self):
         enriched = enrich(alert_with_ipv4, known_ips)
 
         assert '192.168.0.1 known' not in enriched['summary']
-
 
     def test_unrecognized_ipv6_addrs_not_enriched(self):
         enriched = enrich(alert_with_ipv6, known_ips)

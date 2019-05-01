@@ -3,10 +3,15 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+import os
+import re
+
 import netaddr
 
 
-CONFIG_FILE = './ip_source_enrichment.json.conf'
+CONFIG_FILE = os.path.join(
+    os.path.dirname(__file__),
+    'ip_source_enrichment.json.conf')
 
 
 def _isIPv4(ip):
@@ -32,12 +37,12 @@ def _find_ip_addresses(string):
     return re.findall(ipv4_rx, string) + re.findall(ipv6_rx, string)
 
 
-def enrich(self, alert, known_ips):
+def enrich(alert, known_ips):
     '''Add information to alerts containing IP addresses that describes
     the source location of the IP address if it can be determined based
     on a configured mapping.
     '''
-    
+
     return alert
 
 
@@ -81,6 +86,7 @@ class message(object):
     def __init__(self):
         self._config = _load_config(CONFIG_FILE)
 
-
     def onMessage(self, message):
-        return enrich(message, self._configj)
+        known_ips = self._config.get('known', [])
+
+        return enrich(message, known_ips)
