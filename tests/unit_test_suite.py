@@ -84,7 +84,6 @@ class UnitTestSuite(object):
 
         event = {
             "_index": "events",
-            "_type": "event",
             "_source": {
                 "category": "excategory",
                 "utctimestamp": current_timestamp,

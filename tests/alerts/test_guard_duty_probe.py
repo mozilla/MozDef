@@ -14,7 +14,6 @@ class TestGuardDutyProbe(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "event",
         "_source": {
             "source": "guardduty",
             "details": {

@@ -30,7 +30,6 @@ class TestAlertFeedbackEvents(AlertTestSuite):
         "tags": ["geomodel"]
     }
     default_event = {
-        "_type": "event",
         "_source": {
             'category': u'user_feedback',
             'details': {
