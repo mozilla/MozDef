@@ -10,8 +10,6 @@ from parse_sshd import message
 import copy
 
 accept_message = {}
-accept_message['_type'] = 'event'
-accept_message = {}
 accept_message['utctimestamp'] = '2017-08-24T22:49:42+00:00'
 accept_message['timestamp'] = '2017-08-24T22:49:42+00:00'
 accept_message['receivedtimestamp'] = '2017-08-24T22:49:42+00:00'
@@ -41,7 +39,6 @@ class TestSSHDAcceptedMessageV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -66,7 +63,6 @@ class TestSSHDAcceptedMessageV2():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -90,7 +86,6 @@ class TestSSHDAcceptedMessageV3():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -114,7 +109,6 @@ class TestSSHDAcceptedMessageV4():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -138,7 +132,6 @@ class TestSSHDPAMSessionOpenedMessageV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -157,7 +150,6 @@ class TestSSHDPAMSessionClosedMessageV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -176,7 +168,6 @@ class TestSSHDPostponedMessageV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -196,7 +187,6 @@ class TestSSHDPostponedMessageV2():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -216,7 +206,6 @@ class TestSSHDPostponedMessageV3():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -236,7 +225,6 @@ class TestSSHDStartingSessionV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -258,7 +246,6 @@ class TestSSHDStartingSessionV2():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -281,7 +268,6 @@ class TestSSHDUnauthorizedUserV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -301,7 +287,6 @@ class TestSSHDUnauthorizedUsertV2():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -320,7 +305,6 @@ class TestSSHDReceivedDisconnectV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -340,7 +324,6 @@ class TestSSHDReceivedDisconnectV2():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -360,7 +343,6 @@ class TestSSHDReceivedDisconnectV3():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
