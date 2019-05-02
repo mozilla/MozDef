@@ -152,6 +152,9 @@ class TestSuricataFixup(object):
         assert result['category'] == 'suricata'
         assert result['source'] == 'alamakota'
 
+    def verify_metadata(self, metadata):
+        assert metadata['index'] == 'events'
+
     def test_defaults(self):
         event = {
             'customendpoint': '',

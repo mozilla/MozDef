@@ -88,6 +88,9 @@ class TestSquidFixup(object):
         result, metadata = plugin.onMessage(event, self.metadata)
         assert result['mozdefhostname'] == 'failed to fetch mozdefhostname'
 
+    def verify_metadata(self, metadata):
+        assert metadata['index'] == 'events'
+
     def test_defaults(self):
         event = {
             'category': 'proxy',
