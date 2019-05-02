@@ -81,7 +81,6 @@ class TestWriteWithRead(ElasticsearchClientTest):
                         'timestamp': '2016-08-19T16:40:55.818595+00:00',
                         'utctimestamp': '2016-08-19T16:40:55.818595+00:00'
                     },
-                    'documenttype': 'bro'
                 }
             ],
             'severity': 'NOTICE',
