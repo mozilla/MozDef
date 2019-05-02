@@ -12,8 +12,6 @@ from utilities.logger import logger
 
 from event import Event
 
-TMP_DOC_TYPE = 'doc'
-
 
 class ElasticsearchBadServer(Exception):
     def __str__(self):
@@ -128,16 +126,16 @@ class ElasticsearchClient():
         self.bulk_queue.flush()
         self.bulk_queue.stop_thread()
 
-    def __bulk_save_document(self, index, doc_type, body, doc_id=None):
+    def __bulk_save_document(self, index, body, doc_id=None):
         if not self.bulk_queue.started():
             self.bulk_queue.start_thread()
-        self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+        self.bulk_queue.add(index=index, body=body, doc_id=doc_id)
 
-    def __save_document(self, index, doc_type, body, doc_id=None, bulk=False):
+    def __save_document(self, index, body, doc_id=None, bulk=False):
         if bulk:
-            self.__bulk_save_document(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+            self.__bulk_save_document(index=index, body=body, doc_id=doc_id)
         else:
-            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=body)
+            return self.es_connection.index(index=index, id=doc_id, body=body)
 
     def __parse_document(self, body):
         if type(body) is str:
@@ -148,19 +146,19 @@ class ElasticsearchClient():
             doc_body = body['_source']
         return doc_body
 
-    def save_object(self, body, index, doc_type=TMP_DOC_TYPE, doc_id=None, bulk=False):
+    def save_object(self, body, index, doc_id=None, bulk=False):
         doc_body = self.__parse_document(body)
-        return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, body=doc_body, doc_id=doc_id, bulk=bulk)
 
     def save_alert(self, body, index='alerts', doc_id=None, bulk=False):
         doc_body = self.__parse_document(body)
-        return self.__save_document(index=index, doc_type=TMP_DOC_TYPE, body=doc_body, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, body=doc_body, doc_id=doc_id, bulk=bulk)
 
     def save_event(self, body, index='events', doc_id=None, bulk=False):
         doc_body = self.__parse_document(body)
         event = Event(doc_body)
         event.add_required_fields()
-        return self.__save_document(index=index, doc_type=TMP_DOC_TYPE, body=event, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, body=event, doc_id=doc_id, bulk=bulk)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)
