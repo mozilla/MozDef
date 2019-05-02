@@ -5,7 +5,6 @@ from datetime import datetime
 import os
 import sys
 from mozdef_util.query_models import SearchQuery, ExistsMatch, TermMatch, Aggregation
-from mozdef_util.elasticsearch_client import TMP_DOC_TYPE
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
@@ -150,9 +149,8 @@ class TestExecute(SearchQueryUnitTest):
 
         assert len(sorted_hits) == 3
 
-        assert sorted_hits[0].keys() == ['_score', '_type', '_id', '_source', '_index']
+        assert sorted_hits[0].keys() == ['_score', '_id', '_source', '_index']
         assert type(sorted_hits[0]['_id']) == unicode
-        assert sorted_hits[0]['_type'] == TMP_DOC_TYPE
 
         assert sorted_hits[0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -163,9 +161,8 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted_hits[0]['_source']['details'].keys() == ['information']
         assert sorted_hits[0]['_source']['details']['information'] == 'Example information'
 
-        assert sorted_hits[1].keys() == ['_score', '_type', '_id', '_source', '_index']
+        assert sorted_hits[1].keys() == ['_score', '_id', '_source', '_index']
         assert type(sorted_hits[1]['_id']) == unicode
-        assert sorted_hits[1]['_type'] == TMP_DOC_TYPE
 
         assert sorted_hits[1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -177,7 +174,6 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted_hits[1]['_source']['details']['information'] == 'Example information'
 
         assert type(sorted_hits[2]['_id']) == unicode
-        assert sorted_hits[2]['_type'] == TMP_DOC_TYPE
 
         assert sorted_hits[2]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -231,9 +227,8 @@ class TestExecute(SearchQueryUnitTest):
 
         assert len(results['hits']) == 2
 
-        assert results['hits'][0].keys() == ['_score', '_type', '_id', '_source', '_index']
+        assert results['hits'][0].keys() == ['_score', '_id', '_source', '_index']
         assert type(results['hits'][0]['_id']) == unicode
-        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -244,9 +239,8 @@ class TestExecute(SearchQueryUnitTest):
         assert results['hits'][0]['_source']['details'].keys() == ['information']
         assert results['hits'][0]['_source']['details']['information'] == 'Example information'
 
-        assert results['hits'][1].keys() == ['_score', '_type', '_id', '_source', '_index']
+        assert results['hits'][1].keys() == ['_score', '_id', '_source', '_index']
         assert type(results['hits'][1]['_id']) == unicode
-        assert results['hits'][1]['_type'] == TMP_DOC_TYPE
 
         assert results['hits'][1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -282,9 +276,8 @@ class TestExecute(SearchQueryUnitTest):
         assert results['meta']['timed_out'] is False
         assert len(results['hits']) == 1
 
-        assert results['hits'][0].keys() == ['_score', '_type', '_id', '_source', '_index']
+        assert results['hits'][0].keys() == ['_score', '_id', '_source', '_index']
         assert type(results['hits'][0]['_id']) == unicode
-        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
