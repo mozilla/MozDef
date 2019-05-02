@@ -16,7 +16,6 @@ class TestWriteAudit(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "auditd",
         "_source": {
             "category": "write",
             "summary": "Write: /etc/audit/plugins.d/temp-file.conf",

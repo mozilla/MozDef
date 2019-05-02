@@ -15,7 +15,6 @@ class TestAlertSSHPasswordAuthViolation(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "event",
         "_source": {
             "category": "ssh_password_auth_policy_violation",
             "tags": ["ssh_password_auth_policy_violation"],

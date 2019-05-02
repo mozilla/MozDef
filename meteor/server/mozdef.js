@@ -8,38 +8,38 @@ import { Meteor } from 'meteor/meteor';
 import '/imports/models.js';
 
 
-if (Meteor.isServer) {
+if ( Meteor.isServer ) {
 
-    Meteor.startup(function() {
+    Meteor.startup( function() {
         // Since we only connect to localhost or to ourselves, adding a hack to bypass cert validation
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         // We don't use websockets, turn 'em off to make for a faster startup
         process.env.DISABLE_WEBSOCKETS = "1";
-        console.log("MozDef starting")
+        console.log( "MozDef starting" )
 
         // important to set this so meteor knows it's source URL
         // set to what the browser thinks you are coming from (i.e. localhost, or actual servername)
         Meteor.absoluteUrl.defaultOptions.rootUrl = mozdef.rootURL + ':' + mozdef.port
 
         // figure out what features are enabled
-        console.log("updating features");
-        features.remove({});
-        var featuresFile = Assets.getText("features.txt");
-        var featuresObject = featuresFile.split("\n");
-        var featuresRemoved = mozdef.removeFeatures.split(',').map(function(item) {
+        console.log( "updating features" );
+        features.remove( {} );
+        var featuresFile = Assets.getText( "features.txt" );
+        var featuresObject = featuresFile.split( "\n" );
+        var featuresRemoved = mozdef.removeFeatures.split( ',' ).map( function( item ) {
             return item.trim();
-        });
-        console.log(featuresRemoved);
-        featuresObject.forEach(function(featureItem) {
+        } );
+        console.log( featuresRemoved );
+        featuresObject.forEach( function( featureItem ) {
             feature = models.feature();
-            feature.name = featureItem.split(" ")[0];
-            feature.url = featureItem.split(" ")[1]
-            if (featuresRemoved.includes(feature.name)) {
+            feature.name = featureItem.split( " " )[0];
+            feature.url = featureItem.split( " " )[1]
+            if ( featuresRemoved.includes( feature.name ) ) {
                 feature.enabled = false;
             }
-            features.insert(feature);
-        });
-        console.log('settings', mozdef);
+            features.insert( feature );
+        } );
+        console.log( 'settings', mozdef );
         // in addition to the Meteor.settings we use put deployment
         // settings in settings.js to make it easier to deploy
         // and to allow clients to get access to deployment-specific settings.
@@ -50,28 +50,28 @@ if (Meteor.isServer) {
         // and resolved via the client-side getSetting() function
         // or by use of the mozdef.settingKey object.
 
-        mozdefsettings.remove({});
-        mozdefsettings.insert({
+        mozdefsettings.remove( {} );
+        mozdefsettings.insert( {
             key: 'rootURL',
             value: mozdef.rootURL + ':' + mozdef.port
-        });
-        mozdefsettings.insert({
+        } );
+        mozdefsettings.insert( {
             key: 'rootAPI',
             value: mozdef.rootAPI
-        });
-        mozdefsettings.insert({
+        } );
+        mozdefsettings.insert( {
             key: 'kibanaURL',
             value: mozdef.kibanaURL
-        });
-        mozdefsettings.insert({
+        } );
+        mozdefsettings.insert( {
             key: 'authenticationType',
             value: mozdef.authenticationType
-        });
+        } );
 
-        mozdefsettings.insert({
+        mozdefsettings.insert( {
             key: 'enableClientAccountCreation',
             value: mozdef.enableClientAccountCreation
-        });
+        } );
 
         // allow local account creation?
         // http://docs.meteor.com/#/full/accounts_config
@@ -80,46 +80,53 @@ if (Meteor.isServer) {
         // newer meteor uses a key of forbidClientAccountCreation, so
         // we invert the enableClientAccountCreation mozdef setting
         Accounts._options.forbidClientAccountCreation = !mozdef.enableClientAccountCreation;
-        mozdefsettings.insert({
+        mozdefsettings.insert( {
             key: 'forbidClientAccountCreation',
             value: !mozdef.enableClientAccountCreation
-        });
+        } );
 
         registerLoginMethod();
 
-        Accounts.onLogin(function(loginDetails) {
-            console.log('loginDetails', loginDetails);
-            var preferenceRecord = preferences.findOne({ 'userId': loginDetails.user.profile.email })
-            if (preferenceRecord == undefined) {
+        Accounts.onLogin( function( loginDetails ) {
+            console.log( 'loginDetails', loginDetails );
+            var preferenceRecord = preferences.findOne( { 'userId': loginDetails.user.profile.email } )
+            if ( preferenceRecord == undefined ) {
                 preferenceRecord = models.preference();
-                preferences.insert(preferenceRecord);
-                console.log('inserted', preferenceRecord);
+                preferences.insert( preferenceRecord );
             } else {
-                console.log('found', preferenceRecord);
+                console.log( 'found', preferenceRecord );
+                // ensure preferences record is complete
+                modelPrefs = models.preference();
+                for ( var k in modelPrefs ) {
+                    if ( preferenceRecord[k] == undefined ) {
+                        preferenceRecord[k] = modelPrefs[k]
+                    }
+                }
+                preferences.update( preferenceRecord._id, { $set: preferenceRecord } );
             }
-        })
+        } )
 
         //update veris if missing:
-        console.log("checking the veris framework reference enumeration");
-        console.log('tags: ' + veris.find().count());
-        if (veris.find().count() == 0) {
-            console.log("updating the veris collection");
-            var verisFile = Assets.getText("veris.dotformat.txt");
-            var verisObject = verisFile.split("\n");
-            verisObject.forEach(function(verisItem) {
-                veris.insert({ tag: verisItem });
-            });
+        console.log( "checking the veris framework reference enumeration" );
+        console.log( 'tags: ' + veris.find().count() );
+        if ( veris.find().count() == 0 ) {
+            console.log( "updating the veris collection" );
+            var verisFile = Assets.getText( "veris.dotformat.txt" );
+            var verisObject = verisFile.split( "\n" );
+            verisObject.forEach( function( verisItem ) {
+                veris.insert( { tag: verisItem } );
+            } );
         }
 
-    });   //end startup
+    } );   //end startup
 }   //end is server
 
 
 function registerLoginMethod() {
     // Setup a single login method to allow
     var authenticationType = mozdef.authenticationType;
-    console.log("Authentication Type: ", authenticationType);
-    switch (authenticationType) {
+    console.log( "Authentication Type: ", authenticationType );
+    switch ( authenticationType ) {
         case 'meteor-password':
             registerLoginViaPassword();
             break;
@@ -135,24 +142,24 @@ function registerLoginMethod() {
 }
 
 function registerLoginViaPassword() {
-    console.log("Setting up Password Authentication");
+    console.log( "Setting up Password Authentication" );
     // We need to attach the users email address to the user.profile
-    Accounts.onCreateUser(function(options, user) {
-        if (user.emails.count <= 0) {
-            console.log("No user emails")
+    Accounts.onCreateUser( function( options, user ) {
+        if ( user.emails.count <= 0 ) {
+            console.log( "No user emails" )
             return user;
         }
 
         var email = user.emails[0].address;
-        if (typeof (email) === "undefined") {
-            console.log("User Email address not defined.")
+        if ( typeof ( email ) === "undefined" ) {
+            console.log( "User Email address not defined." )
             return user;
         } else {
             // set the username to the primary email
             user.username = email;
         }
 
-        if (typeof (user.profile) === "undefined") {
+        if ( typeof ( user.profile ) === "undefined" ) {
             // user has no profile - this is the usual case
             user.profile = {
                 "email": email
@@ -168,11 +175,11 @@ function registerLoginViaPassword() {
         // set any other profile information here.
 
         return user
-    });
+    } );
 }
 
 function registerLoginViaHeader() {
-    Accounts.registerLoginHandler("headerLogin", function(loginRequest) {
+    Accounts.registerLoginHandler( "headerLogin", function( loginRequest ) {
         // there are multiple login handlers in meteor.
         // a login request goes through all these handlers to find it's login hander
         // in our login handler, we only consider login requests which are via a header
@@ -189,30 +196,30 @@ function registerLoginViaHeader() {
 
         //our authentication logic
         //check for user email header
-        if (userEmail == undefined) {
-            console.log('refused login request due to missing http header')
+        if ( userEmail == undefined ) {
+            console.log( 'refused login request due to missing http header' )
             // throw an error
             return new {
-                error: handleError("SSO Login failure: email not found in the 'via' http header")
+                error: handleError( "SSO Login failure: email not found in the 'via' http header" )
             };
         }
 
-        console.log('target header:', userEmail);
-        console.log('handling login request', loginRequest);
+        console.log( 'target header:', userEmail );
+        console.log( 'handling login request', loginRequest );
 
         //we create a user if needed, and get the userId
         var userId = null;
-        var user = Meteor.users.findOne({ profile: { email: userEmail } });
-        if (user) {
+        var user = Meteor.users.findOne( { profile: { email: userEmail } } );
+        if ( user ) {
             userId = user._id;
         } else {
-            console.log('creating user:', userEmail)
-            userId = Meteor.users.insert({
+            console.log( 'creating user:', userEmail )
+            userId = Meteor.users.insert( {
                 profile: { email: userEmail },
                 username: userEmail,
                 emails: [{ address: userEmail, "verified": true }],
                 createdAt: new Date()
-            });
+            } );
         }
         // per https://github.com/meteor/meteor/blob/devel/packages/accounts-base/accounts_server.js#L263
         // generating and storing the stamped login token is optional
@@ -220,10 +227,10 @@ function registerLoginViaHeader() {
         return {
             userId: userId
         }
-    });
+    } );
 }
 
-function handleError(msg) {
+function handleError( msg ) {
     const error = new Meteor.Error(
         403,
         Accounts._options.ambiguousErrorMessages
