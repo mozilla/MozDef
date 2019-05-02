@@ -10,7 +10,6 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "cloudtrail",
         "_source": {
             "eventname": "StopLogging",
             "source": "cloudtrail",
