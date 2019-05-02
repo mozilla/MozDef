@@ -9,26 +9,39 @@ Copyright (c) 2014 Mozilla Corporation
 <!--a striped table-->
 <template name="investigations">
     <div class="investigations container">
-        <div class="fluid center">            
+        <div class="fluid center">
             <table class="table table-striped table-hover table-condensed">
-                <caption><p class="lead">Last 100 investigations</p></caption>
-                <thead>
-                    <tr>
-                        <td></td>
-                        <td>Summary</td>
-                        <td>Phase</td>
-                        <td>Opened</td>
-                        <td>By</td>
-                        <td>Closed</td>
-                        <td></td>
-                    </tr>
-                </thead>
-                <tbody>
-                {{#each investigation}}
-                    {{>each_investigation}}
-                {{/each}}
-                </tbody>
+                <caption><p class="lead">Investigations</p>
+                    <div class="pull-left">
+                            <input autofocus type="text" id="search" name="search" class="form-control"  placeholder="search..." value="{{query}}">
+                    </div>
+                </caption>
+                {{ #if isReady }}
+                    <thead>
+                        <tr>
+                            <td><button class="btn btn-xs btn-default investigationadd">add</button></td>
+                            <td>Summary</td>
+                            <td>Phase</td>
+                            <td>Opened</td>
+                            <td>By</td>
+                            <td>Closed</td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each documents}}
+                            {{>each_investigation}}
+                        {{else}}
+                            {{#if query}}
+                                <tr><td colspan="7"><p class="alert alert-warning">Nothing found for {{query}}..</p></td></tr>
+                            {{/if}}
+                        {{/each}}
+                    </tbody>
+                {{else}}
+                    {{>loading}}
+                {{/if}}
             </table>
+            {{> defaultBootstrapPaginator pagination=templatePagination limit=5 containerClass="text-center"}}
             </div>
     </div>
 </template>

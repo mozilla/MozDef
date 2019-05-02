@@ -255,6 +255,24 @@ Resources:
                 # This is the additional worker reserved for future use
                 OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
+            - content: |
+                [Unit]
+                Description=Docker Compose container starter
+                After=docker.service network-online.target
+                Requires=docker.service network-online.target
+
+                [Service]
+                WorkingDirectory=/opt/mozdef
+                Type=oneshot
+                RemainAfterExit=yes
+
+                ExecStart=/bin/docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p mozdef up -d
+
+                ExecStop=/bin/docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p mozdef down
+
+                [Install]
+                WantedBy=multi-user.target
+              path: /etc/systemd/system/docker-compose.service
           runcmd:
             - echo RABBITMQ_PASSWORD=`python3 -c 'import secrets; s = secrets.token_hex(); print(s)'` > /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/rabbitmq.env
@@ -268,8 +286,10 @@ Resources:
             - grep "${EFSID}" /etc/fstab >/dev/null || echo "${EFSID}:/ ${EFSMountPoint} efs tls,_netdev" >> /etc/fstab
             - for i in 1 2 3 4 5 6; do mount --verbose --all --types efs defaults && break || sleep 15; done
             - cd /opt/mozdef && git pull origin master
-            - make -C /opt/mozdef -f /opt/mozdef/Makefile  run-cloudy-mozdef
-            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef \$RABBITMQ_PASSWORD
+            - systemctl daemon-reload
+            - systemctl enable docker-compose
+            - systemctl start docker-compose
+            - cd /opt/mozdef && cat /opt/mozdef/docker/compose/rabbitmq.env | cut -d '=' -f2 | xargs docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef
             - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_user_tags mozdef administrator
             - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_permissions -p / mozdef ".*" ".*" ".*"
   MozDefAutoScaleGroup:

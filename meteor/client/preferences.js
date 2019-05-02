@@ -22,15 +22,27 @@ if ( Meteor.isClient ) {
     } );
 
     Template.preferences.rendered = function() {
-        // Deps.autorun(function () {
-        //     Meteor.subscribe("preferences", Meteor.user().profile.email);
-        // });
 
         savePreferences = function( e, template ) {
+            // defaults
+            modelPrefs = models.preference();
+
+            // sanity check the page size pref
+            var psize = modelPrefs.pageSize; // default page size
+            // magic way to parse anything (empty, undefined, etc)
+            psize = ~~parseInt( $( '#pageSize' ).val() ) || modelPrefs.pageSize;
+            // out of bounds check
+            if ( psize <= 0 || psize > 500 ) {
+                psize = modelPrefs.pageSize;
+            }
+
+            // update the UI for where we've landed
+            $( "#pageSize" ).val( psize );
             var preferencesobj = {
                 name: template.find( "#name" ).value,
                 email: template.find( "#email" ).value,
-                theme: template.find( "#theme" ).value
+                theme: template.find( "#theme" ).value,
+                pageSize: psize
             }
 
             preferences.update( template.data._id,

@@ -10,7 +10,6 @@ class TestAlertDuoFailOpen(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "event",
         "_source": {
             "summary": 'Failsafe Duo login by 1.2.3.4',
         }

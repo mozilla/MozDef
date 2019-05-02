@@ -14,7 +14,6 @@ class TestProxyExfilDomains(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "event",
         "_source": {
             "category": "proxy",
             "details": {"sourceipaddress": "1.2.3.4", "host": "pastebin.com"},

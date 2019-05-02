@@ -58,8 +58,7 @@ class message(object):
             The complianceitems plugin is called when an event
             is posted with a doctype 'complianceitems'.
             Compliance items are stored in the complianceitems
-            index, with a type of last_known_state. The doc_type
-            is overwritten with _doc.
+            index, with a type of last_known_state.
         """
         if not self.validate(message['details']):
             logger.error('Invalid format for complianceitem {0}'.format(message))
