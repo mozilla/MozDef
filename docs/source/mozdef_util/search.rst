@@ -49,8 +49,7 @@ Example simple result:
           },
           'category': 'excategory',
           'summary': 'Test Summary'
-        },
-        '_type': 'event'
+        }
       }
     ],
     'meta': {'timed_out': False}
@@ -66,9 +65,8 @@ Aggregate search
    from mozdef_util.query_models import SearchQuery, TermMatch, Aggregation
 
    search_query = SearchQuery(hours=24)
-   search_query.add_must(TermMatch('_type', 'event'))
    search_query.add_must(TermMatch('category', 'brointel'))
-   search_query.add_aggregation(Aggregation('_type'))
+   search_query.add_aggregation(Aggregation('eventsource'))
    results = search_query.execute(es_client)
 
 AggregatedResults
@@ -118,8 +116,7 @@ When you perform an aggregated search (Ex: give me a count of all different ip a
            },
            'ip': '1.2.3.4',
            'summary': 'Test Summary'
-         },
-         '_type': 'event'
+         }
        },
        {
          '_id': u'F1dLS66DR_W3v7ZWlX4Jwg',
@@ -131,8 +128,7 @@ When you perform an aggregated search (Ex: give me a count of all different ip a
            },
            'ip': '1.2.3.4',
            'summary': 'Test Summary'
-         },
-         '_type': 'event'
+         }
        },
        {
          '_id': u'G1nGdxqoT6eXkL5KIjLecA',
@@ -144,8 +140,7 @@ When you perform an aggregated search (Ex: give me a count of all different ip a
            },
            'ip': '127.0.0.1',
            'summary': 'Test Summary'
-         },
-         '_type': 'event'
+         }
        }
      ],
      'meta': {
