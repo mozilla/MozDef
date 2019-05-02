@@ -289,7 +289,7 @@ Resources:
             - systemctl daemon-reload
             - systemctl enable docker-compose
             - systemctl start docker-compose
-            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef \$RABBITMQ_PASSWORD
+            - cd /opt/mozdef && cat /opt/mozdef/docker/compose/rabbitmq.env | cut -d '=' -f2 | xargs docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef
             - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_user_tags mozdef administrator
             - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_permissions -p / mozdef ".*" ".*" ".*"
   MozDefAutoScaleGroup:
