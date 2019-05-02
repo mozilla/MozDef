@@ -10,14 +10,12 @@ class TestSquidFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'doc_type': 'nsm',
             'index': 'events'
         }
 
     # Should never match and be modified by the plugin
     def test_notsquid_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -27,12 +25,10 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_notsquid_log2(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -42,12 +38,10 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_squid_notype_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -57,7 +51,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     def test_squid_wrongtype_log(self):
         event = {
@@ -70,7 +63,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert metadata['doc_type'] is 'nsm'
 
     @mock.patch('squidFixup.node')
     def test_mozdefhostname_mock_string(self, mock_path):
@@ -95,9 +87,6 @@ class TestSquidFixup(object):
         plugin = message()
         result, metadata = plugin.onMessage(event, self.metadata)
         assert result['mozdefhostname'] == 'failed to fetch mozdefhostname'
-
-    def verify_metadata(self, metadata):
-        assert metadata['doc_type'] == 'nsm'
 
     def test_defaults(self):
         event = {
