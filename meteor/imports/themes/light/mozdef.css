@@ -38,6 +38,10 @@ body{
     text-transform: uppercase;
 }
 
+.brightURL {
+    color: var(--txt-primary-color)
+}
+
 caption, legend {
     color: var(--txt-secondary-color);;
 }

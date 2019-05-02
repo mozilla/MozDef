@@ -48,7 +48,8 @@ Example simple result:
             'information': 'Example information'
           },
           'category': 'excategory',
-          'summary': 'Test Summary'
+          'summary': 'Test Summary',
+          'type': 'event'
         }
       }
     ],
@@ -66,7 +67,7 @@ Aggregate search
 
    search_query = SearchQuery(hours=24)
    search_query.add_must(TermMatch('category', 'brointel'))
-   search_query.add_aggregation(Aggregation('eventsource'))
+   search_query.add_aggregation(Aggregation('source'))
    results = search_query.execute(es_client)
 
 AggregatedResults
@@ -115,7 +116,8 @@ When you perform an aggregated search (Ex: give me a count of all different ip a
              'information': 'Example information'
            },
            'ip': '1.2.3.4',
-           'summary': 'Test Summary'
+           'summary': 'Test Summary',
+           'type': 'event'
          }
        },
        {
@@ -127,7 +129,8 @@ When you perform an aggregated search (Ex: give me a count of all different ip a
              'information': 'Example information'
            },
            'ip': '1.2.3.4',
-           'summary': 'Test Summary'
+           'summary': 'Test Summary',
+           'type': 'event'
          }
        },
        {
@@ -139,7 +142,8 @@ When you perform an aggregated search (Ex: give me a count of all different ip a
              'information': 'Example information'
            },
            'ip': '127.0.0.1',
-           'summary': 'Test Summary'
+           'summary': 'Test Summary',
+           'type': 'event'
          }
        }
      ],
