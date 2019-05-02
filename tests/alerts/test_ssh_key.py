@@ -11,7 +11,6 @@ class TestSSHKey(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        '_type': 'event',
         '_source': {
             'category': 'event',
             'processid': '19690',
