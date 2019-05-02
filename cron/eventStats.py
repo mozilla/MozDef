@@ -21,7 +21,7 @@ from mozdef_util.query_models import SearchQuery, Aggregation
 
 def esSearch(es):
     search_query = SearchQuery(minutes=options.aggregationminutes)
-    search_query.add_aggregation(Aggregation('category'))
+    search_query.add_aggregation(Aggregation('category.keyword'))
     results = search_query.execute(es)
 
     mozdefstats = dict(utctimestamp=toUTC(datetime.now()).isoformat())
@@ -36,7 +36,7 @@ def esSearch(es):
     mozdefstats['processid'] = os.getpid()
     mozdefstats['processname'] = sys.argv[0]
     mozdefstats['details'] = dict(counts=list())
-    for bucket in results['aggregations']['category']['terms']:
+    for bucket in results['aggregations']['category.keyword']['terms']:
         entry = dict()
         entry[bucket['key']] = bucket['count']
         mozdefstats['details']['counts'].append(entry)
