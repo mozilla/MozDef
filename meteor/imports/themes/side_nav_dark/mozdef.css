@@ -441,7 +441,7 @@ circle:hover{
 }
 
 /* Attackers sidenav menu */
-.sidenav {
+sidenav {
   background: var(--primary-bg-color);
   border-left: 15px solid var(--secondary-color);
   text-align: left;
@@ -465,7 +465,7 @@ circle:hover{
 }
 
 /*pull out triangle*/
-.sidenav:after {
+sidenav:after {
     position: absolute;
     content: ' ';
     width: 0;
@@ -476,24 +476,24 @@ circle:hover{
     border-bottom: 45px solid transparent;
     border-right: 45px solid var(--secondary-color);
 }
-.sidenav ul {
+sidenav ul {
     width: 14em;
     list-style-type: none;
     margin: auto;
     padding: 1em;
 }
-.sidenav div{
+sidenav div{
     margin:auto;
 }
-.sidenav:hover {
+sidenav:hover {
     right: 0;
     width: 405px;
 }
-.sidenav .filters-col .row {
+sidenav .filters-col .row {
     margin-top: 45px;
     padding: 0 0.5em;
 }
-.sidenav .reset-filter {
+sidenav .reset-filter {
     text-align: center;
     margin-top: 20px;
 }
@@ -504,7 +504,7 @@ circle:hover{
 }
 
 @media screen and (max-width: 1000px) {
-  .sidenav {
+  sidenav {
     background: var(--primary-bg-color);
     border-left: 15px solid var(--secondary-color);
     text-align: left;
@@ -526,34 +526,34 @@ circle:hover{
     -o-transition: all 400ms ease;
     transition: all 400ms ease;
   }
-  .sidenav:after {
+  sidenav:after {
     right: 230px;
     border-top: 0;
     border-bottom: 0;
     border-right: 0;
     content: none;
   }
-  .sidenav ul {
+  sidenav ul {
     width: 14em;
     list-style-type: none;
     margin: auto;
     padding: 1em;
   }
-  .sidenav div{
+  sidenav div{
     margin:auto;
   }
-  .sidenav:hover {
+  sidenav:hover {
     right: 0;
     width: 230px;
     overflow-y: scroll;
     scrollbar-width: inherit;
     scrollbar-color: var(--secondary-color) black;
   }
-  .sidenav .filters-col .row {
+  sidenav .filters-col .row {
     margin-top: 25px;
     padding: 0 1.5em;
   }
-  .sidenav .reset-filter {
+  sidenav .reset-filter {
     text-align: center;
     margin-top: 20px;
   }
