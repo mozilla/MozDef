@@ -2,7 +2,7 @@
 version: '2.2'
 services:
   nginx:
-    image: mozillaiam/mozilla.oidc.accessproxy
+    image: mozdef/mozdef_cognito_proxy:latest
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -11,19 +11,8 @@ services:
     links:
       - "meteor"
     ports:
-      - 80:80
-      - 443:80
-        #      - 8080:8080 is loginput
-        #      - 9090:9090 is kibana
-    networks:
-      - default
-  nginxkibana:
-    image: mozillaiam/mozilla.oidc.accessproxy
-    env_file:
-      - cloudy_mozdef_kibana.env
-    restart: always
-    ports:
-      - 9090:80
+      - 8000:80
+      - 8090:9090
     networks:
       - default
   mongodb:
