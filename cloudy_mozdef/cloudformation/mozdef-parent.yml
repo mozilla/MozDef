@@ -19,11 +19,14 @@ Metadata:
       Parameters:
         - ACMCertArn
     - Label:
-        default: OIDC Configuration
+        default: OIDC Configuration (optional)  If not set this will use basic auth.
       Parameters:
-        - OIDCDiscoveryURL
+        - OIDCAuthorizationEndpoint
         - OIDCClientId
         - OIDCClientSecret
+        - OIDCIssuer
+        - OIDCTokenEndpoint
+        - OIDCUserInfoEndpoint
     ParameterLabels:
       VpcId:
         default: VPC ID
@@ -39,12 +42,18 @@ Metadata:
         default: FQDN to host MozDef at
       ACMCertArn:
         default: ACM Certificate ARN
-      OIDCDiscoveryURL:
-        default: OIDC Discovery URL
+      OIDCAuthorizationEndpoint:
+        default: Generally can be found at the .well-known endpoint for your provider.
       OIDCClientId:
         default: OIDC Client ID
       OIDCClientSecret:
         default: OIDC Client Secret
+      OIDCIssuer:
+        default: Generally can be found at the .well-known endpoint for your provider.
+      OIDCTokenEndpoint:
+        default: Generally can be found at the .well-known endpoint for your provider.
+      OIDCUserInfoEndpoint:
+        default: Generally can be found at the .well-known endpoint for your provider.
 Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
@@ -70,19 +79,34 @@ Parameters:
     Default: cloudymozdef.security.allizom.org
   ACMCertArn:
     Type: String
+    Default: Unset
     Description: "The ARN of your pre-issued ACM cert. (Example: arn:aws:acm:us-west-2:123456789012:certificate/abcdef01-2345-6789-abcd-ef0123456789)"
-  OIDCDiscoveryURL:
+  OIDCAuthorizationEndpoint:
     Type: String
-    AllowedPattern: '^https?:\/\/.*'
+    Default: Unset
     ConstraintDescription: A valid URL
-    Description: "The URL of your OIDC provider's well-known discovery URL (Example: https://auth.example.com/.well-known/openid-configuration)"
+    Description: "The url of the authorization endpoint found for your oidc provider generall found on (Example: https://auth.example.com/.well-known/openid-configuration)"
   OIDCClientId:
     Type: String
+    Default: Unset
     Description: The client ID that your OIDC provider issues you for your Mozdef instance.
   OIDCClientSecret:
     Type: String
+    Default: Unset
     Description: The secret that your OIDC provider issues you for your Mozdef instance.
     NoEcho: true
+  OIDCIssuer:
+    Type: String
+    Default: Unset
+    Description: Generally can be found at the .well-known endpoint for your provider.
+  OIDCTokenEndpoint:
+    Type: String
+    Default: Unset
+    Description: Generally can be found at the .well-known endpoint for your provider.
+  OIDCUserInfoEndpoint:
+    Type: String
+    Default: Unset
+    Description: Generally can be found at the .well-known endpoint for your provider.
 # A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
 # INSERT MAPPING HERE : This template does not work in this state. The mapping is replaced with a working AWS region to AMI ID mapping as well as a variable map with the S3TemplateLocationPrefix by cloudy_mozdef/ci/publish_versioned_templates. The resulting functioning CloudFormation template is uploaded to S3 for the version being built.
 Resources:
@@ -128,7 +152,10 @@ Resources:
         KibanaDomainOnlyURL: !GetAtt MozDefES.Outputs.ElasticsearchDomainOnlyURL
         OIDCClientId: !Ref OIDCClientId
         OIDCClientSecret: !Ref OIDCClientSecret
-        OIDCDiscoveryURL: !Ref OIDCDiscoveryURL
+        OIDCAuthorizationEndpoint: !Ref OIDCDiscoveryURL
+        OIDCIssuer: !Ref OIDCIssuer
+        OIDCTokenEndpoint: !Ref OIDCTokenEndpoint
+        OIDCUserInfoEndpoint: !Ref OIDCUserInfoEndpoint
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
         MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
         DomainName: !Ref DomainName
