@@ -285,7 +285,13 @@ services:
         - mozdef_tester:latest
     networks:
       - default
-
+  cognito_proxy:
+    image: mozdef/mozdef_cognito_proxy
+    build:
+      context: ../../
+      dockerfile: docker/compose/mozdef_cognito_proxy/Dockerfile
+    networks:
+      - default
 volumes:
   elasticsearch:
   rabbitmq:
