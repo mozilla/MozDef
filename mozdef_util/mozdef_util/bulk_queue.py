@@ -31,11 +31,10 @@ class BulkQueue():
     def started(self):
         return self.running
 
-    def add(self, index, doc_type, body, doc_id=None):
+    def add(self, index, body, doc_id=None):
         """ Add event to queue, flushing if we hit the threshold """
         bulk_doc = {
             "_index": index,
-            "_type": doc_type,
             "_id": doc_id,
             "_source": body
         }
