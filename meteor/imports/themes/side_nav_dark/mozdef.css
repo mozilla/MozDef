@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css?family=Zilla+Slab+Highlight');
+@import url('https://fonts.googleapis.com/css?family=Zilla+Slab');
+@import url('https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css');
 /*
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,9 +9,6 @@ Copyright (c) 2014 Mozilla Corporation
 */
 
 /*side-nav-dark css */
-@import url('https://fonts.googleapis.com/css?family=Zilla+Slab+Highlight');
-@import url('https://fonts.googleapis.com/css?family=Zilla+Slab');
-@import url('https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css');
 
 :root {
   --primary-bg-color: #2a2f35;
