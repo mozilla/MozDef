@@ -3,7 +3,7 @@
 action="${1}"
 branch="${2}"
 
-for name in mozdef_meteor mozdef_base mozdef_tester mozdef_mq_worker mozdef_kibana \
+for name in mozdef_cognito_proxy mozdef_meteor mozdef_base mozdef_tester mozdef_mq_worker mozdef_kibana \
         mozdef_syslog mozdef_cron mozdef_elasticsearch mozdef_loginput mozdef_mongodb \
         mozdef_bootstrap mozdef_alerts mozdef_nginx mozdef_alertactions mozdef_rabbitmq \
         mozdef_rest mozdef_base ; do
