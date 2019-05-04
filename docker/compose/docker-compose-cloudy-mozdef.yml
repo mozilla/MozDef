@@ -11,8 +11,8 @@ services:
     links:
       - "meteor"
     ports:
-      - 8000:80
-      - 8090:9090
+      - 80:8000
+      - 9090:8090
     networks:
       - default
   mongodb:
