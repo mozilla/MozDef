@@ -152,7 +152,7 @@ Resources:
         KibanaDomainOnlyURL: !GetAtt MozDefES.Outputs.ElasticsearchDomainOnlyURL
         OIDCClientId: !Ref OIDCClientId
         OIDCClientSecret: !Ref OIDCClientSecret
-        OIDCAuthorizationEndpoint: !Ref OIDCDiscoveryURL
+        OIDCAuthorizationEndpoint: !Ref OIDCAuthorizationEndpoint
         OIDCIssuer: !Ref OIDCIssuer
         OIDCTokenEndpoint: !Ref OIDCTokenEndpoint
         OIDCUserInfoEndpoint: !Ref OIDCUserInfoEndpoint
