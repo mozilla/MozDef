@@ -85,13 +85,15 @@ Parameters:
     Description: The fully qualified domain you'll be hosting MozDef at.
 Conditions: 
   OIDCEnabledCondition:
-    !Not [!Equals [!Ref OIDCClientSecret, Unset]]
+    !Not [!Equals [!Ref OIDCClientId, Unset]]
   OIDCNotEnabledCondition:
-    !Equals [!Ref OIDCClientSecret, Unset]
+    !Equals [!Ref OIDCClientId, Unset]
   SSLEnabledCondition:
-    !Not [!Equals [!Ref MozDefACMCertArn, Unset]]
+    !And [!Not [!Equals [!Ref MozDefACMCertArn, Unset]], !Equals [!Ref OIDCClientId, Unset]]
   SSLNotEnabledCondition:
-    !Equals [!Ref MozDefACMCertArn, Unset]
+    !And [!Equals [!Ref MozDefACMCertArn, Unset], !Equals [!Ref OIDCClientId, Unset]]
+  SSLEnabledWithOidcCondition:
+    !And [!Not [!Equals [!Ref MozDefACMCertArn, Unset]], !Not [!Equals [!Ref OIDCClientId, Unset]]]
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -357,7 +359,7 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref AWS::StackName
-  MozDefElasticLoadBalancingV2ListenerKibanaHttps:
+  MozDefElasticLoadBalancingV2ListenerKibanaSSL:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Condition: SSLEnabledCondition
     Properties:
@@ -369,10 +371,22 @@ Resources:
           Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
       LoadBalancerArn:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
-      Port: 9090
+      Port: 9443
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
-  MozDefElasticLoadBalancingV2ListenerHttps:
+  MozDefElasticLoadBalancingV2ListenerKibana:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLNotEnabledCondition
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 9090
+      Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerSSL:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Condition: SSLEnabledCondition
     Properties:
@@ -387,36 +401,7 @@ Resources:
       Port: 443
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
-  MozDefElasticLoadBalancingV2ListenerHttp:
-    Type : AWS::ElasticLoadBalancingV2::Listener
-    Condition: SSLEnabledCondition
-    Properties:
-      DefaultActions:
-      - Type: redirect
-        RedirectConfig:
-          Host: '#{host}'
-          Path: '/#{path}'
-          Protocol: HTTPS
-          Query: '#{query}'
-          Port: '443'
-          StatusCode: HTTP_301
-      LoadBalancerArn:
-        Ref: MozDefElasticLoadBalancingV2LoadBalancer
-      Port: 80
-      Protocol: HTTP
-  MozDefElasticLoadBalancingV2ListenerKibanaHttpNoSSL:
-    Type : AWS::ElasticLoadBalancingV2::Listener
-    Condition: SSLNotEnabledCondition
-    Properties:
-      DefaultActions:
-      - Type: forward
-        TargetGroupArn:
-          Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
-      LoadBalancerArn:
-        Ref: MozDefElasticLoadBalancingV2LoadBalancer
-      Port: 9090
-      Protocol: HTTP
-  MozDefElasticLoadBalancingV2ListenerHttpNoSSL:
+  MozDefElasticLoadBalancingV2ListenerNoSSL:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Condition: SSLNotEnabledCondition
     Properties:
@@ -428,3 +413,108 @@ Resources:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
       Port: 80
       Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerRedirectSSL:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledCondition
+    Properties:
+      DefaultActions:
+      - Type: redirect
+        RedirectConfig:
+          Host: '#{host}'
+          Path: '/#{path}'
+          Protocol: HTTPS
+          Query: '#{query}'
+          Port: '443'
+          StatusCode: HTTP_302
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 80
+      Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerRedirectSSLOIDC:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledWithOidcCondition
+    Properties:
+      DefaultActions:
+      - Type: redirect
+        RedirectConfig:
+          Host: '#{host}'
+          Path: '/#{path}'
+          Protocol: HTTPS
+          Query: '#{query}'
+          Port: '443'
+          StatusCode: HTTP_302
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 80
+      Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerSSLOIDC:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledWithOidcCondition
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: authenticate-oidc
+        AuthenticateOidcConfig:
+          AuthorizationEndpoint: !Ref OIDCAuthorizationEndpoint
+          ClientId: !Ref OIDCClientId
+          ClientSecret: !Ref OIDCClientSecret
+          Issuer: !Ref OIDCIssuer
+          OnUnauthenticatedRequest: authenticate
+          SessionCookieName: mozdefMeteor
+          TokenEndpoint: !Ref OIDCTokenEndpoint
+          UserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+        Order: 1
+      - Type: forward
+        Order: 2
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroup
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+  MozDefElasticLoadBalancingV2ListenerRedirectKibanaSSLOIDC:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledWithOidcCondition
+    Properties:
+      DefaultActions:
+      - Type: redirect
+        RedirectConfig:
+          Host: '#{host}'
+          Path: '/#{path}'
+          Protocol: HTTPS
+          Query: '#{query}'
+          Port: '9443'
+          StatusCode: HTTP_302
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 9090
+      Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerSSLKibanaOIDC:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledWithOidcCondition
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: authenticate-oidc
+        AuthenticateOidcConfig:
+          AuthorizationEndpoint: !Ref OIDCAuthorizationEndpoint
+          ClientId: !Ref OIDCClientId
+          ClientSecret: !Ref OIDCClientSecret
+          Issuer: !Ref OIDCIssuer
+          OnUnauthenticatedRequest: authenticate
+          SessionCookieName: mozdefMeteor
+          TokenEndpoint: !Ref OIDCTokenEndpoint
+          UserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+        Order: 1
+      - Type: forward
+        Order: 2
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 9443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
