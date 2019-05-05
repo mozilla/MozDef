@@ -61,6 +61,11 @@ Resources:
           FromPort: 9090
           ToPort: 9090
           CidrIp: 0.0.0.0/0
+        - Description: Allow 9443 inbound from everywhere
+          IpProtocol: tcp
+          FromPort: 9443
+          ToPort: 9443
+          CidrIp: 0.0.0.0/0
       Tags:
         - Key: application
           Value: mozdef
