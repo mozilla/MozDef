@@ -518,3 +518,8 @@ Resources:
       Port: 9443
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
+Outputs:
+  LoadBalancerDNSName:
+    Description: The DNS name of the ALB hosting MozDef.  If using OIDC or SSL point your DNS at this.
+    Value:
+      Fn::GetAtt: [ MozDefElasticLoadBalancingV2LoadBalancer, DNSName ]

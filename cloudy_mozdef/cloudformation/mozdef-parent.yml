@@ -307,3 +307,7 @@ Resources:
       RoleName: AWSServiceRoleForAmazonElasticsearchService
       PathPrefix: '/aws-service-role/es.amazonaws.com/'
       ServiceToken: !GetAtt DoesRoleExistLambdaFunction.Arn
+Outputs:
+  LoadBalancerDNSName:
+    Description: The DNS name of the ALB hosting MozDef.  If using OIDC or SSL point your DNS at this.  If using basic auth no DNS is necessary.
+    Value: !GetAtt MozDefInstance.Outputs.LoadBalancerDNSName
