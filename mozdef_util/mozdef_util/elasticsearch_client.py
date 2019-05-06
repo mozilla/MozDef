@@ -166,6 +166,9 @@ class ElasticsearchClient():
         event.add_required_fields()
         return self.__save_document(index=index, body=event, doc_id=doc_id, bulk=bulk)
 
+    def save_dashboard(self, body, dash_name, doc_id=None):
+        return self.es_connection.index(index='.kibana', doc_type='dashboard', body=body, id=doc_id)
+
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)
         search_query = SearchQuery()
@@ -181,23 +184,6 @@ class ElasticsearchClient():
 
     def get_event_by_id(self, event_id):
         return self.get_object_by_id(event_id, ['events'])
-
-    def save_dashboard(self, dash_file, dash_name):
-        f = open(dash_file)
-        dashboardjson = json.load(f)
-        f.close()
-        title = dashboardjson['title']
-        dashid = dash_name.replace(' ', '-')
-        if dash_name:
-            title = dash_name
-        dashboarddata = {
-            "user": "guest",
-            "group": "guest",
-            "title": title,
-            "dashboard": json.dumps(dashboardjson)
-        }
-
-        return self.es_connection.index(index='.kibana', doc_type='dashboard', body=dashboarddata, id=dashid)
 
     def get_cluster_health(self):
         health_dict = self.es_connection.cluster.health()

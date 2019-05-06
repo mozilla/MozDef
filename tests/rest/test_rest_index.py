@@ -35,6 +35,17 @@ class TestKibanaDashboardsRoute(RestTestSuite):
 
     status_code = 200
 
+    def save_dashboard(self, dash_file, dash_name):
+        f = open(dash_file)
+        dashboardjson = json.load(f)
+        f.close()
+        title = dashboardjson['dashboard']['title']
+        dashid = dash_name.replace(' ', '-')
+        if dash_name:
+            title = dash_name
+        dashboardjson['dashboard']['title'] = dash_name
+        return self.es_client.save_dashboard(dashboardjson, dash_name, doc_id=dashid)
+
     def teardown(self):
         super(TestKibanaDashboardsRoute, self).teardown()
         if pytest.config.option.delete_indexes:
@@ -47,8 +58,8 @@ class TestKibanaDashboardsRoute(RestTestSuite):
             self.es_client.create_index('.kibana')
 
         json_dashboard_location = os.path.join(os.path.dirname(__file__), "ssh_dashboard.json")
-        self.es_client.save_dashboard(json_dashboard_location, "Example SSH Dashboard")
-        self.es_client.save_dashboard(json_dashboard_location, "Example FTP Dashboard")
+        self.save_dashboard(json_dashboard_location, "Example SSH Dashboard")
+        self.save_dashboard(json_dashboard_location, "Example FTP Dashboard")
         self.refresh('.kibana')
 
     def test_route_endpoints(self):
