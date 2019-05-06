@@ -106,7 +106,10 @@ class AlertTask(Task):
         self._configureKombu()
         self._configureES()
 
-        self.event_indices = ['events', 'events-previous']
+        # We want to select all event indices
+        # and filter out the window based on timestamp
+        # from the search query
+        self.event_indices = ['events-*']
 
     def classname(self):
         return self.__class__.__name__

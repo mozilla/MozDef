@@ -46,7 +46,7 @@ class SearchQuery(object):
     def add_aggregation(self, input_obj):
         self.append_to_array(self.aggregation, input_obj)
 
-    def execute(self, elasticsearch_client, indices=['events', 'events-previous'], size=1000, request_timeout=30):
+    def execute(self, elasticsearch_client, indices=['events-*'], size=1000, request_timeout=30):
         if self.must == [] and self.must_not == [] and self.should == [] and self.aggregation == []:
             raise AttributeError('Must define a must, must_not, should query, or aggregation')
 

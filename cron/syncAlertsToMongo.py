@@ -26,7 +26,7 @@ def getESAlerts(es):
     # We use an ExistsMatch here just to satisfy the
     # requirements of a search query must have some "Matchers"
     search_query.add_must(ExistsMatch('summary'))
-    results = search_query.execute(es, indices=['alerts'], size=10000)
+    results = search_query.execute(es, indices=['alerts-*'], size=10000)
     return results
 
 
