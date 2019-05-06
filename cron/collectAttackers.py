@@ -370,7 +370,6 @@ def updateMongoWithESEvents(mozdefdb, results):
                 if not sourceIP.ip.is_loopback() and not sourceIP.ip.is_private() and not sourceIP.ip.is_reserved():
                     esrecord = dict(
                         documentid=r['_id'],
-                        documenttype=r['_type'],
                         documentindex=r['_index'],
                         documentsource=r['_source']
                     )

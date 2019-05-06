@@ -10,24 +10,38 @@ Copyright (c) 2014 Mozilla Corporation
     <div class="fqdnblocklist container">
         <div class="fluid center">
             <table class="table table-striped table-hover table-condensed">
-                <caption><p class="lead">FQDN Blocklist</p></caption>
-                <thead>
-                    <tr>
-                        <td><button class="btn btn-xs btn-default fqdnblockadd">add</button></td>
-                        <td>FQDN</td>
-                        <td>Added</td>
-                        <td>Expiring</td>
-                        <td>Comment</td>
-                        <td>By</td>
-                        <td>Reference</td>
-                    </tr>
-                </thead>
-                <tbody>
-                {{#each fqdnblock}}
-                    {{>each_fqdnblock}}
-                {{/each}}
-                </tbody>
+                <caption><p class="lead">FQDN Blocklist</p>
+                    <div class="pull-left">
+                            <input autofocus type="text" id="search" name="search" class="form-control"  placeholder="search..." value="{{query}}">
+                    </div>
+                </caption>
+                {{ #if isReady }}
+                    <thead>
+                        <tr>
+                            <td><button class="btn btn-xs btn-default fqdnblockadd">add</button></td>
+                            <td>FQDN</td>
+                            <td>Added</td>
+                            <td>Expiring</td>
+                            <td>Comment</td>
+                            <td>By</td>
+                            <td>Reference</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each documents}}
+                            {{>each_fqdnblock}}
+                        {{else}}
+                            {{#if query}}
+                                <tr><td colspan="7"><p class="alert alert-warning">Nothing found for {{query}}..</p></td></tr>
+                            {{/if}}
+                        {{/each}}
+                    </tbody>
+
+                {{else}}
+                    {{>loading}}
+                {{/if}}
             </table>
+            {{> defaultBootstrapPaginator pagination=templatePagination limit=5 containerClass="text-center"}}
         </div>
     </div>
 </template>

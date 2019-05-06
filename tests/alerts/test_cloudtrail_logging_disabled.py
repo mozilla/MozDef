@@ -10,12 +10,13 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "cloudtrail",
         "_source": {
-            "eventname": "StopLogging",
             "source": "cloudtrail",
-            "requestparameters": {
-                "name": "cloudtrail_example_name",
+            "details": {
+                "eventname": "StopLogging",
+                "requestparameters": {
+                    "name": "cloudtrail_example_name",
+                }
             }
         }
     }
@@ -60,7 +61,7 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    event['_source']['eventname'] = 'Badeventname'
+    event['_source']['details']['eventname'] = 'Badeventname'
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test case with bad eventName",

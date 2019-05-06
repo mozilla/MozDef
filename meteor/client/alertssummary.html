@@ -81,11 +81,12 @@ Copyright (c) 2014 Mozilla Corporation
                 </tr>
                 </thead>
                 <tbody>
-                    {{#each selectedalerts}}
+                    {{#each documents}}
                         {{>alertTableItem}}
                     {{/each}}
                 </tbody>
             </table>
+            {{> defaultBootstrapPaginator pagination=templatePagination limit=5 containerClass="text-center"}}
         </div>
     </div>
 </div>
@@ -106,7 +107,7 @@ Copyright (c) 2014 Mozilla Corporation
         <td>
             {{#if acknowledged}}
                 <span class="tooltip-wrapper" title="Ack by: {{acknowledgedby}}" data-toggle="tooltip">
-                    <button class="btn btn-xs btn-warning btnAlertAck" disabled data-target="{{_id}}">acked</button>
+                    <button class="btn btn-xs btn-warning btnAlertAcked"  data-target="{{_id}}">acked</button>
                 </span>
             {{else}}
                 <button class="btn btn-xs btn-warning btnAlertAck" data-target="{{_id}}">ack</button>
