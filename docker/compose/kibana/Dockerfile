@@ -2,7 +2,7 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV KIBANA_VERSION 5.6.14
+ENV KIBANA_VERSION 6.6.2
 
 RUN \
     curl -s -L https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C / -xz && \
