@@ -11,10 +11,12 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
     # alert to trigger
     default_event = {
         "_source": {
-            "details.eventname": "StopLogging",
             "source": "cloudtrail",
-            "requestparameters": {
-                "name": "cloudtrail_example_name",
+            "details": {
+                "eventname": "StopLogging",
+                "requestparameters": {
+                    "name": "cloudtrail_example_name",
+                }
             }
         }
     }
