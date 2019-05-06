@@ -14,7 +14,7 @@ import os
 import sys
 
 from mozdef_util.query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
-from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex, DOCUMENT_TYPE
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
@@ -28,11 +28,11 @@ class ElasticsearchClientTest(UnitTestSuite):
     def get_num_events(self):
         self.refresh('events')
         search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', '_doc'))
+        search_query.add_must(TermMatch('_type', DOCUMENT_TYPE))
         search_query.add_aggregation(Aggregation('_type'))
         results = search_query.execute(self.es_client)
-        if len(results['aggregations']['_doc']['terms']) != 0:
-            return results['aggregations']['_doc']['terms'][0]['count']
+        if len(results['aggregations']['_type']['terms']) != 0:
+            return results['aggregations']['_type']['terms'][0]['count']
         else:
             return 0
 
