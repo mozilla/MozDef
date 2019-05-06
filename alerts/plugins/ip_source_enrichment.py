@@ -3,6 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+from operator import add
 import os
 import re
 
@@ -12,20 +13,6 @@ import netaddr
 CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
     'ip_source_enrichment.json.conf')
-
-
-def _isIPv4(ip):
-    try:
-        return netaddr.valid_ipv4(ip)
-    except:
-        return False
-
-
-def _isIPv6(ip):
-    try:
-        return netaddr.valid_ipv6(ip)
-    except:
-        return False
 
 
 def _find_ip_addresses(string):
@@ -42,6 +29,42 @@ def enrich(alert, known_ips):
     the source location of the IP address if it can be determined based
     on a configured mapping.
     '''
+
+    def find_ips(value):
+        if isinstance(value, str):
+            return _find_ip_addresses(value)
+
+        if isinstance(value, list) or isinstance(value, tuple):
+            found = [find_ips(item) for item in value]
+            return reduce(add, found, [])
+
+        if isinstance(value, dict):
+            found = [find_ips(item) for item in value.values()]
+            return reduce(add, found, [])
+
+        return []
+
+    ips = find_ips(alert)
+
+    alert = alert.copy()
+
+    for ip in set(ips):
+        if netaddr.valid_ipv6(ip):
+            ip = ip[0]
+
+        ip_address = netaddr.IPAddress(ip)
+
+        if isinstance(ip_address, tuple):
+            ip_address = netaddr.IPAddress(ip_address[0])
+
+        matching_descriptions = filter(
+            lambda known: ip_address in netaddr.IPSet([known['range']]),
+            known_ips)
+
+        for desc in matching_descriptions:
+            enriched = desc['format'].format(ip)
+
+            alert['summary'] += '; ' + enriched
 
     return alert
 
