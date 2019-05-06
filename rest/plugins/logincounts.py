@@ -80,7 +80,10 @@ class message(object):
         search_query.add_aggregation(Aggregation('details.success'))
         search_query.add_aggregation(Aggregation('details.username'))
 
-        results = search_query.execute(es_client, indices=['events','events-previous'])
+        # We want to select all event indices
+        # and filter out the window based on timestamp
+        # from the search query
+        results = search_query.execute(es_client, indices=['events-*'])
 
         # any usernames or words to ignore
         # especially useful if ES is analyzing the username field and breaking apart user@somewhere.com
