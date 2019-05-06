@@ -12,6 +12,8 @@ from utilities.logger import logger
 
 from event import Event
 
+DOCUMENT_TYPE = '_doc'
+
 
 class ElasticsearchBadServer(Exception):
     def __str__(self):
@@ -117,6 +119,9 @@ class ElasticsearchClient():
         return result_set
 
     def save_documents(self, documents):
+        # ES library still requires _type to be set
+        for document in documents:
+            document['_type'] = DOCUMENT_TYPE
         try:
             bulk(self.es_connection, documents)
         except BulkIndexError as e:
@@ -135,7 +140,8 @@ class ElasticsearchClient():
         if bulk:
             self.__bulk_save_document(index=index, body=body, doc_id=doc_id)
         else:
-            return self.es_connection.index(index=index, id=doc_id, body=body)
+            # ES library still requires _type to be set
+            return self.es_connection.index(index=index, doc_type=DOCUMENT_TYPE, id=doc_id, body=body)
 
     def __parse_document(self, body):
         if type(body) is str:
