@@ -317,6 +317,7 @@ Resources:
             - systemctl daemon-reload
             - systemctl enable docker-compose
             - systemctl start docker-compose
+            - sleep 10
             - cd /opt/mozdef && cat /opt/mozdef/docker/compose/rabbitmq.env | cut -d '=' -f2 | xargs docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef
             - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_user_tags mozdef administrator
             - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_permissions -p / mozdef ".*" ".*" ".*"
@@ -478,6 +479,8 @@ Resources:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Condition: SSLEnabledWithOidcCondition
     Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
       DefaultActions:
       - Type: redirect
         RedirectConfig:
@@ -490,7 +493,7 @@ Resources:
       LoadBalancerArn:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
       Port: 9090
-      Protocol: HTTP
+      Protocol: HTTPS
   MozDefElasticLoadBalancingV2ListenerSSLKibanaOIDC:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Condition: SSLEnabledWithOidcCondition
@@ -505,6 +508,7 @@ Resources:
           ClientSecret: !Ref OIDCClientSecret
           Issuer: !Ref OIDCIssuer
           OnUnauthenticatedRequest: authenticate
+          Scope: openid profile email
           SessionCookieName: mozdefMeteor
           TokenEndpoint: !Ref OIDCTokenEndpoint
           UserInfoEndpoint: !Ref OIDCUserInfoEndpoint
