@@ -14,6 +14,9 @@ Parameters:
   MozDefSQSQueueArn:
     Type: String
     Description: The ARN of the SQS queue that receives events destined for MozDef
+  MozDefAlertSqsQueueArn:
+    Type: String
+    Description: The ARN of the SQS queue that alerttask uses for taskExchange
   ESServiceLinkedRoleExists:
     Type: String
     Description: Does the ES Service Linked Role already exist. true or false
@@ -102,6 +105,14 @@ Resources:
               - sqs:ReceiveMessage
               - sqs:DeleteMessage
             Resource: !Ref MozDefSQSQueueArn
+          - Sid: AllowReadWriteFromAlertQueue
+            Effect: Allow
+              - sqs:GetQueueUrl
+              - sqs:ReceiveMessage
+              - sqs:DeleteMessage
+              - sqs:SendMessage
+              - sqs:SendMessageBatch
+            Resource: !Ref MozDefAlertSqsQueueArn  
   MozDefIAMRole:
     Type: AWS::IAM::Role
     Properties:

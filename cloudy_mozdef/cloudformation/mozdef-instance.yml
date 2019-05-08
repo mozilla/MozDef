@@ -83,6 +83,9 @@ Parameters:
   DomainName:
     Type: String
     Description: The fully qualified domain you'll be hosting MozDef at.
+  AlertQueueUrl:
+    Type: String
+    Description: The url of the alert queue kombu should use for taskExchange.
 Conditions: 
   OIDCEnabledCondition:
     !Not [!Equals [!Ref OIDCClientId, Unset]]
@@ -172,6 +175,8 @@ Resources:
                 # Set thresholds for attack dataviz lower means more ogres
                 OPTIONS_IPV4ATTACKERHITCOUNT=5
                 OPTIONS_IPV4ATTACKERPREFIXLENGTH=24
+                OPTIONS_ALERTSQSQUEUEURL=${AlertQueueUrl}
+                OPTIONS_MQPROTOCOL=sqs
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
             - content: |
                 #!/usr/bin/env python

@@ -127,6 +127,7 @@ Resources:
         CloudTrailS3BucketName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailS3BucketName
         CloudTrailSQSQueueArn: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueArn
         MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
+        MozDefAlertSqsQueueArn: !GetAtt MozDefSQS.Outputs.AlertTaskSQSQueueArn
         # CloudTrailS3BucketIAMRoleArn we leave empty as we will consume CloudTrail logs from our own account
         ESServiceLinkedRoleExists: !GetAtt ESServiceLinkedRoleExists.RoleExists
       Tags:
@@ -159,6 +160,7 @@ Resources:
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
         MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
         DomainName: !Ref DomainName
+        AlertQueueUrl: !GetAtt MozDefSQS.Outputs.AlertTaskSQSQueueUrl
       Tags:
         - Key: application
           Value: mozdef

@@ -23,6 +23,28 @@ Resources:
           Resource: !GetAtt MozDefSQSQueue.Arn
       Queues:
         - !Ref MozDefSQSQueue
+  MozDefSQSAlertTaskQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+  MozDefAlertTaskSQSQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: AllowThisAccountSendToSQS
+          Effect: Allow
+          Principal:
+            AWS: !Join [ '', [ 'arn:', 'aws:', 'iam::', !Ref 'AWS::AccountId', ':root' ] ]
+          Action: sqs:SendMessage
+          Resource: !GetAtt MozDefSQSAlertTaskQueue.Arn
+      Queues:
+        - !Ref MozDefSQSAlertTaskQueue
 Outputs:
   SQSQueueArn:
     Description: ARN of the SQS Queue that MozDef will consume events from
@@ -30,3 +52,14 @@ Outputs:
   SQSQueueName:
     Description: Name of the SQS Queue that MozDef will consume events from
     Value: !GetAtt MozDefSQSQueue.QueueName
+  AlertTaskSQSQueueArn:
+    Description: ARN of the SQS Queue that MozDef will consume events from
+    Value: !GetAtt MozDefSQSAlertTaskQueue.Arn
+  AlertTaskSQSQueueName:
+    Description: Name of the SQS Queue that MozDef will consume events from
+    Value: !GetAtt MozDefSQSAlertTaskQueue.QueueName
+  AlertTaskSQSQueueUrl:
+    Description: The SQS queue url for the alerttask exchange as used in kombu.
+    Value: 
+      !Join ['', ['https://', 'sqs', ".", !Ref "AWS::Region",".amazonaws.com", "/"
+, !Ref "AWS::AccountId", "/",!GetAtt MozDefSQSAlertTaskQueue.QueueName]]
