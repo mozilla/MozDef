@@ -125,15 +125,18 @@ if state_index_name not in all_indices:
     client.create_index(state_index_name, index_config=state_index_settings)
 
 # Wait for kibana service to get ready
-num_times = 0
-while not requests.get(kibana_url).ok:
-    if num_times < 5:
-        print("Waiting for kibana index to be ready")
-        time.sleep(2)
-        num_times += 1
-    else:
-        print("Kibana service never started up...exiting")
-        sys.exit(1)
+total_num_tries = 10
+for attempt in range(total_num_tries):
+    try:
+        if requests.get(kibana_url).ok:
+            break
+    except Exception:
+        pass
+    print('Unable to connect to Elasticsearch...retrying')
+    sleep(5)
+else:
+    print('Cannot connect to Kibana after ' + str(total_num_tries) + ' tries, exiting script.')
+    exit(1)
 
 # Check if index-patterns already exist
 if kibana_index_name in client.get_indices():
