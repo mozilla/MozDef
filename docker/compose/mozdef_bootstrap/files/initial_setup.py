@@ -186,7 +186,7 @@ if kibana_index_name in client.get_indices():
         sys.exit(0)
 
 # Create visualizations/dashboards
-dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
+dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources')
 listing = os.listdir(dashboards_path)
 for infile in listing:
     json_file_path = os.path.join(dashboards_path, infile)
