@@ -12,6 +12,8 @@ from utilities.logger import logger
 
 from event import Event
 
+DOCUMENT_TYPE = '_doc'
+
 
 class ElasticsearchBadServer(Exception):
     def __str__(self):
@@ -117,6 +119,9 @@ class ElasticsearchClient():
         return result_set
 
     def save_documents(self, documents):
+        # ES library still requires _type to be set
+        for document in documents:
+            document['_type'] = DOCUMENT_TYPE
         try:
             bulk(self.es_connection, documents)
         except BulkIndexError as e:
@@ -135,7 +140,8 @@ class ElasticsearchClient():
         if bulk:
             self.__bulk_save_document(index=index, body=body, doc_id=doc_id)
         else:
-            return self.es_connection.index(index=index, id=doc_id, body=body)
+            # ES library still requires _type to be set
+            return self.es_connection.index(index=index, doc_type=DOCUMENT_TYPE, id=doc_id, body=body)
 
     def __parse_document(self, body):
         if type(body) is str:
@@ -175,23 +181,6 @@ class ElasticsearchClient():
 
     def get_event_by_id(self, event_id):
         return self.get_object_by_id(event_id, ['events'])
-
-    def save_dashboard(self, dash_file, dash_name):
-        f = open(dash_file)
-        dashboardjson = json.load(f)
-        f.close()
-        title = dashboardjson['title']
-        dashid = dash_name.replace(' ', '-')
-        if dash_name:
-            title = dash_name
-        dashboarddata = {
-            "user": "guest",
-            "group": "guest",
-            "title": title,
-            "dashboard": json.dumps(dashboardjson)
-        }
-
-        return self.es_connection.index(index='.kibana', doc_type='dashboard', body=dashboarddata, id=dashid)
 
     def get_cluster_health(self):
         health_dict = self.es_connection.cluster.health()
