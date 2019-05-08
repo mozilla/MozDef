@@ -26,7 +26,6 @@ services:
       interval: 1m30s
       timeout: 10s
       retries: 3
-      start_period: 40s
   mongodb:
     image: mozdef/mozdef_mongodb:latest
     logging:
