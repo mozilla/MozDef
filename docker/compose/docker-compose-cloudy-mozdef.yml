@@ -1,5 +1,5 @@
 ---
-version: '2.2'
+version: '2.3'
 services:
   nginx:
     image: mozdef/mozdef_cognito_proxy:latest
