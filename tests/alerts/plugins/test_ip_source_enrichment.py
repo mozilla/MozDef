@@ -8,9 +8,9 @@ from ip_source_enrichment import enrich
 
 
 good_ipv4 = '255.0.1.2'
-good_ipv6 = '3001:4d9c:b29:12f0::1'
+good_ipv6 = '3001:4d9c:b29:12f0::'
 bad_ipv4 = '192.168.0.1'
-bad_ipv6 = '2001:db8:a0b:12f0::1'
+bad_ipv6 = '2001:db8:a0b:12f0::'
 
 known_ips = [
     {
