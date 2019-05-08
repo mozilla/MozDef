@@ -45,7 +45,13 @@ event_index_name = current_date.strftime("events-%Y%m%d")
 previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
 weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
-kibana_index_name = '.kibana'
+
+kibana_index_name = '.kibana_1'
+# For this version of kibana, they require specifying
+# the kibana version via the api for setting
+# the default index, seems weird, but it is what it is.
+kibana_version = '6.6.2'
+
 state_index_name = 'mozdefstate'
 
 index_settings_str = ''
@@ -115,63 +121,76 @@ if weekly_index_alias not in all_indices:
     print "Creating " + weekly_index_alias
     client.create_alias_multiple_indices(weekly_index_alias, [event_index_name, previous_event_index_name])
 
-if kibana_index_name not in all_indices:
-    print "Creating " + kibana_index_name
-    client.create_index(kibana_index_name, index_config={"settings": index_options})
-
 if state_index_name not in all_indices:
     print "Creating " + state_index_name
     client.create_index(state_index_name, index_config=state_index_settings)
 
-# Wait for .kibana index to be ready
+
+# Wait for kibana service to get ready
 num_times = 0
-while not client.index_exists(kibana_index_name):
-    if num_times < 3:
-        print("Waiting for .kibana index to be ready")
-        time.sleep(1)
+while not requests.get(kibana_url).ok:
+    if num_times < 5:
+        print("Waiting for kibana index to be ready")
+        time.sleep(2)
         num_times += 1
     else:
-        print(".kibana index not created...exiting")
+        print("Kibana service never started up...exiting")
         sys.exit(1)
 
-# Check to see if index patterns exist in .kibana
-query = SearchQuery()
-query.add_must(TermMatch('_type', 'index-pattern'))
-results = query.execute(client, indices=[kibana_index_name])
-if len(results['hits']) == 0:
-    # Create index patterns and assign default index mapping
-    index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
-    listing = os.listdir(index_mappings_path)
-    for infile in listing:
-        json_file_path = os.path.join(index_mappings_path, infile)
-        with open(json_file_path) as json_data:
-            mapping_data = json.load(json_data)
-            print "Creating {0} index mapping".format(mapping_data['title'])
-            client.save_object(body=mapping_data, index=kibana_index_name, doc_type='index-pattern', doc_id=mapping_data['title'])
+# Check if index-patterns already exist
+if kibana_index_name in client.get_indices():
+    existing_patterns_url = kibana_url + "/api/saved_objects/_find?type=index-pattern&search_fields=title&search=*"
+    resp = requests.get(url=existing_patterns_url)
+    existing_patterns = json.loads(resp.text)
+    if len(existing_patterns['saved_objects']) > 0:
+        print("Index patterns already exist, exiting script early")
+        sys.exit(0)
 
-    # Assign default index to 'events'
-    print "Assigning events as default index mapping"
-    index_name = 'events'
-    url = '{}/api/kibana/settings/defaultIndex'.format(kibana_url)
-    data = {'value': index_name}
-    r = requests.post(url, json=data, headers={'kbn-xsrf': "true"})
-    if not r.ok:
-        print("Failed to set defaultIndex to events : {} {}".format(r.status_code, r.content))
+# Create index-patterns
+headers = {'content-type': 'application/json', 'kbn-xsrf': 'true'}
+index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
+listing = os.listdir(index_mappings_path)
+for infile in listing:
+    json_file_path = os.path.join(index_mappings_path, infile)
+    with open(json_file_path) as json_data:
+        mapping_data = json.load(json_data)
+        index_name = mapping_data['attributes']['title']
+        print "Creating {0} index mapping".format(index_name)
+        mapping_url = kibana_url + "/api/saved_objects/index-pattern/" + index_name
+        resp = requests.post(url=mapping_url, data=json.dumps(mapping_data), headers=headers)
+        if not resp.ok:
+            print("Unable to create index mapping: " + resp.text)
 
+# Remove existing default index mapping if it exists
+resp = requests.delete(url=kibana_url + "/api/saved_objects/config/" + kibana_version, headers=headers)
+if not resp.ok:
+    print("Unable to delete existing default index mapping: {} {}".format(resp.status_code, resp.content))
 
-# Check to see if dashboards already exist in .kibana
-query = SearchQuery()
-query.add_must(TermMatch('_type', 'dashboard'))
-results = query.execute(client, indices=[kibana_index_name])
-if len(results['hits']) == 0:
-    dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
-    listing = os.listdir(dashboards_path)
-    for infile in listing:
-        json_file_path = os.path.join(dashboards_path, infile)
-        with open(json_file_path) as json_data:
-            mapping_data = json.load(json_data)
-            print("Creating {0} {1}".format(
-                mapping_data['_source']['title'],
-                mapping_data['_type']
-            ))
-            client.save_object(body=mapping_data['_source'], index=kibana_index_name, doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])
+# Set default index mapping to events-*
+data = {
+    "attributes": {
+        "buildNum": "19548",
+        "defaultIndex": "events-*"
+    }
+}
+print("Creating default index pattern for events-*")
+resp = requests.post(url=kibana_url + "/api/saved_objects/config/" + kibana_version, data=json.dumps(data), headers=headers)
+if not resp.ok:
+    print("Failed to set default index: {} {}".format(resp.status_code, resp.content))
+
+# # Check to see if dashboards already exist in .kibana
+# query = SearchQuery()
+# query.add_must(TermMatch('_type', 'dashboard'))
+# results = query.execute(client, indices=[kibana_index_name])
+# if len(results['hits']) == 0:
+#     dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
+#     listing = os.listdir(dashboards_path)
+#     for infile in listing:
+#         json_file_path = os.path.join(dashboards_path, infile)
+#         with open(json_file_path) as json_data:
+#             mapping_data = json.load(json_data)
+#             print("Creating {0} {1}".format(
+#                 mapping_data['_source']['title'],
+#                 mapping_data['_type']
+#             ))
+#             client.save_object(body=mapping_data['_source'], index=kibana_index_name, doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])
