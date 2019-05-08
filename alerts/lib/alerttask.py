@@ -32,9 +32,9 @@ from lib.alert_plugin_set import AlertPluginSet
 # determine most common values
 # in a list of dicts
 def keypaths(nested):
-    ''' return a list of nested dict key paths
+    """ return a list of nested dict key paths
         like: [u'_source', u'details', u'program']
-    '''
+    """
     for key, value in nested.iteritems():
         if isinstance(value, collections.Mapping):
             for subkey, subvalue in keypaths(value):
@@ -44,11 +44,11 @@ def keypaths(nested):
 
 
 def dictpath(path):
-    ''' split a string representing a
+    """ split a string representing a
         nested dictionary path key.subkey.subkey
-    '''
-    for i in path.split('.'):
-        yield '{0}'.format(i)
+    """
+    for i in path.split("."):
+        yield "{0}".format(i)
 
 
 def getValueByPath(input_dict, path_string):
@@ -58,7 +58,7 @@ def getValueByPath(input_dict, path_string):
         path_string can be key.subkey.subkey.subkey
     """
     return_data = input_dict
-    for chunk in path_string.split('.'):
+    for chunk in path_string.split("."):
         return_data = return_data.get(chunk, {})
     return return_data
 
@@ -99,7 +99,7 @@ class AlertTask(Task):
         # e.g. when aggregField is email: [{value:'evil@evil.com',count:1337,events:[...]}, ...]
         self.aggregations = None
 
-        self.log.debug('starting {0}'.format(self.alert_name))
+        self.log.debug("starting {0}".format(self.alert_name))
         self.log.debug(RABBITMQ)
         self.log.debug(ES)
 
@@ -109,56 +109,75 @@ class AlertTask(Task):
         # We want to select all event indices
         # and filter out the window based on timestamp
         # from the search query
-        self.event_indices = ['events-*']
+        self.event_indices = ["events-*"]
 
     def classname(self):
         return self.__class__.__name__
 
     @property
     def log(self):
-        return get_task_logger('%s.%s' % (__name__, self.alert_name))
+        return get_task_logger("%s.%s" % (__name__, self.alert_name))
 
     def parse_config(self, config_filename, config_keys):
         myparser = OptionParser()
         self.config = None
         (self.config, args) = myparser.parse_args([])
         for config_key in config_keys:
-            temp_value = getConfig(config_key, '', config_filename)
+            temp_value = getConfig(config_key, "", config_filename)
             setattr(self.config, config_key, temp_value)
+
+    def _discover_task_exchange(self):
+        """Use configuration information to understand the message queue protocol.
+        
+        return: amqp, sqs
+        """
+        return getConfig("mqprotocol", "amqp", None)
+
+    def __build_conn_string(self):
+        exchange_protocol = self._discover_task_exchange()
+        if exchange_protocol == "amqp":
+            connString = "amqp://{0}:{1}@{2}:{3}//".format(
+                RABBITMQ["mquser"],
+                RABBITMQ["mqpassword"],
+                RABBITMQ["mqserver"],
+                RABBITMQ["mqport"],
+            )
+            return connString
+        elif exchange_protocol == "sqs":
+            connString = "sqs://{}".format(getConfig("alertSqsQueueUrl", None, None))
+            return connString
 
     def _configureKombu(self):
         """
-        Configure kombu for rabbitmq
+        Configure kombu for amqp or sqs
         """
         try:
-            connString = 'amqp://{0}:{1}@{2}:{3}//'.format(
-                RABBITMQ['mquser'],
-                RABBITMQ['mqpassword'],
-                RABBITMQ['mqserver'],
-                RABBITMQ['mqport'])
+            connString = self.__build_conn_string()
             self.mqConn = kombu.Connection(connString)
-
             self.alertExchange = kombu.Exchange(
-                name=RABBITMQ['alertexchange'],
-                type='topic',
-                durable=True)
+                name=RABBITMQ["alertexchange"], type="topic", durable=True
+            )
             self.alertExchange(self.mqConn).declare()
-            alertQueue = kombu.Queue(RABBITMQ['alertqueue'], exchange=self.alertExchange)
+            alertQueue = kombu.Queue(
+                RABBITMQ["alertqueue"], exchange=self.alertExchange
+            )
             alertQueue(self.mqConn).declare()
-            self.mqproducer = self.mqConn.Producer(serializer='json')
-            self.log.debug('Kombu configured')
+            self.mqproducer = self.mqConn.Producer(serializer="json")
+            self.log.debug("Kombu configured")
         except Exception as e:
-            self.log.error('Exception while configuring kombu for alerts: {0}'.format(e))
+            self.log.error(
+                "Exception while configuring kombu for alerts: {0}".format(e)
+            )
 
     def _configureES(self):
         """
         Configure elasticsearch client
         """
         try:
-            self.es = ElasticsearchClient(ES['servers'])
-            self.log.debug('ES configured')
+            self.es = ElasticsearchClient(ES["servers"])
+            self.log.debug("ES configured")
         except Exception as e:
-            self.log.error('Exception while configuring ES for alerts: {0}'.format(e))
+            self.log.error("Exception while configuring ES for alerts: {0}".format(e))
 
     def mostCommon(self, listofdicts, dictkeypath):
         """
@@ -169,8 +188,8 @@ class AlertTask(Task):
             returned as a list of tuples
             [(value,count),(value,count)]
         """
-        inspectlist=list()
-        path=list(dictpath(dictkeypath))
+        inspectlist = list()
+        path = list(dictpath(dictkeypath))
         for i in listofdicts:
             for k in list(keypaths(i)):
                 if not (set(k[0]).symmetric_difference(path)):
@@ -180,33 +199,34 @@ class AlertTask(Task):
 
     def alertToMessageQueue(self, alertDict):
         """
-        Send alert to the rabbit message queue
+        Send alert to the kombu based message queue.  The default is rabbitmq.
         """
         try:
             # cherry pick items from the alertDict to send to the alerts messageQueue
-            mqAlert = dict(severity='INFO', category='')
-            if 'severity' in alertDict:
-                mqAlert['severity'] = alertDict['severity']
-            if 'category' in alertDict:
-                mqAlert['category'] = alertDict['category']
-            if 'utctimestamp' in alertDict:
-                mqAlert['utctimestamp'] = alertDict['utctimestamp']
-            if 'eventtimestamp' in alertDict:
-                mqAlert['eventtimestamp'] = alertDict['eventtimestamp']
-            mqAlert['summary'] = alertDict['summary']
+            mqAlert = dict(severity="INFO", category="")
+            if "severity" in alertDict:
+                mqAlert["severity"] = alertDict["severity"]
+            if "category" in alertDict:
+                mqAlert["category"] = alertDict["category"]
+            if "utctimestamp" in alertDict:
+                mqAlert["utctimestamp"] = alertDict["utctimestamp"]
+            if "eventtimestamp" in alertDict:
+                mqAlert["eventtimestamp"] = alertDict["eventtimestamp"]
+            mqAlert["summary"] = alertDict["summary"]
             self.log.debug(mqAlert)
             ensurePublish = self.mqConn.ensure(
-                self.mqproducer,
-                self.mqproducer.publish,
-                max_retries=10)
+                self.mqproducer, self.mqproducer.publish, max_retries=10
+            )
             ensurePublish(
                 alertDict,
                 exchange=self.alertExchange,
-                routing_key=RABBITMQ['alertqueue']
+                routing_key=RABBITMQ["alertqueue"],
             )
-            self.log.debug('alert sent to the alert queue')
+            self.log.debug("alert sent to the alert queue")
         except Exception as e:
-            self.log.error('Exception while sending alert to message queue: {0}'.format(e))
+            self.log.error(
+                "Exception while sending alert to message queue: {0}".format(e)
+            )
 
     def alertToES(self, alertDict):
         """
@@ -214,31 +234,35 @@ class AlertTask(Task):
         """
         try:
             res = self.es.save_alert(body=alertDict)
-            self.log.debug('alert sent to ES')
+            self.log.debug("alert sent to ES")
             self.log.debug(res)
             return res
         except Exception as e:
-            self.log.error('Exception while pushing alert to ES: {0}'.format(e))
+            self.log.error("Exception while pushing alert to ES: {0}".format(e))
 
     def tagBotNotify(self, alert):
         """
             Tag alert to be excluded based on severity
             If 'ircchannel' is set in an alert, we automatically notify mozdefbot
         """
-        alert['notify_mozdefbot'] = True
-        if alert['severity'] == 'NOTICE' or alert['severity'] == 'INFO':
-            alert['notify_mozdefbot'] = False
+        alert["notify_mozdefbot"] = True
+        if alert["severity"] == "NOTICE" or alert["severity"] == "INFO":
+            alert["notify_mozdefbot"] = False
 
         # If an alert sets specific ircchannel, then we should probably always notify in mozdefbot
-        if 'ircchannel' in alert and alert['ircchannel'] != '' and alert['ircchannel'] is not None:
-            alert['notify_mozdefbot'] = True
+        if (
+            "ircchannel" in alert
+            and alert["ircchannel"] != ""
+            and alert["ircchannel"] is not None
+        ):
+            alert["notify_mozdefbot"] = True
         return alert
 
     def saveAlertID(self, saved_alert):
         """
         Save alert to self so we can analyze it later
         """
-        self.alert_ids.append(saved_alert['_id'])
+        self.alert_ids.append(saved_alert["_id"])
 
     def filtersManual(self, query):
         """
@@ -248,7 +272,7 @@ class AlertTask(Task):
 
         """
         # Don't fire on already alerted events
-        duplicate_matcher = TermMatch('alert_names', self.determine_alert_classname())
+        duplicate_matcher = TermMatch("alert_names", self.determine_alert_classname())
         if duplicate_matcher not in query.must_not:
             query.add_must_not(duplicate_matcher)
 
@@ -258,7 +282,7 @@ class AlertTask(Task):
         alert_name = self.classname()
         # Allow alerts like the generic alerts (one python alert but represents many 'alerts')
         # can customize the alert name
-        if hasattr(self, 'custom_alert_name'):
+        if hasattr(self, "custom_alert_name"):
             alert_name = self.custom_alert_name
         return alert_name
 
@@ -274,10 +298,10 @@ class AlertTask(Task):
         """
         try:
             results = self.executeSearchEventsSimple()
-            self.events = results['hits']
+            self.events = results["hits"]
             self.log.debug(self.events)
         except Exception as e:
-            self.log.error('Error while searching events in ES: {0}'.format(e))
+            self.log.error("Error while searching events in ES: {0}".format(e))
 
     def searchEventsAggregated(self, aggregationPath, samplesLimit=5):
         """
@@ -301,37 +325,37 @@ class AlertTask(Task):
 
         try:
             esresults = self.main_query.execute(self.es, indices=self.event_indices)
-            results = esresults['hits']
+            results = esresults["hits"]
 
             # List of aggregation values that can be counted/summarized by Counter
             # Example: ['evil@evil.com','haxoor@noob.com', 'evil@evil.com'] for an email aggregField
             aggregationValues = []
             for r in results:
-                aggregationValues.append(getValueByPath(r['_source'], aggregationPath))
+                aggregationValues.append(getValueByPath(r["_source"], aggregationPath))
 
             # [{value:'evil@evil.com',count:1337,events:[...]}, ...]
             aggregationList = []
             for i in Counter(aggregationValues).most_common():
-                idict = {
-                    'value': i[0],
-                    'count': i[1],
-                    'events': [],
-                    'allevents': []
-                }
+                idict = {"value": i[0], "count": i[1], "events": [], "allevents": []}
                 for r in results:
-                    if getValueByPath(r['_source'], aggregationPath).encode('ascii', 'ignore') == i[0]:
+                    if (
+                        getValueByPath(r["_source"], aggregationPath).encode(
+                            "ascii", "ignore"
+                        )
+                        == i[0]
+                    ):
                         # copy events detail into this aggregation up to our samples limit
-                        if len(idict['events']) < samplesLimit:
-                            idict['events'].append(r)
+                        if len(idict["events"]) < samplesLimit:
+                            idict["events"].append(r)
                         # also copy all events to a non-sampled list
                         # so we mark all events as alerted and don't re-alert
-                        idict['allevents'].append(r)
+                        idict["allevents"].append(r)
                 aggregationList.append(idict)
 
             self.aggregations = aggregationList
             self.log.debug(self.aggregations)
         except Exception as e:
-            self.log.error('Error while searching events in ES: {0}'.format(e))
+            self.log.error("Error while searching events in ES: {0}".format(e))
 
     def walkEvents(self, **kwargs):
         """
@@ -367,8 +391,8 @@ class AlertTask(Task):
         """
         if len(self.aggregations) > 0:
             for aggregation in self.aggregations:
-                if aggregation['count'] >= threshold:
-                    aggregation['config']=config
+                if aggregation["count"] >= threshold:
+                    aggregation["config"] = config
                     alert = self.onAggregation(aggregation)
                     if alert:
                         alert = self.tagBotNotify(alert)
@@ -378,7 +402,7 @@ class AlertTask(Task):
                         # even though we only sample events in the alert
                         # tag all events as alerted to avoid re-alerting
                         # on events we've already processed.
-                        self.tagEventsAlert(aggregation['allevents'], alertResultES)
+                        self.tagEventsAlert(aggregation["allevents"], alertResultES)
                         self.alertToMessageQueue(alert)
                         self.saveAlertID(alertResultES)
 
@@ -387,33 +411,45 @@ class AlertTask(Task):
         Send alerts through a plugin system
         """
 
-        plugin_dir = os.path.join(os.path.dirname(__file__), '../plugins')
+        plugin_dir = os.path.join(os.path.dirname(__file__), "../plugins")
         plugin_set = AlertPluginSet(plugin_dir, ALERT_PLUGINS)
         alertDict = plugin_set.run_plugins(alert)[0]
 
         return alertDict
 
-    def createAlertDict(self, summary, category, tags, events, severity='NOTICE', url=None, ircchannel=None):
+    def createAlertDict(
+        self,
+        summary,
+        category,
+        tags,
+        events,
+        severity="NOTICE",
+        url=None,
+        ircchannel=None,
+    ):
         """
         Create an alert dict
         """
         alert = {
-            'utctimestamp': toUTC(datetime.now()).isoformat(),
-            'severity': severity,
-            'summary': summary,
-            'category': category,
-            'tags': tags,
-            'events': [],
-            'ircchannel': ircchannel,
+            "utctimestamp": toUTC(datetime.now()).isoformat(),
+            "severity": severity,
+            "summary": summary,
+            "category": category,
+            "tags": tags,
+            "events": [],
+            "ircchannel": ircchannel,
         }
         if url:
-            alert['url'] = url
+            alert["url"] = url
 
         for e in events:
-            alert['events'].append({
-                'documentindex': e['_index'],
-                'documentsource': e['_source'],
-                'documentid': e['_id']})
+            alert["events"].append(
+                {
+                    "documentindex": e["_index"],
+                    "documentsource": e["_source"],
+                    "documentid": e["_id"],
+                }
+            )
         self.log.debug(alert)
         return alert
 
@@ -459,21 +495,23 @@ class AlertTask(Task):
         """
         try:
             for event in events:
-                if 'alerts' not in event['_source']:
-                    event['_source']['alerts'] = []
-                event['_source']['alerts'].append({
-                    'index': alertResultES['_index'],
-                    'id': alertResultES['_id']})
+                if "alerts" not in event["_source"]:
+                    event["_source"]["alerts"] = []
+                event["_source"]["alerts"].append(
+                    {"index": alertResultES["_index"], "id": alertResultES["_id"]}
+                )
 
-                if 'alert_names' not in event['_source']:
-                    event['_source']['alert_names'] = []
-                event['_source']['alert_names'].append(self.determine_alert_classname())
+                if "alert_names" not in event["_source"]:
+                    event["_source"]["alert_names"] = []
+                event["_source"]["alert_names"].append(self.determine_alert_classname())
 
-                self.es.save_event(index=event['_index'], body=event['_source'], doc_id=event['_id'])
+                self.es.save_event(
+                    index=event["_index"], body=event["_source"], doc_id=event["_id"]
+                )
             # We refresh here to ensure our changes to the events will show up for the next search query results
-            self.es.refresh(event['_index'])
+            self.es.refresh(event["_index"])
         except Exception as e:
-            self.log.error('Error while updating events in ES: {0}'.format(e))
+            self.log.error("Error while updating events in ES: {0}".format(e))
 
     def main(self):
         """
@@ -487,15 +525,15 @@ class AlertTask(Task):
         """
         try:
             self.main(*args, **kwargs)
-            self.log.debug('finished')
+            self.log.debug("finished")
         except Exception as e:
-            self.log.exception('Exception in main() method: {0}'.format(e))
+            self.log.exception("Exception in main() method: {0}".format(e))
 
     def parse_json_alert_config(self, config_file):
         """
         Helper function to parse an alert config file
         """
-        alert_dir = os.path.join(os.path.dirname(__file__), '..')
+        alert_dir = os.path.join(os.path.dirname(__file__), "..")
         config_file_path = os.path.abspath(os.path.join(alert_dir, config_file))
         json_obj = {}
         with open(config_file_path, "r") as fd:
