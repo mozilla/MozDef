@@ -166,9 +166,6 @@ class ElasticsearchClient():
         event.add_required_fields()
         return self.__save_document(index=index, body=event, doc_id=doc_id, bulk=bulk)
 
-    def save_dashboard(self, body, dash_name, doc_id=None):
-        return self.es_connection.index(index='.kibana', doc_type='dashboard', body=body, id=doc_id)
-
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)
         search_query = SearchQuery()

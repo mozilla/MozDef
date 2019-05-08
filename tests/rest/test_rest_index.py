@@ -39,12 +39,10 @@ class TestKibanaDashboardsRoute(RestTestSuite):
         f = open(dash_file)
         dashboardjson = json.load(f)
         f.close()
-        title = dashboardjson['dashboard']['title']
         dashid = dash_name.replace(' ', '-')
-        if dash_name:
-            title = dash_name
         dashboardjson['dashboard']['title'] = dash_name
-        return self.es_client.save_dashboard(dashboardjson, dash_name, doc_id=dashid)
+        dashboardjson['type'] = 'dashboard'
+        return self.es_client.save_object(body=dashboardjson, index='.kibana', doc_id=dashid)
 
     def teardown(self):
         super(TestKibanaDashboardsRoute, self).teardown()
