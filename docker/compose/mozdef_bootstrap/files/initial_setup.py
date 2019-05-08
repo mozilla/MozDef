@@ -19,7 +19,6 @@ from elasticsearch.exceptions import ConnectionError
 import requests
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-from mozdef_util.query_models import SearchQuery, TermMatch
 
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
@@ -125,7 +124,6 @@ if state_index_name not in all_indices:
     print "Creating " + state_index_name
     client.create_index(state_index_name, index_config=state_index_settings)
 
-
 # Wait for kibana service to get ready
 num_times = 0
 while not requests.get(kibana_url).ok:
@@ -147,7 +145,7 @@ if kibana_index_name in client.get_indices():
         sys.exit(0)
 
 # Create index-patterns
-headers = {'content-type': 'application/json', 'kbn-xsrf': 'true'}
+kibana_headers = {'content-type': 'application/json', 'kbn-xsrf': 'true'}
 index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
 listing = os.listdir(index_mappings_path)
 for infile in listing:
@@ -157,12 +155,12 @@ for infile in listing:
         index_name = mapping_data['attributes']['title']
         print "Creating {0} index mapping".format(index_name)
         mapping_url = kibana_url + "/api/saved_objects/index-pattern/" + index_name
-        resp = requests.post(url=mapping_url, data=json.dumps(mapping_data), headers=headers)
+        resp = requests.post(url=mapping_url, data=json.dumps(mapping_data), headers=kibana_headers)
         if not resp.ok:
             print("Unable to create index mapping: " + resp.text)
 
 # Remove existing default index mapping if it exists
-resp = requests.delete(url=kibana_url + "/api/saved_objects/config/" + kibana_version, headers=headers)
+resp = requests.delete(url=kibana_url + "/api/saved_objects/config/" + kibana_version, headers=kibana_headers)
 if not resp.ok:
     print("Unable to delete existing default index mapping: {} {}".format(resp.status_code, resp.content))
 
@@ -174,23 +172,35 @@ data = {
     }
 }
 print("Creating default index pattern for events-*")
-resp = requests.post(url=kibana_url + "/api/saved_objects/config/" + kibana_version, data=json.dumps(data), headers=headers)
+resp = requests.post(url=kibana_url + "/api/saved_objects/config/" + kibana_version, data=json.dumps(data), headers=kibana_headers)
 if not resp.ok:
     print("Failed to set default index: {} {}".format(resp.status_code, resp.content))
 
-# # Check to see if dashboards already exist in .kibana
-# query = SearchQuery()
-# query.add_must(TermMatch('_type', 'dashboard'))
-# results = query.execute(client, indices=[kibana_index_name])
-# if len(results['hits']) == 0:
-#     dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
-#     listing = os.listdir(dashboards_path)
-#     for infile in listing:
-#         json_file_path = os.path.join(dashboards_path, infile)
-#         with open(json_file_path) as json_data:
-#             mapping_data = json.load(json_data)
-#             print("Creating {0} {1}".format(
-#                 mapping_data['_source']['title'],
-#                 mapping_data['_type']
-#             ))
-#             client.save_object(body=mapping_data['_source'], index=kibana_index_name, doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])
+# Check if dashboards already exist
+if kibana_index_name in client.get_indices():
+    existing_patterns_url = kibana_url + "/api/saved_objects/_find?type=dashboard&search_fields=title&search=*"
+    resp = requests.get(url=existing_patterns_url)
+    existing_patterns = json.loads(resp.text)
+    if len(existing_patterns['saved_objects']) > 0:
+        print("Dashboards already exist, exiting script early")
+        sys.exit(0)
+
+# Create visualizations/dashboards
+dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
+listing = os.listdir(dashboards_path)
+for infile in listing:
+    json_file_path = os.path.join(dashboards_path, infile)
+    with open(json_file_path) as json_data:
+        mapping_data = json.load(json_data)
+        mapping_type = mapping_data['type']
+        print("Creating {0} {1}".format(
+            mapping_data[mapping_type]['title'],
+            mapping_type
+        ))
+        post_data = {
+            "attributes": mapping_data[mapping_type]
+        }
+        # We use the filename as the id of the resource
+        resource_name = infile.replace('.json', '')
+        kibana_type_url = kibana_url + "/api/saved_objects/" + mapping_type + "/" + resource_name
+        requests.post(url=kibana_type_url, data=json.dumps(post_data), headers=kibana_headers)

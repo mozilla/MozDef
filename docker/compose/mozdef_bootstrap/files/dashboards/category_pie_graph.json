@@ -1,17 +1,13 @@
 {
-  "_index": ".kibana",
-  "_type": "visualization",
-  "_id": "AWg6F1PFk1EXv5E12DRN",
-  "_version": 1,
-  "_score": 1,
-  "_source": {
+  "visualization": {
     "title": "Category Pie Graph",
-    "visState": "{\"aggs\":[{\"enabled\":true,\"id\":\"1\",\"params\":{},\"schema\":\"metric\",\"type\":\"count\"},{\"enabled\":true,\"id\":\"2\",\"params\":{\"field\":\"category\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"segment\",\"type\":\"terms\"}],\"listeners\":{},\"params\":{\"addLegend\":true,\"addTooltip\":true,\"isDonut\":false,\"legendPosition\":\"right\",\"type\":\"pie\"},\"title\":\"Category Pie Graph\",\"type\":\"pie\"}",
+    "visState": "{\"title\":\"Category Pie Graph\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"category\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
     "uiStateJSON": "{}",
     "description": "",
     "version": 1,
     "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"index\":\"events-weekly\",\"query\":{\"match_all\":{}},\"filter\":[]}"
+      "searchSourceJSON": "{\"index\":\"events-*\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
     }
-  }
+  },
+  "type": "visualization"
 }
