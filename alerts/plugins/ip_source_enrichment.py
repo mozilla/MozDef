@@ -21,7 +21,12 @@ def _find_ip_addresses(string):
     ipv4_rx = '(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
     ipv6_rx = '(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))'
 
-    return re.findall(ipv4_rx, string) + re.findall(ipv6_rx, string)
+    ipv4 = re.findall(ipv4_rx, string)
+    ipv6 = map(
+      lambda match: match[0] if isinstance(match, tuple) else match,
+      re.findall(ipv6_rx, string))
+
+    return ipv4 + ipv6
 
 
 def enrich(alert, known_ips):
@@ -49,13 +54,7 @@ def enrich(alert, known_ips):
     alert = alert.copy()
 
     for ip in set(ips):
-        if netaddr.valid_ipv6(ip):
-            ip = ip[0]
-
         ip_address = netaddr.IPAddress(ip)
-
-        if isinstance(ip_address, tuple):
-            ip_address = netaddr.IPAddress(ip_address[0])
 
         matching_descriptions = filter(
             lambda known: ip_address in netaddr.IPSet([known['range']]),
