@@ -9,10 +9,9 @@ Copyright (c) 2014 Mozilla Corporation
     <div class="container headercontainer">
         {{#if haveFeatures }}
         <div id="header" class="row center">
+            <a href="/"><img class="mozillalogo" src="/images/moz_defense-platform_01.png"></a>
             <span id="nav-main">
                 <ul>
-                    <li><img class="mozillalogo" src="/images/mozilla.svg"></li>
-                    <li><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></li>
                     {{#if isFeature "kibana"}}
                         <li> <a target="_blank" href={{ resolveKibanaURL mozdef.kibanaURL }}>Kibana</a>
                             <ul>

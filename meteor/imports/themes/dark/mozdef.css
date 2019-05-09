@@ -5,6 +5,23 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 
+:root {
+    --bg-primary-color: #2a2f35;
+    --secondary-focus-color: #3b89ee;
+    --bg-secondary-color: #2d5fa0;
+    --row-color-odd: #2a2f35;
+    --row-color-even: #636c85;
+    --ack-edit-color: #a2a9b2;
+    --ack-edit-border-color: #adadad;
+    --ack-edit-focus-color: #557750;
+    --ack-edit-disabled-color: #557750;
+    --arm-color: #e69006;
+    --arm-focus-color: #d58512;
+    --txt-primary-color: #fff;
+    --txt-secondary-color: #000;
+    --a-link-color: #a2a9b2;
+  }
+
 /*base css */
 html{
 	background: none;
@@ -50,6 +67,8 @@ caption, legend {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 1200px;
+  padding-bottom: 30px;
 }
 
 #header a.mozilla {
@@ -127,12 +146,12 @@ caption, legend {
     color: rgba(127,255,255,0.75);
 }
 
-.attackercallout .blockip{
+.attackercallout .blockip {
     color: #FFF;
     text-transform: uppercase;
     margin-top: 20px;
 }
-.attackercallout ul{
+.attackercallout ul {
     list-style: none;
     float: left;
     left: auto;
@@ -140,14 +159,14 @@ caption, legend {
     padding: 0px;
 }
 
-.attackercallout .indicator{
+.attackercallout .indicator {
     color: yellow;
 }
-.attackercallout a{
+.attackercallout a {
     color: yellow;
 }
 
-.veris-wrapper td{
+.veris-wrapper td {
     color: black
 }
 
@@ -177,7 +196,7 @@ caption, legend {
     --alert-color: white;
   }
 
-.alert  {
+.alert {
     color: var(--alert-color);
     background-color: var(--alert-bg-color);
     text-transform: uppercase;
@@ -185,7 +204,7 @@ caption, legend {
     font-weight: bold;
   }
 
-.alert-row a{
+.alert-row a {
     color: wheat;
 }
 
@@ -229,20 +248,30 @@ input[type="search"] {
   background-color: rgba(30,87,153,.5);
 }
 
-td{
+td {
   color:white;
 }
 
 
 .welcome {
+    height: 180px;
+    width: 600px;
+    margin-left: 25%;
     text-align: center;
+    color: var(--txt-primary-color);
+    vertical-align: middle;
 }
 
-.tabcontent{
+.mozdeflogo{
+  width: 500px;
+  vertical-align: middle;
+}
+
+.tabcontent {
     margin-top: 20px;
 }
 
-.tabnav a{
+.tabnav a {
     color: lightblue;
 }
 
@@ -266,12 +295,17 @@ td{
 }
 */
 /* don't float the 'create account' link*/
-#login-buttons #signup-link{
+#login-buttons #signup-link {
     float: none;
 }
 
+#login-buttons {
+    line-height: 1;
+    padding-top: 15px;
+}
+
 /* d3 circle styles */
-.successcircle{
+.successcircle {
     /*
     fill: rgb(217,206,178);
 
@@ -281,7 +315,7 @@ td{
     fill: rgba(0,255,0,.5);
 }
 
-.failurecircle{
+.failurecircle {
     /*fill: rgb(213,222,217);*/
     /*fill: #BD2C00;*/
     /*fill: #f93;*/
@@ -289,7 +323,7 @@ td{
     fill: rgba(255,0,0,.5);
 }
 
-circle:hover{
+circle:hover {
   fill: white;
 }
 
@@ -298,7 +332,7 @@ circle:hover{
     stroke-width: 1.5px;
 }
 
-.textlabel{
+.textlabel {
     stroke-width: .2px;
     stroke: black;
 }
@@ -313,7 +347,7 @@ circle:hover{
     display: none;
 }
 
-#header a.mozdef{
+#header a.mozdef {
     color:white;
     text-shadow: #000 5px 3px 3px;
     text-align: center;
@@ -321,14 +355,228 @@ circle:hover{
     margin-top: -.25em;
 }
 
-.mozillalogo{
-    width: 90px;
+.mozillalogo {
+    width: 300px;
+    padding-top: 15px;
 }
 
-#header label{
+#header label {
     display: inherit;
     cursor: auto;
     margin:.5em;
+}
+
+/* Attackers sidenav menu */
+sidenav {
+    background: var(--bg-primary-color);
+    border-right: 15px solid var(--bg-secondary-color);
+    text-align: left;
+    font-weight: bolder;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    left: -25em;
+    margin: 0em;
+    padding-top: 1em;
+    display: inline-block;
+    line-height: normal;
+    -webkit-transform: translateZ(0) scale(1, 1);
+    z-index: 3;
+    -webkit-transition: all 400ms ease;
+    -moz-transition: all 400ms ease;
+    -ms-transition: all 400ms ease;
+    -o-transition: all 400ms ease;
+    transition: all 400ms ease;
+  }
+  
+  /*pull out triangle*/
+  sidenav:after {
+      position: absolute;
+      content: ' ';
+      width: 0;
+      height: 0;
+      right: -75px;
+      top: 50%;
+      border-width: 30px 30px;
+      border-style: solid;
+      border-color: transparent transparent transparent var(--bg-secondary-color);
+  }
+  sidenav ul {
+      width: 14em;
+      list-style-type: none;
+      margin: auto;
+      padding: 1em;
+  }
+  sidenav div{
+      margin:auto;
+  }
+  sidenav:hover {
+      left: 0;
+  }
+  sidenav .filters-col .row {
+      margin-top: 45px;
+      padding: 0 0.5em;
+  }
+  sidenav .reset-filter {
+      text-align: center;
+      margin-top: 20px;
+  }
+  .form-horizontal .form-group {
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-top: 5px;
+  }
+  
+  @media screen and (max-width: 1000px) {
+    sidenav {
+      background: var(--bg-primary-color);
+      border-left: 15px solid var(--bg-secondary-color);
+      text-align: left;
+      font-weight: bolder;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      right: -16em;
+      margin: 0em;
+      padding-top: 1em;
+      display: inline-block;
+      line-height: normal;
+      -webkit-transform: translateZ(0) scale(1, 1);
+      z-index: 3;
+      -webkit-transition: all 400ms ease;
+      -moz-transition: all 400ms ease;
+      -ms-transition: all 400ms ease;
+      -o-transition: all 400ms ease;
+      transition: all 400ms ease;
+    }
+    sidenav:after {
+      right: 230px;
+      border-top: 0;
+      border-bottom: 0;
+      border-right: 0;
+      content: none;
+    }
+    sidenav ul {
+      width: 14em;
+      list-style-type: none;
+      margin: auto;
+      padding: 1em;
+    }
+    sidenav div{
+      margin:auto;
+    }
+    sidenav:hover {
+      right: 0;
+      width: 230px;
+      overflow-y: scroll;
+      scrollbar-width: inherit;
+      scrollbar-color: var(--bg-secondary-color) black;
+    }
+    sidenav .filters-col .row {
+      margin-top: 25px;
+      padding: 0 1.5em;
+    }
+    sidenav .reset-filter {
+      text-align: center;
+      margin-top: 20px;
+    }
+    div.dc-chart {
+      float: none;
+    }
+  }
+
+/* globe styling */
+.globe-container  {
+    background: #000000;
+    color: #ffffff;
+}
+
+.globe-info {
+    font-size: 11px;
+    position: absolute;
+    bottom: 5px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 3px;
+    right: 10px;
+    padding: 10px;
+    color: var(--ack-edit-color);
+}
+
+.globe-container a {
+    color: #aaa;
+    text-decoration: none;
+}
+
+.globe-container a:hover {
+    text-decoration: underline;
+}
+
+.globe-campaigns {
+    width: 270px;
+    position: absolute;
+    left: 10px;
+    top: 125px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px;
+}
+
+.globe-time {
+    width: 400px;
+    position: absolute;
+    left: 10px;
+    top: 180px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 5px;
+}
+
+.globe-facts {
+    width: 300px;
+    position: absolute;
+    left: 10px;
+    bottom: 0px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border-right: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 10px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    display: none;
+}
+
+.globe-campaigns .campaign{
+    font-size: 12px;
+    line-height: 26px;
+    height: 30px;
+    text-align: center;
+    float: left;
+    width: 60px;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.1s ease-out;
+}
+
+.globe-time .time{
+    font-size: 12px;
+    line-height: 26px;
+    height: 30px;
+    text-align: center;
+    float: left;
+    width: 90px;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.1s ease-out;
+}
+
+.globe-campaigns .campaign:hover,
+.globe-campaigns .campaign.active,
+.globe-time .time:hover,
+.globe-time .time.active {
+    font-size: 14px;
+    color: #fff;
 }
 
 /*menu styling*/
@@ -365,7 +613,7 @@ circle:hover{
 #nav-main li span {
     border-color: #3a3c46;
     color: #fff;
-    padding: 8px 10px 10px 10px;
+    padding: 20px 10px 10px 10px;
     height: 25px;
     display: block;
     border-style: solid;
@@ -415,7 +663,7 @@ circle:hover{
     transition-timing-function: linear;
     transition-delay: 0s;
     transition-property: #6363CE, box-shadow, border-right;
-    padding-bottom: 30px;
+    padding-bottom: 20px;
     outline: 0px none;
 }
 
@@ -500,7 +748,6 @@ circle:hover{
 #nav-main ul li.current ul li a:focus,
 #nav-main ul li.current ul li a:active,
 .js #nav-main ul li.current ul li a:focus {
-    background: rgb(227,235,244);
     background: rgba(41,48,54,0.2);
     box-shadow:
         inset rgba(41,48,54,0.3) 0 2px 0px,

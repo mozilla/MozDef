@@ -7,8 +7,8 @@ Copyright (c) 2014 Mozilla Corporation
 
 /* light theme variables */
 :root {
-    --bg-primary-color: rgba(255,255,255,.5);
-    --bg-secondary-color: #444444;
+    --bg-primary-color: rgba(230, 227, 227, 0.5);
+    --bg-secondary-color: #707070;
     --txt-primary-color: #000;
     --txt-secondary-color: #fff;
     --txt-shadow-color:  #aaa;
@@ -61,6 +61,8 @@ caption, legend {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 1200px;
+  padding-bottom: 30px;
 }
 
 #header a.mozilla {
@@ -138,12 +140,12 @@ caption, legend {
     color: rgba(127,255,255,0.75);
 }
 
-.attackercallout .blockip{
+.attackercallout .blockip {
     color: var(--txt-primary-color);;
     text-transform: uppercase;
     margin-top: 20px;
 }
-.attackercallout ul{
+.attackercallout ul {
     list-style: none;
     float: left;
     left: auto;
@@ -151,14 +153,14 @@ caption, legend {
     padding: 0px;
 }
 
-.attackercallout .indicator{
+.attackercallout .indicator {
     color: yellow;
 }
-.attackercallout a{
+.attackercallout a {
     color: yellow;
 }
 
-.veris-wrapper td{
+.veris-wrapper td {
     color: black
 }
 
@@ -196,7 +198,7 @@ caption, legend {
     font-weight: bold;
   }
 
-.alert-row a{
+.alert-row a {
     color: var(--a-link-color);
 }
 
@@ -268,6 +270,11 @@ input[type="search"] {
     float: none;
 }
 
+.dc-chart .empty-chart .pie-slice path {
+    fill: #e3e3e3;
+    cursor: default;
+}
+
 .table-striped tbody > tr:nth-child(odd) > td,
 .table-striped tbody > tr:nth-child(odd) > th {
   background-color: var(--row-color-odd);
@@ -278,29 +285,44 @@ input[type="search"] {
   background-color: var(--txt-highlight-color);
 }
 
-td{
+td {
   color: var(--txt-primary-color);
 }
 
 .welcome {
+    height: 180px;
+    width: 600px;
+    margin-left: 25%;
     text-align: center;
+    color: var(--txt-primary-color);
+    vertical-align: middle;
 }
 
-.tabcontent{
+.mozdeflogo{
+  width: 500px;
+  vertical-align: middle;
+}
+
+.tabcontent {
     margin-top: 20px;
 }
 
-.tabnav a{
+.tabnav a {
     color: lightblue;
 }
 
 /* don't float the 'create account' link*/
-#login-buttons #signup-link{
+#login-buttons #signup-link {
     float: none;
 }
 
+#login-buttons {
+    line-height: 1;
+    padding-top: 15px;
+}
+
 /* d3 circle styles */
-.successcircle{
+.successcircle {
     /*
     fill: rgb(217,206,178);
 
@@ -310,7 +332,7 @@ td{
     fill: rgba(0,255,0,.5);
 }
 
-.failurecircle{
+.failurecircle {
     /*fill: rgb(213,222,217);*/
     /*fill: #BD2C00;*/
     /*fill: #f93;*/
@@ -318,7 +340,7 @@ td{
     fill: rgba(255,0,0,.5);
 }
 
-circle:hover{
+circle:hover {
   fill: white;
 }
 
@@ -327,7 +349,7 @@ circle:hover{
     stroke-width: 1.5px;
 }
 
-.textlabel{
+.textlabel {
     stroke-width: .2px;
     stroke: black;
 }
@@ -342,19 +364,12 @@ circle:hover{
     display: none;
 }
 
-#header a.mozdef{
-    color: var(--txt-primary-color);
-    text-shadow: var(--txt-shadow-color) 3px 2px 2px;
-    text-align: center;
-    font-size: large;
-    margin-top: -.25em;
+.mozillalogo {
+    width: 300px;
+    padding-top: 15px;
 }
 
-.mozillalogo{
-    width: 90px;
-}
-
-#header label{
+#header label {
     display: inherit;
     cursor: auto;
     margin:.5em;
@@ -362,14 +377,13 @@ circle:hover{
 
 /* attacker side nav pull out styling */
 /* http://www.sitepoint.com/css3-sliding-menu/ */
-sidenav
-{
+sidenav {
     position: fixed;
     left: -25em;
     top: 0;
     bottom: 0;
     background-color: var(--bg-secondary-color);
-    border-right: 15px solid #765;
+    border-right: 15px solid  #6d5e5e;
     box-shadow: 4px 0 5px rgba(0,0,0,0.2);
     z-index: 1;
 
@@ -383,8 +397,7 @@ sidenav
 }
 
 /*pull out triangle */
-sidenav:after
-{
+sidenav:after {
     position: absolute;
     content: ' ';
     width: 0;
@@ -393,23 +406,21 @@ sidenav:after
     top: 50%;
     border-width: 30px 30px;
     border-style: solid;
-    border-color: transparent transparent transparent #765;
+    border-color: transparent transparent transparent #6d5e5e;
 }
 
-sidenav ul
-{
+sidenav ul {
     width: 14em;
     list-style-type: none;
     margin: auto;
     padding: 1em;
 }
 
-sidenav div{
+sidenav div {
     margin:auto;
 }
 
-sidenav:hover
-{
+sidenav:hover {
     left: 0;
 }
 
@@ -423,8 +434,7 @@ sidenav .reset-filter {
     margin-top: 20px;
 }
 
-sidenav
-{
+sidenav {
     -webkit-transition: all 400ms ease;
     -moz-transition: all 400ms ease;
     -ms-transition: all 400ms ease;
@@ -434,7 +444,7 @@ sidenav
 
 /*veris tag styling*/
 
-.veristagform{
+.veristagform {
     padding: 10px;
     font-size: 95%;
     background: #999;
@@ -444,7 +454,7 @@ sidenav
 .veristagform .dropdown {
     margin: 10px 0;
 }
-.tag{
+.tag {
     cursor: pointer;
     text-align: left;
     word-wrap: break-word;
@@ -453,7 +463,7 @@ sidenav
     cursor: pointer;
     color: var(--txt-primary-color);
 }
-.veristagform .label{
+.veristagform .label {
     cursor: pointer;
 }
 
@@ -487,7 +497,7 @@ sidenav
     width: 270px;
     position: absolute;
     left: 10px;
-    top: 63px;
+    top: 125px;
     background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.4);
     padding: 10px;
@@ -497,10 +507,10 @@ sidenav
     width: 400px;
     position: absolute;
     left: 10px;
-    top: 103px;
+    top: 180px;
     background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.4);
-    padding: 10px;
+    padding: 5px;
 }
 
 .globe-facts {
@@ -582,12 +592,11 @@ sidenav
 #nav-main li a:visited,
 #nav-main li span {
     color:#000;
-    padding: 8px 10px 10px 10px;
+    padding: 20px 10px 10px 10px;
     height: 25px;
     display: block;
-    border-style: solid;
+    border-style: none;
     border-width: 0px 1px;
-    z-index: 100;
     position:relative;
     float:left;
     border-image: none;
@@ -636,10 +645,8 @@ sidenav
     z-index: 99;
     width: 190px;
     border-radius: 0px 4px 4px;
-    border: 1px solid #3a3c46;
-    background: #000;
-    background: rgba(0,0,0,0.9);
-
+    border: none;
+    background: rgb(73, 70, 70);
 }
 
 #nav-main ul ul li {
@@ -667,7 +674,7 @@ sidenav
 #nav-main ul ul a:hover,
 #nav-main ul ul a:focus,
 #nav-main ul ul a:active {
-    color: #000;
+    color: var(--txt-secondary-color);
     background: rgb(227,235,244);
     background: rgba(241,248,254,0.2);
 

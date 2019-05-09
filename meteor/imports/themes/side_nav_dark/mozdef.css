@@ -336,7 +336,19 @@ td{
 }
 
 .welcome {
+    background: #fff;
+    height: 180px;
+    width: 600px;
+    margin-left: 25%;
     text-align: center;
+    color: var(--font-focus);
+    border: 1px solid var(--secondary-focus-color);
+    vertical-align: middle;
+}
+
+.mozdeflogo{
+  width: 500px;
+  vertical-align: middle;
 }
 
 .tabcontent{
@@ -412,14 +424,6 @@ circle:hover{
 #header:after {
     content: "";
     display: none;
-}
-
-#header a.mozdef{
-    color: var(--font-main);
-    text-shadow: #000 5px 3px 3px;
-    text-align: center;
-    font-size: large;
-    margin-top: -.25em;
 }
 
 .mozillalogo{
@@ -829,7 +833,7 @@ nav.main-menu li.active>a,
   text-decoration: none;
   -webkit-transform: translateZ(0) scale(1, 1);
   -webkit-transition: all .1s linear;
-  transition: all .3s linear;
+  transition: all .5s linear;
 }
 
 .main-menu .nav-icon {

@@ -70,6 +70,8 @@ caption, legend {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 1200px;
+  padding-bottom: 30px;
 }
 
 #header a.mozilla {
@@ -281,29 +283,44 @@ input[type="search"] {
   background-color: var(--txt-highlight-color);
 }
 
-td{
+td {
   color: var(--txt-primary-color);
 }
 
 .welcome {
+    height: 180px;
+    width: 600px;
+    margin-left: 25%;
     text-align: center;
+    color: var(--txt-primary-color);
+    vertical-align: middle;
 }
 
-.tabcontent{
+.mozdeflogo{
+  width: 500px;
+  vertical-align: middle;
+}
+
+.tabcontent {
     margin-top: 20px;
 }
 
-.tabnav a{
+.tabnav a {
     color: rgb(173, 216, 230);
 }
 
 /* don't float the 'create account' link*/
-#login-buttons #signup-link{
+#login-buttons #signup-link {
     float: none;
 }
 
+#login-buttons {
+    line-height: 1;
+    padding-top: 15px;
+}
+
 /* d3 circle styles for the logincounts visualization */
-.successcircle{
+.successcircle {
     /*
     fill: rgb(217,206,178);
 
@@ -313,7 +330,7 @@ td{
     fill: rgba(0,255,0,.5);
 }
 
-.failurecircle{
+.failurecircle {
     /*fill: rgb(213,222,217);*/
     /*fill: #BD2C00;*/
     /*fill: #f93;*/
@@ -321,7 +338,7 @@ td{
     fill: rgba(255,0,0,.5);
 }
 
-circle:hover{
+circle:hover {
   fill: white;
 }
 
@@ -330,7 +347,7 @@ circle:hover{
     stroke-width: 1.5px;
 }
 
-.textlabel{
+.textlabel {
     stroke-width: .2px;
     stroke: black;
 }
@@ -345,7 +362,7 @@ circle:hover{
     display: none;
 }
 
-#header a.mozdef{
+#header a.mozdef {
     color: var(--txt-primary-color);
     text-shadow: var(--txt-shadow-color) 5px 3px 3px;
     text-align: center;
@@ -353,11 +370,12 @@ circle:hover{
     margin-top: -.25em;
 }
 
-.mozillalogo{
-    width: 90px;
+.mozillalogo {
+    width: 300px;
+    padding-top: 15px;
 }
 
-#header label{
+#header label {
     display: inherit;
     cursor: auto;
     margin:.5em;
@@ -365,8 +383,7 @@ circle:hover{
 
 /* attacker side nav pull out styling */
 /* http://www.sitepoint.com/css3-sliding-menu/ */
-sidenav
-{
+sidenav {
     position: fixed;
     left: -25em;
     top: 0;
@@ -375,8 +392,6 @@ sidenav
     border-right: 15px solid #765;
     box-shadow: 4px 0 5px rgba(0,0,0,0.2);
     z-index: 1;
-
-
     text-align: left;
     font-weight: bolder;
     display: inline-block;
@@ -386,8 +401,7 @@ sidenav
 }
 
 /*pull out triangle */
-sidenav:after
-{
+sidenav:after {
     position: absolute;
     content: ' ';
     width: 0;
@@ -399,20 +413,18 @@ sidenav:after
     border-color: transparent transparent transparent #765;
 }
 
-sidenav ul
-{
+sidenav ul {
     width: 14em;
     list-style-type: none;
     margin: auto;
     padding: 1em;
 }
 
-sidenav div{
+sidenav div {
     margin:auto;
 }
 
-sidenav:hover
-{
+sidenav:hover {
     left: 0;
 }
 
@@ -426,8 +438,7 @@ sidenav .reset-filter {
     margin-top: 20px;
 }
 
-sidenav
-{
+sidenav {
     -webkit-transition: all 400ms ease;
     -moz-transition: all 400ms ease;
     -ms-transition: all 400ms ease;
@@ -490,7 +501,7 @@ sidenav
     width: 270px;
     position: absolute;
     left: 10px;
-    top: 63px;
+    top: 125px;
     background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.4);
     padding: 10px;
@@ -500,7 +511,7 @@ sidenav
     width: 400px;
     position: absolute;
     left: 10px;
-    top: 103px;
+    top: 180px;
     background-color: rgba(0, 0, 0, 0.2);
     border-top: 1px solid rgba(255, 255, 255, 0.4);
     padding: 10px;
@@ -586,7 +597,7 @@ sidenav
 #nav-main li span {
     border-color: #3a3c46;
     color: var(--txt-primary-color);
-    padding: 8px 10px 10px 10px;
+    padding: 20px 10px 10px 10px;
     height: 25px;
     display: block;
     border-style: solid;
@@ -636,7 +647,7 @@ sidenav
     transition-timing-function: linear;
     transition-delay: 0s;
     transition-property: #6363CE, box-shadow, border-right;
-    padding-bottom: 30px;
+    padding-bottom: 20px;
     outline: 0px none;
 }
 
