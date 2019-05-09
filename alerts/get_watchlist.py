@@ -17,27 +17,23 @@ from mozdef_util.query_models import SearchQuery, QueryStringMatch
 
 class AlertWatchList(AlertTask):
     def main(self):
-        self.parse_config('get_watchlist.conf', ['api_url', 'jwt_secret'])
+        self.parse_config('get_watchlist.conf', ['api_url', 'jwt_secret', 'use_auth'])
 
-        jwt_token = JWTAuth(self.config.jwt_secret)
-        jwt_token.set_header_format('Bearer %s')
+        jwt_token = None
+        if self.config.use_auth.lower() != 'false':
+            jwt_token = JWTAuth(self.config.jwt_secret)
+            jwt_token.set_header_format('Bearer %s')
 
-        # Connect to rest api and grab response
         r = requests.get(self.config.api_url, auth=jwt_token)
-        status = r.status_code
-        index = 0
-        if status == 200:
-            status = r.status_code
+        # Connect to rest api and grab response
+        if r.ok:
             response = r.text
             terms_list = json.loads(response)
-            while index < len(terms_list):
-                term = terms_list[index]
-                term = '"{}"'.format(term)
+            for term in terms_list:
                 self.watchterm = term
-                index += 1
-                self.process_alert(term)
+                self.process_alert()
         else:
-            logger.error('The watchlist request failed. Status {0}.\n'.format(status))
+            logger.error('The watchlist request failed. Status {0}.\n'.format(r))
 
     def process_alert(self, term):
         search_query = SearchQuery(minutes=20)
