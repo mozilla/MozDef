@@ -57,7 +57,10 @@ Copyright (c) 2014 Mozilla Corporation
             </span>
           </a>
           <ul>
-            <li class="has-subnav">
+              <li class="has-subnav">
+              {{#if isFeature "watchlist"}}
+              <li><a href="/watchlist">watchlist</a></li>
+              {{/if}}
               {{#if isFeature "ipblocklist"}}
               <li>
                 <a href="/ipblocklist">ip blocklist</a>
