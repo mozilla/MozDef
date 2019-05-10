@@ -65,7 +65,7 @@ build: build-from-cwd
 
 .PHONY: build-from-cwd
 build-from-cwd:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE) --parallel
 
 .PHONY: build-from-github
 build-from-github:  ## Build local MozDef images from the github branch (use make NO_CACHE=--no-cache build to disable caching).
