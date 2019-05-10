@@ -30,8 +30,8 @@ RUN \
   mkdir /opt/mozdef/envs/mozdef && \
   mkdir /opt/mozdef/envs/mozdef/cron
 
-# Force pycurl to understand we prefer openssl backend
-ENV PYCURL_SSL_LIBRARY=openssl
+# Force pycurl to understand we prefer nss backend
+ENV PYCURL_SSL_LIBRARY=nss
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
