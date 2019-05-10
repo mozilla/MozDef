@@ -15,9 +15,10 @@ if os.getenv("OPTIONS_MQPROTOCOL", "amqp") == "sqs":
     BROKER_URL = "sqs://@"
     BROKER_TRANSPORT_OPTIONS = {'region': os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('.')[1]}
     CELERY_RESULT_BACKEND = None
-    CELERY_DEFAULT_QUEUE = os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('/')[4]
+    alert_queue_name = os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('/')[4]
+    CELERY_DEFAULT_QUEUE = alert_queue_name
     CELERY_QUEUES = {
-        "celery-default": {"exchange": "celery-default", "binding_key": "celery-default"}
+        {alert_queue_name}: {"exchange": "alert_queue_name, "binding_key": alert_queue_name}
     }
 else:
     BROKER_URL = "amqp://{0}:{1}@{2}:{3}//".format(
