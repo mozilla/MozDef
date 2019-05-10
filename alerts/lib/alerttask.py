@@ -128,7 +128,6 @@ class AlertTask(Task):
 
     def _discover_task_exchange(self):
         """Use configuration information to understand the message queue protocol.
-        
         return: amqp, sqs
         """
         return getConfig("mqprotocol", "amqp", None)
@@ -251,9 +250,7 @@ class AlertTask(Task):
 
         # If an alert sets specific ircchannel, then we should probably always notify in mozdefbot
         if (
-            "ircchannel" in alert
-            and alert["ircchannel"] != ""
-            and alert["ircchannel"] is not None
+            "ircchannel" in alert and alert["ircchannel"] != "" and alert["ircchannel"] is not None
         ):
             alert["notify_mozdefbot"] = True
         return alert
@@ -341,8 +338,7 @@ class AlertTask(Task):
                     if (
                         getValueByPath(r["_source"], aggregationPath).encode(
                             "ascii", "ignore"
-                        )
-                        == i[0]
+                        ) == i[0]
                     ):
                         # copy events detail into this aggregation up to our samples limit
                         if len(idict["events"]) < samplesLimit:
