@@ -13,6 +13,9 @@ RUN \
                   libstdc++ \
                   libffi-devel \
                   zlib-devel \
+                  libcurl-devel \
+                  openssl \ 
+                  openssl-devel \
                   git \
                   make && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
@@ -26,6 +29,9 @@ RUN \
   pip install virtualenv && \
   mkdir /opt/mozdef/envs/mozdef && \
   mkdir /opt/mozdef/envs/mozdef/cron
+
+# Force pycurl to understand we prefer openssl backend
+ENV PYCURL_SSL_LIBRARY=openssl
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt

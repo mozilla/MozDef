@@ -4,10 +4,10 @@ services:
   nginx:
     image: mozdef/mozdef_cognito_proxy:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     command: nginx
     env_file:
       - cloudy_mozdef.env
@@ -29,10 +29,10 @@ services:
   mongodb:
     image: mozdef/mozdef_mongodb:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -44,10 +44,10 @@ services:
   bootstrap:
     image: mozdef/mozdef_bootstrap:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     command: bash -c 'python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/mozdefStateDefaultMappingTemplate.json cron/backup.conf http://kibana:5601'
@@ -59,10 +59,10 @@ services:
   base:
     image: mozdef/mozdef_base:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
@@ -71,10 +71,10 @@ services:
   alertactions:
     image: mozdef/mozdef_alertactions:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -88,10 +88,10 @@ services:
   alerts:
     image: mozdef/mozdef_alerts:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
       - rabbitmq.env
@@ -107,10 +107,10 @@ services:
   cron:
     image: mozdef/mozdef_cron:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -126,10 +126,10 @@ services:
   loginput:
     image: mozdef/mozdef_loginput:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -144,10 +144,10 @@ services:
   meteor:
     image: mozdef/mozdef_meteor:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -163,10 +163,10 @@ services:
   rest:
     image: mozdef/mozdef_rest:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -180,10 +180,10 @@ services:
   syslog:
     image: mozdef/mozdef_syslog:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -198,10 +198,10 @@ services:
   rabbitmq:
     image: mozdef/mozdef_rabbitmq:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - rabbitmq.env
     restart: always
@@ -216,10 +216,10 @@ services:
   mq_eventtask:
     image: mozdef/mozdef_mq_worker:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -237,10 +237,10 @@ services:
   mq_cloudtrail:
     image: mozdef/mozdef_mq_worker:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_cloudtrail.env
@@ -259,10 +259,10 @@ services:
   mq_sqs:
     image: mozdef/mozdef_mq_worker:latest
     logging:
-        driver: "json-file"
-        options:
-            max-file: 5
-            max-size: 10m
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
     env_file:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_sns_sqs.env
