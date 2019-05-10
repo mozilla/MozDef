@@ -107,12 +107,22 @@ Resources:
             Resource: !Ref MozDefSQSQueueArn
           - Sid: AllowReadWriteFromAlertQueue
             Effect: Allow
-              - sqs:GetQueueUrl
-              - sqs:ReceiveMessage
-              - sqs:DeleteMessage
-              - sqs:SendMessage
-              - sqs:SendMessageBatch
-            Resource: !Ref MozDefAlertSqsQueueArn  
+            Action:
+              - "sqs:DeleteMessage"
+              - "sqs:GetQueueUrl"
+              - "sqs:ChangeMessageVisibility"
+              - "sqs:DeleteMessageBatch"
+              - "sqs:SendMessageBatch"
+              - "sqs:ReceiveMessage"
+              - "sqs:SendMessage"
+              - "sqs:GetQueueAttributes"
+              - "sqs:ChangeMessageVisibilityBatch"
+            Resource: !Ref MozDefAlertSqsQueueArn
+          - Sid: AllowListQueuesCelery
+            Effect: Allow
+            Action:
+              - "sqs:ListQueues"
+            Resource: "*"
   MozDefIAMRole:
     Type: AWS::IAM::Role
     Properties:
