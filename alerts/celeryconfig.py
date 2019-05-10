@@ -16,6 +16,9 @@ if os.getenv("OPTIONS_MQPROTOCOL", "amqp") == "sqs":
     BROKER_TRANSPORT_OPTIONS = {'region': os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('.')[1]}
     CELERY_RESULT_BACKEND = None
     CELERY_DEFAULT_QUEUE = os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('/')[4]
+    CELERY_QUEUES = {
+        "celery-default": {"exchange": "celery-default", "binding_key": "celery-default"}
+    }
 else:
     BROKER_URL = "amqp://{0}:{1}@{2}:{3}//".format(
         RABBITMQ["mquser"], RABBITMQ["mqpassword"], RABBITMQ["mqserver"], RABBITMQ["mqport"]
@@ -30,7 +33,6 @@ CELERYD_CONCURRENCY = 1
 CELERY_IGNORE_RESULT = True
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
-CELERY_DEFAULT_QUEUE = 'celery-default'
 CELERYBEAT_SCHEDULE = {}
 
 # Register frequency of the tasks in the scheduler
