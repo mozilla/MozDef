@@ -122,6 +122,8 @@ Resources:
             Effect: Allow
             Action:
               - "sqs:ListQueues"
+              - "sqs:GetQueueAttributes"
+              - "sqs:GetQueueUrl"
             Resource: "*"
   MozDefIAMRole:
     Type: AWS::IAM::Role
