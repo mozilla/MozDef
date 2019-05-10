@@ -61,6 +61,21 @@ caption, legend {
     overflow: visible;
 }
 
+/* Home Page Styling */
+.welcome {
+    height: 180px;
+    width: 600px;
+    margin-left: 25%;
+    text-align: center;
+    color: var(--txt-primary-color);
+    vertical-align: middle;
+}
+
+.mozdeflogo{
+  width: 500px;
+  vertical-align: middle;
+}
+
 #bottom-toolbar {
   background: #444444;
   width: 100%;
@@ -231,11 +246,6 @@ input[type="search"] {
 
 td{
   color:white;
-}
-
-
-.welcome {
-    text-align: center;
 }
 
 .tabcontent{
