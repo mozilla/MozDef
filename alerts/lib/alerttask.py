@@ -144,6 +144,8 @@ class AlertTask(Task):
             return connString
         elif exchange_protocol == "sqs":
             connString = "sqs://{}".format(getConfig("alertSqsQueueUrl", None, None))
+            if connString:
+                connString = connString.replace('https://','')
             return connString
 
     def _configureKombu(self):
@@ -153,13 +155,23 @@ class AlertTask(Task):
         try:
             connString = self.__build_conn_string()
             self.mqConn = kombu.Connection(connString)
-            self.alertExchange = kombu.Exchange(
-                name=RABBITMQ["alertexchange"], type="topic", durable=True
-            )
-            self.alertExchange(self.mqConn).declare()
-            alertQueue = kombu.Queue(
-                RABBITMQ["alertqueue"], exchange=self.alertExchange
-            )
+            if connString.find('sqs') == 0:
+                self.mqConn.transport_options['region'] = os.getenv('DEFAULT_AWS_REGION', 'us-west-2')
+                self.alertExchange = kombu.Exchange(
+                    name=RABBITMQ["alertexchange"], type="topic", durable=True
+                )
+                self.alertExchange(self.mqConn).declare()
+                alertQueue = kombu.Queue(
+                    os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('/')[4], exchange=self.alertExchange
+                )           
+            else:
+                self.alertExchange = kombu.Exchange(
+                    name=RABBITMQ["alertexchange"], type="topic", durable=True
+                )
+                self.alertExchange(self.mqConn).declare()
+                alertQueue = kombu.Queue(
+                    RABBITMQ["alertqueue"], exchange=self.alertExchange
+                )
             alertQueue(self.mqConn).declare()
             self.mqproducer = self.mqConn.Producer(serializer="json")
             self.log.debug("Kombu configured")

@@ -177,6 +177,7 @@ Resources:
                 OPTIONS_IPV4ATTACKERPREFIXLENGTH=24
                 OPTIONS_ALERTSQSQUEUEURL=${AlertQueueUrl}
                 OPTIONS_MQPROTOCOL=sqs
+                DEFAULT_AWS_REGION=${AWS::Region}
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
             - content: |
                 #!/usr/bin/env python
