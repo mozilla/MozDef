@@ -163,7 +163,7 @@ class AlertTask(Task):
                 self.alertExchange(self.mqConn).declare()
                 alertQueue = kombu.Queue(
                     os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('/')[4], exchange=self.alertExchange
-                )           
+                )
             else:
                 self.alertExchange = kombu.Exchange(
                     name=RABBITMQ["alertexchange"], type="topic", durable=True
