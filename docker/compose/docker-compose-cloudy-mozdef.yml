@@ -6,7 +6,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     command: ["/usr/bin/openresty", "-g", "daemon off;"]
     env_file:
@@ -22,7 +22,7 @@ services:
     networks:
       - default
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 1m30s
       timeout: 10s
       retries: 3
@@ -31,7 +31,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -46,7 +46,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -61,7 +61,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -73,7 +73,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -90,7 +90,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -109,7 +109,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -128,7 +128,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -146,7 +146,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -165,7 +165,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -182,7 +182,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -200,7 +200,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - rabbitmq.env
@@ -218,7 +218,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -239,7 +239,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
@@ -261,7 +261,7 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-file: "5"
+        max-file: "1"
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
