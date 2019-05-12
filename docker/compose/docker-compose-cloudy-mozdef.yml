@@ -25,7 +25,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 1m30s
       timeout: 10s
-      retries: 3
+      retries: 10
   mongodb:
     image: mozdef/mozdef_mongodb:latest
     logging:
