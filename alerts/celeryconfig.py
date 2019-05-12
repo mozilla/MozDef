@@ -18,7 +18,7 @@ if os.getenv("OPTIONS_MQPROTOCOL", "amqp") == "sqs":
     alert_queue_name = os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('/')[4]
     CELERY_DEFAULT_QUEUE = alert_queue_name
     CELERY_QUEUES = {
-        {alert_queue_name}: {"exchange": alert_queue_name, "binding_key": alert_queue_name}
+        alert_queue_name: {"exchange": alert_queue_name, "binding_key": alert_queue_name}
     }
 else:
     BROKER_URL = "amqp://{0}:{1}@{2}:{3}//".format(
