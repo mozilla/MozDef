@@ -41,7 +41,7 @@ for alert in ALERTS.keys():
     CELERYBEAT_SCHEDULE[alert] = {
         "task": alert,
         "schedule": ALERTS[alert]["schedule"],
-        "options": {"queue": "celery-default", "exchange": "celery-default"},
+        "options": {"queue": CELERY_DEFAULT_QUEUE, "exchange": CELERY_DEFAULT_QUEUE},
     }
     # add optional parameters:
     if "args" in ALERTS[alert]:
