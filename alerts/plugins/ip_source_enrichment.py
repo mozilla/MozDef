@@ -12,7 +12,7 @@ import netaddr
 
 CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
-    'ip_source_enrichment.json.conf')
+    'ip_source_enrichment.json')
 
 
 def _find_ip_addresses(string):
