@@ -14,7 +14,7 @@ Copyright (c) 2014 Mozilla Corporation
                     <li><img class="mozillalogo" src="/images/mozilla.svg"></li>
                     <li><a class="mozdef" href="/" title="MOZDEF">MOZDEF</a></li>
                     {{#if isFeature "kibana"}}
-                        <li> <a target="_blank" href={{ resolveKibanaURL mozdef.kibanaURL }}>Kibana</a>
+                        <li> <a target="_blank" href={{ mozdef.kibanaURL }}>Kibana</a>
                             <ul>
                                 <li>
                                     {{#each kibanadashboards as item}}
