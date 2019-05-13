@@ -23,8 +23,8 @@ def _find_ip_addresses(string):
 
     ipv4 = re.findall(ipv4_rx, string)
     ipv6 = map(
-      lambda match: match[0] if isinstance(match, tuple) else match,
-      re.findall(ipv6_rx, string))
+        lambda match: match[0] if isinstance(match, tuple) else match,
+        re.findall(ipv6_rx, string))
 
     return ipv4 + ipv6
 
