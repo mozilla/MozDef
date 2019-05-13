@@ -126,6 +126,8 @@ Resources:
                 # to use relative links to Kibana : https://github.com/mozilla/MozDef/pull/956
                 OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
                 OPTIONS_METEOR_ROOTURL=https://${DomainName}
+                # Disable certain web ui features
+                OPTIONS_REMOVE_FEATURES=ipblocklist,fqdnblocklist,logincounts,globe
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
                 # Future support will be added for cognito backed authentication.
                 client_id=${OIDCClientId}
