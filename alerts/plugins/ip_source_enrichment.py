@@ -63,6 +63,7 @@ def enrich(alert, known_ips):
         for desc in matching_descriptions:
             enriched = desc['format'].format(ip)
 
+            alert['details']['site'] = desc['site']
             alert['summary'] += '; ' + enriched
 
     return alert

@@ -14,13 +14,13 @@ bad_ipv6 = '2001:db8:a0b:12f0::'
 
 known_ips = [
     {
-        'ipVersion': 4,
         'range': good_ipv4 + '/8',
+        'site': 'office1',
         'format': '{0} known',
     },
     {
-        'ipVersion': 6,
         'range': good_ipv6 + '/64',
+        'site': 'office2',
         'format': '{0} known',
     }
 ]
@@ -40,7 +40,7 @@ alert_with_ipv6 = {
     'category': 'bro',
     'tags': ['test'],
     'summary': 'Another test alert',
-    'deails': {
+    'details': {
         'sourceipaddress': good_ipv6,
         'destinationipaddress': bad_ipv6,
         'port': [22, 9001, 24404, 65532]
@@ -67,21 +67,25 @@ class TestIPSourceEnrichment(object):
         enriched = enrich(alert_with_ipv4, known_ips)
 
         assert '{0} known'.format(good_ipv4) in enriched['summary']
+        assert enriched['details']['site'] == 'office1'
 
     def test_ipv6_addrs_enriched(self):
         enriched = enrich(alert_with_ipv6, known_ips)
 
         assert '{0} known'.format(good_ipv6) in enriched['summary']
+        assert enriched['details']['site'] == 'office2'
 
     def test_ipv4_addrs_in_summary_enriched(self):
         enriched = enrich(alert_with_ipv4_in_summary, known_ips)
 
         assert '{0} known'.format(good_ipv4) in enriched['summary']
+        assert enriched['details']['site'] == 'office1'
 
     def test_ipv6_addrs_in_summary_enriched(self):
         enriched = enrich(alert_with_ipv6_in_summary, known_ips)
 
         assert '{0} known'.format(good_ipv6) in enriched['summary']
+        assert enriched['details']['site'] == 'office2'
 
     def test_unrecognized_ipv4_addrs_not_enriched(self):
         enriched = enrich(alert_with_ipv4, known_ips)
