@@ -172,9 +172,11 @@ Resources:
                 ALERTS = {
                     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
                     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
+                    'get_watchlist.AlertWatchList': {'schedule': timedelta(minutes=1)},
                     'guard_duty_probe.AlertGuardDutyProbe': {'schedule': crontab(minute='*/1')},
                     'cloudtrail_logging_disabled.AlertCloudtrailLoggingDisabled': {'schedule': timedelta(minutes=1)},
-                    'cloudtrail_deadman.AlertCloudtrailDeadman': {'schedule': timedelta(hours=1)}
+                    'cloudtrail_public_bucket.AlertCloudtrailPublicBucket': {'schedule': timedelta(minutes=1)},
+                    'cloudtrail_deadman.AlertCloudtrailDeadman': {'schedule': timedelta(hours=1)},
                 }
 
                 ALERT_PLUGINS = [
@@ -273,6 +275,12 @@ Resources:
                 [Install]
                 WantedBy=multi-user.target
               path: /etc/systemd/system/docker-compose.service
+            - content: |
+                [options]
+                api_url = http://rest:8081/getwatchlist
+                jwt_secret = secret
+                use_auth = false
+              path: /opt/mozdef/docker/compose/mozdef_alerts/files/get_watchlist.conf
           runcmd:
             - echo RABBITMQ_PASSWORD=`python3 -c 'import secrets; s = secrets.token_hex(); print(s)'` > /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/rabbitmq.env
