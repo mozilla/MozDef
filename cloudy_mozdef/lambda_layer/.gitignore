@@ -1,0 +1,6 @@
+build/
+!build/.keep
+lambda-layer.zip
+alert-function.zip
+function-latest.zip
+layer-latest.zip
