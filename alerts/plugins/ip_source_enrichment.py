@@ -91,13 +91,13 @@ class message(object):
     {
       "known": [
         {
-          "ipVersion": 4,
           "range": "1.2.3.4/8",
+          "site": "office1",
           "format": "IPv4 {1} is known"
         },
         {
-          "ipVersion": 6,
           "range": "1a2b:3c4d:123::/48",
+          "site": "office2",
           "format": "IPv6 {1} is known"
         }
       ]
