@@ -8,11 +8,6 @@ import { Meteor } from 'meteor/meteor';
 import validator from 'validator';
 import 'pnotify/dist/pnotify.css';
 import PNotify from 'pnotify';
-// import './mozdef.html';
-// import './menu.js';
-//import '/client/layout.js';
-
-
 
 
 if ( Meteor.isClient ) {
