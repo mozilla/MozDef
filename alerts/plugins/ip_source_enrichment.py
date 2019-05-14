@@ -61,7 +61,7 @@ def enrich(alert, known_ips):
             known_ips)
 
         for desc in matching_descriptions:
-            enriched = desc['format'].format(ip)
+            enriched = desc['format'].format(ip, desc['site'])
 
             alert['details']['site'] = desc['site']
             alert['summary'] += '; ' + enriched
@@ -83,7 +83,8 @@ class message(object):
     This plugin will look for IP addresses in any of the values of an
     alert dictionary.  For each IP address found, it will append some
     text to the summary of the alert to provide more information
-    about where the IP originates from if it is recognized.
+    about where the IP originates from if it is recognized.  It will
+    also add a `details.site` value containing the value of `site`.
 
     The expected format of the configuration file,
     `ip_source_enrichment.json.conf`, is as follows:
@@ -94,16 +95,20 @@ class message(object):
         {
           "range": "1.2.3.4/8",
           "site": "office1",
-          "format": "IPv4 {1} is known"
+          "format": "IPv4 {0} is from {1}"
         },
         {
           "range": "1a2b:3c4d:123::/48",
           "site": "office2",
-          "format": "IPv6 {1} is known"
+          "format": "IPv6 {0} is from {1}"
         }
       ]
     }
     ```
+
+    The format string can accept zero to two parameters.  The first
+    will be the IP address found and the second will be the
+    value of the corresponding 'site'.
     '''
 
     def __init__(self):
