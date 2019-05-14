@@ -4,7 +4,7 @@
 *                @pwnbus @mpurzynski @Phrozyn @tristanweir
 
 # Allow review by Gene or Andrew for cloudy MozDef code
-/cloudy_mozdef/  @gene1wood @andrewkrug
+/cloudy_mozdef/  @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
 
 # Entire set can review certain documentation files
 /README.md       @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
