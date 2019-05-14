@@ -13,7 +13,7 @@ Copyright (c) 2014 Mozilla Corporation
                 <ul>
                     <li><a href="/">Home</a></li>
                     {{#if isFeature "kibana"}}
-                        <li> <a target="_blank" href={{ mozdef.kibanaURL }}>Kibana</a>
+                        <li> <a target="_blank" href={{ resolveKibanaURL mozdef.kibanaURL }}>Kibana</a>
                             <ul>
                                 <li>
                                     {{#each kibanadashboards as item}}
@@ -93,7 +93,7 @@ Copyright (c) 2014 Mozilla Corporation
 
 <template name="kibanaDashboardItem">
     <li>
-        <a target=" _blank" href="{{ mozdef.kibanaURL }}#/dashboard/{{id}}">{{name}}</a>
+        <a target=" _blank" href="{{ resolveKibanaURL mozdef.kibanaURL }}#/dashboard/{{id}}">{{name}}</a>
     </li>
 </template>
 
