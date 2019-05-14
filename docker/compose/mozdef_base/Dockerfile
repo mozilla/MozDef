@@ -31,6 +31,7 @@ RUN \
   mkdir /opt/mozdef/envs/mozdef/cron
 
 # Force pycurl to understand we prefer nss backend
+# Pycurl with ssl support is required by kombu in order to use SQS
 ENV PYCURL_SSL_LIBRARY=nss
 
 # Create python virtual environment and install dependencies
