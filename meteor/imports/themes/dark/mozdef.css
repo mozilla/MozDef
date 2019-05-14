@@ -218,9 +218,10 @@ caption, legend {
 /*bootstrap overrides*/
 
 .btn {
-  border: 1px outset;
-  border-radius: 4px;
-}
+    border: 1px outset;
+    border-radius: 4px;
+    color: #999;
+  }
 
 
 input[type="search"] {
