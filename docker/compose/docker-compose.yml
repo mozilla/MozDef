@@ -290,7 +290,7 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_cognito_proxy/Dockerfile
-    command: exit
+    command: bash -c 'exit 0'
     networks:
       - default
 volumes:
