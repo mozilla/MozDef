@@ -197,6 +197,10 @@ if ( Meteor.isClient ) {
         return isFeature( featureName );
     } );
 
+    UI.registerHelper( 'resolveKibanaURL', function(url){
+        return resolveKibanaURL(url);
+    });
+
     UI.registerHelper( 'uiDateFormat', function( adate ) {
         return dateFormat( adate );
     } );
