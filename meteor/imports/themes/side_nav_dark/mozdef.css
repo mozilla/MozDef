@@ -336,19 +336,18 @@ td{
 }
 
 .welcome {
-    background: #fff;
+    background: none;
     height: 180px;
     width: 600px;
     margin-left: 25%;
     text-align: center;
     color: var(--font-focus);
-    border: 1px solid var(--secondary-focus-color);
+    border: none;
     vertical-align: middle;
 }
 
 .mozdeflogo{
   width: 500px;
-  vertical-align: middle;
 }
 
 .tabcontent{

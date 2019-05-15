@@ -1,6 +1,6 @@
 /* default start/login css */
 :root {
-    --bg-primary-color: rgb(32,87,153);
+    --bg-primary-color: #205799;
     --bg-secondary-color: #444444;
     --txt-primary-color: #fff;
     --txt-secondary-color: #000;
@@ -22,4 +22,21 @@ body{
     color: var(--txt-primary-color);
     line-height: normal;
     text-align: left;
+}
+
+.col-xs-offset-3 {
+  margin-left: 28%;
+}
+
+.welcome {
+  height: 180px;
+  width: 800px;
+  margin-left: 25%;
+  color: var(--txt-primary-color);
+  vertical-align: middle;
+}
+
+.mozdeflogo{
+  padding-top: 30%;
+  width: 100%;
 }
