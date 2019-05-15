@@ -156,7 +156,7 @@ Resources:
                 OPTIONS_KIBANAURL=${KibanaURL}
                 # The OPTIONS_METEOR_KIBANAURL uses the reserved word "relative" which triggers MozDef
                 # to use relative links to Kibana : https://github.com/mozilla/MozDef/pull/956
-                OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
+                OPTIONS_METEOR_KIBANAURL=http://relative:9090/_plugin/kibana/
                 OPTIONS_METEOR_ROOTURL=https://${DomainName}
                 METEOR_BACKEND=meteor:3000
                 ESBACKEND=${KibanaDomainOnlyURL}
