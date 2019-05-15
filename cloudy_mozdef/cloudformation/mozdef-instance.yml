@@ -86,7 +86,7 @@ Parameters:
   AlertQueueUrl:
     Type: String
     Description: The url of the alert queue kombu should use for taskExchange.
-Conditions: 
+Conditions:
   OIDCEnabledCondition:
     !Not [!Equals [!Ref OIDCClientId, Unset]]
   OIDCNotEnabledCondition:
@@ -152,10 +152,11 @@ Resources:
                 # Drives the configuration of variables for a variety of containers.
                 OIDC_CLIENT_ID=${OIDCClientId}
                 OPTIONS_ESSERVERS=${ESURL}
+                # Private unauthed kibana url for accessing kibana API
                 OPTIONS_KIBANAURL=${KibanaURL}
                 # The OPTIONS_METEOR_KIBANAURL uses the reserved word "relative" which triggers MozDef
                 # to use relative links to Kibana : https://github.com/mozilla/MozDef/pull/956
-                OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
+                OPTIONS_METEOR_KIBANAURL=http://relative:9090/_plugin/kibana/
                 OPTIONS_METEOR_ROOTURL=https://${DomainName}
                 METEOR_BACKEND=meteor:3000
                 ESBACKEND=${KibanaDomainOnlyURL}
