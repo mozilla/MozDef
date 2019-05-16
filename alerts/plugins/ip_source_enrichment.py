@@ -49,22 +49,29 @@ def enrich(alert, known_ips):
 
         return []
 
+
+    def ip_in_range(ip):
+        return lambda known: netaddr.IPAddress(ip) in netaddr.IPSet([known['range']])
+
+
     ips = find_ips(alert)
 
     alert = alert.copy()
+        
+    alert['details']['sites'] = []
 
     for ip in set(ips):
-        ip_address = netaddr.IPAddress(ip)
-
-        matching_descriptions = filter(
-            lambda known: ip_address in netaddr.IPSet([known['range']]),
-            known_ips)
+        matching_descriptions = filter(ip_in_range(ip), known_ips)
 
         for desc in matching_descriptions:
             enriched = desc['format'].format(ip, desc['site'])
-
-            alert['details']['site'] = desc['site']
+            
             alert['summary'] += '; ' + enriched
+
+            alert['details']['sites'].append({
+                'ip': ip,
+                'site': desc['site'],
+            })
 
     return alert
 
