@@ -83,8 +83,7 @@ class message(object):
     This plugin will look for IP addresses in any of the values of an
     alert dictionary.  For each IP address found, it will append some
     text to the summary of the alert to provide more information
-    about where the IP originates from if it is recognized.  It will
-    also add a `details.site` value containing the value of `site`.
+    about where the IP originates from if it is recognized.
 
     The expected format of the configuration file,
     `ip_source_enrichment.json.conf`, is as follows:
@@ -109,6 +108,26 @@ class message(object):
     The format string can accept zero to two parameters.  The first
     will be the IP address found and the second will be the
     value of the corresponding 'site'.
+
+    The modified alert will have a `details.sites` field added to it,
+    with the following form:
+
+    ```json
+    {
+      "details": {
+        "sites": [
+          {
+            "ip": "1.2.3.4",
+            "site": "office1"
+          },
+          {
+            "ip": "1a2b:3c4d:123::",
+            "site": "office2"
+          }
+        ]
+      }
+    }
+    ```
     '''
 
     def __init__(self):

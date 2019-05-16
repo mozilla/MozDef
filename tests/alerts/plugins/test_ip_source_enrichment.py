@@ -67,25 +67,29 @@ class TestIPSourceEnrichment(object):
         enriched = enrich(alert_with_ipv4, known_ips)
 
         assert '{0} known'.format(good_ipv4) in enriched['summary']
-        assert enriched['details']['site'] == 'office1'
+        assert len(enriched['details']['sites']) == 1
+        assert enriched['details']['sites'][0]['site'] == 'office1'
 
     def test_ipv6_addrs_enriched(self):
         enriched = enrich(alert_with_ipv6, known_ips)
 
         assert '{0} known'.format(good_ipv6) in enriched['summary']
-        assert enriched['details']['site'] == 'office2'
+        assert len(enriched['details']['sites']) == 1
+        assert enriched['details']['sites'][0]['site'] == 'office2'
 
     def test_ipv4_addrs_in_summary_enriched(self):
         enriched = enrich(alert_with_ipv4_in_summary, known_ips)
 
         assert '{0} known'.format(good_ipv4) in enriched['summary']
-        assert enriched['details']['site'] == 'office1'
+        assert len(enriched['details']['sites']) == 1
+        assert enriched['details']['sites'][0]['site'] == 'office1'
 
     def test_ipv6_addrs_in_summary_enriched(self):
         enriched = enrich(alert_with_ipv6_in_summary, known_ips)
 
         assert '{0} known'.format(good_ipv6) in enriched['summary']
-        assert enriched['details']['site'] == 'office2'
+        assert len(enriched['details']['sites']) == 1
+        assert enriched['details']['sites'][0]['site'] == 'office2'
 
     def test_unrecognized_ipv4_addrs_not_enriched(self):
         enriched = enrich(alert_with_ipv4, known_ips)
