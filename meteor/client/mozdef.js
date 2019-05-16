@@ -5,20 +5,9 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor';
-import { Template } from 'meteor/templating';
 import validator from 'validator';
-import '/imports/collections.js';
-import '/imports/settings.js';
-import '/imports/helpers.js';
-import '/client/js/jquery.highlight.js';
-import PNotify from 'pnotify';
 import 'pnotify/dist/pnotify.css';
-import './mozdef.html';
-import './menu.html';
-import './menu.js';
-import '/client/layout.js';
-import '/public/css/dropdowns.css';
-
+import PNotify from 'pnotify';
 
 
 if ( Meteor.isClient ) {
@@ -35,9 +24,9 @@ if ( Meteor.isClient ) {
         Session.set( 'blockIPipaddress', '' );
         Session.set( 'blockFQDN', '' );
         Session.set( 'watchItemwatchcontent', '' );
+        Session.set( 'menuname', 'menu' );
         getAllPlugins();
-        // use a default theme, overridden later by login per user
-        require( '/imports/themes/classic/mozdef.css' );
+
     } );
 
     prefs = function() {
@@ -170,32 +159,13 @@ if ( Meteor.isClient ) {
         return result
     };
 
-    Template.hello.helpers( {
-        greeting: function() {
-            if ( typeof console !== 'undefined' )
-                console.log( "mozdef starting" );
-            return "MozDef: The Mozilla Defense Platform";
-        }
-    } );
-
-    Template.hello.events( {
-        'click': function() {
-            // template data, if any, is available in 'this'
-            Session.set( 'displayMessage', 'Welcome &amp; to mozdef.' )
-        }
-    } );
-
-    // loads kibana dashboards
-    Template.menu.helpers( {
-        kibanadashboards: function() {
-            Meteor.call( 'loadKibanaDashboards' );
-            return kibanadashboards.find();
-        }
-    } );
-
     UI.registerHelper( 'isFeature', function( featureName ) {
         return isFeature( featureName );
     } );
+
+    UI.registerHelper( 'resolveKibanaURL', function(url){
+        return resolveKibanaURL(url);
+    });
 
     UI.registerHelper( 'uiDateFormat', function( adate ) {
         return dateFormat( adate );
@@ -360,7 +330,7 @@ if ( Meteor.isClient ) {
         anelement.children( '.hostname' ).each( function( index ) {
             hosttext = $( this ).text();
             $( this ).append( '<b></b>' );
-            var searchDomain = getSetting( 'kibanaURL' );
+            var searchDomain = resolveKibanaURL(getSetting( 'kibanaURL' ));
             searchPath = "#/discover?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-1h,mode:quick,to:now))&_a=(columns:!(_source),index:events-weekly,interval:auto,query:(query_string:(analyze_wildcard:!t,query:'hostname:" + hosttext + "')),sort:!(utctimestamp,desc))"
             searchURL = searchDomain + searchPath;
             $( this ).wrap( "<a href=" + searchURL + " target='_blank'></a>" );
@@ -378,6 +348,10 @@ if ( Meteor.isClient ) {
         if ( Meteor.user() ) {
             return preferences.findOne( { 'userId': Meteor.user().profile.email } );
         }
+    } )
+
+    UI.registerHelper( 'menuName', function() {
+        return Session.get( 'menuname' );
     } )
 
     //Notify messages for the UI
@@ -498,12 +472,18 @@ if ( Meteor.isClient ) {
 
                 } else {
                     //console.log( 'client found preferences', preferenceRecord );
-
                     // import the preferred theme elements
+                    // html must be 'imported' from somewhere other than the 'import'
+                    // directory (hence the duplicate themes directory)
                     if ( preferenceRecord.theme == 'Dark' ) {
                         require( '/imports/themes/dark/mozdef.css' );
                     } else if ( preferenceRecord.theme == 'Light' ) {
                         require( '/imports/themes/light/mozdef.css' )
+                    } else if ( preferenceRecord.theme == 'Dark Side Nav' ) {
+                        require( '/client/themes/side_nav_dark/menu.html' )
+                        require( '/imports/themes/side_nav_dark/menu.js' )
+                        Session.set( 'menuname', 'side_nav_menu' );
+                        require( '/imports/themes/side_nav_dark/mozdef.css' );
                     } else {
                         require( '/imports/themes/classic/mozdef.css' );
                     }
@@ -511,4 +491,11 @@ if ( Meteor.isClient ) {
             } );
 
     } );
+
+    // finally,load the default starting point
+    // use a default theme and menu, overridden later by login per user preference
+    require( '/client/themes/none/menu-start.html' );
+    require( '/client/themes/none/menu-start.css' );
+    require( '/client/menu.html' );
+    require( '/client/menu.js' );
 }
