@@ -8,7 +8,6 @@
 from celery.schedules import crontab, timedelta
 import time
 import logging
-import os
 
 ALERTS = {
     # 'pythonfile.pythonclass':{'schedule': crontab(minute='*/10')},
@@ -32,14 +31,9 @@ RABBITMQ = {
     'alertqueue': 'mozdef.alert'
 }
 
-if os.getenv('OPTIONS_ESSERVERS'):
-    ES = {
-        'servers': [os.getenv('OPTIONS_ESSERVERS')]
-    }
-else:
-    ES = {
-        'servers': ['http://localhost:9200']
-    }
+ES = {
+    'servers': ['http://localhost:9200']
+}
 
 LOGGING = {
     'version': 1,
