@@ -2,3 +2,5 @@ function-latest.zip
 layer-latest.zip
 build/lib/*
 build/python/*
+lib/*
+python/*
