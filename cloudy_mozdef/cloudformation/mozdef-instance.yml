@@ -471,6 +471,7 @@ Resources:
           SessionCookieName: mozdefMeteor
           TokenEndpoint: !Ref OIDCTokenEndpoint
           UserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+          Scope: "openid email"
         Order: 1
       - Type: forward
         Order: 2
