@@ -166,7 +166,6 @@ Resources:
                 # Future support will be added for cognito backed authentication.
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
-                discovery_url=${OIDCDiscoveryURL}
                 backend=http://meteor:3000
                 redirect_uri_path=/redirect_uri
                 httpsredir=no
