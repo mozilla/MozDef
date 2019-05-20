@@ -54,6 +54,8 @@ Metadata:
         default: OIDC oauth token endpoint.
       OIDCUserInfoEndpoint:
         default: OIDC user info endpoint.
+      ALBBasicAuthSecret:
+        default: Default basic authentication password, if enabled.
 Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
