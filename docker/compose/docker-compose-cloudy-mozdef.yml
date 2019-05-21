@@ -8,7 +8,6 @@ services:
       options:
         max-file: "1"
         max-size: "10m"
-    command: ["/usr/bin/openresty", "-g", "daemon off;"]
     env_file:
       - cloudy_mozdef.env
     restart: always
