@@ -215,6 +215,19 @@ Resources:
       - Key: stack
         Value: !Ref AWS::StackName
       TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-cloudtrail.yml ] ]
+  MozDefVPCFlowLogs:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !Ref VpcId
+        MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
+        MozDefSQSQueueUrl: !GetAtt MozDefSQS.Outputs.SQSQueueUrl
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-vpc-flow-logs.yml ] ]
   CloudFormationLambdaIAMRole:
     Type: AWS::IAM::Role
     Properties:
