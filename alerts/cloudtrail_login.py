@@ -16,8 +16,8 @@ class AlertCloudtrailLogin(AlertTask):
         search_query.add_must([
             TermMatch('type', 'cloudtrail'),
             TermMatch('hostname', 'signin.amazonaws.com'),
-            TermMatch('eventname', 'ConsoleLogin'),
             TermMatch('category', 'AwsConsoleSignIn'),
+            TermMatch('details.eventname', 'ConsoleLogin'),
             TermMatch('details.responseelements.consolelogin', 'Success'),
             ExistsMatch('details.useridentity.username')
         ])
@@ -25,23 +25,18 @@ class AlertCloudtrailLogin(AlertTask):
         search_query.add_must_not(TermMatch('details.useridentity.username', 'HIDDEN_DUE_TO_SECURITY_REASONS'))
 
         self.filtersManual(search_query)
+        self.searchEventsSimple()
+        self.walkEvents()
 
-        # Search aggregations on field 'username', keep X samples of events at most
-        self.searchEventsAggregated('details.useridentity.username', samplesLimit=10)
-        # alert when >= X matching events in an aggregation
-        self.walkAggregations(threshold=5)
-
-    def onEvent(self, aggreg):
+    def onEvent(self, event):
         category = 'authentication'
         tags = ['cloudtrail']
         severity = 'NOTICE'
 
-        source = set()
-        for event in aggreg["allevents"]:
-            source.add(event['_source']['details']['sourceipaddress'])
+        # source = set()
+        # for event in aggreg["allevents"]:
+        #    source.add(event['_source']['details']['sourceipaddress'])
 
-        summary = "Cloudtrail Event: Multiple successful logins for {0} from {1}".format(
-            aggreg["value"], ",".join(sorted(source))
-        )
+        summary = "Cloudtrail Event: Multiple successful logins"
 
-        return self.createAlertDict(summary, category, tags, aggreg["events"], severity)
+        return self.createAlertDict(summary, category, tags, [event], severity)
