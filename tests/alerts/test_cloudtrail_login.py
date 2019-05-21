@@ -35,6 +35,7 @@ class TestCloudtrailLogin(AlertTestSuite):
     # This event is an alternate source that we'd want to aggregate
     default_event2 = AlertTestSuite.copy(default_event)
     default_event2["_source"]["details"]["sourceipaddress"] = "10.1.1.2"
+    default_event2["_source"]["summary"] = "10.1.1.2 performed ConsoleLogin in signin.amazonaws.com"
 
     # This alert is the expected result from running this task
     default_alert = {
