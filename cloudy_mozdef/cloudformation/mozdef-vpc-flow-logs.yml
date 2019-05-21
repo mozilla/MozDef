@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Pipeline to send VPC Flow Logs to MozDef
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-dc8eacb4
+    Description: 'The VPC ID of the VPC to deploy in (Example : vpc-abcdef12)'
+Resources:
+  MozDefVPCFlowLogsSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 1
+  FlowLogRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowWriteCloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: "*"
+  FlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      DeliverLogsPermissionArn: !GetAtt FlowLogRole.Arn
+      LogDestination: !GetAtt LogGroup.Arn
+      ResourceId: !Ref VpcId
+      ResourceType: VPC
+      TrafficType: ALL
+  FlowLogProcessorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: AllowSendToSQS
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:DeleteMessage
+                  - sqs:DeleteMessageBatch
+                  - sqs:GetQueueAttributes
+                  - sqs:GetQueueUrl
+                  - sqs:SendMessage
+                  - sqs:SendMessageBatch
+                Resource: !GetAtt MozDefVPCFlowLogsSQSQueue.Arn
+  FlowLogProcessor:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import os
+          def lambda_handler(event, context):
+              print(os.getenv('SQS_ARN'))
+      Description: Transform VPC Flow logs into MozDef events
+      Environment:
+        Variables:
+          SQS_ARN: !GetAtt MozDefVPCFlowLogsSQSQueue.Arn
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt FlowLogProcessorRole.Arn
+      Runtime: python3.7
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+      Timeout: 30
+  FlowLogSubscriptionFilter:
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      DestinationArn: !GetAtt FlowLogProcessor.Arn
+      FilterPattern: ""
+      LogGroupName: String
+      RoleArn: String
+Outputs:
+  MozDefVPCFlowLogsSQSQueueArn:
+    Description: ARN of the MozDef VPC Flow Logs SQS Queue
+    Value: !GetAtt MozDefVPCFlowLogsSQSQueue.Arn
+  MozDefVPCFlowLogsSQSQueueName:
+    Description: Name of the MozDef VPC Flow Logs SQS Queue
+    Value: !GetAtt MozDefVPCFlowLogsSQSQueue.QueueName
