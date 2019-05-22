@@ -25,18 +25,25 @@ class AlertCloudtrailLogin(AlertTask):
         search_query.add_must_not(TermMatch('details.useridentity.username', 'HIDDEN_DUE_TO_SECURITY_REASONS'))
 
         self.filtersManual(search_query)
-        self.searchEventsSimple()
-        self.walkEvents()
 
-    def onEvent(self, event):
+        # Search aggregations on field 'details.useridentity.username', keep X samples of
+        # events at most
+        self.searchEventsAggregated("details.useridentity.username", samplesLimit=10)
+        # alert when >= X matching events in an aggregation
+        # I think it makes sense to alert every time here
+        self.walkAggregations(threshold=2)
+
+    def onEvent(self, aggreg):
         category = 'authentication'
         tags = ['cloudtrail']
         severity = 'NOTICE'
 
-        # source = set()
-        # for event in aggreg["allevents"]:
-        #    source.add(event['_source']['details']['sourceipaddress'])
+        sourceip = set()
+        for event in aggreg["allevents"]:
+            sourceip.add(event['_source']['details']['sourceipaddress'])
 
-        summary = "Cloudtrail Event: Multiple successful logins"
+        summary = "Cloudtrail Event: Many logins by user: {0} from many IPs: {1}".format(
+            aggreg["value"], ",".join(sorted(sourceip))
+        )
 
-        return self.createAlertDict(summary, category, tags, [event], severity)
+        return self.createAlertDict(summary, category, tags, aggreg["events"], severity)

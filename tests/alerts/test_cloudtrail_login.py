@@ -30,31 +30,30 @@ class TestCloudtrailLogin(AlertTestSuite):
     }
 
     # This event is an alternate source that we'd want to aggregate
-    # default_event2 = AlertTestSuite.copy(default_event)
-    # default_event2["_source"]["details"]["sourceipaddress"] = "10.1.1.2"
+    default_event2 = AlertTestSuite.copy(default_event)
+    default_event2["_source"]["details"]["sourceipaddress"] = "10.1.1.2"
 
     # This alert is the expected result from running this task
     default_alert = {
         "category": "authentication",
         "tags": ['cloudtrail'],
         "severity": "NOTICE",
-        "summary": 'Cloudtrail Event: Multiple successful logins',
+        "summary": 'Cloudtrail Event: Many logins by user: randomuser from many IPs: 1.2.3.4, 10.1.1.2',
     }
-
-    # default_alert_aggregated = AlertTestSuite.copy(default_alert)
-    # default_alert_aggregated["summary"] = 'Cloudtrail Event: Multiple successful logins for randomuser'
 
     test_cases = []
 
+    events1 = AlertTestSuite.create_events(default_event, 2)
+    events2 = AlertTestSuite.create_events(default_event2, 2)
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
-            events=AlertTestSuite.create_events(default_event, 1),
-            expected_alert=default_alert
+            events=events1 + events2,
+            expected_alert=default_alert,
         )
     )
 
-    events = AlertTestSuite.create_events(default_event, 10)
+    events = AlertTestSuite.create_events(default_event, 3)
     for event in events:
         event['_source']['category'] = 'bad'
     test_cases.append(
@@ -65,7 +64,7 @@ class TestCloudtrailLogin(AlertTestSuite):
     )
 
     events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
+    for event in events1:
         event['_source']['details']['useridentity']['username'] = 'HIDDEN_DUE_TO_SECURITY_REASONS'
     test_cases.append(
         NegativeAlertTestCase(
@@ -95,13 +94,3 @@ class TestCloudtrailLogin(AlertTestSuite):
             events=events,
         )
     )
-
-    # events1 = AlertTestSuite.create_events(default_event, 10)
-    # events2 = AlertTestSuite.create_events(default_event2, 10)
-    # test_cases.append(
-    #     PositiveAlertTestCase(
-    #         description="Positive test with default events and default alert expected - different sources",
-    #         events=events1 + events2,
-    #         expected_alert=default_alert_aggregated,
-    #     )
-    # )
