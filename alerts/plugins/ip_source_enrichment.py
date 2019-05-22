@@ -82,7 +82,8 @@ def _load_config(file_path):
     Read and parse a file from disk as JSON into a dictionary.
     '''
 
-    return {}
+    with open(file_path) as config_file:
+        return json.load(config_file)
 
 
 class message(object):
