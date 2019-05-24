@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CodeBuild CI/CD Job to build on commit
+Mappings:
+  VariableMap:
+    Variables:
+      S3BucketToPublishCloudFormationTemplatesTo: public.us-west-2.infosec.mozilla.org
+      CloudWatchLogGroupName: MozDefCI
+      CloudWatchLogStreamName: build
+Resources:
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: MozDefCodeBuild
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: ManagePackerEC2Instance
+                Effect: Allow
+                Action:
+                  - ec2:DeleteVolume
+                  - ec2:TerminateInstances
+                  - ec2:ModifyInstanceAttribute
+                  - ec2:StopInstances
+                  - ec2:AttachVolume
+                  - ec2:DetachVolume
+                  - ec2:DeleteSnapshot
+                  - ec2:CreateSnapshot
+                Resource: '*'
+                Condition:
+                  StringEqualsIfExists:
+                    'ec2:ResourceTag/app': packer-builder-mozdef
+              - Sid: UploadCloudFormationTemplatesToS3
+                Effect: Allow
+                Action:
+                  - s3:PutObject*
+                  - s3:GetObject*
+                Resource: !Join [ '', [ 'arn:aws:s3::', !FindInMap [ 'VariableMap', 'Variables', 'S3BucketToPublishCloudFormationTemplatesTo' ], '/*' ] ]
+              - Sid: ListS3BucketContents
+                Effect: Allow
+                Action:
+                  - s3:ListBucket*
+                Resource: !Join [ '', [ 'arn:aws:s3::', !FindInMap [ 'VariableMap', 'Variables', 'S3BucketToPublishCloudFormationTemplatesTo' ] ] ]
+              - Sid: CreatePackerEC2Instance
+                Effect: Allow
+                Action:
+                  - ec2:CreateKeyPair
+                  - ec2:CreateVolume
+                  - ec2:CreateImage
+                  - ec2:CreateSecurityGroup
+                  - ec2:CreateTags
+                  - ec2:ModifyImageAttribute
+                  - ec2:DeregisterImage
+                  - ec2:CopyImage
+                  - ec2:RegisterImage
+                  - ec2:RunInstances
+                  - ec2:DeleteSecurityGroup
+                  - ec2:AuthorizeSecurityGroupIngress
+                  - ec2:DeleteKeyPair
+                Resource: '*'
+              - Sid: ReadEC2
+                Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeRegions
+                  - ec2:DescribeSnapshots
+                  - ec2:DescribeVolumes
+                  - ec2:DescribeInstanceStatus
+                  - ec2:DescribeTags
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeImages
+                  - ec2:DescribeImageAttribute
+                  - ec2:DescribeSubnets
+                Resource: '*'
+              - Sid: ReadSSMParameters
+                Effect: Allow
+                Action: ssm:GetParameter
+                Resource: arn:aws:ssm:*:*:parameter/mozdef/ci/*
+              # I think these are vestigial, created by the CodeBuild UI.
+              # Also they're not even the right resource path since they contain "/aws/codebuild/" but the actual LogGroup that CodeBuild writes to doesn't
+              # e.g. arn:aws:logs:us-west-2:371522382791:log-group:MozDefCI:*
+#              - Sid: NotSure1
+#                Effect: Allow
+#                Action:
+#                  - logs:CreateLogGroup
+#                  - logs:CreateLogStream
+#                  - logs:PutLogEvents
+#                Resource:
+#                  - !Join [ ':', [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group:/aws/codebuild/mozdef' ] ]
+#                  - !Join [ ':', [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group:/aws/codebuild/mozdef:*' ] ]
+#                  - !Join [ ':', [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group:/aws/codebuild/MozDefCI' ] ]
+#                  - !Join [ ':', [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group:/aws/codebuild/MozDefCI:*' ] ]
+              - Sid: NotSure2
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Effect: Allow
+                Resource:
+                  - arn:aws:s3:::codepipeline-us-west-2-*
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: mozdef
+      Description: Builds MozDef AMI, dockers containers,  and runs test suite. Owner is Andrew Krug.
+      BadgeEnabled: True
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: aws/codebuild/docker:18.09.0-1.7.0
+      Source:
+        Type: GITHUB
+        # Auth:  # This information is for the AWS CodeBuild console's use only. Your code should not get or set Auth directly.
+        # SourceIdentifier:  # Not sure what this should be yet
+        BuildSpec: cloudy_mozdef/buildspec.yml
+        Location: https://github.com/mozilla/MozDef
+        ReportBuildStatus: True
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: BASE_REF  # Build on commits to branch reinforce2019
+              Pattern: '^refs/heads/reinforce2019'
+            - Type: BASE_REF  # Build on commits to branch master
+              Pattern: '^refs/heads/master'
+            - Type: HEAD_REF  # Build on tags like v1.2.3 and v1.2.3-testing
+              Pattern: '^refs/tag\/v[0-9]+\.[0-9]+\.[0-9]+(\-(prod|pre|testing))?$'
+      Tags:
+      - Key: app
+        Value: mozdef
+      LogsConfig:
+        CloudWatchLogs:
+          GroupName: !FindInMap [ 'VariableMap', 'Variables', 'CloudWatchLogGroupName' ]
+          Status: ENABLED
+          StreamName: !FindInMap [ 'VariableMap', 'Variables', 'CloudWatchLogStreamName' ]
