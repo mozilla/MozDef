@@ -172,5 +172,5 @@ Resources:
     Type: AWS::Logs::SubscriptionFilter
     Properties:
       DestinationArn: !GetAtt FlowLogProcessor.Arn
-      FilterPattern: ""
+      FilterPattern: '[version, account, eni, source, destination, srcport, destport="22", protocol="6", packets, bytes, windowstart, windowend, action="ACCEPT", flowlogstatus]'
       LogGroupName: !Ref LogGroup
