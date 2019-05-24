@@ -23,7 +23,7 @@ echo "Injecting the region AMI mapping into the mozdef-parent.yml CloudFormation
 sed '/# INSERT MAPPING HERE.*/{
     s/# INSERT MAPPING HERE.*//g
     r '"${AMI_MAP_TEMP_FILE}"'
-}' cloudformation/mozdef-parent.yml > ${TMPDIR}/mozdef-parent-reinforce.yml
+}' cloudformation/mozdef-parent-reinforce.yml > ${TMPDIR}/mozdef-parent-reinforce.yml
 
 echo "Uploading CloudFormation templates to S3 directory ${VERSIONED_BUCKET_URI}/"
 # Sync all .yml files except mozdef-parent.yml
