@@ -43,7 +43,8 @@ Resources:
     Type: AWS::EC2::FlowLog
     Properties:
       DeliverLogsPermissionArn: !GetAtt FlowLogRole.Arn
-      LogDestination: !GetAtt LogGroup.Arn
+      # We can't use !GetAtt LogGroup.Arn because it actually returns and Arn suffixed with ":*"
+      LogDestination: !Join [ ':', [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', !Ref 'LogGroup' ] ]
       ResourceId: !Ref VpcId
       ResourceType: VPC
       TrafficType: ALL
@@ -153,12 +154,6 @@ Resources:
       Principal: !Join [ '.', [ 'logs', !Ref 'AWS::Region', 'amazonaws.com' ] ]
       SourceAccount: !Ref 'AWS::AccountId'
       SourceArn: !GetAtt LogGroup.Arn
-      # LogGroup.Arn claims to be a value like
-      #  arn:aws:logs:us-west-1:123456789012:log-group:/mystack-testgroup-12ABC1AB12A1:*
-      # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-logs-loggroup.html#aws-resource-logs-loggroup-return-values
-      # Which should be correct for SourceArn which is expecting something like
-      # arn:aws:logs:region:123456789123:log-group:TestLambda:*
-      # https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#LambdaFunctionExample
   FlowLogSubscriptionFilter:
     Type: AWS::Logs::SubscriptionFilter
     Properties:
