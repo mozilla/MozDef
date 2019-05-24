@@ -59,7 +59,7 @@
         "cd /opt/mozdef",
         "sudo git checkout {{ user `github_branch`}}",
         "sudo git rev-parse HEAD",
-        "sudo touch docker/compose/cloudy_mozdef.env docker/compose/rabbitmq.env docker/compose/cloudy_mozdef_mq_cloudtrail.env docker/compose/cloudy_mozdef_mq_sns_sqs.env docker/compose/cloudy_mozdef_kibana.env",
+        "sudo touch docker/compose/cloudy_mozdef.env docker/compose/rabbitmq.env docker/compose/cloudy_mozdef_mq_cloudtrail.env docker/compose/cloudy_mozdef_mq_sqs.env docker/compose/cloudy_mozdef_kibana.env",
         "sudo sed --in-place s/latest/{{ user `github_branch`}}/g docker/compose/docker-compose-cloudy-mozdef.yml",
         "sudo docker-compose --file docker/compose/docker-compose-cloudy-mozdef.yml --project-name mozdef pull",
         "sudo rm --recursive --force --verbose /tmp/* /home/ec2-user/.bash_history /root/.ssh /home/ec2-user/.ssh/known_hosts /home/ec2-user/.ssh/authorized_keys"
