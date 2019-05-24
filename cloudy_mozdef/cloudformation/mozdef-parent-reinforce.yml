@@ -102,15 +102,6 @@ Parameters:
     Description: The arn of the sns topic to post a credential back to from the account.  Do not use unless you are deploying this for reinforce workshop.  This will attack the MozDef account.
 # A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
 # INSERT MAPPING HERE : This template does not work in this state. The mapping is replaced with a working AWS region to AMI ID mapping as well as a variable map with the S3TemplateLocationPrefix by cloudy_mozdef/ci/publish_versioned_templates. The resulting functioning CloudFormation template is uploaded to S3 for the version being built.
-Mappings:
-  RegionMap:
-    us-west-2:
-      HVM64: ami-084efd8afd6e93bd1
-    us-east-1:
-      HVM64: ami-0a265236e4027c00d
-  VariableMap:
-    Variables:
-      S3TemplateLocation: https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/reinforce2019/
 Conditions: 
   LeakACredential: !Not [!Equals [!Ref LeakCredentialSNSArn, ""]]
 Resources:
@@ -193,7 +184,10 @@ Resources:
     DependsOn: MozDefIAMRoleAndInstanceProfile
     Properties:
       Parameters:
-        SubnetIds: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
+        SubnetIds: 
+          - !GetAtt MozDefVPC.Outputs.Subnet1
+          - !GetAtt MozDefVPC.Outputs.Subnet2 
+          - !GetAtt MozDefVPC.Outputs.Subnet3
         BlockStoreSizeGB: '100'
         VpcId: !GetAtt MozDefVPC.Outputs.VpcId
         MozDefInstanceSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
