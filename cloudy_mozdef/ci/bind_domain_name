@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Exit on any error
+set -e
+
+DOMAIN_NAME="$1"
+STACK_NAME="$2"
+test -n "${DOMAIN_NAME}" -a -n "${STACK_NAME}"
+
+DOMAIN_NAME_ZONE="${DOMAIN_NAME#*.}."
+ZONE_ID="$(aws route53 list-hosted-zones-by-name --dns-name ${DOMAIN_NAME_ZONE} --query "HostedZones[?Name == '${DOMAIN_NAME_ZONE}'].Id" --output text)"
+INSTANCE_STACK_ARN="$(aws cloudformation describe-stack-resource --stack-name ${STACK_NAME} --logical-resource-id MozDefInstance --query 'StackResourceDetail.PhysicalResourceId' --output text)"
+instance_stack_name_prefix="${INSTANCE_STACK_ARN##*:stack/}"
+INSTANCE_STACK_NAME="${instance_stack_name_prefix%%/*}"
+ELB_ARN="$(aws cloudformation describe-stack-resource --stack-name ${INSTANCE_STACK_NAME} --logical-resource-id MozDefElasticLoadBalancingV2LoadBalancer --query 'StackResourceDetail.PhysicalResourceId' --output text)"
+#elb_name_prefix="${ELB_ARN##*:loadbalancer/app/}"
+#ELB_NAME="${elb_name_prefix%%/*}"
+ELB_DNS_NAME=$(aws elbv2 describe-load-balancers --load-balancer-arns ${ELB_ARN} --query 'LoadBalancers[0].DNSName' --output text)
+ELB_HOSTED_ZONE_ID=$(aws elbv2 describe-load-balancers --load-balancer-arns ${ELB_ARN} --query 'LoadBalancers[0].CanonicalHostedZoneId' --output text)
+CHANGE_BATCH=$(cat <<END_HEREDOC
+{"Changes": [{"Action": "UPSERT", "ResourceRecordSet": {"Name": "${DOMAIN_NAME}", "Type": "A", "AliasTarget": {"HostedZoneId": "${ELB_HOSTED_ZONE_ID}", "DNSName": "${ELB_DNS_NAME}", "EvaluateTargetHealth": true}}}]}
+END_HEREDOC
+)
+echo "Changing Route53 ${DOMAIN_NAME} to ${ELB_DNS_NAME} in ELB Hosted Zone ${ELB_HOSTED_ZONE_ID}"
+CHANGE_ID=$(aws route53 change-resource-record-sets --hosted-zone-id ${ZONE_ID} --change-batch "${CHANGE_BATCH}" --query 'ChangeInfo.Id' --output text)
+CHANGE_STATUS=$(aws route53 get-change --id ${CHANGE_ID} --query 'ChangeInfo.Status' --output text)
+echo "DNS Change is ${CHANGE_STATUS}"
+while [ "${CHANGE_STATUS}" = "PENDING" ]; do
+    echo -n "."
+    sleep 5
+    CHANGE_STATUS=$(aws route53 get-change --id ${CHANGE_ID} --query 'ChangeInfo.Status' --output text)
+done
+echo "DNS Change is ${CHANGE_STATUS}"
