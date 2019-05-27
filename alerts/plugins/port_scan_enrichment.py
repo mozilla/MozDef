@@ -98,8 +98,9 @@ class message(object):
         es_client = ElasticsearchClient(es_address)
 
         search_indices = config.get('searchIndices', [])
+
         self.max_connections = config.get('maxConnections', 0)
-        self.match_tags = config.get('matchTags', ['portscan'])
+        self.match_tags = config.get('matchTags', [])
         self.search_window = config.get('searchWindow', {})
 
         if len(search_indices) == 0:
@@ -107,6 +108,9 @@ class message(object):
 
         if self.max_connections == 0:
             self.max_connections = None
+
+        if len(self.match_tags) == 0:
+            self.match_tags = ['portscan']
 
         if len(self.search_window) == 0:
             self.search_window = {'hours': 24}
