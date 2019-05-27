@@ -4,6 +4,7 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 
+import json
 import os
 
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
@@ -125,6 +126,16 @@ class message(object):
                 self.search_indices)
             
         return message
+
+
+def _load_config(file_path):
+    '''Private
+
+    Load the alert plugin configuration from a file.
+    '''
+
+    with open(file_path) as config_file:
+        return json.load(config_file)
 
 
 def take(ls, n_items=None):
