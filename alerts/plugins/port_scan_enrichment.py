@@ -19,7 +19,6 @@ MISSING_REQUIRED_KEY_ERR_MSG = 'invalid configuration; '\
     'missing key "elasticSearchAddress" must be a URL '\
     'pointing to the ElasticSearch instance used by MozDef'
 
-
 class message(object):
     '''Alert plugin that handles messages (alerts) tagged as containing
     information about a port scan having been detected.  This plugin
@@ -91,9 +90,11 @@ class message(object):
         config = _load_config(CONFIG_FILE)
 
         try:
-            self.es_address = config['elasticSearchAddress']
+            es_address = config['elasticSearchAddress']
         except KeyError:
             raise KeyError(MISSING_REQUIRED_KEY_ERR_MSG)
+
+        es_client = ElasticsearchClient(es_address)
 
         self.search_indices = config.get('searchIndices', [])
         self.max_connections = config.get('maxConnections', 0)
@@ -109,6 +110,15 @@ class message(object):
         if len(self.search_window) == 0:
             self.search_window = { 'hours': 24 }
 
+        # Store our ES client in a closure bound to the plugin object.
+        # The intent behind this approach is to make the interface to
+        # the `enrich` function require dependency injection for testing.
+        def search_fn(query):
+            indices = indices if indices is not None else []
+            return query.execute(es_client, indices=self.search_indices)
+
+        self.search = search_fn
+
 
     def onMessage(self, message):
         alert_tags = message.get('tags', [])
@@ -121,6 +131,7 @@ class message(object):
         if should_enrich:
             return enrich(
                 message,
+                self.search,
                 self.search_window,
                 self.max_connections,
                 self.search_indices)
@@ -147,9 +158,20 @@ def take(ls, n_items=None):
     return ls[:n_items]
 
 
-def enrich(alert, search_window, max_connections, indices):
+def enrich(alert, search_fn, search_window, max_connections):
     '''Enrich an alert with information about recent connections made by
     the 'details.sourceipaddress'.
+
+    `search_fn` is expected to be a function that accepts a single argument,
+    a `SearchQuery` object, and returns a list of results from Elastic Search.
+
+    `search_window` is expected to be a dictionary specifying the amount of
+    time into the past to query for events.
+
+    `max_connections` is expected to be the maximum number of connections to
+    list in the modified alert or else `None` if no limit should be applied.
+
+    Returns a modified alert based on a copy of the original.
     '''
 
     search_query = SearchQuery(**search_window)
@@ -162,9 +184,7 @@ def enrich(alert, search_window, max_connections, indices):
             alert['details']['sourceipaddress'])
     ])
 
-    es_client = ElasticsearchClient(self.es_address)
-
-    results = search_query.execute(es_client, indices=indices) 
+    results = search_fn(search_query)
 
     events = [
         hit.get('_source', {})
