@@ -19,6 +19,7 @@ MISSING_REQUIRED_KEY_ERR_MSG = 'invalid configuration; '\
     'missing key "elasticSearchAddress" must be a URL '\
     'pointing to the ElasticSearch instance used by MozDef'
 
+
 class message(object):
     '''Alert plugin that handles messages (alerts) tagged as containing
     information about a port scan having been detected.  This plugin
@@ -96,29 +97,27 @@ class message(object):
 
         es_client = ElasticsearchClient(es_address)
 
-        self.search_indices = config.get('searchIndices', [])
+        search_indices = config.get('searchIndices', [])
         self.max_connections = config.get('maxConnections', 0)
         self.match_tags = config.get('matchTags', ['portscan'])
         self.search_window = config.get('searchWindow', {})
 
-        if len(self.search_indices) == 0:
-            self.search_indices = ['alerts']
+        if len(search_indices) == 0:
+            search_indices = ['alerts']
 
         if self.max_connections == 0:
             self.max_connections = None
 
         if len(self.search_window) == 0:
-            self.search_window = { 'hours': 24 }
+            self.search_window = {'hours': 24}
 
         # Store our ES client in a closure bound to the plugin object.
         # The intent behind this approach is to make the interface to
         # the `enrich` function require dependency injection for testing.
         def search_fn(query):
-            indices = indices if indices is not None else []
-            return query.execute(es_client, indices=self.search_indices)
+            return query.execute(es_client, indices=search_indices)
 
         self.search = search_fn
-
 
     def onMessage(self, message):
         alert_tags = message.get('tags', [])
@@ -133,9 +132,8 @@ class message(object):
                 message,
                 self.search,
                 self.search_window,
-                self.max_connections,
-                self.search_indices)
-            
+                self.max_connections)
+
         return message
 
 

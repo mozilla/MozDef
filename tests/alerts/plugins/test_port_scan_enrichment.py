@@ -3,6 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
+import os
 import sys
 
 plugin_path = os.path.join(os.path.dirname(__file__), '../../../alerts/plugins')
@@ -64,4 +65,4 @@ class TestPortScanEnrichment(object):
         assert len(enriched['details']['recentconnections']) == 1
         assert enriched['details']['recentconnections'][0]['destinationipaddress'] in ['1.2.3.4', '4.3.2.1']
         assert enriched['details']['recentconnections'][0]['destinationport'] in [80, 443]
-        assert enriched['details']['recentconnections'][0]['timestamp'] in ['30 minutes ago'm 'an hour ago']
+        assert enriched['details']['recentconnections'][0]['timestamp'] in ['30 minutes ago', 'an hour ago']
