@@ -197,6 +197,7 @@ services:
       - default
   rabbitmq:
     image: mozdef/mozdef_rabbitmq:latest
+    init: true
     logging:
       driver: "json-file"
       options:
