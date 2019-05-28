@@ -35,9 +35,9 @@ class AlertWatchList(AlertTask):
         else:
             logger.error('The watchlist request failed. Status {0}.\n'.format(r))
 
-    def process_alert(self, term):
+    def process_alert(self):
         search_query = SearchQuery(minutes=20)
-        content = QueryStringMatch(str(term))
+        content = QueryStringMatch(str(self.watchterm))
         search_query.add_must(content)
         self.filtersManual(search_query)
         self.searchEventsSimple()

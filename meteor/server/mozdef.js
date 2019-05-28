@@ -193,6 +193,7 @@ function registerLoginViaHeader() {
 
         //grab the email from the header
         var userEmail = this.connection.httpHeaders[headerName];
+        console.log( 'target header:', userEmail );
 
         //our authentication logic
         //check for user email header
@@ -203,8 +204,7 @@ function registerLoginViaHeader() {
                 error: handleError( "SSO Login failure: email not found in the 'via' http header" )
             };
         }
-
-        console.log( 'target header:', userEmail );
+        
         console.log( 'handling login request', loginRequest );
 
         //we create a user if needed, and get the userId

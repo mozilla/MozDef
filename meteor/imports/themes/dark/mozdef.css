@@ -227,9 +227,17 @@ caption, legend {
     color: white;
 }
 
-.modal-body .row {
-    color: black;
-}
+.modal-header {
+    color: var(--font-focus);
+  }
+  
+  .modal-body {
+    color: var(--font-focus);
+  }
+  
+  .modal-body .row {
+      color: black;
+  }
 /*bootstrap overrides*/
 
 .btn {

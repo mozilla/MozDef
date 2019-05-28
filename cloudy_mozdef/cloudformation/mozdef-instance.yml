@@ -280,9 +280,8 @@ Resources:
                 OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
             - content: |
-                # This is the additional worker reserved for future use
                 OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
-              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
+              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
             - content: |
                 [Unit]
                 Description=Docker Compose container starter
@@ -312,7 +311,7 @@ Resources:
             - chmod --verbose 600 /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
-            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
             - mkdir --verbose --parents ${EFSMountPoint}
             - echo '*.* @@127.0.0.1:514' >> /etc/rsyslog.conf
             - systemctl enable rsyslog
@@ -471,6 +470,7 @@ Resources:
           SessionCookieName: mozdefMeteor
           TokenEndpoint: !Ref OIDCTokenEndpoint
           UserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+          Scope: "openid email"
         Order: 1
       - Type: forward
         Order: 2
