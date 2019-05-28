@@ -232,6 +232,14 @@ caption, legend {
     color: white;
 }
 
+.modal-header {
+  color: var(--font-focus);
+}
+
+.modal-body {
+  color: var(--font-focus);
+}
+
 .modal-body .row {
     color: black;
 }
