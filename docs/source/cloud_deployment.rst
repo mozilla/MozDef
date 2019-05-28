@@ -31,10 +31,10 @@ MozDef requires the following:
   at the IP address of the Application Load Balancer
 - An OIDC Provider with ClientID, ClientSecret, and Discovery URL
 
-  - Mozilla Uses Auth0 but you can use any OIDC provider you like: Shibboleth,
-    KeyCloak, AWS Cognito, Okta, Ping (etc)
+  - Mozilla uses Auth0 but you can use any OIDC provider you like: Shibboleth,
+    KeyCloak, AWS Cognito, Okta, Ping (etc.)
   - You will need to configure the redirect URI of ``/redirect_uri`` as allowed in
-    your OIDC provider
+    your OIDC provider configuration
 - An ACM Certificate in the deployment region for your DNS name
 - A VPC with three public subnets available.
 
@@ -49,8 +49,7 @@ MozDef requires the following:
 Supported Regions
 ------------------
 
-MozDef for AWS is currently only supported in us-west-2 but will onboard
-additional regions over time.
+MozDef for AWS is currently only supported in us-west-2 but additional regions will be added over time.
 
 
 Architecture

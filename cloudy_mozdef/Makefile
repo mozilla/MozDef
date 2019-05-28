@@ -21,8 +21,9 @@ S3_PROD_BUCKET_PATH	:= mozdef/cf
 S3_PROD_BUCKET_URI	:= s3://$(S3_PROD_BUCKET_NAME)/$(S3_PROD_BUCKET_PATH)
 S3_PROD_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_PROD_BUCKET_NAME)/$(S3_PROD_BUCKET_PATH)/
 
-# OIDC_CLIENT_SECRET is set in an environment variable by running "source aws_parameters.sh"
+# OIDC_CLIENT_SECRET and other secrets are set in an environment variable by running "source aws_parameters.sh"
 OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET)")
+ALB_BASIC_AUTH_SECRET_PARAM_ARG := $(shell test -n "$(ALB_BASIC_AUTH_SECRET_PARAM_ARG)" && echo "ParameterKey=ALBBasicAuthSecret,ParameterValue=$(ALB_BASIC_AUTH_SECRET_PARAM_ARG)")
 
 .PHONY:all
 all:
@@ -45,6 +46,7 @@ create-dev-stack: test ## Create everything you need for a fresh new stack!
 	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
 	  --parameters $(OIDC_CLIENT_SECRET_PARAM_ARG) \
+	               $(ALB_BASIC_AUTH_SECRET_PARAM_ARG) \
 	               $(DEV_STACK_PARAMS) \
 	  --output text
 
@@ -60,6 +62,7 @@ update-dev-stack: test ## Updates the nested stack on AWS
 	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
 	  --parameters $(OIDC_CLIENT_SECRET_PARAM_ARG) \
+	               $(ALB_BASIC_AUTH_SECRET_PARAM_ARG) \
 	               $(DEV_STACK_PARAMS) \
 	  --output text
 

@@ -27,6 +27,7 @@ Metadata:
         - OIDCIssuer
         - OIDCTokenEndpoint
         - OIDCUserInfoEndpoint
+        - ALBBasicAuthSecret
     ParameterLabels:
       VpcId:
         default: VPC ID
@@ -54,6 +55,8 @@ Metadata:
         default: OIDC oauth token endpoint.
       OIDCUserInfoEndpoint:
         default: OIDC user info endpoint.
+      ALBBasicAuthSecret:
+        default: Default basic authentication password, if enabled.
 Parameters:
   VpcId:
     Type: AWS::EC2::VPC::Id
@@ -157,6 +160,7 @@ Resources:
         OIDCIssuer: !Ref OIDCIssuer
         OIDCTokenEndpoint: !Ref OIDCTokenEndpoint
         OIDCUserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+        ALBBasicAuthSecret: !Ref ALBBasicAuthSecret
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
         MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
         DomainName: !Ref DomainName

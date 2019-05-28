@@ -52,7 +52,7 @@ Parameters:
     Type: String
     Default: Unset
     ConstraintDescription: A valid URL
-    Description: "The url of the authorization endpoint found for your oidc provider generall found on (Example: https://auth.example.com/.well-known/openid-configuration)"
+    Description: "The URL of the authorization endpoint found for your OIDC provider generaly found on (Example: https://auth.example.com/.well-known/openid-configuration)"
   OIDCClientId:
     Type: String
     Default: Unset
@@ -86,9 +86,15 @@ Parameters:
   AlertQueueUrl:
     Type: String
     Description: The url of the alert queue kombu should use for taskExchange.
+  ALBBasicAuthSecret:
+    Type: String
+    Default: Unset
+    Description: Default basic authentication password, if enabled.
+    NoEcho: true
 Conditions:
   OIDCEnabledCondition:
     !Not [!Equals [!Ref OIDCClientId, Unset]]
+    !Equals [!Ref ALBBasicAuthSecret, Unset]]
   OIDCNotEnabledCondition:
     !Equals [!Ref OIDCClientId, Unset]
   SSLEnabledCondition:
@@ -166,6 +172,7 @@ Resources:
                 # Future support will be added for cognito backed authentication.
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
+                basic_auth_secret=${ALBBasicAuthSecret}
                 backend=http://meteor:3000
                 redirect_uri_path=/redirect_uri
                 httpsredir=no
