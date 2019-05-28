@@ -27,6 +27,7 @@ Metadata:
         - OIDCIssuer
         - OIDCTokenEndpoint
         - OIDCUserInfoEndpoint
+        - ALBBasicAuthSecret
     ParameterLabels:
       VpcId:
         default: VPC ID
@@ -159,6 +160,7 @@ Resources:
         OIDCIssuer: !Ref OIDCIssuer
         OIDCTokenEndpoint: !Ref OIDCTokenEndpoint
         OIDCUserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+        ALBBasicAuthSecret: !Ref ALBBasicAuthSecret
         CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
         MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
         DomainName: !Ref DomainName
