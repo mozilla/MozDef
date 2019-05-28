@@ -6,4 +6,4 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 source  /opt/mozdef/envs/python/bin/activate
-/opt/mozdef/envs/mozdef/cron/update_geolite_db.py -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
+/opt/mozdef/envs/mozdef/cron/update_geolite_db.py -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf "$@"

@@ -49,6 +49,8 @@ def save_db_data(save_path, db_data):
 def main():
     logger.debug('Starting')
     logger.debug(options)
+    if options.only_update_if_absent and os.path.isfile(options.db_location):
+        return True
     db_data = fetch_db_data(options.db_download_location)
     save_db_data(options.db_location, db_data)
 
@@ -70,6 +72,9 @@ if __name__ == '__main__':
         dest='configfile',
         default=sys.argv[0].replace('.py', '.conf'),
         help="configuration file to use")
+    parser.add_option(
+        "-o", "--only-update-if-absent", action="store_true",
+        help="Only update the geolite DB if it's not present on disk")
     (options, args) = parser.parse_args()
     initConfig()
     initLogger(options)

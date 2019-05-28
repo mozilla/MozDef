@@ -7,3 +7,4 @@ BASH_ENV=/env
 0 0 * * * /opt/mozdef/envs/mozdef/cron/esMaint.sh
 0 8 * * * /opt/mozdef/envs/mozdef/cron/pruneES.sh
 0 0 * * * /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
+@reboot /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh --only-update-if-absent
