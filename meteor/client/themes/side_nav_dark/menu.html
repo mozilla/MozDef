@@ -31,7 +31,7 @@ Copyright (c) 2014 Mozilla Corporation
         </li>
         {{#if isFeature "kibana"}}
         <li>
-          <a target="_blank" href={{mozdef.kibanaURL}}>
+          <a target="_blank" href={{ resolveKibanaURL mozdef.kibanaURL }}>
             <span class="moz">
             <img src="/images/logo-elastic-kibana-dk.svg" width="23" height="20">
             </span>
