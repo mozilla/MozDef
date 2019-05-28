@@ -32,14 +32,14 @@ RABBITMQ = {
     'alertqueue': 'mozdef.alert'
 }
 
+es_server = "http://localhost:9200"
+
 if os.getenv('OPTIONS_ESSERVERS'):
-    ES = {
-        'servers': [os.getenv('OPTIONS_ESSERVERS')]
-    }
-else:
-    ES = {
-        'servers': ['http://localhost:9200']
-    }
+    es_server = os.getenv('OPTIONS_ESSERVERS')
+
+ES = {
+    'servers': [es_server]
+}
 
 LOGGING = {
     'version': 1,
