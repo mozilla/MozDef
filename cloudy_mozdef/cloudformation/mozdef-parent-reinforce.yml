@@ -4,11 +4,6 @@ Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
     - Label:
-        default: VPC Settings
-      Parameters:
-      - VpcId
-      - PublicSubnetIds
-    - Label:
         default: EC2 Instance
       Parameters:
       - InstanceType
@@ -27,11 +22,11 @@ Metadata:
         - OIDCIssuer
         - OIDCTokenEndpoint
         - OIDCUserInfoEndpoint
+    - Label:
+        default: Experimental Features
+      Parameters:
+        - LeakCredentialSNSArn
     ParameterLabels:
-      VpcId:
-        default: VPC ID
-      PublicSubnetIds:
-        default: Public Subnet IDs
       InstanceType:
         default: EC2 Instance Type
       KeyName:
@@ -54,13 +49,8 @@ Metadata:
         default: OIDC oauth token endpoint.
       OIDCUserInfoEndpoint:
         default: OIDC user info endpoint.
+      LeakCredentialSNSArn: Arn of the SNS topic to post admin creds to.
 Parameters:
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-    Description: 'The VPC ID of the VPC to deploy in (Example : vpc-abcdef12)'
-  PublicSubnetIds:
-    Type: List<AWS::EC2::Subnet::Id>
-    Description: 'A comma delimited list of public subnet IDs (Example: subnet-abcdef12,subnet-bcdef123)'
   InstanceType:
     Type: String
     Description: EC2 instance type, e.g. m1.small, m1.large, etc.
@@ -107,14 +97,36 @@ Parameters:
     Type: String
     Default: Unset
     Description: Generally can be found at the .well-known endpoint for your provider.
+  LeakCredentialSNSArn:
+    Type: String
+    Description: The arn of the sns topic to post a credential back to from the account.  Do not use unless you are deploying this for reinforce workshop.  This will attack the MozDef account.
 # A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
 # INSERT MAPPING HERE : This template does not work in this state. The mapping is replaced with a working AWS region to AMI ID mapping as well as a variable map with the S3TemplateLocationPrefix by cloudy_mozdef/ci/publish_versioned_templates. The resulting functioning CloudFormation template is uploaded to S3 for the version being built.
+Conditions: 
+  LeakACredential: !Not [!Equals [!Ref LeakCredentialSNSArn, ""]]
 Resources:
+  LeakedCredentials:
+    Condition: LeakACredential
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        SNSReceiverArn: !Ref LeakCredentialSNSArn
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-credential-leak.yml ] ]
+  MozDefVPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-vpc.yml ] ]
   MozDefSecurityGroups:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        VpcId: !Ref VpcId
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
         SSHIngressCIDR: !Ref SSHIngressCIDR
       Tags:
         - Key: application
@@ -138,11 +150,11 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        VpcId: !Ref VpcId
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
         InstanceType: !Ref InstanceType
         KeyName: !Ref KeyName
         IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
-        AutoScaleGroupSubnetIds: !Join [ ',', !Ref PublicSubnetIds ]
+        AutoScaleGroupSubnetIds: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
         AMIImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', HVM64 ]
         EFSID: !GetAtt MozDefEFS.Outputs.EFSID
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
@@ -172,9 +184,9 @@ Resources:
     DependsOn: MozDefIAMRoleAndInstanceProfile
     Properties:
       Parameters:
-        SubnetIds: !Join [ ',', !Ref PublicSubnetIds ]
+        SubnetIds: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
         BlockStoreSizeGB: '100'
-        VpcId: !Ref VpcId
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
         MozDefInstanceSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         ESInstanceCount: '1'
       Tags:
@@ -187,8 +199,8 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        VpcId: !Ref VpcId
-        SubnetList: !Join [ ',', !Ref PublicSubnetIds ]
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        SubnetList: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
         NumberOfSubnets: !GetAtt NumberOfSubnets.Length
         MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
       Tags:
@@ -219,7 +231,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        VpcId: !Ref VpcId
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
         MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
         MozDefSQSQueueUrl: !GetAtt MozDefSQS.Outputs.SQSQueueUrl
       Tags:
@@ -281,7 +293,10 @@ Resources:
   NumberOfSubnets:
     Type: AWS::CloudFormation::CustomResource
     Properties:
-      Array: !Ref PublicSubnetIds
+      Array: 
+        - !GetAtt MozDefVPC.Outputs.Subnet1
+        - !GetAtt MozDefVPC.Outputs.Subnet2
+        - !GetAtt MozDefVPC.Outputs.Subnet3
       ServiceToken: !GetAtt GetArrayLengthLambdaFunction.Arn
   DoesRoleExistLambdaFunction:
     Type: AWS::Lambda::Function
@@ -322,6 +337,29 @@ Resources:
       RoleName: AWSServiceRoleForAmazonElasticsearchService
       PathPrefix: '/aws-service-role/es.amazonaws.com/'
       ServiceToken: !GetAtt DoesRoleExistLambdaFunction.Arn
+  MozDefAlertWriterEnv:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        PublicSubnetIds: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
+        MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+        ESUrl: !GetAtt MozDefES.Outputs.ElasticsearchURL
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-alert-developer.yml ] ]
+  MozDefVPCFlowLogs:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
+        MozDefSQSQueueUrl: !GetAtt MozDefSQS.Outputs.SQSQueueUrl
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-vpc-flow-logs.yml ] ]
 Outputs:
   LoadBalancerDNSName:
     Description: The DNS name of the ALB hosting MozDef.  If using OIDC or SSL point your DNS at this.  If using basic auth no DNS is necessary.
