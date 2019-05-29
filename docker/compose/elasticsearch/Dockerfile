@@ -28,3 +28,5 @@ VOLUME /var/lib/elasticsearch
 EXPOSE 9200
 
 USER mozdef
+
+CMD ["bin/elasticsearch"]

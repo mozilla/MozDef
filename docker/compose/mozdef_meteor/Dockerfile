@@ -60,3 +60,5 @@ RUN if [ "${METEOR_BUILD}" = "YES" ]; then \
 WORKDIR /opt/mozdef/envs/meteor/mozdef
 
 EXPOSE 3000
+
+CMD ["/wait-for-port.sh", "mongodb:3002", "node", "bundle/main.js"]

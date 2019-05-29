@@ -12,3 +12,5 @@ RUN chmod u+rwx /opt/mozdef/envs/mozdef/examples/demo/sampleevents.sh
 WORKDIR /opt/mozdef/envs/mozdef/examples/demo
 
 USER root
+
+CMD ["/wait-for-container.sh", "bootstrap", "/opt/mozdef/envs/mozdef/examples/demo/sampleevents.sh"]

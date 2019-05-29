@@ -8,7 +8,6 @@ services:
       options:
         max-file: "1"
         max-size: "10m"
-    command: ["/usr/bin/openresty", "-g", "daemon off;"]
     env_file:
       - cloudy_mozdef.env
     restart: always
@@ -36,7 +35,6 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
     volumes:
       - /var/lib/mongodb:/var/lib/mongo
     networks:
@@ -50,7 +48,6 @@ services:
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
-    command: bash -c 'python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/mozdefStateDefaultMappingTemplate.json cron/backup.conf http://kibana:5601'
     depends_on:
       - base
     networks:
@@ -65,7 +62,6 @@ services:
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
-    command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data
   alertactions:
@@ -78,7 +74,6 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: /wait-for-container.sh bootstrap python alert_actions_worker.py -c alert_actions_worker.conf
     depends_on:
       - base
       - alerts
@@ -98,7 +93,6 @@ services:
     volumes:
       - /opt/mozdef/docker/compose/mozdef_alerts/files/config.py:/opt/mozdef/envs/mozdef/alerts/lib/config.py
     restart: always
-    command: /wait-for-container.sh bootstrap celery -A celeryconfig worker --loglevel=info --beat
     depends_on:
       - base
       - bootstrap
@@ -114,7 +108,6 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: /wait-for-container.sh bootstrap cd / && bash launch_cron
     volumes:
       - cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
@@ -133,7 +126,6 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: /wait-for-port.sh rabbitmq:5672 python index.py -c index.conf
     depends_on:
       - base
       - bootstrap
@@ -151,7 +143,6 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: /wait-for-port.sh mongodb:3002 node bundle/main.js
     depends_on:
       - mongodb
       - rest
@@ -170,7 +161,6 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: /wait-for-container.sh bootstrap python index.py -c index.conf
     depends_on:
       - base
       - mongodb
@@ -187,7 +177,6 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: /wait-for-port.sh rabbitmq:5672 /usr/sbin/syslog-ng --no-caps -F
     depends_on:
       - loginput
     ports:
@@ -205,7 +194,6 @@ services:
     env_file:
       - rabbitmq.env
     restart: always
-    command: rabbitmq-server
     ports:
        - 5672:5672
        - 15672:15672 # Admin interface
@@ -223,7 +211,6 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: /wait-for-container.sh bootstrap python esworker_eventtask.py -c esworker_eventtask.conf
     scale: 1
     depends_on:
       - base
@@ -245,7 +232,7 @@ services:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_cloudtrail.env
     restart: always
-    command: /wait-for-container.sh bootstrap python esworker_cloudtrail.py -c esworker_cloudtrail.conf
+    command: ["/wait-for-container.sh", "bootstrap", "python", "esworker_cloudtrail.py", "-c", "esworker_cloudtrail.conf"]
     scale: 1
     depends_on:
       - base
@@ -267,7 +254,7 @@ services:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_sqs.env
     restart: always
-    command: /wait-for-container.sh bootstrap python esworker_sqs.py -c esworker_sqs.conf
+    command: ["/wait-for-container.sh", "bootstrap", "python", "esworker_sqs.py", "-c", "esworker_sqs.conf"]
     scale: 1
     depends_on:
       - base

@@ -9,7 +9,6 @@ services:
       cache_from:
         - mozdef/mozdef_elasticsearch
         - mozdef_elasticsearch:latest
-    command: bin/elasticsearch
     restart: always
     volumes:
       - elasticsearch:/var/lib/elasticsearch
@@ -26,7 +25,6 @@ services:
         - mozdef/mozdef_rabbitmq
         - mozdef_rabbitmq:latest
     restart: always
-    command: rabbitmq-server
     volumes:
       - rabbitmq:/var/lib/rabbitmq
     # ports:
@@ -43,7 +41,6 @@ services:
         - mozdef/mozdef_mongodb
         - mozdef_mongodb:latest
     restart: always
-    command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
     volumes:
       - mongodb:/var/lib/mongo
     # ports:
@@ -59,7 +56,6 @@ services:
         - mozdef/mozdef_kibana
         - mozdef_kibana:latest
     restart: always
-    command: /wait-for-port.sh elasticsearch:9200 bin/kibana --elasticsearch=http://elasticsearch:9200
     depends_on:
       - elasticsearch
     networks:
@@ -73,7 +69,6 @@ services:
         - mozdef/mozdef_nginx
         - mozdef_nginx:latest
     restart: always
-    command: /usr/sbin/nginx
     depends_on:
       - kibana
       - meteor
@@ -94,7 +89,6 @@ services:
       cache_from:
         - mozdef/mozdef_base
         - mozdef_base:latest
-    command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
     volumes:
       - geolite_db:/opt/mozdef/envs/mozdef/data
   bootstrap:
@@ -105,7 +99,6 @@ services:
       cache_from:
         - mozdef/mozdef_bootstrap
         - mozdef_bootstrap:latest
-    command: /wait-for-port.sh elasticsearch:9200 /wait-for-port.sh kibana:5601 python initial_setup.py http://elasticsearch:9200 cron/defaultMappingTemplate.json cron/mozdefStateDefaultMappingTemplate.json cron/backup.conf http://kibana:5601
     depends_on:
       - base
       - elasticsearch
@@ -122,7 +115,6 @@ services:
         - mozdef/mozdef_alertactions
         - mozdef_alertactions:latest
     restart: always
-    command: /wait-for-container.sh bootstrap python alert_actions_worker.py -c alert_actions_worker.conf
     depends_on:
       - base
       - elasticsearch
@@ -140,7 +132,6 @@ services:
         - mozdef/mozdef_alerts
         - mozdef_alerts:latest
     restart: always
-    command: /wait-for-container.sh bootstrap celery -A celeryconfig worker --loglevel=info --beat
     depends_on:
       - base
       - elasticsearch
@@ -160,7 +151,6 @@ services:
   #       # This is either 'irc', or 'slack'
   #       BOT_TYPE: slack
   #   restart: always
-  #   command: /wait-for-port.sh rabbitmq:5672 python mozdefbot.py -c mozdefbot.conf
   #   depends_on:
   #     - base
   #     - rabbitmq
@@ -179,7 +169,6 @@ services:
         - mozdef/mozdef_cron
         - mozdef_cron:latest
     restart: always
-    command: /wait-for-container.sh bootstrap crond -n
     volumes:
       - cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
@@ -200,7 +189,6 @@ services:
         - mozdef/mozdef_loginput
         - mozdef_loginput:latest
     restart: always
-    command: /wait-for-port.sh rabbitmq:5672 python index.py -c index.conf
     depends_on:
       - base
       - elasticsearch
@@ -217,7 +205,6 @@ services:
         - mozdef/mozdef_mq_worker
         - mozdef_mq_worker:latest
     restart: always
-    command: /wait-for-container.sh bootstrap python esworker_eventtask.py -c esworker_eventtask.conf
     depends_on:
       - base
       - rabbitmq
@@ -237,7 +224,6 @@ services:
         - mozdef/mozdef_meteor
         - mozdef_meteor:latest
     restart: always
-    command: /wait-for-port.sh mongodb:3002 node bundle/main.js
     depends_on:
       - mongodb
       - rest
@@ -252,7 +238,6 @@ services:
         - mozdef/mozdef_rest
         - mozdef_rest:latest
     restart: always
-    command: /wait-for-container.sh bootstrap python index.py -c index.conf
     depends_on:
       - base
       - elasticsearch
@@ -269,7 +254,6 @@ services:
         - mozdef/mozdef_syslog
         - mozdef_syslog:latest
     restart: always
-    command: /wait-for-port.sh rabbitmq:5672 /usr/sbin/syslog-ng --no-caps -F
     depends_on:
       - loginput
     ports:

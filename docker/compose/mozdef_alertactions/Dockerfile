@@ -10,3 +10,5 @@ RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/alerts
 WORKDIR /opt/mozdef/envs/mozdef/alerts
 
 USER mozdef
+
+CMD ["/wait-for-container.sh", "bootstrap", "python", "alert_actions_worker.py", "-c", "alert_actions_worker.conf"]

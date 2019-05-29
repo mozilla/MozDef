@@ -17,3 +17,5 @@ COPY docker/compose/rabbitmq/files/rabbitmq.config /etc/rabbitmq/
 COPY docker/compose/rabbitmq/files/enabled_plugins /etc/rabbitmq/
 
 EXPOSE 5672 15672
+
+CMD ["rabbitmq-server"]

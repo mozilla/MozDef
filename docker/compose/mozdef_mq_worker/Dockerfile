@@ -10,3 +10,5 @@ RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/mq
 WORKDIR /opt/mozdef/envs/mozdef/mq
 
 USER mozdef
+
+CMD ["/wait-for-container.sh", "bootstrap", "python", "esworker_eventtask.py", "-c", "esworker_eventtask.conf"]

@@ -12,3 +12,5 @@ EXPOSE 8080
 WORKDIR /opt/mozdef/envs/mozdef/loginput
 
 USER mozdef
+
+CMD ["/wait-for-port.sh", "rabbitmq:5672", "python", "index.py", "-c", "index.conf"]

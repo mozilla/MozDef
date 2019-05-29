@@ -19,3 +19,5 @@ COPY docker/compose/mongodb/files/mongod.conf /etc/mongod.conf
 VOLUME /var/lib/mongo
 
 EXPOSE 3002
+
+CMD ["/usr/bin/mongod", "--smallfiles", "--config", "/etc/mongod.conf"]

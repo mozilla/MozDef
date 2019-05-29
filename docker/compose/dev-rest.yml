@@ -6,7 +6,6 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_rest/Dockerfile
     restart: always
-    command: /wait-for-container.sh bootstrap python index.py -c index.conf
     depends_on:
       - base
       - elasticsearch

@@ -28,4 +28,5 @@ RUN crontab /cron_entries.txt
 
 USER root
 WORKDIR /
-CMD ['./launch_cron']
+
+CMD ["/wait-for-container.sh", "bootstrap", "./launch_cron"]

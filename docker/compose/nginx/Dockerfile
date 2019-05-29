@@ -18,3 +18,5 @@ RUN \
 COPY docker/compose/nginx/files/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80 9090
+
+CMD ["/usr/sbin/nginx"]

@@ -12,3 +12,5 @@ EXPOSE 8081
 WORKDIR /opt/mozdef/envs/mozdef/rest
 
 USER mozdef
+
+CMD ["/wait-for-container.sh", "bootstrap", "python", "index.py", "-c", "index.conf"]

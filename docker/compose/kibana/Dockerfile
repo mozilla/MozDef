@@ -15,3 +15,5 @@ COPY docker/compose/kibana/files/kibana.yml /kibana-$KIBANA_VERSION-linux-x86_64
 WORKDIR /kibana-$KIBANA_VERSION-linux-x86_64
 
 EXPOSE 5601
+
+CMD ["/wait-for-port.sh", "elasticsearch:9200", "bin/kibana", "--elasticsearch=http://elasticsearch:9200"]

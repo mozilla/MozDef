@@ -23,3 +23,5 @@ COPY docker/compose/mozdef_syslog/files/syslog-ng.conf /etc/syslog-ng/syslog-ng.
 
 EXPOSE 514/udp
 EXPOSE 514
+
+CMD ["/wait-for-port.sh", "rabbitmq:5672", "/usr/sbin/syslog-ng", "--no-caps", "-F"]

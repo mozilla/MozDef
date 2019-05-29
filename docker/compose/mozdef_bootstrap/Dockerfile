@@ -16,3 +16,5 @@ RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/
 WORKDIR /opt/mozdef/envs/mozdef
 
 USER mozdef
+
+CMD ["/wait-for-port.sh", "elasticsearch:9200", "/wait-for-port.sh", "kibana:5601", "python", "initial_setup.py", "http://elasticsearch:9200", "cron/defaultMappingTemplate.json", "cron/mozdefStateDefaultMappingTemplate.json", "cron/backup.conf", "http://kibana:5601"]

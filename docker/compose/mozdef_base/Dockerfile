@@ -69,3 +69,5 @@ VOLUME /opt/mozdef/envs/mozdef/data
 ENV PATH=/opt/mozdef/envs/python/bin:$PATH
 
 USER root
+
+CMD ["bash", "-c", "su", "-", "mozdef", "-c", "/opt/mozdef/envs/mozdef/cron/update_geolite_db.sh"]
