@@ -383,7 +383,7 @@ Resources:
           Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
       LoadBalancerArn:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
-      Port: 9443
+      Port: 9090
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
   MozDefElasticLoadBalancingV2ListenerKibana:
@@ -531,7 +531,7 @@ Resources:
           Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
       LoadBalancerArn:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
-      Port: 9443
+      Port: 9090
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
 Outputs:
