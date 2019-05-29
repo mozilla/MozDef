@@ -78,7 +78,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'python alert_actions_worker.py -c alert_actions_worker.conf'
+    command: /wait-for-container.sh bootstrap python alert_actions_worker.py -c alert_actions_worker.conf
     depends_on:
       - base
       - alerts
@@ -98,7 +98,7 @@ services:
     volumes:
       - /opt/mozdef/docker/compose/mozdef_alerts/files/config.py:/opt/mozdef/envs/mozdef/alerts/lib/config.py
     restart: always
-    command: bash -c 'celery -A celeryconfig worker --loglevel=info --beat'
+    command: /wait-for-container.sh bootstrap celery -A celeryconfig worker --loglevel=info --beat
     depends_on:
       - base
       - bootstrap
@@ -114,7 +114,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'cd / && bash launch_cron'
+    command: /wait-for-container.sh bootstrap cd / && bash launch_cron
     volumes:
       - cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
@@ -133,7 +133,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'python index.py -c index.conf'
+    command: /wait-for-port.sh rabbitmq:5672 python index.py -c index.conf
     depends_on:
       - base
       - bootstrap
@@ -151,7 +151,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'node bundle/main.js'
+    command: /wait-for-port.sh mongodb:3002 node bundle/main.js
     depends_on:
       - mongodb
       - rest
@@ -170,7 +170,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'python index.py -c index.conf'
+    command: /wait-for-container.sh bootstrap python index.py -c index.conf
     depends_on:
       - base
       - mongodb
@@ -187,7 +187,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c '/usr/sbin/syslog-ng --no-caps -F'
+    command: /wait-for-port.sh rabbitmq:5672 /usr/sbin/syslog-ng --no-caps -F
     depends_on:
       - loginput
     ports:
@@ -223,7 +223,7 @@ services:
     env_file:
       - cloudy_mozdef.env
     restart: always
-    command: bash -c 'python esworker_eventtask.py -c esworker_eventtask.conf'
+    command: /wait-for-container.sh bootstrap python esworker_eventtask.py -c esworker_eventtask.conf
     scale: 1
     depends_on:
       - base
@@ -245,7 +245,7 @@ services:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_cloudtrail.env
     restart: always
-    command: bash -c 'python esworker_cloudtrail.py -c esworker_cloudtrail.conf'
+    command: /wait-for-container.sh bootstrap python esworker_cloudtrail.py -c esworker_cloudtrail.conf
     scale: 1
     depends_on:
       - base
@@ -267,7 +267,7 @@ services:
       - cloudy_mozdef.env
       - cloudy_mozdef_mq_sqs.env
     restart: always
-    command: bash -c 'python esworker_sqs.py -c esworker_sqs.conf'
+    command: /wait-for-container.sh bootstrap python esworker_sqs.py -c esworker_sqs.conf
     scale: 1
     depends_on:
       - base

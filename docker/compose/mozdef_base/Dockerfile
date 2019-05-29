@@ -14,7 +14,7 @@ RUN \
                   libffi-devel \
                   zlib-devel \
                   libcurl-devel \
-                  openssl \ 
+                  openssl \
                   openssl-devel \
                   git \
                   make && \
@@ -33,6 +33,12 @@ RUN \
 # Force pycurl to understand we prefer nss backend
 # Pycurl with ssl support is required by kombu in order to use SQS
 ENV PYCURL_SSL_LIBRARY=nss
+
+COPY docker/compose/wait-for-container.sh /wait-for-container.sh
+COPY docker/compose/wait-for-port.sh /wait-for-port.sh
+RUN \
+  chmod +x /wait-for-container.sh && \
+  chmod +x /wait-for-port.sh
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt

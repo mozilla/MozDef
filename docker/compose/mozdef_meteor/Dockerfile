@@ -11,6 +11,10 @@ ENV PORT=3000
 
 ARG METEOR_BUILD='YES'
 
+COPY docker/compose/wait-for-port.sh /wait-for-port.sh
+RUN \
+  chmod +x /wait-for-port.sh
+
 RUN \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir -p /opt/mozdef/envs/mozdef && \

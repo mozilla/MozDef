@@ -4,9 +4,11 @@ LABEL maintainer="mozdef@mozilla.com"
 
 ENV KIBANA_VERSION 5.6.14
 
+COPY docker/compose/wait-for-port.sh /wait-for-port.sh
+
 RUN \
     curl -s -L https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C / -xz && \
-    cd /kibana-$KIBANA_VERSION-linux-x86_64
+    chmod +x /wait-for-port.sh
 
 COPY docker/compose/kibana/files/kibana.yml /kibana-$KIBANA_VERSION-linux-x86_64/config/kibana.yml
 

@@ -6,7 +6,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_cron/Dockerfile
     restart: always
-    command: bash -c 'sleep 90 && crond -n'
+    command: /wait-for-container.sh bootstrap crond -n
     volumes:
       - ../../cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
