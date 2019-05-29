@@ -178,6 +178,7 @@ Resources:
         MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
         DomainName: !Ref DomainName
         AlertQueueUrl: !GetAtt MozDefSQS.Outputs.AlertTaskSQSQueueUrl
+        ALBBasicAuthSecret: !Ref ALBBasicAuthSecret
       Tags:
         - Key: application
           Value: mozdef
