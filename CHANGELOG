@@ -5,6 +5,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v1.39.0] - 2019-05-29
+### Added
+- Pagination of Web UI tables
+- Added support for SQS in replacement of Rabbitmq for alerts
+- Support for no_auth for watchlist
+- Cron script for closing indexes
+- Documentation on AlertActions
+
+### Changed
+- Removed dependency on '_type' field in Elasticsearch
+
+### Fixed
+- Slackbot reconnects successfully during network errors
+- Relative Kibana URLs now work correctly with protocol
+
+
 ## [v1.38.5] - 2019-04-09
 ### Added
 - Support for CSS themes
@@ -76,7 +92,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased]: https://github.com/mozilla/MozDef/compare/v1.38.5...HEAD
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v1.39.0...HEAD
+[v1.39.0]: https://github.com/mozilla/MozDef/compare/v1.38.5...v1.39.0
 [v1.38.5]: https://github.com/mozilla/MozDef/compare/v1.38.4...v1.38.5
 [v1.38.4]: https://github.com/mozilla/MozDef/compare/v1.38.3...v1.38.4
 [v1.38.3]: https://github.com/mozilla/MozDef/compare/v1.38.2...v1.38.3
