@@ -23,7 +23,7 @@ S3_PROD_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_PROD_BUCKET_NAM
 
 # OIDC_CLIENT_SECRET and other secrets are set in an environment variable by running "source aws_parameters.sh"
 OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET)")
-ALB_BASIC_AUTH_SECRET_PARAM_ARG := $(shell test -n "$(ALB_BASIC_AUTH_SECRET_PARAM_ARG)" && echo "ParameterKey=ALBBasicAuthSecret,ParameterValue=$(ALB_BASIC_AUTH_SECRET_PARAM_ARG)")
+ALB_BASIC_AUTH_SECRET_PARAM_ARG := $(shell test -n "$(ALB_BASIC_AUTH_SECRET)" && echo "ParameterKey=ALBBasicAuthSecret,ParameterValue=$(ALB_BASIC_AUTH_SECRET)")
 
 .PHONY:all
 all:
@@ -38,11 +38,17 @@ packer-build-github: ## Build the base AMI with packer
 	@echo "Branch based build triggered for $(BRANCH)."
 	ci/pack_and_copy $(BRANCH) $(AMI_MAP_TEMP_FILE)
 
-.PHONY: create-dev-stack
-create-dev-stack: test ## Create everything you need for a fresh new stack!
-	@export AWS_REGION=$(AWS_REGION)
+.PHONY: safety-checks
+safety-checks:
 	@echo "Make sure you have an environment variable OIDC_CLIENT_SECRET set."
 	@test -n "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -n "$(OIDC_CLIENT_ID)" -o -z "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -z "$(OIDC_CLIENT_ID)"
+	@echo "Make sure you have either OIDC_CLIENT_ID or ALB_BASIC_AUTH_SECRET set."
+	@test \! \("$(OIDC_CLIENT_ID) = 'Unset'" -a "$(ALB_BASIC_AUTH_SECRET_PARAM_ARG) = 'Unset'"\)
+	@test -n "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -n "$(OIDC_CLIENT_ID)" -o -z "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -z "$(OIDC_CLIENT_ID)"
+
+.PHONY: create-dev-stack
+create-dev-stack: safety-checks test ## Create everything you need for a fresh new stack!
+	@export AWS_REGION=$(AWS_REGION)
 	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
 	  --parameters $(OIDC_CLIENT_SECRET_PARAM_ARG) \
@@ -56,9 +62,8 @@ create-dev-s3-bucket:
 	aws s3api create-bucket --bucket $(S3_DEV_BUCKET_NAME) --acl public-read --create-bucket-configuration LocationConstraint=$(AWS_REGION)
 
 .PHONY: update-dev-stack
-update-dev-stack: test ## Updates the nested stack on AWS
+update-dev-stack: safety-checks test ## Updates the nested stack on AWS
 	@export AWS_REGION=$(AWS_REGION)
-	@test -n "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -n "$(OIDC_CLIENT_ID)" -o -z "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -z "$(OIDC_CLIENT_ID)"
 	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
 	  --parameters $(OIDC_CLIENT_SECRET_PARAM_ARG) \
