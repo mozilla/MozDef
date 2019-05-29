@@ -100,6 +100,11 @@ Parameters:
   LeakCredentialSNSArn:
     Type: String
     Description: The arn of the sns topic to post a credential back to from the account.  Do not use unless you are deploying this for reinforce workshop.  This will attack the MozDef account.
+  ALBBasicAuthSecret:
+    Type: String
+    Default: Unset
+    Description: The secret that you use to authenticate to the MozDef instance using HTTP Basic Authentication.
+    NoEcho: true
 # A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
 # INSERT MAPPING HERE : This template does not work in this state. The mapping is replaced with a working AWS region to AMI ID mapping as well as a variable map with the S3TemplateLocationPrefix by cloudy_mozdef/ci/publish_versioned_templates. The resulting functioning CloudFormation template is uploaded to S3 for the version being built.
 Conditions: 
@@ -173,6 +178,7 @@ Resources:
         MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
         DomainName: !Ref DomainName
         AlertQueueUrl: !GetAtt MozDefSQS.Outputs.AlertTaskSQSQueueUrl
+        ALBBasicAuthSecret: !Ref ALBBasicAuthSecret
       Tags:
         - Key: application
           Value: mozdef
