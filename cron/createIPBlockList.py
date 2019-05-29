@@ -137,12 +137,13 @@ def main():
             {"$project": {"address": 1}},
             {"$limit": options.iplimit}
         ])
-        IPList = []
+        ips = []
         for ip in ipCursor:
-            IPList.append(ip['address'])
+            ips.append(ip['address'])
+        uniq_ranges = netaddr.cidr_merge(ips)
         # to text
         with open(options.outputfile, 'w') as outputfile:
-            for ip in IPList:
+            for ip in uniq_ranges:
                 outputfile.write("{0}\n".format(ip))
         outputfile.close()
         # to s3?
