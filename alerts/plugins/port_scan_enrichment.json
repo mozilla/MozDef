@@ -1,7 +1,7 @@
 {
   "elasticSearchAddress": "http://127.0.0.1:9200",
   "indicesToSearch": [
-    "events-*"
+    "events-weekly"
   ],
   "maxConnections": 32,
   "matchTags": [

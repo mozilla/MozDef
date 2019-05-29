@@ -34,7 +34,7 @@ class message(object):
     {
       "elasticSearchAddress": "http://127.0.0.1:9200",
       "indicesToSearch": [
-        "events-*"
+        "events-weekly"
       ],
       "maxConnections": 32,
       "matchTags": [
@@ -51,7 +51,7 @@ class message(object):
     `elasticSearchAddress` must be provided and must be a URL pointing
     to the ElasticSearch instance containing MozDef alerts.
     `indicesToSearch` is an array of names of indices to search in ES.
-    If not provided or else an empty array, it defaults to `["events-*"]`.
+    If not provided or else an empty array, it defaults to `["events-weekly"]`.
     `maxConnections` is the maximum number of successful
     connections to list.  If set to 0, all will be listed.
     `matchTags` is a list of tags to match against.  This plugin will
