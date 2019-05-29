@@ -94,7 +94,6 @@ Parameters:
 Conditions:
   OIDCEnabledCondition:
     !Not [!Equals [!Ref OIDCClientId, Unset]]
-    !Equals [!Ref ALBBasicAuthSecret, Unset]]
   OIDCNotEnabledCondition:
     !Equals [!Ref OIDCClientId, Unset]
   SSLEnabledCondition:

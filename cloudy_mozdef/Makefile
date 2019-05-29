@@ -25,6 +25,10 @@ S3_PROD_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_PROD_BUCKET_NAM
 OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET)")
 ALB_BASIC_AUTH_SECRET_PARAM_ARG := $(shell test -n "$(ALB_BASIC_AUTH_SECRET)" && echo "ParameterKey=ALBBasicAuthSecret,ParameterValue=$(ALB_BASIC_AUTH_SECRET)")
 
+# Make functions
+eq = $(if $(or $(1),$(2)),$(and $(findstring $(1),$(2)),\
+                              $(findstring $(2),$(1))),1)
+
 .PHONY:all
 all:
 	@echo 'Available make targets:'
@@ -40,11 +44,12 @@ packer-build-github: ## Build the base AMI with packer
 
 .PHONY: safety-checks
 safety-checks:
-	@echo "Make sure you have an environment variable OIDC_CLIENT_SECRET set."
+	@echo "Making sure you have an environment variable OIDC_CLIENT_SECRET set."
 	@test -n "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -n "$(OIDC_CLIENT_ID)" -o -z "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -z "$(OIDC_CLIENT_ID)"
-	@echo "Make sure you have either OIDC_CLIENT_ID or ALB_BASIC_AUTH_SECRET set."
-	@test \! \("$(OIDC_CLIENT_ID) = 'Unset'" -a "$(ALB_BASIC_AUTH_SECRET_PARAM_ARG) = 'Unset'"\)
-	@test -n "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -n "$(OIDC_CLIENT_ID)" -o -z "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -z "$(OIDC_CLIENT_ID)"
+	@echo "Making sure you have either OIDC_CLIENT_ID or ALB_BASIC_AUTH_SECRET set."
+	# If both are equal then you're either leaking the secret, or, most likely, both are equal to string "Unset"
+	# which is unsafe (as it would effectively give you a basic auth password of string "Unset")
+	$(call eq, $(OIDC_CLIENT_ID), $(ALB_BASIC_AUTH_SECRET_PARAM_ARG))
 
 .PHONY: create-dev-stack
 create-dev-stack: safety-checks test ## Create everything you need for a fresh new stack!
