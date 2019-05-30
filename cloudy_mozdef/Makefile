@@ -22,8 +22,8 @@ S3_PROD_BUCKET_URI	:= s3://$(S3_PROD_BUCKET_NAME)/$(S3_PROD_BUCKET_PATH)
 S3_PROD_STACK_URI	:= https://s3-$(AWS_REGION).amazonaws.com/$(S3_PROD_BUCKET_NAME)/$(S3_PROD_BUCKET_PATH)/
 
 # OIDC_CLIENT_SECRET and other secrets are set in an environment variable by running "source aws_parameters.sh"
-OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET)")
-ALB_BASIC_AUTH_SECRET_PARAM_ARG := $(shell test -n "$(ALB_BASIC_AUTH_SECRET)" && echo "ParameterKey=ALBBasicAuthSecret,ParameterValue=$(ALB_BASIC_AUTH_SECRET)")
+OIDC_CLIENT_SECRET_PARAM_ARG := $(shell test -n "$(OIDC_CLIENT_SECRET)" && echo "ParameterKey=OIDCClientSecret,ParameterValue=$(OIDC_CLIENT_SECRET),UsePreviousValue=false")
+ALB_BASIC_AUTH_SECRET_PARAM_ARG := $(shell test -n "$(ALB_BASIC_AUTH_SECRET)" && echo "ParameterKey=ALBBasicAuthSecret,ParameterValue=$(ALB_BASIC_AUTH_SECRET),UsePreviousValue=false")
 
 # Make functions
 eq = $(if $(or $(1),$(2)),$(and $(findstring $(1),$(2)),\
