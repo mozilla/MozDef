@@ -487,25 +487,6 @@ Resources:
       Port: 443
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
-  MozDefElasticLoadBalancingV2ListenerRedirectKibanaSSLOIDC:
-    Type : AWS::ElasticLoadBalancingV2::Listener
-    Condition: SSLEnabledWithOidcCondition
-    Properties:
-      Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
-      DefaultActions:
-      - Type: redirect
-        RedirectConfig:
-          Host: '#{host}'
-          Path: '/#{path}'
-          Protocol: HTTPS
-          Query: '#{query}'
-          Port: '9443'
-          StatusCode: HTTP_302
-      LoadBalancerArn:
-        Ref: MozDefElasticLoadBalancingV2LoadBalancer
-      Port: 9090
-      Protocol: HTTPS
   MozDefElasticLoadBalancingV2ListenerSSLKibanaOIDC:
     Type : AWS::ElasticLoadBalancingV2::Listener
     Condition: SSLEnabledWithOidcCondition
