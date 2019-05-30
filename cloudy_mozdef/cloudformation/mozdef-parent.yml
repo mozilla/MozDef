@@ -78,8 +78,8 @@ Parameters:
     Description: The CIDR of IP addresses from which to allow inbound SSH connections
   DomainName:
     Type: String
-    Description: The fully qualified DNS name you will host CloudyMozDef at.
-    Default: cloudymozdef.security.allizom.org
+    Description: The fully qualified DNS name you will host MozDef at if you want to use a custom domain
+    Default: Unset
   ACMCertArn:
     Type: String
     Default: Unset
