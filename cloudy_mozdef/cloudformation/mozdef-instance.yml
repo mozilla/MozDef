@@ -171,6 +171,7 @@ Resources:
                 # Future support will be added for cognito backed authentication.
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
+                BASIC_AUTH_SECRET=${ALBBasicAuthSecret}
                 basic_auth_secret=${ALBBasicAuthSecret}
                 backend=http://meteor:3000
                 redirect_uri_path=/redirect_uri
