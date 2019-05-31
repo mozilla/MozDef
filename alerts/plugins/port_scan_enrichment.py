@@ -7,7 +7,7 @@
 import json
 import os
 
-from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
@@ -181,7 +181,7 @@ def enrich(alert, search_fn, search_window, max_connections):
     search_query.add_must([
         TermMatch('category', 'bro'),
         TermMatch('source', 'conn'),
-        PhraseMatch(
+        TermMatch(
             'details.sourceipaddress',
             alert['details']['sourceipaddress'])
     ])
