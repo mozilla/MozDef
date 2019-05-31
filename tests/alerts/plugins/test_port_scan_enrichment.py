@@ -12,6 +12,9 @@ sys.path.append(plugin_path)
 from port_scan_enrichment import enrich
 
 
+EXAMPLE_TIMESTAMP = '2016-07-13 22:33:31.625443+00:00'
+
+
 def mock_search_fn(results):
     def search_fn(_query):
         return results
@@ -29,7 +32,7 @@ class TestPortScanEnrichment(object):
                             'destinationipaddress': '1.2.3.4',
                             'destinationport': 80
                         },
-                        'timestamp': '30 minutes ago'
+                        'timestamp': EXAMPLE_TIMESTAMP
                     }
                 },
                 {
@@ -38,7 +41,7 @@ class TestPortScanEnrichment(object):
                             'destinationipaddress': '4.3.2.1',
                             'destinationport': 443
                         },
-                        'timestamp': 'an hour ago'
+                        'timestamp': EXAMPLE_TIMESTAMP
                     }
                 }
             ]
@@ -65,4 +68,4 @@ class TestPortScanEnrichment(object):
         assert len(enriched['details']['recentconnections']) == 1
         assert enriched['details']['recentconnections'][0]['destinationipaddress'] in ['1.2.3.4', '4.3.2.1']
         assert enriched['details']['recentconnections'][0]['destinationport'] in [80, 443]
-        assert enriched['details']['recentconnections'][0]['timestamp'] in ['30 minutes ago', 'an hour ago']
+        assert enriched['details']['recentconnections'][0]['timestamp'] == EXAMPLE_TIMESTAMP
