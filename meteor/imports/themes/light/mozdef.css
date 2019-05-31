@@ -13,6 +13,8 @@ Copyright (c) 2014 Mozilla Corporation
     --txt-secondary-color: #fff;
     --txt-shadow-color:  #aaa;
     --txt-highlight-color: rgba(165, 170, 172, 0.904);
+    --arm-color: #d1b61e;
+    --arm-focus-color: #e7c714a9;
     --a-link-color:  rgb(49, 130, 189);
     --row-color-odd: rgba(30,87,153,.1);
     --row-color-even: #636c85;
@@ -268,9 +270,29 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 .btn {
-  border: 1px outset;
-  border-radius: 4px;
-}
+    border: 1px outset;
+    border-radius: 4px;
+    color: var(--txt-primary-color);
+    background-color: var(--arm-color);
+  }
+  
+  .btn-warning.active,
+  .btn-warning:active,
+  .btn-warning:hover,
+  .open > .dropdown-toggle.btn-warning {
+    color: var(--txt-secondary-color);
+    background-color: var(--arm-focus-color);
+    border-color: var(--arm-color);
+  }
+
+  .btnAlertAcked,
+  .btnAlertAcked.active,
+  .btnAlertAcked:active,
+  .btnAlertAcked:hover > .btn {
+    color: var(--txt-shadow-color);
+    background-color: var(--arm-focus-color);
+    border-color: var(--arm-color);
+  }
 
 
 input[type="search"] {

@@ -11,14 +11,11 @@ Copyright (c) 2014 Mozilla Corporation
     --bg-secondary-color: #2d5fa0;
     --row-color-odd: #2a2f35;
     --row-color-even: #636c85;
-    --ack-edit-color: #a2a9b2;
-    --ack-edit-border-color: #adadad;
-    --ack-edit-focus-color: #557750;
-    --ack-edit-disabled-color: #557750;
     --arm-color: #e69006;
     --arm-focus-color: #d58512;
     --txt-primary-color: #fff;
     --txt-secondary-color: #000;
+    --txt-disabled-color: #576d54;
     --a-link-color: #a2a9b2;
   }
 
@@ -193,23 +190,23 @@ caption, legend {
 .alert.alert-NOTICE {
     --alert-bg-color: #4a6785;
     --alert-color: white;
-  }
+}
 .alert.alert-WARNING {
     --alert-bg-color: #ffd351;
     --alert-color: black;
-  }
+}
 .alert.alert-CRITICAL {
     --alert-bg-color: #d04437;
     --alert-color: white;
-  }
+}
 .alert.alert-INFO {
     --alert-bg-color: #cccccc;
     --alert-color: black;
-  }
+}
 .alert.alert-ERROR {
     --alert-bg-color: #d04437;
     --alert-color: white;
-  }
+}
 
 .alert {
     color: var(--alert-color);
@@ -217,7 +214,7 @@ caption, legend {
     text-transform: uppercase;
     display: table-cell;
     font-weight: bold;
-  }
+}
 
 .alert-row a {
     color: wheat;
@@ -229,22 +226,41 @@ caption, legend {
 
 .modal-header {
     color: var(--font-focus);
-  }
+}
   
   .modal-body {
     color: var(--font-focus);
-  }
+}
   
   .modal-body .row {
       color: black;
-  }
+}
 /*bootstrap overrides*/
 
 .btn {
     border: 1px outset;
     border-radius: 4px;
-    color: #999;
-  }
+    color: var(--txt-primary-color);
+    background-color: var(--arm-color);
+}
+  
+  .btn-warning.active,
+  .btn-warning:active,
+  .btn-warning:hover,
+  .open > .dropdown-toggle.btn-warning {
+    color: var(--txt-secondary-color);
+    background-color: var(--arm-focus-color);
+    border-color: var(--arm-color);
+}
+
+  .btnAlertAcked,
+  .btnAlertAcked.active,
+  .btnAlertAcked:active,
+  .btnAlertAcked:hover > .btn {
+    color: var(--txt-disabled-color);
+    background-color: var(--arm-focus-color);
+    border-color: var(--arm-color);
+}
 
 
 input[type="search"] {
