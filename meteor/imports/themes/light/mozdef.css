@@ -195,23 +195,23 @@ caption, legend {
 .alert.alert-NOTICE {
     --alert-bg-color: #4a6785;
     --alert-color: black;
-  }
+}
 .alert.alert-WARNING {
     --alert-bg-color: #ffd351;
     --alert-color: black;
-  }
+}
 .alert.alert-CRITICAL {
     --alert-bg-color: #d04437;
     --alert-color: black;
-  }
+}
 .alert.alert-INFO {
     --alert-bg-color: #cccccc;
     --alert-color: black;
-  }
+}
 .alert.alert-ERROR {
     --alert-bg-color: #d04437;
     --alert-color: black;
-  }
+}
 
 .alert  {
     color: var(--alert-color);
@@ -219,7 +219,7 @@ caption, legend {
     text-transform: uppercase;
     display: table-cell;
     font-weight: bold;
-  }
+}
 
 .alert-row a {
     color: var(--a-link-color);
@@ -274,7 +274,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     border-radius: 4px;
     color: var(--txt-primary-color);
     background-color: var(--arm-color);
-  }
+}
   
   .btn-warning.active,
   .btn-warning:active,
@@ -283,7 +283,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     color: var(--txt-secondary-color);
     background-color: var(--arm-focus-color);
     border-color: var(--arm-color);
-  }
+}
 
   .btnAlertAcked,
   .btnAlertAcked.active,
@@ -292,7 +292,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     color: var(--txt-shadow-color);
     background-color: var(--arm-focus-color);
     border-color: var(--arm-color);
-  }
+}
 
 
 input[type="search"] {

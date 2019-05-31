@@ -17,7 +17,7 @@ Copyright (c) 2014 Mozilla Corporation
     --txt-secondary-color: #000;
     --txt-disabled-color: #576d54;
     --a-link-color: #a2a9b2;
-  }
+}
 
 /*base css */
 html{
@@ -428,104 +428,104 @@ sidenav {
     -ms-transition: all 400ms ease;
     -o-transition: all 400ms ease;
     transition: all 400ms ease;
-  }
+}
   
   /*pull out triangle*/
+sidenav:after {
+    position: absolute;
+    content: ' ';
+    width: 0;
+    height: 0;
+    right: -75px;
+    top: 50%;
+    border-width: 30px 30px;
+    border-style: solid;
+    border-color: transparent transparent transparent var(--bg-secondary-color);
+}
+sidenav ul {
+    width: 14em;
+    list-style-type: none;
+    margin: auto;
+    padding: 1em;
+}
+sidenav div{
+    margin:auto;
+}
+sidenav:hover {
+    left: 0;
+}
+sidenav .filters-col .row {
+    margin-top: 45px;
+    padding: 0 0.5em;
+}
+sidenav .reset-filter {
+    text-align: center;
+    margin-top: 20px;
+}
+.form-horizontal .form-group {
+  margin-left: 5px;
+  margin-right: 5px;
+  padding-top: 5px;
+}
+  
+@media screen and (max-width: 1000px) {
+  sidenav {
+    background: var(--bg-primary-color);
+    border-left: 15px solid var(--bg-secondary-color);
+    text-align: left;
+    font-weight: bolder;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    right: -16em;
+    margin: 0em;
+    padding-top: 1em;
+    display: inline-block;
+    line-height: normal;
+    -webkit-transform: translateZ(0) scale(1, 1);
+    z-index: 3;
+    -webkit-transition: all 400ms ease;
+    -moz-transition: all 400ms ease;
+    -ms-transition: all 400ms ease;
+    -o-transition: all 400ms ease;
+    transition: all 400ms ease;
+  }
   sidenav:after {
-      position: absolute;
-      content: ' ';
-      width: 0;
-      height: 0;
-      right: -75px;
-      top: 50%;
-      border-width: 30px 30px;
-      border-style: solid;
-      border-color: transparent transparent transparent var(--bg-secondary-color);
+    right: 230px;
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+    content: none;
   }
   sidenav ul {
-      width: 14em;
-      list-style-type: none;
-      margin: auto;
-      padding: 1em;
+    width: 14em;
+    list-style-type: none;
+    margin: auto;
+    padding: 1em;
   }
   sidenav div{
-      margin:auto;
+    margin:auto;
   }
   sidenav:hover {
-      left: 0;
+    right: 0;
+    width: 230px;
+    overflow-y: scroll;
+    scrollbar-width: inherit;
+    scrollbar-color: var(--bg-secondary-color) black;
   }
   sidenav .filters-col .row {
-      margin-top: 45px;
-      padding: 0 0.5em;
+    margin-top: 25px;
+    padding: 0 1.5em;
   }
   sidenav .reset-filter {
-      text-align: center;
-      margin-top: 20px;
+    text-align: center;
+    margin-top: 20px;
   }
-  .form-horizontal .form-group {
-    margin-left: 5px;
-    margin-right: 5px;
-    padding-top: 5px;
+  div.dc-chart {
+    float: none;
   }
-  
-  @media screen and (max-width: 1000px) {
-    sidenav {
-      background: var(--bg-primary-color);
-      border-left: 15px solid var(--bg-secondary-color);
-      text-align: left;
-      font-weight: bolder;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      height: 100%;
-      right: -16em;
-      margin: 0em;
-      padding-top: 1em;
-      display: inline-block;
-      line-height: normal;
-      -webkit-transform: translateZ(0) scale(1, 1);
-      z-index: 3;
-      -webkit-transition: all 400ms ease;
-      -moz-transition: all 400ms ease;
-      -ms-transition: all 400ms ease;
-      -o-transition: all 400ms ease;
-      transition: all 400ms ease;
-    }
-    sidenav:after {
-      right: 230px;
-      border-top: 0;
-      border-bottom: 0;
-      border-right: 0;
-      content: none;
-    }
-    sidenav ul {
-      width: 14em;
-      list-style-type: none;
-      margin: auto;
-      padding: 1em;
-    }
-    sidenav div{
-      margin:auto;
-    }
-    sidenav:hover {
-      right: 0;
-      width: 230px;
-      overflow-y: scroll;
-      scrollbar-width: inherit;
-      scrollbar-color: var(--bg-secondary-color) black;
-    }
-    sidenav .filters-col .row {
-      margin-top: 25px;
-      padding: 0 1.5em;
-    }
-    sidenav .reset-filter {
-      text-align: center;
-      margin-top: 20px;
-    }
-    div.dc-chart {
-      float: none;
-    }
-  }
+}
 
 /* globe styling */
 .globe-container  {

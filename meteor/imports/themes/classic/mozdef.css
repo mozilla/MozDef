@@ -19,7 +19,7 @@ Copyright (c) 2014 Mozilla Corporation
     --a-link-color:  rgb(245, 222, 179);
     --row-color-odd: rgba(30,87,153,.7);
     --row-color-even: #636c85;
-  }
+}
 
 html{
 	background: none;
@@ -313,7 +313,7 @@ input[type="search"] {
 
 .table-striped > tbody > tr:nth-of-type(2n+1) {
     background-color: var(--row-color-even)
-  }
+}
 
 .table-hover tbody tr:hover > td,
 .table-hover tbody tr:hover > th,
