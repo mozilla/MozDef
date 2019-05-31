@@ -2,9 +2,6 @@
 
 set -e  # Exit immediately if a command exits with a non-zero status.
 
-echo 'Welcome GitHub webhook to the CodeBuild Job of MozDef.'
-echo "It's dangerous to go alone.  Take one of these: <%%%%|==========>"
-
 # echo "Begin test of the MozDef codebase."
 # export COMPOSE_INTERACTIVE_NO_CLI=1 make tests
 # The above does not currently work in a non-interactive TTY.
@@ -24,23 +21,17 @@ echo "  Event : ${CODEBUILD_WEBHOOK_EVENT}"
 echo "  Head Ref : ${CODEBUILD_WEBHOOK_HEAD_REF}"
 echo "  Trigger : ${CODEBUILD_WEBHOOK_TRIGGER}"
 
-if [[ "branch/master" == "${CODEBUILD_WEBHOOK_TRIGGER}" \
-        || "branch/reinforce2019" == "${CODEBUILD_WEBHOOK_TRIGGER}" \
-        || "${CODEBUILD_WEBHOOK_TRIGGER}" =~ ^tag\/v[0-9]+\.[0-9]+\.[0-9]+(\-(prod|pre|testing))?$ ]]; then
-    echo "Codebuild is ubuntu 14.04. Installing packer in order to compensate. Someone should build a CI docker container \;)."
-    wget -nv https://releases.hashicorp.com/packer/1.3.5/packer_1.3.5_linux_amd64.zip
-    unzip packer_1.3.5_linux_amd64.zip -d /usr/bin
-    echo "Building a release. C|_| This may take a bit.  Might as well grab a coffee."
-    BRANCH="`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`"
-    make build-from-cwd
-    make hub-login
-    make BRANCH=${BRANCH} docker-push-tagged
-    cd cloudy_mozdef
-    make BRANCH=${BRANCH} packer-build-github
-    make BRANCH=${BRANCH} publish-versioned-templates
-    cd ..
-    echo "End build of the MozDef codebase."
-else
-    echo "Trigger '${CODEBUILD_WEBHOOK_TRIGGER}' was not a commit to branch/master or a conforming git tag name. Skipping build"
-fi
+echo "Codebuild is ubuntu 14.04. Installing packer in order to compensate. Someone should build a CI docker container \;)."
+wget -nv https://releases.hashicorp.com/packer/1.3.5/packer_1.3.5_linux_amd64.zip
+unzip packer_1.3.5_linux_amd64.zip -d /usr/bin
+echo "Building a release. C|_| This may take a bit.  Might as well grab a coffee."
+BRANCH="`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`"
+make build-from-cwd
+make hub-login
+make BRANCH=${BRANCH} docker-push-tagged
+cd cloudy_mozdef
+make BRANCH=${BRANCH} packer-build-github
+make BRANCH=${BRANCH} publish-versioned-templates
+cd ..
+echo "End build of the MozDef codebase."
 
