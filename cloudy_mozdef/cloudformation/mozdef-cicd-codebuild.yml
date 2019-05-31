@@ -132,9 +132,9 @@ Resources:
         FilterGroups:
           - - Type: EVENT
               Pattern: PUSH
-            - Type: BASE_REF  # Build on commits to branch reinforce2019
+            - Type: HEAD_REF  # Build on commits to branch reinforce2019
               Pattern: '^refs/heads/reinforce2019'
-            - Type: BASE_REF  # Build on commits to branch master
+            - Type: HEAD_REF  # Build on commits to branch master
               Pattern: '^refs/heads/master'
             - Type: HEAD_REF  # Build on tags like v1.2.3 and v1.2.3-testing
               Pattern: '^refs/tag\/v[0-9]+\.[0-9]+\.[0-9]+(\-(prod|pre|testing))?$'
