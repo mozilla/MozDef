@@ -75,7 +75,7 @@ class message(object):
           {
             "destinationipaddress": "1.2.3.4",
             "destinationport": 80,
-            "timestamp": "May 27th 2019, 20:29:27.516"
+            "timestamp": "2016-07-13 22:33:31.625443+00:00"
           }
         ]
       }
