@@ -14,15 +14,14 @@ RUN \
                   libffi-devel \
                   zlib-devel \
                   libcurl-devel \
-                  openssl \ 
+                  openssl \
                   openssl-devel \
                   git \
                   make && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
   cd /opt/mozdef && \
-  yum install -y mysql-devel \
-                    python \
+  yum install -y python \
                     python-devel \
                     python-pip && \
   yum clean all && \
