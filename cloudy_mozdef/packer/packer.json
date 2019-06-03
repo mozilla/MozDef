@@ -50,7 +50,7 @@
         "set -e",
         "sudo yum update -y",
         "sudo yum makecache fast",
-        "sudo yum install -y glibc-devel gcc libstdc++ libffi-devel zlib-devel make mysql-devel python python-devel python-pip git docker python3",
+        "sudo yum install -y glibc-devel gcc libstdc++ libffi-devel zlib-devel make python python-devel python-pip git docker python3",
         "sudo pip install virtualenv docker-compose",
         "sudo systemctl enable docker",
         "sudo systemctl start docker",
