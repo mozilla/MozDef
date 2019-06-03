@@ -1,0 +1,176 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Pipeline to send VPC Flow Logs to MozDef
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-dc8eacb4
+    Description: 'The VPC ID of the VPC to deploy in (Example : vpc-abcdef12)'
+  MozDefSQSQueueUrl:
+    Type: String
+    Description: 'The SQS URL to send MozDef structured events to for consumption'
+  MozDefSQSQueueArn:
+    Type: String
+    Description: 'The SQS ARN to send MozDef structured events to for consumption'
+Resources:
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 1
+  FlowLogRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: vpc-flow-logs.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowWriteCloudWatchLogs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: "*"
+  FlowLog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      DeliverLogsPermissionArn: !GetAtt FlowLogRole.Arn
+      # We can't use !GetAtt LogGroup.Arn because it actually returns and Arn suffixed with ":*"
+      LogDestination: !Join [ ':', [ 'arn:aws:logs', !Ref 'AWS::Region', !Ref 'AWS::AccountId', 'log-group', !Ref 'LogGroup' ] ]
+      ResourceId: !Ref VpcId
+      ResourceType: VPC
+      TrafficType: ALL
+  FlowLogProcessorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: AllowSendToSQS
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:DeleteMessage
+                  - sqs:DeleteMessageBatch
+                  - sqs:GetQueueAttributes
+                  - sqs:GetQueueUrl
+                  - sqs:SendMessage
+                  - sqs:SendMessageBatch
+                Resource: !Ref MozDefSQSQueueArn
+  FlowLogProcessor:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |
+          import os, boto3, gzip, base64, json, socket, sys
+          from datetime import datetime
+
+          PROTO_NUM_MAP = {num: name[8:] for name, num in vars(socket).items() if name.startswith("IPPROTO")}
+          FIELD_NAMES = [
+              'version', 'account-id', 'interface-id', 'srcaddr', 'dstaddr', 'srcport',
+              'dstport', 'protocol', 'packets', 'bytes', 'start', 'end', 'action',
+              'log-status']
+
+          def lambda_handler(event, context):
+              client = boto3.client('sqs')
+              raw_data = event.get('awslogs', {}).get('data')
+              data = json.loads(
+                  gzip.decompress(base64.b64decode(raw_data)).decode('utf-8'))
+              entries = []
+              for log_event_record in data.get('logEvents', ''):
+                  log_event_record_values = log_event_record['message'].split(' ')
+                  log_event = {FIELD_NAMES[i]: log_event_record_values[i]
+                               for i in range(len(FIELD_NAMES))}
+                  if log_event.get('log-status') != 'OK':
+                      print('Skipping {} entry : {}'.format(log_event.get('log-status'), log_event_record['message']))
+                      continue
+
+                  # TODO : Do we want to do something with log_status NODATA and SKIPDATA events?
+                  message = dict(
+                      category='vpc-flow',
+                      hostname=socket.getfqdn(),
+                      processid=os.getpid(),
+                      processname=sys.argv[0],
+                      severity='INFO',
+                      source='vpc_flow')
+                  message['utctimestamp'] = datetime.utcfromtimestamp(
+                      int(log_event_record['timestamp'] / 1000)).strftime('%Y-%m-%dT%H:%M:%S+00:00')
+                  message['summary'] = '{srcaddr}:{srcport} -> {dstaddr}:{dstport} {bytes} bytes {action}'.format(**log_event)
+                  message['details'] = dict(
+                      destinationipaddress=log_event['dstaddr'],
+                      destinationport=int(log_event['dstport']),
+                      sourceipaddress=log_event['srcaddr'],
+                      sourceport=int(log_event['srcport']),
+                      success=log_event['action'] == 'ACCEPT',
+                      capture_window_start=datetime.utcfromtimestamp(
+                          int(log_event['start'])).strftime('%Y-%m-%dT%H:%M:%S+00:00'),
+                      capture_window_end=datetime.utcfromtimestamp(
+                          int(log_event['end'])).strftime('%Y-%m-%dT%H:%M:%S+00:00'),
+                      version=int(log_event['version']),
+                      pkts=int(log_event['packets']),
+                      proto=PROTO_NUM_MAP.get(int(log_event['protocol']), 'unknown').lower(),
+                      recipientaccountid=log_event['account-id'],
+                      interface_id=log_event['interface-id'],
+                      bytes=int(log_event['bytes']))
+                  entry = dict(
+                      Id=log_event_record['id'],
+                      MessageBody=json.dumps(message))
+                  entries.append(entry)
+                  print('Going to send entry : {}'.format(entry))
+                  if len(entries) == 10:
+                      print('sending batch')
+                      response = client.send_message_batch(
+                          QueueUrl=os.getenv('SQS_URL'),
+                          Entries=entries)
+                      # TODO : Process the response and do something about failures
+                      del entries[:]
+              if len(entries) > 0:
+                  print('sending final batch')
+                  response = client.send_message_batch(
+                      QueueUrl=os.getenv('SQS_URL'),
+                      Entries=entries)
+      Description: Transform VPC Flow logs into MozDef events
+      Environment:
+        Variables:
+          SQS_URL: !Ref MozDefSQSQueueUrl
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt FlowLogProcessorRole.Arn
+      Runtime: python3.7
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+      Timeout: 30
+  FlowLogProcessorPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt FlowLogProcessor.Arn
+      Principal: !Join [ '.', [ 'logs', !Ref 'AWS::Region', 'amazonaws.com' ] ]
+      SourceAccount: !Ref 'AWS::AccountId'
+      SourceArn: !GetAtt LogGroup.Arn
+  FlowLogSubscriptionFilter:
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      DestinationArn: !GetAtt FlowLogProcessor.Arn
+      FilterPattern: '[version, account, eni, source, destination, srcport, destport="22", protocol="6", packets, bytes, windowstart, windowend, action="ACCEPT", flowlogstatus]'
+      LogGroupName: !Ref LogGroup

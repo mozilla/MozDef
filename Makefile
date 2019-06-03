@@ -7,12 +7,13 @@
 ROOT_DIR	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 DKR_IMAGES	:= mozdef_alertactions mozdef_alerts mozdef_base mozdef_bootstrap mozdef_meteor mozdef_rest \
 		   mozdef_mq_worker mozdef_loginput mozdef_cron mozdef_elasticsearch mozdef_mongodb \
-		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq mozdef_kibana
+		   mozdef_syslog mozdef_nginx mozdef_tester mozdef_rabbitmq mozdef_kibana mozdef_cognito_proxy
 BUILD_MODE	:= build  ## Pass `pull` in order to pull images instead of building them
 NAME		:= mozdef
 VERSION		:= 0.1
 BRANCH		:= master
 NO_CACHE	:= ## Pass `--no-cache` in order to disable Docker cache
+PARALLEL	:= --parallel
 GITHASH		:= latest  ## Pass `$(git rev-parse --short HEAD`) to tag docker hub images as latest git-hash instead
 TEST_CASE	:= tests  ## Run all (`tests`) or a specific test case (ex `tests/alerts/tests/alerts/test_proxy_drop_exfil_domains.py`)
 TMPDIR      := $(shell mktemp -d )
@@ -65,7 +66,7 @@ build: build-from-cwd
 
 .PHONY: build-from-cwd
 build-from-cwd:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
-	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(NO_CACHE) $(BUILD_MODE)
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(BUILD_MODE) $(PARALLEL) $(NO_CACHE)
 
 .PHONY: build-from-github
 build-from-github:  ## Build local MozDef images from the github branch (use make NO_CACHE=--no-cache build to disable caching).

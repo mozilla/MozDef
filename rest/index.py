@@ -527,11 +527,7 @@ def kibanaDashboards():
         for dashboard in results['hits']:
             resultsList.append({
                 'name': dashboard['_source']['dashboard']['title'],
-                'url': "%s#/%s/%s" % (
-                    options.kibanaurl,
-                    "dashboard",
-                    dashboard['_id']
-                )
+                'id': dashboard['_id']
             })
 
     except ElasticsearchInvalidIndex as e:
@@ -627,9 +623,6 @@ def initConfig():
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
-    options.kibanaurl = getConfig('kibanaurl',
-                                  'http://localhost:9090',
-                                  options.configfile)
 
     # mongo connectivity options
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
