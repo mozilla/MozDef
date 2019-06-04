@@ -209,7 +209,7 @@ Resources:
         EFSID: !GetAtt MozDefEFS.Outputs.EFSID
         MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
         MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
-        MozDefACMCertArn: !Ref ACMCertArn
+        ACMCertArn: !Ref ACMCertArn
         ESURL: !GetAtt MozDefES.Outputs.ElasticsearchURL
         KibanaURL: !GetAtt MozDefES.Outputs.ElasticsearchKibanaURL
         KibanaDomainOnlyURL: !GetAtt MozDefES.Outputs.ElasticsearchDomainOnlyURL

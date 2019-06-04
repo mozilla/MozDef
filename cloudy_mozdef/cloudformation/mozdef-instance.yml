@@ -33,7 +33,7 @@ Parameters:
   MozDefLoadBalancerSecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
     Description: The security group to apply to the EC2 instance
-  MozDefACMCertArn:
+  ACMCertArn:
     Type: String
     Description: The arn of your pre-issued certificate for ssl termination.
   ESURL:
@@ -151,11 +151,11 @@ Conditions:
   OIDCNotEnabledCondition:
     !Equals [!Ref OIDCClientId, '']
   SSLEnabledCondition:
-    !And [!Not [!Equals [!Ref MozDefACMCertArn, '']], !Equals [!Ref OIDCClientId, '']]
+    !And [!Not [!Equals [!Ref ACMCertArn, '']], !Equals [!Ref OIDCClientId, '']]
   SSLNotEnabledCondition:
-    !And [!Equals [!Ref MozDefACMCertArn, ''], !Equals [!Ref OIDCClientId, '']]
+    !And [!Equals [!Ref ACMCertArn, ''], !Equals [!Ref OIDCClientId, '']]
   SSLEnabledWithOidcCondition:
-    !And [!Not [!Equals [!Ref MozDefACMCertArn, '']], !Not [!Equals [!Ref OIDCClientId, '']]]
+    !And [!Not [!Equals [!Ref ACMCertArn, '']], !Not [!Equals [!Ref OIDCClientId, '']]]
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -431,7 +431,7 @@ Resources:
     Condition: SSLEnabledCondition
     Properties:
       Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
+        - CertificateArn: !Ref ACMCertArn
       DefaultActions:
       - Type: forward
         TargetGroupArn:
@@ -458,7 +458,7 @@ Resources:
     Condition: SSLEnabledCondition
     Properties:
       Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
+        - CertificateArn: !Ref ACMCertArn
       DefaultActions:
       - Type: forward
         TargetGroupArn:
@@ -519,7 +519,7 @@ Resources:
     Condition: SSLEnabledWithOidcCondition
     Properties:
       Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
+        - CertificateArn: !Ref ACMCertArn
       DefaultActions:
       - Type: authenticate-oidc
         AuthenticateOidcConfig:
@@ -547,7 +547,7 @@ Resources:
     Condition: SSLEnabledWithOidcCondition
     Properties:
       Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
+        - CertificateArn: !Ref ACMCertArn
       DefaultActions:
       - Type: authenticate-oidc
         AuthenticateOidcConfig:
