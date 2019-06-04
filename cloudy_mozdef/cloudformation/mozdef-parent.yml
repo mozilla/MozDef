@@ -116,13 +116,6 @@ Parameters:
     Description: The secret that you use to authenticate to the MozDef instance using HTTP Basic Authentication.
     NoEcho: true
 Rules:
-  SubnetsInVPC:
-    Assertions:
-    - Assert:
-        !EachMemberIn
-        - !ValueOfAll [ 'AWS::EC2::Subnet::Id', 'VpcId' ]
-        - !RefAll 'AWS::EC2::VPC::Id'
-      AssertDescription: All subnets must in the VPC
   ALBBasicAuthOnly:
     RuleCondition: !Not [ !Equals [ !Ref 'ALBBasicAuthSecret', '' ] ]
     Assertions:
