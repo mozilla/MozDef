@@ -1,0 +1,58 @@
+<template name="preferences">
+    <div class="container">
+        <div id="preferences">
+            <div class="row col-xs-12">
+                <p><span class="col-xs-offset-3" id="saveMessage"></span><br></p>
+                <div class="col-xs-9">
+                    <form id="preferences" class="form-horizontal  col-xs-10 col-xs-offset-2">
+                        <div class="form-group">
+                            <label class="col-xs-2 control-label" for="name">Name:
+                                <i class="fa fa-info-circle" data-toggle="tooltip" title="Your Name "></i>
+                            </label>
+                            <div class="col-xs-10">
+                                <input id="name" name="name" placeholder="Your name" class="name form-control" required
+                                    type="text" value="{{name}}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-xs-2 control-label" for="email">Email:
+                                <i class="fa fa-info-circle" data-toggle="tooltip" title="Your email"></i>
+                            </label>
+                            <div class="col-xs-10">
+                                <input id="email" name="email" placeholder="someone@email.com :id"
+                                    class="contact form-control" disabled type="text"
+                                    value="{{currentUser.profile.email}}">
+                            </div>
+                        </div>
+                        <!-- Theme -->
+                        <div class="form-group">
+                            <label class="col-xs-2 control-label" for="theme">Theme:
+                                <i class="fa fa-info-circle" data-toggle="tooltip"
+                                    title="The Look and Feel you prefer"></i>
+                            </label>
+                            <div class="col-xs-10">
+                                <select id="theme" name="theme" class="form-control">
+                                    <option {{ isselected 'Classic' theme }}>Classic</option>
+                                    <option {{ isselected 'Dark' theme }}>Dark</option>
+                                    <option {{ isselected 'Light' theme }}>Light</option>
+                                    <option {{ isselected 'Dark Side Nav' theme }}>Dark Side Nav</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- records per page -->
+                        <div class="form-group">
+                            <label class="col-xs-2 control-label" for="email">Page Size:
+                                <i class="fa fa-info-circle" data-toggle="tooltip" title="# of records per page"></i>
+                            </label>
+                            <div class="col-xs-10">
+                                <input id="pageSize" name="pageSize" placeholder="25"
+                                    class="form-control" type="text"
+                                    value="{{pageSize}}">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

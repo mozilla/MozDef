@@ -12,6 +12,8 @@ from utilities.logger import logger
 
 from event import Event
 
+TMP_DOC_TYPE = 'doc'
+
 
 class ElasticsearchBadServer(Exception):
     def __str__(self):
@@ -38,11 +40,16 @@ class ElasticsearchClient():
         self.es_connection.ping()
         self.bulk_queue = BulkQueue(self, threshold=bulk_amount, flush_time=bulk_refresh_time)
 
+    def close_index(self, index_name):
+        return self.es_connection.indices.close(index=index_name)
+
+    def open_index(self, index_name):
+        return self.es_connection.indices.open(index=index_name)
+
     def delete_index(self, index_name, ignore_fail=False):
         ignore_codes = []
         if ignore_fail is True:
             ignore_codes = [400, 404]
-
         self.es_connection.indices.delete(index=index_name, ignore=ignore_codes)
 
     def get_indices(self):
@@ -132,31 +139,28 @@ class ElasticsearchClient():
         else:
             return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=body)
 
-    def __parse_document(self, body, doc_type):
+    def __parse_document(self, body):
         if type(body) is str:
             body = json.loads(body)
-
-        if '_type' in body:
-            doc_type = body['_type']
 
         doc_body = body
         if '_source' in body:
             doc_body = body['_source']
-        return doc_body, doc_type
+        return doc_body
 
-    def save_object(self, body, index, doc_type, doc_id=None, bulk=False):
-        doc_body, doc_type = self.__parse_document(body, doc_type)
+    def save_object(self, body, index, doc_type=TMP_DOC_TYPE, doc_id=None, bulk=False):
+        doc_body = self.__parse_document(body)
         return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
 
-    def save_alert(self, body, index='alerts', doc_type='alert', doc_id=None, bulk=False):
-        doc_body, doc_type = self.__parse_document(body, doc_type)
-        return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
+    def save_alert(self, body, index='alerts', doc_id=None, bulk=False):
+        doc_body = self.__parse_document(body)
+        return self.__save_document(index=index, doc_type=TMP_DOC_TYPE, body=doc_body, doc_id=doc_id, bulk=bulk)
 
-    def save_event(self, body, index='events', doc_type='event', doc_id=None, bulk=False):
-        doc_body, doc_type = self.__parse_document(body, doc_type)
+    def save_event(self, body, index='events', doc_id=None, bulk=False):
+        doc_body = self.__parse_document(body)
         event = Event(doc_body)
         event.add_required_fields()
-        return self.__save_document(index=index, doc_type=doc_type, body=event, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, doc_type=TMP_DOC_TYPE, body=event, doc_id=doc_id, bulk=bulk)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)

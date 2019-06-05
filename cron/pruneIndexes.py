@@ -12,31 +12,17 @@
 # Create a starter .conf file with backupDiscover.py
 
 import sys
-import logging
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
 from configlib import getConfig, OptionParser
 
-from logging.handlers import SysLogHandler
-
 from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
-logger = logging.getLogger(sys.argv[0])
-logger.level = logging.WARNING
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
-
-
 def esPruneIndexes():
-    if options.output == 'syslog':
-        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
-
     logger.debug('started')
     try:
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))

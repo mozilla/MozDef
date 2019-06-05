@@ -10,6 +10,7 @@ class Event(dict):
     # create an alert around these, and know when events
     # have to use defaults
     DEFAULT_STRING = 'UNKNOWN'
+    DEFAULT_TYPE = 'event'
 
     def add_required_fields(self):
         if 'receivedtimestamp' not in self:
@@ -20,6 +21,8 @@ class Event(dict):
             self['timestamp'] = toUTC(datetime.now()).isoformat()
         if 'mozdefhostname' not in self:
             self['mozdefhostname'] = socket.gethostname()
+        if 'type' not in self:
+            self['type'] = self.DEFAULT_TYPE
         if 'tags' not in self:
             self['tags'] = []
         if 'category' not in self:

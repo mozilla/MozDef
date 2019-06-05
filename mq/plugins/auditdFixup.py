@@ -113,8 +113,7 @@ class message(object):
         # add category
         if 'category' not in message:
             message['category'] = 'auditd'
-
-        # set doctype
-        metadata['doc_type'] = 'auditd'
+        # add type as a static entry
+        message['type'] = 'auditd'
 
         return (message, metadata)

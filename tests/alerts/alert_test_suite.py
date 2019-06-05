@@ -173,7 +173,12 @@ class AlertTestSuite(UnitTestSuite):
         if self.deadman:
             return
 
-        assert len(found_alert['_source']['events']) == len(test_case.full_events)
+        # If we override the number of expected events, let's use that value
+        num_events = len(test_case.full_events)
+        if hasattr(self, 'num_samples'):
+            num_events = self.num_samples
+        assert len(found_alert['_source']['events']) == num_events
+
         for event in found_alert['_source']['events']:
             event_id = event['documentid']
             found_event = self.es_client.get_event_by_id(event_id)

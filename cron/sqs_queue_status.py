@@ -20,7 +20,7 @@ from hashlib import md5
 import boto.sqs
 
 from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
@@ -98,13 +98,14 @@ def getQueueSizes():
             messages_inflight=inflight)
         healthlog['details']['queues'].append(queueinfo)
         qcounter -= 1
+    healthlog['type'] = 'mozdefhealth'
     # post to elasticsearch servers directly without going through
     # message queues in case there is an availability issue
-    es.save_event(index=options.index, doc_type='mozdefhealth', body=json.dumps(healthlog))
+    es.save_event(index=options.index, body=json.dumps(healthlog))
     # post another doc with a static docid and tag
     # for use when querying for the latest sqs status
     healthlog['tags'] = ['mozdef', 'status', 'sqs-latest']
-    es.save_event(index=options.index, doc_type='mozdefhealth', doc_id=getDocID(sqsid), body=json.dumps(healthlog))
+    es.save_event(index=options.index, doc_id=getDocID(sqsid), body=json.dumps(healthlog))
 #    except Exception as e:
 #        logger.error("Exception %r when gathering health and status " % e)
 
@@ -136,5 +137,4 @@ if __name__ == '__main__':
     parser.add_option("-c", dest='configfile', default=sys.argv[0].replace('.py', '.conf'), help="configuration file to use")
     (options, args) = parser.parse_args()
     initConfig()
-    initLogger(options)
     main()

@@ -25,6 +25,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
 parser.add_argument('esserver', help='Elasticsearch server (ex: http://elasticsearch:9200)')
 parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultMappingTemplate.json)')
+parser.add_argument('state_mapping_file', help='The relative path to state mapping json file (ex: cron/mozdefStateDefaultMappingTemplate.json)')
 parser.add_argument('backup_conf_file', help='The relative path to backup.conf file (ex: cron/backup.conf)')
 parser.add_argument('kibana_url', help='The URL of the kibana endpoint (ex: http://kibana:5601)')
 args = parser.parse_args()
@@ -45,12 +46,20 @@ previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-
 weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
 kibana_index_name = '.kibana'
+state_index_name = 'mozdefstate'
 
 index_settings_str = ''
 with open(args.default_mapping_file) as data_file:
     index_settings_str = data_file.read()
 
 index_settings = json.loads(index_settings_str)
+
+state_index_settings_str = ''
+with open(args.state_mapping_file) as data_file:
+    state_index_settings_str = data_file.read()
+
+state_index_settings = json.loads(state_index_settings_str)
+
 
 all_indices = []
 total_num_tries = 15
@@ -84,6 +93,7 @@ index_options = {
     }
 }
 index_settings['settings'] = index_options
+state_index_settings['settings'] = index_options
 
 # Create initial indices
 if event_index_name not in all_indices:
@@ -108,6 +118,10 @@ if weekly_index_alias not in all_indices:
 if kibana_index_name not in all_indices:
     print "Creating " + kibana_index_name
     client.create_index(kibana_index_name, index_config={"settings": index_options})
+
+if state_index_name not in all_indices:
+    print "Creating " + state_index_name
+    client.create_index(state_index_name, index_config=state_index_settings)
 
 # Wait for .kibana index to be ready
 num_times = 0

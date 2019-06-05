@@ -49,17 +49,18 @@ class UnitTestSuite(object):
         if 'plugins' in sys.modules:
             del sys.modules['plugins']
 
-    def populate_test_event(self, event, event_type='event'):
-        self.es_client.save_event(body=event, doc_type=event_type)
+    def populate_test_event(self, event):
+        self.es_client.save_event(body=event)
 
-    def populate_test_object(self, event, event_type='event'):
-        self.es_client.save_object(index='events', body=event, doc_type=event_type)
+    def populate_test_object(self, event):
+        self.es_client.save_object(index='events', body=event)
 
     def setup_elasticsearch(self):
         self.es_client.create_index(self.event_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('events', self.event_index_name)
         self.es_client.create_index(self.previous_event_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('events-previous', self.previous_event_index_name)
+        self.es_client.create_alias_multiple_indices('events-weekly', ['events', 'events-previous'])
         self.es_client.create_index(self.alert_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('alerts', self.alert_index_name)
 
@@ -84,7 +85,6 @@ class UnitTestSuite(object):
 
         event = {
             "_index": "events",
-            "_type": "event",
             "_source": {
                 "category": "excategory",
                 "utctimestamp": current_timestamp,

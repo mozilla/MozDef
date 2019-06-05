@@ -10,14 +10,12 @@ class TestSquidFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'doc_type': 'nsm',
             'index': 'events'
         }
 
     # Should never match and be modified by the plugin
     def test_notsquid_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -27,12 +25,10 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_notsquid_log2(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -42,12 +38,10 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_squid_notype_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -57,7 +51,6 @@ class TestSquidFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     def test_squid_wrongtype_log(self):
         event = {
@@ -65,12 +58,11 @@ class TestSquidFixup(object):
             'SOURCE': 'nosuchtype',
             'customendpoint': ' '
         }
-        event['MESSAGE'] = "1547953357.127   1690 192.168.97.135 58306 185.53.177.31 443 TCP_TUNNEL - 86 4700 CONNECT test.com:443 - test.com -"
+        event['MESSAGE'] = "1547953357.127 1690 192.168.97.135 58306 185.53.177.31 443 TCP_TUNNEL - 86 4700 CONNECT test.com:443 - test.com -"
 
         result, metadata = self.plugin.onMessage(event, self.metadata)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
-        assert metadata['doc_type'] is 'nsm'
 
     @mock.patch('squidFixup.node')
     def test_mozdefhostname_mock_string(self, mock_path):
@@ -97,7 +89,7 @@ class TestSquidFixup(object):
         assert result['mozdefhostname'] == 'failed to fetch mozdefhostname'
 
     def verify_metadata(self, metadata):
-        assert metadata['doc_type'] == 'nsm'
+        assert metadata['index'] == 'events'
 
     def test_defaults(self):
         event = {
@@ -204,7 +196,7 @@ class TestSquidFixup(object):
             "SOURCEIP":"127.0.0.1",
             "SOURCE":"access_src",
             "PRIORITY":"notice",
-            "MESSAGE":"1548043032.187    524 192.168.97.135 58322 185.53.177.31 444 TCP_MISS 200 152 339 GET http://test.com:444/ http test.com text/html",
+            "MESSAGE":"1548043032.187 524 192.168.97.135 58322 185.53.177.31 444 TCP_MISS 200 152 339 GET http://test.com:444/ http test.com text/html",
             "HOST_FROM":"localhost",
             "HOST":"localhost",
             "FILE_NAME":"/etc/syslog-ng/access.log.local",
@@ -228,6 +220,7 @@ class TestSquidFixup(object):
         assert result['details']['proto'] == 'http'
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
+        assert result['summary'] == '1548043032.187 524 192.168.97.135 58322 185.53.177.31 444 TCP_MISS 200 152 339 GET http://test.com:444/ http test.com text/html'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -273,6 +266,7 @@ class TestSquidFixup(object):
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
         assert result['tags'] == 'squid'
+        assert result['summary'] == '1548043032.187 412 192.168.97.135 58322 185.53.177.31 80 TCP_MISS 403 158 453 GET http://test.com/ http test.com text/html'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -318,6 +312,7 @@ class TestSquidFixup(object):
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
         assert result['tags'] == 'squid'
+        assert result['summary'] == '1548043032.187 412 192.168.97.135 58322 185.53.177.31 80 TCP_MISS 403 158 453 GET http://test.com/3something.bin http test.com text/html'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -338,7 +333,7 @@ class TestSquidFixup(object):
             "SOURCEIP":"127.0.0.1",
             "SOURCE":"access_src",
             "PRIORITY":"notice",
-            "MESSAGE":"1548043032.187    412 192.168.97.135 58322 185.53.177.31 444 TCP_MISS 403 158 453 GET http://test.com:444/3something.bin http test.com text/html",
+            "MESSAGE":"1548043032.187 412 192.168.97.135 58322 185.53.177.31 444 TCP_MISS 403 158 453 GET http://test.com:444/3something.bin http test.com text/html",
             "HOST_FROM":"localhost",
             "HOST":"localhost",
             "FILE_NAME":"/etc/syslog-ng/access.log.local",
@@ -363,6 +358,7 @@ class TestSquidFixup(object):
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
         assert result['tags'] == 'squid'
+        assert result['summary'] == '1548043032.187 412 192.168.97.135 58322 185.53.177.31 444 TCP_MISS 403 158 453 GET http://test.com:444/3something.bin http test.com text/html'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -383,7 +379,7 @@ class TestSquidFixup(object):
             "SOURCEIP":"127.0.0.1",
             "SOURCE":"access_src",
             "PRIORITY":"notice",
-            "MESSAGE":"1548043024.368   1082 192.168.97.135 58318 185.53.177.31 443 TCP_TUNNEL - 86 4700 CONNECT test.com:443 - test.com -",
+            "MESSAGE":"1548043024.368 1082 192.168.97.135 58318 185.53.177.31 443 TCP_TUNNEL - 86 4700 CONNECT test.com:443 - test.com -",
             "HOST_FROM":"localhost",
             "HOST":"localhost",
             "FILE_NAME":"/etc/syslog-ng/access.log.local",
@@ -408,6 +404,7 @@ class TestSquidFixup(object):
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == '-'
         assert result['tags'] == 'squid'
+        assert result['summary'] == '1548043024.368 1082 192.168.97.135 58318 185.53.177.31 443 TCP_TUNNEL - 86 4700 CONNECT test.com:443 - test.com -'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -428,7 +425,7 @@ class TestSquidFixup(object):
             "SOURCEIP":"127.0.0.1",
             "SOURCE":"access_src",
             "PRIORITY":"notice",
-            "MESSAGE":"1548043048.377      0 192.168.97.135 58332 - - TCP_DENIED - 86 3892 CONNECT test.com:444 - - text/html",
+            "MESSAGE":"1548043048.377 0 192.168.97.135 58332 - - TCP_DENIED - 86 3892 CONNECT test.com:444 - - text/html",
             "HOST_FROM":"localhost",
             "HOST":"localhost",
             "FILE_NAME":"/etc/syslog-ng/access.log.local",
@@ -453,6 +450,7 @@ class TestSquidFixup(object):
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
         assert result['tags'] == 'squid'
+        assert result['summary'] == '1548043048.377 0 192.168.97.135 58332 - - TCP_DENIED - 86 3892 CONNECT test.com:444 - - text/html'
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
         assert 'MESSAGE' not in result
@@ -473,7 +471,7 @@ class TestSquidFixup(object):
             "SOURCEIP":"127.0.0.1",
             "SOURCE":"access_src",
             "PRIORITY":"notice",
-            "MESSAGE":"1548043040.983      0 192.168.97.135 58328 - - TCP_DENIED - 152 3992 GET http://test.com:444/ http - text/html",
+            "MESSAGE":"1548043040.983 0 192.168.97.135 58328 - - TCP_DENIED - 152 3992 GET http://test.com:444/ http - text/html",
             "HOST_FROM":"localhost",
             "HOST":"localhost",
             "FILE_NAME":"/etc/syslog-ng/access.log.local",
@@ -498,6 +496,7 @@ class TestSquidFixup(object):
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
         assert result['tags'] == 'squid'
+        assert result['summary'] == '1548043040.983 0 192.168.97.135 58328 - - TCP_DENIED - 152 3992 GET http://test.com:444/ http - text/html'
         assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result
@@ -518,7 +517,7 @@ class TestSquidFixup(object):
             "SOURCEIP":"127.0.0.1",
             "SOURCE":"access_src",
             "PRIORITY":"notice",
-            "MESSAGE":"1548043040.983      0 192.168.97.135 58328 - - TCP_DENIED - 152 3992 GET http://test.com:444/ http - text/html",
+            "MESSAGE":"1548043040.983 0 192.168.97.135 58328 - - TCP_DENIED - 152 3992 GET http://test.com:444/ http - text/html",
             "HOST_FROM":"localhost",
             "HOST":"localhost",
             "FILE_NAME":"/etc/syslog-ng/access.log.local",
@@ -543,6 +542,7 @@ class TestSquidFixup(object):
         assert result['details']['host'] == 'test.com'
         assert result['details']['mimetype'] == 'text/html'
         assert result['tags'] == 'squid'
+        assert result['summary'] == '1548043040.983 0 192.168.97.135 58328 - - TCP_DENIED - 152 3992 GET http://test.com:444/ http - text/html'
         assert 'TAGS' not in result
         assert 'SOURCEIP' not in result
         assert 'PRIORITY' not in result

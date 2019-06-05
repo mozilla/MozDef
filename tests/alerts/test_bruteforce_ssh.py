@@ -15,7 +15,6 @@ class TestAlertBruteforceSsh(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "event",
         "_source": {
             "summary": 'login invalid ldap_count_entries failed by 1.2.3.4',
             "hostname": "exhostname",

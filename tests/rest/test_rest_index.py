@@ -63,10 +63,10 @@ class TestKibanaDashboardsRoute(RestTestSuite):
 
             json_resp.sort()
 
-            assert json_resp[1]['url'].endswith("/app/kibana#/dashboard/Example-SSH-Dashboard") is True
+            assert json_resp[1]['id'] == "Example-SSH-Dashboard"
             assert json_resp[1]['name'] == 'Example SSH Dashboard'
 
-            assert json_resp[0]['url'].endswith("/app/kibana#/dashboard/Example-FTP-Dashboard") is True
+            assert json_resp[0]['id'] == "Example-FTP-Dashboard"
             assert json_resp[0]['name'] == 'Example FTP Dashboard'
 
 

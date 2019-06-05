@@ -8,19 +8,17 @@ class message(object):
     def __init__(self):
         '''
         takes an incoming custom endpoint message
-        and sets the doc_type
+        and sets the type sub-category filter
         '''
 
         self.registration = ['customendpoint']
         self.priority = 2
 
     def onMessage(self, message, metadata):
-        # set the doc type
-        # to avoid data type conflicts with other doc types
-        # (int vs string, etc)
+        # set the type field for sub-categorical filtering
         if 'endpoint' in message and 'customendpoint' in message:
             if message['customendpoint']:
                 if isinstance(message['endpoint'], str) or \
                    isinstance(message['endpoint'], unicode):
-                    metadata['doc_type']= message['endpoint']
+                    message['type'] = message['endpoint']
         return (message, metadata)

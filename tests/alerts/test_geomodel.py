@@ -11,7 +11,6 @@ from alert_test_suite import AlertTestSuite
 
 class TestAlertGeomodel(AlertTestSuite):
     default_event = {
-        "_type": "event",
         "_source": {
             "category": "geomodelnotice",
             "summary": "ttesterson@mozilla.com NEWCOUNTRY Diamond Bar, United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",

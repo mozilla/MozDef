@@ -9,12 +9,11 @@ class TestSuricataFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
 
     def verify_metadata(self, metadata):
-        assert metadata['doc_type'] == 'event'
+        assert metadata['index'] == 'events'
 
     def test_defaults(self):
         event = {

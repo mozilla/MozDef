@@ -14,6 +14,10 @@ from mozdef_util.utilities.logger import logger
 class AlertDeadmanGeneric(DeadmanAlertTask):
 
     def main(self):
+        # We override the event indices to search for
+        # because our deadman alerts might look past 48 hours
+        self.event_indices = ["events-weekly"]
+
         self._config = self.parse_json_alert_config('deadman_generic.json')
         for alert_cfg in self._config['alerts']:
             try:

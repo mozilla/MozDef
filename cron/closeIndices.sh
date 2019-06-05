@@ -6,5 +6,4 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 source  /opt/mozdef/envs/python/bin/activate
-/opt/mozdef/envs/mozdef/cron/vidyo2MozDef.py -c /opt/mozdef/envs/mozdef/cron/vidyo2MozDef.conf
-
+/opt/mozdef/envs/mozdef/cron/closeIndices.py -c /opt/mozdef/envs/mozdef/cron/closeIndices.conf

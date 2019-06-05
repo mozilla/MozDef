@@ -17,8 +17,6 @@
 
 import sys
 import os
-import logging
-from logging.handlers import SysLogHandler
 from datetime import datetime
 from datetime import timedelta
 from datetime import date
@@ -30,19 +28,10 @@ import boto.s3
 import requests
 import json
 from os.path import expanduser
-
-logger = logging.getLogger(sys.argv[0])
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+from mozdef_util.utilities.logger import logger
 
 
 def main():
-    if options.output == 'syslog':
-        logger.addHandler(SysLogHandler(address=(options.sysloghostname, options.syslogport)))
-    else:
-        sh = logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
-
     logger.debug('started')
     try:
         esserver = options.esservers[0]

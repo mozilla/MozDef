@@ -9,7 +9,6 @@ class TestPluginSet(object):
         self.plugin_set = PluginSet(self.plugin_dir)
         self.metadata = {
             'index': 'test',
-            'doc_type': 'testdoc',
         }
 
     def test_registered_plugins(self):

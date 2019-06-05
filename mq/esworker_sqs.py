@@ -25,7 +25,6 @@ from ssl import SSLEOFError, SSLError
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
-from mozdef_util.utilities.is_cef import isCEF
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
@@ -141,6 +140,11 @@ def keyMapping(aDict):
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
 
+        if 'type' not in returndict:
+            # default replacement for old _type subcategory.
+            # to preserve filtering capabilities
+            returndict['type'] = 'event'
+
     except Exception as e:
         logger.exception('Exception normalizing the message %r' % e)
         logger.error('Malformed message dict: %r' % aDict)
@@ -240,7 +244,6 @@ class taskConsumer(object):
             # default elastic search metadata for an event
             metadata = {
                 'index': 'events',
-                'doc_type': 'event',
                 'id': None
             }
             # just to be safe..check what we were sent.
@@ -281,14 +284,6 @@ class taskConsumer(object):
             # make a json version for posting to elastic search
             jbody = json.JSONEncoder().encode(normalizedDict)
 
-            if isCEF(normalizedDict):
-                # cef records are set to the 'deviceproduct' field value.
-                metadata['doc_type'] = 'cef'
-                if 'details' in normalizedDict and 'deviceproduct' in normalizedDict['details']:
-                    # don't create strange doc types..
-                    if ' ' not in normalizedDict['details']['deviceproduct'] and '.' not in normalizedDict['details']['deviceproduct']:
-                        metadata['doc_type'] = normalizedDict['details']['deviceproduct']
-
             try:
                 bulk = False
                 if options.esbulksize != 0:
@@ -297,7 +292,6 @@ class taskConsumer(object):
                 self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
-                    doc_type=metadata['doc_type'],
                     body=jbody,
                     bulk=bulk
                 )

@@ -70,11 +70,11 @@ We need to install a python2.7 virtualenv.
 
 On Yum-based systems::
 
-  sudo yum install make zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel pcre-devel gcc gcc-c++ mysql-devel
+  sudo yum install make zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel pcre-devel gcc gcc-c++
 
 On APT-based systems::
 
-  sudo apt-get install make zlib1g-dev libbz2-dev libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev tk-dev libpcre3-dev libpcre++-dev build-essential g++ libmysqlclient-dev
+  sudo apt-get install make zlib1g-dev libbz2-dev libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev tk-dev libpcre3-dev libpcre++-dev build-essential g++
 
 Then::
 
@@ -429,7 +429,7 @@ You should now be able to access to Marvel at http://any-server-in-cluster:9200/
 Kibana
 ******
 
-`Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data::
+`Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data
 
 Create the Repo in /etc/yum/repos.d/kibana.repo::
 

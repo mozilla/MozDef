@@ -21,6 +21,7 @@ Table of Contents
   advanced_settings
   code
   benchmarking
+  cicd
   contributors
 
 

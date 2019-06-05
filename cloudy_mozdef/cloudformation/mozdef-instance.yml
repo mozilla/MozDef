@@ -48,16 +48,32 @@ Parameters:
     Type: String
     Description: The AWS ES Kibana URL with domain only
     Default: https://kibana.example.com/
+  OIDCAuthorizationEndpoint:
+    Type: String
+    Default: Unset
+    ConstraintDescription: A valid URL
+    Description: "The url of the authorization endpoint found for your oidc provider generall found on (Example: https://auth.example.com/.well-known/openid-configuration)"
   OIDCClientId:
     Type: String
+    Default: Unset
     Description: The client ID that your OIDC provider issues you for your Mozdef instance.
   OIDCClientSecret:
     Type: String
+    Default: Unset
     Description: The secret that your OIDC provider issues you for your Mozdef instance.
     NoEcho: true
-  OIDCDiscoveryURL:
+  OIDCIssuer:
     Type: String
-    Description: The URL of your OIDC provider's well-known discovery URL
+    Default: Unset
+    Description: Generally can be found at the .well-known endpoint for your provider.
+  OIDCTokenEndpoint:
+    Type: String
+    Default: Unset
+    Description: Generally can be found at the .well-known endpoint for your provider.
+  OIDCUserInfoEndpoint:
+    Type: String
+    Default: Unset
+    Description: Generally can be found at the .well-known endpoint for your provider.
   CloudTrailSQSNotificationQueueName:
     Type: String
     Description: The name of the SQS used for CloudTrail notifications.
@@ -67,6 +83,20 @@ Parameters:
   DomainName:
     Type: String
     Description: The fully qualified domain you'll be hosting MozDef at.
+  AlertQueueUrl:
+    Type: String
+    Description: The url of the alert queue kombu should use for taskExchange.
+Conditions:
+  OIDCEnabledCondition:
+    !Not [!Equals [!Ref OIDCClientId, Unset]]
+  OIDCNotEnabledCondition:
+    !Equals [!Ref OIDCClientId, Unset]
+  SSLEnabledCondition:
+    !And [!Not [!Equals [!Ref MozDefACMCertArn, Unset]], !Equals [!Ref OIDCClientId, Unset]]
+  SSLNotEnabledCondition:
+    !And [!Equals [!Ref MozDefACMCertArn, Unset], !Equals [!Ref OIDCClientId, Unset]]
+  SSLEnabledWithOidcCondition:
+    !And [!Not [!Equals [!Ref MozDefACMCertArn, Unset]], !Not [!Equals [!Ref OIDCClientId, Unset]]]
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -120,17 +150,22 @@ Resources:
             - content: |
                 # Cloudy MozDef env file as imported by docker compose.
                 # Drives the configuration of variables for a variety of containers.
+                OIDC_CLIENT_ID=${OIDCClientId}
                 OPTIONS_ESSERVERS=${ESURL}
+                # Private unauthed kibana url for accessing kibana API
                 OPTIONS_KIBANAURL=${KibanaURL}
                 # The OPTIONS_METEOR_KIBANAURL uses the reserved word "relative" which triggers MozDef
                 # to use relative links to Kibana : https://github.com/mozilla/MozDef/pull/956
-                OPTIONS_METEOR_KIBANAURL=https://relative:9090/_plugin/kibana/
+                OPTIONS_METEOR_KIBANAURL=http://relative:9090/_plugin/kibana/
                 OPTIONS_METEOR_ROOTURL=https://${DomainName}
+                METEOR_BACKEND=meteor:3000
+                ESBACKEND=${KibanaDomainOnlyURL}
+                # Disable certain web ui features
+                OPTIONS_REMOVE_FEATURES=ipblocklist,fqdnblocklist,logincounts,globe
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
                 # Future support will be added for cognito backed authentication.
                 client_id=${OIDCClientId}
                 client_secret=${OIDCClientSecret}
-                discovery_url=${OIDCDiscoveryURL}
                 backend=http://meteor:3000
                 redirect_uri_path=/redirect_uri
                 httpsredir=no
@@ -148,6 +183,9 @@ Resources:
                 # Set thresholds for attack dataviz lower means more ogres
                 OPTIONS_IPV4ATTACKERHITCOUNT=5
                 OPTIONS_IPV4ATTACKERPREFIXLENGTH=24
+                OPTIONS_ALERTSQSQUEUEURL=${AlertQueueUrl}
+                OPTIONS_MQPROTOCOL=sqs
+                DEFAULT_AWS_REGION=${AWS::Region}
               path: /opt/mozdef/docker/compose/cloudy_mozdef.env
             - content: |
                 #!/usr/bin/env python
@@ -172,9 +210,11 @@ Resources:
                 ALERTS = {
                     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
                     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
+                    'get_watchlist.AlertWatchList': {'schedule': timedelta(minutes=1)},
                     'guard_duty_probe.AlertGuardDutyProbe': {'schedule': crontab(minute='*/1')},
                     'cloudtrail_logging_disabled.AlertCloudtrailLoggingDisabled': {'schedule': timedelta(minutes=1)},
-                    'cloudtrail_deadman.AlertCloudtrailDeadman': {'schedule': timedelta(hours=1)}
+                    'cloudtrail_deadman.AlertCloudtrailDeadman': {'schedule': timedelta(minutes=15)},
+                    'cloudtrail_public_bucket.AlertCloudtrailPublicBucket': {'schedule': timedelta(minutes=1)},
                 }
 
                 ALERT_PLUGINS = [
@@ -236,31 +276,42 @@ Resources:
                 logging.Formatter.converter = time.gmtime
               path: /opt/mozdef/docker/compose/mozdef_alerts/files/config.py
             - content: |
-                # Cloudy MozDef env file as imported by docker compose for the kibana reverse proxy
-                # Cloudy MozDef uses managed elasticsearch and proxies connections to that using the LUA proxy
-                # This will support cognito backed authentication in the future
-                client_id=${OIDCClientId}
-                client_secret=${OIDCClientSecret}
-                discovery_url=${OIDCDiscoveryURL}
-                backend=${KibanaDomainOnlyURL}
-                redirect_uri_path=/redirect_uri
-                httpsredir=no
-                cookiename=seskibana
-              path: /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
-            - content: |
                 # This configures the worker that pulls in CloudTrail logs
                 OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
             - content: |
-                # This is the additional worker reserved for future use
                 OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
-              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
+              path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
+            - content: |
+                [Unit]
+                Description=Docker Compose container starter
+                After=docker.service network-online.target
+                Requires=docker.service network-online.target
+
+                [Service]
+                WorkingDirectory=/opt/mozdef
+                Type=oneshot
+                RemainAfterExit=yes
+
+                ExecStart=/bin/docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p mozdef up -d
+
+                ExecStop=/bin/docker-compose -f docker/compose/docker-compose-cloudy-mozdef.yml -p mozdef down
+
+                [Install]
+                WantedBy=multi-user.target
+              path: /etc/systemd/system/docker-compose.service
+            - content: |
+                [options]
+                api_url = http://rest:8081/getwatchlist
+                jwt_secret = secret
+                use_auth = false
+              path: /opt/mozdef/docker/compose/mozdef_alerts/files/get_watchlist.conf
           runcmd:
             - echo RABBITMQ_PASSWORD=`python3 -c 'import secrets; s = secrets.token_hex(); print(s)'` > /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/rabbitmq.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef.env
             - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_kibana.env
-            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sns_sqs.env
+            - chmod --verbose 600 /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
             - mkdir --verbose --parents ${EFSMountPoint}
             - echo '*.* @@127.0.0.1:514' >> /etc/rsyslog.conf
             - systemctl enable rsyslog
@@ -268,8 +319,11 @@ Resources:
             - grep "${EFSID}" /etc/fstab >/dev/null || echo "${EFSID}:/ ${EFSMountPoint} efs tls,_netdev" >> /etc/fstab
             - for i in 1 2 3 4 5 6; do mount --verbose --all --types efs defaults && break || sleep 15; done
             - cd /opt/mozdef && git pull origin master
-            - make -C /opt/mozdef -f /opt/mozdef/Makefile  run-cloudy-mozdef
-            - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef \$RABBITMQ_PASSWORD
+            - systemctl daemon-reload
+            - systemctl enable docker-compose
+            - systemctl start docker-compose
+            - sleep 10
+            - cd /opt/mozdef && cat /opt/mozdef/docker/compose/rabbitmq.env | cut -d '=' -f2 | xargs docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl add_user mozdef
             - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_user_tags mozdef administrator
             - cd /opt/mozdef && docker-compose -f docker/compose/docker-compose.yml -p mozdef exec -T rabbitmq rabbitmqctl set_permissions -p / mozdef ".*" ".*" ".*"
   MozDefAutoScaleGroup:
@@ -311,8 +365,9 @@ Resources:
           Value: mozdef
         - Key: stack
           Value: !Ref AWS::StackName
-  MozDefElasticLoadBalancingV2ListenerKibanaHttps:
+  MozDefElasticLoadBalancingV2ListenerKibanaSSL:
     Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledCondition
     Properties:
       Certificates:
         - CertificateArn: !Ref MozDefACMCertArn
@@ -322,11 +377,24 @@ Resources:
           Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
       LoadBalancerArn:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
-      Port: 9090
+      Port: 9443
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
-  MozDefElasticLoadBalancingV2ListenerHttps:
+  MozDefElasticLoadBalancingV2ListenerKibana:
     Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLNotEnabledCondition
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 9090
+      Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerSSL:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledCondition
     Properties:
       Certificates:
         - CertificateArn: !Ref MozDefACMCertArn
@@ -339,8 +407,21 @@ Resources:
       Port: 443
       Protocol: HTTPS
       SslPolicy: ELBSecurityPolicy-2016-08
-  MozDefElasticLoadBalancingV2ListenerHttp:
+  MozDefElasticLoadBalancingV2ListenerNoSSL:
     Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLNotEnabledCondition
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroup
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 80
+      Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerRedirectSSL:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledCondition
     Properties:
       DefaultActions:
       - Type: redirect
@@ -350,8 +431,105 @@ Resources:
           Protocol: HTTPS
           Query: '#{query}'
           Port: '443'
-          StatusCode: HTTP_301
+          StatusCode: HTTP_302
       LoadBalancerArn:
         Ref: MozDefElasticLoadBalancingV2LoadBalancer
       Port: 80
       Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerRedirectSSLOIDC:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledWithOidcCondition
+    Properties:
+      DefaultActions:
+      - Type: redirect
+        RedirectConfig:
+          Host: '#{host}'
+          Path: '/#{path}'
+          Protocol: HTTPS
+          Query: '#{query}'
+          Port: '443'
+          StatusCode: HTTP_302
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 80
+      Protocol: HTTP
+  MozDefElasticLoadBalancingV2ListenerSSLOIDC:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledWithOidcCondition
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: authenticate-oidc
+        AuthenticateOidcConfig:
+          AuthorizationEndpoint: !Ref OIDCAuthorizationEndpoint
+          ClientId: !Ref OIDCClientId
+          ClientSecret: !Ref OIDCClientSecret
+          Issuer: !Ref OIDCIssuer
+          OnUnauthenticatedRequest: authenticate
+          SessionCookieName: mozdefMeteor
+          TokenEndpoint: !Ref OIDCTokenEndpoint
+          UserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+          Scope: "openid email"
+        Order: 1
+      - Type: forward
+        Order: 2
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroup
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+  MozDefElasticLoadBalancingV2ListenerRedirectKibanaSSLOIDC:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledWithOidcCondition
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: redirect
+        RedirectConfig:
+          Host: '#{host}'
+          Path: '/#{path}'
+          Protocol: HTTPS
+          Query: '#{query}'
+          Port: '9443'
+          StatusCode: HTTP_302
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 9090
+      Protocol: HTTPS
+  MozDefElasticLoadBalancingV2ListenerSSLKibanaOIDC:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Condition: SSLEnabledWithOidcCondition
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref MozDefACMCertArn
+      DefaultActions:
+      - Type: authenticate-oidc
+        AuthenticateOidcConfig:
+          AuthorizationEndpoint: !Ref OIDCAuthorizationEndpoint
+          ClientId: !Ref OIDCClientId
+          ClientSecret: !Ref OIDCClientSecret
+          Issuer: !Ref OIDCIssuer
+          OnUnauthenticatedRequest: authenticate
+          Scope: openid profile email
+          SessionCookieName: mozdefMeteor
+          TokenEndpoint: !Ref OIDCTokenEndpoint
+          UserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+        Order: 1
+      - Type: forward
+        Order: 2
+        TargetGroupArn:
+          Ref: MozDefElasticLoadBalancingV2TargetGroupKibana
+      LoadBalancerArn:
+        Ref: MozDefElasticLoadBalancingV2LoadBalancer
+      Port: 9443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+Outputs:
+  LoadBalancerDNSName:
+    Description: The DNS name of the ALB hosting MozDef.  If using OIDC or SSL point your DNS at this.
+    Value:
+      Fn::GetAtt: [ MozDefElasticLoadBalancingV2LoadBalancer, DNSName ]
