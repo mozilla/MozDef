@@ -33,7 +33,7 @@ Parameters:
   MozDefLoadBalancerSecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
     Description: The security group to apply to the EC2 instance
-  MozDefACMCertArn:
+  ACMCertArn:
     Type: String
     Description: The arn of your pre-issued certificate for ssl termination.
   ESURL:
@@ -50,29 +50,29 @@ Parameters:
     Default: https://kibana.example.com/
   OIDCAuthorizationEndpoint:
     Type: String
-    Default: Unset
+    Default: ''
     ConstraintDescription: A valid URL
     Description: "The URL of the authorization endpoint found for your OIDC provider generaly found on (Example: https://auth.example.com/.well-known/openid-configuration)"
   OIDCClientId:
     Type: String
-    Default: Unset
+    Default: ''
     Description: The client ID that your OIDC provider issues you for your Mozdef instance.
   OIDCClientSecret:
     Type: String
-    Default: Unset
+    Default: ''
     Description: The secret that your OIDC provider issues you for your Mozdef instance.
     NoEcho: true
   OIDCIssuer:
     Type: String
-    Default: Unset
+    Default: ''
     Description: Generally can be found at the .well-known endpoint for your provider.
   OIDCTokenEndpoint:
     Type: String
-    Default: Unset
+    Default: ''
     Description: Generally can be found at the .well-known endpoint for your provider.
   OIDCUserInfoEndpoint:
     Type: String
-    Default: Unset
+    Default: ''
     Description: Generally can be found at the .well-known endpoint for your provider.
   CloudTrailSQSNotificationQueueName:
     Type: String
@@ -88,20 +88,74 @@ Parameters:
     Description: The url of the alert queue kombu should use for taskExchange.
   ALBBasicAuthSecret:
     Type: String
-    Default: Unset
+    Default: ''
     Description: Default basic authentication password, if enabled.
     NoEcho: true
+Rules:
+  ALBBasicAuthOnly:
+    RuleCondition: !Not [ !Equals [ !Ref 'ALBBasicAuthSecret', '' ] ]
+    Assertions:
+    - Assert:
+        !EachMemberEquals
+        - - !Ref 'OIDCAuthorizationEndpoint'
+          - !Ref 'OIDCClientId'
+          - !Ref 'OIDCClientSecret'
+          - !Ref 'OIDCIssuer'
+          - !Ref 'OIDCTokenEndpoint'
+          - !Ref 'OIDCUserInfoEndpoint'
+        - ''
+      AssertDescription: >
+        If you set an ALBBasicAuthSecret indicating you wish to use HTTP Basic
+        Auth for authentication, you must leave all OIDC attributes blank
+  OIDCHasAllRequiredParameters:
+    RuleCondition:
+      !Or
+      - !Not [ !Equals [ !Ref 'OIDCAuthorizationEndpoint', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCClientId', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCClientSecret', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCIssuer', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCTokenEndpoint', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCUserInfoEndpoint', '' ] ]
+    Assertions:
+    - Assert:
+        !And
+        - !Not [ !Equals [ !Ref 'OIDCAuthorizationEndpoint', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCClientId', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCClientSecret', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCIssuer', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCTokenEndpoint', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCUserInfoEndpoint', '' ] ]
+        - !Not [ !Equals [ !Ref 'ACMCertArn', '' ] ]
+      AssertDescription: >
+        If you set any OIDC parameter indicating you wish to use OIDC for
+        authentication, you must set all six OIDC parameters, [
+        OIDCAuthorizationEndpoint, OIDCClientId, OIDCClientSecret, OIDCIssuer,
+        OIDCTokenEndpoint, OIDCUserInfoEndpoint] as well as an ACM Certificate
+        in the ACMCertArn parameter
+  SomeAuthHasBeenConfigured:
+    Assertions:
+    - Assert:
+        !Or
+        - !Not [ !Equals [ !Ref 'OIDCClientId', '' ] ]
+        - !Not [ !Equals [ !Ref 'ALBBasicAuthSecret', '' ] ]
+      AssertDescription: >
+        You must choose either to use HTTP Basic Auth or OIDC for authentication.
+        To choose HTTP Basic Auth you must set an ALBBasicAuthSecret. To choose
+        OIDC you must set all six OIDC parameters, [OIDCAuthorizationEndpoint,
+        OIDCClientId, OIDCClientSecret, OIDCIssuer, OIDCTokenEndpoint,
+        OIDCUserInfoEndpoint] as well as an ACM Certificate in the ACMCertArn
+        parameter.
 Conditions:
   OIDCEnabledCondition:
-    !Not [!Equals [!Ref OIDCClientId, Unset]]
+    !Not [!Equals [!Ref OIDCClientId, '']]
   OIDCNotEnabledCondition:
-    !Equals [!Ref OIDCClientId, Unset]
+    !Equals [!Ref OIDCClientId, '']
   SSLEnabledCondition:
-    !And [!Not [!Equals [!Ref MozDefACMCertArn, Unset]], !Equals [!Ref OIDCClientId, Unset]]
+    !And [!Not [!Equals [!Ref ACMCertArn, '']], !Equals [!Ref OIDCClientId, '']]
   SSLNotEnabledCondition:
-    !And [!Equals [!Ref MozDefACMCertArn, Unset], !Equals [!Ref OIDCClientId, Unset]]
+    !And [!Equals [!Ref ACMCertArn, ''], !Equals [!Ref OIDCClientId, '']]
   SSLEnabledWithOidcCondition:
-    !And [!Not [!Equals [!Ref MozDefACMCertArn, Unset]], !Not [!Equals [!Ref OIDCClientId, Unset]]]
+    !And [!Not [!Equals [!Ref ACMCertArn, '']], !Not [!Equals [!Ref OIDCClientId, '']]]
 Resources:
   MozDefElasticLoadBalancingV2TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -377,7 +431,7 @@ Resources:
     Condition: SSLEnabledCondition
     Properties:
       Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
+        - CertificateArn: !Ref ACMCertArn
       DefaultActions:
       - Type: forward
         TargetGroupArn:
@@ -404,7 +458,7 @@ Resources:
     Condition: SSLEnabledCondition
     Properties:
       Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
+        - CertificateArn: !Ref ACMCertArn
       DefaultActions:
       - Type: forward
         TargetGroupArn:
@@ -465,7 +519,7 @@ Resources:
     Condition: SSLEnabledWithOidcCondition
     Properties:
       Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
+        - CertificateArn: !Ref ACMCertArn
       DefaultActions:
       - Type: authenticate-oidc
         AuthenticateOidcConfig:
@@ -493,7 +547,7 @@ Resources:
     Condition: SSLEnabledWithOidcCondition
     Properties:
       Certificates:
-        - CertificateArn: !Ref MozDefACMCertArn
+        - CertificateArn: !Ref ACMCertArn
       DefaultActions:
       - Type: authenticate-oidc
         AuthenticateOidcConfig:

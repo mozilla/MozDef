@@ -47,8 +47,8 @@ safety-checks:
 	@echo "Making sure you have an environment variable OIDC_CLIENT_SECRET set."
 	@test -n "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -n "$(OIDC_CLIENT_ID)" -o -z "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -z "$(OIDC_CLIENT_ID)"
 	@echo "Making sure you have either OIDC_CLIENT_ID or ALB_BASIC_AUTH_SECRET set."
-	# If both are equal then you're either leaking the secret, or, most likely, both are equal to string "Unset"
-	# which is unsafe (as it would effectively give you a basic auth password of string "Unset")
+	# If both are equal then you're either leaking the secret, or, most likely, both are equal to string ""
+	# which is unsafe (as it would effectively give you a basic auth password of string "")
 	$(call eq, $(OIDC_CLIENT_ID), $(ALB_BASIC_AUTH_SECRET_PARAM_ARG))
 
 .PHONY: create-dev-stack
