@@ -28,7 +28,7 @@ class AlertLdapPasswordSpray(AlertTask):
         tags = ['ldap']
         severity = 'WARNING'
         email_list = set()
-        email_regex = r'mail=([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)'
+        email_regex = r'.*mail=([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)'
 
         for event in aggreg['allevents']:
             for request in event['_source']['details']['requests']:
