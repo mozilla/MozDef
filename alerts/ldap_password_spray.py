@@ -23,23 +23,22 @@ class AlertLdapPasswordSpray(AlertTask):
         self.searchEventsAggregated('details.client', samplesLimit=10)
         self.walkAggregations(threshold=int(self.config.threshold_count))
 
-    # Set alert properties
     def onAggregation(self, aggreg):
         category = 'ldap'
         tags = ['ldap']
         severity = 'WARNING'
-
         email_list = set()
+        email_regex = r'mail=([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)'
 
         for event in aggreg['allevents']:
             for request in event['_source']['details']['requests']:
-                email = extractEmail(request['details'][0])
-                if email:
-                    email_list.add(extractEmail(request['details'][0]))
+                match_object = re.match(email_regex, request['details'][0])
+                if match_object:
+                    email_list.add(match_object.group(1))
 
         # If no emails, don't throw alert
-        if len(email_list) == 0:
-            return None
+        # if len(email_list) == 0:
+        #     return None
 
         summary = 'Password Spray Attack in Progress from {0} targeting the following account(s): {1}'.format(
             aggreg['value'],
@@ -47,19 +46,3 @@ class AlertLdapPasswordSpray(AlertTask):
         )
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
-
-    # A helper function to extract the first email in a string.
-    #
-    # Example:
-    #
-    # Input: 'dn="mail=user@example.com,o=com,dc=example"'
-    # Ouput: user@example.com
-    #
-    def extractEmail(string):
-        email_regex = r'mail=([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)'
-        match_object = re.match(email_regex, string)
-
-        if match_object:
-            return match_object.group(1)
-        else:
-            return None
