@@ -11,19 +11,11 @@ import hjson
 import sys
 import os
 import requests
-import mozdef_client as mozdef
-from mozdef_util.utilities.dot_dict import DotDict
-
-try:
-    import urllib.parse
-
-    quote_url = urllib.parse.quote
-except ImportError:
-    # Well hello there python2 user!
-    import urllib
-
-    quote_url = urllib.quote
 import traceback
+
+import mozdef_client as mozdef
+
+from mozdef_util.utilities.dot_dict import DotDict
 
 
 def fatal(msg):
