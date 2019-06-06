@@ -1,0 +1,13 @@
+{
+  "elasticSearchAddress": "http://127.0.0.1:9200",
+  "indicesToSearch": [
+    "events-weekly"
+  ],
+  "maxConnections": 32,
+  "matchTags": [
+    "portscan"
+  ],
+  "searchWindow": {
+    "hours": 24
+  }
+}
