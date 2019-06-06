@@ -17,7 +17,6 @@ class AlertLdapPasswordSpray(AlertTask):
         search_query = SearchQuery(minutes=int(self.config.search_depth_min))
         search_query.add_must([
             TermMatch('category', 'ldap'),
-            TermMatch('tags', 'ldap'),
             TermMatch('details.response.error', 'LDAP_INVALID_CREDENTIALS')
         ])
         self.filtersManual(search_query)
@@ -42,7 +41,7 @@ class AlertLdapPasswordSpray(AlertTask):
         if len(email_list) == 0:
             return None
 
-        summary = 'Password Spray Attack in Progress from {0} targeting the following accounts: {1}'.format(
+        summary = 'Password Spray Attack in Progress from {0} targeting the following account(s): {1}'.format(
             aggreg['value'],
             ",".join(sorted(email_list))
         )
