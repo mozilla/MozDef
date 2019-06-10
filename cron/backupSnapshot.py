@@ -33,6 +33,10 @@ from mozdef_util.utilities.logger import logger
 
 def main():
     logger.debug('started')
+
+    json_headers = {
+        'Content-type': 'application/json',
+    }
     try:
         esserver = options.esservers[0]
         s3 = boto.connect_s3(
@@ -53,7 +57,7 @@ def main():
                 "region": "{0}".format(options.aws_region)
             }
         }
-        r = requests.put('%s/_snapshot/s3backup' % esserver, data=json.dumps(snapshot_config))
+        r = requests.put('%s/_snapshot/s3backup' % esserver, headers=json_headers, data=json.dumps(snapshot_config))
         if 'status' in r.json():
             logger.error("Error while registering snapshot repo: %s" % r.text)
         else:
@@ -75,6 +79,7 @@ def main():
                 epoch = calendar.timegm(datetime.utcnow().utctimetuple())
                 r = requests.put(
                     '{0}/_snapshot/s3backup/{1}-{2}?wait_for_completion=true'.format(esserver, index_to_snapshot, epoch),
+                    headers=json_headers,
                     data=json.dumps(snapshot_config)
                 )
                 if 'status' in r.json():
