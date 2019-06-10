@@ -35,7 +35,7 @@ def main():
     logger.debug('started')
 
     json_headers = {
-        'Content-type': 'application/json',
+        'Content-Type': 'application/json',
     }
     try:
         esserver = options.esservers[0]
