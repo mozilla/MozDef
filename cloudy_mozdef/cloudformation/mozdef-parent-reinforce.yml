@@ -336,6 +336,7 @@ Resources:
     # occurs on stack creation for this Lambda Function resource. The DependsOn
     # prevents the error.
     Properties:
+      Description: Function used within CloudFormation to get the length of an array
       Code:
         ZipFile: |
           import cfnresponse
@@ -370,6 +371,7 @@ Resources:
     # occurs on stack creation for this Lambda Function resource. The DependsOn
     # prevents the error.
     Properties:
+      Description: Function used within CloudFormation to check if an IAM role exists
       Code:
         ZipFile: |
           import cfnresponse
