@@ -49,7 +49,7 @@ kibana_index_name = '.kibana_1'
 # For this version of kibana, they require specifying
 # the kibana version via the api for setting
 # the default index, seems weird, but it is what it is.
-kibana_version = '6.6.2'
+kibana_version = '6.8.0'
 
 state_index_name = 'mozdefstate'
 
