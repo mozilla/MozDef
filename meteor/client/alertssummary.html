@@ -96,7 +96,7 @@ Copyright (c) 2014 Mozilla Corporation
     <tr class="alert-row">
         <td>{{utctimestamp}}</td>
         <td><a href="/alert/{{esmetadata.id}}">mozdef</a><br>
-            <a href="{{ resolveKibanaURL mozdef.kibanaURL }}#/doc/alerts-*/{{esmetadata.index}}/doc?id={{esmetadata.id}}" target="_blank">kibana</a>
+            <a href="{{ resolveKibanaURL mozdef.kibanaURL }}#/doc/alerts-*/{{esmetadata.index}}/_doc?id={{esmetadata.id}}" target="_blank">kibana</a>
             {{#if url}}
                 <br><a href="{{url}}" target ="_blank">docs</a>
             {{/if}}
