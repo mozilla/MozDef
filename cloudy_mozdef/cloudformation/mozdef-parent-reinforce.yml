@@ -414,17 +414,6 @@ Resources:
         - Key: application
           Value: mozdef
       TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-alert-developer.yml ] ]
-  MozDefVPCFlowLogs:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
-        MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
-        MozDefSQSQueueUrl: !GetAtt MozDefSQS.Outputs.SQSQueueUrl
-      Tags:
-        - Key: application
-          Value: mozdef
-      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-vpc-flow-logs.yml ] ]
 Outputs:
   LoadBalancerDNSName:
     Description: The DNS name of the ALB hosting MozDef.  If using OIDC or SSL point your DNS at this.  If using basic auth no DNS is necessary.
