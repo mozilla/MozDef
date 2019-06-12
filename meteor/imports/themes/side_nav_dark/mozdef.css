@@ -18,8 +18,7 @@ Copyright (c) 2014 Mozilla Corporation
   --row-color-even: #636c85;
   --ack-edit-color: #a2a9b2;
   --ack-edit-border-color: #adadad;
-  --ack-edit-focus-color: #557750;
-  --ack-edit-disabled-color: #557750;
+  --txt-shadow-color: #576d54;
   --arm-color: #e69006;
   --arm-focus-color: #d58512;
   --font-main: #fff;
@@ -232,6 +231,14 @@ caption, legend {
     color: white;
 }
 
+.modal-header {
+  color: var(--font-focus);
+}
+
+.modal-body {
+  color: var(--font-focus);
+}
+
 .modal-body .row {
     color: black;
 }
@@ -249,6 +256,15 @@ caption, legend {
 .btn-warning:hover,
 .open > .dropdown-toggle.btn-warning {
   color: var(--font-focus);
+  background-color: var(--arm-focus-color);
+  border-color: var(--arm-color);
+}
+
+.btnAlertAcked,
+.btnAlertAcked.active,
+.btnAlertAcked:active,
+.btnAlertAcked:hover > .btn {
+  color: var(--txt-shadow-color);
   background-color: var(--arm-focus-color);
   border-color: var(--arm-color);
 }

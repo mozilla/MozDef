@@ -42,8 +42,9 @@ resolveKibanaURL = function(url){
     if ( kibanaURL.hostname == 'relative' ){
         // we were passed something like  OPTIONS_METEOR_KIBANAURL=http://relative:9090/app/kibana
         // so lets figure out where we should be
-        dnsURL=new URL(document.URL);
+        dnsURL = new URL(document.URL);
         kibanaURL.hostname = dnsURL.hostname;
+        kibanaURL.protocol = dnsURL.protocol;
     }
     return kibanaURL;
 };

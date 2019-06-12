@@ -4,3 +4,4 @@ build/lib/*
 build/python/*
 lib/*
 python/*
+build/lambdalert.py

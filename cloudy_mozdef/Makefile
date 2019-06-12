@@ -7,6 +7,8 @@ AMI_MAP_TEMP_FILE	:= /tmp/mozdef-ami-map.txt
 DEV_STACK_PARAMS_FILENAME	:= aws_parameters.dev.json
 # For more information on the rationale behind the code in STACK_PARAMS see https://github.com/aws/aws-cli/issues/2429#issuecomment-441133480
 DEV_STACK_PARAMS	:= $(shell test -e $(DEV_STACK_PARAMS_FILENAME) && python -c 'import json,sys;f=open(sys.argv[1]);print(" ".join([",".join(["%s=\\\"%s\\\""%(k,v) for k,v in x.items()]) for x in json.load(f)]));f.close()' $(DEV_STACK_PARAMS_FILENAME))
+OIDC_CLIENT_ID		:= $(shell test -e $(DEV_STACK_PARAMS_FILENAME) && python -c 'import json,sys;f=open(sys.argv[1]);print(next((x["ParameterValue"] for x in json.load(f) if x["ParameterKey"]=="OIDCClientId"),""));f.close()' $(DEV_STACK_PARAMS_FILENAME))
+DOMAIN_NAME			:= $(shell test -e $(DEV_STACK_PARAMS_FILENAME) && python -c 'import json,sys;f=open(sys.argv[1]);print(next((x["ParameterValue"] for x in json.load(f) if x["ParameterKey"]=="DomainName"),""));f.close()' $(DEV_STACK_PARAMS_FILENAME))
 # MozDef uses a nested CF stack, the mozdef-parent.yml will tie all child stacks together and load them from S3
 # See also mozdef.infosec.mozilla.org bucket
 S3_DEV_BUCKET_NAME	:= mozdef.infosec.allizom.org
@@ -39,6 +41,7 @@ packer-build-github: ## Build the base AMI with packer
 create-dev-stack: test ## Create everything you need for a fresh new stack!
 	@export AWS_REGION=$(AWS_REGION)
 	@echo "Make sure you have an environment variable OIDC_CLIENT_SECRET set."
+	@test -n "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -n "$(OIDC_CLIENT_ID)" -o -z "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -z "$(OIDC_CLIENT_ID)"
 	aws cloudformation create-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
 	  --parameters $(OIDC_CLIENT_SECRET_PARAM_ARG) \
@@ -53,6 +56,7 @@ create-dev-s3-bucket:
 .PHONY: update-dev-stack
 update-dev-stack: test ## Updates the nested stack on AWS
 	@export AWS_REGION=$(AWS_REGION)
+	@test -n "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -n "$(OIDC_CLIENT_ID)" -o -z "$(OIDC_CLIENT_SECRET_PARAM_ARG)" -a -z "$(OIDC_CLIENT_ID)"
 	aws cloudformation update-stack --stack-name $(STACK_NAME) --template-url $(S3_DEV_STACK_URI)mozdef-parent.yml \
 	  --capabilities CAPABILITY_IAM \
 	  --parameters $(OIDC_CLIENT_SECRET_PARAM_ARG) \
@@ -93,3 +97,7 @@ diff-dev-templates:
 .PHONY: diff-prod-templates
 diff-prod-templates:
 	tempdir=`mktemp --directory`; aws s3 sync $(S3_PROD_BUCKET_URI) "$$tempdir" --exclude="*" --include="*.yml"; diff --recursive --unified "$$tempdir" cloudformation; rm -rf "$$tempdir"
+
+.PHONY: bind-domain-name
+bind-domain-name:
+	ci/bind_domain_name "$(DOMAIN_NAME)" "$(STACK_NAME)"
