@@ -10,8 +10,7 @@
 # Each run creates a snapshot of indexname-epochtimestamp
 # .conf file will determine what indexes are operated on
 # Create a starter .conf file with backupDiscover.py
-# You must create the s3 bucket (options.aws_bucket) first paying attention to
-# the region assigned to the bucket.
+# You must create the s3 bucket (options.aws_bucket).
 # Snapshots will be placed in:
 # options.aws_bucket/elasticsearch/YYYY-MM/servername/indices/indexname
 
@@ -50,7 +49,6 @@ def main():
             "settings": {
                 "bucket": options.aws_bucket,
                 "base_path": "elasticsearch/{0}/{1}".format(bucketdate, hostname),
-                "region": "{0}".format(options.aws_region)
             }
         }
         r = requests.put('%s/_snapshot/s3backup' % esserver, data=json.dumps(snapshot_config))
@@ -166,12 +164,6 @@ def initConfig():
         '',
         options.configfile
     )
-    options.aws_region = getConfig(
-        'aws_region',
-        'us-west-1',
-        options.configfile
-    )
-
     options.aws_bucket = getConfig(
         'aws_bucket',
         '',
