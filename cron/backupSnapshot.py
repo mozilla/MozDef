@@ -49,8 +49,7 @@ def main():
             "type": "s3",
             "settings": {
                 "bucket": options.aws_bucket,
-                "base_path": "elasticsearch/{0}/{1}".format(bucketdate, hostname),
-                "region": "{0}".format(options.aws_region)
+                "base_path": "elasticsearch/{0}/{1}".format(bucketdate, hostname)
             }
         }
         r = requests.put('%s/_snapshot/s3backup' % esserver, data=json.dumps(snapshot_config))
@@ -166,12 +165,6 @@ def initConfig():
         '',
         options.configfile
     )
-    options.aws_region = getConfig(
-        'aws_region',
-        'us-west-1',
-        options.configfile
-    )
-
     options.aws_bucket = getConfig(
         'aws_bucket',
         '',
