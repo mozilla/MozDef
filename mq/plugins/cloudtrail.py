@@ -26,6 +26,7 @@ class message(object):
             'details.requestparameters.bucketpolicy.statement.principal',
             'details.requestparameters.callerreference',
             'details.requestparameters.description',
+            'details.requestparameters.describeflowlogsrequest.filter.value',
             'details.requestparameters.disableapitermination',
             'details.requestparameters.domainname',
             'details.requestparameters.domainnames',
