@@ -19,12 +19,12 @@ class AlertCloudtrailExcessiveDescribe(AlertTask):
         search_query.add_must([
             TermMatch('source', 'cloudtrail'),
             TermMatch('details.eventverb', 'Describe'),
-            ExistsMatch('details.source')
+            ExistsMatch('hostname')
         ])
 
         self.filtersManual(search_query)
-        # We aggregate on details.hostname which is the AWS service name
-        self.searchEventsAggregated('details.source', samplesLimit=2)
+        # We aggregate on hostname which is the AWS service name
+        self.searchEventsAggregated('hostname', samplesLimit=2)
         self.walkAggregations(threshold=50)
 
     def onAggregation(self, aggreg):
