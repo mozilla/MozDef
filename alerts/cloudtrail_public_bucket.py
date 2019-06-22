@@ -16,8 +16,8 @@ class AlertCloudtrailPublicBucket(AlertTask):
 
         search_query.add_must([
             TermMatch('source', 'cloudtrail'),
-            TermMatch('details.eventname', 'PutBucketPolicy'),
-            ExistsMatch('details.requestparameters.bucketpolicy.statement.principal')
+            TermMatch('details.eventname', 'CreateBucket'),
+            TermMatch('details.requestparameters.x-amz-acl', 'public-read-write'),
         ])
 
         self.filtersManual(search_query)

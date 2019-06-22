@@ -13,7 +13,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch, ExistsMatch
 class AlertCloudtrailExcessiveDescribe(AlertTask):
     def main(self):
         # Create a query to look back the last 20 minutes
-        search_query = SearchQuery(minutes=20)
+        search_query = SearchQuery(minutes=30)
 
         # Add search terms to our query
         search_query.add_must([
@@ -25,7 +25,7 @@ class AlertCloudtrailExcessiveDescribe(AlertTask):
         self.filtersManual(search_query)
         # We aggregate on details.hostname which is the AWS service name
         self.searchEventsAggregated('details.source', samplesLimit=2)
-        self.walkAggregations(threshold=50)
+        self.walkAggregations(threshold=5)
 
     def onAggregation(self, aggreg):
         category = 'access'
