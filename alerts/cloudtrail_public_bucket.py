@@ -27,9 +27,6 @@ class AlertCloudtrailPublicBucket(AlertTask):
     # Set alert properties
     def onEvent(self, event):
         request_parameters = event['_source']['details']['requestparameters']
-        for statement in request_parameters['bucketpolicy']['statement']:
-            if statement['principal'] != '*':
-                return
         category = 'access'
         tags = ['cloudtrail']
         severity = 'INFO'
