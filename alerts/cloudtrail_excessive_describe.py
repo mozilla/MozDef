@@ -13,7 +13,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch, ExistsMatch
 class AlertCloudtrailExcessiveDescribe(AlertTask):
     def main(self):
         # Create a query to look back the last 20 minutes
-        search_query = SearchQuery(minutes=30)
+        search_query = SearchQuery(minutes=5)
 
         # Add search terms to our query
         search_query.add_must([
@@ -31,7 +31,6 @@ class AlertCloudtrailExcessiveDescribe(AlertTask):
         category = 'access'
         tags = ['cloudtrail']
         severity = 'WARNING'
-        summary = "Excessive Describe calls on {} ({})".format(aggreg['value'], aggreg['count'])
-
+        summary = "A production service is generating excessive describe calls."
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
