@@ -23,7 +23,7 @@ class AlertCloudtrailExcessiveDescribe(AlertTask):
         ])
 
         self.filtersManual(search_query)
-        # We aggregate on details.hostname which is the AWS service name
+        # We aggregate on details.sourceipv4address which is the AWS service name
         self.searchEventsAggregated('details.sourceipv4address', samplesLimit=2)
         self.walkAggregations(threshold=5)
 
