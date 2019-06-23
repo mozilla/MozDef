@@ -157,6 +157,7 @@ class AlertTask(Task):
             self.mqConn = kombu.Connection(connString)
             if connString.find('sqs') == 0:
                 self.mqConn.transport_options['region'] = os.getenv('DEFAULT_AWS_REGION', 'us-west-2')
+                self.mqConn.transport_options['is_secure'] = True
                 self.alertExchange = kombu.Exchange(
                     name=RABBITMQ["alertexchange"], type="topic", durable=True
                 )

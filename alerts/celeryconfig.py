@@ -13,7 +13,7 @@ alerts_include = list(set(alerts_include))
 # XXX TBD this should get wrapped into an object that provides pyconfig
 if os.getenv("OPTIONS_MQPROTOCOL", "amqp") == "sqs":
     BROKER_URL = "sqs://@"
-    BROKER_TRANSPORT_OPTIONS = {'region': os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('.')[1]}
+    BROKER_TRANSPORT_OPTIONS = {'region': os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('.')[1], 'is_secure': True, 'port': 443}
     CELERY_RESULT_BACKEND = None
     alert_queue_name = os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('/')[4]
     CELERY_DEFAULT_QUEUE = alert_queue_name
