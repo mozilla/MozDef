@@ -31,7 +31,7 @@ class AlertCloudtrailExcessiveDescribe(AlertTask):
         category = 'access'
         tags = ['cloudtrail']
         severity = 'WARNING'
-        summary = "Excessive Describe calls on {0} ({1})".format(aggreg['value'], aggreg['count'])
+        summary = "Excessive Describe calls on {} ({})".format(aggreg['value'], aggreg['count'])
 
         # Create the alert object based on these properties
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
