@@ -1,25 +1,23 @@
 {
     "order": 0,
-    "template": "mozdefstate",
+    "index_patterns": "mozdefstate",
     "settings": {
         "number_of_shards": 1,
         "number_of_replicas": 0
     },
     "mappings": {
-        "doc": {
-            "_all": {
-                "enabled": true
-            },
-            "dynamic_templates": [{
-                    "string_fields": {
-                        "match": "*",
-                        "match_mapping_type": "string",
-                        "mapping": {
-                            "type": "keyword"
-                        }
-                    }
-                }
-            ],
+        "_doc": {
+           "dynamic_templates": [
+             {
+               "string_fields": {
+                 "match": "*",
+                 "match_mapping_type": "string",
+                 "mapping": {
+                   "type": "keyword"
+                 }
+               }
+             }
+           ],
             "properties": {
                 "category": {
                     "type": "keyword"

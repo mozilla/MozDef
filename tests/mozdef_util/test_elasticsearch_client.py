@@ -14,7 +14,7 @@ import os
 import sys
 
 from mozdef_util.query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
-from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex, TMP_DOC_TYPE
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex, DOCUMENT_TYPE
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
@@ -28,7 +28,7 @@ class ElasticsearchClientTest(UnitTestSuite):
     def get_num_events(self):
         self.refresh('events')
         search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', TMP_DOC_TYPE))
+        search_query.add_must(TermMatch('_type', DOCUMENT_TYPE))
         search_query.add_aggregation(Aggregation('_type'))
         results = search_query.execute(self.es_client)
         if len(results['aggregations']['_type']['terms']) != 0:
@@ -46,8 +46,8 @@ class MockTransportClass:
     def backup_function(self, orig_function):
         self.original_function = orig_function
 
-    def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):
-        if url == '/_bulk' or url == '/events/' + TMP_DOC_TYPE:
+    def perform_request(self, method, url, headers=None, params=None, body=None):
+        if url == '/_bulk' or url == '/events/_doc':
             self.request_counts += 1
         return self.original_function(method, url, params=params, body=body)
 
@@ -96,9 +96,6 @@ class TestWriteWithRead(ElasticsearchClientTest):
         self.saved_alert = self.es_client.save_alert(body=self.alert)
         self.refresh('alerts')
 
-    def test_saved_type(self):
-        assert self.saved_alert['_type'] == TMP_DOC_TYPE
-
     def test_saved_index(self):
         assert self.saved_alert['_index'] == self.alert_index_name
 
@@ -131,7 +128,7 @@ class TestCloseIndex(ElasticsearchClientTest):
             self.es_client.create_index('test_index')
         time.sleep(1)
         closed = self.es_client.close_index('test_index')
-        assert closed == {'acknowledged': True}
+        assert closed == {u'acknowledged': True}
 
 
 class TestWritingToClosedIndex(ElasticsearchClientTest):
@@ -164,7 +161,7 @@ class TestOpenIndex(ElasticsearchClientTest):
         time.sleep(1)
         self.es_client.close_index('test_index')
         opened = self.es_client.open_index('test_index')
-        assert opened == {'acknowledged': True}
+        assert opened == {u'acknowledged': True, u'shards_acknowledged': True}
 
 
 class TestWithBadIndex(ElasticsearchClientTest):
@@ -207,11 +204,10 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query = SearchQuery()
         query.add_must(ExistsMatch('key'))
         results = query.execute(self.es_client)
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         assert results['hits'][0]['_source']['key'] == 'example value for string of json test'
 
         assert len(results['hits']) == 1
-        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
         assert results['hits'][0]['_source']['type'] == 'event'
 
     def test_writing_dot_fieldname(self):
@@ -225,11 +221,10 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query = SearchQuery()
         query.add_must(ExistsMatch('key.othername'))
         results = query.execute(self.es_client)
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         assert results['hits'][0]['_source']['key.othername'] == 'example value for string of json test'
 
         assert len(results['hits']) == 1
-        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
 
     def test_writing_event_defaults(self):
         query = SearchQuery()
@@ -240,7 +235,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         saved_event = results['hits'][0]['_source']
         assert 'category' in saved_event
         assert 'details' in saved_event
@@ -257,7 +252,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         assert 'utctimestamp' in saved_event
         assert 'category' in saved_event
 
-    def test_writing_with_type(self):
+    def test_writing_with_details(self):
         query = SearchQuery()
         default_event = {
             "_source": {
@@ -274,8 +269,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         assert results['hits'][0]['_source']['summary'] == 'Test summary'
         assert results['hits'][0]['_source']['details'] == {"note": "Example note"}
 
@@ -296,8 +290,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
 
 
 class BulkTest(ElasticsearchClientTest):
@@ -514,7 +507,7 @@ class TestBulkInvalidFormatProblem(BulkTest):
 
         mapping = {
             "mappings": {
-                "event": {
+                DOCUMENT_TYPE: {
                     "properties": {
                         "utcstamp": {
                             "type": "date",

@@ -60,7 +60,7 @@ class UnitTestSuite(object):
         self.es_client.create_alias('events', self.event_index_name)
         self.es_client.create_index(self.previous_event_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('events-previous', self.previous_event_index_name)
-        self.es_client.create_alias_multiple_indices('events-weekly', ['events', 'events-previous'])
+        self.es_client.create_alias_multiple_indices('events-weekly', [self.event_index_name, self.previous_event_index_name])
         self.es_client.create_index(self.alert_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('alerts', self.alert_index_name)
 
