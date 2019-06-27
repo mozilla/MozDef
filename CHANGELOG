@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v1.40.0] - 2019-06-27
+### Added
+- Alertplugin for ip source enrichment
+- Alertplugin for port scan enrichment
+
+### Fixed
+- Bulk message support in loginput
+
+### Removed
+- Vidyo2Mozdef cron script to https://github.com/mozilla/mozdef-deprecated/blob/master/cron/vidyo2MozDef.py
+
+
 ## [v1.39.0] - 2019-05-29
 ### Added
 - Pagination of Web UI tables
