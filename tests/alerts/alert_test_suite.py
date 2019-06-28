@@ -127,7 +127,7 @@ class AlertTestSuite(UnitTestSuite):
         obj = args[0]
         if not isinstance(obj, dict):
             return obj
-        for k, v in obj.iteritems():
+        for k, v in obj.items():
             if k in target and isinstance(target[k], dict):
                 self.dict_merge(target[k], v)
             else:
@@ -217,7 +217,7 @@ class AlertTestSuite(UnitTestSuite):
         assert type(found_alert['_source']['events']) == list, 'Alert events field is not a list'
 
         # Verify that the alert properties are set correctly
-        for key, value in test_case.expected_alert.iteritems():
+        for key, value in test_case.expected_alert.items():
             assert found_alert['_source'][key] == value, u'{0} does not match!\n\tgot: {1}\n\texpected: {2}'.format(key, found_alert['_source'][key], value)
 
     def verify_alert_task(self, alert_task, test_case):

@@ -51,7 +51,7 @@ def keyMapping(aDict):
     returndict['mozdefhostname'] = options.mozdefhostname
     returndict[u'details'] = {}
     try:
-        for k, v in aDict.iteritems():
+        for k, v in aDict.items():
             k = removeAt(k).lower()
 
             if k == 'sourceip':

@@ -100,11 +100,11 @@ class taskConsumer(object):
             event['severity'] = 'INFO'
             event['details'] = {}
 
-            for message_key, message_value in message.iteritems():
+            for message_key, message_value in message.items():
                 if 'Message' == message_key:
                     try:
                         message_json = json.loads(message_value)
-                        for inside_message_key, inside_message_value in message_json.iteritems():
+                        for inside_message_key, inside_message_value in message_json.items():
                             if inside_message_key in ('type', 'category'):
                                 event['category'] = inside_message_value
                                 # add type subcategory for filtering after
@@ -131,7 +131,7 @@ class taskConsumer(object):
                                     event[u'details'][u'message'] = inside_message_value
                                 else:
                                     if len(inside_message_value) > 0:
-                                        for details_key, details_value in inside_message_value.iteritems():
+                                        for details_key, details_value in inside_message_value.items():
                                             event[u'details'][details_key] = details_value
                             else:
                                 event['details'][inside_message_key] = inside_message_value

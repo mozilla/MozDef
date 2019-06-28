@@ -106,7 +106,7 @@ class UnitTestSuite(object):
 
     def verify_event(self, event, expected_event):
         assert sorted(event.keys()) == sorted(expected_event.keys())
-        for key, value in expected_event.iteritems():
+        for key, value in expected_event.tems():
             if key in ('receivedtimestamp', 'timestamp', 'utctimestamp'):
                 assert type(event[key]) == unicode
             else:

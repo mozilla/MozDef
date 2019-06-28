@@ -90,7 +90,7 @@ class message(object):
             if 'ses' in message['details'] and message['details']['ses'] == "4294967295":
                     message['details']['ses'] = '-1'
             # fix '(null)' string records to fit in a long
-            for k, v in message['details'].iteritems():
+            for k, v in message['details'].items():
                 if v == '(null)' and 'id' in k:
                     message['details'][k] = -1
 

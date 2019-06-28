@@ -402,7 +402,7 @@ def initConfig():
 
     # Our config parser stomps out the '#' so we gotta readd
     channelkeys = {}
-    for key, value in options.channelkeys.iteritems():
+    for key, value in options.channelkeys.items():
         if not key.startswith('#'):
             key = '#{0}'.format(key)
         channelkeys[key] = value

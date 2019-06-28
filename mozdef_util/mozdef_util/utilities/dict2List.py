@@ -3,7 +3,7 @@ def dict2List(inObj):
        return a list of the dict keys and values
     '''
     if isinstance(inObj, dict):
-        for key, value in inObj.iteritems():
+        for key, value in inObj.items():
             if isinstance(value, dict):
                 for d in dict2List(value):
                     yield d

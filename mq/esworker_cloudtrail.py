@@ -160,7 +160,7 @@ def keyMapping(aDict):
     returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
     returndict['mozdefhostname'] = options.mozdefhostname
     try:
-        for k, v in aDict.iteritems():
+        for k, v in aDict.items():
             k = removeAt(k).lower()
 
             if k == 'sourceip':
@@ -228,7 +228,7 @@ def keyMapping(aDict):
                     returndict[u'details'][u'message'] = v
                 else:
                     if len(v) > 0:
-                        for details_key, details_value in v.iteritems():
+                        for details_key, details_value in v.items():
                             returndict[u'details'][details_key] = details_value
 
             # custom fields/details as a one off, not in an array
