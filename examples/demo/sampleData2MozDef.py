@@ -17,7 +17,7 @@ from Queue import Empty
 import requests
 import time
 from configlib import getConfig, OptionParser
-import ConfigParser
+import configparser
 import glob
 from datetime import timedelta
 
@@ -43,7 +43,7 @@ logcache=Queue()
 def setConfig(option,value,configfile):
     """write an option/value pair to our config file"""
     if os.path.isfile(configfile):
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         configfp=open(configfile,'r')
         config.readfp(configfp)
         configfp.close()
