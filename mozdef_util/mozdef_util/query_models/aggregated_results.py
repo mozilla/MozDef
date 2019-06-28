@@ -17,7 +17,6 @@ def AggregatedResults(input_results):
     for hit in input_results.hits:
         hit_dict = {
             '_id': hit.meta.id,
-            '_type': hit.meta.doc_type,
             '_index': hit.meta.index,
             '_score': hit.meta.score,
             '_source': hit.to_dict()

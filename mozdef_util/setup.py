@@ -21,8 +21,8 @@ requirements = [
     'coverage>=4.5.1',
     'Sphinx>=1.8.1',
     'twine>=1.12.1',
-    'elasticsearch>=5.5.2',
-    'elasticsearch-dsl>=5.4.0',
+    'elasticsearch==6.3.1',
+    'elasticsearch-dsl==6.3.1',
     'geoip2>=2.5.0',
     'pytz>=2017.3',
     'tzlocal>=1.4',
@@ -56,6 +56,6 @@ setup(
     test_suite='tests',
     tests_require=[],
     url='https://github.com/mozilla/MozDef/tree/master/lib',
-    version='1.0.8',
+    version='2.0.0',
     zip_safe=False,
 )
