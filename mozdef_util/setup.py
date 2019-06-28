@@ -52,7 +52,6 @@ setup(
     license='MPL-2.0',
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    package_data={'mozdef_util': ['HISTORY.rst', 'README.rst']},
     keywords='mozdef_util',
     name='mozdef_util',
     packages=find_packages(),
@@ -60,6 +59,6 @@ setup(
     test_suite='tests',
     tests_require=[],
     url='https://github.com/mozilla/MozDef/tree/master/lib',
-    version='2.0.2',
+    version='2.0.3',
     zip_safe=False,
 )

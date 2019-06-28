@@ -67,3 +67,15 @@ Add is_ip utility function
 ------------------
 
 * Fixed setup.py relative file paths
+
+
+2.0.2 (2019-06-28)
+------------------
+
+* Attempted fix at including static files
+
+
+2.0.3 (2019-06-28)
+------------------
+
+* Fixed static file includes in python package
