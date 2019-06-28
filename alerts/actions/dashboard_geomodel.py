@@ -107,8 +107,8 @@ class message(object):
             previous_location_str = u'{0}, {1}'.format(previous_city, previous_country)
 
         alert_record = {
-            'alert_id': b2a_hex(os.urandom(15)),
-            'alert_code': b2a_hex(self.alert_classname),
+            'alert_id': b2a_hex(os.urandom(15)).decode(),
+            'alert_code': b2a_hex(self.alert_classname.encode()).decode(),
             'user_id': auth_full_username,
             'risk': self.config['risk'],
             'summary': summary,

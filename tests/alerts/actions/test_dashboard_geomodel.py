@@ -103,7 +103,7 @@ class TestDashboardGeomodel(object):
         assert self.test_connect_called is True
         assert self.test_result_record is None
 
-    def test_unicode_location(self):
+    def test_str_location(self):
         self.good_message_dict['summary'] = u"ttesterson@mozilla.com NEWCOUNTRY \u0107abcd, \xe4Spain access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before"
         self.good_message_dict['details']['locality_details']['city'] = u'\u0107abcd'
         self.good_message_dict['details']['locality_details']['country'] = u'\xe4Spain'
@@ -112,19 +112,19 @@ class TestDashboardGeomodel(object):
         assert result_message == self.good_message_dict
         assert self.test_connect_called is True
         assert self.test_result_record is not None
-        assert type(result_message['summary']) is unicode
-        assert type(result_message['details']['locality_details']['city']) is unicode
-        assert type(result_message['details']['locality_details']['country']) is unicode
+        assert type(result_message['summary']) is str
+        assert type(result_message['details']['locality_details']['city']) is str
+        assert type(result_message['details']['locality_details']['country']) is str
 
-    def test_unicode_username(self):
+    def test_str_username(self):
         self.good_message_dict['details']['principal'] = u'\xfcttesterson@mozilla.com'
         assert self.test_result_record is None
         result_message = self.plugin.onMessage(self.good_message_dict)
         assert result_message == self.good_message_dict
         assert self.test_connect_called is True
         assert self.test_result_record is not None
-        assert type(result_message['summary']) is unicode
-        assert type(result_message['details']['principal']) is unicode
+        assert type(result_message['summary']) is str
+        assert type(result_message['details']['principal']) is str
 
     def test_written_details(self):
         assert self.test_result_record is None
