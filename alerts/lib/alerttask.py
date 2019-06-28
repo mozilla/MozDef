@@ -344,11 +344,7 @@ class AlertTask(Task):
             for i in Counter(aggregationValues).most_common():
                 idict = {"value": i[0], "count": i[1], "events": [], "allevents": []}
                 for r in results:
-                    if (
-                        getValueByPath(r["_source"], aggregationPath).encode(
-                            "ascii", "ignore"
-                        ) == i[0]
-                    ):
+                    if getValueByPath(r["_source"], aggregationPath) == i[0]:
                         # copy events detail into this aggregation up to our samples limit
                         if len(idict["events"]) < samplesLimit:
                             idict["events"].append(r)
@@ -510,11 +506,9 @@ class AlertTask(Task):
                     event["_source"]["alert_names"] = []
                 event["_source"]["alert_names"].append(self.determine_alert_classname())
 
-                self.es.save_event(
-                    index=event["_index"], body=event["_source"], doc_id=event["_id"]
-                )
-            # We refresh here to ensure our changes to the events will show up for the next search query results
-            self.es.refresh(event["_index"])
+                self.es.save_event(index=event["_index"], body=event["_source"], doc_id=event["_id"])
+                # We refresh here to ensure our changes to the events will show up for the next search query results
+                self.es.refresh(event["_index"])
         except Exception as e:
             self.log.error("Error while updating events in ES: {0}".format(e))
 

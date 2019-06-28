@@ -66,7 +66,7 @@ def flattenDict(inDict, pre=None, values=True):
                         if isinstance(value, str):
                             yield '.'.join(pre) + '.' + key + '=' + str(value)
                         elif isinstance(value, unicode):
-                            yield '.'.join(pre) + '.' + key + '=' + value.encode('ascii', 'ignore')
+                            yield '.'.join(pre) + '.' + key + '=' + value
                         elif value is None:
                             yield '.'.join(pre) + '.' + key + '=None'
                     else:
@@ -76,7 +76,7 @@ def flattenDict(inDict, pre=None, values=True):
                         if isinstance(value, str):
                             yield key + '=' + str(value)
                         elif isinstance(value, unicode):
-                            yield key + '=' + value.encode('ascii', 'ignore')
+                            yield key + '=' + value
                         elif value is None:
                             yield key + '=None'
                     else:
