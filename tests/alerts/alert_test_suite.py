@@ -241,7 +241,7 @@ class AlertTestSuite(UnitTestSuite):
     @staticmethod
     def create_events(default_event, num_events):
         events = []
-        for num in xrange(num_events):
+        for num in range(num_events):
             events.append(AlertTestSuite.create_event(default_event))
         return events
 
