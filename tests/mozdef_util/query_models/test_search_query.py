@@ -150,7 +150,7 @@ class TestExecute(SearchQueryUnitTest):
         assert len(sorted_hits) == 3
 
         assert list(sorted_hits[0].keys()) == ['_score', '_id', '_source', '_index']
-        assert type(sorted_hits[0]['_id']) == unicode
+        assert type(sorted_hits[0]['_id']) == str
 
         assert sorted_hits[0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -162,7 +162,7 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted_hits[0]['_source']['details']['information'] == 'Example information'
 
         assert list(sorted_hits[1].keys()) == ['_score', '_id', '_source', '_index']
-        assert type(sorted_hits[1]['_id']) == unicode
+        assert type(sorted_hits[1]['_id']) == str
 
         assert sorted_hits[1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -173,7 +173,7 @@ class TestExecute(SearchQueryUnitTest):
         assert list(sorted_hits[1]['_source']['details'].keys()) == ['information']
         assert sorted_hits[1]['_source']['details']['information'] == 'Example information'
 
-        assert type(sorted_hits[2]['_id']) == unicode
+        assert type(sorted_hits[2]['_id']) == str
 
         assert sorted_hits[2]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -228,7 +228,7 @@ class TestExecute(SearchQueryUnitTest):
         assert len(results['hits']) == 2
 
         assert list(results['hits'][0].keys()) == ['_score', '_id', '_source', '_index']
-        assert type(results['hits'][0]['_id']) == unicode
+        assert type(results['hits'][0]['_id']) == str
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -240,7 +240,7 @@ class TestExecute(SearchQueryUnitTest):
         assert results['hits'][0]['_source']['details']['information'] == 'Example information'
 
         assert list(results['hits'][1].keys()) == ['_score', '_id', '_source', '_index']
-        assert type(results['hits'][1]['_id']) == unicode
+        assert type(results['hits'][1]['_id']) == str
 
         assert results['hits'][1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -277,7 +277,7 @@ class TestExecute(SearchQueryUnitTest):
         assert len(results['hits']) == 1
 
         assert list(results['hits'][0].keys()) == ['_score', '_id', '_source', '_index']
-        assert type(results['hits'][0]['_id']) == unicode
+        assert type(results['hits'][0]['_id']) == str
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 

@@ -6,7 +6,7 @@ from mozdef_util.query_models import ExistsMatch
 
 class TestExistsMatchPositiveTestSuite(PositiveTestSuite):
     def query_tests(self):
-        tests = {
+        tests = [
             ExistsMatch('summary'): [
                 {'summary': 'test'},
                 {'summary': 'example test summary'},
@@ -16,13 +16,13 @@ class TestExistsMatchPositiveTestSuite(PositiveTestSuite):
                  'details': {'note': 'test'}
                  },
             ]
-        }
+        ]
         return tests
 
 
 class TestExistsMatchNegativeTestSuite(NegativeTestSuite):
     def query_tests(self):
-        tests = {
+        tests = [
             ExistsMatch('summary'): [
                 {'note': 'example note'},
                 {'sum': 'example sum'},
@@ -39,5 +39,5 @@ class TestExistsMatchNegativeTestSuite(NegativeTestSuite):
                 # todo: fix code to handle this elegantly
                 # },
             ]
-        }
+        ]
         return tests

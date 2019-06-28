@@ -127,11 +127,11 @@ def keyMapping(aDict):
                 # we let them dictate the data type with field_datatype
                 # convention
                 if newName.endswith('_int'):
-                    returndict[u'details'][unicode(newName)] = int(v)
+                    returndict[u'details'][str(newName)] = int(v)
                 elif newName.endswith('_float'):
-                    returndict[u'details'][unicode(newName)] = float(v)
+                    returndict[u'details'][str(newName)] = float(v)
                 else:
-                    returndict[u'details'][unicode(newName)] = toUnicode(v)
+                    returndict[u'details'][str(newName)] = toUnicode(v)
 
         # nxlog windows log handling
         if 'Domain' in aDict and 'SourceModuleType' in aDict:
@@ -190,7 +190,7 @@ class taskConsumer(ConsumerMixin):
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
                 bodyDict = body
-            elif isinstance(body, str) or isinstance(body, unicode):
+            elif isinstance(body, str):
                 try:
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:

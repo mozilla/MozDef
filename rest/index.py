@@ -346,7 +346,7 @@ def createIncident():
         return response
 
     # Validating Incident phase type
-    if (type(incident['phase']) not in (str, unicode) or
+    if (type(incident['phase']) is not str or
             incident['phase'] not in validIncidentPhases):
 
         response.status = 500

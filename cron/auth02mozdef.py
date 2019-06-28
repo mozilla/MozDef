@@ -252,8 +252,8 @@ def byteify(input):
         return {byteify(key): byteify(value) for key, value in input.items()}
     elif isinstance(input, list):
         return [byteify(element) for element in input]
-    elif isinstance(input, unicode):
-        return input.encode("utf-8")
+    elif not isinstance(input, str):
+        return input.encode()
     else:
         return input
 
