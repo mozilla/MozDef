@@ -83,6 +83,12 @@
             "destinationport": {
               "type": "keyword"
             },
+            "destinationipgeopoint": {
+              "type": "geo_point"
+            },
+            "sourceipgeopoint": {
+              "type": "geo_point"
+            },
             "success": {
               "type": "boolean"
             },
