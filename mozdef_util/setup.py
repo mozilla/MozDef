@@ -3,12 +3,15 @@
 
 """The setup script."""
 
+import os
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+readme_path = os.path.join(os.path.dirname(__file__), 'README.rst')
+with open(readme_path) as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
+history_path = os.path.join(os.path.dirname(__file__), 'HISTORY.rst')
+with open(history_path) as history_file:
     history = history_file.read()
 
 requirements = [
@@ -56,6 +59,6 @@ setup(
     test_suite='tests',
     tests_require=[],
     url='https://github.com/mozilla/MozDef/tree/master/lib',
-    version='2.0.0',
+    version='2.0.1',
     zip_safe=False,
 )

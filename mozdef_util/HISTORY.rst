@@ -55,8 +55,15 @@ Add is_ip utility function
 
 * Transition away from custom _type for elasticsearch documents
 
+
 2.0.0 (2019-06-27)
 ------------------
 
 * Add support for Elasticsearch 6
 * Remove support for Elasticsearch 5
+
+
+2.0.1 (2019-06-28)
+------------------
+
+* Fixed setup.py relative file paths
