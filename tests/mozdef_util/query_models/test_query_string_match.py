@@ -1,5 +1,5 @@
-from positive_test_suite import PositiveTestSuite
-from negative_test_suite import NegativeTestSuite
+from .positive_test_suite import PositiveTestSuite
+from .negative_test_suite import NegativeTestSuite
 
 from mozdef_util.query_models import QueryStringMatch
 

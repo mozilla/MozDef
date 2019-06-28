@@ -7,12 +7,11 @@
 
 import os
 import sys
+import pytest
 from mozdef_util.query_models import SearchQuery
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
-
-import pytest
 
 
 class QueryTestSuite(UnitTestSuite):

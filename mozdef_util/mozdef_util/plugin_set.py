@@ -1,8 +1,8 @@
 import os
 import pynsive
 from operator import itemgetter
-from utilities.dict2List import dict2List
-from utilities.logger import logger
+from .utilities.dict2List import dict2List
+from .utilities.logger import logger
 
 
 class PluginSet(object):
