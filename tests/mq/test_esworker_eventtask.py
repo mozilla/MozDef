@@ -84,7 +84,7 @@ class TestKeyMapping():
         }
         result = self.key_mapping(message)
         assert result['summary'] == 'example summary'
-        assert result['details'].keys() == ['message', 'payload']
+        assert list(result['details'].keys()) == ['message', 'payload']
         assert result['details']['message'] == 'somestring'
         assert result['details']['payload'] == 'examplepayload'
 

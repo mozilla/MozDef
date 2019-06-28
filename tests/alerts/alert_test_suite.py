@@ -193,10 +193,10 @@ class AlertTestSuite(UnitTestSuite):
         assert found_alert['_index'] == self.alert_index_name, 'Alert index not propertly set, got: {}'.format(found_alert['_index'])
 
         # Verify that the alert has the right "look to it"
-        assert found_alert.keys() == ['_score', '_id', '_source', '_index'], 'Alert format is malformed'
+        assert sorted(found_alert.keys()) == ['_id', '_index', '_score', '_source'], 'Alert format is malformed'
 
-        # Verify the alert has an id field that is unicode
-        assert type(found_alert['_id']) == unicode, 'Alert _id is not an integer'
+        # Verify the alert has an id field that is str
+        assert type(found_alert['_id']) == str, 'Alert _id is malformed'
 
         # Verify there is a utctimestamp field
         assert 'utctimestamp' in found_alert['_source'], 'Alert does not have utctimestamp specified'

@@ -98,7 +98,7 @@ class PTRequestor(object):
                 break
         # cache event ids we return to allow for some duplicate filtering checks
         # during next run
-        self._evidcache = self._events.keys()
+        self._evidcache = list(self._events.keys())
         return self._events
 
 

@@ -435,8 +435,7 @@ class TestClusterHealth(ElasticsearchClientTest):
 
     def test_cluster_health_results(self):
         health_results = self.es_client.get_cluster_health()
-        health_keys = health_results.keys()
-        health_keys.sort()
+        health_keys = sorted(health_results.keys())
         assert health_keys == ['active_primary_shards', 'active_shards', 'cluster_name', 'initializing_shards', 'number_of_data_nodes', 'number_of_nodes', 'relocating_shards', 'status', 'timed_out', 'unassigned_shards']
         assert type(health_results['active_primary_shards']) is int
         assert type(health_results['active_shards']) is int
