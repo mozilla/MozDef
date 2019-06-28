@@ -70,8 +70,6 @@ class TestKibanaDashboardsRoute(RestTestSuite):
             assert type(json_resp) == list
             assert len(json_resp) == 2
 
-            json_resp.sort()
-
             assert json_resp[1]['id'] == "Example-SSH-Dashboard"
             assert json_resp[1]['name'] == 'Example SSH Dashboard'
 
@@ -258,33 +256,31 @@ class TestLoginCountsRoute(RestTestSuite):
             assert type(json_resp) == list
             assert len(json_resp) == 3
 
-            json_resp.sort()
-
-            assert list(json_resp[0].keys()) == ['username', 'failures', 'begin', 'end', 'success']
-            assert json_resp[0]['username'] == 'qwerty@mozillafoundation.org'
-            assert json_resp[0]['failures'] == 8
-            assert json_resp[0]['success'] == 3
-            assert type(json_resp[0]['begin']) == unicode
+            assert sorted(json_resp[0].keys()) == ['begin', 'end', 'failures', 'success', 'username']
+            assert json_resp[0]['username'] == 'ttesterson@mozilla.com'
+            assert json_resp[0]['failures'] == 10
+            assert json_resp[0]['success'] == 5
+            assert type(json_resp[0]['begin']) == str
             assert parse(json_resp[0]['begin']).tzname() == 'UTC'
-            assert type(json_resp[0]['end']) == unicode
+            assert type(json_resp[0]['end']) == str
             assert parse(json_resp[0]['begin']).tzname() == 'UTC'
 
-            assert list(json_resp[1].keys()) == ['username', 'failures', 'begin', 'end', 'success']
+            assert sorted(json_resp[1].keys()) == ['begin', 'end', 'failures', 'success', 'username']
             assert json_resp[1]['username'] == 'ttester@mozilla.com'
             assert json_resp[1]['failures'] == 9
             assert json_resp[1]['success'] == 7
-            assert type(json_resp[1]['begin']) == unicode
+            assert type(json_resp[1]['begin']) == str
             assert parse(json_resp[1]['begin']).tzname() == 'UTC'
-            assert type(json_resp[1]['end']) == unicode
+            assert type(json_resp[1]['end']) == str
             assert parse(json_resp[1]['begin']).tzname() == 'UTC'
 
-            assert list(json_resp[2].keys()) == ['username', 'failures', 'begin', 'end', 'success']
-            assert json_resp[2]['username'] == 'ttesterson@mozilla.com'
-            assert json_resp[2]['failures'] == 10
-            assert json_resp[2]['success'] == 5
-            assert type(json_resp[2]['begin']) == unicode
+            assert sorted(json_resp[2].keys()) == ['begin', 'end', 'failures', 'success', 'username']
+            assert json_resp[2]['username'] == 'qwerty@mozillafoundation.org'
+            assert json_resp[2]['failures'] == 8
+            assert json_resp[2]['success'] == 3
+            assert type(json_resp[2]['begin']) == str
             assert parse(json_resp[2]['begin']).tzname() == 'UTC'
-            assert type(json_resp[2]['end']) == unicode
+            assert type(json_resp[2]['end']) == str
             assert parse(json_resp[2]['begin']).tzname() == 'UTC'
 
 # Routes left need to have unit tests written for:
