@@ -10,6 +10,7 @@ import os
 from operator import itemgetter
 from datetime import datetime
 import pynsive
+import importlib
 
 from mozdef_util.utilities.dict2List import dict2List
 from mozdef_util.utilities.logger import logger
@@ -61,7 +62,7 @@ def registerPlugins():
         modules = pynsive.list_modules('plugins')
         for mname in modules:
             module = pynsive.import_module(mname)
-            reload(module)
+            importlib.reload(module)
             if not module:
                 raise ImportError('Unable to load module {}'.format(mname))
             else:

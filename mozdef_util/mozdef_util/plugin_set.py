@@ -1,6 +1,8 @@
 import os
 import pynsive
+import importlib
 from operator import itemgetter
+
 from .utilities.dict2List import dict2List
 from .utilities.logger import logger
 
@@ -33,7 +35,7 @@ class PluginSet(object):
 
             try:
                 module_obj = pynsive.import_module(found_module)
-                reload(module_obj)
+                importlib.reload(module_obj)
                 plugin_class_obj = module_obj.message()
 
                 if 'priority' in dir(plugin_class_obj):
