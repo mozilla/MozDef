@@ -13,7 +13,7 @@ import time
 import pytest
 from dateutil.parser import parse
 
-from rest_test_suite import RestTestSuite
+from .rest_test_suite import RestTestSuite
 
 
 class TestTestRoute(RestTestSuite):

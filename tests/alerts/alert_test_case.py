@@ -2,7 +2,7 @@ import os.path
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts"))
 
-from alert_test_suite import AlertTestSuite
+from .alert_test_suite import AlertTestSuite
 
 
 class AlertTestCase(object):

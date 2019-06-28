@@ -1,4 +1,4 @@
-from alert_test_case import AlertTestCase
+from .alert_test_case import AlertTestCase
 
 
 class NegativeAlertTestCase(AlertTestCase):
