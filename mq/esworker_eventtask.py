@@ -22,7 +22,7 @@ from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 
-from lib.plugins import sendEventToPlugins, registerPlugins
+from .lib.plugins import sendEventToPlugins, registerPlugins
 
 
 # running under uwsgi?

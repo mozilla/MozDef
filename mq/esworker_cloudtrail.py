@@ -66,7 +66,7 @@ class RoleManager:
             try:
                 if self.session_credentials is None or self.session_credentials.is_expired():
                     self.session_credentials = self.local_conn_sts.get_session_token()
-            except Exception, e:
+            except Exception as e:
                 logger.error("Unable to get session token due to exception {0}".format(e))
                 raise
             try:
@@ -76,7 +76,7 @@ class RoleManager:
                     self.session_credentials.secret_key,
                     self.session_credentials.session_token) if self.session_credentials else {}
                 self.session_conn_sts = boto.sts.connect_to_region(**creds)
-            except Exception, e:
+            except Exception as e:
                 logger.error("Unable to connect to STS with session token due to exception {0}".format(e))
                 raise
             self.conn_sts = self.session_conn_sts
@@ -103,7 +103,7 @@ class RoleManager:
                 role_session_name=role_session_name,
                 policy=policy).credentials
             logger.debug("Assumed new role with credential %s" % self.credentials[role_arn].to_dict())
-        except Exception, e:
+        except Exception as e:
             logger.error("Unable to assume role {0} due to exception {1}".format(role_arn, e))
             self.credentials[role_arn] = False
         return self.credentials[role_arn]
