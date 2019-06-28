@@ -21,11 +21,11 @@ RUN \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
   cd /opt/mozdef && \
-  yum install -y python \
-                    python-devel \
-                    python-pip && \
+  yum install -y python36 \
+                    python36-devel \
+                    python36-pip && \
   yum clean all && \
-  pip install virtualenv && \
+  pip3 install virtualenv && \
   mkdir /opt/mozdef/envs/mozdef && \
   mkdir /opt/mozdef/envs/mozdef/cron
 
@@ -46,7 +46,7 @@ RUN chown -R mozdef:mozdef /opt/mozdef/
 
 USER mozdef
 RUN \
-  virtualenv /opt/mozdef/envs/python && \
+  virtualenv -p /usr/bin/python3.6 /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
   pip install -r /opt/mozdef/envs/mozdef/requirements.txt && \
   cd /opt/mozdef/envs/mozdef/mozdef_util && \
