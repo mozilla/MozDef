@@ -50,7 +50,7 @@ class PluginSet(object):
                     }
                 )
             except Exception as e:
-                logger.exception('Received exception when loading {0} plugins\n{1}'.format(module_name, e.message))
+                logger.exception('Received exception when loading {0} plugins\n{1}'.format(module_name, e))
         plugin_manager.destroy()
         return plugins
 
@@ -84,7 +84,7 @@ class PluginSet(object):
                 try:
                     (message, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message, metadata=metadata)
                 except Exception as e:
-                    logger.exception('Received exception in {0}: message: {1}\n{2}'.format(plugin['plugin_class'], message, e.message))
+                    logger.exception('Received exception in {0}: message: {1}\n{2}'.format(plugin['plugin_class'], message, e))
                 if message is None:
                     return (message, metadata)
         return (message, metadata)

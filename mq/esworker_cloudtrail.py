@@ -58,7 +58,7 @@ class RoleManager:
                     self.aws_access_key_id,
                     self.aws_secret_access_key))
         except Exception, e:
-            logger.error("Unable to connect to STS due to exception %s" % e.message)
+            logger.error("Unable to connect to STS due to exception {0}".format(e))
             raise
 
         if self.aws_access_key_id is not None or self.aws_secret_access_key is not None:
@@ -67,7 +67,7 @@ class RoleManager:
                 if self.session_credentials is None or self.session_credentials.is_expired():
                     self.session_credentials = self.local_conn_sts.get_session_token()
             except Exception, e:
-                logger.error("Unable to get session token due to exception %s" % e.message)
+                logger.error("Unable to get session token due to exception {0}".format(e))
                 raise
             try:
                 creds = get_aws_credentials(
@@ -77,7 +77,7 @@ class RoleManager:
                     self.session_credentials.session_token) if self.session_credentials else {}
                 self.session_conn_sts = boto.sts.connect_to_region(**creds)
             except Exception, e:
-                logger.error("Unable to connect to STS with session token due to exception %s" % e.message)
+                logger.error("Unable to connect to STS with session token due to exception {0}".format(e))
                 raise
             self.conn_sts = self.session_conn_sts
         else:
@@ -104,7 +104,7 @@ class RoleManager:
                 policy=policy).credentials
             logger.debug("Assumed new role with credential %s" % self.credentials[role_arn].to_dict())
         except Exception, e:
-            logger.error("Unable to assume role %s due to exception %s" % (role_arn, e.message))
+            logger.error("Unable to assume role {0} due to exception {1}".format(role_arn, e))
             self.credentials[role_arn] = False
         return self.credentials[role_arn]
 
