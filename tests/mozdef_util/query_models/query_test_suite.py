@@ -24,7 +24,9 @@ class QueryTestSuite(UnitTestSuite):
             assert len(query_result['hits']) is 0
 
     def test_query_class(self):
-        for query, events in self.query_tests().items():
+        for testcase in self.query_tests():
+            query = testcase[0]
+            events = testcase[1]
             for event in events:
                 if pytest.config.option.delete_indexes:
                     self.reset_elasticsearch()

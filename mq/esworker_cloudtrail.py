@@ -57,7 +57,7 @@ class RoleManager:
                     region_name,
                     self.aws_access_key_id,
                     self.aws_secret_access_key))
-        except Exception, e:
+        except Exception as e:
             logger.error("Unable to connect to STS due to exception {0}".format(e))
             raise
 

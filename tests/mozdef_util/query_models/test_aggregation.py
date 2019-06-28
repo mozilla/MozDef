@@ -131,7 +131,7 @@ class TestAggregation(UnitTestSuite):
         search_query.add_aggregation(Aggregation('example'))
         results = search_query.execute(self.es_client)
 
-        assert list(results.keys()) == ['hits', 'meta', 'aggregations']
+        assert sorted(results.keys()) == ['aggregations', 'hits', 'meta']
         assert len(results['hits']) == 4
         assert list(results['aggregations'].keys()) == ['example']
 
