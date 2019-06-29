@@ -7,7 +7,6 @@
 
 import os
 import sys
-import pytest
 from mozdef_util.query_models import SearchQuery
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
@@ -28,7 +27,7 @@ class QueryTestSuite(UnitTestSuite):
             query = testcase[0]
             events = testcase[1]
             for event in events:
-                if pytest.config.option.delete_indexes:
+                if self.config_delete_indexes:
                     self.reset_elasticsearch()
                     self.setup_elasticsearch()
 

@@ -23,6 +23,17 @@ def pytest_addoption(parser):
     )
 
 
+def pytest_generate_tests(metafunc):
+    ''' just to attach the cmd-line args to a test-class that needs them '''
+    delete_indexes = metafunc.config.getoption("delete_indexes")
+    if delete_indexes and hasattr(metafunc.cls, 'config_delete_indexes'):
+        metafunc.cls.config_delete_indexes = delete_indexes
+
+    delete_queues = metafunc.config.getoption("delete_queues")
+    if delete_queues and hasattr(metafunc.cls, 'config_delete_queues'):
+        metafunc.cls.config_delete_queues = delete_queues
+
+
 def pytest_configure(config):
     warning_text = ""
     if not config.option.delete_indexes:

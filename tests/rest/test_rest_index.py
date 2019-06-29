@@ -10,7 +10,6 @@ import os
 import json
 import time
 
-import pytest
 from dateutil.parser import parse
 
 from .rest_test_suite import RestTestSuite
@@ -46,12 +45,12 @@ class TestKibanaDashboardsRoute(RestTestSuite):
 
     def teardown(self):
         super(TestKibanaDashboardsRoute, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('.kibana', True)
 
     def setup(self):
         super(TestKibanaDashboardsRoute, self).setup()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('.kibana', True)
             self.es_client.create_index('.kibana')
 
@@ -84,14 +83,14 @@ class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
 
     def setup(self):
         super(TestKibanaDashboardsRouteWithoutDashboards, self).setup()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('.kibana', True)
             self.es_client.create_index('.kibana')
         time.sleep(0.2)
 
     def teardown(self):
         super(TestKibanaDashboardsRouteWithoutDashboards, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('.kibana', True)
 
     def test_route_endpoints(self):

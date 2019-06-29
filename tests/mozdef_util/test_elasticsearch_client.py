@@ -120,7 +120,7 @@ class TestCloseIndex(ElasticsearchClientTest):
 
     def teardown(self):
         super(TestCloseIndex, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
     def test_close_index(self):
@@ -135,7 +135,7 @@ class TestWritingToClosedIndex(ElasticsearchClientTest):
 
     def teardown(self):
         super(TestWritingToClosedIndex, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
     def test_writing_to_closed_index(self):
@@ -152,7 +152,7 @@ class TestOpenIndex(ElasticsearchClientTest):
 
     def teardown(self):
         super(TestOpenIndex, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
     def test_index_open(self):
@@ -404,11 +404,11 @@ class TestGetIndices(ElasticsearchClientTest):
 
     def teardown(self):
         super(TestGetIndices, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
     def test_get_indices(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.create_index('test_index')
         time.sleep(1)
         indices = self.es_client.get_indices()
@@ -420,11 +420,11 @@ class TestIndexExists(ElasticsearchClientTest):
 
     def teardown(self):
         super(TestIndexExists, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
     def test_index_exists(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.create_index('test_index')
         time.sleep(1)
         indices = self.es_client.index_exists('test_index')
@@ -453,20 +453,20 @@ class TestCreatingAlias(ElasticsearchClientTest):
 
     def setup(self):
         super(TestCreatingAlias, self).setup()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('index1', True)
             self.es_client.delete_index('index2', True)
             self.es_client.delete_index('alias1', True)
 
     def teardown(self):
         super(TestCreatingAlias, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('index1', True)
             self.es_client.delete_index('index2', True)
             self.es_client.delete_index('alias1', True)
 
     def test_simple_create_alias(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.create_index('index1')
             self.es_client.create_alias('alias1', 'index1')
         alias_indices = self.es_client.get_alias('alias1')
@@ -475,7 +475,7 @@ class TestCreatingAlias(ElasticsearchClientTest):
         assert 'index1' in indices
 
     def test_alias_multiple_indices(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.create_index('index1')
             self.es_client.create_index('index2')
             self.es_client.create_alias('alias1', 'index1')
@@ -519,7 +519,7 @@ class TestBulkInvalidFormatProblem(BulkTest):
 
         # Recreate the test indexes with a custom mapping to throw
         # parsing errors
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index("events", True)
             self.es_client.delete_index(self.event_index_name, True)
             self.es_client.create_index(self.event_index_name, index_config=mapping)
