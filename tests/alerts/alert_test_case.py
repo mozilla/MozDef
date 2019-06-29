@@ -22,4 +22,5 @@ class AlertTestCase(object):
 
         alert_task = alert_class_attr()
         alert_task.run()
+        alert_task.close_connections()
         return alert_task

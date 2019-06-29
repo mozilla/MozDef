@@ -123,6 +123,9 @@ class AlertTask(Task):
             temp_value = getConfig(config_key, "", config_filename)
             setattr(self.config, config_key, temp_value)
 
+    def close_connections(self):
+        self.mqConn.release()
+
     def _discover_task_exchange(self):
         """Use configuration information to understand the message queue protocol.
         return: amqp, sqs
