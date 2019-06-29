@@ -43,7 +43,7 @@ MozDef is in production at Mozilla where we are using it to process over 300 mil
 If you're interested in running MozDef and would like to give us feedback, please take the following surveys:
 
 - [I have not used MozDef yet but I'm interested](https://www.surveygizmo.com/s3/5040959/fdd6121c7d32)
-- [I have used MozDef and I have feeback!](https://www.surveygizmo.com/s3/5040962/7a801108021b)
+- [I have used MozDef and I have feedback!](https://www.surveygizmo.com/s3/5040962/7a801108021b)
 
 These survey also include a contact form where you can reach us if you would like to (it's optional)
 
