@@ -15,7 +15,7 @@ from optparse import OptionParser
 from requests_futures.sessions import FuturesSession
 from multiprocessing import Process, Queue
 import logging
-from Queue import Empty
+from queue import Empty
 from requests.packages.urllib3.exceptions import ClosedPoolError
 import time
 

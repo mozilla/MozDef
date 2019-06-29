@@ -112,7 +112,7 @@ def keyMapping(aDict):
                     returndict['details']['message'] = v
                 else:
                     if len(v) > 0:
-                        for details_key, details_value in v.iteritems():
+                        for details_key, details_value in v.items():
                             returndict['details'][details_key] = details_value
 
             # custom fields/details as a one off, not in an array

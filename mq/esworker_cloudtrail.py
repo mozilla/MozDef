@@ -16,7 +16,7 @@ import boto.sts
 import boto.s3
 from boto.sqs.message import RawMessage
 import gzip
-from StringIO import StringIO
+from io import StringIO
 import re
 import time
 import kombu
