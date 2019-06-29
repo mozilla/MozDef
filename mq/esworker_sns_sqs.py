@@ -128,11 +128,11 @@ class taskConsumer(object):
                                 event['source'] = inside_message_value
                             elif inside_message_key in ('fields', 'details'):
                                 if type(inside_message_value) is not dict:
-                                    event[u'details'][u'message'] = inside_message_value
+                                    event['details']['message'] = inside_message_value
                                 else:
                                     if len(inside_message_value) > 0:
                                         for details_key, details_value in inside_message_value.items():
-                                            event[u'details'][details_key] = details_value
+                                            event['details'][details_key] = details_value
                             else:
                                 event['details'][inside_message_key] = inside_message_value
                     except ValueError:

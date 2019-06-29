@@ -736,12 +736,12 @@ class TestBroFixup(object):
             "mailfrom":"bugzilla-daemon@mozilla.org",
             "rcptto":["bugmail@firebot.glob.uno"],
             "date":"Mon, 18 Sep 2017 02:59:56 +0000",
-            "from":"\u0022Bugzilla@Mozilla\u0022 <bugzilla-daemon@mozilla.org>",
+            "from":"\\u0022Bugzilla@Mozilla\\u0022 <bugzilla-daemon@mozilla.org>",
             "to":["bugmail@firebot.glob.uno"],
             "msg_id":"<bug-1400759-507647@https.bugzilla.mozilla.org/>",
-            "subject":"[Bug 1400759] New: Debugger script search not working when content type = \u0027image/svg+xml\u0027",
-            "first_received":"by jobqueue2.bugs.scl3.mozilla.com (Postfix, from userid 0)\u0009id 87345380596; Mon, 18 Sep 2017 02:59:56 +0000 (UTC)",
-            "second_received":"from jobqueue2.bugs.scl3.mozilla.com (jobqueue2.bugs.scl3.mozilla.com [10.22.82.42])\u0009by mx1.mail.scl3.mozilla.com (Postfix) with ESMTPS id 9EBCBC0A97\u0009for <bugmail@firebot.glob.uno>; Mon, 18 Sep 2017 02:59:56 +0000 (UTC)",
+            "subject":"[Bug 1400759] New: Debugger script search not working when content type = \\u0027image/svg+xml\\u0027",
+            "first_received":"by jobqueue2.bugs.scl3.mozilla.com (Postfix, from userid 0)\\u0009id 87345380596; Mon, 18 Sep 2017 02:59:56 +0000 (UTC)",
+            "second_received":"from jobqueue2.bugs.scl3.mozilla.com (jobqueue2.bugs.scl3.mozilla.com [10.22.82.42])\\u0009by mx1.mail.scl3.mozilla.com (Postfix) with ESMTPS id 9EBCBC0A97\\u0009for <bugmail@firebot.glob.uno>; Mon, 18 Sep 2017 02:59:56 +0000 (UTC)",
             "last_reply":"250 2.0.0 Ok: queued as 3E1EC13F655",
             "path":["128.199.139.6","63.245.214.155","127.0.0.1","10.22.82.42"],
             "tls":'false',
@@ -775,9 +775,9 @@ class TestBroFixup(object):
             "mailfrom":"bugzilla-daemon@mozilla.org",
             "rcptto":["bugmail@firebot.glob.uno"],
             "date":"Mon, 18 Sep 2017 02:59:56 +0000",
-            "subject":"[Bug 1400759] New: Debugger script search not working when content type = \u0027image/svg+xml\u0027",
-            "first_received":"by jobqueue2.bugs.scl3.mozilla.com (Postfix, from userid 0)\u0009id 87345380596; Mon, 18 Sep 2017 02:59:56 +0000 (UTC)",
-            "second_received":"from jobqueue2.bugs.scl3.mozilla.com (jobqueue2.bugs.scl3.mozilla.com [10.22.82.42])\u0009by mx1.mail.scl3.mozilla.com (Postfix) with ESMTPS id 9EBCBC0A97\u0009for <bugmail@firebot.glob.uno>; Mon, 18 Sep 2017 02:59:56 +0000 (UTC)",
+            "subject":"[Bug 1400759] New: Debugger script search not working when content type = \\u0027image/svg+xml\\u0027",
+            "first_received":"by jobqueue2.bugs.scl3.mozilla.com (Postfix, from userid 0)\\u0009id 87345380596; Mon, 18 Sep 2017 02:59:56 +0000 (UTC)",
+            "second_received":"from jobqueue2.bugs.scl3.mozilla.com (jobqueue2.bugs.scl3.mozilla.com [10.22.82.42])\\u0009by mx1.mail.scl3.mozilla.com (Postfix) with ESMTPS id 9EBCBC0A97\\u0009for <bugmail@firebot.glob.uno>; Mon, 18 Sep 2017 02:59:56 +0000 (UTC)",
             "last_reply":"250 2.0.0 Ok: queued as 3E1EC13F655",
             "path":["128.199.139.6","63.245.214.155","127.0.0.1","10.22.82.42"],
             "tls":'false',
@@ -804,13 +804,13 @@ class TestBroFixup(object):
         }
 
         message = {
-            u'from': u'"Test from field\xe2\x80\x99s here" <Contact@1234.com>',
-            u'id.orig_h': u'1.2.3.4',
-            u'id.orig_p': 47311,
-            u'id.resp_h': u'5.6.7.8',
-            u'id.resp_p': 25,
-            u'subject': u'Example subject of email\xe2\x80\x99s',
-            u'ts': 1531818582.216429,
+            'from': '"Test from field\xe2\x80\x99s here" <Contact@1234.com>',
+            'id.orig_h': '1.2.3.4',
+            'id.orig_p': 47311,
+            'id.resp_h': '5.6.7.8',
+            'id.resp_p': 25,
+            'subject': 'Example subject of email\xe2\x80\x99s',
+            'ts': 1531818582.216429,
         }
 
         event['MESSAGE'] = json.dumps(message)
@@ -820,8 +820,8 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(message['ts']).isoformat() == result['utctimestamp']
         assert toUTC(message['ts']).isoformat() == result['timestamp']
-        assert result['details']['from'] == u'"Test from field\xe2\x80\x99s here" <Contact@1234.com>'
-        assert result['details']['subject'] == u'Example subject of email\xe2\x80\x99s'
+        assert result['details']['from'] == '"Test from field\xe2\x80\x99s here" <Contact@1234.com>'
+        assert result['details']['subject'] == 'Example subject of email\xe2\x80\x99s'
 
     def test_ssh_log(self):
         event = {
@@ -1752,7 +1752,7 @@ class TestBroFixup(object):
             "id.resp_h":"10.22.69.21",
             "id.resp_p":445,
             "rtt":0.001135,
-            "named_pipe":"\u005cpipe\u005clsass",
+            "named_pipe":"\\u005cpipe\\u005clsass",
             "endpoint":"samr",
             "operation":"SamrEnumerateDomainsInSamServer"
         }
@@ -1783,7 +1783,7 @@ class TestBroFixup(object):
             "id.resp_h":"10.22.69.21",
             "id.resp_p":445,
             "rtt":0.001135,
-            "named_pipe":"\u005cpipe\u005clsass"
+            "named_pipe":"\\u005cpipe\\u005clsass"
         }
         event['MESSAGE'] = json.dumps(MESSAGE)
 
@@ -1977,8 +1977,8 @@ class TestBroFixup(object):
             "id.resp_h":"10.22.69.21",
             "id.resp_p":445,
             "action":"SMB::FILE_OPEN",
-            "name":"releng.ad.mozilla.com\u005cPolicies\u005c{8614FE9A-333C-47C1-9EFD-856B4DF64883}\u005cMachine\u005cPreferences\u005cScheduledTasks",
-            "path":"\u005c\u005cDC8.releng.ad.mozilla.com\u005cSysVol",
+            "name":"releng.ad.mozilla.com\\u005cPolicies\\u005c{8614FE9A-333C-47C1-9EFD-856B4DF64883}\\u005cMachine\\u005cPreferences\\u005cScheduledTasks",
+            "path":"\\u005c\\u005cDC8.releng.ad.mozilla.com\\u005cSysVol",
             "size":4096,
             "times.modified":1401486067.13068,
             "times.accessed":1401486067.13068,
@@ -2058,7 +2058,7 @@ class TestBroFixup(object):
             "id.orig_p":49720,
             "id.resp_h":"10.22.69.18",
             "id.resp_p":445,
-            "path":"\u005c\u005cDC6\u005cSYSVOL",
+            "path":"\\u005c\\u005cDC6\\u005cSYSVOL",
             "share_type":"DISK"
         }
         event['MESSAGE'] = json.dumps(MESSAGE)

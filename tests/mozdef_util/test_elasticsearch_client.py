@@ -128,7 +128,7 @@ class TestCloseIndex(ElasticsearchClientTest):
             self.es_client.create_index('test_index')
         time.sleep(1)
         closed = self.es_client.close_index('test_index')
-        assert closed == {u'acknowledged': True}
+        assert closed == {'acknowledged': True}
 
 
 class TestWritingToClosedIndex(ElasticsearchClientTest):
@@ -161,7 +161,7 @@ class TestOpenIndex(ElasticsearchClientTest):
         time.sleep(1)
         self.es_client.close_index('test_index')
         opened = self.es_client.open_index('test_index')
-        assert opened == {u'acknowledged': True, u'shards_acknowledged': True}
+        assert opened == {'acknowledged': True, 'shards_acknowledged': True}
 
 
 class TestWithBadIndex(ElasticsearchClientTest):
