@@ -16,7 +16,7 @@ import boto.sts
 import boto.s3
 from boto.sqs.message import RawMessage
 import gzip
-from io import StringIO
+from io import BytesIO
 import re
 import time
 import kombu
@@ -313,7 +313,7 @@ class taskConsumer(object):
     def process_file(self, s3file):
         logger.debug("Fetching %s" % s3file.name)
         compressedData = s3file.read()
-        databuf = StringIO(compressedData)
+        databuf = BytesIO(compressedData)
         gzip_file = gzip.GzipFile(fileobj=databuf)
         json_logs = json.loads(gzip_file.read())
         return json_logs['Records']
