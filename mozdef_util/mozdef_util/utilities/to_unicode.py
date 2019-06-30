@@ -1,4 +1,4 @@
-def toUnicode(obj, encoding='utf-8'):
+def toUnicode(obj):
     if not isinstance(obj, str):
-        obj = str(obj, encoding)
+        obj = str(obj)
     return obj
