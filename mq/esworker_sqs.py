@@ -13,6 +13,7 @@
 
 import json
 import sys
+import os
 import socket
 import time
 from configlib import getConfig, OptionParser
@@ -28,9 +29,10 @@ from mozdef_util.utilities.remove_at import removeAt
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-from lib.aws import get_aws_credentials
-from lib.plugins import sendEventToPlugins, registerPlugins
-from lib.sqs import connect_sqs
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
+from mq.lib.aws import get_aws_credentials
+from mq.lib.plugins import sendEventToPlugins, registerPlugins
+from mq.lib.sqs import connect_sqs
 
 
 # running under uwsgi?

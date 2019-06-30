@@ -12,6 +12,7 @@
 import json
 import kombu
 import sys
+import os
 import socket
 import time
 from configlib import getConfig, OptionParser
@@ -26,7 +27,8 @@ from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 from mozdef_util.utilities.logger import logger, initLogger
 
-from lib.plugins import sendEventToPlugins, registerPlugins
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
+from mq.lib.plugins import sendEventToPlugins, registerPlugins
 
 
 # running under uwsgi?

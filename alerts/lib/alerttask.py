@@ -23,7 +23,8 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
 
-from .config import RABBITMQ, ES, ALERT_PLUGINS
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
+from lib.config import RABBITMQ, ES, ALERT_PLUGINS
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from lib.alert_plugin_set import AlertPluginSet
