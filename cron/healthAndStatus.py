@@ -23,7 +23,8 @@ def getDocID(servername):
     # create a hash to use as the ES doc id
     # hostname plus salt as doctype.latest
     hash = md5()
-    hash.update('{0}.mozdefhealth.latest'.format(servername))
+    seed = '{0}.mozdefhealth.latest'.format(servername)
+    hash.update(seed.encode())
     return hash.hexdigest()
 
 
