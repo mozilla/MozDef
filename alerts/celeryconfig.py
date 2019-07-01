@@ -52,7 +52,7 @@ for alert in ALERTS.keys():
 # Load logging config
 dictConfig(LOGGING)
 
-# print CELERYBEAT_SCHEDULE
+# print(CELERYBEAT_SCHEDULE)
 
 # Optional configuration, see the application user guide.
 # app.conf.update(
