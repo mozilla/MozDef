@@ -240,8 +240,8 @@ def searchMongoAlerts(mozdefdb):
                         if len(categoryCounts) == 1:
                             # is the alert category mapped to an attacker category?
                             for category in options.categorymapping:
-                                if category.keys()[0] == categoryCounts[0][0]:
-                                    attacker['category'] = category[category.keys()[0]]
+                                if list(category.keys())[0] == categoryCounts[0][0]:
+                                    attacker['category'] = category[list(category.keys())[0]]
                                     attackers.save(attacker)
 
 
