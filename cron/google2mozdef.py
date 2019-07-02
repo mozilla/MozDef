@@ -106,7 +106,7 @@ def main():
         # or you will get access denied even with correct delegations/scope
 
         credentials = SignedJwtAssertionCredentials(client_email,
-                                                    private_key,
+                                                    private_key.encode(),
                                                     scope=scope,
                                                     sub=options.impersonate)
         http = Http()
@@ -134,8 +134,10 @@ def main():
                     # change key/values like:
                     # actor.email=someone@mozilla.com
                     # to actor_email=value
-
-                    key,value =keyValue.split('=')
+                    try:
+                        key,value =keyValue.split('=')
+                    except ValueError as e:
+                        continue
                     key=key.replace('.','_').lower()
                     details[key]=value
 

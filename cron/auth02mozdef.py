@@ -253,7 +253,7 @@ def byteify(input):
     elif isinstance(input, list):
         return [byteify(element) for element in input]
     elif not isinstance(input, str):
-        return input.encode()
+        return str(input)
     else:
         return input
 
