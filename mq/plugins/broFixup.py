@@ -228,7 +228,7 @@ class message(object):
 
                 if logtype == 'dhcp':
                     newmessage[u'summary'] = (
-                        '{assigned_ip} assigned to '
+                        '{assigned_addr} assigned to '
                         '{mac}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
