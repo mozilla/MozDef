@@ -17,7 +17,7 @@ import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from hashlib import md5
-import boto.sqs
+import boto3
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger
@@ -41,8 +41,9 @@ def getQueueSizes():
     qcount = len(options.taskexchange)
     qcounter = qcount - 1
 
-    mqConn = boto.sqs.connect_to_region(
-        options.region,
+    client = boto3.client(
+        'sqs',
+        region_name=options.region,
         aws_access_key_id=options.accesskey,
         aws_secret_access_key=options.secretkey
     )
@@ -50,10 +51,11 @@ def getQueueSizes():
     while qcounter >= 0:
         for exchange in options.taskexchange:
             logger.debug('Looking for sqs queue stats in queue' + exchange)
-            eventTaskQueue = mqConn.get_queue(exchange)
-            # get queue stats
-            taskQueueStats = eventTaskQueue.get_attributes('All')
-            sqslist['queue_stats'][qcounter] = taskQueueStats
+            response = client.get_queue_attributes(
+                QueueUrl=client.get_queue_url(QueueName=exchange)['QueueUrl'],
+                AttributeNames=['All']
+            )
+            sqslist['queue_stats'][qcounter] = response['Attributes']
             sqslist['queue_stats'][qcounter]['name'] = exchange
             qcounter -= 1
 
