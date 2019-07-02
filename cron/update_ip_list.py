@@ -21,8 +21,11 @@ def fetch_ip_list(aws_key_id, aws_secret_key, s3_bucket, ip_list_filename):
         aws_secret_access_key=aws_secret_key
     )
     response = client.get_object(Bucket=s3_bucket, Key=ip_list_filename)
-    return response['Body'].read().rstrip().splitlines()
-
+    ip_content_list = response['Body'].read().rstrip().splitlines()
+    ips = []
+    for ip in ip_content_list:
+        ips.append(ip.decode())
+    return ips
 
 def save_ip_list(save_path, ips):
     ip_list_contents = '\n'.join(ips)
