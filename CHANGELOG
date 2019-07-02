@@ -5,6 +5,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v2.0.0] - 2019-06-28
+### Added
+- Source IP and Destination IP GeoPoints
+- Elasticsearch 6.8 Support
+- Kibana 6.8 Support
+- All doc_types have been set to _doc to support Elasticsearch >= 6
+
+### Removed
+- Elasticsearch <= 5 Support
+- Kibana <= 5 Support
+- Specifying AWS keys in S3 backup script, moved to Elasticsearch Secrets
+
+
+## [v1.40.0] - 2019-06-27
+### Added
+- Alertplugin for ip source enrichment
+- Alertplugin for port scan enrichment
+
+### Fixed
+- Bulk message support in loginput
+
+### Removed
+- Vidyo2Mozdef cron script to https://github.com/mozilla/mozdef-deprecated/blob/master/cron/vidyo2MozDef.py
+
+
 ## [v1.39.0] - 2019-05-29
 ### Added
 - Pagination of Web UI tables
@@ -92,7 +117,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased]: https://github.com/mozilla/MozDef/compare/v1.39.0...HEAD
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v2.00.0...HEAD
+[v2.0.0]: https://github.com/mozilla/MozDef/compare/v1.40.0...v2.00.0
+[v1.40.0]: https://github.com/mozilla/MozDef/compare/v1.40.0...v1.39.0
 [v1.39.0]: https://github.com/mozilla/MozDef/compare/v1.38.5...v1.39.0
 [v1.38.5]: https://github.com/mozilla/MozDef/compare/v1.38.4...v1.38.5
 [v1.38.4]: https://github.com/mozilla/MozDef/compare/v1.38.3...v1.38.4

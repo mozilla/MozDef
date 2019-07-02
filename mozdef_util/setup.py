@@ -3,12 +3,15 @@
 
 """The setup script."""
 
+import os
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+readme_path = os.path.join(os.path.dirname(__file__), 'README.rst')
+with open(readme_path) as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
+history_path = os.path.join(os.path.dirname(__file__), 'HISTORY.rst')
+with open(history_path) as history_file:
     history = history_file.read()
 
 requirements = [
@@ -21,8 +24,8 @@ requirements = [
     'coverage>=4.5.1',
     'Sphinx>=1.8.1',
     'twine>=1.12.1',
-    'elasticsearch>=5.5.2',
-    'elasticsearch-dsl>=5.4.0',
+    'elasticsearch==6.3.1',
+    'elasticsearch-dsl==6.3.1',
     'geoip2>=2.5.0',
     'pytz>=2017.3',
     'tzlocal>=1.4',
@@ -56,6 +59,6 @@ setup(
     test_suite='tests',
     tests_require=[],
     url='https://github.com/mozilla/MozDef/tree/master/lib',
-    version='1.0.8',
+    version='2.0.3',
     zip_safe=False,
 )
