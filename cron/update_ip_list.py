@@ -27,6 +27,7 @@ def fetch_ip_list(aws_key_id, aws_secret_key, s3_bucket, ip_list_filename):
         ips.append(ip.decode())
     return ips
 
+
 def save_ip_list(save_path, ips):
     ip_list_contents = '\n'.join(ips)
     logger.debug("Saving ip list")
