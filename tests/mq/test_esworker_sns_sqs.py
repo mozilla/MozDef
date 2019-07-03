@@ -33,7 +33,7 @@ class TestEsworkerSNSSQS(UnitTestSuite):
                 'plugincheckfrequency': 120,
             }
         )
-        self.consumer = taskConsumer(mq_conn, task_queue, es_connection, options)
+        self.consumer = taskConsumer(mq_conn, es_connection, options)
 
     def search_and_verify_event(self, expected_event):
         self.refresh('events')
