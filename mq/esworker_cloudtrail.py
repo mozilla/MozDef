@@ -12,8 +12,7 @@ import sys
 import socket
 from configlib import getConfig, OptionParser
 from datetime import datetime
-import boto.sts
-import boto.s3
+import boto3
 import gzip
 from io import BytesIO
 import re
@@ -42,89 +41,6 @@ try:
     hasUWSGI = True
 except ImportError as e:
     hasUWSGI = False
-
-
-class RoleManager:
-    def __init__(self, region_name='us-east-1', aws_access_key_id=None, aws_secret_access_key=None):
-        self.aws_access_key_id = aws_access_key_id
-        self.aws_secret_access_key = aws_secret_access_key
-        self.credentials = {}
-        self.session_credentials = None
-        self.session_conn_sts = None
-        try:
-            self.local_conn_sts = boto.sts.connect_to_region(
-                **get_aws_credentials(
-                    region_name,
-                    self.aws_access_key_id,
-                    self.aws_secret_access_key))
-        except Exception as e:
-            logger.error("Unable to connect to STS due to exception {0}".format(e))
-            raise
-
-        if self.aws_access_key_id is not None or self.aws_secret_access_key is not None:
-            # We're using API credentials not an IAM Role
-            try:
-                if self.session_credentials is None or self.session_credentials.is_expired():
-                    self.session_credentials = self.local_conn_sts.get_session_token()
-            except Exception as e:
-                logger.error("Unable to get session token due to exception {0}".format(e))
-                raise
-            try:
-                creds = get_aws_credentials(
-                    region_name,
-                    self.session_credentials.access_key,
-                    self.session_credentials.secret_key,
-                    self.session_credentials.session_token) if self.session_credentials else {}
-                self.session_conn_sts = boto.sts.connect_to_region(**creds)
-            except Exception as e:
-                logger.error("Unable to connect to STS with session token due to exception {0}".format(e))
-                raise
-            self.conn_sts = self.session_conn_sts
-        else:
-            self.conn_sts = self.local_conn_sts
-
-    def assume_role(self,
-                    role_arn,
-                    role_session_name='unknown',
-                    policy=None):
-        '''Return a boto.sts.credential.Credential object given a role_arn.
-        First check if a Credential oject exists in the local self.credentials
-        cache that is not expired. If there isn't one, assume the role of role_arn
-        store the Credential in the credentials cache and return it'''
-        logger.debug("Connecting to sts")
-        if role_arn in self.credentials:
-            if not self.credentials[role_arn] or not self.credentials[role_arn].is_expired():
-                # Return the cached value if it's False (indicating a permissions issue) or if
-                # it hasn't expired.
-                return self.credentials[role_arn]
-        try:
-            self.credentials[role_arn] = self.conn_sts.assume_role(
-                role_arn=role_arn,
-                role_session_name=role_session_name,
-                policy=policy).credentials
-            logger.debug("Assumed new role with credential %s" % self.credentials[role_arn].to_dict())
-        except Exception as e:
-            logger.error("Unable to assume role {0} due to exception {1}".format(role_arn, e))
-            self.credentials[role_arn] = False
-        return self.credentials[role_arn]
-
-    def get_credentials(self,
-                        role_arn,
-                        role_session_name='unknown',
-                        policy=None):
-        '''Assume the role of role_arn, and return a credential dictionary for that role'''
-        credential = self.assume_role(role_arn,
-                                      role_session_name,
-                                      policy)
-        return self.get_credential_arguments(credential)
-
-    def get_credential_arguments(self, credential):
-        '''Given a boto.sts.credential.Credential object, return a dictionary of get_credential_arguments
-        usable as kwargs with a boto connect method'''
-        return {
-            'aws_access_key_id': credential.access_key,
-            'aws_secret_access_key': credential.secret_key,
-            'security_token': credential.session_token} if credential else {}
 
 
 def keyMapping(aDict):
@@ -279,10 +195,7 @@ class taskConsumer(object):
     def __init__(self, queue, esConnection):
         self.sqs_queue = queue
         self.esConnection = esConnection
-        self.s3_connection = None
-        # This value controls how long we sleep
-        # between reauthenticating and getting a new set of creds
-        self.flush_wait_time = 1800
+        self.s3_client = None
         self.authenticate()
 
         # Run thread to flush s3 credentials
@@ -291,16 +204,35 @@ class taskConsumer(object):
         reauthenticate_thread.start()
 
     def authenticate(self):
+        # This value controls how long we sleep
+        # between reauthenticating and getting a new set of creds
+        # eventually this gets set by aws response
+        self.flush_wait_time = 1800
         if options.cloudtrail_arn not in ['<cloudtrail_arn>', 'cloudtrail_arn']:
-            role_manager = RoleManager(**get_aws_credentials(
-                options.region,
-                options.accesskey,
-                options.secretkey))
-            role_manager.assume_role(options.cloudtrail_arn)
-            role_creds = role_manager.get_credentials(options.cloudtrail_arn)
+            client = boto3.client(
+                'sts',
+                aws_access_key_id=options.accesskey,
+                aws_secret_access_key=options.secretkey
+            )
+            response = client.assume_role(
+                RoleArn=options.cloudtrail_arn,
+                RoleSessionName='MozDef-CloudTrail-Reader',
+            )
+            role_creds = {
+                'aws_access_key_id': response['Credentials']['AccessKeyId'],
+                'aws_secret_access_key': response['Credentials']['SecretAccessKey'],
+                'aws_session_token': response['Credentials']['SessionToken']
+            }
+            current_time = toUTC(datetime.now())
+            # Let's remove 3 seconds from the flush wait time just in case
+            self.flush_wait_time = (response['Credentials']['Expiration'] - current_time).seconds - 3
         else:
             role_creds = {}
-        self.s3_connection = boto.connect_s3(**role_creds)
+        self.s3_client = boto3.client(
+            's3',
+            region_name=options.region,
+            **role_creds
+        )
 
     def reauth_timer(self):
         while True:
@@ -308,10 +240,9 @@ class taskConsumer(object):
             logger.debug('Recycling credentials and reassuming role')
             self.authenticate()
 
-    def process_file(self, s3file):
-        logger.debug("Fetching %s" % s3file.name)
-        compressedData = s3file.read()
-        databuf = BytesIO(compressedData)
+    def parse_s3_file(self, s3_obj):
+        compressed_data = s3_obj['Body'].read()
+        databuf = BytesIO(compressed_data)
         gzip_file = gzip.GzipFile(fileobj=databuf)
         json_logs = json.loads(gzip_file.read())
         return json_logs['Records']
@@ -343,10 +274,8 @@ class taskConsumer(object):
                     s3_log_files = message_json['s3ObjectKey']
                     for log_file in s3_log_files:
                         logger.debug('Downloading and parsing ' + log_file)
-                        bucket = self.s3_connection.get_bucket(message_json['s3Bucket'])
-
-                        log_file_lookup = bucket.lookup(log_file)
-                        events = self.process_file(log_file_lookup)
+                        s3_obj = self.s3_client.get_object(Bucket=message_json['s3Bucket'], Key=log_file)
+                        events = self.parse_s3_file(s3_obj)
                         for event in events:
                             self.on_message(event)
 
