@@ -1,9 +1,7 @@
 amqp==2.2.2
 anyjson==0.3.3
 appdirs==1.4.0
-boto==2.49.0
 boto3==1.7.67
-botocore==1.10.67
 bottle==0.12.4
 celery==4.1.0
 celery[sqs]==4.1.0
