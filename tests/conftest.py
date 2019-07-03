@@ -41,5 +41,5 @@ def pytest_configure(config):
         warning_text += "\n** WARNING - The --delete_queues flag has been set. We will be purging RabbitMQ queues before test execution**\n"
         warning_text += "Continuing the unit test execution in 10 seconds...CANCEL ME IF YOU DO NOT WANT PREVIOUS QUEUES PURGED!!! **\n"
 
-    print warning_text
+    print(warning_text)
     time.sleep(10)

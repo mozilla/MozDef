@@ -104,7 +104,6 @@ class RoleManager:
                 policy=policy).credentials
             logger.debug("Assumed new role with credential %s" % self.credentials[role_arn].to_dict())
         except Exception, e:
-            print e
             logger.error("Unable to assume role %s due to exception %s" % (role_arn, e.message))
             self.credentials[role_arn] = False
         return self.credentials[role_arn]
