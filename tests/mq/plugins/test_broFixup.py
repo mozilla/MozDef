@@ -570,7 +570,7 @@ class TestBroFixup(object):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == '10.251.30.202 assigned to f0:18:98:55:0e:0e'
-    
+
     def test_dhcp_log2(self):
         event = {
             'category': 'bro',
