@@ -14,7 +14,6 @@ from configlib import getConfig, OptionParser
 from datetime import datetime
 import boto.sts
 import boto.s3
-from boto.sqs.message import RawMessage
 import gzip
 from io import BytesIO
 import re
@@ -319,7 +318,6 @@ class taskConsumer(object):
         return json_logs['Records']
 
     def run(self):
-        self.taskQueue.set_message_class(RawMessage)
         while True:
             try:
                 records = self.taskQueue.get_messages(options.prefetch)
@@ -363,7 +361,6 @@ class taskConsumer(object):
                         options.region,
                         options.accesskey,
                         options.secretkey))
-                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, body):
         # print("RECEIVED MESSAGE: %r" % (body, ))

@@ -16,7 +16,6 @@ from configlib import getConfig, OptionParser
 from datetime import datetime
 import pytz
 
-from boto.sqs.message import RawMessage
 import kombu
 from ssl import SSLEOFError, SSLError
 
@@ -53,8 +52,6 @@ class taskConsumer(object):
         self.options = options
 
     def run(self):
-        self.taskQueue.set_message_class(RawMessage)
-
         while True:
             try:
                 records = self.taskQueue.get_messages(self.options.prefetch)
@@ -80,7 +77,6 @@ class taskConsumer(object):
                     options.secretkey,
                     options.taskexchange
                 )
-                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, message):
         try:

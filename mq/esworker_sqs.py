@@ -18,7 +18,6 @@ import socket
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from boto.sqs.message import RawMessage
 import base64
 import kombu
 from ssl import SSLEOFError, SSLError
@@ -168,9 +167,6 @@ class taskConsumer(object):
         self.taskQueue = taskQueue
 
     def run(self):
-        # Boto expects base64 encoded messages - but if the writer is not boto it's not necessarily base64 encoded
-        # Thus we've to detect that and decode or not decode accordingly
-        self.taskQueue.set_message_class(RawMessage)
         while True:
             try:
                 records = self.taskQueue.get_messages(options.prefetch)
@@ -238,7 +234,6 @@ class taskConsumer(object):
                     options.secretkey,
                     options.taskexchange
                 )
-                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
