@@ -161,21 +161,20 @@ def esConnect():
 
 class taskConsumer(object):
 
-    def __init__(self, mqConnection, taskQueue, esConnection):
-        self.connection = mqConnection
+    def __init__(self, queue, esConnection):
+        self.sqs_queue = queue
         self.esConnection = esConnection
-        self.taskQueue = taskQueue
 
     def run(self):
         while True:
             try:
-                records = self.taskQueue.get_messages(options.prefetch)
+                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=options.prefetch)
                 for msg in records:
                     # msg.id is the id,
                     # get_body() should be json
 
                     # pre process the message a bit
-                    tmp = msg.get_body()
+                    tmp = msg.body
                     try:
                         msgbody = json.loads(tmp)
                     except ValueError:
@@ -185,14 +184,14 @@ class taskConsumer(object):
                             msgbody = json.loads(tmp)
                         except Exception as e:
                             logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg.get_body())
-                            self.taskQueue.delete_message(msg)
+                            msg.delete()
                             continue
 
                     # If this is still not a dict,
                     # let's just drop the message and move on
                     if type(msgbody) is not dict:
                         logger.debug("Message is not a dictionary, dropping message.")
-                        self.taskQueue.delete_message(msg)
+                        msg.delete()
                         continue
 
                     event = dict()
@@ -219,16 +218,16 @@ class taskConsumer(object):
                     self.on_message(event, msg)
 
                     # delete message from queue
-                    self.taskQueue.delete_message(msg)
+                    msg.delete()
                 time.sleep(.1)
 
             except ValueError as e:
                 logger.exception('Exception while handling message: %r' % e)
-                self.taskQueue.delete_message(msg)
+                msg.delete()
             except (SSLEOFError, SSLError, socket.error):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
-                self.connection, self.taskQueue = connect_sqs(
+                self.sqs_queue = connect_sqs(
                     options.region,
                     options.accesskey,
                     options.secretkey,
@@ -331,14 +330,14 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    sqs_conn, eventTaskQueue = connect_sqs(
+    sqs_queue = connect_sqs(
         task_exchange=options.taskexchange,
         **get_aws_credentials(
             options.region,
             options.accesskey,
             options.secretkey))
     # consume our queue
-    taskConsumer(sqs_conn, eventTaskQueue, es).run()
+    taskConsumer(sqs_queue, es).run()
 
 
 def initConfig():

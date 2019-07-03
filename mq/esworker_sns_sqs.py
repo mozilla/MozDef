@@ -44,34 +44,33 @@ def esConnect():
 
 class taskConsumer(object):
 
-    def __init__(self, mqConnection, taskQueue, esConnection, options):
-        self.connection = mqConnection
+    def __init__(self, queue, esConnection, options):
+        self.sqs_queue = queue
         self.esConnection = esConnection
-        self.taskQueue = taskQueue
         self.pluginList = registerPlugins()
         self.options = options
 
     def run(self):
         while True:
             try:
-                records = self.taskQueue.get_messages(self.options.prefetch)
+                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=options.prefetch)
                 for msg in records:
-                    msg_body = msg.get_body()
+                    msg_body = msg.body
                     try:
                         # get_body() should be json
                         message_json = json.loads(msg_body)
                         self.on_message(message_json)
                         # delete message from queue
-                        self.taskQueue.delete_message(msg)
+                        msg.delete()
                     except ValueError:
                         logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
-                        self.taskQueue.delete_message(msg)
+                        msg.delete()
                         continue
                 time.sleep(.1)
             except (SSLEOFError, SSLError, socket.error):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
-                self.connection, self.taskQueue = connect_sqs(
+                self.sqs_queue = connect_sqs(
                     options.region,
                     options.accesskey,
                     options.secretkey,
@@ -192,14 +191,14 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    sqs_conn, eventTaskQueue = connect_sqs(
+    sqs_queue = connect_sqs(
         task_exchange=options.taskexchange,
         **get_aws_credentials(
             options.region,
             options.accesskey,
             options.secretkey))
     # consume our queue
-    taskConsumer(sqs_conn, eventTaskQueue, es, options).run()
+    taskConsumer(sqs_queue, es, options).run()
 
 
 def initConfig():
