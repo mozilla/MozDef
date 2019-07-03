@@ -202,7 +202,6 @@ def s3_upload_file(file_path, bucket_name, key_name):
         aws_access_key_id=options.aws_access_key_id,
         aws_secret_access_key=options.aws_secret_access_key
     )
-    bucket = s3.create_bucket(Bucket=bucket_name)  # This call is idempotent
     s3.meta.client.upload_file(
         file_path, bucket_name, key_name, ExtraArgs={'ACL': 'public-read'})
     url = "https://s3.amazonaws.com/{}/{}".format(bucket_name, key_name)
