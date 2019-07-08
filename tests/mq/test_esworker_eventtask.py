@@ -37,20 +37,20 @@ class TestKeyMapping():
 
     def test_syslog_dict(self):
         syslog_dict = {
-            u'CATEGORY': 'syslog',
-            u'DATE': u'Oct 27 14:01:12',
-            u'FACILITY': u'daemon',
-            u'HOST': u'ub_server',
-            u'HOST_FROM': u'10.1.20.139',
-            u'LEGACY_MSGHDR': u'systemd[1]: ',
-            u'MESSAGE': u'Stopped Getty on tty1.',
-            u'PID': u'1',
-            u'PRIORITY': u'info',
-            u'PROGRAM': u'systemd',
-            u'SEQNUM': u'8',
-            u'SOURCE': u'syslog_tcp',
-            u'SOURCEIP': u'10.1.20.139',
-            u'TAGS': u'.source.syslog_tcp'
+            'CATEGORY': 'syslog',
+            'DATE': 'Oct 27 14:01:12',
+            'FACILITY': 'daemon',
+            'HOST': 'ub_server',
+            'HOST_FROM': '10.1.20.139',
+            'LEGACY_MSGHDR': 'systemd[1]: ',
+            'MESSAGE': 'Stopped Getty on tty1.',
+            'PID': '1',
+            'PRIORITY': 'info',
+            'PROGRAM': 'systemd',
+            'SEQNUM': '8',
+            'SOURCE': 'syslog_tcp',
+            'SOURCEIP': '10.1.20.139',
+            'TAGS': '.source.syslog_tcp'
         }
 
         result = self.key_mapping(syslog_dict)
@@ -84,7 +84,7 @@ class TestKeyMapping():
         }
         result = self.key_mapping(message)
         assert result['summary'] == 'example summary'
-        assert result['details'].keys() == ['message', 'payload']
+        assert sorted(result['details'].keys()) == ['message', 'payload']
         assert result['details']['message'] == 'somestring'
         assert result['details']['payload'] == 'examplepayload'
 

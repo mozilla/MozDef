@@ -49,7 +49,7 @@ class AlertConsumer(ConsumerMixin):
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
                 body_dict = body
-            elif isinstance(body, str) or isinstance(body, unicode):
+            elif isinstance(body, str):
                 try:
                     body_dict = json.loads(body)  # lets assume it's json
                 except ValueError as e:

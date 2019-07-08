@@ -16,4 +16,4 @@ class HTTPTestSuite(UnitTestSuite):
         for route in self.routes:
             response = self.response_per_route(route)
             assert response.status_code == self.status_code
-            assert response.body == self.body
+            assert response.text == self.body

@@ -13,6 +13,7 @@ import re
 import requests
 import sys
 import socket
+import importlib
 from bottle import route, run, response, request, default_app, post
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
@@ -345,7 +346,7 @@ def createIncident():
         return response
 
     # Validating Incident phase type
-    if (type(incident['phase']) not in (str, unicode) or
+    if (type(incident['phase']) is not str or
             incident['phase'] not in validIncidentPhases):
 
         response.status = 500
@@ -461,7 +462,7 @@ def registerPlugins():
         modules = pynsive.list_modules(module_name)
         for mfile in modules:
             module = pynsive.import_module(mfile)
-            reload(module)
+            importlib.reload(module)
             if not module:
                 raise ImportError('Unable to load module {}'.format(mfile))
             else:
@@ -521,12 +522,12 @@ def kibanaDashboards():
     try:
         es_client = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', 'dashboard'))
+        search_query.add_must(TermMatch('type', 'dashboard'))
         results = search_query.execute(es_client, indices=['.kibana'])
 
         for dashboard in results['hits']:
             resultsList.append({
-                'name': dashboard['_source']['title'],
+                'name': dashboard['_source']['dashboard']['title'],
                 'id': dashboard['_id']
             })
 

@@ -35,7 +35,7 @@ def keypaths(nested):
     """ return a list of nested dict key paths
         like: [u'_source', u'details', u'program']
     """
-    for key, value in nested.iteritems():
+    for key, value in nested.items():
         if isinstance(value, collections.Mapping):
             for subkey, subvalue in keypaths(value):
                 yield [key] + subkey, subvalue
@@ -347,11 +347,7 @@ class AlertTask(Task):
             for i in Counter(aggregationValues).most_common():
                 idict = {"value": i[0], "count": i[1], "events": [], "allevents": []}
                 for r in results:
-                    if (
-                        getValueByPath(r["_source"], aggregationPath).encode(
-                            "ascii", "ignore"
-                        ) == i[0]
-                    ):
+                    if getValueByPath(r["_source"], aggregationPath) == i[0]:
                         # copy events detail into this aggregation up to our samples limit
                         if len(idict["events"]) < samplesLimit:
                             idict["events"].append(r)

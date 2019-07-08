@@ -66,36 +66,36 @@ Create a mozdef user::
   chown mozdef: .bash*
   chown -R mozdef: *
 
-We need to install a python2.7 virtualenv.
+We need to install a python3.6 virtualenv.
 
 On Yum-based systems::
 
-  sudo yum install make zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel pcre-devel gcc gcc-c++ mysql-devel
+  sudo yum install make zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel pcre-devel gcc gcc-c++
 
 On APT-based systems::
 
-  sudo apt-get install make zlib1g-dev libbz2-dev libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev tk-dev libpcre3-dev libpcre++-dev build-essential g++ libmysqlclient-dev
+  sudo apt-get install make zlib1g-dev libbz2-dev libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev tk-dev libpcre3-dev libpcre++-dev build-essential g++
 
 Then::
 
   sudo -i -u mozdef -g mozdef
-  mkdir /opt/mozdef/python2.7
-  wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
-  tar xvzf Python-2.7.11.tgz
-  cd Python-2.7.11
-  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared LDFLAGS="-Wl,--rpath=/opt/mozdef/python2.7/lib"
+  mkdir /opt/mozdef/python3.6
+  wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
+  tar xvzf Python-3.6.9.tgz
+  cd Python-3.6.9
+  ./configure --prefix=/opt/mozdef/python3.6 --enable-shared LDFLAGS="-Wl,--rpath=/opt/mozdef/python3.6/lib"
   make
   make install
 
   cd /opt/mozdef
 
   wget https://bootstrap.pypa.io/get-pip.py
-  export LD_LIBRARY_PATH=/opt/mozdef/python2.7/lib/
-  ./python2.7/bin/python get-pip.py
-  ./python2.7/bin/pip install virtualenv
+  export LD_LIBRARY_PATH=/opt/mozdef/python3.6/lib/
+  ./python3.6/bin/python get-pip.py
+  ./python3.6/bin/pip install virtualenv
   mkdir ~/envs
   cd ~/envs
-  ~/python2.7/bin/virtualenv python
+  ~/python3.6/bin/virtualenv python
   source python/bin/activate
   pip install -r ../requirements.txt
 
@@ -109,9 +109,9 @@ Copy the following into a file called .bash_profile for the mozdef user within /
 
   export PATH
 
-At this point when you launch python from within your virtual environment, It should tell you that you're using Python 2.7.11.
+At this point when you launch python from within your virtual environment, It should tell you that you're using Python 3.6.9.
 
-Whenever you launch a python script from now on, you should have your mozdef virtualenv active and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/ automatically.
+Whenever you launch a python script from now on, you should have your mozdef virtualenv active and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python3.6/lib/ automatically.
 
 RabbitMQ
 ********
@@ -330,8 +330,8 @@ We use `uwsgi`_ to interface python and nginx, in your venv execute the followin
   wget https://projects.unbit.it/downloads/uwsgi-2.0.17.1.tar.gz
   tar zxvf uwsgi-2.0.17.1.tar.gz
   cd uwsgi-2.0.17.1
-  ~/python2.7/bin/python uwsgiconfig.py --build
-  ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
+  ~/python3.6/bin/python uwsgiconfig.py --build
+  ~/python3.6/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/python/bin/
   cp uwsgi ~/envs/python/bin/
 

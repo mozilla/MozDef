@@ -1,5 +1,6 @@
 import os
 import pynsive
+import importlib
 
 from mozdef_util.utilities.logger import logger
 
@@ -32,7 +33,7 @@ class BotPluginSet():
                 continue
 
             module_obj = pynsive.import_module(found_module)
-            reload(module_obj)
+            importlib.reload(module_obj)
             plugin_class_obj = module_obj.Command()
             logger.info('Plugin {0} registered to receive command with {1}'.format(module_name, plugin_class_obj.command_name))
             plugins.append(

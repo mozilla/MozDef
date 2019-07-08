@@ -18,7 +18,8 @@ class message(object):
     def onMessage(self, message, metadata):
         def renameKeysToLower(message):
             if isinstance(message, dict):
-                for key in message.keys():
+                message_keys = list(message.keys())
+                for key in message_keys:
                     message[key.lower()] = message.pop(key)
                     if isinstance(message[key.lower()], dict) or isinstance(message[key.lower()], list):
                         message[key.lower()] = renameKeysToLower(message[key.lower()])

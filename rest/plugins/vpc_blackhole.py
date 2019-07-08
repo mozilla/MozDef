@@ -5,7 +5,7 @@
 
 import os
 import sys
-import ConfigParser
+import configparser
 import netaddr
 from boto3.session import Session
 
@@ -67,7 +67,7 @@ class message(object):
             self.initConfiguration()
 
     def initConfiguration(self):
-        myparser = ConfigParser.ConfigParser()
+        myparser = configparser.ConfigParser()
         myparser.read(self.configfile)
         cur_sections = myparser.sections()
         for cur_section in cur_sections:

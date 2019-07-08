@@ -15,18 +15,18 @@ from optparse import OptionParser
 from requests_futures.sessions import FuturesSession
 from multiprocessing import Process, Queue
 import logging
-from Queue import Empty
+from queue import Empty
 from requests.packages.urllib3.exceptions import ClosedPoolError
 import time
 
 httpsession = FuturesSession(max_workers=5)
-httpsession.trust_env=False  # turns of needless .netrc check for creds
+httpsession.trust_env = False  # turns of needless .netrc check for creds
 # a = requests.adapters.HTTPAdapter(max_retries=2)
 # httpsession.mount('http://', a)
 
 
 logger = logging.getLogger(sys.argv[0])
-logger.level=logging.DEBUG
+logger.level = logging.DEBUG
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -34,19 +34,19 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 def postLogs(logcache):
     # post logs asynchronously with requests workers and check on the results
     # expects a queue object from the multiprocessing library
-    posts=[]
+    posts = []
     try:
         while not logcache.empty():
-            postdata=logcache.get_nowait()
+            postdata = logcache.get_nowait()
             if len(postdata) > 0:
-                url=options.url
-                a=httpsession.get_adapter(url)
-                a.max_retries=3
-                r=httpsession.post(url,data=postdata)
+                url = options.url
+                a = httpsession.get_adapter(url)
+                a.max_retries = 3
+                r = httpsession.post(url,data=postdata)
                 posts.append((r,postdata,url))
     except Empty as e:
         pass
-    for p,postdata,url in posts:
+    for p, postdata, url in posts:
         try:
             if p.result().status_code >= 500:
                 logger.error("exception posting to %s %r [will retry]\n" % (url, p.result().status_code))
@@ -63,12 +63,12 @@ def postLogs(logcache):
 if __name__ == '__main__':
     parser=OptionParser()
     parser.add_option("-u", dest='url', default='http://localhost:8080/events/', help="mozdef events URL to use when posting events")
-    (options,args) = parser.parse_args()
-    sh=logging.StreamHandler(sys.stdout)
+    (options, args) = parser.parse_args()
+    sh = logging.StreamHandler(sys.stdout)
     sh.setFormatter(formatter)
     logger.addHandler(sh)
     # create a list of logs we can append json to and call for a post when we want.
-    logcache=Queue()
+    logcache = Queue()
     try:
         for i in range(0,10):
 
@@ -84,14 +84,14 @@ if __name__ == '__main__':
                 tags=[],
                 details=[]
             )
-            alog['details']=dict(success=True,username='mozdef')
-            alog['tags']=['mozdef','stresstest']
+            alog['details'] = dict(success=True, username='mozdef')
+            alog['tags'] = ['mozdef', 'stresstest']
 
             logcache.put(json.dumps(alog))
             if not logcache.empty():
                 time.sleep(.001)
                 try:
-                    postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
+                    postingProcess = Process(target=postLogs, args=(logcache,), name="json2MozdefStressTest")
                     postingProcess.start()
                 except OSError as e:
                     if e.errno == 35:  # resource temporarily unavailable.
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
         while not logcache.empty():
             try:
-                postingProcess=Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
+                postingProcess = Process(target=postLogs, args=(logcache,), name = "json2MozdefStressTest")
                 postingProcess.start()
             except OSError as e:
                 if e.errno == 35:  # resource temporarily unavailable.
