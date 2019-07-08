@@ -85,30 +85,30 @@ class message(object):
             whois = IPWhois(source_ip).lookup_whois()
             whois_str = whois['nets'][0]['description']
             source_ip_isp = whois_str.replace('\n', ', ').replace('\r', '')
-            new_ip_info = u'{} ({})'.format(source_ip, source_ip_isp)
+            new_ip_info = '{} ({})'.format(source_ip, source_ip_isp)
         except Exception:
-            new_ip_info = u'{}'.format(source_ip)
+            new_ip_info = '{}'.format(source_ip)
 
-        new_location_str = u""
+        new_location_str = ""
         if city.lower() == 'unknown':
-            new_location_str += u'{0}'.format(country)
+            new_location_str += '{0}'.format(country)
         else:
-            new_location_str += u'{0}, {1}'.format(city, country)
+            new_location_str += '{0}, {1}'.format(city, country)
 
         event_timestamp = toUTC(message['events'][0]['documentsource']['details']['event_time'])
         event_day = event_timestamp.strftime('%B %d, %Y')
-        summary = u'On {0} (UTC), did you login from {1} ({2})?'.format(event_day, new_location_str, source_ip)
+        summary = 'On {0} (UTC), did you login from {1} ({2})?'.format(event_day, new_location_str, source_ip)
 
         previous_city = message['details']['previous_locality_details']['city']
         previous_country = message['details']['previous_locality_details']['country']
         if previous_city.lower() == 'unknown':
-            previous_location_str = u'{0}'.format(previous_country)
+            previous_location_str = '{0}'.format(previous_country)
         else:
-            previous_location_str = u'{0}, {1}'.format(previous_city, previous_country)
+            previous_location_str = '{0}, {1}'.format(previous_city, previous_country)
 
         alert_record = {
-            'alert_id': b2a_hex(os.urandom(15)),
-            'alert_code': b2a_hex(self.alert_classname),
+            'alert_id': b2a_hex(os.urandom(15)).decode(),
+            'alert_code': b2a_hex(self.alert_classname.encode()).decode(),
             'user_id': auth_full_username,
             'risk': self.config['risk'],
             'summary': summary,

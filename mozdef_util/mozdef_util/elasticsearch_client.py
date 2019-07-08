@@ -5,14 +5,14 @@ from elasticsearch_dsl import Search
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch.helpers import bulk, BulkIndexError
 
-from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
-from bulk_queue import BulkQueue
+from .query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
+from .bulk_queue import BulkQueue
 
-from utilities.logger import logger
+from .utilities.logger import logger
 
-from event import Event
+from .event import Event
 
-TMP_DOC_TYPE = 'doc'
+DOCUMENT_TYPE = '_doc'
 
 
 class ElasticsearchBadServer(Exception):
@@ -53,7 +53,7 @@ class ElasticsearchClient():
         self.es_connection.indices.delete(index=index_name, ignore=ignore_codes)
 
     def get_indices(self):
-        return self.es_connection.indices.stats()['indices'].keys()
+        return list(self.es_connection.indices.stats()['indices'].keys())
 
     def index_exists(self, index_name):
         return self.es_connection.indices.exists(index_name)
@@ -64,7 +64,7 @@ class ElasticsearchClient():
             {
               "mappings":{}
             }'''
-        self.es_connection.indices.create(index=index_name, update_all_types='true', body=index_config)
+        self.es_connection.indices.create(index=index_name, body=index_config)
 
     def create_alias(self, alias, index):
         actions = []
@@ -90,10 +90,10 @@ class ElasticsearchClient():
         self.es_connection.indices.update_aliases(dict(actions=actions))
 
     def get_alias(self, alias_name):
-        return self.es_connection.indices.get_alias(index='*', name=alias_name).keys()
+        return list(self.es_connection.indices.get_alias(index='*', name=alias_name).keys())
 
     def get_aliases(self):
-        return self.es_connection.cat.stats()['indices'].keys()
+        return list(self.es_connection.cat.stats()['indices'].keys())
 
     def refresh(self, index_name):
         self.es_connection.indices.refresh(index=index_name)
@@ -119,6 +119,9 @@ class ElasticsearchClient():
         return result_set
 
     def save_documents(self, documents):
+        # ES library still requires _type to be set
+        for document in documents:
+            document['_type'] = DOCUMENT_TYPE
         try:
             bulk(self.es_connection, documents)
         except BulkIndexError as e:
@@ -128,16 +131,17 @@ class ElasticsearchClient():
         self.bulk_queue.flush()
         self.bulk_queue.stop_thread()
 
-    def __bulk_save_document(self, index, doc_type, body, doc_id=None):
+    def __bulk_save_document(self, index, body, doc_id=None):
         if not self.bulk_queue.started():
             self.bulk_queue.start_thread()
-        self.bulk_queue.add(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+        self.bulk_queue.add(index=index, body=body, doc_id=doc_id)
 
-    def __save_document(self, index, doc_type, body, doc_id=None, bulk=False):
+    def __save_document(self, index, body, doc_id=None, bulk=False):
         if bulk:
-            self.__bulk_save_document(index=index, doc_type=doc_type, body=body, doc_id=doc_id)
+            self.__bulk_save_document(index=index, body=body, doc_id=doc_id)
         else:
-            return self.es_connection.index(index=index, doc_type=doc_type, id=doc_id, body=body)
+            # ES library still requires _type to be set
+            return self.es_connection.index(index=index, doc_type=DOCUMENT_TYPE, id=doc_id, body=body)
 
     def __parse_document(self, body):
         if type(body) is str:
@@ -148,19 +152,19 @@ class ElasticsearchClient():
             doc_body = body['_source']
         return doc_body
 
-    def save_object(self, body, index, doc_type=TMP_DOC_TYPE, doc_id=None, bulk=False):
+    def save_object(self, body, index, doc_id=None, bulk=False):
         doc_body = self.__parse_document(body)
-        return self.__save_document(index=index, doc_type=doc_type, body=doc_body, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, body=doc_body, doc_id=doc_id, bulk=bulk)
 
     def save_alert(self, body, index='alerts', doc_id=None, bulk=False):
         doc_body = self.__parse_document(body)
-        return self.__save_document(index=index, doc_type=TMP_DOC_TYPE, body=doc_body, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, body=doc_body, doc_id=doc_id, bulk=bulk)
 
     def save_event(self, body, index='events', doc_id=None, bulk=False):
         doc_body = self.__parse_document(body)
         event = Event(doc_body)
         event.add_required_fields()
-        return self.__save_document(index=index, doc_type=TMP_DOC_TYPE, body=event, doc_id=doc_id, bulk=bulk)
+        return self.__save_document(index=index, body=event, doc_id=doc_id, bulk=bulk)
 
     def get_object_by_id(self, object_id, indices):
         id_match = TermMatch('_id', object_id)
@@ -177,23 +181,6 @@ class ElasticsearchClient():
 
     def get_event_by_id(self, event_id):
         return self.get_object_by_id(event_id, ['events'])
-
-    def save_dashboard(self, dash_file, dash_name):
-        f = open(dash_file)
-        dashboardjson = json.load(f)
-        f.close()
-        title = dashboardjson['title']
-        dashid = dash_name.replace(' ', '-')
-        if dash_name:
-            title = dash_name
-        dashboarddata = {
-            "user": "guest",
-            "group": "guest",
-            "title": title,
-            "dashboard": json.dumps(dashboardjson)
-        }
-
-        return self.es_connection.index(index='.kibana', doc_type='dashboard', body=dashboarddata, id=dashid)
 
     def get_cluster_health(self):
         health_dict = self.es_connection.cluster.health()

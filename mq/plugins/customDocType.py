@@ -18,7 +18,6 @@ class message(object):
         # set the type field for sub-categorical filtering
         if 'endpoint' in message and 'customendpoint' in message:
             if message['customendpoint']:
-                if isinstance(message['endpoint'], str) or \
-                   isinstance(message['endpoint'], unicode):
+                if isinstance(message['endpoint'], str):
                     message['type'] = message['endpoint']
         return (message, metadata)

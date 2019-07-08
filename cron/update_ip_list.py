@@ -8,21 +8,24 @@
 import sys
 import os
 from configlib import getConfig, OptionParser
-import boto
+import boto3
 
 from mozdef_util.utilities.logger import logger, initLogger
 
 
 def fetch_ip_list(aws_key_id, aws_secret_key, s3_bucket, ip_list_filename):
     logger.debug("Fetching ip list from s3")
-    s3 = boto.connect_s3(
+    client = boto3.client(
+        's3',
         aws_access_key_id=aws_key_id,
         aws_secret_access_key=aws_secret_key
     )
-    bucket = s3.get_bucket(s3_bucket)
-    ip_list_key = bucket.lookup(ip_list_filename)
-    contents = ip_list_key.get_contents_as_string().rstrip()
-    return contents.split("\n")
+    response = client.get_object(Bucket=s3_bucket, Key=ip_list_filename)
+    ip_content_list = response['Body'].read().rstrip().splitlines()
+    ips = []
+    for ip in ip_content_list:
+        ips.append(ip.decode())
+    return ips
 
 
 def save_ip_list(save_path, ips):

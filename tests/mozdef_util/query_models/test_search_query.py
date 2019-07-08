@@ -5,7 +5,6 @@ from datetime import datetime
 import os
 import sys
 from mozdef_util.query_models import SearchQuery, ExistsMatch, TermMatch, Aggregation
-from mozdef_util.elasticsearch_client import TMP_DOC_TYPE
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
@@ -142,17 +141,16 @@ class TestExecute(SearchQueryUnitTest):
         self.refresh(self.event_index_name)
 
         results = query.execute(self.es_client)
-        assert results.keys() == ['hits', 'meta', 'aggregations']
-        assert results['meta'].keys() == ['timed_out']
+        assert sorted(results.keys()) == ['aggregations', 'hits', 'meta']
+        assert list(results['meta'].keys()) == ['timed_out']
         assert results['meta']['timed_out'] is False
 
         sorted_hits = sorted(results['hits'], key=lambda k: k['_source']['ip'])
 
         assert len(sorted_hits) == 3
 
-        assert sorted_hits[0].keys() == ['_score', '_type', '_id', '_source', '_index']
-        assert type(sorted_hits[0]['_id']) == unicode
-        assert sorted_hits[0]['_type'] == TMP_DOC_TYPE
+        assert sorted(sorted_hits[0].keys()) == ['_id', '_index', '_score', '_source']
+        assert type(sorted_hits[0]['_id']) == str
 
         assert sorted_hits[0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -160,12 +158,11 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted_hits[0]['_source']['summary'] == 'Test Summary'
         assert sorted_hits[1]['_source']['type'] == 'event'
 
-        assert sorted_hits[0]['_source']['details'].keys() == ['information']
+        assert list(sorted_hits[0]['_source']['details'].keys()) == ['information']
         assert sorted_hits[0]['_source']['details']['information'] == 'Example information'
 
-        assert sorted_hits[1].keys() == ['_score', '_type', '_id', '_source', '_index']
-        assert type(sorted_hits[1]['_id']) == unicode
-        assert sorted_hits[1]['_type'] == TMP_DOC_TYPE
+        assert sorted(sorted_hits[1].keys()) == ['_id', '_index', '_score', '_source']
+        assert type(sorted_hits[1]['_id']) == str
 
         assert sorted_hits[1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -173,11 +170,10 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted_hits[1]['_source']['summary'] == 'Test Summary'
         assert sorted_hits[1]['_source']['type'] == 'event'
 
-        assert sorted_hits[1]['_source']['details'].keys() == ['information']
+        assert list(sorted_hits[1]['_source']['details'].keys()) == ['information']
         assert sorted_hits[1]['_source']['details']['information'] == 'Example information'
 
-        assert type(sorted_hits[2]['_id']) == unicode
-        assert sorted_hits[2]['_type'] == TMP_DOC_TYPE
+        assert type(sorted_hits[2]['_id']) == str
 
         assert sorted_hits[2]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -185,21 +181,20 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted_hits[2]['_source']['summary'] == 'Test Summary'
         assert sorted_hits[2]['_source']['type'] == 'event'
 
-        assert sorted_hits[2]['_source']['details'].keys() == ['information']
+        assert list(sorted_hits[2]['_source']['details'].keys()) == ['information']
         assert sorted_hits[2]['_source']['details']['information'] == 'Example information'
 
-        assert results['aggregations'].keys() == ['ip']
+        assert list(results['aggregations'].keys()) == ['ip']
 
-        assert results['aggregations']['ip'].keys() == ['terms']
+        assert list(results['aggregations']['ip'].keys()) == ['terms']
 
         assert len(results['aggregations']['ip']['terms']) == 2
 
-        results['aggregations']['ip']['terms'].sort()
-        assert results['aggregations']['ip']['terms'][0]['count'] == 1
-        assert results['aggregations']['ip']['terms'][0]['key'] == '127.0.0.1'
+        assert results['aggregations']['ip']['terms'][0]['count'] == 2
+        assert results['aggregations']['ip']['terms'][0]['key'] == '1.2.3.4'
 
-        assert results['aggregations']['ip']['terms'][1]['count'] == 2
-        assert results['aggregations']['ip']['terms'][1]['key'] == '1.2.3.4'
+        assert results['aggregations']['ip']['terms'][1]['count'] == 1
+        assert results['aggregations']['ip']['terms'][1]['key'] == '127.0.0.1'
 
     def test_aggregation_without_must_fields(self):
         event = self.generate_default_event()
@@ -225,15 +220,14 @@ class TestExecute(SearchQueryUnitTest):
         self.refresh(self.event_index_name)
 
         results = query.execute(self.es_client)
-        assert results.keys() == ['hits', 'meta', 'aggregations']
-        assert results['meta'].keys() == ['timed_out']
+        assert sorted(results.keys()) == ['aggregations', 'hits', 'meta']
+        assert list(results['meta'].keys()) == ['timed_out']
         assert results['meta']['timed_out'] is False
 
         assert len(results['hits']) == 2
 
-        assert results['hits'][0].keys() == ['_score', '_type', '_id', '_source', '_index']
-        assert type(results['hits'][0]['_id']) == unicode
-        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
+        assert type(results['hits'][0]['_id']) == str
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -241,12 +235,11 @@ class TestExecute(SearchQueryUnitTest):
         assert results['hits'][0]['_source']['summary'] == 'Test Summary'
         assert results['hits'][0]['_source']['type'] == 'event'
 
-        assert results['hits'][0]['_source']['details'].keys() == ['information']
+        assert list(results['hits'][0]['_source']['details'].keys()) == ['information']
         assert results['hits'][0]['_source']['details']['information'] == 'Example information'
 
-        assert results['hits'][1].keys() == ['_score', '_type', '_id', '_source', '_index']
-        assert type(results['hits'][1]['_id']) == unicode
-        assert results['hits'][1]['_type'] == TMP_DOC_TYPE
+        assert sorted(results['hits'][1].keys()) == ['_id', '_index', '_score', '_source']
+        assert type(results['hits'][1]['_id']) == str
 
         assert results['hits'][1]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -254,12 +247,12 @@ class TestExecute(SearchQueryUnitTest):
         assert results['hits'][1]['_source']['summary'] == 'Test Summary'
         assert results['hits'][1]['_source']['type'] == 'event'
 
-        assert results['hits'][1]['_source']['details'].keys() == ['information']
+        assert list(results['hits'][1]['_source']['details'].keys()) == ['information']
         assert results['hits'][1]['_source']['details']['information'] == 'Example information'
 
-        assert results['aggregations'].keys() == ['note']
+        assert list(results['aggregations'].keys()) == ['note']
 
-        assert results['aggregations']['note'].keys() == ['terms']
+        assert list(results['aggregations']['note'].keys()) == ['terms']
 
         assert len(results['aggregations']['note']['terms']) == 1
 
@@ -277,14 +270,13 @@ class TestExecute(SearchQueryUnitTest):
 
         results = query.execute(self.es_client)
 
-        assert results.keys() == ['hits', 'meta']
-        assert results['meta'].keys() == ['timed_out']
+        assert sorted(results.keys()) == ['hits', 'meta']
+        assert list(results['meta'].keys()) == ['timed_out']
         assert results['meta']['timed_out'] is False
         assert len(results['hits']) == 1
 
-        assert results['hits'][0].keys() == ['_score', '_type', '_id', '_source', '_index']
-        assert type(results['hits'][0]['_id']) == unicode
-        assert results['hits'][0]['_type'] == TMP_DOC_TYPE
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
+        assert type(results['hits'][0]['_id']) == str
 
         assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
 
@@ -292,7 +284,7 @@ class TestExecute(SearchQueryUnitTest):
         assert results['hits'][0]['_source']['summary'] == 'Test Summary'
         assert results['hits'][0]['_source']['type'] == 'event'
 
-        assert results['hits'][0]['_source']['details'].keys() == ['information']
+        assert list(results['hits'][0]['_source']['details'].keys()) == ['information']
         assert results['hits'][0]['_source']['details']['information'] == 'Example information'
 
         with pytest.raises(KeyError):

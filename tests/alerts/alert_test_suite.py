@@ -127,7 +127,7 @@ class AlertTestSuite(UnitTestSuite):
         obj = args[0]
         if not isinstance(obj, dict):
             return obj
-        for k, v in obj.iteritems():
+        for k, v in obj.items():
             if k in target and isinstance(target[k], dict):
                 self.dict_merge(target[k], v)
             else:
@@ -193,10 +193,10 @@ class AlertTestSuite(UnitTestSuite):
         assert found_alert['_index'] == self.alert_index_name, 'Alert index not propertly set, got: {}'.format(found_alert['_index'])
 
         # Verify that the alert has the right "look to it"
-        assert found_alert.keys() == ['_score', '_type', '_id', '_source', '_index'], 'Alert format is malformed'
+        assert sorted(found_alert.keys()) == ['_id', '_index', '_score', '_source'], 'Alert format is malformed'
 
-        # Verify the alert has an id field that is unicode
-        assert type(found_alert['_id']) == unicode, 'Alert _id is not an integer'
+        # Verify the alert has an id field that is str
+        assert type(found_alert['_id']) == str, 'Alert _id is malformed'
 
         # Verify there is a utctimestamp field
         assert 'utctimestamp' in found_alert['_source'], 'Alert does not have utctimestamp specified'
@@ -217,8 +217,8 @@ class AlertTestSuite(UnitTestSuite):
         assert type(found_alert['_source']['events']) == list, 'Alert events field is not a list'
 
         # Verify that the alert properties are set correctly
-        for key, value in test_case.expected_alert.iteritems():
-            assert found_alert['_source'][key] == value, u'{0} does not match!\n\tgot: {1}\n\texpected: {2}'.format(key, found_alert['_source'][key], value)
+        for key, value in test_case.expected_alert.items():
+            assert found_alert['_source'][key] == value, '{0} does not match!\n\tgot: {1}\n\texpected: {2}'.format(key, found_alert['_source'][key], value)
 
     def verify_alert_task(self, alert_task, test_case):
         assert alert_task.classname() == self.alert_classname, 'Alert classname did not match expected name'
@@ -241,7 +241,7 @@ class AlertTestSuite(UnitTestSuite):
     @staticmethod
     def create_events(default_event, num_events):
         events = []
-        for num in xrange(num_events):
+        for num in range(num_events):
             events.append(AlertTestSuite.create_event(default_event))
         return events
 

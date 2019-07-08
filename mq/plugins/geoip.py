@@ -50,6 +50,13 @@ class message(object):
                     if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                         '''lookup geoip info'''
                         message['details']['sourceipgeolocation'] = self.ipLocation(ipText)
+                        # Add a geo_point coordinates if latitude and longitude exist
+                        if 'latitude' in message['details']['sourceipgeolocation'] and 'longitude' in message['details']['sourceipgeolocation']:
+                            message['details']['sourceipgeopoint'] = '{0},{1}'.format(
+                                message['details']['sourceipgeolocation']['latitude'],
+                                message['details']['sourceipgeolocation']['longitude']
+                            )
+
                 else:
                     # invalid ip sent in the field
                     # if we send on, elastic search will error, so set it
@@ -63,6 +70,12 @@ class message(object):
                     if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                         '''lookup geoip info'''
                         message['details']['destinationipgeolocation'] = self.ipLocation(ipText)
+                        # Add a geo_point coordinates if latitude and longitude exist
+                        if 'latitude' in message['details']['destinationipgeolocation'] and 'longitude' in message['details']['destinationipgeolocation']:
+                            message['details']['destinationipgeopoint'] = '{0},{1}'.format(
+                                message['details']['destinationipgeolocation']['latitude'],
+                                message['details']['destinationipgeolocation']['longitude']
+                            )
                 else:
                     # invalid ip sent in the field
                     # if we send on, elastic search will error, so set it

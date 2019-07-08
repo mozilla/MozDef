@@ -28,7 +28,7 @@ class AlertAuthSignRelengSSH(AlertTask):
 
         for exclusion in self.config['exclusions']:
             exclusion_query = None
-            for key, value in exclusion.iteritems():
+            for key, value in exclusion.items():
                 phrase_exclusion = PhraseMatch(key, value)
                 if exclusion_query is None:
                     exclusion_query = phrase_exclusion
