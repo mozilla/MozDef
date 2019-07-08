@@ -19,7 +19,7 @@ from unit_test_suite import UnitTestSuite
 class TestDotDict(UnitTestSuite):
     def test_blank_init(self):
         dct = DotDict()
-        assert dct.keys() == []
+        assert list(dct.keys()) == []
 
     def test_nonexisting_key(self):
         dct = DotDict()

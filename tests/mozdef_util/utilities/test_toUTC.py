@@ -1,6 +1,7 @@
 from datetime import datetime, date
 from dateutil.parser import parse
 
+import importlib
 import sys
 import pytz
 
@@ -23,7 +24,7 @@ def utc_timezone():
 tzlocal.get_localzone = utc_timezone
 
 if 'mozdef_util.utilities.toUTC' in sys.modules:
-    reload(sys.modules['mozdef_util.utilities.toUTC'])
+    importlib.reload(sys.modules['mozdef_util.utilities.toUTC'])
 
 
 class TestToUTC():

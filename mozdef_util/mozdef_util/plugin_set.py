@@ -1,8 +1,10 @@
 import os
 import pynsive
+import importlib
 from operator import itemgetter
-from utilities.dict2List import dict2List
-from utilities.logger import logger
+
+from .utilities.dict2List import dict2List
+from .utilities.logger import logger
 
 
 class PluginSet(object):
@@ -33,7 +35,7 @@ class PluginSet(object):
 
             try:
                 module_obj = pynsive.import_module(found_module)
-                reload(module_obj)
+                importlib.reload(module_obj)
                 plugin_class_obj = module_obj.message()
 
                 if 'priority' in dir(plugin_class_obj):
@@ -50,7 +52,7 @@ class PluginSet(object):
                     }
                 )
             except Exception as e:
-                logger.exception('Received exception when loading {0} plugins\n{1}'.format(module_name, e.message))
+                logger.exception('Received exception when loading {0} plugins\n{1}'.format(module_name, e))
         plugin_manager.destroy()
         return plugins
 
@@ -84,7 +86,7 @@ class PluginSet(object):
                 try:
                     (message, metadata) = self.send_message_to_plugin(plugin_class=plugin['plugin_class'], message=message, metadata=metadata)
                 except Exception as e:
-                    logger.exception('Received exception in {0}: message: {1}\n{2}'.format(plugin['plugin_class'], message, e.message))
+                    logger.exception('Received exception in {0}: message: {1}\n{2}'.format(plugin['plugin_class'], message, e))
                 if message is None:
                     return (message, metadata)
         return (message, metadata)

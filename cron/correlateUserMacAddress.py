@@ -19,7 +19,8 @@ from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 def getDocID(usermacaddress):
     # create a hash to use as the ES doc id
     hash = md5()
-    hash.update('{0}.mozdefintel.usernamemacaddress'.format(usermacaddress))
+    seed = '{0}.mozdefintel.usernamemacaddress'.format(usermacaddress)
+    hash.update(seed.encode())
     return hash.hexdigest()
 
 

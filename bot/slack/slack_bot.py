@@ -50,7 +50,7 @@ class SlackBot():
 
         if command == '!help':
             response = "\nHelp is on it's way...try these:\n"
-            for command_name, plugin in self.plugins.iteritems():
+            for command_name, plugin in self.plugins.items():
                 response += "\n{0} -- {1}".format(
                     command_name,
                     plugin['help_text']

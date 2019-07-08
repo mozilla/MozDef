@@ -2,7 +2,7 @@ import os.path
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts"))
 
-from alert_test_suite import AlertTestSuite
+from .alert_test_suite import AlertTestSuite
 
 
 class AlertTestCase(object):
@@ -22,4 +22,5 @@ class AlertTestCase(object):
 
         alert_task = alert_class_attr()
         alert_task.run()
+        alert_task.close_connections()
         return alert_task
