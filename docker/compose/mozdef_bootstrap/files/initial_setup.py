@@ -34,7 +34,7 @@ esserver = os.environ.get('OPTIONS_ESSERVERS')
 if esserver is None:
     esserver = args.esserver
 esserver = esserver.strip('/')
-print "Connecting to " + esserver
+print("Connecting to " + esserver)
 client = ElasticsearchClient(esserver)
 
 kibana_url = os.environ.get('OPTIONS_KIBANAURL', args.kibana_url)
@@ -72,12 +72,12 @@ for attempt in range(total_num_tries):
     try:
         all_indices = client.get_indices()
     except ConnectionError:
-        print 'Unable to connect to Elasticsearch...retrying'
+        print('Unable to connect to Elasticsearch...retrying')
         sleep(5)
     else:
         break
 else:
-    print 'Cannot connect to Elasticsearch after ' + str(total_num_tries) + ' tries, exiting script.'
+    print('Cannot connect to Elasticsearch after ' + str(total_num_tries) + ' tries, exiting script.')
     exit(1)
 
 refresh_interval = getConfig('refresh_interval', '1s', args.backup_conf_file)
@@ -102,26 +102,26 @@ state_index_settings['settings'] = index_options
 
 # Create initial indices
 if event_index_name not in all_indices:
-    print "Creating " + event_index_name
+    print("Creating " + event_index_name)
     client.create_index(event_index_name, index_config=index_settings)
 client.create_alias('events', event_index_name)
 
 if previous_event_index_name not in all_indices:
-    print "Creating " + previous_event_index_name
+    print("Creating " + previous_event_index_name)
     client.create_index(previous_event_index_name, index_config=index_settings)
 client.create_alias('events-previous', previous_event_index_name)
 
 if alert_index_name not in all_indices:
-    print "Creating " + alert_index_name
+    print("Creating " + alert_index_name)
     client.create_index(alert_index_name, index_config=index_settings)
 client.create_alias('alerts', alert_index_name)
 
 if weekly_index_alias not in all_indices:
-    print "Creating " + weekly_index_alias
+    print("Creating " + weekly_index_alias)
     client.create_alias_multiple_indices(weekly_index_alias, [event_index_name, previous_event_index_name])
 
 if state_index_name not in all_indices:
-    print "Creating " + state_index_name
+    print("Creating " + state_index_name)
     client.create_index(state_index_name, index_config=state_index_settings)
 
 # Wait for kibana service to get ready
@@ -156,7 +156,7 @@ for infile in listing:
     with open(json_file_path) as json_data:
         mapping_data = json.load(json_data)
         index_name = mapping_data['attributes']['title']
-        print "Creating {0} index mapping".format(index_name)
+        print("Creating {0} index mapping".format(index_name))
         mapping_url = kibana_url + "/api/saved_objects/index-pattern/" + index_name
         resp = requests.post(url=mapping_url, data=json.dumps(mapping_data), headers=kibana_headers)
         if not resp.ok:

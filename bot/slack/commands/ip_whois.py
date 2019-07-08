@@ -16,7 +16,7 @@ class Command():
                 ip = netaddr.IPNetwork(ip_token)[0]
                 if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                     whois = IPWhois(ip).lookup_whois()
-                    description = str(whois['nets'][0]['description']).encode('string_escape')
+                    description = whois['nets'][0]['description']
                     response += "{0} description: {1}\n".format(ip_token, description)
                 else:
                     response += "{0}: hrm...loopback? private ip?\n".format(ip_token)

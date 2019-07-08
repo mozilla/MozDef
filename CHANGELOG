@@ -5,6 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v3.0.0] - 2019-07-08
+### Added
+- Support for Python3
+
+### Removed
+- Support for Python2
+- Usage of boto (boto3 now preferred)
+
+
+## [v2.0.1] - 2019-07-08
+### Fixed
+- Ensure all print statements use parenthesis
+- Improved broFixup plugin to handle new zeek format
+
+
 ## [v2.0.0] - 2019-06-28
 ### Added
 - Source IP and Destination IP GeoPoints
@@ -117,8 +132,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased]: https://github.com/mozilla/MozDef/compare/v2.00.0...HEAD
-[v2.0.0]: https://github.com/mozilla/MozDef/compare/v1.40.0...v2.00.0
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v3.0.0...HEAD
+[v3.0.0]: https://github.com/mozilla/MozDef/compare/v2.0.1...v3.0.0
+[v2.0.1]: https://github.com/mozilla/MozDef/compare/v2.0.0...v2.0.1
+[v2.0.0]: https://github.com/mozilla/MozDef/compare/v1.40.0...v2.0.0
 [v1.40.0]: https://github.com/mozilla/MozDef/compare/v1.40.0...v1.39.0
 [v1.39.0]: https://github.com/mozilla/MozDef/compare/v1.38.5...v1.39.0
 [v1.38.5]: https://github.com/mozilla/MozDef/compare/v1.38.4...v1.38.5
