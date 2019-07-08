@@ -91,7 +91,7 @@ if __name__ == '__main__':
             if not logcache.empty():
                 time.sleep(.001)
                 try:
-                    postingProcess = Process(target=postLogs,args=(logcache,),name="json2MozdefStressTest")
+                    postingProcess = Process(target=postLogs, args=(logcache,), name="json2MozdefStressTest")
                     postingProcess.start()
                 except OSError as e:
                     if e.errno == 35:  # resource temporarily unavailable.
