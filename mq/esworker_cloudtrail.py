@@ -12,11 +12,9 @@ import sys
 import socket
 from configlib import getConfig, OptionParser
 from datetime import datetime
-import boto.sts
-import boto.s3
-from boto.sqs.message import RawMessage
+import boto3
 import gzip
-from StringIO import StringIO
+from io import BytesIO
 import re
 import time
 import kombu
@@ -29,9 +27,10 @@ from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 
-from lib.aws import get_aws_credentials
-from lib.plugins import sendEventToPlugins, registerPlugins
-from lib.sqs import connect_sqs
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
+from mq.lib.aws import get_aws_credentials
+from mq.lib.plugins import sendEventToPlugins, registerPlugins
+from mq.lib.sqs import connect_sqs
 
 
 CLOUDTRAIL_VERB_REGEX = re.compile(r'^([A-Z][^A-Z]*)')
@@ -42,89 +41,6 @@ try:
     hasUWSGI = True
 except ImportError as e:
     hasUWSGI = False
-
-
-class RoleManager:
-    def __init__(self, region_name='us-east-1', aws_access_key_id=None, aws_secret_access_key=None):
-        self.aws_access_key_id = aws_access_key_id
-        self.aws_secret_access_key = aws_secret_access_key
-        self.credentials = {}
-        self.session_credentials = None
-        self.session_conn_sts = None
-        try:
-            self.local_conn_sts = boto.sts.connect_to_region(
-                **get_aws_credentials(
-                    region_name,
-                    self.aws_access_key_id,
-                    self.aws_secret_access_key))
-        except Exception, e:
-            logger.error("Unable to connect to STS due to exception %s" % e.message)
-            raise
-
-        if self.aws_access_key_id is not None or self.aws_secret_access_key is not None:
-            # We're using API credentials not an IAM Role
-            try:
-                if self.session_credentials is None or self.session_credentials.is_expired():
-                    self.session_credentials = self.local_conn_sts.get_session_token()
-            except Exception, e:
-                logger.error("Unable to get session token due to exception %s" % e.message)
-                raise
-            try:
-                creds = get_aws_credentials(
-                    region_name,
-                    self.session_credentials.access_key,
-                    self.session_credentials.secret_key,
-                    self.session_credentials.session_token) if self.session_credentials else {}
-                self.session_conn_sts = boto.sts.connect_to_region(**creds)
-            except Exception, e:
-                logger.error("Unable to connect to STS with session token due to exception %s" % e.message)
-                raise
-            self.conn_sts = self.session_conn_sts
-        else:
-            self.conn_sts = self.local_conn_sts
-
-    def assume_role(self,
-                    role_arn,
-                    role_session_name='unknown',
-                    policy=None):
-        '''Return a boto.sts.credential.Credential object given a role_arn.
-        First check if a Credential oject exists in the local self.credentials
-        cache that is not expired. If there isn't one, assume the role of role_arn
-        store the Credential in the credentials cache and return it'''
-        logger.debug("Connecting to sts")
-        if role_arn in self.credentials:
-            if not self.credentials[role_arn] or not self.credentials[role_arn].is_expired():
-                # Return the cached value if it's False (indicating a permissions issue) or if
-                # it hasn't expired.
-                return self.credentials[role_arn]
-        try:
-            self.credentials[role_arn] = self.conn_sts.assume_role(
-                role_arn=role_arn,
-                role_session_name=role_session_name,
-                policy=policy).credentials
-            logger.debug("Assumed new role with credential %s" % self.credentials[role_arn].to_dict())
-        except Exception, e:
-            logger.error("Unable to assume role %s due to exception %s" % (role_arn, e.message))
-            self.credentials[role_arn] = False
-        return self.credentials[role_arn]
-
-    def get_credentials(self,
-                        role_arn,
-                        role_session_name='unknown',
-                        policy=None):
-        '''Assume the role of role_arn, and return a credential dictionary for that role'''
-        credential = self.assume_role(role_arn,
-                                      role_session_name,
-                                      policy)
-        return self.get_credential_arguments(credential)
-
-    def get_credential_arguments(self, credential):
-        '''Given a boto.sts.credential.Credential object, return a dictionary of get_credential_arguments
-        usable as kwargs with a boto connect method'''
-        return {
-            'aws_access_key_id': credential.access_key,
-            'aws_secret_access_key': credential.secret_key,
-            'security_token': credential.session_token} if credential else {}
 
 
 def keyMapping(aDict):
@@ -160,76 +76,76 @@ def keyMapping(aDict):
     returndict['receivedtimestamp'] = toUTC(datetime.now()).isoformat()
     returndict['mozdefhostname'] = options.mozdefhostname
     try:
-        for k, v in aDict.iteritems():
+        for k, v in aDict.items():
             k = removeAt(k).lower()
 
             if k == 'sourceip':
-                returndict[u'details']['sourceipaddress'] = v
+                returndict['details']['sourceipaddress'] = v
 
             elif k == 'sourceipaddress':
-                returndict[u'details']['sourceipaddress'] = v
+                returndict['details']['sourceipaddress'] = v
 
             elif k in ('facility', 'source'):
-                returndict[u'source'] = v
+                returndict['source'] = v
 
             elif k in ('eventsource'):
-                returndict[u'hostname'] = v
+                returndict['hostname'] = v
 
             elif k in ('message', 'summary'):
-                returndict[u'summary'] = toUnicode(v)
+                returndict['summary'] = toUnicode(v)
 
             elif k in ('payload') and 'summary' not in aDict:
                 # special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
-                returndict[u'summary'] = toUnicode(v)
+                returndict['summary'] = toUnicode(v)
             elif k in ('payload'):
-                returndict[u'details']['payload'] = toUnicode(v)
+                returndict['details']['payload'] = toUnicode(v)
 
             elif k in ('eventtime', 'timestamp', 'utctimestamp', 'date'):
-                returndict[u'utctimestamp'] = toUTC(v).isoformat()
-                returndict[u'timestamp'] = toUTC(v).isoformat()
+                returndict['utctimestamp'] = toUTC(v).isoformat()
+                returndict['timestamp'] = toUTC(v).isoformat()
 
             elif k in ('hostname', 'source_host', 'host'):
-                returndict[u'hostname'] = toUnicode(v)
+                returndict['hostname'] = toUnicode(v)
 
             elif k in ('tags'):
                 if 'tags' not in returndict:
-                    returndict[u'tags'] = []
+                    returndict['tags'] = []
                 if type(v) == list:
-                    returndict[u'tags'] += v
+                    returndict['tags'] += v
                 else:
                     if len(v) > 0:
-                        returndict[u'tags'].append(v)
+                        returndict['tags'].append(v)
 
             # nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
             elif k in ('syslogseverity', 'severity', 'severityvalue', 'level', 'priority'):
-                returndict[u'severity'] = toUnicode(v).upper()
+                returndict['severity'] = toUnicode(v).upper()
 
             elif k in ('facility', 'syslogfacility'):
-                returndict[u'facility'] = toUnicode(v)
+                returndict['facility'] = toUnicode(v)
 
             elif k in ('pid', 'processid'):
-                returndict[u'processid'] = toUnicode(v)
+                returndict['processid'] = toUnicode(v)
 
             # nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
             elif k in ('pname', 'processname', 'sourcename', 'program'):
-                returndict[u'processname'] = toUnicode(v)
+                returndict['processname'] = toUnicode(v)
 
             # the file, or source
             elif k in ('path', 'logger', 'file'):
-                returndict[u'eventsource'] = toUnicode(v)
+                returndict['eventsource'] = toUnicode(v)
 
             elif k in ('type', 'eventtype', 'category'):
-                returndict[u'category'] = toUnicode(v)
-                returndict[u'type'] = 'cloudtrail'
+                returndict['category'] = toUnicode(v)
+                returndict['type'] = 'cloudtrail'
 
             # custom fields as a list/array
             elif k in ('fields', 'details'):
                 if type(v) is not dict:
-                    returndict[u'details'][u'message'] = v
+                    returndict['details']['message'] = v
                 else:
                     if len(v) > 0:
-                        for details_key, details_value in v.iteritems():
-                            returndict[u'details'][details_key] = details_value
+                        for details_key, details_value in v.items():
+                            returndict['details'][details_key] = details_value
 
             # custom fields/details as a one off, not in an array
             # i.e. fields.something=value or details.something=value
@@ -239,20 +155,20 @@ def keyMapping(aDict):
                 newName = newName.lower().replace('details.', '')
                 # add a dict to hold the details if it doesn't exist
                 if 'details' not in returndict:
-                    returndict[u'details'] = dict()
+                    returndict['details'] = dict()
                 # add field with a special case for shippers that
                 # don't send details
                 # in an array as int/floats/strings
                 # we let them dictate the data type with field_datatype
                 # convention
                 if newName.endswith('_int'):
-                    returndict[u'details'][unicode(newName)] = int(v)
+                    returndict['details'][str(newName)] = int(v)
                 elif newName.endswith('_float'):
-                    returndict[u'details'][unicode(newName)] = float(v)
+                    returndict['details'][str(newName)] = float(v)
                 else:
-                    returndict[u'details'][unicode(newName)] = toUnicode(v)
+                    returndict['details'][str(newName)] = toUnicode(v)
             else:
-                returndict[u'details'][k] = v
+                returndict['details'][k] = v
 
         if 'utctimestamp' not in returndict:
             # default in case we don't find a reasonable timestamp
@@ -276,14 +192,10 @@ def esConnect():
 
 class taskConsumer(object):
 
-    def __init__(self, mqConnection, taskQueue, esConnection):
-        self.connection = mqConnection
+    def __init__(self, queue, esConnection):
+        self.sqs_queue = queue
         self.esConnection = esConnection
-        self.taskQueue = taskQueue
-        self.s3_connection = None
-        # This value controls how long we sleep
-        # between reauthenticating and getting a new set of creds
-        self.flush_wait_time = 1800
+        self.s3_client = None
         self.authenticate()
 
         # Run thread to flush s3 credentials
@@ -292,16 +204,35 @@ class taskConsumer(object):
         reauthenticate_thread.start()
 
     def authenticate(self):
+        # This value controls how long we sleep
+        # between reauthenticating and getting a new set of creds
+        # eventually this gets set by aws response
+        self.flush_wait_time = 1800
         if options.cloudtrail_arn not in ['<cloudtrail_arn>', 'cloudtrail_arn']:
-            role_manager = RoleManager(**get_aws_credentials(
-                options.region,
-                options.accesskey,
-                options.secretkey))
-            role_manager.assume_role(options.cloudtrail_arn)
-            role_creds = role_manager.get_credentials(options.cloudtrail_arn)
+            client = boto3.client(
+                'sts',
+                aws_access_key_id=options.accesskey,
+                aws_secret_access_key=options.secretkey
+            )
+            response = client.assume_role(
+                RoleArn=options.cloudtrail_arn,
+                RoleSessionName='MozDef-CloudTrail-Reader',
+            )
+            role_creds = {
+                'aws_access_key_id': response['Credentials']['AccessKeyId'],
+                'aws_secret_access_key': response['Credentials']['SecretAccessKey'],
+                'aws_session_token': response['Credentials']['SessionToken']
+            }
+            current_time = toUTC(datetime.now())
+            # Let's remove 3 seconds from the flush wait time just in case
+            self.flush_wait_time = (response['Credentials']['Expiration'] - current_time).seconds - 3
         else:
             role_creds = {}
-        self.s3_connection = boto.connect_s3(**role_creds)
+        self.s3_client = boto3.client(
+            's3',
+            region_name=options.region,
+            **role_creds
+        )
 
     def reauth_timer(self):
         while True:
@@ -309,21 +240,19 @@ class taskConsumer(object):
             logger.debug('Recycling credentials and reassuming role')
             self.authenticate()
 
-    def process_file(self, s3file):
-        logger.debug("Fetching %s" % s3file.name)
-        compressedData = s3file.read()
-        databuf = StringIO(compressedData)
+    def parse_s3_file(self, s3_obj):
+        compressed_data = s3_obj['Body'].read()
+        databuf = BytesIO(compressed_data)
         gzip_file = gzip.GzipFile(fileobj=databuf)
         json_logs = json.loads(gzip_file.read())
         return json_logs['Records']
 
     def run(self):
-        self.taskQueue.set_message_class(RawMessage)
         while True:
             try:
-                records = self.taskQueue.get_messages(options.prefetch)
+                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=options.prefetch)
                 for msg in records:
-                    body_message = msg.get_body()
+                    body_message = msg.body
                     event = json.loads(body_message)
 
                     if not event['Message']:
@@ -345,24 +274,22 @@ class taskConsumer(object):
                     s3_log_files = message_json['s3ObjectKey']
                     for log_file in s3_log_files:
                         logger.debug('Downloading and parsing ' + log_file)
-                        bucket = self.s3_connection.get_bucket(message_json['s3Bucket'])
-
-                        log_file_lookup = bucket.lookup(log_file)
-                        events = self.process_file(log_file_lookup)
+                        s3_obj = self.s3_client.get_object(Bucket=message_json['s3Bucket'], Key=log_file)
+                        events = self.parse_s3_file(s3_obj)
                         for event in events:
                             self.on_message(event)
 
-                    self.taskQueue.delete_message(msg)
+                    msg.delete()
             except (SSLEOFError, SSLError, socket.error):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
-                self.connection, self.taskQueue = connect_sqs(
+                self.sqs_queue = connect_sqs(
                     task_exchange=options.taskexchange,
                     **get_aws_credentials(
                         options.region,
                         options.accesskey,
-                        options.secretkey))
-                self.taskQueue.set_message_class(RawMessage)
+                        options.secretkey)
+                )
 
     def on_message(self, body):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -375,7 +302,7 @@ class taskConsumer(object):
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
                 bodyDict = body
-            elif isinstance(body, str) or isinstance(body, unicode):
+            elif isinstance(body, str):
                 try:
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
@@ -454,14 +381,15 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    sqs_conn, eventTaskQueue = connect_sqs(
+    sqs_queue = connect_sqs(
         task_exchange=options.taskexchange,
         **get_aws_credentials(
             options.region,
             options.accesskey,
-            options.secretkey))
+            options.secretkey)
+    )
     # consume our queue
-    taskConsumer(sqs_conn, eventTaskQueue, es).run()
+    taskConsumer(sqs_queue, es).run()
 
 
 def initConfig():

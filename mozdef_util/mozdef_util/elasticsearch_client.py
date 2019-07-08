@@ -5,12 +5,12 @@ from elasticsearch_dsl import Search
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch.helpers import bulk, BulkIndexError
 
-from query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
-from bulk_queue import BulkQueue
+from .query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
+from .bulk_queue import BulkQueue
 
-from utilities.logger import logger
+from .utilities.logger import logger
 
-from event import Event
+from .event import Event
 
 DOCUMENT_TYPE = '_doc'
 
@@ -53,7 +53,7 @@ class ElasticsearchClient():
         self.es_connection.indices.delete(index=index_name, ignore=ignore_codes)
 
     def get_indices(self):
-        return self.es_connection.indices.stats()['indices'].keys()
+        return list(self.es_connection.indices.stats()['indices'].keys())
 
     def index_exists(self, index_name):
         return self.es_connection.indices.exists(index_name)
@@ -90,10 +90,10 @@ class ElasticsearchClient():
         self.es_connection.indices.update_aliases(dict(actions=actions))
 
     def get_alias(self, alias_name):
-        return self.es_connection.indices.get_alias(index='*', name=alias_name).keys()
+        return list(self.es_connection.indices.get_alias(index='*', name=alias_name).keys())
 
     def get_aliases(self):
-        return self.es_connection.cat.stats()['indices'].keys()
+        return list(self.es_connection.cat.stats()['indices'].keys())
 
     def refresh(self, index_name):
         self.es_connection.indices.refresh(index=index_name)

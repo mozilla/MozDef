@@ -31,9 +31,9 @@ class AlertFeedbackEvents(AlertTask):
         user = event['_source']['details']['alert_information']['user_id']
         event_summary = event['_source']['summary']
         event_date = event['_source']['details']['alert_information']['date']
-        summary = u"{} escalated alert within single-sign on (SSO) dashboard. Event Date: {} Summary: \"{}\"".format(user, event_date, event_summary)
+        summary = "{} escalated alert within single-sign on (SSO) dashboard. Event Date: {} Summary: \"{}\"".format(user, event_date, event_summary)
 
-        for alert_code, tag in self._config.iteritems():
+        for alert_code, tag in self._config.items():
             if event['_source']['details']['alert_information']['alert_code'] == alert_code:
                 tags.append(tag)
 

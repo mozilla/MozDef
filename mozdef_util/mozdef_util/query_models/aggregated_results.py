@@ -23,7 +23,7 @@ def AggregatedResults(input_results):
         }
         converted_results['hits'].append(hit_dict)
 
-    for agg_name, aggregation in input_results.aggregations.to_dict().iteritems():
+    for agg_name, aggregation in input_results.aggregations.to_dict().items():
         aggregation_dict = {
             'terms': []
         }

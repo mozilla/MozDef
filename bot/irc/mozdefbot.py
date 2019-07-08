@@ -147,7 +147,7 @@ def formatAlert(jsonDictIn):
     return colorify('{0}: {1} {2}'.format(
         severity,
         colors['blue'] + category + colors['normal'],
-        summary.encode('ascii', 'replace')
+        summary
     ))
 
 
@@ -219,7 +219,7 @@ class mozdefBot():
                             ip = netaddr.IPNetwork(field)[0]
                             if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
                                 whois = IPWhois(ip).lookup_whois()
-                                description = whois['nets'][0]['description'].encode('string_escape')
+                                description = whois['nets'][0]['description']
                                 self.client.msg(
                                     recipient, "{0} description: {1}".format(field, description))
                             else:
@@ -290,7 +290,7 @@ class alertConsumer(ConsumerMixin):
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
                 bodyDict = body
-            elif isinstance(body, str) or isinstance(body, unicode):
+            elif isinstance(body, str):
                 try:
                     bodyDict = json.loads(body)  # lets assume it's json
                 except ValueError as e:
@@ -402,7 +402,7 @@ def initConfig():
 
     # Our config parser stomps out the '#' so we gotta readd
     channelkeys = {}
-    for key, value in options.channelkeys.iteritems():
+    for key, value in options.channelkeys.items():
         if not key.startswith('#'):
             key = '#{0}'.format(key)
         channelkeys[key] = value

@@ -66,6 +66,7 @@ build: build-from-cwd
 
 .PHONY: build-from-cwd
 build-from-cwd:  ## Build local MozDef images (use make NO_CACHE=--no-cache build to disable caching)
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(BUILD_MODE) $(PARALLEL) $(NO_CACHE) base
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) $(BUILD_MODE) $(PARALLEL) $(NO_CACHE)
 
 .PHONY: build-from-github
@@ -76,6 +77,7 @@ build-from-github:  ## Build local MozDef images from the github branch (use mak
 
 .PHONY: build-tests
 build-tests:  ## Build end-to-end test environment only
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) $(NO_CACHE) $(BUILD_MODE) base
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) $(NO_CACHE) $(BUILD_MODE)
 
 .PHONY: stop
