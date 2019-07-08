@@ -59,6 +59,6 @@ setup(
     test_suite='tests',
     tests_require=[],
     url='https://github.com/mozilla/MozDef/tree/master/lib',
-    version='3.0.0-dev',
+    version='3.0.0',
     zip_safe=False,
 )

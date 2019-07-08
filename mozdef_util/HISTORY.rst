@@ -81,7 +81,7 @@ Add is_ip utility function
 * Fixed static file includes in python package
 
 
-3.0.0 (2019-??-??)
+3.0.0 (2019-07-08)
 ------------------
 
 * Updated to work with python3
