@@ -227,8 +227,12 @@ class message(object):
                     return (newmessage, metadata)
 
                 if logtype == 'dhcp':
+                    if 'assigned_addr' not in newmessage['details']:
+                        newmessage['details']['assigned_addr'] = '0.0.0.0'
+                    if 'mac' not in newmessage['details']:
+                        newmessage['details']['mac'] = '00:00:00:00:00:00'
                     newmessage[u'summary'] = (
-                        '{assigned_ip} assigned to '
+                        '{assigned_addr} assigned to '
                         '{mac}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)

@@ -546,16 +546,17 @@ class TestBroFixup(object):
             'customendpoint': 'bro'
         }
         MESSAGE = {
-            "ts":1505701256.181043,
-            "uid":"Cbs59u2x6KXu85dsOi",
-            "id.orig_h":"10.26.40.65",
-            "id.orig_p":68,
-            "id.resp_h":"10.26.40.1",
-            "id.resp_p":67,
-            "mac":"00:25:90:9b:67:b2",
-            "assigned_ip":"10.26.40.65",
-            "lease_time":86400.0,
-            "trans_id":1504605887
+            "ts": 1561756317.104897,
+            "uids": ["C6uJBE1z3CKfrA9FE4", "CdCBtl1fKEIMNvebrb", "CNJJ9g1HgefKR09ied", "CuXKNM1R5MEJ9GsMIi", "CMIYsm2weaHvzBRJIi", "C0vslbmXr3Psyy5Ff", "Ct0BRQ2Y84MWhag1Ik", "C5BNK71HlfhlXf8Pq", "C5ZrPG3DfQNzsiUMi2", "CMJHze3BH9o7yg9yM6", "CMSyg03ZZcdic8pTMc"],
+            "client_addr": "10.251.255.10",
+            "server_addr": "10.251.24.1",
+            "mac": "f0:18:98:55:0e:0e",
+            "host_name": "aliczekkroliczek",
+            "domain": "ala.ma.kota",
+            "assigned_addr": "10.251.30.202",
+            "lease_time": 43200.0,
+            "msg_types": ["DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "DISCOVER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER"],
+            "duration": 34.037004
         }
         event['MESSAGE'] = json.dumps(MESSAGE)
 
@@ -568,7 +569,33 @@ class TestBroFixup(object):
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
-        assert result['summary'] == '10.26.40.65 assigned to 00:25:90:9b:67:b2'
+        assert result['summary'] == '10.251.30.202 assigned to f0:18:98:55:0e:0e'
+
+    def test_dhcp_log2(self):
+        event = {
+            'category': 'bro',
+            'SOURCE': 'bro_dhcp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
+            "ts": 1561607456.803827,
+            "uids": ["CsXuIb2HTmDaPrPvT7"],
+            "host_name": "nsm2",
+            "msg_types": ["DISCOVER", "DISCOVER"],
+            "duration": 17.778322
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == '0.0.0.0 assigned to 00:00:00:00:00:00'
 
     def test_ftp_log(self):
         event = {
