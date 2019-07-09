@@ -86,3 +86,9 @@ Add is_ip utility function
 
 * Updated to work with python3
 * Removed support for python2
+
+
+3.0.1 (2019-07-08)
+------------------
+
+* Updated bulk queue to acquire lock before saving events
