@@ -526,9 +526,13 @@ def kibanaDashboards():
         results = search_query.execute(es_client, indices=['.kibana'])
 
         for dashboard in results['hits']:
+            dashboard_id = dashboard['_id']
+            if dashboard_id.startswith('dashboard:'):
+                dashboard_id = dashboard_id.replace('dashboard:', '')
+
             resultsList.append({
                 'name': dashboard['_source']['dashboard']['title'],
-                'id': dashboard['_id']
+                'id': dashboard_id
             })
 
     except ElasticsearchInvalidIndex as e:
