@@ -25,12 +25,12 @@ class TestDashboardGeomodel(object):
         self.good_message_dict = {
             "category": "geomodel",
             "tags": ['geomodel'],
-            "summary": u"ttesterson@mozilla.com NEWCOUNTRY Diamond Bar, United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
+            "summary": "ttesterson@mozilla.com NEWCOUNTRY Diamond Bar, United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
             "events": [
                 {
-                    u'documentsource': {
-                        u'details': {
-                            u'event_time': u'2018-08-08T02:11:41.85Z',
+                    'documentsource': {
+                        'details': {
+                            'event_time': '2018-08-08T02:11:41.85Z',
                         }
                     }
                 }
@@ -38,8 +38,8 @@ class TestDashboardGeomodel(object):
             "details": {
                 "category": "NEWCOUNTRY",
                 'previous_locality_details': {
-                    u'city': u'Oakland',
-                    u'country': u'United States'
+                    'city': 'Oakland',
+                    'country': 'United States'
                 },
                 "locality_details": {
                     "city": "Diamond Bar",
@@ -103,28 +103,28 @@ class TestDashboardGeomodel(object):
         assert self.test_connect_called is True
         assert self.test_result_record is None
 
-    def test_unicode_location(self):
-        self.good_message_dict['summary'] = u"ttesterson@mozilla.com NEWCOUNTRY \u0107abcd, \xe4Spain access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before"
-        self.good_message_dict['details']['locality_details']['city'] = u'\u0107abcd'
-        self.good_message_dict['details']['locality_details']['country'] = u'\xe4Spain'
+    def test_str_location(self):
+        self.good_message_dict['summary'] = "ttesterson@mozilla.com NEWCOUNTRY \u0107abcd, \xe4Spain access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before"
+        self.good_message_dict['details']['locality_details']['city'] = '\u0107abcd'
+        self.good_message_dict['details']['locality_details']['country'] = '\xe4Spain'
         assert self.test_result_record is None
         result_message = self.plugin.onMessage(self.good_message_dict)
         assert result_message == self.good_message_dict
         assert self.test_connect_called is True
         assert self.test_result_record is not None
-        assert type(result_message['summary']) is unicode
-        assert type(result_message['details']['locality_details']['city']) is unicode
-        assert type(result_message['details']['locality_details']['country']) is unicode
+        assert type(result_message['summary']) is str
+        assert type(result_message['details']['locality_details']['city']) is str
+        assert type(result_message['details']['locality_details']['country']) is str
 
-    def test_unicode_username(self):
-        self.good_message_dict['details']['principal'] = u'\xfcttesterson@mozilla.com'
+    def test_str_username(self):
+        self.good_message_dict['details']['principal'] = '\xfcttesterson@mozilla.com'
         assert self.test_result_record is None
         result_message = self.plugin.onMessage(self.good_message_dict)
         assert result_message == self.good_message_dict
         assert self.test_connect_called is True
         assert self.test_result_record is not None
-        assert type(result_message['summary']) is unicode
-        assert type(result_message['details']['principal']) is unicode
+        assert type(result_message['summary']) is str
+        assert type(result_message['details']['principal']) is str
 
     def test_written_details(self):
         assert self.test_result_record is None
@@ -134,8 +134,8 @@ class TestDashboardGeomodel(object):
         assert self.test_result_record is not None
         result_db_entry = self.test_result_record
         assert result_db_entry['details'] == {
-            'New IP': u'1.2.3.4 (APNIC Debogon Project, APNIC Pty Ltd)',
-            'New Location': u'Diamond Bar, United States',
-            'Previous Location': u'Oakland, United States',
+            'New IP': '1.2.3.4 (APNIC Debogon Project, APNIC Pty Ltd)',
+            'New Location': 'Diamond Bar, United States',
+            'Previous Location': 'Oakland, United States',
             'Timestamp': 'Wednesday, August 08 2018 02:11 UTC'
         }

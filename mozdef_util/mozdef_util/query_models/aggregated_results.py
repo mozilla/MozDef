@@ -17,14 +17,13 @@ def AggregatedResults(input_results):
     for hit in input_results.hits:
         hit_dict = {
             '_id': hit.meta.id,
-            '_type': hit.meta.doc_type,
             '_index': hit.meta.index,
             '_score': hit.meta.score,
             '_source': hit.to_dict()
         }
         converted_results['hits'].append(hit_dict)
 
-    for agg_name, aggregation in input_results.aggregations.to_dict().iteritems():
+    for agg_name, aggregation in input_results.aggregations.to_dict().items():
         aggregation_dict = {
             'terms': []
         }

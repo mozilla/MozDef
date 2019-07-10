@@ -41,9 +41,21 @@ def bulkindex():
         bulkpost=request.body.read()
         # bottlelog('request:{0}\n'.format(bulkpost))
         request.body.close()
-        if len(bulkpost)>10:  # TODO Check for bulk format.
-            # iterate on messages and post to event message queue
+        try:  # Handles json array bulk format [{},{},...]
+            messages = json.loads(bulkpost)
+            for event in messages:
+                # don't post the items telling us where to post things..
+                if 'index' not in event:
+                    ensurePublish=mqConn.ensure(mqproducer,mqproducer.publish,max_retries=10)
+                    ensurePublish(event,exchange=eventTaskExchange,routing_key=options.taskexchange)
+            return
+        except ValueError as e:
+            bottlelog('Decoded raw input failed with {0}'.format(e))
+            pass
 
+        if len(bulkpost)>10:  # Handles single element format {}
+            # TODO Check for other bulk formats.
+            # iterate on messages and post to event message queue
             eventlist=[]
             for i in bulkpost.splitlines():
                 eventlist.append(i)

@@ -52,7 +52,7 @@ for alert in ALERTS.keys():
 # Load logging config
 dictConfig(LOGGING)
 
-# print CELERYBEAT_SCHEDULE
+# print(CELERYBEAT_SCHEDULE)
 
 # Optional configuration, see the application user guide.
 # app.conf.update(
@@ -72,7 +72,7 @@ for alert_namespace in CELERYBEAT_SCHEDULE:
         alert_class = getattr(alert_module, alert_classname)
         app.register_task(alert_class())
     except ImportError as e:
-        print("Error importing {}").format(alert_namespace)
+        print("Error importing {}".format(alert_namespace))
         print(e)
         pass
     except Exception as e:

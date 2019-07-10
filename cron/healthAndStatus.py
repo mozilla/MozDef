@@ -23,7 +23,8 @@ def getDocID(servername):
     # create a hash to use as the ES doc id
     # hostname plus salt as doctype.latest
     hash = md5()
-    hash.update('{0}.mozdefhealth.latest'.format(servername))
+    seed = '{0}.mozdefhealth.latest'.format(servername)
+    hash.update(seed.encode())
     return hash.hexdigest()
 
 
@@ -109,11 +110,11 @@ def main():
 
         # post to elastic search servers directly without going through
         # message queues in case there is an availability issue
-        es.save_event(index=index, body=json.dumps(healthlog))
+        es.save_object(index=index, body=json.dumps(healthlog))
         # post another doc with a static docid and tag
         # for use when querying for the latest status
         healthlog['tags'] = ['mozdef', 'status', 'latest']
-        es.save_event(index=index, doc_id=getDocID(server), body=json.dumps(healthlog))
+        es.save_object(index=index, doc_id=getDocID(server), body=json.dumps(healthlog))
 
 
 def initConfig():
