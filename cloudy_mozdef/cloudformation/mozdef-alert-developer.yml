@@ -40,6 +40,7 @@ Resources:
     AlertWritersEnv:
       Type: "AWS::Lambda::Function"
       Properties:
+        Description: MozDef alert writer environment used to develop and invoke a MozDef alert
         Handler: "lambdalert.handle"
         Role:
           Fn::GetAtt:
