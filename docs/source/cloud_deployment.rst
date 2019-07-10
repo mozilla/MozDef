@@ -104,7 +104,10 @@ To view logs on the ec2 instance
 4. Tail logs from the container you'd like to examine with
    ::
 
+     # show both the access logs and the error logs
      sudo docker logs --follow NAME_OF_CONTAINER
+     # show only the error logs
+     docker logs --follow NAME_OF_CONTAINER >/dev/null
 
    where ``NAME_OF_CONTAINER`` is the container name or ID that you found in the
    step above
