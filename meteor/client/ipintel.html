@@ -11,20 +11,21 @@ modal: for  Session.set('ipintelipaddress','1,2.3.4') then
 -->
 
 <template name="ipintel">
-<body>
+
+    <body>
 
 
-<div class="container">
-    <div class="well">
-        intel: {{intel.status}} {{intel.error}}
-    </div>
-    <div class="row"><a class="showmodal" href=#>click me for modal</a></div>
-    <div class="row center">
-        <pre>{{ stringify intel.data }}</pre>
-    </div>
-    {{>intelmodal}}
-</div>
-</body>
+        <div class="container">
+            <div class="well">
+                intel: {{intel.status}} {{intel.error}}
+            </div>
+            <div class="row"><a class="showmodal" href=#>click me for modal</a></div>
+            <div class="row center">
+                <pre>{{ stringify intel.data }}</pre>
+            </div>
+            {{>intelmodal}}
+        </div>
+    </body>
 </template>
 
 <template name="intelmodal">
@@ -32,8 +33,8 @@ modal: for  Session.set('ipintelipaddress','1,2.3.4') then
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                   <button type="button" class="close" data-dismiss="modal">&times;</button>
-                   <h4>intel Results</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4>intel Results</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row center">
@@ -42,24 +43,25 @@ modal: for  Session.set('ipintelipaddress','1,2.3.4') then
                         </div>
                     </div>
                     {{#if isEqual intel.result.statusCode 200}}
-                        <div class="row center">
-                            <pre>{{ stringify intel.data }}</pre>
-                        </div>
+                    <div class="row center">
+                        <pre>{{ stringify intel.data }}</pre>
+                    </div>
                     {{else}}
-                        <div class="row center">
-                            <pre>Nothing found </pre>
-                        </div>
+                    <div class="row center">
+                        <pre>Nothing found </pre>
+                    </div>
                     {{/if}}
-                    <div class="col-xs-1"><button class="btn btn-xs" data-toggle="collapse" data-target="#rawinteljson">raw json</button></div>
+                    <div class="col-xs-1"><button class="btn btn-default btn-xs" data-toggle="collapse"
+                            data-target="#rawinteljson">raw json</button></div>
                     <div class="col-xs-7 col-xs-offset-1">
                         <div id='rawinteljson' class="collapse">
                             <pre>{{intel.content}}</pre>
                         </div>
                     </div>
-              </div>
-              <div class="modal-footer">
-                <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
-              </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+                </div>
             </div>
         </div>
     </div>

@@ -80,7 +80,7 @@ Used to apply specific "matchers" to a query. This will unlikely be used outside
        ExistsMatch('details.ip')
    ]
    must_not = [
-       TermMatch('_type', 'alert')
+       TermMatch('type', 'alert')
    ]
 
    BooleanMatch(must=must, should=[], must_not=must_not)

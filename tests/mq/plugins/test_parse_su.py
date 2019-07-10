@@ -10,8 +10,6 @@ from parse_su import message
 import copy
 
 session_su = {}
-session_su['_type'] = 'event'
-session_su = {}
 session_su['utctimestamp'] = '2017-08-24T22:49:42+00:00'
 session_su['timestamp'] = '2017-08-24T22:49:42+00:00'
 session_su['receivedtimestamp'] = '2017-08-24T22:49:42+00:00'
@@ -35,7 +33,6 @@ class TestSuSessionOpenedMessageV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -57,7 +54,6 @@ class TestSuSessionOpenedMessageV2():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -79,7 +75,6 @@ class TestSuSessionOpenedMessageV3():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -101,7 +96,6 @@ class TestSuSessionOpenedMessageV4():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 
@@ -123,7 +117,6 @@ class TestSuSessionClosedMessageV1():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         (retmessage, retmeta) = self.msgobj.onMessage(self.msg, metadata)
 

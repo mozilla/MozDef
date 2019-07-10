@@ -48,12 +48,10 @@ class message(object):
         Also sets ipv4 in two fields:
             ipaddress (decimal mapping IP)
             ipv4address (string mapping)
-            Elastic search is inconsistent about returning IPs as
-            decimal or IPs.
-            In a query an IP field is returned as string.
-            In a facets an IP field is returned as decimal.
-            No ES field type exists for ipv6, so always having
-            a string version is the most flexible option.
+            While the IP field-type serves for IPv4 or IPv6,
+            it is not quite mature yet as kibana lacks filtering
+            to differentiate between IPv4 and IPv6, so always
+            having a string version is the most flexible option.
         '''
 
         if 'details' in message:

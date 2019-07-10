@@ -21,7 +21,7 @@ class message(object):
             mapping_map = f.read()
 
         yap = yaml.safe_load(mapping_map)
-        self.eventtypes = yap.keys()
+        self.eventtypes = list(yap.keys())
         self.yap = yap
         del(mapping_map)
 

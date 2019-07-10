@@ -11,8 +11,8 @@ from mozdef_util.utilities.toUTC import toUTC
 from datetime import datetime
 from datetime import timedelta
 
-from range_match import RangeMatch
-from boolean_match import BooleanMatch
+from .range_match import RangeMatch
+from .boolean_match import BooleanMatch
 
 
 class SearchQuery(object):

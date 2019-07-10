@@ -14,14 +14,12 @@ class TestSuricataFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'doc_type': 'nsm',
             'index': 'events'
         }
 
     # Should never match and be modified by the plugin
     def test_notsuri_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -31,12 +29,10 @@ class TestSuricataFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_notsuri_log2(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -46,12 +42,10 @@ class TestSuricataFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_suricata_nocustomendpoint_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -63,11 +57,9 @@ class TestSuricataFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     def test_suricata_nocategory_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -79,11 +71,9 @@ class TestSuricataFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     def test_suricata_wrongcategory_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -96,12 +86,10 @@ class TestSuricataFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_suricata_notype_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -115,11 +103,10 @@ class TestSuricataFixup(object):
         assert result['category'] == 'suricata'
         assert result['source'] == 'eve-log'
         assert result['event_type'] == 'unknown'
-        assert metadata['doc_type'] is 'nsm'
+        assert result['type'] is 'nsm'
 
     def test_suricata_wrongtype_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -133,7 +120,7 @@ class TestSuricataFixup(object):
         assert result['category'] == 'suricata'
         assert result['source'] == 'eve-log'
         assert result['event_type'] == 'alamakota'
-        assert metadata['doc_type'] is 'nsm'
+        assert result['type'] is 'nsm'
 
     def test_suricata_nosource_log(self):
         event = {
@@ -148,7 +135,6 @@ class TestSuricataFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result['category'] == 'suricata'
         assert result['source'] == 'unknown'
-        assert metadata['doc_type'] is 'nsm'
 
     def test_suricata_wrongsource_log(self):
         event = {
@@ -165,10 +151,9 @@ class TestSuricataFixup(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result['category'] == 'suricata'
         assert result['source'] == 'alamakota'
-        assert metadata['doc_type'] is 'nsm'
 
     def verify_metadata(self, metadata):
-        assert metadata['doc_type'] == 'nsm'
+        assert metadata['index'] == 'events'
 
     def test_defaults(self):
         event = {
@@ -584,10 +569,10 @@ class TestSuricataFixup(object):
         self.verify_metadata(metadata)
         assert 'suricata_alert' in result['details']
         assert 'alert' not in result['details']
-        assert result['details'][u'suricata_alert'][u'action'] == MESSAGE['alert']['action']
-        assert result['details'][u'suricata_alert'][u'gid'] == MESSAGE['alert']['gid']
-        assert result['details'][u'suricata_alert'][u'rev'] == MESSAGE['alert']['rev']
-        assert result['details'][u'suricata_alert'][u'signature_id'] == MESSAGE['alert']['signature_id']
-        assert result['details'][u'suricata_alert'][u'signature'] == MESSAGE['alert']['signature']
-        assert result['details'][u'suricata_alert'][u'category'] == MESSAGE['alert']['category']
-        assert result['details'][u'suricata_alert'][u'severity'] == MESSAGE['alert']['severity']
+        assert result['details']['suricata_alert']['action'] == MESSAGE['alert']['action']
+        assert result['details']['suricata_alert']['gid'] == MESSAGE['alert']['gid']
+        assert result['details']['suricata_alert']['rev'] == MESSAGE['alert']['rev']
+        assert result['details']['suricata_alert']['signature_id'] == MESSAGE['alert']['signature_id']
+        assert result['details']['suricata_alert']['signature'] == MESSAGE['alert']['signature']
+        assert result['details']['suricata_alert']['category'] == MESSAGE['alert']['category']
+        assert result['details']['suricata_alert']['severity'] == MESSAGE['alert']['severity']

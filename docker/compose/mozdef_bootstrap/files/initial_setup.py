@@ -16,15 +16,17 @@ import os
 import sys
 
 from elasticsearch.exceptions import ConnectionError
+import requests
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient
-from mozdef_util.query_models import SearchQuery, TermMatch
 
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
 parser.add_argument('esserver', help='Elasticsearch server (ex: http://elasticsearch:9200)')
-parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultTemplateMapping.json)')
+parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultMappingTemplate.json)')
+parser.add_argument('state_mapping_file', help='The relative path to state mapping json file (ex: cron/mozdefStateDefaultMappingTemplate.json)')
 parser.add_argument('backup_conf_file', help='The relative path to backup.conf file (ex: cron/backup.conf)')
+parser.add_argument('kibana_url', help='The URL of the kibana endpoint (ex: http://kibana:5601)')
 args = parser.parse_args()
 
 
@@ -32,17 +34,24 @@ esserver = os.environ.get('OPTIONS_ESSERVERS')
 if esserver is None:
     esserver = args.esserver
 esserver = esserver.strip('/')
-print "Connecting to " + esserver
+print("Connecting to " + esserver)
 client = ElasticsearchClient(esserver)
 
+kibana_url = os.environ.get('OPTIONS_KIBANAURL', args.kibana_url)
 
 current_date = datetime.now()
 event_index_name = current_date.strftime("events-%Y%m%d")
 previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
 weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
-kibana_index_name = '.kibana'
-kibana_version = '5.6.14'
+
+kibana_index_name = '.kibana_1'
+# For this version of kibana, they require specifying
+# the kibana version via the api for setting
+# the default index, seems weird, but it is what it is.
+kibana_version = '6.8.0'
+
+state_index_name = 'mozdefstate'
 
 index_settings_str = ''
 with open(args.default_mapping_file) as data_file:
@@ -50,18 +59,25 @@ with open(args.default_mapping_file) as data_file:
 
 index_settings = json.loads(index_settings_str)
 
+state_index_settings_str = ''
+with open(args.state_mapping_file) as data_file:
+    state_index_settings_str = data_file.read()
+
+state_index_settings = json.loads(state_index_settings_str)
+
+
 all_indices = []
 total_num_tries = 15
 for attempt in range(total_num_tries):
     try:
         all_indices = client.get_indices()
     except ConnectionError:
-        print 'Unable to connect to Elasticsearch...retrying'
+        print('Unable to connect to Elasticsearch...retrying')
         sleep(5)
     else:
         break
 else:
-    print 'Cannot connect to Elasticsearch after ' + str(total_num_tries) + ' tries, exiting script.'
+    print('Cannot connect to Elasticsearch after ' + str(total_num_tries) + ' tries, exiting script.')
     exit(1)
 
 refresh_interval = getConfig('refresh_interval', '1s', args.backup_conf_file)
@@ -82,79 +98,112 @@ index_options = {
     }
 }
 index_settings['settings'] = index_options
+state_index_settings['settings'] = index_options
 
 # Create initial indices
 if event_index_name not in all_indices:
-    print "Creating " + event_index_name
+    print("Creating " + event_index_name)
     client.create_index(event_index_name, index_config=index_settings)
 client.create_alias('events', event_index_name)
 
 if previous_event_index_name not in all_indices:
-    print "Creating " + previous_event_index_name
+    print("Creating " + previous_event_index_name)
     client.create_index(previous_event_index_name, index_config=index_settings)
 client.create_alias('events-previous', previous_event_index_name)
 
 if alert_index_name not in all_indices:
-    print "Creating " + alert_index_name
+    print("Creating " + alert_index_name)
     client.create_index(alert_index_name, index_config=index_settings)
 client.create_alias('alerts', alert_index_name)
 
 if weekly_index_alias not in all_indices:
-    print "Creating " + weekly_index_alias
+    print("Creating " + weekly_index_alias)
     client.create_alias_multiple_indices(weekly_index_alias, [event_index_name, previous_event_index_name])
 
-if kibana_index_name not in all_indices:
-    print "Creating " + kibana_index_name
-    client.create_index(kibana_index_name, index_config={"settings": index_options})
+if state_index_name not in all_indices:
+    print("Creating " + state_index_name)
+    client.create_index(state_index_name, index_config=state_index_settings)
 
-# Wait for .kibana index to be ready
-num_times = 0
-while not client.index_exists('.kibana'):
-    if num_times < 3:
-        print("Waiting for .kibana index to be ready")
-        time.sleep(1)
-        num_times += 1
-    else:
-        print(".kibana index not created...exiting")
-        sys.exit(1)
+# Wait for kibana service to get ready
+total_num_tries = 10
+for attempt in range(total_num_tries):
+    try:
+        if requests.get(kibana_url).ok:
+            break
+    except Exception:
+        pass
+    print('Unable to connect to Elasticsearch...retrying')
+    sleep(5)
+else:
+    print('Cannot connect to Kibana after ' + str(total_num_tries) + ' tries, exiting script.')
+    exit(1)
 
-# Check to see if index patterns exist in .kibana
-query = SearchQuery()
-query.add_must(TermMatch('_type', 'index-pattern'))
-results = query.execute(client, indices=['.kibana'])
-if len(results['hits']) == 0:
-    # Create index patterns and assign default index mapping
-    index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
-    listing = os.listdir(index_mappings_path)
-    for infile in listing:
-        json_file_path = os.path.join(index_mappings_path, infile)
-        with open(json_file_path) as json_data:
-            mapping_data = json.load(json_data)
-            print "Creating {0} index mapping".format(mapping_data['title'])
-            client.save_object(body=mapping_data, index='.kibana', doc_type='index-pattern', doc_id=mapping_data['title'])
+# Check if index-patterns already exist
+if kibana_index_name in client.get_indices():
+    existing_patterns_url = kibana_url + "/api/saved_objects/_find?type=index-pattern&search_fields=title&search=*"
+    resp = requests.get(url=existing_patterns_url)
+    existing_patterns = json.loads(resp.text)
+    if len(existing_patterns['saved_objects']) > 0:
+        print("Index patterns already exist, exiting script early")
+        sys.exit(0)
 
-    # Assign default index to 'events'
-    client.refresh('.kibana')
-    default_mapping_data = {
-        "defaultIndex": 'events'
+# Create index-patterns
+kibana_headers = {'content-type': 'application/json', 'kbn-xsrf': 'true'}
+index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
+listing = os.listdir(index_mappings_path)
+for infile in listing:
+    json_file_path = os.path.join(index_mappings_path, infile)
+    with open(json_file_path) as json_data:
+        mapping_data = json.load(json_data)
+        index_name = mapping_data['attributes']['title']
+        print("Creating {0} index mapping".format(index_name))
+        mapping_url = kibana_url + "/api/saved_objects/index-pattern/" + index_name
+        resp = requests.post(url=mapping_url, data=json.dumps(mapping_data), headers=kibana_headers)
+        if not resp.ok:
+            print("Unable to create index mapping: " + resp.text)
+
+# Remove existing default index mapping if it exists
+resp = requests.delete(url=kibana_url + "/api/saved_objects/config/" + kibana_version, headers=kibana_headers)
+if not resp.ok:
+    print("Unable to delete existing default index mapping: {} {}".format(resp.status_code, resp.content))
+
+# Set default index mapping to events-*
+data = {
+    "attributes": {
+        "buildNum": "19548",
+        "defaultIndex": "events-*"
     }
-    print "Assigning events as default index mapping"
-    client.save_object(default_mapping_data, '.kibana', 'config', kibana_version)
+}
+print("Creating default index pattern for events-*")
+resp = requests.post(url=kibana_url + "/api/saved_objects/config/" + kibana_version, data=json.dumps(data), headers=kibana_headers)
+if not resp.ok:
+    print("Failed to set default index: {} {}".format(resp.status_code, resp.content))
 
+# Check if dashboards already exist
+if kibana_index_name in client.get_indices():
+    existing_patterns_url = kibana_url + "/api/saved_objects/_find?type=dashboard&search_fields=title&search=*"
+    resp = requests.get(url=existing_patterns_url)
+    existing_patterns = json.loads(resp.text)
+    if len(existing_patterns['saved_objects']) > 0:
+        print("Dashboards already exist, exiting script early")
+        sys.exit(0)
 
-# Check to see if dashboards already exist in .kibana
-query = SearchQuery()
-query.add_must(TermMatch('_type', 'dashboard'))
-results = query.execute(client, indices=['.kibana'])
-if len(results['hits']) == 0:
-    dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dashboards')
-    listing = os.listdir(dashboards_path)
-    for infile in listing:
-        json_file_path = os.path.join(dashboards_path, infile)
-        with open(json_file_path) as json_data:
-            mapping_data = json.load(json_data)
-            print("Creating {0} {1}".format(
-                mapping_data['_source']['title'],
-                mapping_data['_type']
-            ))
-            client.save_object(body=mapping_data['_source'], index='.kibana', doc_type=mapping_data['_type'], doc_id=mapping_data['_id'])
+# Create visualizations/dashboards
+dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources')
+listing = os.listdir(dashboards_path)
+for infile in listing:
+    json_file_path = os.path.join(dashboards_path, infile)
+    with open(json_file_path) as json_data:
+        mapping_data = json.load(json_data)
+        mapping_type = mapping_data['type']
+        print("Creating {0} {1}".format(
+            mapping_data[mapping_type]['title'],
+            mapping_type
+        ))
+        post_data = {
+            "attributes": mapping_data[mapping_type]
+        }
+        # We use the filename as the id of the resource
+        resource_name = infile.replace('.json', '')
+        kibana_type_url = kibana_url + "/api/saved_objects/" + mapping_type + "/" + resource_name
+        requests.post(url=kibana_type_url, data=json.dumps(post_data), headers=kibana_headers)

@@ -13,19 +13,25 @@ RUN \
                   libstdc++ \
                   libffi-devel \
                   zlib-devel \
+                  libcurl-devel \
+                  openssl \
+                  openssl-devel \
                   git \
                   make && \
   useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
   mkdir /opt/mozdef/envs && \
   cd /opt/mozdef && \
-  yum install -y mysql-devel \
-                    python \
-                    python-devel \
-                    python-pip && \
+  yum install -y python36 \
+                    python36-devel \
+                    python36-pip && \
   yum clean all && \
-  pip install virtualenv && \
+  pip3 install virtualenv && \
   mkdir /opt/mozdef/envs/mozdef && \
   mkdir /opt/mozdef/envs/mozdef/cron
+
+# Force pycurl to understand we prefer nss backend
+# Pycurl with ssl support is required by kombu in order to use SQS
+ENV PYCURL_SSL_LIBRARY=nss
 
 # Create python virtual environment and install dependencies
 COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
@@ -40,7 +46,7 @@ RUN chown -R mozdef:mozdef /opt/mozdef/
 
 USER mozdef
 RUN \
-  virtualenv /opt/mozdef/envs/python && \
+  virtualenv -p /usr/bin/python3.6 /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
   pip install -r /opt/mozdef/envs/mozdef/requirements.txt && \
   cd /opt/mozdef/envs/mozdef/mozdef_util && \
@@ -56,3 +62,7 @@ VOLUME /opt/mozdef/envs/mozdef/data
 ENV PATH=/opt/mozdef/envs/python/bin:$PATH
 
 USER root
+
+# Remove once https://github.com/jeffbryner/configlib/pull/9 is mergeg
+# and a new version of configlib is in place
+RUN sed -i 's/from configlib import getConfig/from .configlib import getConfig/g' /opt/mozdef/envs/python/lib/python3.6/site-packages/configlib/__init__.py

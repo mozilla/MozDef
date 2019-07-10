@@ -31,3 +31,5 @@ accounts-password@1.5.1
 twbs:bootstrap
 momentjs:moment
 dangrossman:bootstrap-daterangepicker
+kurounin:pagination
+kurounin:pagination-blaze

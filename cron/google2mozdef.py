@@ -6,21 +6,16 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import sys
-import logging
 import requests
 import json
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from logging.handlers import SysLogHandler
 from httplib2 import Http
 from oauth2client.client import SignedJwtAssertionCredentials
 from apiclient.discovery import build
 
 from mozdef_util.utilities.toUTC import toUTC
-
-logger = logging.getLogger(sys.argv[0])
-logger.level=logging.INFO
-formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+from mozdef_util.utilities.logger import logger
 
 
 class State:
@@ -57,7 +52,7 @@ def flattenDict(inDict, pre=None, values=True):
     '''
     pre = pre[:] if pre else []
     if isinstance(inDict, dict):
-        for key, value in inDict.iteritems():
+        for key, value in inDict.items():
             if isinstance(value, dict):
                 for d in flattenDict(value, pre + [key], values):
                     yield d
@@ -70,8 +65,6 @@ def flattenDict(inDict, pre=None, values=True):
                     if values:
                         if isinstance(value, str):
                             yield '.'.join(pre) + '.' + key + '=' + str(value)
-                        elif isinstance(value, unicode):
-                            yield '.'.join(pre) + '.' + key + '=' + value.encode('ascii', 'ignore')
                         elif value is None:
                             yield '.'.join(pre) + '.' + key + '=None'
                     else:
@@ -80,8 +73,6 @@ def flattenDict(inDict, pre=None, values=True):
                     if values:
                         if isinstance(value, str):
                             yield key + '=' + str(value)
-                        elif isinstance(value, unicode):
-                            yield key + '=' + value.encode('ascii', 'ignore')
                         elif value is None:
                             yield key + '=None'
                     else:
@@ -91,13 +82,6 @@ def flattenDict(inDict, pre=None, values=True):
 
 
 def main():
-    if options.output=='syslog':
-        logger.addHandler(SysLogHandler(address=(options.sysloghostname,options.syslogport)))
-    else:
-        sh=logging.StreamHandler(sys.stderr)
-        sh.setFormatter(formatter)
-        logger.addHandler(sh)
-
     logger.debug('started')
     state = State(options.state_file_name)
     try:
@@ -122,7 +106,7 @@ def main():
         # or you will get access denied even with correct delegations/scope
 
         credentials = SignedJwtAssertionCredentials(client_email,
-                                                    private_key,
+                                                    private_key.encode(),
                                                     scope=scope,
                                                     sub=options.impersonate)
         http = Http()
@@ -150,8 +134,10 @@ def main():
                     # change key/values like:
                     # actor.email=someone@mozilla.com
                     # to actor_email=value
-
-                    key,value =keyValue.split('=')
+                    try:
+                        key,value =keyValue.split('=')
+                    except ValueError as e:
+                        continue
                     key=key.replace('.','_').lower()
                     details[key]=value
 

@@ -12,9 +12,14 @@ import logging
 ALERTS = {
     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
     'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
+    'get_watchlist.AlertWatchList': {'schedule': crontab(minute='*/1')},
 }
 
 ALERT_PLUGINS = [
+    # 'relative pythonfile name (exclude the .py) - EX: sso_dashboard',
+]
+
+ALERT_ACTIONS = [
     # 'relative pythonfile name (exclude the .py) - EX: sso_dashboard',
 ]
 

@@ -5,10 +5,10 @@
 
 import json
 
-from positive_alert_test_case import PositiveAlertTestCase
-from negative_alert_test_case import NegativeAlertTestCase
+from .positive_alert_test_case import PositiveAlertTestCase
+from .negative_alert_test_case import NegativeAlertTestCase
 
-from alert_test_suite import AlertTestSuite
+from .alert_test_suite import AlertTestSuite
 
 
 class TestAlertFeedbackEvents(AlertTestSuite):
@@ -30,30 +30,29 @@ class TestAlertFeedbackEvents(AlertTestSuite):
         "tags": ["geomodel"]
     }
     default_event = {
-        "_type": "event",
         "_source": {
-            'category': u'user_feedback',
+            'category': 'user_feedback',
             'details': {
-                u'action': u'escalate',
-                u'alert_information': {
-                    u'alert_code': u'123456',
-                    u'alert_id': u'7891011',
-                    u'alert_str_json': json.dumps(inner_alert_dict),
-                    u'date': u'2012-06-15',
-                    u'description': u'This alert is created based on geo ip information about the last login of a user.',
-                    u'duplicate': False,
-                    u'last_update': 1524686938,
-                    u'risk': u'high',
-                    u'state': u'escalate',
-                    u'summary': u'Did you recently login from Montana, Tonga (109.117.1.33)?',
-                    u'url': u'https://www.mozilla.org',
-                    u'url_title': u'Get Help',
-                    u'user_id': u'ad|Mozilla|ttesterson'
+                'action': 'escalate',
+                'alert_information': {
+                    'alert_code': '123456',
+                    'alert_id': '7891011',
+                    'alert_str_json': json.dumps(inner_alert_dict),
+                    'date': '2012-06-15',
+                    'description': 'This alert is created based on geo ip information about the last login of a user.',
+                    'duplicate': False,
+                    'last_update': 1524686938,
+                    'risk': 'high',
+                    'state': 'escalate',
+                    'summary': 'Did you recently login from Montana, Tonga (109.117.1.33)?',
+                    'url': 'https://www.mozilla.org',
+                    'url_title': 'Get Help',
+                    'user_id': 'ad|Mozilla|ttesterson'
                 }
             },
             'mozdefhostname': 'host1',
             'severity': 'INFO',
-            'summary': u'Did you recently login from Montana, Tonga (109.117.1.33)?',
+            'summary': 'Did you recently login from Montana, Tonga (109.117.1.33)?',
             'tags': ['SSODashboardAlertFeedback']
         }
     }
@@ -87,9 +86,9 @@ class TestAlertFeedbackEvents(AlertTestSuite):
     )
 
     unicode_event = AlertTestSuite.create_event(default_event)
-    unicode_event['_source']['details']['alert_information']['user_id'] = u'\xfctest'
+    unicode_event['_source']['details']['alert_information']['user_id'] = '\xfctest'
     unicode_alert = AlertTestSuite.create_alert(default_alert)
-    unicode_alert['summary'] = u'\xfctest escalated alert within single-sign on (SSO) dashboard. Event Date: 2012-06-15 Summary: "Did you recently login from Montana, Tonga (109.117.1.33)?"'
+    unicode_alert['summary'] = '\xfctest escalated alert within single-sign on (SSO) dashboard. Event Date: 2012-06-15 Summary: "Did you recently login from Montana, Tonga (109.117.1.33)?"'
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test case with good unicode event",

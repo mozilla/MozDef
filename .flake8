@@ -1,4 +1,7 @@
 [flake8]
+# Ignore any leftover build artifacts of mozdef_util package
+exclude = mozdef_util/build
+
 per-file-ignores =
   # Ignore 'library imported but unused' for only the alert config files
   # since we stub timedelta and crontab

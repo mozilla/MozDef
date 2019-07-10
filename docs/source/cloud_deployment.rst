@@ -7,7 +7,7 @@ Cloud based MozDef is an opinionated deployment of the MozDef services created i
 ingest CloudTrail, GuardDuty, and provide security services.
 
 .. image:: images/cloudformation-launch-stack.png
-   :target: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/mozdef-parent.yml
+   :target: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/v1.38.5/mozdef-parent.yml
 
 
 Feedback
@@ -31,10 +31,10 @@ MozDef requires the following:
   at the IP address of the Application Load Balancer
 - An OIDC Provider with ClientID, ClientSecret, and Discovery URL
 
-  - Mozilla Uses Auth0 but you can use any OIDC provider you like: Shibboleth,
-    KeyCloak, AWS Cognito, Okta, Ping (etc)
+  - Mozilla uses Auth0 but you can use any OIDC provider you like: Shibboleth,
+    KeyCloak, AWS Cognito, Okta, Ping (etc.)
   - You will need to configure the redirect URI of ``/redirect_uri`` as allowed in
-    your OIDC provider
+    your OIDC provider configuration
 - An ACM Certificate in the deployment region for your DNS name
 - A VPC with three public subnets available.
 
@@ -49,8 +49,7 @@ MozDef requires the following:
 Supported Regions
 ------------------
 
-MozDef for AWS is currently only supported in us-west-2 but will onboard
-additional regions over time.
+MozDef for AWS is currently only supported in us-west-2 but additional regions will be added over time.
 
 
 Architecture
@@ -105,7 +104,10 @@ To view logs on the ec2 instance
 4. Tail logs from the container you'd like to examine with
    ::
 
+     # show both the access logs and the error logs
      sudo docker logs --follow NAME_OF_CONTAINER
+     # show only the error logs
+     docker logs --follow NAME_OF_CONTAINER >/dev/null
 
    where ``NAME_OF_CONTAINER`` is the container name or ID that you found in the
    step above

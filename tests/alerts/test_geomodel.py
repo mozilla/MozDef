@@ -3,15 +3,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-from positive_alert_test_case import PositiveAlertTestCase
-from negative_alert_test_case import NegativeAlertTestCase
+from .positive_alert_test_case import PositiveAlertTestCase
+from .negative_alert_test_case import NegativeAlertTestCase
 
-from alert_test_suite import AlertTestSuite
+from .alert_test_suite import AlertTestSuite
 
 
 class TestAlertGeomodel(AlertTestSuite):
     default_event = {
-        "_type": "event",
         "_source": {
             "category": "geomodelnotice",
             "summary": "ttesterson@mozilla.com NEWCOUNTRY Diamond Bar, United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
@@ -88,8 +87,8 @@ class TestAlertGeomodel(AlertTestSuite):
 
     movement_event = {
         "_source": {
-            u'category': u'geomodelnotice',
-            u'details': {
+            'category': 'geomodelnotice',
+            'details': {
                 'category': 'MOVEMENT',
             },
             'severity': 'NOTICE',
@@ -112,33 +111,33 @@ class TestAlertGeomodel(AlertTestSuite):
     )
 
     unicode_event = AlertTestSuite.create_event(default_event)
-    unicode_event['_source']['summary'] = u"\xfcttesterson@mozilla.com NEWCOUNTRY \u0107Bar, \u0107United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before"
+    unicode_event['_source']['summary'] = "\xfcttesterson@mozilla.com NEWCOUNTRY \u0107Bar, \u0107United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before"
     unicode_event['_source']['details']['prev_locality_details'] = {
-        "city": u"\u0107Toronto",
-        "country": u"\u0107Canada"
+        "city": "\u0107Toronto",
+        "country": "\u0107Canada"
     }
     unicode_event['_source']['details']['locality_details'] = {
-        "city": u"\u0107Bar",
-        "country": u"\u0107United States"
+        "city": "\u0107Bar",
+        "country": "\u0107United States"
     }
-    unicode_event['_source']['details']['principal'] = u"\xfcttesterson@mozilla.com"
+    unicode_event['_source']['details']['principal'] = "\xfcttesterson@mozilla.com"
 
     unicode_alert = {
         "category": "geomodel",
         "tags": ['geomodel'],
         "severity": "NOTICE",
-        "summary": u"\xfcttesterson@mozilla.com NEWCOUNTRY \u0107Bar, \u0107United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
+        "summary": "\xfcttesterson@mozilla.com NEWCOUNTRY \u0107Bar, \u0107United States access from 1.2.3.4 (duo) [deviation:12.07010770457331] last activity was from Ottawa, Canada (3763 km away) approx 23.43 hours before",
         "details": {
             "category": "NEWCOUNTRY",
             "previous_locality_details": {
-                "city": u"\u0107Toronto",
-                "country": u"\u0107Canada"
+                "city": "\u0107Toronto",
+                "country": "\u0107Canada"
             },
             "locality_details": {
-                "city": u"\u0107Bar",
-                "country": u"\u0107United States"
+                "city": "\u0107Bar",
+                "country": "\u0107United States"
             },
-            "principal": u"\xfcttesterson@mozilla.com",
+            "principal": "\xfcttesterson@mozilla.com",
             "source_ip": "1.2.3.4"
         },
         "url": "https://www.mozilla.org",

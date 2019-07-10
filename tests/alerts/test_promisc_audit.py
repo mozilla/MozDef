@@ -1,7 +1,7 @@
-from positive_alert_test_case import PositiveAlertTestCase
-from negative_alert_test_case import NegativeAlertTestCase
+from .positive_alert_test_case import PositiveAlertTestCase
+from .negative_alert_test_case import NegativeAlertTestCase
 
-from alert_test_suite import AlertTestSuite
+from .alert_test_suite import AlertTestSuite
 
 
 class TestPromiscAudit(AlertTestSuite):
@@ -10,7 +10,6 @@ class TestPromiscAudit(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        "_type": "auditd",
         "_source": {
             "category": "promiscuous",
             "summary": "Promisc: Interface eth0 set promiscuous on",

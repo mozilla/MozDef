@@ -1,0 +1,34 @@
+#!/bin/bash
+
+BRANCH=$1
+S3_PROD_BUCKET_URI=$2
+S3_PROD_STACK_URI=$3
+AMI_MAP_TEMP_FILE=$4
+TMPDIR=$(mktemp -d)
+
+VERSIONED_BUCKET_URI="${S3_PROD_BUCKET_URI}/${BRANCH}"
+VERSIONED_STACK_URI="${S3_PROD_STACK_URI}${BRANCH}/"
+
+echo "  VariableMap:" >> "${AMI_MAP_TEMP_FILE}"
+echo "    Variables:" >> "${AMI_MAP_TEMP_FILE}"
+echo "      S3TemplateLocation: ${VERSIONED_STACK_URI}" >> "${AMI_MAP_TEMP_FILE}"
+
+echo "Injecting the region AMI mapping into the mozdef-parent.yml CloudFormation template"
+sed '/# INSERT MAPPING HERE.*/{
+    s/# INSERT MAPPING HERE.*//g
+    r '"${AMI_MAP_TEMP_FILE}"'
+}' cloudformation/mozdef-parent.yml > ${TMPDIR}/mozdef-parent.yml
+
+echo "Injecting the region AMI mapping into the mozdef-parent.yml CloudFormation template"
+sed '/# INSERT MAPPING HERE.*/{
+    s/# INSERT MAPPING HERE.*//g
+    r '"${AMI_MAP_TEMP_FILE}"'
+}' cloudformation/mozdef-parent-reinforce.yml > ${TMPDIR}/mozdef-parent-reinforce.yml
+
+echo "Uploading CloudFormation templates to S3 directory ${VERSIONED_BUCKET_URI}/"
+# Sync all .yml files except mozdef-parent.yml
+aws s3 sync cloudformation/ ${VERSIONED_BUCKET_URI} --exclude="*" --include="*.yml" --exclude="mozdef-parent.yml"
+# cp modified mozdef-parent.yml from TMPDIR to S3
+aws s3 cp ${TMPDIR}/mozdef-parent.yml ${VERSIONED_BUCKET_URI}/
+aws s3 cp ${TMPDIR}/mozdef-parent-reinforce.yml ${VERSIONED_BUCKET_URI}/
+rm -rf "${TMPDIR}"

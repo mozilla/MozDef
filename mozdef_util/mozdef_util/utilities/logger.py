@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 from logging.handlers import SysLogHandler
 
-from toUTC import toUTC
+from .toUTC import toUTC
 
 
 def loggerTimeStamp(self, record, datefmt=None):

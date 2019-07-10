@@ -1,0 +1,420 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy MozDef into AWS
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+    - Label:
+        default: EC2 Instance
+      Parameters:
+      - InstanceType
+      - KeyName
+      - SSHIngressCIDR
+    - Label:
+        default: Certificate
+      Parameters:
+        - ACMCertArn
+    - Label:
+        default: Authentication
+      Parameters:
+        - OIDCAuthorizationEndpoint
+        - OIDCClientId
+        - OIDCClientSecret
+        - OIDCIssuer
+        - OIDCTokenEndpoint
+        - OIDCUserInfoEndpoint
+        - ALBBasicAuthSecret
+    - Label:
+        default: Experimental Features
+      Parameters:
+        - LeakCredentialSNSArn
+    ParameterLabels:
+      InstanceType:
+        default: EC2 Instance Type
+      KeyName:
+        default: EC2 SSH Key Name
+      SSHIngressCIDR:
+        default: Inbound SSH allowed IP address CIDR
+      DomainName:
+        default: FQDN to host MozDef at
+      ACMCertArn:
+        default: ACM Certificate ARN
+      OIDCAuthorizationEndpoint:
+        default: OIDC authorization endpoint.
+      OIDCClientId:
+        default: OIDC Client ID.
+      OIDCClientSecret:
+        default: OIDC Client Secret.
+      OIDCIssuer:
+        default: OIDC issuer.
+      OIDCTokenEndpoint:
+        default: OIDC oauth token endpoint.
+      OIDCUserInfoEndpoint:
+        default: OIDC user info endpoint.
+      ALBBasicAuthSecret:
+        default: Default basic authentication password, if enabled.
+      LeakCredentialSNSArn: Arn of the SNS topic to post admin creds to.
+Parameters:
+  InstanceType:
+    Type: String
+    Description: EC2 instance type, e.g. m1.small, m1.large, etc.
+    Default: m5.large
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the web server
+  SSHIngressCIDR:
+    Type: String
+    AllowedPattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$'
+    ConstraintDescription: A valid CIDR (e.g. 203.0.113.0/24)
+    Description: The CIDR of IP addresses from which to allow inbound SSH connections
+  DomainName:
+    Type: String
+    Description: The fully qualified DNS name you will host MozDef at if you want to use a custom domain. Optional.
+    Default: ''
+  ACMCertArn:
+    Type: String
+    Default: ''
+    Description: "The ARN of your pre-issued ACM cert. Required if OIDC is being used. (Example: arn:aws:acm:us-west-2:123456789012:certificate/abcdef01-2345-6789-abcd-ef0123456789)"
+  OIDCAuthorizationEndpoint:
+    Type: String
+    Default: ''
+    ConstraintDescription: A valid URL
+    Description: "The url of the authorization endpoint found for your oidc provider generall found on (Example: https://auth.example.com/.well-known/openid-configuration)"
+  OIDCClientId:
+    Type: String
+    Default: ''
+    Description: The client ID that your OIDC provider issues you for your Mozdef instance.
+  OIDCClientSecret:
+    Type: String
+    Default: ''
+    Description: The secret that your OIDC provider issues you for your Mozdef instance.
+    NoEcho: true
+  OIDCIssuer:
+    Type: String
+    Default: ''
+    Description: Generally can be found at the .well-known endpoint for your provider.
+  OIDCTokenEndpoint:
+    Type: String
+    Default: ''
+    Description: Generally can be found at the .well-known endpoint for your provider.
+  OIDCUserInfoEndpoint:
+    Type: String
+    Default: ''
+    Description: Generally can be found at the .well-known endpoint for your provider.
+  LeakCredentialSNSArn:
+    Type: String
+    Description: The arn of the sns topic to post a credential back to from the account.  Do not use unless you are deploying this for reinforce workshop.  This will attack the MozDef account.
+  ALBBasicAuthSecret:
+    Type: String
+    Default: ''
+    Description: The secret that you use to authenticate to the MozDef instance using HTTP Basic Authentication.
+    NoEcho: true
+Rules:
+  ALBBasicAuthOnly:
+    RuleCondition: !Not [ !Equals [ !Ref 'ALBBasicAuthSecret', '' ] ]
+    Assertions:
+    - Assert:
+        !EachMemberEquals
+        - - !Ref 'OIDCAuthorizationEndpoint'
+          - !Ref 'OIDCClientId'
+          - !Ref 'OIDCClientSecret'
+          - !Ref 'OIDCIssuer'
+          - !Ref 'OIDCTokenEndpoint'
+          - !Ref 'OIDCUserInfoEndpoint'
+        - ''
+      AssertDescription: >
+        If you set an ALBBasicAuthSecret indicating you wish to use HTTP Basic
+        Auth for authentication, you must leave all OIDC attributes blank
+  OIDCHasAllRequiredParameters:
+    RuleCondition:
+      !Or
+      - !Not [ !Equals [ !Ref 'OIDCAuthorizationEndpoint', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCClientId', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCClientSecret', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCIssuer', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCTokenEndpoint', '' ] ]
+      - !Not [ !Equals [ !Ref 'OIDCUserInfoEndpoint', '' ] ]
+    Assertions:
+    - Assert:
+        !And
+        - !Not [ !Equals [ !Ref 'OIDCAuthorizationEndpoint', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCClientId', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCClientSecret', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCIssuer', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCTokenEndpoint', '' ] ]
+        - !Not [ !Equals [ !Ref 'OIDCUserInfoEndpoint', '' ] ]
+        - !Not [ !Equals [ !Ref 'ACMCertArn', '' ] ]
+      AssertDescription: >
+        If you set any OIDC parameter indicating you wish to use OIDC for
+        authentication, you must set all six OIDC parameters, [
+        OIDCAuthorizationEndpoint, OIDCClientId, OIDCClientSecret, OIDCIssuer,
+        OIDCTokenEndpoint, OIDCUserInfoEndpoint] as well as an ACM Certificate
+        in the ACMCertArn parameter
+  SomeAuthHasBeenConfigured:
+    Assertions:
+    - Assert:
+        !Or
+        - !Not [ !Equals [ !Ref 'OIDCClientId', '' ] ]
+        - !Not [ !Equals [ !Ref 'ALBBasicAuthSecret', '' ] ]
+      AssertDescription: >
+        You must choose either to use HTTP Basic Auth or OIDC for authentication.
+        To choose HTTP Basic Auth you must set an ALBBasicAuthSecret. To choose
+        OIDC you must set all six OIDC parameters, [OIDCAuthorizationEndpoint,
+        OIDCClientId, OIDCClientSecret, OIDCIssuer, OIDCTokenEndpoint,
+        OIDCUserInfoEndpoint] as well as an ACM Certificate in the ACMCertArn
+        parameter.
+# A RegionMap of AMI IDs is required by AWS Marketplace  https://docs.aws.amazon.com/marketplace/latest/userguide/cloudformation.html#aws-cloudformation-template-preparation
+# INSERT MAPPING HERE : This template does not work in this state. The mapping is replaced with a working AWS region to AMI ID mapping as well as a variable map with the S3TemplateLocationPrefix by cloudy_mozdef/ci/publish_versioned_templates. The resulting functioning CloudFormation template is uploaded to S3 for the version being built.
+Conditions:
+  LeakACredential: !Not [!Equals [!Ref LeakCredentialSNSArn, ""]]
+Resources:
+  LeakedCredentials:
+    Condition: LeakACredential
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        SNSReceiverArn: !Ref LeakCredentialSNSArn
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-credential-leak.yml ] ]
+  MozDefVPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-vpc.yml ] ]
+  MozDefSecurityGroups:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        SSHIngressCIDR: !Ref SSHIngressCIDR
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-security-group.yml ] ]
+  MozDefIAMRoleAndInstanceProfile:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        CloudTrailS3BucketName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailS3BucketName
+        CloudTrailSQSQueueArn: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueArn
+        MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
+        MozDefAlertSqsQueueArn: !GetAtt MozDefSQS.Outputs.AlertTaskSQSQueueArn
+        # CloudTrailS3BucketIAMRoleArn we leave empty as we will consume CloudTrail logs from our own account
+        ESServiceLinkedRoleExists: !GetAtt ESServiceLinkedRoleExists.RoleExists
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], base-iam.yml ] ]
+  MozDefInstance:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyName
+        IamInstanceProfile: !GetAtt MozDefIAMRoleAndInstanceProfile.Outputs.InstanceProfileArn
+        AutoScaleGroupSubnetIds: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
+        AMIImageId: !FindInMap [ RegionMap, !Ref 'AWS::Region', HVM64 ]
+        EFSID: !GetAtt MozDefEFS.Outputs.EFSID
+        MozDefSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+        MozDefLoadBalancerSecurityGroupId: !GetAtt MozDefSecurityGroups.Outputs.MozDefLoadBalancerSecurityGroupId
+        ACMCertArn: !Ref ACMCertArn
+        ESURL: !GetAtt MozDefES.Outputs.ElasticsearchURL
+        KibanaURL: !GetAtt MozDefES.Outputs.ElasticsearchKibanaURL
+        KibanaDomainOnlyURL: !GetAtt MozDefES.Outputs.ElasticsearchDomainOnlyURL
+        OIDCClientId: !Ref OIDCClientId
+        OIDCClientSecret: !Ref OIDCClientSecret
+        OIDCAuthorizationEndpoint: !Ref OIDCAuthorizationEndpoint
+        OIDCIssuer: !Ref OIDCIssuer
+        OIDCTokenEndpoint: !Ref OIDCTokenEndpoint
+        OIDCUserInfoEndpoint: !Ref OIDCUserInfoEndpoint
+        CloudTrailSQSNotificationQueueName: !GetAtt MozDefCloudTrail.Outputs.CloudTrailSQSQueueName
+        MozDefSQSQueueName: !GetAtt MozDefSQS.Outputs.SQSQueueName
+        DomainName: !Ref DomainName
+        AlertQueueUrl: !GetAtt MozDefSQS.Outputs.AlertTaskSQSQueueUrl
+        ALBBasicAuthSecret: !Ref ALBBasicAuthSecret
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-instance.yml ] ]
+  MozDefES:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: MozDefIAMRoleAndInstanceProfile
+    Properties:
+      Parameters:
+        SubnetIds: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
+        BlockStoreSizeGB: '100'
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        MozDefInstanceSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+        ESInstanceCount: '1'
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-es.yml ] ]
+  MozDefEFS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        SubnetList: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
+        NumberOfSubnets: !GetAtt NumberOfSubnets.Length
+        MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-efs.yml ] ]
+  MozDefSQS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-sqs.yml ] ]
+  MozDefCloudTrail:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-cloudtrail.yml ] ]
+  MozDefVPCFlowLogs:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        MozDefSQSQueueArn: !GetAtt MozDefSQS.Outputs.SQSQueueArn
+        MozDefSQSQueueUrl: !GetAtt MozDefSQS.Outputs.SQSQueueUrl
+      Tags:
+      - Key: application
+        Value: mozdef
+      - Key: stack
+        Value: !Ref AWS::StackName
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ], mozdef-vpc-flow-logs.yml ] ]
+  CloudFormationLambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        -
+          PolicyName: AllowLambdaLogging
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - logs:*
+                  - iam:ListRoles
+                Resource: '*'
+  GetArrayLengthLambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: CloudFormationLambdaIAMRole
+    # This DependsOn shouldn't be needed because the "Role" value is set to
+    # "!GetAtt CloudFormationLambdaIAMRole.Arn" but without DependsOn the error
+    # "Template error: IAM role mozdef-aws-nested-CloudFormationLambdaIAMRole-108UCUPESC6WG doesn't exist"
+    # occurs on stack creation for this Lambda Function resource. The DependsOn
+    # prevents the error.
+    Properties:
+      Description: Function used within CloudFormation to get the length of an array
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import secrets, string
+          def handler(event, context):
+            length = len(event['ResourceProperties']['Array'])
+            physical_id = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for i in range(13))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, {'Length': length}, "GetArrayLength-%s" % physical_id)
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      Timeout: 20
+  NumberOfSubnets:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      Array:
+        - !GetAtt MozDefVPC.Outputs.Subnet1
+        - !GetAtt MozDefVPC.Outputs.Subnet2
+        - !GetAtt MozDefVPC.Outputs.Subnet3
+      ServiceToken: !GetAtt GetArrayLengthLambdaFunction.Arn
+  DoesRoleExistLambdaFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: CloudFormationLambdaIAMRole
+    # This DependsOn shouldn't be needed because the "Role" value is set to
+    # "!GetAtt CloudFormationLambdaIAMRole.Arn" but without DependsOn the error
+    # "Template error: IAM role mozdef-aws-nested-CloudFormationLambdaIAMRole-108UCUPESC6WG doesn't exist"
+    # occurs on stack creation for this Lambda Function resource. The DependsOn
+    # prevents the error.
+    Properties:
+      Description: Function used within CloudFormation to check if an IAM role exists
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import boto3, secrets, string
+          def handler(event, context):
+              paginator = boto3.client('iam').get_paginator('list_roles')
+              args = {'PathPrefix': event['ResourceProperties']['PathPrefix']} if 'PathPrefix' in event['ResourceProperties'] else {}
+              iterator = paginator.paginate(**args).search(
+                  "Roles[?RoleName == '%s'][]" % event['ResourceProperties']['RoleName'])
+              response = {'RoleExists': len([x for x in iterator]) > 0}
+              physical_id = ''.join(
+                  secrets.choice(string.ascii_uppercase + string.digits) for i in
+                  range(13))
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response,
+                               "DoesRoleExist-%s" % physical_id)
+      Handler: index.handler
+      Runtime: python3.6
+      Role: !GetAtt CloudFormationLambdaIAMRole.Arn
+      Tags:
+        - Key: application
+          Value: mozdef
+        - Key: stack
+          Value: !Ref AWS::StackName
+      Timeout: 20
+  ESServiceLinkedRoleExists:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      RoleName: AWSServiceRoleForAmazonElasticsearchService
+      PathPrefix: '/aws-service-role/es.amazonaws.com/'
+      ServiceToken: !GetAtt DoesRoleExistLambdaFunction.Arn
+  MozDefAlertWriterEnv:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VpcId: !GetAtt MozDefVPC.Outputs.VpcId
+        PublicSubnetIds: !Join [ ',', [!GetAtt MozDefVPC.Outputs.Subnet1, !GetAtt MozDefVPC.Outputs.Subnet2, !GetAtt MozDefVPC.Outputs.Subnet3 ]]
+        MozDefSecurityGroup: !GetAtt MozDefSecurityGroups.Outputs.MozDefSecurityGroupId
+        ESUrl: !GetAtt MozDefES.Outputs.ElasticsearchURL
+      Tags:
+        - Key: application
+          Value: mozdef
+      TemplateURL: !Join [ '', [ !FindInMap [ VariableMap, Variables, S3TemplateLocation ] , mozdef-alert-developer.yml ] ]
+Outputs:
+  LoadBalancerDNSName:
+    Description: The DNS name of the ALB hosting MozDef.  If using OIDC or SSL point your DNS at this.  If using basic auth no DNS is necessary.
+    Value: !GetAtt MozDefInstance.Outputs.LoadBalancerDNSName

@@ -1,3 +1,4 @@
+BASH_ENV=/env
 * * * * * /opt/mozdef/envs/mozdef/cron/healthAndStatus.sh
 * * * * * /opt/mozdef/envs/mozdef/cron/healthToMongo.sh
 * * * * * /opt/mozdef/envs/mozdef/cron/collectAttackers.sh

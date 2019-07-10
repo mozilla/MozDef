@@ -6,39 +6,15 @@ Copyright (c) 2014 Mozilla Corporation
 -->
 
 <template name="veristags">
-<style>
-.veristagform{
-    padding: 10px;
-    font-size: 95%;
-    background: #999;
-    color: #fff;
-}
-
-.veristagform .dropdown {
-    margin: 10px 0;
-}
-.tag{
-    cursor: pointer;
-    text-align: left;
-    word-wrap: break-word;
-}
-li {
-    cursor: pointer;
-    color: #000;
-}
-.label{
-    cursor: pointer;
-}
-
-</style>
-
-<form class="veristagform" role="form">
-    <div>
+    <form class="veristagform" role="form">
+        <div>
             <div class="nothing">
-                <input type="search" class="form-control search-query tagfilter" id="tagfilter" placeholder="tag filter">
+                <input type="search" class="form-control search-query tagfilter" id="tagfilter"
+                    placeholder="tag filter">
             </div>
             <div class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown" id="dLabel" data-target="#"><span class="label label-info">common</span><b class="caret"></b></a>
+                <a class="dropdown-toggle" data-toggle="dropdown" id="dLabel" data-target="#"><span
+                        class="label label-info">common</span><b class="caret"></b></a>
                 <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
                     <li>category</li>
                     <li>actor</li>
@@ -59,12 +35,13 @@ li {
             </div>
 
             <div class="veristags">
-                  {{#each veris}}
-                      <div class="tag" draggable="true" data-toggle="tooltip" title="drag to the Tags area to add this tag">{{tag}}</div>
-                  {{/each}}
+                {{#each veris}}
+                <div class="tag" draggable="true" data-toggle="tooltip" title="drag to the Tags area to add this tag">
+                    {{tag}}</div>
+                {{/each}}
             </div>
 
-    </div>
-</form>
+        </div>
+    </form>
 
 </template>

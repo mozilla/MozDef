@@ -15,7 +15,7 @@ class GeoIP(object):
         try:
             result = self.db.city(ip)
         except Exception as e:
-            return {'error': e.message}
+            return {'error': str(e)}
 
         geo_dict = {}
         geo_dict['city'] = result.city.name

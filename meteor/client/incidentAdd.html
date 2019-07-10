@@ -7,51 +7,47 @@ Copyright (c) 2014 Mozilla Corporation
 
 <!--new incident form -->
 <template name="addincidentform">
-<style>
-    
-    .daterangepicker td{
-        color:black;
-    }
-</style>
-    <form id="addincidentform" class="form-horizontal" style="margin: 0px 30% 20px;">
-        <legend>New Incident</legend>
-            <!-- Summary -->        
-            <div class="form-group">
-              <label class="col-xs-3 control-label" for="summary">Incident Summary:</label>
-              <div class="col-xs-5">
-                <input id="summary" name="summary" placeholder="'Category: 'activity' on 'affected target''" class="form-control summary" required="" type="text">
-              </div>
-            </div>            
-            <!-- date Opened -->
-            <div class="form-group">
-                <label class="col-xs-3 control-label" for="dateOpened">Date Opened:</label>
-                <div class="col-xs-5">
-                    <div class="input-prepend input-group">
-                        <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
-                        <input class="input form-control dateOpened calendarfield" name="dateOpened" id="dateOpened" type="text" placeholder="today" value="{{uiDateFormat now}}">
-                    </div>
-                </div>
-            </div>
-            <!-- Phase -->
-            <div class="form-group">
-              <label class="col-xs-3 control-label" for="phase">Phase:</label>
-              <div class="col-xs-5">
-                <select id="phase" name="phase" class="form-control">
-                  <option>Identification</option>
-                  <option>Containment</option>
-                  <option>Eradication</option>
-                  <option>Recovery</option>
-                  <option>Lessons Learned</option>
-                </select>
-              </div>
-            </div>
-            
-            <!-- Button -->
-            <div class="form-group">
-              <label class="col-xs-3 control-label" for="submit"></label>
-              <div class="col-xs-3">
-                <button id="submit" type="submit" name="submit" class="form-control btn btn-primary submit">Save</button>
-              </div>
-            </div>
-    </form>
+  <form id="addincidentform" class="form-horizontal" style="margin: 0px 30% 20px;">
+    <legend>New Incident</legend>
+    <!-- Summary -->
+    <div class="form-group">
+      <label class="col-xs-3 control-label" for="summary">Incident Summary:</label>
+      <div class="col-xs-5">
+        <input id="summary" name="summary" placeholder="'Category: 'activity' on 'affected target''"
+          class="form-control summary" required="" type="text">
+      </div>
+    </div>
+    <!-- date Opened -->
+    <div class="form-group">
+      <label class="col-xs-3 control-label" for="dateOpened">Date Opened:</label>
+      <div class="col-xs-5">
+        <div class="input-prepend input-group">
+          <span class="add-on input-group-addon"><i class="icon-calendar fa fa-calendar"></i></span>
+          <input class="input form-control dateOpened calendarfield" name="dateOpened" id="dateOpened" type="text"
+            placeholder="today" value="{{uiDateFormat now}}">
+        </div>
+      </div>
+    </div>
+    <!-- Phase -->
+    <div class="form-group">
+      <label class="col-xs-3 control-label" for="phase">Phase:</label>
+      <div class="col-xs-5">
+        <select id="phase" name="phase" class="form-control">
+          <option>Identification</option>
+          <option>Containment</option>
+          <option>Eradication</option>
+          <option>Recovery</option>
+          <option>Lessons Learned</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Button -->
+    <div class="form-group">
+      <label class="col-xs-3 control-label" for="submit"></label>
+      <div class="col-xs-3">
+        <button id="submit" type="submit" name="submit" class="form-control btn btn-primary submit">Save</button>
+      </div>
+    </div>
+  </form>
 </template>

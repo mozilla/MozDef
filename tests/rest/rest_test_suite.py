@@ -8,6 +8,7 @@ from mozdef_util.utilities.dot_dict import DotDict
 
 import mock
 from configlib import OptionParser
+import importlib
 
 
 class RestTestDict(DotDict):
@@ -23,6 +24,10 @@ class RestTestSuite(HTTPTestSuite):
         sample_config.configfile = os.path.join(os.path.dirname(__file__), 'index.conf')
         OptionParser.parse_args = mock.Mock(return_value=(sample_config, {}))
 
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../rest"))
+        import plugins
+        importlib.reload(plugins)
         from rest import index
+
         self.application = index.application
         super(RestTestSuite, self).setup()

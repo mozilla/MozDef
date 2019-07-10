@@ -13,14 +13,12 @@ class TestBroFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'doc_type': 'nsm',
             'index': 'events'
         }
 
     # Should never match and be modified by the plugin
     def test_notbro_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -30,12 +28,10 @@ class TestBroFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_notbro_log2(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -45,12 +41,10 @@ class TestBroFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     # Should never match and be modified by the plugin
     def test_bro_notype_log(self):
         metadata = {
-            'doc_type': 'event',
             'index': 'events'
         }
         event = {
@@ -60,7 +54,6 @@ class TestBroFixup(object):
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
         assert result == event
-        assert metadata['doc_type'] is not 'nsm'
 
     def test_bro_wrongtype_log(self):
         event = {
@@ -79,7 +72,6 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert sorted(result['details'].keys()) == sorted(MESSAGE.keys())
-        assert metadata['doc_type'] is 'nsm'
 
     @mock.patch('broFixup.node')
     def test_mozdefhostname_mock_string(self, mock_path):
@@ -106,7 +98,7 @@ class TestBroFixup(object):
         assert result['mozdefhostname'] == 'failed to fetch mozdefhostname'
 
     def verify_metadata(self, metadata):
-        assert metadata['doc_type'] == 'nsm'
+        assert metadata['index'] == 'events'
 
     def test_defaults(self):
         event = {
@@ -554,16 +546,17 @@ class TestBroFixup(object):
             'customendpoint': 'bro'
         }
         MESSAGE = {
-            "ts":1505701256.181043,
-            "uid":"Cbs59u2x6KXu85dsOi",
-            "id.orig_h":"10.26.40.65",
-            "id.orig_p":68,
-            "id.resp_h":"10.26.40.1",
-            "id.resp_p":67,
-            "mac":"00:25:90:9b:67:b2",
-            "assigned_ip":"10.26.40.65",
-            "lease_time":86400.0,
-            "trans_id":1504605887
+            "ts": 1561756317.104897,
+            "uids": ["C6uJBE1z3CKfrA9FE4", "CdCBtl1fKEIMNvebrb", "CNJJ9g1HgefKR09ied", "CuXKNM1R5MEJ9GsMIi", "CMIYsm2weaHvzBRJIi", "C0vslbmXr3Psyy5Ff", "Ct0BRQ2Y84MWhag1Ik", "C5BNK71HlfhlXf8Pq", "C5ZrPG3DfQNzsiUMi2", "CMJHze3BH9o7yg9yM6", "CMSyg03ZZcdic8pTMc"],
+            "client_addr": "10.251.255.10",
+            "server_addr": "10.251.24.1",
+            "mac": "f0:18:98:55:0e:0e",
+            "host_name": "aliczekkroliczek",
+            "domain": "ala.ma.kota",
+            "assigned_addr": "10.251.30.202",
+            "lease_time": 43200.0,
+            "msg_types": ["DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "DISCOVER", "OFFER", "OFFER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER", "DISCOVER", "DISCOVER", "OFFER", "OFFER", "OFFER"],
+            "duration": 34.037004
         }
         event['MESSAGE'] = json.dumps(MESSAGE)
 
@@ -576,7 +569,33 @@ class TestBroFixup(object):
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
-        assert result['summary'] == '10.26.40.65 assigned to 00:25:90:9b:67:b2'
+        assert result['summary'] == '10.251.30.202 assigned to f0:18:98:55:0e:0e'
+
+    def test_dhcp_log2(self):
+        event = {
+            'category': 'bro',
+            'SOURCE': 'bro_dhcp',
+            'customendpoint': 'bro'
+        }
+        MESSAGE = {
+            "ts": 1561607456.803827,
+            "uids": ["CsXuIb2HTmDaPrPvT7"],
+            "host_name": "nsm2",
+            "msg_types": ["DISCOVER", "DISCOVER"],
+            "duration": 17.778322
+        }
+        event['MESSAGE'] = json.dumps(MESSAGE)
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
+        assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        for key in MESSAGE.keys():
+            if not key.startswith('id.'):
+                assert key in result['details']
+                assert MESSAGE[key] == result['details'][key]
+        assert result['summary'] == '0.0.0.0 assigned to 00:00:00:00:00:00'
 
     def test_ftp_log(self):
         event = {
@@ -812,13 +831,13 @@ class TestBroFixup(object):
         }
 
         message = {
-            u'from': u'"Test from field\xe2\x80\x99s here" <Contact@1234.com>',
-            u'id.orig_h': u'1.2.3.4',
-            u'id.orig_p': 47311,
-            u'id.resp_h': u'5.6.7.8',
-            u'id.resp_p': 25,
-            u'subject': u'Example subject of email\xe2\x80\x99s',
-            u'ts': 1531818582.216429,
+            'from': '"Test from field\xe2\x80\x99s here" <Contact@1234.com>',
+            'id.orig_h': '1.2.3.4',
+            'id.orig_p': 47311,
+            'id.resp_h': '5.6.7.8',
+            'id.resp_p': 25,
+            'subject': 'Example subject of email\xe2\x80\x99s',
+            'ts': 1531818582.216429,
         }
 
         event['MESSAGE'] = json.dumps(message)
@@ -828,8 +847,8 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(message['ts']).isoformat() == result['utctimestamp']
         assert toUTC(message['ts']).isoformat() == result['timestamp']
-        assert result['details']['from'] == u'"Test from field\xe2\x80\x99s here" <Contact@1234.com>'
-        assert result['details']['subject'] == u'Example subject of email\xe2\x80\x99s'
+        assert result['details']['from'] == '"Test from field\xe2\x80\x99s here" <Contact@1234.com>'
+        assert result['details']['subject'] == 'Example subject of email\xe2\x80\x99s'
 
     def test_ssh_log(self):
         event = {

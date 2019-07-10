@@ -12,6 +12,7 @@
 import json
 import kombu
 import sys
+import os
 import socket
 import time
 from configlib import getConfig, OptionParser
@@ -24,10 +25,10 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchB
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
-from mozdef_util.utilities.is_cef import isCEF
 from mozdef_util.utilities.logger import logger, initLogger
 
-from lib.plugins import sendEventToPlugins, registerPlugins
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
+from mq.lib.plugins import sendEventToPlugins, registerPlugins
 
 
 # running under uwsgi?
@@ -99,7 +100,7 @@ class PTRequestor(object):
                 break
         # cache event ids we return to allow for some duplicate filtering checks
         # during next run
-        self._evidcache = self._events.keys()
+        self._evidcache = list(self._events.keys())
         return self._events
 
 
@@ -121,58 +122,58 @@ def keyMapping(aDict):
     returndict['mozdefhostname'] = options.mozdefhostname
     returndict['details'] = {}
     try:
-        for k, v in aDict.iteritems():
+        for k, v in aDict.items():
             k = removeAt(k).lower()
 
             if k in ('message', 'summary'):
-                returndict[u'summary'] = toUnicode(v)
+                returndict['summary'] = toUnicode(v)
 
             if k in ('payload') and 'summary' not in aDict:
                 # special case for heka if it sends payload as well as a summary, keep both but move payload to the details section.
-                returndict[u'summary'] = toUnicode(v)
+                returndict['summary'] = toUnicode(v)
             elif k in ('payload'):
-                returndict[u'details']['payload'] = toUnicode(v)
+                returndict['details']['payload'] = toUnicode(v)
 
             if k in ('eventtime', 'timestamp', 'utctimestamp'):
-                returndict[u'utctimestamp'] = toUTC(v).isoformat()
-                returndict[u'timestamp'] = toUTC(v).isoformat()
+                returndict['utctimestamp'] = toUTC(v).isoformat()
+                returndict['timestamp'] = toUTC(v).isoformat()
 
             if k in ('hostname', 'source_host', 'host'):
-                returndict[u'hostname'] = toUnicode(v)
+                returndict['hostname'] = toUnicode(v)
 
             if k in ('tags'):
                 if len(v) > 0:
-                    returndict[u'tags'] = v
+                    returndict['tags'] = v
 
             # nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
             if k in ('syslogseverity', 'severity', 'severityvalue', 'level'):
-                returndict[u'severity'] = toUnicode(v).upper()
+                returndict['severity'] = toUnicode(v).upper()
 
             if k in ('facility', 'syslogfacility','source'):
-                returndict[u'source'] = toUnicode(v)
+                returndict['source'] = toUnicode(v)
 
             if k in ('pid', 'processid'):
-                returndict[u'processid'] = toUnicode(v)
+                returndict['processid'] = toUnicode(v)
 
             # nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
             if k in ('pname', 'processname', 'sourcename'):
-                returndict[u'processname'] = toUnicode(v)
+                returndict['processname'] = toUnicode(v)
 
             # the file, or source
             if k in ('path', 'logger', 'file'):
-                returndict[u'eventsource'] = toUnicode(v)
+                returndict['eventsource'] = toUnicode(v)
 
             if k in ('type', 'eventtype', 'category'):
-                returndict[u'category'] = toUnicode(v)
+                returndict['category'] = toUnicode(v)
 
             # custom fields as a list/array
             if k in ('fields', 'details'):
                 if type(v) is not dict:
-                    returndict[u'details'][u'message'] = v
+                    returndict['details']['message'] = v
                 else:
                     if len(v) > 0:
-                        for details_key, details_value in v.iteritems():
-                            returndict[u'details'][details_key] = details_value
+                        for details_key, details_value in v.items():
+                            returndict['details'][details_key] = details_value
 
             # custom fields/details as a one off, not in an array
             # i.e. fields.something=value or details.something=value
@@ -186,21 +187,26 @@ def keyMapping(aDict):
                 # we let them dictate the data type with field_datatype
                 # convention
                 if newName.endswith('_int'):
-                    returndict[u'details'][unicode(newName)] = int(v)
+                    returndict['details'][str(newName)] = int(v)
                 elif newName.endswith('_float'):
-                    returndict[u'details'][unicode(newName)] = float(v)
+                    returndict['details'][str(newName)] = float(v)
                 else:
-                    returndict[u'details'][unicode(newName)] = toUnicode(v)
+                    returndict['details'][str(newName)] = toUnicode(v)
 
         # nxlog windows log handling
         if 'Domain' in aDict and 'SourceModuleType' in aDict:
             # nxlog parses all windows event fields very well
             # copy all fields to details
-            returndict[u'details'][k] = v
+            returndict['details'][k] = v
 
         if 'utctimestamp' not in returndict:
             # default in case we don't find a reasonable timestamp
             returndict['utctimestamp'] = toUTC(datetime.now()).isoformat()
+
+        if 'type' not in returndict:
+            # default replacement for old _type subcategory.
+            # to preserve filtering capabilities
+            returndict['type'] = 'event'
 
     except Exception as e:
         logger.exception('Received exception while normalizing message: %r' % e)
@@ -270,13 +276,12 @@ class taskConsumer(object):
             # default elastic search metadata for an event
             metadata = {
                 'index': 'events',
-                'doc_type': 'event',
                 'id': None
             }
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
                 bodyDict = body
-            elif isinstance(body, str) or isinstance(body, unicode):
+            elif isinstance(body, str):
                 try:
                     bodyDict = json.loads(body)   # lets assume it's json
                 except ValueError as e:
@@ -311,14 +316,6 @@ class taskConsumer(object):
             # make a json version for posting to elastic search
             jbody = json.JSONEncoder().encode(normalizedDict)
 
-            if isCEF(normalizedDict):
-                # cef records are set to the 'deviceproduct' field value.
-                metadata['doc_type'] = 'cef'
-                if 'details' in normalizedDict and 'deviceproduct' in normalizedDict['details']:
-                    # don't create strange doc types..
-                    if ' ' not in normalizedDict['details']['deviceproduct'] and '.' not in normalizedDict['details']['deviceproduct']:
-                        metadata['doc_type'] = normalizedDict['details']['deviceproduct']
-
             try:
                 bulk = False
                 if options.esbulksize != 0:
@@ -327,7 +324,6 @@ class taskConsumer(object):
                 self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
-                    doc_type=metadata['doc_type'],
                     body=jbody,
                     bulk=bulk
                 )

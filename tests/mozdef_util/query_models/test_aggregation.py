@@ -31,11 +31,11 @@ class TestAggregation(UnitTestSuite):
         search_query.add_aggregation(Aggregation('source'))
         results = search_query.execute(self.es_client)
 
-        assert results['aggregations'].keys() == ['source']
+        assert list(results['aggregations'].keys()) == ['source']
 
-        assert results['aggregations']['source'].keys() == ['terms']
+        assert list(results['aggregations']['source'].keys()) == ['terms']
         assert len(results['aggregations']['source']['terms']) == 3
-        assert results['aggregations']['source']['terms'][0].keys() == ['count', 'key']
+        assert list(results['aggregations']['source']['terms'][0].keys()) == ['count', 'key']
 
         assert results['aggregations']['source']['terms'][0]['count'] == 2
         assert results['aggregations']['source']['terms'][0]['key'] == 'anothersource1'
@@ -63,11 +63,11 @@ class TestAggregation(UnitTestSuite):
         search_query.add_aggregation(Aggregation('note'))
         results = search_query.execute(self.es_client)
 
-        assert results['aggregations'].keys() == ['note']
+        assert list(results['aggregations'].keys()) == ['note']
 
-        assert results['aggregations']['note'].keys() == ['terms']
+        assert list(results['aggregations']['note'].keys()) == ['terms']
         assert len(results['aggregations']['note']['terms']) == 3
-        assert results['aggregations']['note']['terms'][0].keys() == ['count', 'key']
+        assert list(results['aggregations']['note']['terms'][0].keys()) == ['count', 'key']
 
         assert results['aggregations']['note']['terms'][0]['count'] == 2
         assert results['aggregations']['note']['terms'][0]['key'] == 'abvc'
@@ -95,13 +95,12 @@ class TestAggregation(UnitTestSuite):
         search_query.add_aggregation(Aggregation('test'))
         results = search_query.execute(self.es_client)
 
-        aggregation_keys = results['aggregations'].keys()
-        aggregation_keys.sort()
+        aggregation_keys = sorted(results['aggregations'].keys())
         assert aggregation_keys == ['note', 'test']
 
-        assert results['aggregations']['note'].keys() == ['terms']
+        assert list(results['aggregations']['note'].keys()) == ['terms']
         assert len(results['aggregations']['note']['terms']) == 2
-        assert results['aggregations']['note']['terms'][0].keys() == ['count', 'key']
+        assert list(results['aggregations']['note']['terms'][0].keys()) == ['count', 'key']
 
         assert results['aggregations']['note']['terms'][0]['count'] == 2
         assert results['aggregations']['note']['terms'][0]['key'] == 'abvc'
@@ -109,9 +108,9 @@ class TestAggregation(UnitTestSuite):
         assert results['aggregations']['note']['terms'][1]['count'] == 1
         assert results['aggregations']['note']['terms'][1]['key'] == 'think'
 
-        assert results['aggregations']['test'].keys() == ['terms']
+        assert list(results['aggregations']['test'].keys()) == ['terms']
         assert len(results['aggregations']['test']['terms']) == 1
-        assert results['aggregations']['test']['terms'][0].keys() == ['count', 'key']
+        assert list(results['aggregations']['test']['terms'][0].keys()) == ['count', 'key']
 
         assert results['aggregations']['test']['terms'][0]['count'] == 4
         assert results['aggregations']['test']['terms'][0]['key'] == 'value'
@@ -132,11 +131,11 @@ class TestAggregation(UnitTestSuite):
         search_query.add_aggregation(Aggregation('example'))
         results = search_query.execute(self.es_client)
 
-        assert results.keys() == ['hits', 'meta', 'aggregations']
+        assert sorted(results.keys()) == ['aggregations', 'hits', 'meta']
         assert len(results['hits']) == 4
-        assert results['aggregations'].keys() == ['example']
+        assert list(results['aggregations'].keys()) == ['example']
 
-        assert results['aggregations']['example'].keys() == ['terms']
+        assert list(results['aggregations']['example'].keys()) == ['terms']
         assert results['aggregations']['example']['terms'] == []
 
     def test_aggregation_multiple_layers(self):
@@ -164,8 +163,8 @@ class TestAggregation(UnitTestSuite):
         search_query.add_aggregation(Aggregation('details.ip'))
         results = search_query.execute(self.es_client)
 
-        assert results['aggregations'].keys() == ['details.ip']
-        assert results['aggregations']['details.ip'].keys() == ['terms']
+        assert list(results['aggregations'].keys()) == ['details.ip']
+        assert list(results['aggregations']['details.ip'].keys()) == ['terms']
         assert len(results['aggregations']['details.ip']['terms']) == 2
 
         assert results['aggregations']['details.ip']['terms'][0]['count'] == 2
@@ -190,8 +189,8 @@ class TestAggregation(UnitTestSuite):
         search_query.add_aggregation(Aggregation('details.ipinformation'))
         results = search_query.execute(self.es_client)
 
-        assert results['aggregations'].keys() == ['details.ipinformation']
-        assert results['aggregations']['details.ipinformation'].keys() == ['terms']
+        assert list(results['aggregations'].keys()) == ['details.ipinformation']
+        assert list(results['aggregations']['details.ipinformation'].keys()) == ['terms']
         assert len(results['aggregations']['details.ipinformation']['terms']) == 0
 
     def test_aggregation_with_default_size(self):
