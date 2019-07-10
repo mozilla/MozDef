@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from dateutil.parser import parse
 
 import random
-import pytest
 import sys
 
 from mozdef_util.utilities import toUTC
@@ -18,6 +17,8 @@ from suite_helper import parse_config_file, parse_mapping_file, setup_es_client,
 
 
 class UnitTestSuite(object):
+    config_delete_indexes = None
+    config_delete_queues = None
 
     def setup(self):
         self.options = parse_config_file()
@@ -30,20 +31,20 @@ class UnitTestSuite(object):
         self.previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
         self.alert_index_name = current_date.strftime("alerts-%Y%m")
 
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.reset_elasticsearch()
             self.setup_elasticsearch()
 
-        if pytest.config.option.delete_queues:
+        if self.config_delete_queues:
             self.reset_rabbitmq()
 
     def reset_rabbitmq(self):
         self.rabbitmq_alerts_consumer.channel.queue_purge()
 
     def teardown(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.reset_elasticsearch()
-        if pytest.config.option.delete_queues:
+        if self.config_delete_queues:
             self.reset_rabbitmq()
         # Remove any leftover plugin module as a result of loading
         if 'plugins' in sys.modules:
@@ -106,9 +107,9 @@ class UnitTestSuite(object):
 
     def verify_event(self, event, expected_event):
         assert sorted(event.keys()) == sorted(expected_event.keys())
-        for key, value in expected_event.iteritems():
+        for key, value in expected_event.items():
             if key in ('receivedtimestamp', 'timestamp', 'utctimestamp'):
-                assert type(event[key]) == unicode
+                assert type(event[key]) == str
             else:
                 assert event[key] == value, 'Incorrect match for {0}, expected: {1}'.format(key, value)
 

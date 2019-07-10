@@ -18,11 +18,13 @@ from datetime import datetime
 from collections import Counter
 from celery import Task
 from celery.utils.log import get_task_logger
-from config import RABBITMQ, ES, ALERT_PLUGINS
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
+from lib.config import RABBITMQ, ES, ALERT_PLUGINS
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from lib.alert_plugin_set import AlertPluginSet
@@ -35,7 +37,7 @@ def keypaths(nested):
     """ return a list of nested dict key paths
         like: [u'_source', u'details', u'program']
     """
-    for key, value in nested.iteritems():
+    for key, value in nested.items():
         if isinstance(value, collections.Mapping):
             for subkey, subvalue in keypaths(value):
                 yield [key] + subkey, subvalue
@@ -123,6 +125,9 @@ class AlertTask(Task):
             temp_value = getConfig(config_key, "", config_filename)
             setattr(self.config, config_key, temp_value)
 
+    def close_connections(self):
+        self.mqConn.release()
+
     def _discover_task_exchange(self):
         """Use configuration information to understand the message queue protocol.
         return: amqp, sqs
@@ -154,6 +159,7 @@ class AlertTask(Task):
             self.mqConn = kombu.Connection(connString)
             if connString.find('sqs') == 0:
                 self.mqConn.transport_options['region'] = os.getenv('DEFAULT_AWS_REGION', 'us-west-2')
+                self.mqConn.transport_options['is_secure'] = True
                 self.alertExchange = kombu.Exchange(
                     name=RABBITMQ["alertexchange"], type="topic", durable=True
                 )
@@ -344,11 +350,7 @@ class AlertTask(Task):
             for i in Counter(aggregationValues).most_common():
                 idict = {"value": i[0], "count": i[1], "events": [], "allevents": []}
                 for r in results:
-                    if (
-                        getValueByPath(r["_source"], aggregationPath).encode(
-                            "ascii", "ignore"
-                        ) == i[0]
-                    ):
+                    if getValueByPath(r["_source"], aggregationPath) == i[0]:
                         # copy events detail into this aggregation up to our samples limit
                         if len(idict["events"]) < samplesLimit:
                             idict["events"].append(r)
@@ -510,11 +512,9 @@ class AlertTask(Task):
                     event["_source"]["alert_names"] = []
                 event["_source"]["alert_names"].append(self.determine_alert_classname())
 
-                self.es.save_event(
-                    index=event["_index"], body=event["_source"], doc_id=event["_id"]
-                )
-            # We refresh here to ensure our changes to the events will show up for the next search query results
-            self.es.refresh(event["_index"])
+                self.es.save_event(index=event["_index"], body=event["_source"], doc_id=event["_id"])
+                # We refresh here to ensure our changes to the events will show up for the next search query results
+                self.es.refresh(event["_index"])
         except Exception as e:
             self.log.error("Error while updating events in ES: {0}".format(e))
 

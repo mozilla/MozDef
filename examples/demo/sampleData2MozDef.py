@@ -13,11 +13,11 @@ import json
 from multiprocessing import Process, Queue
 import random
 import logging
-from Queue import Empty
+from queue import Empty
 import requests
 import time
 from configlib import getConfig, OptionParser
-import ConfigParser
+import configparser
 import glob
 from datetime import timedelta
 
@@ -43,7 +43,7 @@ logcache=Queue()
 def setConfig(option,value,configfile):
     """write an option/value pair to our config file"""
     if os.path.isfile(configfile):
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         configfp=open(configfile,'r')
         config.readfp(configfp)
         configfp.close()
@@ -66,7 +66,7 @@ def postLogs(logcache):
                 a=httpsession.get_adapter(url)
                 a.max_retries=3
                 r=httpsession.post(url,data=postdata)
-                print(r, postdata)
+                print(r)
                 # append to posts if this is long running and you want
                 # events to try again later.
                 # posts.append((r,postdata,url))

@@ -13,7 +13,7 @@ alerts_include = list(set(alerts_include))
 # XXX TBD this should get wrapped into an object that provides pyconfig
 if os.getenv("OPTIONS_MQPROTOCOL", "amqp") == "sqs":
     BROKER_URL = "sqs://@"
-    BROKER_TRANSPORT_OPTIONS = {'region': os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('.')[1]}
+    BROKER_TRANSPORT_OPTIONS = {'region': os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('.')[1], 'is_secure': True, 'port': 443}
     CELERY_RESULT_BACKEND = None
     alert_queue_name = os.getenv('OPTIONS_ALERTSQSQUEUEURL').split('/')[4]
     CELERY_DEFAULT_QUEUE = alert_queue_name
@@ -72,7 +72,7 @@ for alert_namespace in CELERYBEAT_SCHEDULE:
         alert_class = getattr(alert_module, alert_classname)
         app.register_task(alert_class())
     except ImportError as e:
-        print("Error importing {}").format(alert_namespace)
+        print("Error importing {}".format(alert_namespace))
         print(e)
         pass
     except Exception as e:

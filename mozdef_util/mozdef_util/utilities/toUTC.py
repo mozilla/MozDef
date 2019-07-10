@@ -30,7 +30,7 @@ def toUTC(suspectedDate):
             # epoch? but seconds/milliseconds/nanoseconds (lookin at you heka)
             epochDivisor = int(str(1) + '0' * (len(str(suspectedDate)) % 10))
             objDate = datetime.fromtimestamp(float(suspectedDate / epochDivisor), LOCAL_TIMEZONE)
-    elif type(suspectedDate) in (str, unicode):
+    elif type(suspectedDate) is str:
         # try to parse float or negative number from string:
         objDate = None
         try:

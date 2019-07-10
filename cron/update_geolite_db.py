@@ -9,7 +9,9 @@ import sys
 import os
 from configlib import getConfig, OptionParser
 
-import urllib2
+import urllib.request
+import urllib.error
+import urllib.parse
 import tempfile
 import tarfile
 
@@ -19,7 +21,7 @@ from mozdef_util.utilities.logger import logger, initLogger
 
 def fetch_db_data(db_download_location):
     logger.debug('Fetching db data from ' + db_download_location)
-    response = urllib2.urlopen(db_download_location)
+    response = urllib.request.urlopen(db_download_location)
     db_raw_data = response.read()
     with tempfile.NamedTemporaryFile(mode='wb') as temp:
         logger.debug('Writing compressed gzip to temp file: ' + temp.name)

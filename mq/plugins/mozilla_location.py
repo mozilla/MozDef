@@ -24,7 +24,7 @@ class message(object):
 
     def onMessage(self, message, metadata):
         if 'details' in message and 'hostname' in message['details']:
-            hostnamesplit = str.lower(message['details']['hostname'].encode('ascii', 'ignore')).split('.')
+            hostnamesplit = str.lower(message['details']['hostname']).split('.')
             if len(hostnamesplit) == 5:
                 if 'mozilla' == hostnamesplit[-2]:
                     message['details']['site'] = hostnamesplit[-3]
@@ -35,7 +35,7 @@ class message(object):
                     else:
                         message['details']['sitetype'] = 'unknown'
         elif 'hostname' in message:
-            hostnamesplit = str.lower(message['hostname'].encode('ascii', 'ignore')).split('.')
+            hostnamesplit = str.lower(message['hostname']).split('.')
             if len(hostnamesplit) == 5:
                 if 'mozilla' == hostnamesplit[-2]:
                     message['details']['site'] = hostnamesplit[-3]

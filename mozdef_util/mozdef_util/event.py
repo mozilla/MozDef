@@ -1,7 +1,7 @@
 from datetime import datetime
 import socket
 
-from utilities.toUTC import toUTC
+from .utilities.toUTC import toUTC
 
 
 class Event(dict):

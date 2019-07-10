@@ -79,3 +79,16 @@ Add is_ip utility function
 ------------------
 
 * Fixed static file includes in python package
+
+
+3.0.0 (2019-07-08)
+------------------
+
+* Updated to work with python3
+* Removed support for python2
+
+
+3.0.1 (2019-07-08)
+------------------
+
+* Updated bulk queue to acquire lock before saving events

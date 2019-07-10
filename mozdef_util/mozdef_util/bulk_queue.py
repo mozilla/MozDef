@@ -52,9 +52,9 @@ class BulkQueue():
 
     def flush(self):
         """ Write all stored events to ES """
-        self.es_client.save_documents(self.list)
         self.lock.acquire()
         try:
+            self.es_client.save_documents(self.list)
             self.list = list()
         finally:
             self.lock.release()

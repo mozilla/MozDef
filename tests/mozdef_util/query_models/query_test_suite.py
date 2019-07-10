@@ -12,8 +12,6 @@ from mozdef_util.query_models import SearchQuery
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
 from unit_test_suite import UnitTestSuite
 
-import pytest
-
 
 class QueryTestSuite(UnitTestSuite):
 
@@ -25,9 +23,11 @@ class QueryTestSuite(UnitTestSuite):
             assert len(query_result['hits']) is 0
 
     def test_query_class(self):
-        for query, events in self.query_tests().iteritems():
+        for testcase in self.query_tests():
+            query = testcase[0]
+            events = testcase[1]
             for event in events:
-                if pytest.config.option.delete_indexes:
+                if self.config_delete_indexes:
                     self.reset_elasticsearch()
                     self.setup_elasticsearch()
 

@@ -23,7 +23,7 @@ Resources:
                 S3Bucket: public.us-west-2.security.allizom.org
                 S3Key: mozdef-lambda-layer/layer-latest.zip
             CompatibleRuntimes:
-              - python2.7
+              - python3.6
             LicenseInfo: 'MPL 2.0'
     LambdalertIAMRole:
       Type: AWS::IAM::Role
@@ -36,16 +36,16 @@ Resources:
                 Service: lambda.amazonaws.com
               Action: sts:AssumeRole
         ManagedPolicyArns:
-          -  arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole 
-    AlertWritersEnv: 
+          -  arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+    AlertWritersEnv:
       Type: "AWS::Lambda::Function"
-      Properties: 
+      Properties:
         Handler: "lambdalert.handle"
-        Role: 
-          Fn::GetAtt: 
+        Role:
+          Fn::GetAtt:
             - "LambdalertIAMRole"
             - "Arn"
-        Code: 
+        Code:
           S3Bucket: public.us-west-2.security.allizom.org
           S3Key: mozdef-lambda-layer/function-latest.zip
         Layers:
@@ -55,9 +55,9 @@ Resources:
             OPTIONS_ESSERVERS: !Ref ESUrl
             OPTIONS_MQPROTOCOL: sqs
         VpcConfig:
-          SecurityGroupIds: 
+          SecurityGroupIds:
             - !Ref MozDefSecurityGroup
           SubnetIds: !Ref PublicSubnetIds
         ReservedConcurrentExecutions: 1
-        Runtime: "python2.7"
+        Runtime: "python3.6"
         Timeout: 120

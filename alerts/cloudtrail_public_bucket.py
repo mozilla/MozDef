@@ -7,7 +7,7 @@
 
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, ExistsMatch
+from mozdef_util.query_models import SearchQuery, TermMatch
 
 
 class AlertCloudtrailPublicBucket(AlertTask):
@@ -16,8 +16,8 @@ class AlertCloudtrailPublicBucket(AlertTask):
 
         search_query.add_must([
             TermMatch('source', 'cloudtrail'),
-            TermMatch('details.eventname', 'PutBucketPolicy'),
-            ExistsMatch('details.requestparameters.bucketpolicy.statement.principal')
+            TermMatch('details.eventname', 'CreateBucket'),
+            TermMatch('details.requestparameters.x-amz-acl', 'public-read-write'),
         ])
 
         self.filtersManual(search_query)
@@ -27,9 +27,6 @@ class AlertCloudtrailPublicBucket(AlertTask):
     # Set alert properties
     def onEvent(self, event):
         request_parameters = event['_source']['details']['requestparameters']
-        for statement in request_parameters['bucketpolicy']['statement']:
-            if statement['principal'] != '*':
-                return
         category = 'access'
         tags = ['cloudtrail']
         severity = 'INFO'

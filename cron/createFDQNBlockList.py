@@ -4,9 +4,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
-
-import boto
-import boto.s3
+import boto3
 import logging
 import random
 import re
@@ -149,19 +147,14 @@ def s3_upload_file(file_path, bucket_name, key_name):
     """
     Upload a file to the given s3 bucket and return a template url.
     """
-    conn = boto.connect_s3(aws_access_key_id=options.aws_access_key_id, aws_secret_access_key=options.aws_secret_access_key)
-    try:
-        bucket = conn.get_bucket(bucket_name, validate=False)
-    except boto.exception.S3ResponseError:
-        conn.create_bucket(bucket_name)
-        bucket = conn.get_bucket(bucket_name, validate=False)
-
-    key = boto.s3.key.Key(bucket)
-    key.key = key_name
-    key.set_contents_from_filename(file_path)
-
-    key.set_acl('public-read')
-    url = "https://s3.amazonaws.com/{}/{}".format(bucket.name, key.name)
+    s3 = boto3.resource(
+        's3',
+        aws_access_key_id=options.aws_access_key_id,
+        aws_secret_access_key=options.aws_secret_access_key
+    )
+    s3.meta.client.upload_file(
+        file_path, bucket_name, key_name, ExtraArgs={'ACL': 'public-read'})
+    url = "https://s3.amazonaws.com/{}/{}".format(bucket_name, key_name)
     print("URL: {}".format(url))
     return url
 

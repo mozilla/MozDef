@@ -52,7 +52,7 @@ def flattenDict(inDict, pre=None, values=True):
     '''
     pre = pre[:] if pre else []
     if isinstance(inDict, dict):
-        for key, value in inDict.iteritems():
+        for key, value in inDict.items():
             if isinstance(value, dict):
                 for d in flattenDict(value, pre + [key], values):
                     yield d
@@ -65,8 +65,6 @@ def flattenDict(inDict, pre=None, values=True):
                     if values:
                         if isinstance(value, str):
                             yield '.'.join(pre) + '.' + key + '=' + str(value)
-                        elif isinstance(value, unicode):
-                            yield '.'.join(pre) + '.' + key + '=' + value.encode('ascii', 'ignore')
                         elif value is None:
                             yield '.'.join(pre) + '.' + key + '=None'
                     else:
@@ -75,8 +73,6 @@ def flattenDict(inDict, pre=None, values=True):
                     if values:
                         if isinstance(value, str):
                             yield key + '=' + str(value)
-                        elif isinstance(value, unicode):
-                            yield key + '=' + value.encode('ascii', 'ignore')
                         elif value is None:
                             yield key + '=None'
                     else:
@@ -110,7 +106,7 @@ def main():
         # or you will get access denied even with correct delegations/scope
 
         credentials = SignedJwtAssertionCredentials(client_email,
-                                                    private_key,
+                                                    private_key.encode(),
                                                     scope=scope,
                                                     sub=options.impersonate)
         http = Http()
@@ -138,8 +134,10 @@ def main():
                     # change key/values like:
                     # actor.email=someone@mozilla.com
                     # to actor_email=value
-
-                    key,value =keyValue.split('=')
+                    try:
+                        key,value =keyValue.split('=')
+                    except ValueError as e:
+                        continue
                     key=key.replace('.','_').lower()
                     details[key]=value
 
