@@ -290,6 +290,7 @@ class taskConsumer(object):
                         options.accesskey,
                         options.secretkey)
                 )
+            time.sleep(options.sleep_time)
 
     def on_message(self, body):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -429,6 +430,9 @@ def initConfig():
 
     # This is the full ARN that the s3 bucket lives under
     options.cloudtrail_arn = getConfig('cloudtrail_arn', 'cloudtrail_arn', options.configfile)
+
+    # How long to sleep between iterations of querying AWS
+    options.sleep_time = getConfig('sleep_time', 0.1, options.configfile)
 
 
 if __name__ == '__main__':

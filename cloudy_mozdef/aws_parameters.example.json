@@ -43,5 +43,10 @@
     "ParameterKey": "OIDCClientSecret",
     "ParameterValue": "secret-value-goes-here",
     "UsePreviousValue": false
+  },
+  {
+    "ParameterKey": "ALBBasicAuthSecret",
+    "ParameterValue": "secret-value-goes-here",
+    "UsePreviousValue": false
   }
 ]

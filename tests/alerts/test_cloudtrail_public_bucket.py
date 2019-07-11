@@ -17,19 +17,10 @@ class TestCloudtrailPublicBucket(AlertTestSuite):
             "source": "cloudtrail",
             "details": {
                 "requestparameters": {
-                    "bucketpolicy": {
-                        "version": "2012-10-17",
-                        "statement": [{
-                            "action": "s3:GetObject",
-                            "principal": "*",
-                            "resource": "arn:aws:s3:::testbucket/*",
-                            "effect": "Allow",
-                            "sid": "AllowGetObject"
-                        }]
-                    },
+                    "x-amz-acl": "public-read-write",
                     "bucketname": "testbucket"
                 },
-                "eventname": "PutBucketPolicy",
+                "eventname": "CreateBucket",
             },
         }
     }
@@ -71,19 +62,10 @@ class TestCloudtrailPublicBucket(AlertTestSuite):
     )
 
     event = AlertTestSuite.create_event(default_event)
-    del(event['_source']['details']['requestparameters']['bucketpolicy']['statement'][0]['principal'])
+    event['_source']['details']['requestparameters']['x-amz-acl'] = 'test'
     test_cases.append(
         NegativeAlertTestCase(
-            description="Negative test case with events with missing field",
-            events=[event],
-        )
-    )
-
-    event = AlertTestSuite.create_event(default_event)
-    event['_source']['details']['requestparameters']['bucketpolicy']['statement'][0]['principal'] = 'bad'
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test case with events with incorrect principal",
+            description="Negative test case with events with incorrect field",
             events=[event],
         )
     )
