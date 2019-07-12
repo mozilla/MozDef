@@ -115,6 +115,11 @@ caption, legend {
   line-height: 13px;
 }
 
+.tag:hover {
+  background: #5bc0de;
+  cursor: pointer;
+}
+
 .dropdown-menu li {
   color: #000;
 }
