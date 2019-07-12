@@ -119,6 +119,11 @@ caption, legend {
   color: #000;
 }
 
+.dropdown-menu li:hover {
+  background: #ccc;
+  cursor: pointer;
+}
+
 .dropdown-submenu {
   position: relative;
 }
