@@ -120,49 +120,50 @@ caption, legend {
 }
 
 .dropdown-submenu {
-  position:relative;
+  position: relative;
 }
 
-.dropdown-submenu>.dropdown-menu {
-  top:0;left:100%;
-  -webkit-border-radius:0 6px 6px 6px;
-  -moz-border-radius:0 6px 6px 6px;
-  border-radius:0 6px 6px 6px;
+.dropdown-submenu > .dropdown-menu {
+  top: 0;
+  left: 100%;
+  -webkit-border-radius: 0 6px 6px 6px;
+  -moz-border-radius: 0 6px 6px 6px;
+  border-radius: 0 6px 6px 6px;
 }
 
-.dropdown-submenu:active>.dropdown-menu,
-.dropdown-submenu:hover>.dropdown-menu {
+.dropdown-submenu:active > .dropdown-menu,
+.dropdown-submenu:hover > .dropdown-menu {
        display: block;
-       right:162px;
+       right: 162px;
 }
 
-.dropdown-submenu>a:after {
-  display:block;
-  content:" ";
-  float:right;
-  width:0;
-  height:0;
-  border-color:transparent;
-  border-style:solid;
-  border-width:5px 0 5px 5px;
-  border-left-color:#cccccc;
-  margin-top:5px;
-  margin-right:-10px;
+.dropdown-submenu > a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
 }
 
-.dropdown-submenu:active>a:after {
-  border-left-color:#ffffff;
+.dropdown-submenu:active > a:after {
+  border-left-color: #ffffff;
 }
 
 .dropdown-submenu.pull-left {
-  float:none;
+  float: none;
 }
-.dropdown-submenu.pull-left>.dropdown-menu {
-  left:-100%;
-  margin-left:10px;
-  -webkit-border-radius:6px 0 6px 6px;
-  -moz-border-radius:6px 0 6px 6px;
-  border-radius:6px 0 6px 6px;
+.dropdown-submenu.pull-left > .dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  -webkit-border-radius: 6px 0 6px 6px;
+  -moz-border-radius: 6px 0 6px 6px;
+  border-radius: 6px 0 6px 6px;
 }
 
 .attackshoverboard {
@@ -754,7 +755,7 @@ nav.main-menu.expanded {
   z-index: 1000;
 }
 
-.main-menu>ul {
+.main-menu > ul {
   margin: 7px 0;
 }
 
@@ -764,13 +765,13 @@ nav.main-menu.expanded {
   width: 225px;
 }
 
-.main-menu li:hover>a,
-nav.main-menu li.active>a,
-.dropdown-menu>li>a:hover,
-.dropdown-menu>li>a:focus,
-.dropdown-menu>.active>a,
-.dropdown-menu>.active>a:hover,
-.dropdown-menu>.active>a:focus,
+.main-menu li:hover > a,
+nav.main-menu li.active > a,
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus,
+.dropdown-menu >.active > a,
+.dropdown-menu >.active > a:hover,
+.dropdown-menu >.active > a:focus,
 .no-touch .dashboard-page nav.dashboard-menu ul li:hover a,
 .dashboard-page nav.dashboard-menu ul li.active a {
   color: rgb(0, 0, 0);
@@ -876,7 +877,7 @@ nav.main-menu li.active>a,
   left: 200px;
 }
 
-.main-menu li>a {
+.main-menu li > a {
   position: relative;
   display: table;
   border-collapse: collapse;
@@ -908,7 +909,7 @@ nav.main-menu li.active>a,
   font-family: 'Zilla Slab', serif;
 }
 
-.main-menu>ul.logout {
+.main-menu > ul.logout {
   position: absolute;
   left: 0;
   bottom: 0;
