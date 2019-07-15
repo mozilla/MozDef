@@ -1,6 +1,6 @@
 import unittest
 
-import model 
+import mozdef_geomodel.model as model
 
 
 class TestValidateConfiguration(unittest.TestCase):
