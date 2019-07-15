@@ -7,7 +7,6 @@ are represented as dictionaries with validator functions.
 from datetime import datetime
 
 
-
 def _is_valid_ipv4(ip):
     octets = ip.split('.')
 
