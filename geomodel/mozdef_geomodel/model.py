@@ -70,7 +70,7 @@ def validate_configuration(config):
     return _match_shape(config, {
         'localities': {
             'index': _is_str,
-            'validDurationHours': lambda hours: int(hours) > 0,
+            'validDurationDays': lambda hours: int(hours) > 0,
             'radiusKilometres': lambda radius: float(radius) > 0.0,
         },
         'events': {

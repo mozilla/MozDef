@@ -8,7 +8,7 @@ class TestValidateConfiguration(unittest.TestCase):
         assert model.validate_configuration({
             'localities': {
                 'index': 'locality-state',
-                'validDurationHours': 32,
+                'validDurationDays': 32,
                 'radiusKilometres': 50.0,
             },
             'events': {
@@ -30,7 +30,7 @@ class TestValidateConfiguration(unittest.TestCase):
         assert not model.validate_configuration({
             'localities': {
                 'index': 'locality-state',
-                'validDurationHours': 32,
+                'validDurationDays': 32,
                 'radiusKilometres': 50.0,
             },
             'events': {
@@ -56,7 +56,7 @@ class TestValidateConfiguration(unittest.TestCase):
         assert not model.validate_configuration({
             'localities': {
                 'index': 'locality-state',
-                'validDurationHours': 32,
+                'validDurationDays': 32,
                 'radiusKilometres': 50.0,
             },
             'events': {
