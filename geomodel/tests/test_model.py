@@ -52,6 +52,26 @@ class TestValidateConfiguration(unittest.TestCase):
         })
 
 
+    def test_malformed(self):
+        assert not model.validate_configuration({
+            'localities': {
+                'index': 'locality-state',
+                'validDurationHours': 32,
+                'radiusKilometres': 50.0,
+            },
+            'events': {
+                'index': 'events-*',
+                'queries': [
+                    {
+                        'lucene': 'tags:duo',
+                        'username': 'details.user'
+                    }
+                ]
+            },
+            'alerts': 32
+        })
+
+
 class TestValidateLocalityState(unittest.TestCase):
     def test_valid_input(self):
         assert model.validate_locality_state({

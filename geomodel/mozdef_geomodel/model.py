@@ -52,14 +52,15 @@ def _match_shape(dictionary, match):
     # { 'key': predicate, 'key2': { 'key3': predicate } }
     # where each `predicate` is a function that accepts the expected value
     # corresponding to each key that validates that value.
-    predicates = [
-        match[key](dictionary.get(key)) if \
-                not isinstance(match[key], dict) \
-                else _match_shape(dictionary.get(key), match[key])
-        for key in match
-    ]
-
-    return all(predicates)
+    try:
+        return all([
+            match[key](dictionary.get(key)) if \
+                    not isinstance(match[key], dict) \
+                    else _match_shape(dictionary.get(key), match[key])
+            for key in match
+        ])
+    except AttributeError:
+        return False
 
 
 def validate_configuration(config):
