@@ -5,6 +5,7 @@ are represented as dictionaries with validator functions.
 '''
 
 from datetime import datetime
+from urllib.parse import urlparse
 
 
 def _is_valid_ipv4(ip):
@@ -46,6 +47,11 @@ def _is_valid_longitude(lon):
         return False
 
 
+def _is_url(url):
+    parsed = urlparse(url)
+    return parsed.scheme != '' and parsed.netloc != ''
+
+
 def _match_shape(dictionary, match):
     # `match` is a dictionary shaped like:
     # { 'key': predicate, 'key2': { 'key3': predicate } }
@@ -68,6 +74,7 @@ def validate_configuration(config):
     '''
 
     return _match_shape(config, {
+        'elasticSearchAddress': _is_url,
         'localities': {
             'index': _is_str,
             'validDurationDays': lambda hours: int(hours) > 0,
