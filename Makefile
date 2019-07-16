@@ -53,7 +53,7 @@ run-tests-resources:  ## Just run the external resources required for tests
 .PHONY: run-test
 run-test: run-tests
 
-.PHONY: run-test
+.PHONY: run-tests
 run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
