@@ -88,8 +88,8 @@ class message(object):
     '''
 
     def __init__(self):
-        # Run plugin on all alerts
-        self.registration = '*'
+        # Run plugin on portscan alerts
+        self.registration = 'portscan'
 
         config = _load_config(CONFIG_FILE)
 
