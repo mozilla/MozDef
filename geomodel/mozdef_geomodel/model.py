@@ -75,9 +75,6 @@ def validate_configuration(config):
 
     return _match_shape(config, {
         'elasticSearchAddress': _is_url,
-        'searchWindow': {
-            'minutes': lambda mins: int(mins) > 0,
-        },
         'localities': {
             'index': _is_str,
             'validDurationDays': lambda hours: int(hours) > 0,
@@ -85,6 +82,9 @@ def validate_configuration(config):
         },
         'events': {
             'index': _is_str,
+            'searchWindow': {
+                'minutes': lambda mins: int(mins) > 0,
+            },
             'queries': lambda queries: all([
                 _match_shape(query, {
                     'lucene': _is_str,
