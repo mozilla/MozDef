@@ -14,7 +14,8 @@ RUN \
   rpm -qi gpg-pubkey-352c64e5 | $gpg | grep 0x6A2FAEA2352C64E5 && \
   yum install -y epel-release && \
   yum install -y syslog-ng.x86_64 syslog-ng-json && \
-  yum clean all
+  yum clean all && \
+  rm -rf /var/cache/yum
 
 COPY docker/compose/mozdef_syslog/files/syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 
