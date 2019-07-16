@@ -59,6 +59,8 @@ def enrich(alert, known_ips):
 
     alert = alert.copy()
 
+    if 'details' not in alert:
+        alert['details'] = {}
     alert['details']['sites'] = []
 
     for ip in set(ips):
