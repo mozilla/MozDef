@@ -75,6 +75,9 @@ def validate_configuration(config):
 
     return _match_shape(config, {
         'elasticSearchAddress': _is_url,
+        'searchWindow': {
+            'minutes': lambda mins: int(mins) > 0,
+        },
         'localities': {
             'index': _is_str,
             'validDurationDays': lambda hours: int(hours) > 0,

@@ -7,10 +7,13 @@ class TestValidateConfiguration(unittest.TestCase):
     def test_valid_input(self):
         assert model.validate_configuration({
             'elasticSearchAddress': 'http://127.0.0.1:5132',
+            'searchWindow': {
+                'minutes': 10
+            },
             'localities': {
                 'index': 'locality-state',
                 'validDurationDays': 32,
-                'radiusKilometres': 50.0,
+                'radiusKilometres': 50.0
             },
             'events': {
                 'index': 'events-*',
@@ -30,6 +33,9 @@ class TestValidateConfiguration(unittest.TestCase):
     def test_invalid_input(self):
         assert not model.validate_configuration({
             'elasticSearchAddress': 'http://127.0.0.1:5132',
+            'searchWindow': {
+                'minutes': 10
+            },
             'localities': {
                 'index': 'locality-state',
                 'validDurationDays': 32,
@@ -57,6 +63,9 @@ class TestValidateConfiguration(unittest.TestCase):
     def test_malformed(self):
         assert not model.validate_configuration({
             'elasticSearchAddress': 'http://127.0.0.1:5132',
+            'searchWindow': {
+                'minutes': 10
+            },
             'localities': {
                 'index': 'locality-state',
                 'validDurationDays': 32,
