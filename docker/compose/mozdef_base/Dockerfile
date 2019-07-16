@@ -62,7 +62,3 @@ VOLUME /opt/mozdef/envs/mozdef/data
 ENV PATH=/opt/mozdef/envs/python/bin:$PATH
 
 USER root
-
-# Remove once https://github.com/jeffbryner/configlib/pull/9 is mergeg
-# and a new version of configlib is in place
-RUN sed -i 's/from configlib import getConfig/from .configlib import getConfig/g' /opt/mozdef/envs/python/lib/python3.6/site-packages/configlib/__init__.py
