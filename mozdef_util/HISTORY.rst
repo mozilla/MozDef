@@ -92,3 +92,9 @@ Add is_ip utility function
 ------------------
 
 * Updated bulk queue to acquire lock before saving events
+
+
+3.0.2 (2019-07-17)
+------------------
+
+* Updated ElasticsearchClient.get_indices() to include closed indices
