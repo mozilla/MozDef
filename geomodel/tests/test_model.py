@@ -87,6 +87,7 @@ class TestValidateConfiguration(unittest.TestCase):
 class TestValidateLocalityState(unittest.TestCase):
     def test_valid_input(self):
         assert model.validate_locality_state({
+            'type': 'locality',
             'username': 'testuser',
             'localities': [
                 {
@@ -113,6 +114,7 @@ class TestValidateLocalityState(unittest.TestCase):
 
     def test_invalid_input(self):
         assert not model.validate_locality_state({
+            'type': 'locality',
             'username': 'testuser',
             'localities': [
                 {

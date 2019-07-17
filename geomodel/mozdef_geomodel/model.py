@@ -105,6 +105,7 @@ def validate_locality_state(state):
     '''
 
     return _match_shape(state, {
+        'type': lambda _type: _type == 'locality',
         'username': _is_str,
         'localities': lambda localities: all([
             _match_shape(locality, {
