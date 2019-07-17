@@ -20,7 +20,6 @@ requirements = [
     'wheel>=0.32.1',
     'watchdog>=0.9.0',
     'flake8>=3.5.0',
-    'tox>=3.5.2',
     'coverage>=4.5.1',
     'Sphinx>=1.8.1',
     'twine>=1.12.1',
