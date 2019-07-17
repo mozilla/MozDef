@@ -58,6 +58,5 @@ tzlocal==1.4
 uritemplate==0.6
 urllib3==1.24.3
 uwsgi==2.0.17.1
-virtualenv==1.11.4
 tldextract==2.2.0
 websocket-client==0.44.0
