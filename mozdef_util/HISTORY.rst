@@ -98,3 +98,9 @@ Add is_ip utility function
 ------------------
 
 * Updated ElasticsearchClient.get_indices() to include closed indices
+
+
+3.0.3 (2019-07-18)
+------------------
+
+* Added ElasticsearchClient.get_open_indices()
