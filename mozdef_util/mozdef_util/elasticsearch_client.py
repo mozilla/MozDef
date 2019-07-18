@@ -56,6 +56,9 @@ class ElasticsearchClient():
         # Includes open and closed indices
         return list(self.es_connection.indices.get_alias('*', params=dict(expand_wildcards='all')).keys())
 
+    def get_open_indices(self):
+        return list(self.es_connection.indices.get_alias('*', params=dict(expand_wildcards='open')).keys())
+
     def index_exists(self, index_name):
         return self.es_connection.indices.exists(index_name)
 
