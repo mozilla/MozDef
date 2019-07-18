@@ -411,9 +411,13 @@ class TestGetIndices(ElasticsearchClientTest):
         if self.config_delete_indexes:
             self.es_client.create_index('test_index')
         time.sleep(1)
-        indices = self.es_client.get_indices()
-        indices.sort()
-        assert indices == [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
+        all_indices = self.es_client.get_indices()
+        all_indices.sort()
+        open_indices = self.es_client.get_open_indices()
+        open_indices.sort()
+        expected_indices = [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
+        assert all_indices == expected_indices
+        assert open_indices == expected_indices
 
     def test_closed_get_indices(self):
         if self.config_delete_indexes:
@@ -421,7 +425,9 @@ class TestGetIndices(ElasticsearchClientTest):
         time.sleep(1)
         self.es_client.close_index('test_index')
         all_indices = self.es_client.get_indices()
+        open_indices = self.es_client.get_open_indices()
         assert 'test_index' in all_indices
+        assert 'test_index' not in open_indices
 
 
 class TestIndexExists(ElasticsearchClientTest):

@@ -24,7 +24,7 @@ def esCloseIndices():
     logger.debug('started')
     try:
         es = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
-        indices = es.get_indices()
+        indices = es.get_open_indices()
     except Exception as e:
         logger.error("Unhandled exception while connecting to ES, terminating: %r" % (e))
 
