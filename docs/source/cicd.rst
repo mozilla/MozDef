@@ -54,26 +54,58 @@ AWS CodeBuild
 Enabling GitHub AWS CodeBuild Integration
 _________________________________________
 
-* Request that a github.com/mozilla GitHub Organization owner temporarily
-  `approve / whitelist
-  <https://help.github.com/en/articles/approving-oauth-apps-for-your-organization>`_
-  the `AWS CodeBuild integration <https://bugzilla.mozilla.org/show_bug.cgi?id=1506740>`_
-  in the github.com/mozilla GitHub Organization
-* Manually configure the GitHub integration in AWS CodeBuild which will create
-  the GitHub webhooks needed using the dedicated, AWS account specific, GitHub
-  service user. A service user is needed as AWS CodeBuild can only integrate
-  with GitHub from one AWS account in one region with a single GitHub user.
-  Technically we could use different users for each region in a single AWS
-  account, but for simplicity we're limiting to only one GitHub user per AWS
-  account (instead of one GitHub user per AWS account per region)
+Onetime Manual Step
+*******************
 
-  * For the `infosec-prod` AWS account use the `infosec-prod-371522382791-codebuild`
-    GitHub user
-  * For the `infosec-dev` AWS account use the `infosec-dev-656532927350-codebuild`
-    GitHub user
+The steps to establish a GitHub CodeBuild integration unfortunately
+require a onetime manual step be done before using CloudFormation to
+configure the integration. This onetime manual step **need only happen a
+single time for a given AWS Account + Region**. It need **not be
+performed with each new CodeBuild project or each new GitHub repo**
 
-* Request that a GitHub Organization owner, re-deny the integration for
-  github.com/mozilla
+1. Manually enable the GitHub integration in AWS CodeBuild using the
+   dedicated, AWS account specific, GitHub service user.
+
+   1. A service user is needed as AWS CodeBuild can only integrate with
+      GitHub from one AWS account in one region with a single GitHub
+      user. Technically you could use different users for each region in
+      a single AWS account, but for simplicity limit yourself to only
+      one GitHub user per AWS account (instead of one GitHub user per
+      AWS account per region)
+
+   2. To do the one time step of integrating the entire AWS account in
+      that region with the GitHub service user
+
+      1. Browse to `CodeBuild`_\ ﻿ in AWS and click Create Project
+      2. Navigate down to ``Source`` and set ``Source Provider`` to
+         ``GitHub``
+      3. For ``Repository`` select
+         ``Connect with a GitHub personal access token``
+      4. Enter the persona access token for the GitHub service user. If
+         you haven't created one do so and grant it ``repo`` and
+         ``admin:repo_hook``
+      5. Click ``Save Token``
+      6. Abort the project setup process by clicking the
+         ``Build Projects`` breadcrumb at the top. This “Save Token”
+         step was the only thing you needed to do in that process
+
+Grant the GitHub service user access to the GitHub repository
+*************************************************************
+
+1. As an admin of the GitHub repository go to that repositories
+   settings, select Collaborators and Teams, and add the GitHub
+   service user to the repository
+2. Set their access level to ``Admin``
+3. Copy the invite link, login as the service user and accept the
+   invitation
+
+Deploy CloudFormation stack creating CodeBuild project
+******************************************************
+
+Deploy the ``mozdef-cicd-codebuild.yml`` CloudFormation template
+to create the CodeBuild project and IAM Role
+
+.. _CodeBuild: https://us-west-2.console.aws.amazon.com/codesuite/codebuild/
 
 The Build Sequence
 __________________
@@ -81,6 +113,10 @@ __________________
 * A branch is merged into `master` in the GitHub repo or a version git tag is
   applied to a commit
 * GitHub emits a webhook event to AWS CodeBuild indicating this
+* AWS CodeBuild considers the Filter Groups configured to decide if the tag
+  or branch warrants triggering a build. These Filter Groups are defined in
+  the ``mozdef-cicd-codebuild.yml`` CloudFormation template. Assuming the tag
+  or branch are acceptable, CodeBuild continues.
 * AWS CodeBuild reads the
   `buildspec.yml <https://github.com/mozilla/MozDef/blob/master/cloudy_mozdef/buildspec.yml>`_
   file to know what to do
