@@ -10,7 +10,10 @@ def query_interface(results: List[Dict[str, Any]]) -> query.QueryInterface:
     '''Produce a `QueryInterface` that just returns the provided results.
     '''
 
-    def closure(q: SearchQuery, esi: str) -> List[str, Any]:
+    def closure(q: SearchQuery, esi: str) -> List[Dict[str, Any]]:
         return results
 
+
     return closure
+
+
