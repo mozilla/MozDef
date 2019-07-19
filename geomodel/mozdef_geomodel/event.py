@@ -1,6 +1,8 @@
 from functools import reduce
+import sys
 from typing import Any, Dict, NamedTuple
 
+sys.path.append('../mozdef_util')
 from mozdef_util.query_models import \
         QueryStringMatch as QSMatch, \
         SearchQuery

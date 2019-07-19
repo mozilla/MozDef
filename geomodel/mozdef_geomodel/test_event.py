@@ -2,6 +2,7 @@ import sys
 from typing import Any, Dict, List
 import unittest
 
+sys.path.append('../mozdef_util')
 from mozdef_util.query_models import SearchQuery
 
 import mozdef_geomodel.config as config 
