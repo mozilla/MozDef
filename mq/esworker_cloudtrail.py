@@ -413,7 +413,6 @@ def initConfig():
     # rabbit message queue options
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
     options.taskexchange = getConfig('taskexchange', 'eventtask', options.configfile)
-    options.eventexchange = getConfig('eventexchange', 'events', options.configfile)
     # rabbit: how many messages to ask for at once from the message queue
     options.prefetch = getConfig('prefetch', 10, options.configfile)
     # rabbit: user creds
