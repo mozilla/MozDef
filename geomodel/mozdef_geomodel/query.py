@@ -17,7 +17,7 @@ def wrap(client: ESClient) -> QueryInterface:
     '''Wrap an `ElasticsearchClient` in a closure of type `QueryInterface`.
     '''
     
-    def wrapper(query: SearchQuery, esindex: str) -> List[Event]:
+    def wrapper(query: SearchQuery, esindex: str) -> List[Dict[str, Any]]:
         return query.execute(client, indices=[esindex])
 
     return wrapper
