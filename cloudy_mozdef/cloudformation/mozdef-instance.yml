@@ -340,9 +340,11 @@ Resources:
             - content: |
                 # This configures the worker that pulls in CloudTrail logs
                 OPTIONS_TASKEXCHANGE=${CloudTrailSQSNotificationQueueName}
+                OPTIONS_REGION=${AWS::Region}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_cloudtrail.env
             - content: |
                 OPTIONS_TASKEXCHANGE=${MozDefSQSQueueName}
+                OPTIONS_REGION=${AWS::Region}
               path: /opt/mozdef/docker/compose/cloudy_mozdef_mq_sqs.env
             - content: |
                 [Unit]
