@@ -46,7 +46,7 @@ def isJVMMemoryHigh():
 
 def clearESCache():
     es = esConnect(None)
-    indexes = es.get_indices()
+    indexes = es.get_open_indices()
     # assums index names  like events-YYYYMMDD etc.
     # used to avoid operating on current indexes
     dtNow = datetime.utcnow()

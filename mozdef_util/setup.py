@@ -20,7 +20,6 @@ requirements = [
     'wheel>=0.32.1',
     'watchdog>=0.9.0',
     'flake8>=3.5.0',
-    'tox>=3.5.2',
     'coverage>=4.5.1',
     'Sphinx>=1.8.1',
     'twine>=1.12.1',
@@ -59,6 +58,6 @@ setup(
     test_suite='tests',
     tests_require=[],
     url='https://github.com/mozilla/MozDef/tree/master/lib',
-    version='3.0.1',
+    version='3.0.3',
     zip_safe=False,
 )
