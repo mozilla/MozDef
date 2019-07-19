@@ -2,7 +2,7 @@ from functools import reduce
 from typing import Any, Dict, NamedTuple
 
 from mozdef_util.query_models import \
-        QueryStringMatch as QSMatch \
+        QueryStringMatch as QSMatch, \
         SearchQuery
 
 import config
@@ -11,7 +11,7 @@ import query
 
 def _lookup_path(nested_dict, dot_key):
     return reduce(
-            lambda d, k: d.get(k) if d is not None else None
+            lambda d, k: d.get(k) if d is not None else None,
             dot_key.split('.'),
             nested_dict)
 

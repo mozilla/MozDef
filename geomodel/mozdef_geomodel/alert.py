@@ -25,7 +25,7 @@ class Alert(NamedTuple):
 
     source: str
     category: str
-    _type: str
+    type_: str
     username: str
     sourceipv4address: str
     timestamp: datetime

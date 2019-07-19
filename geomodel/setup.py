@@ -40,7 +40,7 @@ setup(
     name='mozdef_geomodel',
     packages=find_packages(include=['mozdef_geomodel']),
     setup_requires=setup_requirements,
-    test_suite='tests',
+    test_suite='mozdef_geomodel',
     tests_require=test_requirements,
     url='https://github.com/mozilla/mozdef',
     version='0.1.0',

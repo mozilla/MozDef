@@ -5,16 +5,6 @@ from typing import List, NamedTuple
 # TODO: Switch to dataclasses when we move to Python3.7+
 
 
-class Config(NamedTuple):
-    '''The top-level configuration type.
-    '''
-
-    elasticsearch_address: str
-    localities: Localities
-    events: Events
-    alerts: Alerts
-
-
 class Localities(NamedTuple):
     '''Contains configuration for working with locality state.
     '''
@@ -30,7 +20,7 @@ class QuerySpec(NamedTuple):
     retrieve a username from the events returned by the aforementioned query.
     '''
 
-    lucene: str,
+    lucene: str
     username: str
 
 
@@ -70,3 +60,15 @@ class Alerts(NamedTuple):
 
     es_index: str
     whitelist: Whitelist
+
+
+class Config(NamedTuple):
+    '''The top-level configuration type.
+    '''
+
+    elasticsearch_address: str
+    localities: Localities
+    events: Events
+    alerts: Alerts
+
+
