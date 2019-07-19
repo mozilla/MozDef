@@ -228,7 +228,7 @@ class taskConsumer(object):
             self.flush_wait_time = (response['Credentials']['Expiration'] - current_time).seconds - 3
         else:
             role_creds = {}
-        role_creds['region'] = options.region
+        role_creds['region_name'] = options.region
         self.s3_client = boto3.client(
             's3',
             **get_aws_credentials(**role_creds)
