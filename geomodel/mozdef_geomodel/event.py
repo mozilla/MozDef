@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import NamedTuple
+from typing import Any, Dict, NamedTuple
 
 from mozdef_util.query_models import \
         QueryStringMatch as QSMatch \
@@ -23,7 +23,7 @@ class QueryResult(NamedTuple):
     '''
 
     username: str
-    event: query.Event
+    event: Dict[str, Any]
 
 
 def find_all(
