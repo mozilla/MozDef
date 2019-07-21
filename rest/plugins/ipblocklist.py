@@ -225,18 +225,18 @@ class message(object):
         try:
             for i in request.json:
                 # were we checked?
-                if self.name in i:
-                    blockip = i.values()[0]
-                if 'ipaddress' in i:
-                    ipaddress = i.values()[0]
-                if 'duration' in i:
-                    duration = i.values()[0]
-                if 'comment' in i:
-                    comment = i.values()[0]
-                if 'referenceid' in i:
-                    referenceID = i.values()[0]
-                if 'userid' in i:
-                    userid = i.values()[0]
+                if self.name in list(i.keys()):
+                    blockip = list(i.values())[0]
+                if 'ipaddress' in list(i.keys()):
+                    ipaddress = list(i.values())[0]
+                if 'duration' in list(i.keys()):
+                    duration = list(i.values())[0]
+                if 'comment' in list(i.keys()):
+                    comment = list(i.values())[0]
+                if 'referenceid' in list(i.keys()):
+                    referenceID = list(i.values())[0]
+                if 'userid' in list(i.keys()):
+                    userid = list(i.values())[0]
 
             if blockip and ipaddress is not None:
                 # figure out the CIDR mask

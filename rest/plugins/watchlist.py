@@ -127,18 +127,18 @@ class message(object):
         try:
             for i in request.json:
                 # were we checked?
-                if self.name in i.keys():
-                    watchitem = i.values()[0]
-                if 'watchcontent' in i.keys():
-                    watchcontent = i.values()[0]
-                if 'duration' in i.keys():
-                    duration = i.values()[0]
-                if 'comment' in i.keys():
-                    comment = i.values()[0]
-                if 'referenceid' in i.keys():
-                    referenceID = i.values()[0]
-                if 'userid' in i.keys():
-                    userid = i.values()[0]
+                if self.name in list(i.keys()):
+                    watchitem = list(i.values())[0]
+                if 'watchcontent' in list(i.keys()):
+                    watchcontent = list(i.values())[0]
+                if 'duration' in list(i.keys()):
+                    duration = list(i.values())[0]
+                if 'comment' in list(i.keys()):
+                    comment = list(i.values())[0]
+                if 'referenceid' in list(i.keys()):
+                    referenceID = list(i.values())[0]
+                if 'userid' in list(i.keys()):
+                    userid = list(i.values())[0]
 
             if watchitem and watchcontent is not None:
                 if len(watchcontent) < 2:
