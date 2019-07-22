@@ -58,7 +58,7 @@ class message(object):
         except ValueError:
             response.status = 500
 
-        print(requestDict, requestDict.keys())
+        print(requestDict, list(requestDict.keys()))
         if 'ipaddress' in requestDict:
             url="https://cymon.io/api/nexus/v1/ip/{0}/events?combined=true&format=json".format(requestDict['ipaddress'])
 
