@@ -2,9 +2,9 @@ import sys
 from typing import Any, Dict, List
 import unittest
 
-sys.path.extend(['geomodel', 'geomodel/mozdef_geomodel'])
 from mozdef_util.query_models import SearchQuery
 
+sys.path.extend(['geomodel', 'geomodel/mozdef_geomodel'])
 import geomodel.mozdef_geomodel.config as config 
 import geomodel.mozdef_geomodel.event as event 
 import geomodel.mozdef_geomodel.query as query
