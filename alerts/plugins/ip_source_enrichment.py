@@ -47,7 +47,7 @@ def enrich(alert, known_ips):
             return functools.reduce(add, found, [])
 
         if isinstance(value, dict):
-            found = [find_ips(item) for item in value.values()]
+            found = [find_ips(item) for item in list(value.values())]
             return functools.reduce(add, found, [])
 
         return []
@@ -62,7 +62,7 @@ def enrich(alert, known_ips):
     alert['details']['sites'] = []
 
     for ip in set(ips):
-        matching_descriptions = filter(ip_in_range(ip), known_ips)
+        matching_descriptions = list(filter(ip_in_range(ip), known_ips))
 
         for desc in matching_descriptions:
             enriched = desc['format'].format(ip, desc['site'])
