@@ -1,8 +1,7 @@
 from functools import reduce
 import sys
-from typing import Any, Dict, NamedTuple
+from typing import Any, Dict, List, NamedTuple
 
-sys.path.append('../mozdef_util')
 from mozdef_util.query_models import \
         QueryStringMatch as QSMatch, \
         SearchQuery
@@ -30,19 +29,19 @@ class QueryResult(NamedTuple):
 
 def find_all(
         query_es: query.QueryInterface,
-        events: config.Events
+        evt_cfg: config.Events
         ) -> List[QueryResult]:
     '''Retrieve events from ElasticSearch produced by running the set of
-    queries GeoModel has been configured with.
+    queries Geoodel has been configured with.
     '''
 
     events = []
 
-    for cfg in events_config['queries']:
-        search = SearchQuery(**events_config.search_window)
+    for cfg in evt_cfg.queries:
+        search = SearchQuery(minutes=evt_cfg.search_window.minutes)
         search.add_must([QSMatch(cfg.lucene)])
 
-        search_results = query_es(search, events.esindex)
+        search_results = query_es(search, evt_cfg.es_index)
 
         for result in search_results:
             username = _lookup_path(result, cfg.username)

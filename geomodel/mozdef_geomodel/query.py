@@ -4,7 +4,7 @@ called with a list of ES indices and a `SearchQuery`, produces a list of
 dictionaries as output.
 '''
 
-from typing import Any, Callable, List
+from typing import Any, Callable, Dict, List
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient as ESClient
 from mozdef_util.query_models import SearchQuery
