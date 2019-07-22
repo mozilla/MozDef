@@ -208,7 +208,7 @@ class message(object):
                 if self.name in list(i.keys()):
                     blockfqdn = list(i.values())[0]
                 if 'fqdn' in list(i.keys()):
-                    fqdn = list(i.values()):[0]
+                    fqdn = list(i.values())[0]
                 if 'duration' in list(i.keys()):
                     duration = list(i.values())[0]
                 if 'comment' in list(i.keys()):
