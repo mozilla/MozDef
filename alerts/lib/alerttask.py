@@ -37,7 +37,7 @@ def keypaths(nested):
     """ return a list of nested dict key paths
         like: [u'_source', u'details', u'program']
     """
-    for key, value in nested.items():
+    for key, value in list(nested.items()):
         if isinstance(value, collections.Mapping):
             for subkey, subvalue in keypaths(value):
                 yield [key] + subkey, subvalue

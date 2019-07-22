@@ -23,7 +23,7 @@ class SessionOpenedUser(AlertTask):
         superquery = None
         run = 0
 
-        for user in self._config['users'].values():
+        for user in list(self._config['users'].values()):
             if run == 0:
                 superquery = PhraseMatch('summary', user)
             else:
@@ -38,7 +38,7 @@ class SessionOpenedUser(AlertTask):
             QueryStringMatch('summary:"session opened"')
         ])
 
-        for expectedtime in self._config['scan_expected'].values():
+        for expectedtime in list(self._config['scan_expected'].values()):
             r1 = datetime.datetime.now().replace(hour=int(expectedtime['start_hour']), minute=int(expectedtime['start_minute']), second=int(expectedtime['start_second'])).isoformat()
             r2 = datetime.datetime.now().replace(hour=int(expectedtime['end_hour']), minute=int(expectedtime['end_minute']), second=int(expectedtime['end_second'])).isoformat()
             search_query.add_must_not([
