@@ -166,9 +166,9 @@ class message(object):
             for i in request.json:
                 # were we checked?
                 if self.name in list(i.keys()):
-                    sendToBHVPC = list(i.values()):[0]
+                    sendToBHVPC = list(i.values())[0]
                 if 'ipaddress' in list(i.keys()):
-                    ipaddress = list(i.values()):[0]
+                    ipaddress = list(i.values())[0]
 
             # are we configured?
             if self.multioptions is None:
