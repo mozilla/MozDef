@@ -2,12 +2,12 @@ import sys
 from typing import Any, Dict, List
 import unittest
 
-sys.path.append('../mozdef_util')
+sys.path.extend(['geomodel', 'geomodel/mozdef_geomodel'])
 from mozdef_util.query_models import SearchQuery
 
-import mozdef_geomodel.config as config 
-import mozdef_geomodel.event as event 
-import mozdef_geomodel.query as query
+import geomodel.mozdef_geomodel.config as config 
+import geomodel.mozdef_geomodel.event as event 
+import geomodel.mozdef_geomodel.query as query
 
 
 def _query_interface(results: List[Dict[str, Any]]) -> query.QueryInterface:
@@ -114,4 +114,5 @@ class TestEvent(unittest.TestCase):
         assert None in usernames
         assert 'testuser' in usernames
         assert 'test2' in usernames
+
 
