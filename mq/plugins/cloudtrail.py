@@ -23,7 +23,6 @@ class message(object):
             'details.apiversion',
             'details.serviceeventdetails',
             'details.requestparameters.attribute',
-            'details.requestparameters.bucketpolicy.statement.principal',
             'details.requestparameters.bucketpolicy.statement.principal.service',
             'details.requestparameters.bucketpolicy.statement.principal.aws',
             'details.requestparameters.callerreference',
