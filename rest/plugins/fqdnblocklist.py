@@ -205,17 +205,17 @@ class message(object):
         try:
             for i in request.json:
                 # were we checked?
-                if self.name in list(i.keys()):
+                if self.name in i:
                     blockfqdn = list(i.values())[0]
-                if 'fqdn' in list(i.keys()):
+                if 'fqdn' in i:
                     fqdn = list(i.values())[0]
-                if 'duration' in list(i.keys()):
+                if 'duration' in i:
                     duration = list(i.values())[0]
-                if 'comment' in list(i.keys()):
+                if 'comment' in i:
                     comment = list(i.values())[0]
-                if 'referenceid' in list(i.keys()):
+                if 'referenceid' in i:
                     referenceID = list(i.values())[0]
-                if 'userid' in list(i.keys()):
+                if 'userid' in i:
                     userid = list(i.values())[0]
 
             if blockfqdn and fqdn is not None:
