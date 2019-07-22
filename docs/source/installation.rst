@@ -110,7 +110,7 @@ Then::
 
   source /opt/mozdef/envs/python/bin/activate
   cd /opt/mozdef/envs/mozdef
-  PYCURL_SSL_LIBRARY=nss pip install -r requirements.txt
+  PYCURL_SSL_LIBRARY=nss pip3 install -r requirements.txt
 
 
 Copy the following into a file called .bash_profile for the mozdef user within /opt/mozdef::
