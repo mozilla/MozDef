@@ -343,8 +343,8 @@ We use `uwsgi`_ to interface python and nginx, in your venv execute the followin
   wget https://projects.unbit.it/downloads/uwsgi-2.0.17.1.tar.gz
   tar zxvf uwsgi-2.0.17.1.tar.gz
   cd uwsgi-2.0.17.1
-  ~/python3.6/bin/python uwsgiconfig.py --build
-  ~/python3.6/bin/python uwsgiconfig.py  --plugin plugins/python core
+  ~/envs/python/bin/python uwsgiconfig.py --build
+  ~/envs/python/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/python/bin/
   cp uwsgi ~/envs/python/bin/
 
