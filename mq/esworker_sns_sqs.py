@@ -24,7 +24,6 @@ from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from mq.lib.aws import get_aws_credentials
 from mq.lib.plugins import sendEventToPlugins, registerPlugins
 from mq.lib.sqs import connect_sqs
 
@@ -192,11 +191,11 @@ def main():
         sys.exit(1)
 
     sqs_queue = connect_sqs(
-        task_exchange=options.taskexchange,
-        **get_aws_credentials(
-            options.region,
-            options.accesskey,
-            options.secretkey))
+        region_name=options.region,
+        aws_access_key_id=options.accesskey,
+        aws_secret_access_key=options.secretkey,
+        task_exchange=options.taskexchange
+    )
     # consume our queue
     taskConsumer(sqs_queue, es, options).run()
 
