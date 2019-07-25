@@ -126,21 +126,19 @@ class message(object):
         # loop through the fields of the form
         # and fill in our values
         try:
-            for i in request.json:
-                # were we checked?
-                if self.name in i.keys():
-                    watchitem = i.values()[0]
-                if 'watchcontent' in i.keys():
-                    watchcontent = i.values()[0]
-                if 'duration' in i.keys():
-                    duration = i.values()[0]
-                if 'comment' in i.keys():
-                    comment = i.values()[0]
-                if 'referenceid' in i.keys():
-                    referenceID = i.values()[0]
-                if 'userid' in i.keys():
-                    userid = i.values()[0]
-
+            for field in request.json:
+                if self.name in field:
+                    watchitem = field[self.name]
+                if 'watchcontent' in field:
+                    watchcontent = field['watchcontent']
+                if 'duration' in field:
+                    duration = field['duration']
+                if 'comment' in field:
+                    comment = field['comment']
+                if 'referenceid' in field:
+                    referenceID = field['referenceid']
+                if 'userid' in field:
+                    userid = field['userid']
             if watchitem and watchcontent is not None:
                 if len(watchcontent) < 2:
                     logger.error('{0} does not meet requirements. Not added. \n'.format(watchcontent))

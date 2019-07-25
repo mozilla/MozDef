@@ -10,7 +10,6 @@ import requests
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
-
 from mozdef_util.utilities.logger import logger
 
 
@@ -191,7 +190,7 @@ class message(object):
                                                      headers=headers,
                                                      data=post_data)
                             if response.ok:
-                                logger.info('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
+                                logger.debug('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
                             else:
                                 logger.error('%s: statuspage.io notification failed %s\n' % (str(ipcidr), response.json()))
                         except Exception as e:
@@ -201,7 +200,7 @@ class message(object):
             else:
                 logger.error('%s: is not a valid ip address\n' % (ipaddress))
         except Exception as e:
-            logger.error('Error while blocking %s: %s\n' % (ipaddress, e))
+            logger.exception('Error while blocking %s: %s\n' % (ipaddress, e))
 
     def onMessage(self, request, response):
         '''
@@ -221,23 +220,23 @@ class message(object):
         userid = None
         blockip = False
 
-        # loop through the fields of the form
-        # and fill in our values
         try:
-            for i in request.json:
+            # loop through the fields of the form
+            # and fill in our values
+            for field in request.json:
                 # were we checked?
-                if self.name in i:
-                    blockip = i.values()[0]
-                if 'ipaddress' in i:
-                    ipaddress = i.values()[0]
-                if 'duration' in i:
-                    duration = i.values()[0]
-                if 'comment' in i:
-                    comment = i.values()[0]
-                if 'referenceid' in i:
-                    referenceID = i.values()[0]
-                if 'userid' in i:
-                    userid = i.values()[0]
+                if self.name in field:
+                    blockip = field[self.name]
+                if 'ipaddress' in field:
+                    ipaddress = field['ipaddress']
+                if 'duration' in field:
+                    duration = field['duration']
+                if 'comment' in field:
+                    comment = field['comment']
+                if 'referenceid' in field:
+                    referenceID = field['referenceid']
+                if 'userid' in field:
+                    userid = field['userid']
 
             if blockip and ipaddress is not None:
                 # figure out the CIDR mask

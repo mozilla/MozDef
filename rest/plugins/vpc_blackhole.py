@@ -164,13 +164,12 @@ class message(object):
         # loop through the fields of the form
         # and fill in our values
         try:
-            for i in request.json:
+            for field in request.json:
                 # were we checked?
-                if self.name in i:
-                    sendToBHVPC = i.values()[0]
-                if 'ipaddress' in i:
-                    ipaddress = i.values()[0]
-
+                if self.name in field:
+                    sendToBHVPC = field[self.name]
+                if 'ipaddress' in field:
+                    ipaddress = field['ipaddress']
             # are we configured?
             if self.multioptions is None:
                 logger.error("Customs server blockip requested but not configured\n")

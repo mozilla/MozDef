@@ -204,21 +204,20 @@ class message(object):
         # loop through the fields of the form
         # and fill in our values
         try:
-            for i in request.json:
+            for field in request.json:
                 # were we checked?
-                if self.name in i:
-                    blockfqdn = i.values()[0]
-                if 'fqdn' in i:
-                    fqdn = i.values()[0]
-                if 'duration' in i:
-                    duration = i.values()[0]
-                if 'comment' in i:
-                    comment = i.values()[0]
-                if 'referenceid' in i:
-                    referenceID = i.values()[0]
-                if 'userid' in i:
-                    userid = i.values()[0]
-
+                if self.name in field:
+                    blockfqdn = field[self.name]
+                if 'fqdn' in field:
+                    fqdn = field['fqdn']
+                if 'duration' in field:
+                    duration = field['duration']
+                if 'comment' in field:
+                    comment = field['comment']
+                if 'referenceid' in field:
+                    referenceID = field['referenceid']
+                if 'userid' in field:
+                    userid = field['userid']
             if blockfqdn and fqdn is not None:
                 if isFQDN(fqdn):
                         whitelisted = False
