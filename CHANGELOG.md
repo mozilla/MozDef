@@ -184,7 +184,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased]: https://github.com/mozilla/MozDef/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v3.1.1...HEAD
+[v3.1.1]: https://github.com/mozilla/MozDef/compare/v3.1.0...v3.1.1
 [v3.1.0]: https://github.com/mozilla/MozDef/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/mozilla/MozDef/compare/v2.0.1...v3.0.0
 [v2.0.1]: https://github.com/mozilla/MozDef/compare/v2.0.0...v2.0.1
