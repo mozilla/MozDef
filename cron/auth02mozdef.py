@@ -16,15 +16,12 @@ import traceback
 import mozdef_client as mozdef
 
 from mozdef_util.utilities.dot_dict import DotDict
+from mozdef_util.utilities.logger import logger
 
 
 def fatal(msg):
     print(msg)
     sys.exit(1)
-
-
-def debug(msg):
-    sys.stderr.write("+++ {}\n".format(msg))
 
 
 # This is from https://auth0.com/docs/api/management/v2#!/Logs/get_logs
@@ -163,7 +160,7 @@ def process_msg(mozmsg, msg):
             details.success = True
     except KeyError:
         # New message type, check https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Logs/get_logs for ex.
-        debug("New auth0 message type, please add support: {}".format(msg.type))
+        logger.error("New auth0 message type, please add support: {}".format(msg.type))
         details["eventname"] = msg.type
 
     # determine severity level
@@ -323,7 +320,7 @@ def main():
         config = DotDict(hjson.load(fd))
 
     if config is None:
-        print("No configuration file 'auth02mozdef.json' found.")
+        logger.error("No configuration file 'auth02mozdef.json' found.")
         sys.exit(1)
 
     headers = {"Authorization": "Bearer {}".format(config.auth0.token), "Accept": "application/json"}
