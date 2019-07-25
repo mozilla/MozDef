@@ -1,21 +1,9 @@
-from typing import Any, Dict, List
 import unittest
-
-from mozdef_util.query_models import SearchQuery
 
 import alerts.geomodel.config as config
 import alerts.geomodel.event as event
-import alerts.geomodel.query as query
 
-
-def _query_interface(results: List[Dict[str, Any]]) -> query.QueryInterface:
-    '''Produce a `QueryInterface` that just returns the provided results.
-    '''
-
-    def closure(q: SearchQuery, esi: str) -> List[Dict[str, Any]]:
-        return results
-
-    return closure
+from tests.alerts.geomodel.util import query_interface
 
 
 class TestEvent(unittest.TestCase):
@@ -23,7 +11,7 @@ class TestEvent(unittest.TestCase):
     '''
 
     def test_find_all_retrieves_usernames(self):
-        query_iface = _query_interface([
+        query_iface = query_interface([
             {
                 'details': {
                     'username': 'testuser'
@@ -51,7 +39,7 @@ class TestEvent(unittest.TestCase):
         assert 'test2' in usernames
 
     def test_find_all_handles_bad_username_spec(self):
-        query_iface = _query_interface([
+        query_iface = query_interface([
             {
                 'details': {
                     'username': 'testuser'
@@ -78,7 +66,7 @@ class TestEvent(unittest.TestCase):
         assert usernames == [None, None]
 
     def test_find_all_makes_all_requests(self):
-        query_iface = _query_interface([
+        query_iface = query_interface([
             {
                 'details': {
                     'username': 'testuser'
