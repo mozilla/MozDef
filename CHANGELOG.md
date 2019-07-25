@@ -5,6 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v3.1.1] - 2019-07-25
+
+### Added
+- Ability to get open indices in ElasticsearchClient
+- Documentation on installing dependencies on Mac OS X
+
+### Changed
+- AWS Managed Elasticsearch/Kibana version to 6.7
+
+### Fixed
+- Disk free/total in /about page shows at most 2 decimal places
+- Connections to SQS and S3 without access key and secret
+- Ability to block IPs and add to Watchlist
+
+
 ## [v3.1.0] - 2019-07-18
 
 ### Added
@@ -40,6 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Dashboard Kibana URL
 - Unnecessary and conflicting package dependencies from MozDef and mozdef_util
 - get_indices to include closed indices
+
 
 ## [v3.0.0] - 2019-07-08
 ### Added
