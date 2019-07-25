@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, NamedTuple
 
 
@@ -70,5 +69,3 @@ class Config(NamedTuple):
     localities: Localities
     events: Events
     alerts: Alerts
-
-

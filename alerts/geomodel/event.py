@@ -1,20 +1,19 @@
 from functools import reduce
-import sys
 from typing import Any, Dict, List, NamedTuple
 
-from mozdef_util.query_models import \
-        QueryStringMatch as QSMatch, \
-        SearchQuery
+from mozdef_util.query_models import\
+    QueryStringMatch as QSMatch,\
+    SearchQuery
 
-import config
-import query
+import alerts.geomodel.config as config
+import alerts.geomodel.query as query
 
 
 def _lookup_path(nested_dict, dot_key):
     return reduce(
-            lambda d, k: d.get(k) if d is not None else None,
-            dot_key.split('.'),
-            nested_dict)
+        lambda d, k: d.get(k) if d is not None else None,
+        dot_key.split('.'),
+        nested_dict)
 
 
 # TODO: Replace with a dataclass when we move to Python 3.7+
@@ -30,7 +29,7 @@ class QueryResult(NamedTuple):
 def find_all(
         query_es: query.QueryInterface,
         evt_cfg: config.Events
-        ) -> List[QueryResult]:
+) -> List[QueryResult]:
     '''Retrieve events from ElasticSearch produced by running the set of
     queries Geoodel has been configured with.
     '''

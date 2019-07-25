@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import List, NamedTuple
+from typing import Any, Dict, List, NamedTuple, Optional
 
 from mozdef_util.query_models import SearchQuery, TermMatch
 
-import config
-import query
+import alerts.geomodel.config as config
+import alerts.geomodel.query as query
 
 
 # TODO: Switch to dataclasses when we move to Python3.7+
@@ -34,7 +34,7 @@ class State(NamedTuple):
 def find_all(
         query_es: query.QueryInterface,
         locality: config.Localities
-        ) -> List[State]:
+) -> List[State]:
     '''Retrieve all locality state from ElasticSearch.
     '''
 
@@ -43,7 +43,6 @@ def find_all(
             return State(**result)
         except TypeError:
             return None
-
 
     search = SearchQuery()
     search.add_must([TermMatch('type', 'locality')])

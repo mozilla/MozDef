@@ -3,7 +3,7 @@ from typing import List, NamedTuple
 
 
 _DEFAULT_SUMMARY = 'Authenticated action taken by a user outside of any of '\
-        'their known localities.'
+    'their known localities.'
 
 # TODO: Switch to dataclasses when we move to Python3.7+
 
@@ -33,23 +33,22 @@ class Alert(NamedTuple):
     tags: List[str]
     summary: str
 
-
     def new(
-            username: str,
-            sourceipv4: str,
-            origin: Origin,
-            summary: str = _DEFAULT_SUMMARY
-            ) -> 'Alert':
+        username: str,
+        sourceipv4: str,
+        origin: Origin,
+        summary: str = _DEFAULT_SUMMARY
+    ) -> 'Alert':
         '''Produce a new `Alert` with default values filled.
         '''
-        
+
         return Alert(
-                source='geomodel',
-                category='geomodel',
-                _type='geomodel',
-                username=username,
-                sourceipv4address=sourceipv4,
-                timestamp=datetime.now(),
-                origin=origin,
-                tags=['geomodel'],
-                summary=summary)
+            source='geomodel',
+            category='geomodel',
+            _type='geomodel',
+            username=username,
+            sourceipv4address=sourceipv4,
+            timestamp=datetime.now(),
+            origin=origin,
+            tags=['geomodel'],
+            summary=summary)
