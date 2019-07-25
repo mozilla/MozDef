@@ -2,7 +2,6 @@ from typing import Any, Dict, List
 import unittest
 
 from mozdef_util.query_models import SearchQuery
-from tests.unit_test_suite import UnitTestSuite
 
 import mozdef_geomodel.config as config
 import mozdef_geomodel.event as event
@@ -17,50 +16,6 @@ def _query_interface(results: List[Dict[str, Any]]) -> query.QueryInterface:
         return results
 
     return closure
-
-
-class TestEventAgainstElasticSearch(UnitTestSuite):
-    def test_real_query_interface(self):
-        cfg = config.Events('events', config.SearchWindow(minutes=10), [
-            {
-                'lucene': 'category:test',
-                'username': 'details.username'
-            }
-        ])
-
-        events = [
-            {
-                'category': 'test',
-                'details': {
-                    'username': 'test1'
-                }
-            },
-            {
-                'category': 'test',
-                'details': {
-                    'username': 'test2'
-                }
-            },
-            {
-                'category': 'test',
-                'details': {
-                    'username': 'test3'
-                }
-            }
-        ]
-
-        for evt in events:
-            self.populate_test_object(evt)
-        self.refresh(cfg.es_index)
-
-        run_query = query.wrap(self.es_client)
-        results = event.find_all(run_query, cfg)
-        usernames = [res.username for res in results]
-
-        assert len(results) == 3
-        assert 'test1' in usernames
-        assert 'test2' in usernames
-        assert 'test3' in usernames
 
 
 class TestEvent(unittest.TestCase):
@@ -154,3 +109,4 @@ class TestEvent(unittest.TestCase):
         assert None in usernames
         assert 'testuser' in usernames
         assert 'test2' in usernames
+
