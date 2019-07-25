@@ -24,7 +24,6 @@ def fatal(msg):
     sys.exit(1)
 
 
-
 # This is from https://auth0.com/docs/api/management/v2#!/Logs/get_logs
 # auth0 calls these events with an acronym and description
 # The logs have the acronym, but not the description
