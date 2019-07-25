@@ -5,10 +5,11 @@
 
 import os
 import random
-import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
+
+from mozdef_util.utilities.logger import logger
 
 
 def genMeteorID():
@@ -43,7 +44,7 @@ class message(object):
         self.configfile = './plugins/watchlist.conf'
         self.options = None
         if os.path.exists(self.configfile):
-            sys.stdout.write('found conf file {0}\n'.format(self.configfile))
+            logger.debug('found conf file {0}\n'.format(self.configfile))
         self.initConfiguration()
 
     def initConfiguration(self):
@@ -100,13 +101,13 @@ class message(object):
                 watched['creator']=userID
                 watched['reference']=referenceID
                 ref=watchlist.insert(watched)
-                sys.stdout.write('{0} written to db.\n'.format(ref))
-                sys.stdout.write('%s added to the watchlist table.\n' % (watchcontent))
+                logger.debug('{0} written to db.\n'.format(ref))
+                logger.debug('%s added to the watchlist table.\n' % (watchcontent))
 
             else:
-                sys.stderr.write('%s is already present in the watchlist table\n' % (str(watchcontent)))
+                logger.error('%s is already present in the watchlist table\n' % (str(watchcontent)))
         except Exception as e:
-            sys.stderr.write('Error while watching %s: %s\n' % (watchcontent, e))
+            logger.error('Error while watching %s: %s\n' % (watchcontent, e))
 
     def onMessage(self, request, response):
         '''
@@ -142,7 +143,7 @@ class message(object):
 
             if watchitem and watchcontent is not None:
                 if len(watchcontent) < 2:
-                    sys.stderr.write('{0} does not meet requirements. Not added. \n'.format(watchcontent))
+                    logger.error('{0} does not meet requirements. Not added. \n'.format(watchcontent))
 
                 else:
                     self.watchItem(str(watchcontent),
@@ -152,6 +153,6 @@ class message(object):
                                    userid)
 
         except Exception as e:
-            sys.stderr.write('Error handling request.json %r \n'% (e))
+            logger.error('Error handling request.json %r \n' % (e))
 
         return (request, response)

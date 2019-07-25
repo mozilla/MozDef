@@ -7,10 +7,11 @@ import netaddr
 import os
 import random
 import requests
-import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
+
+from mozdef_util.utilities.logger import logger
 
 
 def isIPv4(ip):
@@ -70,14 +71,14 @@ class message(object):
         self.configfile = './plugins/ipblocklist.conf'
         self.options = None
         if os.path.exists(self.configfile):
-            sys.stdout.write('found conf file {0}\n'.format(self.configfile))
+            logger.debug('found conf file {0}\n'.format(self.configfile))
         self.initConfiguration()
 
     def parse_network_whitelist(self, network_whitelist_location):
         networks = []
         with open(network_whitelist_location, "r") as text_file:
             for line in text_file:
-                line=line.strip().strip("'").strip('"')
+                line = line.strip().strip("'").strip('"')
                 if isIPv4(line) or isIPv6(line):
                     networks.append(line)
         return networks
@@ -140,11 +141,11 @@ class message(object):
                 ipblock = ipblocklist.find_one({'ipaddress': str(ipcidr)})
                 if ipblock is None:
                     # insert
-                    ipblock= dict()
+                    ipblock = dict()
                     ipblock['_id'] = genMeteorID()
                     # str to get the ip/cidr rather than netblock cidr.
                     # i.e. '1.2.3.4/24' not '1.2.3.0/24'
-                    ipblock['address']= str(ipcidr)
+                    ipblock['address'] = str(ipcidr)
                     ipblock['dateAdded'] = datetime.utcnow()
                     # Compute start and end dates
                     # default
@@ -166,8 +167,8 @@ class message(object):
                     ipblock['creator'] = userID
                     ipblock['reference'] = referenceID
                     ref = ipblocklist.insert(ipblock)
-                    sys.stdout.write('{0} written to db\n'.format(ref))
-                    sys.stdout.write('%s: added to the ipblocklist table\n' % (ipaddress))
+                    logger.debug('{0} written to db\n'.format(ref))
+                    logger.debug('%s: added to the ipblocklist table\n' % (ipaddress))
 
                     # send to statuspage.io?
                     if len(self.options.statuspage_api_key) > 1:
@@ -190,17 +191,17 @@ class message(object):
                                                      headers=headers,
                                                      data=post_data)
                             if response.ok:
-                                sys.stdout.write('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
+                                logger.info('%s: notification sent to statuspage.io\n' % (str(ipcidr)))
                             else:
-                                sys.stderr.write('%s: statuspage.io notification failed %s\n' % (str(ipcidr),response.json()))
+                                logger.error('%s: statuspage.io notification failed %s\n' % (str(ipcidr), response.json()))
                         except Exception as e:
-                            sys.stderr.write('Error while notifying statuspage.io for %s: %s\n' %(str(ipcidr),e))
+                            logger.error('Error while notifying statuspage.io for %s: %s\n' % (str(ipcidr), e))
                 else:
-                    sys.stderr.write('%s: is already present in the ipblocklist table\n' % (str(ipcidr)))
+                    logger.error('%s: is already present in the ipblocklist table\n' % (str(ipcidr)))
             else:
-                sys.stderr.write('%s: is not a valid ip address\n' % (ipaddress))
+                logger.error('%s: is not a valid ip address\n' % (ipaddress))
         except Exception as e:
-            sys.stderr.write('Error while blocking %s: %s\n' % (ipaddress, e))
+            logger.error('Error while blocking %s: %s\n' % (ipaddress, e))
 
     def onMessage(self, request, response):
         '''
@@ -251,7 +252,7 @@ class message(object):
                             whitelist_network = netaddr.IPNetwork(whitelist_range)
                             if ipcidr in whitelist_network:
                                 whitelisted = True
-                                sys.stdout.write('{0} is whitelisted as part of {1}\n'.format(ipcidr, whitelist_network))
+                                logger.debug('{0} is whitelisted as part of {1}\n'.format(ipcidr, whitelist_network))
 
                         if not whitelisted:
                             self.blockIP(str(ipcidr),
@@ -259,10 +260,10 @@ class message(object):
                                          duration,
                                          referenceID,
                                          userid)
-                            sys.stdout.write('added {0} to blocklist\n'.format(ipaddress))
+                            logger.info('added {0} to blocklist\n'.format(ipaddress))
                         else:
-                            sys.stdout.write('not adding {0} to blocklist, it was found in whitelist\n'.format(ipaddress))
+                            logger.info('not adding {0} to blocklist, it was found in whitelist\n'.format(ipaddress))
         except Exception as e:
-            sys.stderr.write('Error handling request.json %r \n'% (e))
+            logger.error('Error handling request.json %r \n' % (e))
 
         return (request, response)
