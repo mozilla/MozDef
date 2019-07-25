@@ -40,6 +40,11 @@ def find_all(
 
     def to_state(result: Dict[str, Any]) -> Optional[State]:
         try:
+            result['localities'] = [
+                Locality(**loc)
+                for loc in result['localities']
+            ]
+
             return State(**result)
         except TypeError:
             return None
