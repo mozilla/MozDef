@@ -228,9 +228,9 @@ class message(object):
 
                 if logtype == 'dhcp':
                     if 'assigned_addr' not in newmessage['details']:
-                        return (newmessage, metadata)
+                        newmessage['details']['assigned_addr'] = 0.0.0.0
                     if 'mac' not in newmessage['details']:
-                        return (newmessage, metadata)
+                        newmessage['details']['mac'] = "0000000000000000"
                     newmessage['details']['mac'] = newmessage['details']['mac'].replace(':'. '')
                     newmessage['summary'] = (
                         '{assigned_addr} assigned to '
