@@ -6,11 +6,12 @@ LABEL maintainer="mozdef@mozilla.com"
 ENV KIBANA_VERSION 6.8.0
 
 RUN \
-    curl -s -L https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz | tar -C / -xz && \
-    cd /kibana-$KIBANA_VERSION-linux-x86_64
+  mkdir /kibana && \
+  curl --silent --location https://artifacts.elastic.co/downloads/kibana/kibana-$KIBANA_VERSION-linux-x86_64.tar.gz \
+    | tar --extract --gzip --strip 1 --directory /kibana
 
-COPY docker/compose/kibana/files/kibana.yml /kibana-$KIBANA_VERSION-linux-x86_64/config/kibana.yml
+COPY docker/compose/kibana/files/kibana.yml /kibana/config/kibana.yml
 
-WORKDIR /kibana-$KIBANA_VERSION-linux-x86_64
+WORKDIR /kibana
 
 EXPOSE 5601

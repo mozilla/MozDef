@@ -4,14 +4,14 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 
-def get_aws_credentials(region=None, access_key=None, secret_key=None, security_token=None):
+def get_aws_credentials(region_name=None, aws_access_key_id=None, aws_secret_access_key=None, aws_session_token=None):
     result = {}
-    if region and region != '<add_region>':
-        result['region_name'] = region
-    if access_key and access_key != '<add_accesskey>':
-        result['aws_access_key_id'] = access_key
-    if secret_key and secret_key != '<add_secretkey>':
-        result['aws_secret_access_key'] = secret_key
-    if security_token:
-        result['security_token'] = security_token
+    if region_name and region_name != '<add_region>':
+        result['region_name'] = region_name
+    if aws_access_key_id and aws_access_key_id != '<add_accesskey>':
+        result['aws_access_key_id'] = aws_access_key_id
+    if aws_secret_access_key and aws_secret_access_key != '<add_secretkey>':
+        result['aws_secret_access_key'] = aws_secret_access_key
+    if aws_session_token:
+        result['aws_session_token'] = aws_session_token
     return result

@@ -129,6 +129,16 @@ caption, legend {
     display: none;
 }
 
+.dropdown-menu li:hover {
+    background: rgb(163, 163, 163);
+    cursor: pointer;
+}
+
+.tag:hover {
+    background: #5bc0de;
+    cursor: pointer;
+}
+
 .dropdown-submenu{position:relative;}
 .dropdown-submenu>.dropdown-menu{top:0;left:100%;-webkit-border-radius:0 6px 6px 6px;-moz-border-radius:0 6px 6px 6px;border-radius:0 6px 6px 6px;}
 .dropdown-submenu:active>.dropdown-menu, .dropdown-submenu:hover>.dropdown-menu {
