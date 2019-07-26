@@ -2,8 +2,53 @@ import unittest
 
 import alerts.geomodel.config as config
 import alerts.geomodel.event as event
+import alerts.geomodel.query as query
 
 from tests.alerts.geomodel.util import query_interface
+from tests.unit_test_suite import UnitTestSuite
+
+
+class TestEventElasticSearch(UnitTestSuite):
+    '''Tests for the `event` module that interact with ES.
+    '''
+
+    def test_simple_query(self):
+        events = [
+            {
+                'category': 'geomodel',
+                'details': {
+                    'username': 'testuser1'
+                }
+            },
+            {
+                'category': 'geomodel',
+                'details': {
+                    'username': 'tester2'
+                }
+            }
+        ]
+
+        for evt in events:
+            self.populate_test_object(evt)
+
+        self.refresh(self.event_index_name)
+
+        query_iface = query.wrap(self.es_client)
+        evt_cfg = config.Events(
+            self.event_index_name,
+            config.SearchWindow(minutes=30),
+            [
+                config.QuerySpec(
+                    lucene='category: geomodel',
+                    username='details.username')
+            ])
+
+        results = event.find_all(query_iface, evt_cfg)
+        usernames = [result.username for result in results]
+
+        assert len(results) == 2
+        assert 'testuser1' in usernames
+        assert 'tester2' in usernames
 
 
 class TestEvent(unittest.TestCase):

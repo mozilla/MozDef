@@ -42,6 +42,7 @@ def find_all(
 
         search_results = query_es(search, evt_cfg.es_index)
 
+        print(f'Got search results {search_results}')
         for result in search_results:
             username = _lookup_path(result, cfg.username)
 
