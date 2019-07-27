@@ -125,7 +125,7 @@ if state_index_name not in all_indices:
     client.create_index(state_index_name, index_config=state_index_settings)
 
 # Wait for kibana service to get ready
-total_num_tries = 10
+total_num_tries = 40
 for attempt in range(total_num_tries):
     try:
         if requests.get(kibana_url).ok:
@@ -133,7 +133,7 @@ for attempt in range(total_num_tries):
     except Exception:
         pass
     print('Unable to connect to Elasticsearch...retrying')
-    sleep(5)
+    sleep(10)
 else:
     print('Cannot connect to Kibana after ' + str(total_num_tries) + ' tries, exiting script.')
     exit(1)
