@@ -274,11 +274,11 @@ caption, legend {
 }
 
 .modal-header {
-    color: var(--font-focus);
+    color: var(--txt-secondary-color);
 }
   
   .modal-body {
-    color: var(--font-focus);
+    color: var(--txt-secondary-color);
 }
   
   .modal-body .row {
