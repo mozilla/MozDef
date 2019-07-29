@@ -1,0 +1,15 @@
+{
+  "dashboard": {
+    "title": "Cloudtrail Events",
+    "hits": 0,
+    "description": "",
+    "panelsJSON": "[{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"x\":12,\"y\":16,\"w\":12,\"h\":18,\"i\":\"1\"},\"id\":\"cloudtrail_eventname_pie_graph\",\"panelIndex\":\"1\",\"title\":\"Event Names\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":true}},\"gridData\":{\"x\":12,\"y\":0,\"w\":36,\"h\":16,\"i\":\"2\"},\"id\":\"cloudtrail_events_line_graph\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":12,\"h\":7,\"i\":\"3\"},\"id\":\"cloudtrail_total_event_count\",\"panelIndex\":\"3\",\"title\":\"# Events\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":24,\"y\":16,\"w\":24,\"h\":18,\"i\":\"4\"},\"id\":\"cloudtrail_events_map\",\"panelIndex\":\"4\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":7,\"w\":12,\"h\":15,\"i\":\"5\"},\"id\":\"cloudtrail_user_identity_table\",\"panelIndex\":\"5\",\"type\":\"visualization\",\"version\":\"6.8.0\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":22,\"w\":12,\"h\":12,\"i\":\"8\"},\"id\":\"cloudtrail_eventname_table\",\"panelIndex\":\"8\",\"type\":\"visualization\",\"version\":\"6.8.0\"}]",
+    "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+    "version": 1,
+    "timeRestore": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"index\":\"e3d06450-9b8d-11e9-9b0e-b35568cb01e3\",\"key\":\"source\",\"negate\":false,\"params\":{\"query\":\"cloudtrail\",\"type\":\"phrase\"},\"type\":\"phrase\",\"value\":\"cloudtrail\"},\"query\":{\"match\":{\"source\":{\"query\":\"cloudtrail\",\"type\":\"phrase\"}}}}]}"
+    }
+  },
+  "type": "dashboard"
+}

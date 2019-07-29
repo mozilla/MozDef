@@ -1,0 +1,13 @@
+{
+  "visualization": {
+    "title": "Cloudtrail Events Map",
+    "visState": "{\"title\":\"Cloudtrail Events Map\",\"type\":\"tile_map\",\"params\":{\"colorSchema\":\"Yellow to Red\",\"mapType\":\"Shaded Circle Markers\",\"isDesaturated\":true,\"addTooltip\":true,\"heatClusterSize\":1.5,\"legendPosition\":\"bottomright\",\"mapZoom\":2,\"mapCenter\":[0,0],\"wms\":{\"enabled\":false,\"options\":{\"format\":\"image/png\",\"transparent\":true},\"selectedTmsLayer\":{\"origin\":\"elastic_maps_service\",\"id\":\"road_map\",\"minZoom\":0,\"maxZoom\":18,\"attribution\":\"<p>&#169; <a href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap contributors</a>|<a href=\\\"https://openmaptiles.org\\\">OpenMapTiles</a>|<a href=\\\"https://www.maptiler.com\\\">MapTiler</a>|<a href=\\\"https://www.elastic.co/elastic-maps-service\\\">Elastic Maps Service</a></p>&#10;\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"geohash_grid\",\"schema\":\"segment\",\"params\":{\"field\":\"details.sourceipgeopoint\",\"autoPrecision\":true,\"isFilteredByCollar\":true,\"useGeocentroid\":true,\"mapZoom\":2,\"mapCenter\":{\"lon\":0,\"lat\":-0.17578097424708533},\"mapBounds\":{\"bottom_right\":{\"lat\":-83.94227191521858,\"lon\":282.30468750000006},\"top_left\":{\"lat\":83.9050579559856,\"lon\":-282.30468750000006}},\"precision\":2}}]}",
+    "uiStateJSON": "{}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"events-*\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+    }
+  },
+  "type": "visualization"
+}

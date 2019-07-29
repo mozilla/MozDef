@@ -1,0 +1,13 @@
+{
+  "visualization": {
+    "title": "Cloudtrail User Identify Table",
+    "visState": "{\"title\":\"Cloudtrail User Identify Table\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"details.useridentity.arn\",\"size\":2,\"order\":\"desc\",\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\"}}]}",
+    "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+    "description": "",
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"events-*\",\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+    }
+  },
+  "type": "visualization"
+}
