@@ -53,7 +53,7 @@ At this point, begin development and periodically run your unit-tests locally wi
 Background on concepts
 ----------------------
 
-- Logs - These are individual log entries that are typically emitted from systems, like an Apache log
+- Logs - These are individual log entries that are typically emitted from systems, like an Apache log.
 - Events - The entry point into MozDef, a log parsed into JSON by some log shipper (syslog-ng, nxlog) or a native JSON data source like GuardDuty, CloudTrail, most SaaS systems, etc.
 - Alerts - These are either a 1:1 events to alerts (this thing happens and alert) or a M:1 events to alerts (N of these things happen and alert).
 
