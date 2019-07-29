@@ -26,11 +26,11 @@ The Mozilla Enterprise Defense Platform (MozDef) seeks to automate the security 
 ## Goals:
 
 * Provide a platform for use by defenders to rapidly discover and respond to security incidents.
-* Automate interfaces to other systems like bunker, cymon, mig
-* Provide metrics for security events and incidents
-* Facilitate real-time collaboration amongst incident handlers
-* Facilitate repeatable, predictable processes for incident handling
-* Go beyond traditional SIEM systems in automating incident handling, information sharing, workflow, metrics and response automation
+* Automate interfaces to other systems like bunker, cymon, mig.
+* Provide metrics for security events and incidents.
+* Facilitate real-time collaboration amongst incident handlers.
+* Facilitate repeatable, predictable processes for incident handling.
+* Go beyond traditional SIEM systems in automating incident handling, information sharing, workflow, metrics and response automation.
 
 ## Status:
 
