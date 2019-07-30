@@ -29,7 +29,7 @@ class TestEventElasticSearch(UnitTestSuite):
         ]
 
         for evt in events:
-            self.populate_test_object(evt)
+            self.populate_test_event(evt)
 
         self.refresh(self.event_index_name)
 

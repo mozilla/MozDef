@@ -38,7 +38,9 @@ def find_all(
 
     for cfg in evt_cfg.queries:
         search = SearchQuery(minutes=evt_cfg.search_window.minutes)
-        search.add_must([QSMatch(cfg.lucene)])
+        search.add_must(QSMatch(cfg.lucene))
+
+        print(f'Constructed search query {search}')
 
         search_results = query_es(search, evt_cfg.es_index)
 

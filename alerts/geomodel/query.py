@@ -18,6 +18,8 @@ def wrap(client: ESClient) -> QueryInterface:
     '''
 
     def wrapper(query: SearchQuery, esindex: str) -> List[Dict[str, Any]]:
-        return query.execute(client, indices=[esindex]).get('hits', [])
+        hits = query.execute(client, indices=[esindex]).get('hits', [])
+
+        return [hit.get('_source', {}) for hit in hits]
 
     return wrapper

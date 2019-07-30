@@ -9,6 +9,10 @@ import alerts.geomodel.query as query
 
 # TODO: Switch to dataclasses when we move to Python3.7+
 
+def _dict_take(dictionary, keys):
+    return {key: dictionary[key] for key in keys}
+
+
 class Locality(NamedTuple):
     '''Represents a specific locality.
     '''
@@ -41,16 +45,18 @@ def find_all(
     def to_state(result: Dict[str, Any]) -> Optional[State]:
         try:
             result['localities'] = [
-                Locality(**loc)
+                Locality(**_dict_take(loc, Locality._fields))
                 for loc in result['localities']
             ]
 
-            return State(**result)
+            return State(**_dict_take(result, State._fields))
         except TypeError:
+            return None
+        except KeyError:
             return None
 
     search = SearchQuery()
-    search.add_must([TermMatch('type', 'locality')])
+    search.add_must([TermMatch('type_', 'locality')])
 
     results = query_es(search, locality.es_index)
 
