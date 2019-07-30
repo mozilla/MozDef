@@ -29,6 +29,7 @@ class message(object):
             'details.requestparameters.description',
             'details.requestparameters.describeflowlogsrequest.filter.value',
             'details.requestparameters.disableapitermination',
+            'details.requestparameters.distributionconfig.callerreference'
             'details.requestparameters.domainname',
             'details.requestparameters.domainnames',
             'details.requestparameters.ebsoptimized',
