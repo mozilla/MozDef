@@ -142,3 +142,42 @@ class TestEvent(unittest.TestCase):
         assert None in usernames
         assert 'testuser' in usernames
         assert 'test2' in usernames
+
+    def test_extract_sourceip_recurses_into_dicts(self):
+        test_data = {
+            'top': {
+                'inner1': {
+                    'nothere': 'value'
+                },
+                'inner2': [1, 2, 3, 4],
+                'inner3': {
+                    'deep': {
+                        'sourceipaddress': '4.3.2.1'
+                    }
+                }
+            }
+        }
+
+        ip = event.extract_sourceip(test_data)
+        assert ip == '4.3.2.1'
+
+    def test_extract_sourceip_recurses_into_lists(self):
+        test_data = {
+            'top': {
+                'dummy': {
+                    'key': 'value'
+                },
+                'dummy2': [1, 2, 3, 4],
+                'inner1': [
+                    {
+                        'sourceipaddress': '1.2.3.4'
+                    },
+                    {
+                        'nottherightkey': 'anothervalue'
+                    }
+                ]
+            }
+        }
+
+        ip = event.extract_sourceip(test_data)
+        assert ip == '1.2.3.4'

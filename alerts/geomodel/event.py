@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Any, Dict, List, NamedTuple
+from typing import Any, Dict, List, NamedTuple, Optional
 
 from mozdef_util.query_models import\
     QueryStringMatch as QSMatch,\
@@ -51,3 +51,41 @@ def find_all(
             events.append(QueryResult(username, result))
 
     return events
+
+
+def extract_sourceip(event: Dict[str, Any]) -> Optional[str]:
+    '''Search an event for a `sourceipaddress` field mapping to either an IPv4
+    or IPv6 address.
+    '''
+
+    ip = event.get('sourceipaddress', None)
+
+    if ip is not None:
+        return ip
+
+    for _key, value in event.items():
+        # First try recursing into a dictionary.
+        if isinstance(value, dict):
+            ip = extract_sourceip(value)
+
+            if ip is not None:
+                return ip
+            else:
+                continue
+
+        # Next check if we are looking at an array of dicts.
+        is_valid_array = isinstance(value, list) and\
+            all([isinstance(item, dict) for item in value])
+
+        if is_valid_array:
+            ips = list(filter(
+                lambda ip: ip is not None,
+                map(extract_sourceip, value)))
+
+            if len(ips) > 0:
+                return ips[0]
+            else:
+                continue
+
+    # Did not find the key anywhere.
+    return None
