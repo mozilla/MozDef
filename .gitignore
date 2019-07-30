@@ -19,3 +19,4 @@ docs/source/_build
 docs/source/_static
 *.swp
 *.egg-info/
+.python-version
