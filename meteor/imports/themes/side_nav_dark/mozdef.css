@@ -416,8 +416,13 @@ td{
   width: 500px;
 }
 
-.tabcontent{
-    margin-top: 20px;
+.tabcontent {
+  display: none;
+  margin-top: 20px;
+}
+
+.tabcontent.active {
+  display: block;
 }
 
 .tabnav a{
