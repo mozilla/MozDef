@@ -7,10 +7,11 @@ import os
 import random
 import requests
 import re
-import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from pymongo import MongoClient
+
+from mozdef_util.utilities.logger import logger
 
 
 def isFQDN(fqdn):
@@ -59,7 +60,7 @@ class message(object):
         self.configfile = './plugins/fqdnblocklist.conf'
         self.options = None
         if os.path.exists(self.configfile):
-            sys.stdout.write('found conf file {0}\n'.format(self.configfile))
+            logger.debug('found conf file {0}\n'.format(self.configfile))
         self.initConfiguration()
 
     def parse_fqdn_whitelist(self, fqdn_whitelist_location):
@@ -146,8 +147,8 @@ class message(object):
                     fqdnblock['creator'] = userID
                     fqdnblock['reference'] = referenceID
                     ref = fqdnblocklist.insert(fqdnblock)
-                    sys.stdout.write('{0} written to db\n'.format(ref))
-                    sys.stdout.write('%s: added to the fqdnblocklist table\n' % (fqdn))
+                    logger.debug('{0} written to db\n'.format(ref))
+                    logger.debug('%s: added to the fqdnblocklist table\n' % (fqdn))
 
                     # send to statuspage.io?
                     if len(self.options.statuspage_api_key) > 1:
@@ -170,17 +171,17 @@ class message(object):
                                                      headers=headers,
                                                      data=post_data)
                             if response.ok:
-                                sys.stdout.write('%s: notification sent to statuspage.io\n' % (fqdn))
+                                logger.info('%s: notification sent to statuspage.io\n' % (fqdn))
                             else:
-                                sys.stderr.write('%s: statuspage.io notification failed %s\n' % (fqdn, response.json()))
+                                logger.error('%s: statuspage.io notification failed %s\n' % (fqdn, response.json()))
                         except Exception as e:
-                            sys.stderr.write('Error while notifying statuspage.io for %s: %s\n' %(fqdn, e))
+                            logger.error('Error while notifying statuspage.io for %s: %s\n' % (fqdn, e))
                 else:
-                    sys.stderr.write('%s: is already present in the fqdnblocklist table\n' % (fqdn))
+                    logger.error('%s: is already present in the fqdnblocklist table\n' % (fqdn))
             else:
-                sys.stderr.write('%s: is not a valid fqdn\n' % (fqdn))
+                logger.error('%s: is not a valid fqdn\n' % (fqdn))
         except Exception as e:
-            sys.stderr.write('Error while blocking %s: %s\n' % (fqdn, e))
+            logger.error('Error while blocking %s: %s\n' % (fqdn, e))
 
     def onMessage(self, request, response):
         '''
@@ -203,28 +204,27 @@ class message(object):
         # loop through the fields of the form
         # and fill in our values
         try:
-            for i in request.json:
+            for field in request.json:
                 # were we checked?
-                if self.name in i:
-                    blockfqdn = i.values()[0]
-                if 'fqdn' in i:
-                    fqdn = i.values()[0]
-                if 'duration' in i:
-                    duration = i.values()[0]
-                if 'comment' in i:
-                    comment = i.values()[0]
-                if 'referenceid' in i:
-                    referenceID = i.values()[0]
-                if 'userid' in i:
-                    userid = i.values()[0]
-
+                if self.name in field:
+                    blockfqdn = field[self.name]
+                if 'fqdn' in field:
+                    fqdn = field['fqdn']
+                if 'duration' in field:
+                    duration = field['duration']
+                if 'comment' in field:
+                    comment = field['comment']
+                if 'referenceid' in field:
+                    referenceID = field['referenceid']
+                if 'userid' in field:
+                    userid = field['userid']
             if blockfqdn and fqdn is not None:
                 if isFQDN(fqdn):
                         whitelisted = False
                         for whitelist_fqdn in self.options.fqdnwhitelist:
                             if fqdn == whitelist_fqdn:
                                 whitelisted = True
-                                sys.stdout.write('{0} is whitelisted as part of {1}\n'.format(fqdn, whitelist_fqdn))
+                                logger.debug('{0} is whitelisted as part of {1}\n'.format(fqdn, whitelist_fqdn))
 
                         if not whitelisted:
                             self.blockFQDN(
@@ -234,15 +234,15 @@ class message(object):
                                 referenceID,
                                 userid
                             )
-                            sys.stdout.write('added {0} to blocklist\n'.format(fqdn))
+                            logger.debug('added {0} to blocklist\n'.format(fqdn))
                         else:
-                            sys.stdout.write('not adding {0} to blocklist, it was found in whitelist\n'.format(fqdn))
+                            logger.debug('not adding {0} to blocklist, it was found in whitelist\n'.format(fqdn))
                 else:
-                    sys.stdout.write('not adding {0} to blocklist, invalid fqdn\n'.format(fqdn))
+                    logger.error('not adding {0} to blocklist, invalid fqdn\n'.format(fqdn))
                     response.status = "400 invalid FQDN"
                     response.body = "invalid FQDN"
         except Exception as e:
-            sys.stderr.write('Error handling request.json %r \n' % (e))
+            logger.error('Error handling request.json %r \n' % (e))
             response.status = "500"
 
         return (request, response)

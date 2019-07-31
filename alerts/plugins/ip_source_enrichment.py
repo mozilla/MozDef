@@ -59,6 +59,8 @@ def enrich(alert, known_ips):
 
     alert = alert.copy()
 
+    if 'details' not in alert:
+        alert['details'] = {}
     alert['details']['sites'] = []
 
     for ip in set(ips):
@@ -140,6 +142,8 @@ class message(object):
     '''
 
     def __init__(self):
+        # Run plugin on all alerts
+        self.registration = '*'
         self._config = _load_config(CONFIG_FILE)
 
     def onMessage(self, message):

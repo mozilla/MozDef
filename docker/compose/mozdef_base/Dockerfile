@@ -5,54 +5,55 @@ LABEL maintainer="mozdef@mozilla.com"
 ENV TZ UTC
 
 RUN \
+  gpg="gpg --no-default-keyring --secret-keyring /dev/null --keyring /dev/null --no-option --keyid-format 0xlong" && \
+  rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+  rpm -qi gpg-pubkey-f4a80eb5 | $gpg | grep 0x24C6A8A7F4A80EB5 && \
+  rpmkeys --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 && \
+  rpm -qi gpg-pubkey-352c64e5 | $gpg | grep 0x6A2FAEA2352C64E5 && \
   yum makecache fast && \
   yum install -y epel-release && \
   yum install -y \
-                  glibc-devel \
-                  gcc \
-                  libstdc++ \
-                  libffi-devel \
-                  zlib-devel \
-                  libcurl-devel \
-                  openssl \
-                  openssl-devel \
-                  git \
-                  make && \
-  useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
-  mkdir /opt/mozdef/envs && \
-  cd /opt/mozdef && \
-  yum install -y python36 \
-                    python36-devel \
-                    python36-pip && \
+     glibc-devel \
+     gcc \
+     libstdc++ \
+     libffi-devel \
+     zlib-devel \
+     libcurl-devel \
+     openssl \
+     openssl-devel \
+     git \
+     make \
+     python36 \
+     python36-devel \
+     python36-pip && \
   yum clean all && \
+  rm -rf /var/cache/yum && \
+  useradd --create-home --shell /bin/bash --home-dir /opt/mozdef mozdef && \
   pip3 install virtualenv && \
-  mkdir /opt/mozdef/envs/mozdef && \
-  mkdir /opt/mozdef/envs/mozdef/cron
+  install --owner mozdef --group mozdef --directory /opt/mozdef/envs /opt/mozdef/envs/mozdef /opt/mozdef/envs/mozdef/cron
 
 # Force pycurl to understand we prefer nss backend
 # Pycurl with ssl support is required by kombu in order to use SQS
 ENV PYCURL_SSL_LIBRARY=nss
 
 # Create python virtual environment and install dependencies
-COPY requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
+COPY --chown=mozdef:mozdef requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
 
-COPY cron/update_geolite_db.py /opt/mozdef/envs/mozdef/cron/update_geolite_db.py
-COPY cron/update_geolite_db.conf /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
-COPY cron/update_geolite_db.sh /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
+COPY --chown=mozdef:mozdef cron/update_geolite_db.py /opt/mozdef/envs/mozdef/cron/update_geolite_db.py
+COPY --chown=mozdef:mozdef cron/update_geolite_db.conf /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
+COPY --chown=mozdef:mozdef cron/update_geolite_db.sh /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
 
-COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
-
-RUN chown -R mozdef:mozdef /opt/mozdef/
+COPY --chown=mozdef:mozdef mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
 
 USER mozdef
 RUN \
   virtualenv -p /usr/bin/python3.6 /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
-  pip install -r /opt/mozdef/envs/mozdef/requirements.txt && \
+  pip install --requirement /opt/mozdef/envs/mozdef/requirements.txt && \
   cd /opt/mozdef/envs/mozdef/mozdef_util && \
-  pip install -e .
+  pip install --editable . && \
+  mkdir /opt/mozdef/envs/mozdef/data
 
-RUN mkdir /opt/mozdef/envs/mozdef/data
 
 WORKDIR /opt/mozdef/envs/mozdef
 
@@ -62,7 +63,3 @@ VOLUME /opt/mozdef/envs/mozdef/data
 ENV PATH=/opt/mozdef/envs/python/bin:$PATH
 
 USER root
-
-# Remove once https://github.com/jeffbryner/configlib/pull/9 is mergeg
-# and a new version of configlib is in place
-RUN sed -i 's/from configlib import getConfig/from .configlib import getConfig/g' /opt/mozdef/envs/python/lib/python3.6/site-packages/configlib/__init__.py

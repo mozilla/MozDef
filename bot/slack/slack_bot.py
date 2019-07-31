@@ -20,10 +20,11 @@ greetings = [
 
 
 class SlackBot():
-    def __init__(self, api_key, channels, bot_name):
+    def __init__(self, api_key, channels, bot_name, notify_welcome):
         self.slack_client = SlackClient(api_key)
         self.channels = channels
         self.bot_name = bot_name
+        self.notify_welcome = notify_welcome
         self.load_commands()
 
     def load_commands(self):
@@ -36,7 +37,8 @@ class SlackBot():
     def run(self):
         if self.slack_client.rtm_connect():
             logger.info("Bot connected to slack")
-            self.post_welcome_message(random.choice(greetings))
+            if self.notify_welcome:
+                self.post_welcome_message(random.choice(greetings))
             self.listen_for_messages()
         else:
             logger.error("Unable to connect to slack")

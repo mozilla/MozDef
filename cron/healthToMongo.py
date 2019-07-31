@@ -77,11 +77,14 @@ def getEsNodesStats():
         load_str = "{0},{1},{2}".format(load_average['1m'], load_average['5m'], load_average['15m'])
         hostname = nodeid
         if 'host' in jsonobj['nodes'][nodeid]:
-            hostname=jsonobj['nodes'][nodeid]['host']
+            hostname = jsonobj['nodes'][nodeid]['host']
+
+        disk_free = "{0:.2f}".format(jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024))
+        disk_total = "{0:.2f}".format(jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024))
         results.append({
             'hostname': hostname,
-            'disk_free': jsonobj['nodes'][nodeid]['fs']['total']['free_in_bytes'] / (1024 * 1024 * 1024),
-            'disk_total': jsonobj['nodes'][nodeid]['fs']['total']['total_in_bytes'] / (1024 * 1024 * 1024),
+            'disk_free': disk_free,
+            'disk_total': disk_total,
             'mem_heap_per': jsonobj['nodes'][nodeid]['jvm']['mem']['heap_used_percent'],
             'gc_old': jsonobj['nodes'][nodeid]['jvm']['gc']['collectors']['old']['collection_time_in_millis'] / 1000,
             'cpu_usage': jsonobj['nodes'][nodeid]['os']['cpu']['percent'],

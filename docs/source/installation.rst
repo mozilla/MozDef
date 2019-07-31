@@ -113,6 +113,13 @@ Then::
   PYCURL_SSL_LIBRARY=nss pip install -r requirements.txt
 
 
+If you're using Mac OS X::
+
+  export PYCURL_SSL_LIBRARY=openssl
+  export LDFLAGS=-L/usr/local/opt/openssl/lib;export CPPFLAGS=-I/usr/local/opt/openssl/include
+  pip install -r requirements.txt
+
+
 Copy the following into a file called .bash_profile for the mozdef user within /opt/mozdef::
 
   [mozdef@server ~]$ vim /opt/mozdef/.bash_profile

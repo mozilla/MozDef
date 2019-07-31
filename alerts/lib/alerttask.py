@@ -20,6 +20,7 @@ from celery import Task
 from celery.utils.log import get_task_logger
 
 from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
 
@@ -545,6 +546,6 @@ class AlertTask(Task):
             try:
                 json_obj = json.load(fd)
             except ValueError:
-                sys.stderr.write("FAILED to open the configuration file\n")
+                logger.error("FAILED to open the configuration file\n")
 
         return json_obj
