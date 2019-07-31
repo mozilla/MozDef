@@ -183,7 +183,7 @@ def enrich(alert, search_fn, search_window, max_connections):
         TermMatch('source', 'conn'),
         TermMatch(
             'details.sourceipaddress',
-            alert['details']['sourceipaddress'])
+            alert['events'][0]['_source']['details']['sourceipaddress'])
     ])
 
     results = search_fn(search_query)
