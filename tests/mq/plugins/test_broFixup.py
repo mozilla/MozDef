@@ -595,7 +595,7 @@ class TestBroFixup(object):
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
-        assert result['summary'] == '0.0.0.0 assigned to 00:00:00:00:00:00'
+        assert result['summary'] == '0.0.0.0 assigned to 000000000000'
 
     def test_ftp_log(self):
         event = {
