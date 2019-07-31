@@ -23,7 +23,7 @@ class TestStateBasicInit(object):
         with pytest.raises(StateParsingError) as state_exception:
             State(state_path)
         expected_message = state_path + " state file found but isn't a recognized json format"
-        assert state_exception.value.message == expected_message
+        assert str(state_exception.value) == expected_message
 
 
 class TestStateSave(object):

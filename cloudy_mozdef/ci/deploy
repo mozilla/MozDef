@@ -1,0 +1,41 @@
+#!/bin/bash
+
+set -e  # Exit immediately if a command exits with a non-zero status.
+
+# echo "Begin test of the MozDef codebase."
+# export COMPOSE_INTERACTIVE_NO_CLI=1 make tests
+# The above does not currently work in a non-interactive TTY.
+# Fails with error
+# docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
+# the input device is not a TTY
+# make: *** [run-tests] Error 1
+# Then again we probably do not need to run the test suite here because it has been run three times to get the code here.
+# echo "Tests complete.
+
+# https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+echo "Processing webhook event for"
+echo "  Resolved Source Version : ${CODEBUILD_RESOLVED_SOURCE_VERSION}"
+echo "  Source Version : ${CODEBUILD_SOURCE_VERSION}"
+echo "  Base Ref : ${CODEBUILD_WEBHOOK_BASE_REF}"
+echo "  Event : ${CODEBUILD_WEBHOOK_EVENT}"
+echo "  Head Ref : ${CODEBUILD_WEBHOOK_HEAD_REF}"
+echo "  Trigger : ${CODEBUILD_WEBHOOK_TRIGGER}"
+
+if [ -z "${CODEBUILD_WEBHOOK_TRIGGER}" ]; then
+  echo "CODEBUILD_WEBHOOK_TRIGGER is unset, likely because this build was retried. Retry build isn't supported. Exiting"
+  exit 1
+fi
+echo "Codebuild is ubuntu 14.04. Installing packer in order to compensate. Someone should build a CI docker container \;)."
+wget -nv https://releases.hashicorp.com/packer/1.3.5/packer_1.3.5_linux_amd64.zip
+unzip packer_1.3.5_linux_amd64.zip -d /usr/bin
+echo "Building a release. C|_| This may take a bit.  Might as well grab a coffee."
+BRANCH="`echo $CODEBUILD_WEBHOOK_TRIGGER | cut -d '/' -f2`"
+make build-from-cwd
+make hub-login
+make BRANCH=${BRANCH} docker-push-tagged
+cd cloudy_mozdef
+make BRANCH=${BRANCH} packer-build-github
+make BRANCH=${BRANCH} publish-versioned-templates
+cd ..
+echo "End build of the MozDef codebase."
+

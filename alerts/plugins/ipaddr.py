@@ -24,7 +24,7 @@ def isIPv6(ip):
 
 def addError(message, error):
     '''add an error note to a message'''
-    if 'errors' not in message.keys():
+    if 'errors' not in message:
         message['errors'] = list()
     if isinstance(message['errors'], list):
         message['errors'].append(error)
@@ -33,9 +33,7 @@ def addError(message, error):
 class message(object):
     def __init__(self):
         '''
-        takes an incoming alert
-        and uses it to trigger an event using
-        the pager duty event api
+        uses heuristic to find and attach the source IP address of the alert
         '''
 
         # set my own conf file
@@ -74,25 +72,25 @@ class message(object):
         '''
 
         # here is where you do something with the incoming alert message
-        if 'events' in message.keys():
-            if 'documentsource' in message['events'][0].keys():
-                if 'details' in message['events'][0]['documentsource'].keys():
+        if 'events' in message:
+            if 'documentsource' in message['events'][0]:
+                if 'details' in message['events'][0]['documentsource']:
                     event = message['events'][0]['documentsource']['details']
                     if 'details' not in message:
                         message['details'] = {}
                     # forwarded header can be spoofed, so try it first,
                     # but override later if we've a better field.
-                    if 'http_x_forwarded_for' in event.keys():
+                    if 'http_x_forwarded_for' in event:
                         # should be a comma delimited list of ips with the original client listed first
                         ipText = event['http_x_forwarded_for'].split(',')[0]
-                        if isIPv4(ipText) and 'sourceipaddress' not in event.keys():
+                        if isIPv4(ipText) and 'sourceipaddress' not in event:
                             message['details']['sourceipaddress'] = ipText
-                        if isIPv4(ipText) and 'sourceipv4address' not in event.keys():
+                        if isIPv4(ipText) and 'sourceipv4address' not in event:
                             message['details']['sourceipv4address'] = ipText
-                        if isIPv6(ipText) and 'sourceipv6address' not in event.keys():
+                        if isIPv6(ipText) and 'sourceipv6address' not in event:
                             message['details']['sourceipv6address'] = ipText
 
-                    if 'sourceipaddress' in event.keys():
+                    if 'sourceipaddress' in event:
                         ipText = event['sourceipaddress']
                         if isIPv6(ipText):
                             event['sourceipv6address'] = ipText
@@ -106,7 +104,7 @@ class message(object):
                             message['details']['source'] = event['sourceipaddress']
                             message['details']['sourceipaddress'] = None
 
-                    if 'destinationipaddress' in event.keys():
+                    if 'destinationipaddress' in event:
                         ipText = event['destinationipaddress']
                         if isIPv6(ipText):
                             message['details']['destinationipv6address'] = ipText
@@ -120,7 +118,7 @@ class message(object):
                             message['details']['destination'] = event['destinationipaddress']
                             message['details']['destinationipaddress'] = None
 
-                    if 'cluster_client_ip' in event.keys():
+                    if 'cluster_client_ip' in event:
                         ipText = event['cluster_client_ip']
                         if isIPv4(ipText):
                             message['details']['sourceipaddress'] = ipText

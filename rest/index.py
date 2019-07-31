@@ -11,8 +11,8 @@ import pynsive
 import random
 import re
 import requests
-import sys
 import socket
+import importlib
 from bottle import route, run, response, request, default_app, post
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
@@ -345,7 +345,7 @@ def createIncident():
         return response
 
     # Validating Incident phase type
-    if (type(incident['phase']) not in (str, unicode) or
+    if (type(incident['phase']) is not str or
             incident['phase'] not in validIncidentPhases):
 
         response.status = 500
@@ -461,7 +461,7 @@ def registerPlugins():
         modules = pynsive.list_modules(module_name)
         for mfile in modules:
             module = pynsive.import_module(mfile)
-            reload(module)
+            importlib.reload(module)
             if not module:
                 raise ImportError('Unable to load module {}'.format(mfile))
             else:
@@ -521,24 +521,24 @@ def kibanaDashboards():
     try:
         es_client = ElasticsearchClient((list('{0}'.format(s) for s in options.esservers)))
         search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', 'dashboard'))
+        search_query.add_must(TermMatch('type', 'dashboard'))
         results = search_query.execute(es_client, indices=['.kibana'])
 
         for dashboard in results['hits']:
+            dashboard_id = dashboard['_id']
+            if dashboard_id.startswith('dashboard:'):
+                dashboard_id = dashboard_id.replace('dashboard:', '')
+
             resultsList.append({
-                'name': dashboard['_source']['title'],
-                'url': "%s#/%s/%s" % (
-                    options.kibanaurl,
-                    "dashboard",
-                    dashboard['_id']
-                )
+                'name': dashboard['_source']['dashboard']['title'],
+                'id': dashboard_id
             })
 
     except ElasticsearchInvalidIndex as e:
-        sys.stderr.write('Kibana dashboard index not found: {0}\n'.format(e))
+        logger.error('Kibana dashboard index not found: {0}\n'.format(e))
 
     except Exception as e:
-        sys.stderr.write('Kibana dashboard received error: {0}\n'.format(e))
+        logger.error('Kibana dashboard received error: {0}\n'.format(e))
 
     return json.dumps(resultsList)
 
@@ -554,7 +554,7 @@ def getWatchlist():
         # Log the entries we are removing to maintain an audit log
         expired = watchlistentries.find({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
         for entry in expired:
-            sys.stdout.write('Deleting entry {0} from watchlist /n'.format(entry))
+            logger.debug('Deleting entry {0} from watchlist /n'.format(entry))
 
         # delete any that expired
         watchlistentries.delete_many({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
@@ -577,7 +577,7 @@ def getWatchlist():
             )
         return json.dumps(WatchList)
     except ValueError as e:
-        sys.stderr.write('Exception {0} collecting watch list\n'.format(e))
+        logger.error('Exception {0} collecting watch list\n'.format(e))
 
 
 def getWhois(ipaddress):
@@ -590,7 +590,7 @@ def getWhois(ipaddress):
         whois['fqdn']=socket.getfqdn(str(netaddr.IPNetwork(ipaddress)[0]))
         return (json.dumps(whois))
     except Exception as e:
-        sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
+        logger.error('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
 
 
 def verisSummary(verisRegex=None):
@@ -616,7 +616,7 @@ def verisSummary(verisRegex=None):
         else:
             return json.dumps(list())
     except Exception as e:
-            sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
+            logger.error('Exception while aggregating veris summary: {0}\n'.format(e))
 
 
 def initConfig():
@@ -627,9 +627,6 @@ def initConfig():
     options.esservers = list(getConfig('esservers',
                                        'http://localhost:9200',
                                        options.configfile).split(','))
-    options.kibanaurl = getConfig('kibanaurl',
-                                  'http://localhost:9090',
-                                  options.configfile)
 
     # mongo connectivity options
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)

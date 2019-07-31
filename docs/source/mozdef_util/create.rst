@@ -56,7 +56,7 @@ Create a new generic document
    document_dict = {
        "example_key": "example value"
    }
-   es_client.save_object(index='randomindex', doc_type='randomtype', body=document_dict)
+   es_client.save_object(index='randomindex', body=document_dict)
 
 Update an existing document
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,7 +68,7 @@ Update an existing document
        "example_key": "example new value"
    }
    # Assuming 12345 is the id of the existing entry
-   es_client.save_object(index='randomindex', doc_type='randomtype', body=document_dict, doc_id="12345")
+   es_client.save_object(index='randomindex', body=document_dict, doc_id="12345")
 
 Bulk Importing
 ^^^^^^^^^^^^^^

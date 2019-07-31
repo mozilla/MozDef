@@ -1,7 +1,7 @@
-from positive_alert_test_case import PositiveAlertTestCase
-from negative_alert_test_case import NegativeAlertTestCase
+from .positive_alert_test_case import PositiveAlertTestCase
+from .negative_alert_test_case import NegativeAlertTestCase
 
-from alert_test_suite import AlertTestSuite
+from .alert_test_suite import AlertTestSuite
 
 
 class TestSSHKey(AlertTestSuite):
@@ -11,7 +11,6 @@ class TestSSHKey(AlertTestSuite):
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
-        '_type': 'event',
         '_source': {
             'category': 'event',
             'processid': '19690',

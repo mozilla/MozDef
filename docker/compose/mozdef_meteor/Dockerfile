@@ -11,45 +11,52 @@ ENV PORT=3000
 
 ARG METEOR_BUILD='YES'
 
-RUN \
-  useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
-  mkdir -p /opt/mozdef/envs/mozdef && \
-  cd /opt/mozdef && \
-  chown -R mozdef:mozdef /opt/mozdef && \
-  curl -sL https://rpm.nodesource.com/setup_8.x | bash - && \
-  yum makecache fast && \
-  yum install -y \
-                wget \
-                make \
-                glibc-devel \
-                gcc \
-                gcc-c++ \
-                libstdc++ \
-                libffi-devel \
-                zlib-devel \
-                nodejs && \
-  yum clean all && \
-  mkdir /opt/mozdef/meteor && \
-  curl -sL -o /opt/mozdef/meteor.tar.gz https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz && \
-  tar -xzf /opt/mozdef/meteor.tar.gz -C /opt/mozdef/meteor && \
-  mv /opt/mozdef/meteor/.meteor /opt/mozdef && \
-  rm -r /opt/mozdef/meteor && \
-  cp /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
+# Ignore warnings like 'No such file or directory for /usr/share/info/*.info.gz"
+# https://bugzilla.redhat.com/show_bug.cgi?id=516757
 
-COPY meteor /opt/mozdef/envs/mozdef/meteor
-RUN chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
+RUN \
+  useradd --create-home --shell /bin/bash --home-dir /opt/mozdef mozdef && \
+  cd /opt/mozdef && \
+  gpg="gpg --no-default-keyring --secret-keyring /dev/null --keyring /dev/null --no-option --keyid-format 0xlong" && \
+  rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+  rpm -qi gpg-pubkey-f4a80eb5 | $gpg | grep 0x24C6A8A7F4A80EB5 && \
+  yum makecache fast && \
+  yum install -y which && \
+  curl --silent --location https://rpm.nodesource.com/setup_8.x | bash - && \
+  rpmkeys --import /etc/pki/rpm-gpg/NODESOURCE-GPG-SIGNING-KEY-EL && \
+  rpm -qi gpg-pubkey-34fa74dd | $gpg | grep 0x5DDBE8D434FA74DD && \
+  yum install -y \
+     make \
+     glibc-devel \
+     gcc \
+     gcc-c++ \
+     libstdc++ \
+     libffi-devel \
+     zlib-devel \
+     nodejs && \
+  yum clean all && \
+  rm -rf /var/cache/yum && \
+  echo "Downloading meteor" && \
+  curl --silent --location https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz \
+    | tar --extract --gzip --directory /opt/mozdef .meteor && \
+  ln --symbolic /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor && \
+  install --owner mozdef --group mozdef --directory /opt/mozdef/envs /opt/mozdef/envs/mozdef
+
+COPY --chown=mozdef:mozdef meteor /opt/mozdef/envs/mozdef/meteor
 
 USER mozdef
-RUN mkdir -p /opt/mozdef/envs/meteor/mozdef
 
 # build meteor runtime if asked, if set to NO, only create the dir created above to mount to do live development
-RUN if [ "${METEOR_BUILD}" = "YES" ]; then \
-        cd /opt/mozdef/envs/mozdef/meteor && \
-        meteor npm install && \
-        meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \
-        cp -r /opt/mozdef/envs/mozdef/meteor/node_modules /opt/mozdef/envs/meteor/mozdef/node_modules &&\
-        cd /opt/mozdef/envs/meteor/mozdef/bundle/programs/server && \
-        npm install ;\
+RUN \
+  if [ "${METEOR_BUILD}" = "YES" ]; then \
+    mkdir -p /opt/mozdef/envs/meteor/mozdef && \
+    cd /opt/mozdef/envs/mozdef/meteor && \
+    meteor npm install && \
+    echo "Starting meteor build" && \
+    time meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \
+    ln --symbolic /opt/mozdef/envs/meteor/mozdef/node_modules /opt/mozdef/envs/mozdef/meteor/node_modules && \
+    cd /opt/mozdef/envs/meteor/mozdef/bundle/programs/server && \
+    npm install ;\
   fi
 
 WORKDIR /opt/mozdef/envs/meteor/mozdef

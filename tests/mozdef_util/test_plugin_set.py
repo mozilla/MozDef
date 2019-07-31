@@ -9,13 +9,14 @@ class TestPluginSet(object):
         self.plugin_set = PluginSet(self.plugin_dir)
         self.metadata = {
             'index': 'test',
-            'doc_type': 'testdoc',
         }
 
     def test_registered_plugins(self):
-        total_num_plugins = len([name for name in os.listdir(self.plugin_dir)])
-        # We exclude the __init__.py file
-        assert len(self.plugin_set.enabled_plugins) == total_num_plugins - 1
+        total_num_plugins = 0
+        for name in os.listdir(self.plugin_dir):
+            if name.startswith('plugin'):
+                total_num_plugins += 1
+        assert len(self.plugin_set.enabled_plugins) == total_num_plugins
 
     def test_registered_plugins_specific_enabled_plugins(self):
         enabled_plugins = ['plugin1']

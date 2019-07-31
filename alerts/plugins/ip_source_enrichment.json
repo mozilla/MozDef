@@ -1,0 +1,14 @@
+{
+  "known": [
+    {
+      "range": "8.32.0.0/16",
+      "site": "OFFICE1",
+      "format": "{0} is in OFFICE1."
+    },
+    {
+      "range": "4a00:7a49:232::/48",
+      "site": "OFFICE2",
+      "format": "{0} is in OFFICE2."
+    }
+  ]
+}

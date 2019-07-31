@@ -17,7 +17,6 @@ You're done! Now go to:
  * http://localhost:9090/app/kibana < kibana
  * http://localhost:9200 < elasticsearch
  * http://localhost:8080 < loginput
- * http://localhost:8081 < rest api
 
 
 .. _docker: https://www.docker.io/
@@ -46,9 +45,38 @@ Manual Installation for Yum or Apt based distros
 
 Summary
 *******
-This section explains the manual installation process for the MozDef system::
+This section explains the manual installation process for the MozDef system
 
-  git clone https://github.com/mozilla/MozDef.git mozdef
+Create a mozdef user.
+
+On Yum-based systems::
+
+  adduser mozdef -d /opt/mozdef
+  mkdir /opt/mozdef/envs
+  chown -R mozdef:mozdef /opt/mozdef
+
+On APT-based systems::
+
+  useradd -m -d /opt/mozdef -s /bin/bash mozdef
+  mkdir /opt/mozdef/envs
+  chown -R mozdef:mozdef /opt/mozdef
+
+Clone repository.
+
+On Yum-based systems::
+
+  yum install -y git
+  su mozdef
+  cd
+  git clone https://github.com/mozilla/MozDef.git /opt/mozdef/envs/mozdef
+
+On APT-based systems::
+
+  apt-get install -y git
+  su mozdef
+  cd
+  git clone https://github.com/mozilla/MozDef.git /opt/mozdef/envs/mozdef
+
 
 Web and Workers nodes
 ---------------------
@@ -58,48 +86,41 @@ This section explains the manual installation process for Web and Workers nodes.
 Python
 ******
 
-Create a mozdef user::
-
-  adduser mozdef -d /opt/mozdef
-  cp /etc/skel/.bash* /opt/mozdef/
-  cd /opt/mozdef
-  chown mozdef: .bash*
-  chown -R mozdef: *
-
-We need to install a python2.7 virtualenv.
+We need to install a python3.6 virtualenv.
 
 On Yum-based systems::
 
-  sudo yum install make zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel pcre-devel gcc gcc-c++ mysql-devel
+  yum install -y epel-release
+  yum install -y python36 python36-devel python3-pip libcurl-devel gcc
+  pip3 install virtualenv
+  su mozdef
+  cd /opt/mozdef/envs
+  virtualenv -p /bin/python3 /opt/mozdef/envs/python
 
 On APT-based systems::
 
-  sudo apt-get install make zlib1g-dev libbz2-dev libssl-dev libncurses5-dev libsqlite3-dev libreadline-dev tk-dev libpcre3-dev libpcre++-dev build-essential g++ libmysqlclient-dev
+  apt-get install libcurl4-openssl-dev libssl-dev
+  apt-get install python3-pip
+  pip3 install virtualenv
+  su mozdef
+  cd /opt/mozdef/envs
+  virtualenv -p /usr/bin/python3 /opt/mozdef/envs/python
 
 Then::
 
-  sudo -i -u mozdef -g mozdef
-  mkdir /opt/mozdef/python2.7
-  wget https://www.python.org/ftp/python/2.7.11/Python-2.7.11.tgz
-  tar xvzf Python-2.7.11.tgz
-  cd Python-2.7.11
-  ./configure --prefix=/opt/mozdef/python2.7 --enable-shared LDFLAGS="-Wl,--rpath=/opt/mozdef/python2.7/lib"
-  make
-  make install
+  source /opt/mozdef/envs/python/bin/activate
+  cd /opt/mozdef/envs/mozdef
+  PYCURL_SSL_LIBRARY=nss pip install -r requirements.txt
 
-  cd /opt/mozdef
 
-  wget https://bootstrap.pypa.io/get-pip.py
-  export LD_LIBRARY_PATH=/opt/mozdef/python2.7/lib/
-  ./python2.7/bin/python get-pip.py
-  ./python2.7/bin/pip install virtualenv
-  mkdir ~/envs
-  cd ~/envs
-  ~/python2.7/bin/virtualenv python
-  source python/bin/activate
-  pip install -r ../requirements.txt
+If you're using Mac OS X::
 
-Copy the following into a file called .bash_profile for the mozdef user within /opt/mozdef:
+  export PYCURL_SSL_LIBRARY=openssl
+  export LDFLAGS=-L/usr/local/opt/openssl/lib;export CPPFLAGS=-I/usr/local/opt/openssl/include
+  pip install -r requirements.txt
+
+
+Copy the following into a file called .bash_profile for the mozdef user within /opt/mozdef::
 
   [mozdef@server ~]$ vim /opt/mozdef/.bash_profile
 
@@ -109,9 +130,8 @@ Copy the following into a file called .bash_profile for the mozdef user within /
 
   export PATH
 
-At this point when you launch python from within your virtual environment, It should tell you that you're using Python 2.7.11.
+At this point when you launch python from within your virtual environment, It should tell you that you're using Python 3.6.9.
 
-Whenever you launch a python script from now on, you should have your mozdef virtualenv active and your LD_LIBRARY_PATH env variable should include /opt/mozdef/python2.7/lib/ automatically.
 
 RabbitMQ
 ********
@@ -330,8 +350,8 @@ We use `uwsgi`_ to interface python and nginx, in your venv execute the followin
   wget https://projects.unbit.it/downloads/uwsgi-2.0.17.1.tar.gz
   tar zxvf uwsgi-2.0.17.1.tar.gz
   cd uwsgi-2.0.17.1
-  ~/python2.7/bin/python uwsgiconfig.py --build
-  ~/python2.7/bin/python uwsgiconfig.py  --plugin plugins/python core
+  ~/python3.6/bin/python uwsgiconfig.py --build
+  ~/python3.6/bin/python uwsgiconfig.py  --plugin plugins/python core
   cp python_plugin.so ~/envs/python/bin/
   cp uwsgi ~/envs/python/bin/
 
@@ -370,7 +390,7 @@ you can start the restapi and loginput processes from within your venv via::
 Supervisord
 ***********
 
-We use supervisord to run the alerts and alertplugins. If you plan on starting services manually, you can skip this step.
+We use supervisord to run the alerts and alertactions. If you plan on starting services manually, you can skip this step.
 
 To install supervisord perform the following as the user mozdef::
 
@@ -381,7 +401,7 @@ To install supervisord perform the following as the user mozdef::
 
 Within the alerts directory there is a supervisord_alerts.ini which is preconfigured.
 If you've changed any directory paths for this installation then modify it to reflect your pathing changes.
-There are systemd files in the systemdfiles directory that you can use to start the mozdefalerts and mozdefalertplugins processes which we cover near the end of this tutorial.
+There are systemd files in the systemdfiles directory that you can use to start the mozdefalerts and mozdefalertactions processes which we cover near the end of this tutorial.
 
 
 ElasticSearch
@@ -429,7 +449,7 @@ You should now be able to access to Marvel at http://any-server-in-cluster:9200/
 Kibana
 ******
 
-`Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data::
+`Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data
 
 Create the Repo in /etc/yum/repos.d/kibana.repo::
 
@@ -473,7 +493,7 @@ Ensure it has root file permissions so that systemd can start it::
   cp /opt/mozdef/systemdfiles/consumer/mworker-eventtask.service /etc/systemd/system/
   cp /opt/mozdef/systemdfiles/alert/mozdefalerts.service /etc/systemd/system/
   cp /opt/mozdef/systemdfiles/alert/mozdefbot.service /etc/systemd/system/
-  cp /opt/mozdef/systemdfiles/alert/mozdefalertplugins.service /etc/systemd/system/
+  cp /opt/mozdef/systemdfiles/alert/mozdefalertactions.service /etc/systemd/system/
 
 Then you will need to enable them::
 
@@ -483,7 +503,7 @@ Then you will need to enable them::
   systemctl enable mworker-eventtask.service
   systemctl enable mozdefalerts.service
   systemctl enable mozdefbot.service
-  systemctl enable mozdefalertplugins.service
+  systemctl enable mozdefalertactions.service
   systemctl enable mongod.service
 
 Reload systemd::
@@ -499,7 +519,7 @@ Now you can start your services::
   systemctl start mozdefrestapi
   systemctl start mozdefweb
   systemctl start mworker-eventtask
-  systemctl start mozdefalertplugins
+  systemctl start mozdefalertactions
 
 
 Alternatively you can start the following services manually in this way from inside the venv as mozdef::

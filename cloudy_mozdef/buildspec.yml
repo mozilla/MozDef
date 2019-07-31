@@ -1,0 +1,7 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - mkdir -p serverless-functions/build/python/lib/python3.6/site-packages
+      - bash cloudy_mozdef/ci/deploy

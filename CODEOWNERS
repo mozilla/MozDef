@@ -1,0 +1,12 @@
+# The threat management team will be the default owners for everything in the
+# repo. Unless a later match takes precedence, these users will be requested for
+# review when someone opens a pull request.
+*                @pwnbus @mpurzynski @Phrozyn @tristanweir
+
+# Allow review by Gene or Andrew for cloudy MozDef code
+/cloudy_mozdef/  @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
+
+# Entire set can review certain documentation files
+/README.md       @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
+/CHANGELOG.md    @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
+/docs/           @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug

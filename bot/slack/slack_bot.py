@@ -2,6 +2,7 @@ import random
 import sys
 import os
 import time
+import websocket
 
 from slackclient import SlackClient
 
@@ -19,10 +20,11 @@ greetings = [
 
 
 class SlackBot():
-    def __init__(self, api_key, channels, bot_name):
+    def __init__(self, api_key, channels, bot_name, notify_welcome):
         self.slack_client = SlackClient(api_key)
         self.channels = channels
         self.bot_name = bot_name
+        self.notify_welcome = notify_welcome
         self.load_commands()
 
     def load_commands(self):
@@ -35,7 +37,8 @@ class SlackBot():
     def run(self):
         if self.slack_client.rtm_connect():
             logger.info("Bot connected to slack")
-            self.post_welcome_message(random.choice(greetings))
+            if self.notify_welcome:
+                self.post_welcome_message(random.choice(greetings))
             self.listen_for_messages()
         else:
             logger.error("Unable to connect to slack")
@@ -49,7 +52,7 @@ class SlackBot():
 
         if command == '!help':
             response = "\nHelp is on it's way...try these:\n"
-            for command_name, plugin in self.plugins.iteritems():
+            for command_name, plugin in self.plugins.items():
                 response += "\n{0} -- {1}".format(
                     command_name,
                     plugin['help_text']
@@ -94,11 +97,16 @@ class SlackBot():
 
     def listen_for_messages(self):
         while True:
-            for slack_message in self.slack_client.rtm_read():
-                message_type = slack_message.get('type')
-                if message_type == 'desktop_notification':
-                    logger.info("Received message: {0}".format(slack_message['content']))
-                    self.handle_message(slack_message)
+            try:
+                for slack_message in self.slack_client.rtm_read():
+                    message_type = slack_message.get('type')
+                    if message_type == 'desktop_notification':
+                        logger.info("Received message: {0}".format(slack_message['content']))
+                        self.handle_message(slack_message)
+            except websocket.WebSocketConnectionClosedException:
+                logger.info("Received WebSocketConnectionClosedException exception...reconnecting")
+                time.sleep(3)
+                self.slack_client.rtm_connect()
             time.sleep(1)
 
     def post_thread_message(self, text, channel, thread_ts):

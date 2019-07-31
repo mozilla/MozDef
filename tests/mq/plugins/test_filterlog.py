@@ -18,7 +18,6 @@ class TestFilterlog():
 
     def test_onMessage(self):
         metadata = {}
-        metadata['doc_type'] = 'event'
 
         expected_return_message = {
             'details': {

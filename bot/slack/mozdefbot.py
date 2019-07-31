@@ -49,7 +49,7 @@ class AlertConsumer(ConsumerMixin):
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
                 body_dict = body
-            elif isinstance(body, str) or isinstance(body, unicode):
+            elif isinstance(body, str):
                 try:
                     body_dict = json.loads(body)  # lets assume it's json
                 except ValueError as e:
@@ -160,6 +160,9 @@ def init_config():
     # mqack=True sets persistant delivery, False sets transient delivery
     options.mq_ack = get_config('mqack', True, options.configfile)
 
+    # wether or not the bot should send a welcome message upon connecting
+    options.notify_welcome = get_config('notify_welcome', True, options.configfile)
+
 
 if __name__ == "__main__":
     parser = OptionParser()
@@ -170,7 +173,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     init_config()
 
-    bot = SlackBot(options.slack_token, options.channels, options.name)
+    bot = SlackBot(options.slack_token, options.channels, options.name, options.notify_welcome)
     monitor_alerts_thread = Thread(target=consume_alerts, args=[bot])
     monitor_alerts_thread.daemon = True
     monitor_alerts_thread.start()

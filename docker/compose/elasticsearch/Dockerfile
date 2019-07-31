@@ -2,29 +2,30 @@ FROM centos:7
 
 LABEL maintainer="mozdef@mozilla.com"
 
-ENV ES_VERSION 5.6.14
+ENV ES_VERSION 6.8.0
 ENV ES_JAVA_VERSION 1.8.0
 
+
 RUN \
-  useradd -ms /bin/bash -d /opt/mozdef -m mozdef && \
+  gpg="gpg --no-default-keyring --secret-keyring /dev/null --keyring /dev/null --no-option --keyid-format 0xlong" && \
+  rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+  rpm -qi gpg-pubkey-f4a80eb5 | $gpg | grep 0x24C6A8A7F4A80EB5 && \
+  rpmkeys --import https://packages.elastic.co/GPG-KEY-elasticsearch && \
+  rpm -qi gpg-pubkey-d88e42b4-52371eca | $gpg | grep 0xD27D666CD88E42B4 && \
   yum install -y java-$ES_JAVA_VERSION && \
   mkdir -p /opt/mozdef/envs && \
-  curl -s -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ES_VERSION.tar.gz  | tar -C /opt/mozdef -xz && \
-  mv /opt/mozdef/elasticsearch-$ES_VERSION /opt/mozdef/envs/elasticsearch && \
-  chown -R mozdef:mozdef /opt/mozdef && \
-  mkdir /var/log/elasticsearch && \
-  chown -R mozdef:mozdef /var/log/elasticsearch && \
-  mkdir /var/lib/elasticsearch && \
-  chown -R mozdef:mozdef /var/lib/elasticsearch && \
-  yum clean all
+  curl --silent --location https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ES_VERSION.rpm -o elasticsearch.rpm && \
+  rpm --install elasticsearch.rpm && \
+  yum clean all && \
+  rm -rf /var/cache/yum
 
-COPY docker/compose/elasticsearch/files/elasticsearch.yml /opt/mozdef/envs/elasticsearch/config/
-COPY docker/compose/elasticsearch/files/jvm.options /opt/mozdef/envs/elasticsearch/config/
+USER elasticsearch
 
-WORKDIR /opt/mozdef/envs/elasticsearch
+COPY docker/compose/elasticsearch/files/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+COPY docker/compose/elasticsearch/files/jvm.options /etc/elasticsearch/jvm.options
 
 VOLUME /var/lib/elasticsearch
 
-EXPOSE 9200
+WORKDIR /usr/share/elasticsearch
 
-USER mozdef
+EXPOSE 9200

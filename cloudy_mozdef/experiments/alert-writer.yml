@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Setup an alert writers environment for use with MozDef for AWS.  Note this is PoC only.
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: 'The VPC ID of the VPC to deploy in (Example : vpc-abcdef12)'
+  PublicSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: 'A comma delimited list of public subnet IDs (Example: subnet-abcdef12,subnet-bcdef123)'
+  MozDefSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The security group the MozDef instance runs in.  This is needed to access ES.
+  ESUrl:
+    Type: String
+    Description: 'The location of elasticsearch deployed in managed-es.'
+Resources:
+    MozDefLayer:
+        Type: AWS::Lambda::LayerVersion
+        Properties:
+            LayerName: MozDef
+            Description: Mozilla Enterprise Defense Platform Dependencies
+            Content:
+                S3Bucket: public.us-west-2.security.allizom.org
+                S3Key: mozdef-lambda-layer/layer-latest.zip
+            CompatibleRuntimes:
+              - python3.6
+            LicenseInfo: 'MPL 2.0'
+    LambdalertIAMRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          -  arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+    AlertWritersEnv:
+      Type: "AWS::Lambda::Function"
+      Properties:
+        Handler: "lambdalert.handle"
+        Role:
+          Fn::GetAtt:
+            - "LambdalertIAMRole"
+            - "Arn"
+        Code:
+          S3Bucket: public.us-west-2.security.allizom.org
+          S3Key: mozdef-lambda-layer/function-latest.zip
+        Layers:
+          - !Ref MozDefLayer
+        Environment:
+          Variables:
+            OPTIONS_ESSERVERS: !Ref ESUrl
+            OPTIONS_MQPROTOCOL: sqs
+        VpcConfig:
+          SecurityGroupIds:
+            - !Ref MozDefSecurityGroup
+          SubnetIds: !Ref PublicSubnetIds
+        ReservedConcurrentExecutions: 1
+        Runtime: "python3.6"
+        Timeout: 120

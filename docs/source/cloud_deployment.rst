@@ -7,7 +7,7 @@ Cloud based MozDef is an opinionated deployment of the MozDef services created i
 ingest CloudTrail, GuardDuty, and provide security services.
 
 .. image:: images/cloudformation-launch-stack.png
-   :target: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/mozdef-parent.yml
+   :target: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/v3.1.0/mozdef-parent.yml
 
 
 Feedback
@@ -31,26 +31,26 @@ MozDef requires the following:
   at the IP address of the Application Load Balancer
 - An OIDC Provider with ClientID, ClientSecret, and Discovery URL
 
-  - Mozilla Uses Auth0 but you can use any OIDC provider you like: Shibboleth,
-    KeyCloak, AWS Cognito, Okta, Ping (etc)
+  - Mozilla uses Auth0 but you can use any OIDC provider you like: Shibboleth,
+    KeyCloak, AWS Cognito, Okta, Ping (etc.).
   - You will need to configure the redirect URI of ``/redirect_uri`` as allowed in
-    your OIDC provider
+    your OIDC provider configuration.
 - An ACM Certificate in the deployment region for your DNS name
-- A VPC with three public subnets available.
+- A VPC with three public subnets available
 
   - It is advised that this VPC be dedicated to MozDef or used solely for security automation.
   - The three public subnets must all be in different `availability zones <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#using-regions-availability-zones-describe>`_
-    and have a large enough number of IP addresses to accommodate the infrastructure
+    and have a large enough number of IP addresses to accommodate the infrastructure.
   - The VPC must have an `internet gateway <https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html>`_
-    enabled on it so that MozDef can reach the internet
-- An SQS queue receiving GuardDuty events.  At the time of writing this is not required but may be required in future.
+    enabled on it so that MozDef can reach the internet.
+- An SQS queue receiving GuardDuty events
+  - At the time of writing this is not required but may be required in future.
 
 
 Supported Regions
 ------------------
 
-MozDef for AWS is currently only supported in us-west-2 but will onboard
-additional regions over time.
+MozDef for AWS is currently only supported in us-west-2 but additional regions will be added over time.
 
 
 Architecture
@@ -105,7 +105,10 @@ To view logs on the ec2 instance
 4. Tail logs from the container you'd like to examine with
    ::
 
+     # show both the access logs and the error logs
      sudo docker logs --follow NAME_OF_CONTAINER
+     # show only the error logs
+     docker logs --follow NAME_OF_CONTAINER >/dev/null
 
    where ``NAME_OF_CONTAINER`` is the container name or ID that you found in the
    step above

@@ -14,7 +14,7 @@ import os
 import sys
 
 from mozdef_util.query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
-from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
+from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex, DOCUMENT_TYPE
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 from unit_test_suite import UnitTestSuite
@@ -28,7 +28,7 @@ class ElasticsearchClientTest(UnitTestSuite):
     def get_num_events(self):
         self.refresh('events')
         search_query = SearchQuery()
-        search_query.add_must(TermMatch('_type', 'event'))
+        search_query.add_must(TermMatch('_type', DOCUMENT_TYPE))
         search_query.add_aggregation(Aggregation('_type'))
         results = search_query.execute(self.es_client)
         if len(results['aggregations']['_type']['terms']) != 0:
@@ -46,8 +46,8 @@ class MockTransportClass:
     def backup_function(self, orig_function):
         self.original_function = orig_function
 
-    def perform_request(self, method, url, params=None, body=None, timeout=None, ignore=()):
-        if url == '/_bulk' or url == '/events/event':
+    def perform_request(self, method, url, headers=None, params=None, body=None):
+        if url == '/_bulk' or url == '/events/_doc':
             self.request_counts += 1
         return self.original_function(method, url, params=params, body=body)
 
@@ -81,7 +81,6 @@ class TestWriteWithRead(ElasticsearchClientTest):
                         'timestamp': '2016-08-19T16:40:55.818595+00:00',
                         'utctimestamp': '2016-08-19T16:40:55.818595+00:00'
                     },
-                    'documenttype': 'bro'
                 }
             ],
             'severity': 'NOTICE',
@@ -96,9 +95,6 @@ class TestWriteWithRead(ElasticsearchClientTest):
         }
         self.saved_alert = self.es_client.save_alert(body=self.alert)
         self.refresh('alerts')
-
-    def test_saved_type(self):
-        assert self.saved_alert['_type'] == 'alert'
 
     def test_saved_index(self):
         assert self.saved_alert['_index'] == self.alert_index_name
@@ -118,6 +114,54 @@ class TestNoResultsFound(ElasticsearchClientTest):
         search_query.add_must(TermMatch('garbagefielddoesntexist', 'testingvalues'))
         results = search_query.execute(self.es_client)
         assert results['hits'] == []
+
+
+class TestCloseIndex(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestCloseIndex, self).teardown()
+        if self.config_delete_indexes:
+            self.es_client.delete_index('test_index')
+
+    def test_close_index(self):
+        if not self.es_client.index_exists('test_index'):
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        closed = self.es_client.close_index('test_index')
+        assert closed == {'acknowledged': True}
+
+
+class TestWritingToClosedIndex(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestWritingToClosedIndex, self).teardown()
+        if self.config_delete_indexes:
+            self.es_client.delete_index('test_index')
+
+    def test_writing_to_closed_index(self):
+        if not self.es_client.index_exists('test_index'):
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        self.es_client.close_index('test_index')
+        event = json.dumps({"key": "example value for string of json test"})
+        with pytest.raises(Exception):
+            self.es_client.save_event(index='test_index', body=event)
+
+
+class TestOpenIndex(ElasticsearchClientTest):
+
+    def teardown(self):
+        super(TestOpenIndex, self).teardown()
+        if self.config_delete_indexes:
+            self.es_client.delete_index('test_index')
+
+    def test_index_open(self):
+        if not self.es_client.index_exists('test_index'):
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        self.es_client.close_index('test_index')
+        opened = self.es_client.open_index('test_index')
+        assert opened == {'acknowledged': True, 'shards_acknowledged': True}
 
 
 class TestWithBadIndex(ElasticsearchClientTest):
@@ -160,11 +204,11 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query = SearchQuery()
         query.add_must(ExistsMatch('key'))
         results = query.execute(self.es_client)
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         assert results['hits'][0]['_source']['key'] == 'example value for string of json test'
 
         assert len(results['hits']) == 1
-        assert results['hits'][0]['_type'] == 'event'
+        assert results['hits'][0]['_source']['type'] == 'event'
 
     def test_writing_dot_fieldname(self):
         event = json.dumps({"key.othername": "example value for string of json test"})
@@ -177,11 +221,10 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query = SearchQuery()
         query.add_must(ExistsMatch('key.othername'))
         results = query.execute(self.es_client)
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         assert results['hits'][0]['_source']['key.othername'] == 'example value for string of json test'
 
         assert len(results['hits']) == 1
-        assert results['hits'][0]['_type'] == 'event'
 
     def test_writing_event_defaults(self):
         query = SearchQuery()
@@ -192,7 +235,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         saved_event = results['hits'][0]['_source']
         assert 'category' in saved_event
         assert 'details' in saved_event
@@ -209,10 +252,9 @@ class TestSimpleWrites(ElasticsearchClientTest):
         assert 'utctimestamp' in saved_event
         assert 'category' in saved_event
 
-    def test_writing_with_type(self):
+    def test_writing_with_details(self):
         query = SearchQuery()
         default_event = {
-            "_type": "example",
             "_source": {
                 "receivedtimestamp": UnitTestSuite.current_timestamp(),
                 "summary": "Test summary",
@@ -227,8 +269,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_type'] == 'example'
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         assert results['hits'][0]['_source']['summary'] == 'Test summary'
         assert results['hits'][0]['_source']['details'] == {"note": "Example note"}
 
@@ -249,8 +290,7 @@ class TestSimpleWrites(ElasticsearchClientTest):
         query.add_must(ExistsMatch('summary'))
         results = query.execute(self.es_client)
         assert len(results['hits']) == 1
-        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source', '_type']
-        assert results['hits'][0]['_type'] == 'event'
+        assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
 
 
 class BulkTest(ElasticsearchClientTest):
@@ -300,7 +340,7 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
             events.append({"key": "value" + str(num)})
 
         for event in events:
-            self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
+            self.es_client.save_object(index='events', body=event, bulk=True)
 
         self.refresh(self.event_index_name)
 
@@ -364,27 +404,41 @@ class TestGetIndices(ElasticsearchClientTest):
 
     def teardown(self):
         super(TestGetIndices, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
     def test_get_indices(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.create_index('test_index')
         time.sleep(1)
-        indices = self.es_client.get_indices()
-        indices.sort()
-        assert indices == [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
+        all_indices = self.es_client.get_indices()
+        all_indices.sort()
+        open_indices = self.es_client.get_open_indices()
+        open_indices.sort()
+        expected_indices = [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
+        assert all_indices == expected_indices
+        assert open_indices == expected_indices
+
+    def test_closed_get_indices(self):
+        if self.config_delete_indexes:
+            self.es_client.create_index('test_index')
+        time.sleep(1)
+        self.es_client.close_index('test_index')
+        all_indices = self.es_client.get_indices()
+        open_indices = self.es_client.get_open_indices()
+        assert 'test_index' in all_indices
+        assert 'test_index' not in open_indices
 
 
 class TestIndexExists(ElasticsearchClientTest):
 
     def teardown(self):
         super(TestIndexExists, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
     def test_index_exists(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.create_index('test_index')
         time.sleep(1)
         indices = self.es_client.index_exists('test_index')
@@ -395,17 +449,16 @@ class TestClusterHealth(ElasticsearchClientTest):
 
     def test_cluster_health_results(self):
         health_results = self.es_client.get_cluster_health()
-        health_keys = health_results.keys()
-        health_keys.sort()
+        health_keys = sorted(health_results.keys())
         assert health_keys == ['active_primary_shards', 'active_shards', 'cluster_name', 'initializing_shards', 'number_of_data_nodes', 'number_of_nodes', 'relocating_shards', 'status', 'timed_out', 'unassigned_shards']
         assert type(health_results['active_primary_shards']) is int
         assert type(health_results['active_shards']) is int
-        assert type(health_results['cluster_name']) is unicode
+        assert type(health_results['cluster_name']) is str
         assert type(health_results['initializing_shards']) is int
         assert type(health_results['number_of_data_nodes']) is int
         assert type(health_results['number_of_nodes']) is int
         assert type(health_results['relocating_shards']) is int
-        assert type(health_results['status']) is unicode
+        assert type(health_results['status']) is str
         assert type(health_results['timed_out']) is bool
         assert type(health_results['unassigned_shards']) is int
 
@@ -414,20 +467,20 @@ class TestCreatingAlias(ElasticsearchClientTest):
 
     def setup(self):
         super(TestCreatingAlias, self).setup()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('index1', True)
             self.es_client.delete_index('index2', True)
             self.es_client.delete_index('alias1', True)
 
     def teardown(self):
         super(TestCreatingAlias, self).teardown()
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index('index1', True)
             self.es_client.delete_index('index2', True)
             self.es_client.delete_index('alias1', True)
 
     def test_simple_create_alias(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.create_index('index1')
             self.es_client.create_alias('alias1', 'index1')
         alias_indices = self.es_client.get_alias('alias1')
@@ -436,7 +489,7 @@ class TestCreatingAlias(ElasticsearchClientTest):
         assert 'index1' in indices
 
     def test_alias_multiple_indices(self):
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.create_index('index1')
             self.es_client.create_index('index2')
             self.es_client.create_alias('alias1', 'index1')
@@ -467,7 +520,7 @@ class TestBulkInvalidFormatProblem(BulkTest):
 
         mapping = {
             "mappings": {
-                "event": {
+                DOCUMENT_TYPE: {
                     "properties": {
                         "utcstamp": {
                             "type": "date",
@@ -480,7 +533,7 @@ class TestBulkInvalidFormatProblem(BulkTest):
 
         # Recreate the test indexes with a custom mapping to throw
         # parsing errors
-        if pytest.config.option.delete_indexes:
+        if self.config_delete_indexes:
             self.es_client.delete_index("events", True)
             self.es_client.delete_index(self.event_index_name, True)
             self.es_client.create_index(self.event_index_name, index_config=mapping)
@@ -495,8 +548,8 @@ class TestBulkInvalidFormatProblem(BulkTest):
             "utcstamp": "abc",
         }
 
-        self.es_client.save_object(index='events', doc_type='event', body=event, bulk=True)
-        self.es_client.save_object(index='events', doc_type='event', body=malformed_event, bulk=True)
+        self.es_client.save_object(index='events', body=event, bulk=True)
+        self.es_client.save_object(index='events', body=malformed_event, bulk=True)
         self.refresh(self.event_index_name)
         time.sleep(5)
         assert self.get_num_events() == 1

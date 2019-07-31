@@ -9,13 +9,13 @@
 import json
 
 import sys
+import os
 import socket
 import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 import pytz
 
-from boto.sqs.message import RawMessage
 import kombu
 from ssl import SSLEOFError, SSLError
 
@@ -23,9 +23,9 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-from lib.aws import get_aws_credentials
-from lib.plugins import sendEventToPlugins, registerPlugins
-from lib.sqs import connect_sqs
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
+from mq.lib.plugins import sendEventToPlugins, registerPlugins
+from mq.lib.sqs import connect_sqs
 
 
 # running under uwsgi?
@@ -43,49 +43,44 @@ def esConnect():
 
 class taskConsumer(object):
 
-    def __init__(self, mqConnection, taskQueue, esConnection, options):
-        self.connection = mqConnection
+    def __init__(self, queue, esConnection, options):
+        self.sqs_queue = queue
         self.esConnection = esConnection
-        self.taskQueue = taskQueue
         self.pluginList = registerPlugins()
         self.options = options
 
     def run(self):
-        self.taskQueue.set_message_class(RawMessage)
-
         while True:
             try:
-                records = self.taskQueue.get_messages(self.options.prefetch)
+                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=options.prefetch)
                 for msg in records:
-                    msg_body = msg.get_body()
+                    msg_body = msg.body
                     try:
                         # get_body() should be json
                         message_json = json.loads(msg_body)
                         self.on_message(message_json)
                         # delete message from queue
-                        self.taskQueue.delete_message(msg)
+                        msg.delete()
                     except ValueError:
                         logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
-                        self.taskQueue.delete_message(msg)
+                        msg.delete()
                         continue
                 time.sleep(.1)
             except (SSLEOFError, SSLError, socket.error):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
-                self.connection, self.taskQueue = connect_sqs(
+                self.sqs_queue = connect_sqs(
                     options.region,
                     options.accesskey,
                     options.secretkey,
                     options.taskexchange
                 )
-                self.taskQueue.set_message_class(RawMessage)
 
     def on_message(self, message):
         try:
             # default elastic search metadata for an event
             metadata = {
                 'index': 'events',
-                'doc_type': 'event',
                 'id': None
             }
             event = {}
@@ -101,12 +96,17 @@ class taskConsumer(object):
             event['severity'] = 'INFO'
             event['details'] = {}
 
-            for message_key, message_value in message.iteritems():
+            for message_key, message_value in message.items():
                 if 'Message' == message_key:
                     try:
                         message_json = json.loads(message_value)
-                        for inside_message_key, inside_message_value in message_json.iteritems():
-                            if inside_message_key in ('processid', 'pid'):
+                        for inside_message_key, inside_message_value in message_json.items():
+                            if inside_message_key in ('type', 'category'):
+                                event['category'] = inside_message_value
+                                # add type subcategory for filtering after
+                                # original type field is rewritten as category
+                                event['type'] = 'event'
+                            elif inside_message_key in ('processid', 'pid'):
                                 processid = str(inside_message_value)
                                 processid = processid.replace('[', '')
                                 processid = processid.replace(']', '')
@@ -118,19 +118,17 @@ class taskConsumer(object):
                             elif inside_message_key in ('time', 'timestamp'):
                                 event['timestamp'] = toUTC(inside_message_value).isoformat()
                                 event['utctimestamp'] = toUTC(event['timestamp']).astimezone(pytz.utc).isoformat()
-                            elif inside_message_key in ('type', 'category'):
-                                event['category'] = inside_message_value
                             elif inside_message_key in ('summary','payload', 'message'):
                                 event['summary'] = inside_message_value.lstrip()
                             elif inside_message_key in ('source'):
                                 event['source'] = inside_message_value
                             elif inside_message_key in ('fields', 'details'):
                                 if type(inside_message_value) is not dict:
-                                    event[u'details'][u'message'] = inside_message_value
+                                    event['details']['message'] = inside_message_value
                                 else:
                                     if len(inside_message_value) > 0:
-                                        for details_key, details_value in inside_message_value.iteritems():
-                                            event[u'details'][details_key] = details_value
+                                        for details_key, details_value in inside_message_value.items():
+                                            event['details'][details_key] = details_value
                             else:
                                 event['details'][inside_message_key] = inside_message_value
                     except ValueError:
@@ -162,7 +160,6 @@ class taskConsumer(object):
                 self.esConnection.save_event(
                     index=metadata['index'],
                     doc_id=metadata['id'],
-                    doc_type=metadata['doc_type'],
                     body=jbody,
                     bulk=bulk
                 )
@@ -193,14 +190,14 @@ def main():
         logger.error('Can only process SQS queues, terminating')
         sys.exit(1)
 
-    sqs_conn, eventTaskQueue = connect_sqs(
-        task_exchange=options.taskexchange,
-        **get_aws_credentials(
-            options.region,
-            options.accesskey,
-            options.secretkey))
+    sqs_queue = connect_sqs(
+        region_name=options.region,
+        aws_access_key_id=options.accesskey,
+        aws_secret_access_key=options.secretkey,
+        task_exchange=options.taskexchange
+    )
     # consume our queue
-    taskConsumer(sqs_conn, eventTaskQueue, es, options).run()
+    taskConsumer(sqs_queue, es, options).run()
 
 
 def initConfig():

@@ -15,14 +15,16 @@ from netaddr import valid_ipv4
 class message(object):
     def __init__(self):
         """
-        takes an incoming bro message
-        and sets the doc_type
+        takes an incoming squid event
+        and parses the message to extract
+        data points, and sets the type
+        field
         """
 
         self.registration = ["squid"]
         self.priority = 5
         try:
-            self.mozdefhostname = u"{0}".format(node())
+            self.mozdefhostname = "{0}".format(node())
         except:
             self.mozdefhostname = "failed to fetch mozdefhostname"
             pass
@@ -64,37 +66,35 @@ class message(object):
 
         # make sure I really wanted to see this message
         # bail out early if not
-        if u"customendpoint" not in message:
+        if "customendpoint" not in message:
             return message, metadata
-        if u"category" not in message:
+        if "category" not in message:
             return message, metadata
         if message["category"] != "proxy":
             return message, metadata
 
-        # Reuse the NSM doc type
-        # to avoid data type conflicts with other doc types
-        # (int v string, etc)
-        # index holds documents of type 'type'
-        # index -> type -> doc
-        metadata["doc_type"] = "nsm"
-
         # move Squid specific fields under 'details' while preserving metadata
         newmessage = dict()
 
-        newmessage[u"mozdefhostname"] = self.mozdefhostname
+        # Set NSM as type for categorical filtering of events.
+        newmessage["type"] = "squid"
+
+        newmessage["mozdefhostname"] = self.mozdefhostname
         newmessage["details"] = {}
 
         # move some fields that are expected at the event 'root' where they belong
         if "HOST_FROM" in message:
             newmessage["hostname"] = message["HOST_FROM"]
         if "TAGS" in message:
-            newmessage["TAGS"] = message["tags"]
+            newmessage["tags"] = message["tags"]
         if "category" in message:
             newmessage["category"] = message["category"]
-        newmessage[u"customendpoint"] = message["customendpoint"]
-        newmessage[u"source"] = u"unknown"
+        newmessage["customendpoint"] = message["customendpoint"]
+        newmessage["source"] = "unknown"
         if "source" in message:
-            newmessage[u"source"] = message["source"]
+            newmessage["source"] = message["source"]
+        if "MESSAGE" in message:
+            newmessage["summary"] = message["MESSAGE"]
 
             if newmessage["source"] == "access":
                 # http://www.squid-cache.org/Doc/config/logformat/
@@ -103,42 +103,42 @@ class message(object):
                 line = message["MESSAGE"].strip()
                 tokens = line.split()
 
-                newmessage[u"details"][u"duration"] = float(tokens[1]) / 1000.0
-                newmessage[u"details"][u"sourceipaddress"] = tokens[2]
-                newmessage[u"details"][u"sourceport"] = int(self.create_int(tokens[3]))
+                newmessage["details"]["duration"] = float(tokens[1]) / 1000.0
+                newmessage["details"]["sourceipaddress"] = tokens[2]
+                newmessage["details"]["sourceport"] = int(self.create_int(tokens[3]))
                 if self.isIPv4(tokens[4]):
-                    newmessage[u"details"][u"destinationipaddress"] = tokens[4]
+                    newmessage["details"]["destinationipaddress"] = tokens[4]
                 else:
-                    newmessage[u"details"][u"destinationipaddress"] = u"0.0.0.0"
-                newmessage[u"details"][u"proxyaction"] = tokens[6]
-                if newmessage[u"details"][u"proxyaction"] != "TCP_DENIED":
-                    newmessage[u"details"][u"destinationport"] = int(tokens[5])
-                    newmessage[u"details"][u"host"] = tokens[13]
+                    newmessage["details"]["destinationipaddress"] = "0.0.0.0"
+                newmessage["details"]["proxyaction"] = tokens[6]
+                if newmessage["details"]["proxyaction"] != "TCP_DENIED":
+                    newmessage["details"]["destinationport"] = int(self.create_int(tokens[5]))
+                    newmessage["details"]["host"] = tokens[13]
                 else:
                     (fqdn, dstport) = self.tokenize_url(tokens[11])
-                    newmessage[u"details"][u"destinationport"] = dstport
-                    newmessage[u"details"][u"host"] = fqdn
-                newmessage[u"details"][u"status"] = tokens[7]
-                newmessage[u"details"][u"requestsize"] = int(tokens[8])
-                newmessage[u"details"][u"responsesize"] = int(tokens[9])
+                    newmessage["details"]["destinationport"] = dstport
+                    newmessage["details"]["host"] = fqdn
+                newmessage["details"]["status"] = tokens[7]
+                newmessage["details"]["requestsize"] = int(tokens[8])
+                newmessage["details"]["responsesize"] = int(tokens[9])
                 method = tokens[10]
-                newmessage[u"details"][u"method"] = method
-                newmessage[u"details"][u"destination"] = tokens[11]
+                newmessage["details"]["method"] = method
+                newmessage["details"]["destination"] = tokens[11]
                 proto = tokens[12]
                 if proto == "-" and method == "CONNECT":
                     proto = "ssl"
-                newmessage[u"details"][u"proto"] = proto
-                newmessage[u"details"][u"mimetype"] = tokens[14]
-                newmessage[u"utctimestamp"] = (
+                newmessage["details"]["proto"] = proto
+                newmessage["details"]["mimetype"] = tokens[14]
+                newmessage["utctimestamp"] = (
                     toUTC(float(tokens[0])) - timedelta(milliseconds=float(tokens[1]))
                 ).isoformat()
-                newmessage[u"timestamp"] = (
+                newmessage["timestamp"] = (
                     toUTC(float(tokens[0])) - timedelta(milliseconds=float(tokens[1]))
                 ).isoformat()
 
         # add mandatory fields
-        newmessage[u"receivedtimestamp"] = toUTC(datetime.now()).isoformat()
-        newmessage[u"eventsource"] = u"squid"
-        newmessage[u"severity"] = u"INFO"
+        newmessage["receivedtimestamp"] = toUTC(datetime.now()).isoformat()
+        newmessage["eventsource"] = "squid"
+        newmessage["severity"] = "INFO"
 
         return (newmessage, metadata)

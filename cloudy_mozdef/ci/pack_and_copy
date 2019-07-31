@@ -1,0 +1,72 @@
+#!/bin/bash
+
+BRANCH=$1
+AMI_MAP_TEMP_FILE=$2
+TMPDIR=$(mktemp -d)
+
+cd packer
+packer -machine-readable build -var github_branch="${BRANCH}" packer.json 2>&1 | tee "${TMPDIR}/packer-output.txt"
+
+awk -F "," '$4 == "0" {print $0}' "${TMPDIR}/packer-output.txt"
+ami_source_region=$(awk -F "," '($4 == "0") && ($5 == "id") {print $6}' "${TMPDIR}/packer-output.txt" | awk -F ":" '{print $1}')
+ami_source_id=$(awk -F "," '($4 == "0") && ($5 == "id") {print $6}' "${TMPDIR}/packer-output.txt" | awk -F ":" '{print $2}')
+ami_dest_region_list="us-east-1"
+# aws_marketplace_account_id is the AWS account ID, owned by AWS, not us, that
+# we share with in order to enable the AWS Marketplace to access our AMIs
+aws_marketplace_account_id="679593333241"
+
+if [ -z "${ami_source_id}" -o -z "${ami_source_region}" ]; then
+    echo "Packer output did not provide AMI ID or region. Exiting"
+    exit 1
+fi
+
+echo "Mappings:" > "${AMI_MAP_TEMP_FILE}"
+echo "  RegionMap:" >> "${AMI_MAP_TEMP_FILE}"
+echo "    ${ami_source_region}:" >> "${AMI_MAP_TEMP_FILE}"
+echo "      HVM64: ${ami_source_id}" >> "${AMI_MAP_TEMP_FILE}"
+
+echo "Sharing ${ami_source_id} in ${ami_source_region} with ${aws_marketplace_account_id}"
+AWS_DEFAULT_REGION="${ami_source_region}" aws ec2 modify-image-attribute \
+    --image-id "${ami_source_id}" \
+    --launch-permission "Add=[{UserId=${aws_marketplace_account_id}}]"
+
+echo "Querying for name of ${ami_source_id}"
+ami_name=$(AWS_DEFAULT_REGION="${ami_source_region}" aws ec2 describe-images \
+    --image-ids ${ami_source_id} \
+    --query 'Images[0].Name' \
+    --output text)
+
+echo "Fetching tags for ${ami_source_id}"
+AWS_DEFAULT_REGION="${ami_source_region}" aws ec2 describe-tags \
+    --filters Name=resource-id,Values=${ami_source_id} \
+    --query 'Tags[*].{Key: Key, Value: Value}' > "${TMPDIR}/tags.json"
+
+for ami_dest_region in $ami_dest_region_list; do
+    echo "Copying ${ami_source_id} from ${ami_source_region} to ${ami_dest_region}"
+    ami_dest_id=$(AWS_DEFAULT_REGION="${ami_dest_region}" aws ec2 copy-image \
+        --name "${ami_name}" \
+        --source-image-id "${ami_source_id}" \
+        --source-region "${ami_source_region}" \
+        --description "A MozDef replicated AMI" \
+        --query "ImageId" \
+        --output text)
+
+    echo "Waiting for copy of ${ami_source_id} to complete"
+    AWS_DEFAULT_REGION="${ami_dest_region}" aws ec2 wait image-available \
+    --image-ids "${ami_dest_id}"
+
+    echo "    ${ami_dest_region}:" >> "${AMI_MAP_TEMP_FILE}"
+    echo "      HVM64: ${ami_dest_id}" >> "${AMI_MAP_TEMP_FILE}"
+
+    echo "Applying tags to ${ami_dest_id}"
+    AWS_DEFAULT_REGION="${ami_dest_region}" aws ec2 create-tags \
+        --resources ${ami_dest_id} \
+        --tags file://${TMPDIR}/tags.json
+
+    echo "Sharing ${ami_dest_id} in ${ami_dest_region} with ${aws_marketplace_account_id}"
+    AWS_DEFAULT_REGION="${ami_dest_region}" aws ec2 modify-image-attribute \
+        --image-id "${ami_dest_id}" \
+        --launch-permission "Add=[{UserId=${aws_marketplace_account_id}}]"
+done
+
+rm -rf "${TMPDIR}"

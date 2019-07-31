@@ -21,16 +21,16 @@ def verify_events(options):
         search_query.add_must_not(ExistsMatch(required_field))
 
         # Exclude all events that are mozdef related health and stats
-        search_query.add_must_not(TermMatch('_type', 'mozdefstats'))
-        search_query.add_must_not(TermMatch('_type', 'mozdefhealth'))
+        search_query.add_must_not(TermMatch('type', 'mozdefstats'))
+        search_query.add_must_not(TermMatch('type', 'mozdefhealth'))
 
-        search_query.add_aggregation(Aggregation('_type'))
+        search_query.add_aggregation(Aggregation('type'))
         # We don't care about the actual events, we only want the numbers
         results = search_query.execute(es_client, size=1)
-        for aggreg_term in results['aggregations']['_type']['terms']:
+        for aggreg_term in results['aggregations']['type']['terms']:
             count = aggreg_term['count']
             category = aggreg_term['key']
-            logger.error("Found {0} bad events of _type '{1}' missing '{2}' field".format(
+            logger.error("Found {0} bad events of type '{1}' missing '{2}' field".format(
                 count,
                 category,
                 required_field

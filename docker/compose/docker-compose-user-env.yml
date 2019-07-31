@@ -23,7 +23,7 @@ services:
   bootstrap:
     env_file:
       - $ENV_FILE
-  alertplugins:
+  alertactions:
     env_file:
       - $ENV_FILE
   alerts:

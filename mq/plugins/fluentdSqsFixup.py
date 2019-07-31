@@ -113,7 +113,8 @@ class message(object):
         # Any remaining keys which aren't mandatory fields should be moved
         # to details
         # https://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
-        for key in message.keys():
+        original_keys = list(message.keys())
+        for key in original_keys:
             if key not in [
                     'summary',
                     'utctimestamp',

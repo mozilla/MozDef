@@ -33,7 +33,7 @@ class TestEsworkerSNSSQS(UnitTestSuite):
                 'plugincheckfrequency': 120,
             }
         )
-        self.consumer = taskConsumer(mq_conn, task_queue, es_connection, options)
+        self.consumer = taskConsumer(mq_conn, es_connection, options)
 
     def search_and_verify_event(self, expected_event):
         self.refresh('events')
@@ -59,89 +59,91 @@ class TestEsworkerSNSSQS(UnitTestSuite):
         }
         self.consumer.on_message(event)
         expected_event = {
-            u'category': u'syslog',
-            u'details': {u'logger': u'systemslogs'},
-            u'hostname': u'abcdefghostname',
-            u'mozdefhostname': u'unittest.hostname',
-            u'processid': u'123',
-            u'processname': u'dhclient',
-            u'receivedtimestamp': u'2017-05-26T17:47:17.813876+00:00',
-            u'severity': u'INFO',
-            u'source': u'UNKNOWN',
-            u'summary': u'DHCPREQUEST of 1.2.3.4 on eth0 to 5.6.7.8 port 67 (xid=0x123456)',
-            u'tags': [u'example-logs-mozdef'],
-            u'timestamp': u'2017-05-25T07:14:15+00:00',
-            u'utctimestamp': u'2017-05-25T07:14:15+00:00',
-            u'plugins': []
+            'category': 'syslog',
+            'details': {'logger': 'systemslogs'},
+            'hostname': 'abcdefghostname',
+            'mozdefhostname': 'unittest.hostname',
+            'processid': '123',
+            'processname': 'dhclient',
+            'receivedtimestamp': '2017-05-26T17:47:17.813876+00:00',
+            'severity': 'INFO',
+            'source': 'UNKNOWN',
+            'summary': 'DHCPREQUEST of 1.2.3.4 on eth0 to 5.6.7.8 port 67 (xid=0x123456)',
+            'tags': ['example-logs-mozdef'],
+            'timestamp': '2017-05-25T07:14:15+00:00',
+            'utctimestamp': '2017-05-25T07:14:15+00:00',
+            'plugins': [],
+            'type': 'event'
         }
         self.search_and_verify_event(expected_event)
 
     def test_sso_event(self):
         message_dict = {
-            u'category': u'user_feedback',
-            u'details': {
-                u'action': u'escalate',
-                u'alert_information': {
-                    u'alert_code': u'12345',
-                    u'alert_id': u'abcdefg',
-                    u'alert_str_json': u'{"url": "https://www.mozilla.org/alert", "severity": "NOTICE", "tags": ["geomodel"], "utctimestamp": "1976-09-13T07:43:49+00:00", "category": "geomodel", "summary": "christianherring@gmail.com NEWCOUNTRY New York, Mauritania access from 25.141.235.246", "details": {"locality_details": {"city": "New York", "country": "Mauritania"}, "category": "NEWCOUNTRY", "principal": "christianherring@gmail.com", "source_ip": "25.141.235.246"}}',
-                    u'date': u'1998-06-24',
-                    u'description': u'This alert is created based on geo ip information about the last login of a user.',
-                    u'duplicate': False,
-                    u'last_update': 1524700512,
-                    u'risk': u'high',
-                    u'state': u'escalate',
-                    u'summary': u'Did you recently login from New York, Mauritania (25.141.235.246)?',
-                    u'url': u'https://www.mozilla.org',
-                    u'url_title': u'Get Help',
-                    u'user_id': u'ad|Mozilla-LDAP-Dev|ttesterson'
+            'category': 'user_feedback',
+            'details': {
+                'action': 'escalate',
+                'alert_information': {
+                    'alert_code': '12345',
+                    'alert_id': 'abcdefg',
+                    'alert_str_json': '{"url": "https://www.mozilla.org/alert", "severity": "NOTICE", "tags": ["geomodel"], "utctimestamp": "1976-09-13T07:43:49+00:00", "category": "geomodel", "summary": "christianherring@gmail.com NEWCOUNTRY New York, Mauritania access from 25.141.235.246", "details": {"locality_details": {"city": "New York", "country": "Mauritania"}, "category": "NEWCOUNTRY", "principal": "christianherring@gmail.com", "source_ip": "25.141.235.246"}}',
+                    'date': '1998-06-24',
+                    'description': 'This alert is created based on geo ip information about the last login of a user.',
+                    'duplicate': False,
+                    'last_update': 1524700512,
+                    'risk': 'high',
+                    'state': 'escalate',
+                    'summary': 'Did you recently login from New York, Mauritania (25.141.235.246)?',
+                    'url': 'https://www.mozilla.org',
+                    'url_title': 'Get Help',
+                    'user_id': 'ad|Mozilla-LDAP-Dev|ttesterson'
                 }
             }
         }
         event = {
-            u'Message': json.dumps(message_dict),
-            u'MessageId': u'123456-248e-5b78-84c5-46ac332ea6cd',
-            u'Signature': u'abcdefgh',
-            u'SignatureVersion': u'1',
-            u'SigningCertURL': u'https://sns.us-west-2.amazonaws.com/SimpleNotificationService-1098765.pem',
-            u'Subject': u'sso-dashboard-user-feedback',
-            u'Timestamp': u'2018-04-25T23:55:12.854Z',
-            u'TopicArn': u'arn:aws:sns:us-west-2:7777777777:SSODashboardAlertFeedback',
-            u'Type': u'Notification',
-            u'UnsubscribeURL': u'https://sns.us-west-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-west-2:7777777777:SSODashboardAlertFeedback:123456-248e-5b78-84c5-46ac332ea6cd'
+            'Message': json.dumps(message_dict),
+            'MessageId': '123456-248e-5b78-84c5-46ac332ea6cd',
+            'Signature': 'abcdefgh',
+            'SignatureVersion': '1',
+            'SigningCertURL': 'https://sns.us-west-2.amazonaws.com/SimpleNotificationService-1098765.pem',
+            'Subject': 'sso-dashboard-user-feedback',
+            'Timestamp': '2018-04-25T23:55:12.854Z',
+            'TopicArn': 'arn:aws:sns:us-west-2:7777777777:SSODashboardAlertFeedback',
+            'Type': 'Notification',
+            'UnsubscribeURL': 'https://sns.us-west-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-west-2:7777777777:SSODashboardAlertFeedback:123456-248e-5b78-84c5-46ac332ea6cd'
         }
         self.consumer.on_message(event)
         expected_event = {
-            u'category': u'user_feedback',
-            u'details': {
-                u'action': u'escalate',
-                u'alert_information': {
-                    u'alert_code': u'12345',
-                    u'alert_id': u'abcdefg',
-                    u'alert_str_json': message_dict['details']['alert_information']['alert_str_json'],
-                    u'date': u'1998-06-24',
-                    u'description': u'This alert is created based on geo ip information about the last login of a user.',
-                    u'duplicate': False,
-                    u'last_update': 1524700512,
-                    u'risk': u'high',
-                    u'state': u'escalate',
-                    u'summary': u'Did you recently login from New York, Mauritania (25.141.235.246)?',
-                    u'url': u'https://www.mozilla.org',
-                    u'url_title': u'Get Help',
-                    u'user_id': u'ad|Mozilla-LDAP-Dev|ttesterson'
+            'category': 'user_feedback',
+            'details': {
+                'action': 'escalate',
+                'alert_information': {
+                    'alert_code': '12345',
+                    'alert_id': 'abcdefg',
+                    'alert_str_json': message_dict['details']['alert_information']['alert_str_json'],
+                    'date': '1998-06-24',
+                    'description': 'This alert is created based on geo ip information about the last login of a user.',
+                    'duplicate': False,
+                    'last_update': 1524700512,
+                    'risk': 'high',
+                    'state': 'escalate',
+                    'summary': 'Did you recently login from New York, Mauritania (25.141.235.246)?',
+                    'url': 'https://www.mozilla.org',
+                    'url_title': 'Get Help',
+                    'user_id': 'ad|Mozilla-LDAP-Dev|ttesterson'
                 }
             },
-            u'hostname': u'UNKNOWN',
-            u'mozdefhostname': u'unittest.hostname',
-            u'processid': u'UNKNOWN',
-            u'processname': u'UNKNOWN',
-            u'receivedtimestamp': u'2018-04-26T00:11:23.479565+00:00',
-            u'severity': u'INFO',
-            u'source': u'UNKNOWN',
-            u'summary': u'UNKNOWN',
-            u'tags': [u'example-logs-mozdef'],
-            u'timestamp': u'2018-04-26T00:11:23.479771+00:00',
-            u'utctimestamp': u'2018-04-26T00:11:23.479771+00:00',
-            u'plugins': []
+            'hostname': 'UNKNOWN',
+            'mozdefhostname': 'unittest.hostname',
+            'processid': 'UNKNOWN',
+            'processname': 'UNKNOWN',
+            'receivedtimestamp': '2018-04-26T00:11:23.479565+00:00',
+            'severity': 'INFO',
+            'source': 'UNKNOWN',
+            'summary': 'UNKNOWN',
+            'tags': ['example-logs-mozdef'],
+            'timestamp': '2018-04-26T00:11:23.479771+00:00',
+            'utctimestamp': '2018-04-26T00:11:23.479771+00:00',
+            'plugins': [],
+            'type': 'event'
         }
         self.search_and_verify_event(expected_event)
