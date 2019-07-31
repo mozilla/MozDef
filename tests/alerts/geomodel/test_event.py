@@ -1,3 +1,5 @@
+from datetime import datetime
+import pytz
 import unittest
 
 import alerts.geomodel.config as config
@@ -143,41 +145,61 @@ class TestEvent(unittest.TestCase):
         assert 'testuser' in usernames
         assert 'test2' in usernames
 
-    def test_extract_sourceip_recurses_into_dicts(self):
-        test_data = {
-            'top': {
-                'inner1': {
-                    'nothere': 'value'
-                },
-                'inner2': [1, 2, 3, 4],
-                'inner3': {
-                    'deep': {
-                        'sourceipaddress': '4.3.2.1'
-                    }
+    def test_extract_locality_with_missing_data(self):
+        bad_events = [
+            {
+                '__source': 'invalid'
+            },
+            {
+                '_source': {
+                    'nottheipaddress': 'somethingelse'
+                }
+            },
+            {
+                '_source': {
+                    'sourceipaddress': '1.2.3.4',
+                    'notthegeolocation': 'uhoh'
+                }
+            }
+        ]
+
+        localities = [event.extract_locality(evt) for evt in bad_events]
+
+        assert all([loc is None for loc in localities])
+
+    def test_extract_locality_provides_default_timestamp(self):
+        # Missing `utctimestamp`.
+        test_event = {
+            '_source': {
+                'sourceipaddress': '1.2.3.4',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3849
                 }
             }
         }
 
-        ip = event.extract_sourceip(test_data)
-        assert ip == '4.3.2.1'
+        loc = event.extract_locality(test_event)
 
-    def test_extract_sourceip_recurses_into_lists(self):
-        test_data = {
-            'top': {
-                'dummy': {
-                    'key': 'value'
-                },
-                'dummy2': [1, 2, 3, 4],
-                'inner1': [
-                    {
-                        'sourceipaddress': '1.2.3.4'
-                    },
-                    {
-                        'nottherightkey': 'anothervalue'
-                    }
-                ]
+        assert loc.lastaction < datetime.utcnow().replace(tzinfo=pytz.UTC)
+
+    def test_extract_locality_parses_valid_timestamp(self):
+        test_event = {
+            '_source': {
+                'sourceipaddress': '1.2.3.4',
+                'utctimestamp': '2019-07-31T17:56:38.908000+00:00',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3849
+                }
             }
         }
 
-        ip = event.extract_sourceip(test_data)
-        assert ip == '1.2.3.4'
+        loc = event.extract_locality(test_event)
+
+        assert loc.sourceipv4address == '1.2.3.4'
+        assert loc.lastaction.day == 31
