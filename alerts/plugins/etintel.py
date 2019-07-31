@@ -8,7 +8,7 @@ from configlib import getConfig, OptionParser
 import sys
 from datetime import datetime, timedelta
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib"))
-from iqrlib import iqr
+from etintellib import etintel
 
 
 class message(object):
@@ -21,7 +21,7 @@ class message(object):
 
         # set my own conf file
         # relative path to the rest index.py file
-        self.configfile = os.path.join(os.path.dirname(__file__), 'iqrisk.conf')
+        self.configfile = os.path.join(os.path.dirname(__file__), 'etintelisk.conf')
         self.options = None
         if os.path.exists(self.configfile):
             self.initConfiguration()
@@ -52,7 +52,7 @@ class message(object):
         dtnow = datetime.today()
         dt30 = dtnow - timedelta(days=30)
         if 'sourceipaddress' in message['details']:
-            rep = iqr(message['details']['sourceipaddress'], self.options)
+            rep = etintel(message['details']['sourceipaddress'], self.options)
             message['intel'] = {}
             # events get a special treatment to only get the most recent ones
             rep.get_reputation('events', "ip")
@@ -72,7 +72,7 @@ class message(object):
             rep.get_reputation('reputation', "ip")
             message['intel']['reputation'] = rep.reputation['reputation']
         if 'destinationfqdn' in message['details']:
-            rep = iqr(message['details']['destinationfqdn'], self.options)
+            rep = etintel(message['details']['destinationfqdn'], self.options)
             message['intel'] = {}
             # generic reputation info
             rep.get_reputation('reputation', "domain")
