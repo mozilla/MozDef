@@ -124,7 +124,7 @@ class SshLateral(AlertTask):
         source_ips = []
         users = []
         for x in aggreg['events']:
-            m = re.match('Accepted publickey for (\S+) from (\S+).*', x['_source']['summary'])
+            m = re.match(r'Accepted publickey for (\S+) from (\S+).*', x['_source']['summary'])
             if m is not None and len(m.groups()) == 2:
                 ipaddr = netaddr.IPAddress(m.group(2))
                 for y in self._config['alertifsource']:

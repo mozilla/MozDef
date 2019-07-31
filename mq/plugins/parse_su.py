@@ -22,7 +22,7 @@ class message(object):
 
     def onMessage(self, message, metadata):
 
-        self.session_regexp = re.compile('^pam_unix\(su(?:-l)?\:session\)\: session (?P<status>\w+) for user (?P<username>\w+)(?: (?:by (?:(?P<originuser>\w+))?\(uid\=(?P<uid>[0-9]+)\)?)?)?$')
+        self.session_regexp = re.compile(r'^pam_unix\(su(?:-l)?\:session\)\: session (?P<status>\w+) for user (?P<username>\w+)(?: (?:by (?:(?P<originuser>\w+))?\(uid\=(?P<uid>[0-9]+)\)?)?)?$')
 
         if 'details' in message:
             if 'program' in message['details']:

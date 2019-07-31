@@ -4,11 +4,11 @@ from .negative_test_suite import NegativeTestSuite
 from mozdef_util.query_models import QueryStringMatch
 
 
-hostname_test_regex = 'hostname: /(.*\.)*(groupa|groupb)\.(.*\.)*subdomain\.(.*\.)*.*/'
-filename_matcher = 'summary: /.*\.(exe|sh)/'
+hostname_test_regex = r'hostname: /(.*\.)*(groupa|groupb)\.(.*\.)*subdomain\.(.*\.)*.*/'
+filename_matcher = r'summary: /.*\.(exe|sh)/'
 
 # Note that this has potential for over-matching on foo.bar.baz.com, which needs further validation in alerts
-ip_matcher = 'destination: /.*\..{1,3}\..{1,3}\..{1,3}(:.*|\/.*)/'
+ip_matcher = r'destination: /.*\..{1,3}\..{1,3}\..{1,3}(:.*|\/.*)/'
 
 
 class TestQueryStringMatchPositiveTestSuite(PositiveTestSuite):
