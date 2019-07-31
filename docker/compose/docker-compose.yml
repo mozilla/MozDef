@@ -9,6 +9,11 @@ services:
       cache_from:
         - mozdef/mozdef_elasticsearch
         - mozdef_elasticsearch:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1:9200"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     command: bin/elasticsearch
     restart: always
     volumes:
@@ -25,6 +30,11 @@ services:
       cache_from:
         - mozdef/mozdef_rabbitmq
         - mozdef_rabbitmq:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1:15672"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: rabbitmq-server
     volumes:
@@ -42,6 +52,11 @@ services:
       cache_from:
         - mozdef/mozdef_mongodb
         - mozdef_mongodb:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1:3002"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: /usr/bin/mongod --smallfiles --config /etc/mongod.conf
     volumes:
@@ -58,6 +73,11 @@ services:
       cache_from:
         - mozdef/mozdef_kibana
         - mozdef_kibana:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1:5601"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: bin/kibana --elasticsearch=http://elasticsearch:9200
     depends_on:
@@ -72,6 +92,11 @@ services:
       cache_from:
         - mozdef/mozdef_nginx
         - mozdef_nginx:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: /usr/sbin/nginx
     depends_on:
@@ -199,6 +224,11 @@ services:
       cache_from:
         - mozdef/mozdef_loginput
         - mozdef_loginput:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1:8080/status"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && python index.py -c index.conf'
     depends_on:
@@ -236,6 +266,11 @@ services:
       cache_from:
         - mozdef/mozdef_meteor
         - mozdef_meteor:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1:3000"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: bash -c 'node bundle/main.js'
     depends_on:
@@ -251,6 +286,11 @@ services:
       cache_from:
         - mozdef/mozdef_rest
         - mozdef_rest:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1:8081/status"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && python index.py -c index.conf'
     depends_on:
@@ -268,6 +308,11 @@ services:
       cache_from:
         - mozdef/mozdef_syslog
         - mozdef_syslog:latest
+    healthcheck:
+      test: ["CMD-SHELL", "echo > /dev/tcp/localhost/514"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/rabbitmq/5672";do sleep 1;done && sleep 30 && /usr/sbin/syslog-ng --no-caps -F'
     depends_on:
@@ -292,6 +337,11 @@ services:
     build:
       context: ../../
       dockerfile: docker/compose/mozdef_cognito_proxy/Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "127.0.0.1"]
+      interval: 30s
+      timeout: 3s
+      retries: 10
     command: bash -c 'exit 0'
     networks:
       - default

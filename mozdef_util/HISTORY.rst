@@ -86,3 +86,21 @@ Add is_ip utility function
 
 * Updated to work with python3
 * Removed support for python2
+
+
+3.0.1 (2019-07-08)
+------------------
+
+* Updated bulk queue to acquire lock before saving events
+
+
+3.0.2 (2019-07-17)
+------------------
+
+* Updated ElasticsearchClient.get_indices() to include closed indices
+
+
+3.0.3 (2019-07-18)
+------------------
+
+* Added ElasticsearchClient.get_open_indices()

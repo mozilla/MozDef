@@ -63,7 +63,7 @@ Resources:
         EBSEnabled: true
         VolumeType: gp2
         VolumeSize: !Ref BlockStoreSizeGB
-      ElasticsearchVersion: '5.6'
+      ElasticsearchVersion: '6.7'
       ElasticsearchClusterConfig:
         InstanceCount: !Ref ESInstanceCount
       AccessPolicies:

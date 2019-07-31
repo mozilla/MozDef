@@ -10,6 +10,7 @@ import os
 import json
 import time
 
+from operator import itemgetter
 from dateutil.parser import parse
 
 from .rest_test_suite import RestTestSuite
@@ -39,6 +40,7 @@ class TestKibanaDashboardsRoute(RestTestSuite):
         dashboardjson = json.load(f)
         f.close()
         dashid = dash_name.replace(' ', '-')
+        dashid = 'dashboard:{0}'.format(dashid)
         dashboardjson['dashboard']['title'] = dash_name
         dashboardjson['type'] = 'dashboard'
         return self.es_client.save_object(body=dashboardjson, index='.kibana', doc_id=dashid)
@@ -69,11 +71,11 @@ class TestKibanaDashboardsRoute(RestTestSuite):
             assert type(json_resp) == list
             assert len(json_resp) == 2
 
-            assert json_resp[1]['id'] == "Example-SSH-Dashboard"
-            assert json_resp[1]['name'] == 'Example SSH Dashboard'
-
-            assert json_resp[0]['id'] == "Example-FTP-Dashboard"
-            assert json_resp[0]['name'] == 'Example FTP Dashboard'
+            sorted_dashboards = sorted(json_resp, key=itemgetter('name'))
+            assert sorted_dashboards[0]['id'] == "Example-FTP-Dashboard"
+            assert sorted_dashboards[0]['name'] == 'Example FTP Dashboard'
+            assert sorted_dashboards[1]['id'] == "Example-SSH-Dashboard"
+            assert sorted_dashboards[1]['name'] == 'Example SSH Dashboard'
 
 
 class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):

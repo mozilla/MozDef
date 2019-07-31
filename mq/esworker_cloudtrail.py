@@ -228,10 +228,10 @@ class taskConsumer(object):
             self.flush_wait_time = (response['Credentials']['Expiration'] - current_time).seconds - 3
         else:
             role_creds = {}
+        role_creds['region_name'] = options.region
         self.s3_client = boto3.client(
             's3',
-            region_name=options.region,
-            **role_creds
+            **get_aws_credentials(**role_creds)
         )
 
     def reauth_timer(self):
@@ -284,12 +284,12 @@ class taskConsumer(object):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
                 self.sqs_queue = connect_sqs(
-                    task_exchange=options.taskexchange,
-                    **get_aws_credentials(
-                        options.region,
-                        options.accesskey,
-                        options.secretkey)
+                    region_name=options.region,
+                    aws_access_key_id=options.accesskey,
+                    aws_secret_access_key=options.secretkey,
+                    task_exchange=options.taskexchange
                 )
+            time.sleep(options.sleep_time)
 
     def on_message(self, body):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -382,11 +382,10 @@ def main():
         sys.exit(1)
 
     sqs_queue = connect_sqs(
-        task_exchange=options.taskexchange,
-        **get_aws_credentials(
-            options.region,
-            options.accesskey,
-            options.secretkey)
+        region_name=options.region,
+        aws_access_key_id=options.accesskey,
+        aws_secret_access_key=options.secretkey,
+        task_exchange=options.taskexchange
     )
     # consume our queue
     taskConsumer(sqs_queue, es).run()
@@ -412,7 +411,6 @@ def initConfig():
     # rabbit message queue options
     options.mqserver = getConfig('mqserver', 'localhost', options.configfile)
     options.taskexchange = getConfig('taskexchange', 'eventtask', options.configfile)
-    options.eventexchange = getConfig('eventexchange', 'events', options.configfile)
     # rabbit: how many messages to ask for at once from the message queue
     options.prefetch = getConfig('prefetch', 10, options.configfile)
     # rabbit: user creds
@@ -429,6 +427,9 @@ def initConfig():
 
     # This is the full ARN that the s3 bucket lives under
     options.cloudtrail_arn = getConfig('cloudtrail_arn', 'cloudtrail_arn', options.configfile)
+
+    # How long to sleep between iterations of querying AWS
+    options.sleep_time = getConfig('sleep_time', 0.1, options.configfile)
 
 
 if __name__ == '__main__':

@@ -6,8 +6,9 @@
 import requests
 import json
 import os
-import sys
 from configlib import getConfig, OptionParser
+
+from mozdef_util.utilities.logger import logger
 
 
 class message(object):
@@ -41,7 +42,7 @@ class message(object):
         self.configfile = './plugins/cymon.conf'
         self.options = None
         if os.path.exists(self.configfile):
-            sys.stdout.write('found conf file {0}\n'.format(self.configfile))
+            logger.debug('found conf file {0}\n'.format(self.configfile))
             self.initConfiguration()
 
     def onMessage(self, request, response):
@@ -58,9 +59,8 @@ class message(object):
         except ValueError:
             response.status = 500
 
-        print(requestDict, requestDict.keys())
         if 'ipaddress' in requestDict:
-            url="https://cymon.io/api/nexus/v1/ip/{0}/events?combined=true&format=json".format(requestDict['ipaddress'])
+            url = "https://cymon.io/api/nexus/v1/ip/{0}/events?combined=true&format=json".format(requestDict['ipaddress'])
 
             # add the cymon api key?
             if self.options is not None:
