@@ -131,11 +131,11 @@ Background
 
 Mozilla used CEF as a logging standard for compatibility with Arcsight and for standardization across systems. While CEF is an admirable standard, MozDef prefers JSON logging for the following reasons:
 
-* Every development language can create a JSON structure
-* JSON is easily parsed by computers/programs which are the primary consumer of logs
-* CEF is primarily used by Arcsight and rarely seen outside that platform and doesn't offer the extensibility of JSON
+* Every development language can create a JSON structure.
+* JSON is easily parsed by computers/programs which are the primary consumer of logs.
+* CEF is primarily used by Arcsight and rarely seen outside that platform and doesn't offer the extensibility of JSON.
 * A wide variety of log shippers (heka, logstash, fluentd, nxlog, beaver) are readily available to meet almost any need to transport logs as JSON.
-* JSON is already the standard for cloud platforms like amazon's cloudtrail logging
+* JSON is already the standard for cloud platforms like amazon's cloudtrail logging.
 
 Description
 ***********
@@ -288,8 +288,10 @@ Alerts are stored in the `alerts`_ folder.
 
 There are two types of alerts:
 
-* simple alerts that consider events on at a time. For example you may want to get an alert everytime a single LDAP modification is detected.
-* aggregation alerts allow you to aggregate events on the field of your choice. For example you may want to alert when more than 3 login attempts failed for the same username.
+* simple alerts that consider events on at a time
+   * For example you may want to get an alert everytime a single LDAP modification is detected.
+* aggregation alerts that allow you to aggregate events on the field of your choice
+   * For example you may want to alert when more than 3 login attempts failed for the same username.
 
 You'll find documented examples in the `alerts`_ folder.
 

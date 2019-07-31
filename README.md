@@ -25,7 +25,7 @@ The Mozilla Enterprise Defense Platform (MozDef) seeks to automate the security 
 
 ## Goals:
 
-* Provide a platform for use by defenders to rapidly discover and respond to security incidents.
+* Provide a platform for use by defenders to rapidly discover and respond to security incidents
 * Automate interfaces to other systems like bunker, cymon, mig
 * Provide metrics for security events and incidents
 * Facilitate real-time collaboration amongst incident handlers
@@ -36,7 +36,7 @@ The Mozilla Enterprise Defense Platform (MozDef) seeks to automate the security 
 
 MozDef is in production at Mozilla where we are using it to process over 300 million events per day.
 
-[1]: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/v3.1.0/mozdef-parent.yml
+[1]: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/v3.1.1/mozdef-parent.yml
 
 ## Survey & Contacting us
 
