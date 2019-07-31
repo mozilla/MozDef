@@ -231,7 +231,7 @@ class message(object):
                         newmessage['details']['assigned_addr'] = "0.0.0.0"
                     if 'mac' not in newmessage['details']:
                         newmessage['details']['mac'] = "0000000000000000"
-                    newmessage['details']['mac'] = newmessage['details']['mac'].replace(':'. '')
+                    newmessage['details']['mac'] = newmessage['details']['mac'].replace(':', '')
                     newmessage['summary'] = (
                         '{assigned_addr} assigned to '
                         '{mac}'
