@@ -20,7 +20,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
                 'username': 'tester1',
                 'localities': [
                     {
-                        'sourceipv4address': '1.2.3.4',
+                        'sourceipaddress': '1.2.3.4',
                         'city': 'Toronto',
                         'country': 'CA',
                         'lastaction': datetime.utcnow(),
@@ -58,7 +58,7 @@ class TestLocality(unittest.TestCase):
                 'username': 'tester1',
                 'localities': [
                     {
-                        'sourceipv4address': '1.2.3.4',
+                        'sourceipaddress': '1.2.3.4',
                         'city': 'Toronto',
                         'country': 'CA',
                         'lastaction': datetime.utcnow(),
@@ -73,7 +73,7 @@ class TestLocality(unittest.TestCase):
                 'username': 'tester2',
                 'localities': [
                     {
-                        'sourceipv4address': '4.3.2.1',
+                        'sourceipaddress': '4.3.2.1',
                         'city': 'San Francisco',
                         'country': 'USA',
                         'lastaction': datetime.utcnow(),
@@ -115,8 +115,8 @@ class TestLocality(unittest.TestCase):
                 'username': 'tester2',
                 'localities': [
                     {
-                        # Should be sourceipv4address
-                        'sourceipaddress': '1.2.3.4',
+                        # Should be sourceipaddress; missing a 'd'
+                        'sourceipadress': '1.2.3.4',
                         'city': 'San Francisco',
                         'country': 'USA',
                         'lastaction': datetime.utcnow(),

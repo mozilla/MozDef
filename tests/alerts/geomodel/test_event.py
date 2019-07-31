@@ -201,5 +201,5 @@ class TestEvent(unittest.TestCase):
 
         loc = event.extract_locality(test_event)
 
-        assert loc.sourceipv4address == '1.2.3.4'
+        assert loc.sourceipaddress == '1.2.3.4'
         assert loc.lastaction.day == 31

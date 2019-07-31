@@ -27,7 +27,7 @@ class Alert(NamedTuple):
     category: str
     type_: str
     username: str
-    sourceipv4address: str
+    sourceipaddress: str
     timestamp: datetime
     origin: Origin
     tags: List[str]
@@ -35,7 +35,7 @@ class Alert(NamedTuple):
 
     def new(
         username: str,
-        sourceipv4: str,
+        sourceip: str,
         origin: Origin,
         summary: str = _DEFAULT_SUMMARY
     ) -> 'Alert':
@@ -47,7 +47,7 @@ class Alert(NamedTuple):
             category='geomodel',
             _type='geomodel',
             username=username,
-            sourceipv4address=sourceipv4,
+            sourceipaddress=sourceip,
             timestamp=datetime.now(),
             origin=origin,
             tags=['geomodel'],

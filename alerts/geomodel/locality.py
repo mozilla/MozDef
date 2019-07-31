@@ -17,7 +17,7 @@ class Locality(NamedTuple):
     '''Represents a specific locality.
     '''
 
-    sourceipv4address: str
+    sourceipaddress: str
     city: str
     country: str
     lastaction: datetime
