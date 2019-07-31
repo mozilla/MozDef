@@ -19,7 +19,7 @@ def isFQDN(fqdn):
         # We could resolve FQDNs here, but that could tip our hand and it's
         # possible us investigating could trigger other alerts.
         # validate using the regex from https://github.com/yolothreat/utilitybelt
-        fqdn_re = re.compile('(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', re.I | re.S | re.M)
+        fqdn_re = re.compile(r'(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', re.I | re.S | re.M)
         return bool(re.match(fqdn_re,fqdn))
     except:
         return False
