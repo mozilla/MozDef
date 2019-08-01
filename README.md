@@ -1,11 +1,11 @@
 [![Build Status](https://travis-ci.org/mozilla/MozDef.svg?branch=master)](https://travis-ci.org/mozilla/MozDef)
-[![Documentation Status](https://readthedocs.org/projects/mozdef/badge/?version=latest)](http://mozdef.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/mozdef/badge/?version=latest)](https://mozdef.readthedocs.io/en/latest/?badge=latest)
 
 # MozDef: ![LOGO](docs/source/images/moz_defense-platform_01.png)
 
 ## Documentation:
 
-http://mozdef.readthedocs.org/en/latest/
+https://mozdef.readthedocs.org/en/latest/
 
 
 ## Give MozDef a Try in AWS:
