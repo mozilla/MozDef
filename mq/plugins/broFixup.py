@@ -228,9 +228,10 @@ class message(object):
 
                 if logtype == 'dhcp':
                     if 'assigned_addr' not in newmessage['details']:
-                        newmessage['details']['assigned_addr'] = '0.0.0.0'
+                        newmessage['details']['assigned_addr'] = "0.0.0.0"
                     if 'mac' not in newmessage['details']:
-                        newmessage['details']['mac'] = '00:00:00:00:00:00'
+                        newmessage['details']['mac'] = "000000000000"
+                    newmessage['details']['mac'] = newmessage['details']['mac'].replace(':', '')
                     newmessage['summary'] = (
                         '{assigned_addr} assigned to '
                         '{mac}'

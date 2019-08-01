@@ -352,18 +352,18 @@ class TestSuricataFixup(object):
                 "start":"2018-10-12T22:24:09.546736+0000"
             },
             "payload":"Q09OTkVDVCBzZWN1cml0eS10cmFja2VyLmRlYmlhbi5vcmc6NDQzIEhUVFAvMS4xDQpIb3N0OiBzZWN1cml0eS10cmFja2VyLmRlYmlhbi5vcmc6NDQzDQpVc2VyLUFnZW50OiBHby1odHRwLWNsaWVudC8xLjENCg0K",
-            "payload_printable":"CONNECT security-tracker.debian.org:443 HTTP\/1.1\r\nHost: security-tracker.debian.org:443\r\nUser-Agent: Go-http-client\/1.1\r\n\r\n",
+            "payload_printable":"CONNECT security-tracker.debian.org:443 HTTP/1.1\r\nHost: security-tracker.debian.org:443\r\nUser-Agent: Go-http-client/1.1\r\n\r\n",
             "stream":0,
-            "packet":"RQAAKAAAAABABgAACjBLMAowShHR6Aw4ClEmlrx\/mcdQEgoAAAAAAA==",
+            "packet":"RQAAKAAAAABABgAACjBLMAowShHR6Aw4ClEmlrx/mcdQEgoAAAAAAA==",
             "packet_info":{
                 "linktype":12
             },
             "http": {
                 "hostname":"security-tracker.debian.org",
                 "url":"security-tracker.debian.org:443",
-                "http_user_agent":"Go-http-client\/1.1",
+                "http_user_agent":"Go-http-client/1.1",
                 "http_method":"CONNECT",
-                "protocol":"HTTP\/1.1",
+                "protocol":"HTTP/1.1",
                 "status":200,
                 "length":0,
                 "redirect":"afakedestination"
@@ -428,7 +428,7 @@ class TestSuricataFixup(object):
                 "url":"/allyourfiles",
                 "http_user_agent":"FirefoxRulez",
                 "http_method":"GET",
-                "protocol":"HTTP\/1.2",
+                "protocol":"HTTP/1.2",
                 "status":200,
                 "length":5000,
                 "redirect":"afakedestination"
