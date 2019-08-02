@@ -35,6 +35,44 @@ class State(NamedTuple):
     localities: List[Locality]
 
 
+class Update(NamedTuple):
+    '''Produced by calls to functions operating on lists of `State`s to
+    indicate when an update was applied without having to maintain distinct
+    lists.
+    '''
+
+    state: State
+    did_update: bool
+
+def _update(state: State, from_evt: State) -> Update:
+    did_update = False
+
+    for loc1 in from_evt.localities:
+        did_find = False
+
+        for index, loc2 in enumerate(state.localities):
+            # If we find that the new state's locality has been recorded
+            # for the user in question, we only want to update it if either
+            # their IP changed or the new time of activity is more recent.
+            if loc1.city == loc2.city and loc1.country == loc2.country:
+                did_find = True
+
+                new_more_recent = loc1.lastaction > loc2.lastaction
+                new_ip = loc1.sourceipaddress != loc2.sourceipaddress
+
+                if new_more_recent or new_ip:
+                    state.localities[index] = loc1
+                    did_update = True
+
+                # Stop looking for the locality in the records pulled from ES.
+                break
+        
+        if not did_find:
+            state.localities.append(loc1)
+            did_update = True
+
+    return Update(state, did_update)
+
 def find_all(
         query_es: query.QueryInterface,
         locality: config.Localities
@@ -64,8 +102,7 @@ def find_all(
         lambda value: value is not None,
         map(to_state, results)))
 
-
-def merge(persisted: List[State], event_sourced: List[State]) -> List[State]:
+def merge(persisted: List[State], event_sourced: List[State]) -> List[Update]:
     '''Merge together a list of states already stored in ElasticSearch
     (obtained via `find_all`) and a list of new states extracted from events.
     This process results in the creation of a new list of states wherein the
@@ -76,8 +113,16 @@ def merge(persisted: List[State], event_sourced: List[State]) -> List[State]:
         2. Observations of activity within new localities
     '''
 
-    return []
+    mapped = {state.username: Update(state, False) for state in persisted}
 
+    for new_state in event_sourced:
+        if new_state.username in mapped:
+            old_state = mapped[new_state.username].state
+            mapped[new_state.username] = _update(old_state, new_state)
+        else:
+            mapped[new_state.username] = Update(new_state, True)
+
+    return mapped.values()
 
 def remove_outdated(state: State, days_valid: int) -> State:
     '''Return a new `State` with localities from `state` that are considered
