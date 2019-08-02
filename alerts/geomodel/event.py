@@ -56,7 +56,10 @@ def find_all(
     return events
 
 
-def extract_locality(event: Dict[str, Any], radius=_DEFAULT_RADIUS_KM) -> Optional[Locality]:
+def extract_locality(
+        event: Dict[str, Any],
+        radius=_DEFAULT_RADIUS_KM
+) -> Optional[Locality]:
     '''Extract information about the `sourceipaddress` from which a user's
     event-triggering action was taken along with other locality data if it
     is present.
