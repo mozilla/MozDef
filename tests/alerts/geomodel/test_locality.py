@@ -169,7 +169,7 @@ class TestLocality(unittest.TestCase):
         hour_ago = datetime.utcnow() - timedelta(hours=1)
 
         assert user1.did_update
-        assert last_action < hour_ago
+        assert last_action > hour_ago
 
     def test_merge_records_new_localities(self):
         from_es = [
