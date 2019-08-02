@@ -261,7 +261,7 @@ class TestLocality(unittest.TestCase):
                 radius=50)
         ]
 
-        new_localities = locality.remove_outdated(test_state, 5)
+        new_localities = locality.remove_outdated(test_localities, 5)
 
         assert len(test_localities) == 2
         assert len(new_localities) == 1
