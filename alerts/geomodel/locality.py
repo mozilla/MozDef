@@ -63,3 +63,27 @@ def find_all(
     return list(filter(
         lambda value: value is not None,
         map(to_state, results)))
+
+
+def merge(persisted: List[State], event_sourced: List[State]) -> List[State]:
+    '''Merge together a list of states already stored in ElasticSearch
+    (obtained via `find_all`) and a list of new states extracted from events.
+    This process results in the creation of a new list of states wherein the
+    state for each user in either list has had their list of localities updated
+    to reflect:
+
+        1. Observations of activity within known localities and
+        2. Observations of activity within new localities
+    '''
+
+    return []
+
+
+def remove_outdated(state: State, days_valid: int) -> State:
+    '''Return a new `State` with localities from `state` that are considered
+    "outdated" removed.  A `Locality` is considered to be out of date when the
+    recorded last activity within that locality was greater than some number of
+    days ago.
+    '''
+
+    return state
