@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, NamedTuple, Optional
 
 from mozdef_util.query_models import SearchQuery, TermMatch
@@ -124,11 +124,18 @@ def merge(persisted: List[State], event_sourced: List[State]) -> List[Update]:
 
     return mapped.values()
 
-def remove_outdated(state: State, days_valid: int) -> State:
-    '''Return a new `State` with localities from `state` that are considered
+def remove_outdated(
+        localities: List[Locality],
+        days_valid: int
+) -> List[Locality]:
+    '''Return a new list of localities with those that are considered
     "outdated" removed.  A `Locality` is considered to be out of date when the
     recorded last activity within that locality was greater than some number of
     days ago.
     '''
 
-    return state
+    return [
+        loc
+        for loc in localities
+        if loc.lastaction >= datetime.utcnow() - timedelta(days=days_valid)
+    ]
