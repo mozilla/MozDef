@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import unittest
 
 import alerts.geomodel.config as config
@@ -134,3 +134,105 @@ class TestLocality(unittest.TestCase):
 
         assert len(results) == 1
         assert usernames == ['validtester']
+
+    def test_merge_updates_localities(self):
+        from_es = [
+            locality.State('locality', 'user1', [
+                locality.Locality(
+                    sourceipaddress='1.2.3.4',
+                    city='Toronto',
+                    country='CA',
+                    lastaction=datetime.utcnow() - timedelta(days=3),
+                    latitude=43.6529,
+                    longitude=-79.3849,
+                    radius=50)
+            ]),
+        ]
+
+        from_events = [
+            locality.State('locality', 'user1', [
+                locality.Locality(
+                    sourceipaddress='1.2.3.4',
+                    city='Toronto',
+                    country='CA',
+                    lastaction=datetime.utcnow() - timedelta(minutes=30),
+                    latitude=43.6529,
+                    longitude=-79.3849,
+                    radius=50)
+            ]),
+        ]
+
+        merged = locality.merge(from_es, from_events)
+        user1 = [state for state in merged if state.username == 'user1'][0]
+
+        last_action = user1.localities[0].lastaction 
+        hour_ago = datetime.utcnow() - timedelta(hours=1)
+
+        assert last_action < hour_ago
+
+    def test_merge_records_new_localities(self):
+        from_es = [
+            locality.State('locality', 'user1', [
+                locality.Locality(
+                    sourceipaddress='1.2.3.4',
+                    city='Toronto',
+                    country='CA',
+                    lastaction=datetime.utcnow() - timedelta(days=3),
+                    latitude=43.6529,
+                    longitude=-79.3849,
+                    radius=50)
+            ]),
+        ]
+
+        from_events = [
+            locality.State('locality', 'user1', [
+                locality.Locality(
+                    sourceipaddress='32.64.128.255',
+                    city='Berlin',
+                    country='DE',
+                    lastaction=datetime.utcnow() - timedelta(minutes=30),
+                    latitude=52.520008,
+                    longitude=13.404954,
+                    radius=50)
+            ]),
+        ]
+
+        merged = locality.merge(from_es, from_events)
+        user1 = [state for state in merged if state.username == 'user1'][0]
+        user1_cities = [loc.city for loc in user1.localities]
+
+        assert sorted(user1_cities) == ['Berlin', 'Toronto']
+
+    def test_merge_includes_new_user_states(self):
+        from_es = [
+            # Known user, user1
+            locality.State('locality', 'user1', [
+                locality.Locality(
+                    sourceipaddress='1.2.3.4',
+                    city='Toronto',
+                    country='CA',
+                    lastaction=datetime.utcnow() - timedelta(days=3),
+                    latitude=43.6529,
+                    longitude=-79.3849,
+                    radius=50)
+            ]),
+        ]
+
+        from_events = [
+            # New user, user3
+            locality.State('locality', 'user3', [
+                locality.Locality(
+                    sourceipaddress='32.64.128.255',
+                    city='Berlin',
+                    country='DE',
+                    lastaction=datetime.utcnow() - timedelta(minutes=30),
+                    latitude=52.520008,
+                    longitude=13.404954,
+                    radius=50)
+            ]),
+        ]
+
+        merged = locality.merge(from_es, from_events)
+        sorted_users = sorted([state.username for state in merged])
+
+        assert sorted_users == ['user1', 'user3']
