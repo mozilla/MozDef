@@ -260,14 +260,6 @@ caption, legend {
     color: var(--txt-primary-color);
 }
 
-.tabcontent {
-    display: none;
-}
-
-.tabcontent.active {
-    display: block;
-}
-
 textarea {
     overflow: auto;
     vertical-align: top;
@@ -343,12 +335,12 @@ td {
 }
 
 .welcome {
-    height: 180px;
-    width: 600px;
-    margin-left: 25%;
-    text-align: center;
-    color: var(--txt-primary-color);
-    vertical-align: middle;
+  height: 180px;
+  width: 600px;
+  margin-left: 25%;
+  text-align: center;
+  color: var(--txt-primary-color);
+  vertical-align: middle;
 }
 
 .mozdeflogo{
@@ -357,11 +349,16 @@ td {
 }
 
 .tabcontent {
-    margin-top: 20px;
+  display: none;
+  margin-top: 20px;
+}
+
+.tabcontent.active {
+  display: block;
 }
 
 .tabnav a {
-    color: lightblue;
+  color: lightblue;
 }
 
 /* don't float the 'create account' link*/

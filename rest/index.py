@@ -11,7 +11,6 @@ import pynsive
 import random
 import re
 import requests
-import sys
 import socket
 import importlib
 from bottle import route, run, response, request, default_app, post
@@ -536,10 +535,10 @@ def kibanaDashboards():
             })
 
     except ElasticsearchInvalidIndex as e:
-        sys.stderr.write('Kibana dashboard index not found: {0}\n'.format(e))
+        logger.error('Kibana dashboard index not found: {0}\n'.format(e))
 
     except Exception as e:
-        sys.stderr.write('Kibana dashboard received error: {0}\n'.format(e))
+        logger.error('Kibana dashboard received error: {0}\n'.format(e))
 
     return json.dumps(resultsList)
 
@@ -555,7 +554,7 @@ def getWatchlist():
         # Log the entries we are removing to maintain an audit log
         expired = watchlistentries.find({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
         for entry in expired:
-            sys.stdout.write('Deleting entry {0} from watchlist /n'.format(entry))
+            logger.debug('Deleting entry {0} from watchlist /n'.format(entry))
 
         # delete any that expired
         watchlistentries.delete_many({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(hours=1)}})
@@ -578,7 +577,7 @@ def getWatchlist():
             )
         return json.dumps(WatchList)
     except ValueError as e:
-        sys.stderr.write('Exception {0} collecting watch list\n'.format(e))
+        logger.error('Exception {0} collecting watch list\n'.format(e))
 
 
 def getWhois(ipaddress):
@@ -591,7 +590,7 @@ def getWhois(ipaddress):
         whois['fqdn']=socket.getfqdn(str(netaddr.IPNetwork(ipaddress)[0]))
         return (json.dumps(whois))
     except Exception as e:
-        sys.stderr.write('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
+        logger.error('Error looking up whois for {0}: {1}\n'.format(ipaddress, e))
 
 
 def verisSummary(verisRegex=None):
@@ -617,7 +616,7 @@ def verisSummary(verisRegex=None):
         else:
             return json.dumps(list())
     except Exception as e:
-            sys.stderr.write('Exception while aggregating veris summary: {0}\n'.format(e))
+            logger.error('Exception while aggregating veris summary: {0}\n'.format(e))
 
 
 def initConfig():

@@ -274,11 +274,11 @@ caption, legend {
 }
 
 .modal-header {
-    color: var(--font-focus);
+    color: var(--txt-secondary-color);
 }
   
   .modal-body {
-    color: var(--font-focus);
+    color: var(--txt-secondary-color);
 }
   
   .modal-body .row {
@@ -343,12 +343,12 @@ td {
 
 
 .welcome {
-    height: 180px;
-    width: 600px;
-    margin-left: 25%;
-    text-align: center;
-    color: var(--txt-primary-color);
-    vertical-align: middle;
+  height: 180px;
+  width: 600px;
+  margin-left: 25%;
+  text-align: center;
+  color: var(--txt-primary-color);
+  vertical-align: middle;
 }
 
 .mozdeflogo{
@@ -357,11 +357,16 @@ td {
 }
 
 .tabcontent {
-    margin-top: 20px;
+  display: none;
+  margin-top: 20px;
+}
+
+.tabcontent.active {
+  display: block;
 }
 
 .tabnav a {
-    color: lightblue;
+  color: lightblue;
 }
 
 /* uncomment this login ui css to hide the local account/password signup options

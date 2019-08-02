@@ -7,7 +7,7 @@ Cloud based MozDef is an opinionated deployment of the MozDef services created i
 ingest CloudTrail, GuardDuty, and provide security services.
 
 .. image:: images/cloudformation-launch-stack.png
-   :target: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/v1.38.5/mozdef-parent.yml
+   :target: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/v3.1.0/mozdef-parent.yml
 
 
 Feedback
@@ -32,18 +32,19 @@ MozDef requires the following:
 - An OIDC Provider with ClientID, ClientSecret, and Discovery URL
 
   - Mozilla uses Auth0 but you can use any OIDC provider you like: Shibboleth,
-    KeyCloak, AWS Cognito, Okta, Ping (etc.)
+    KeyCloak, AWS Cognito, Okta, Ping (etc.).
   - You will need to configure the redirect URI of ``/redirect_uri`` as allowed in
-    your OIDC provider configuration
+    your OIDC provider configuration.
 - An ACM Certificate in the deployment region for your DNS name
-- A VPC with three public subnets available.
+- A VPC with three public subnets available
 
   - It is advised that this VPC be dedicated to MozDef or used solely for security automation.
   - The three public subnets must all be in different `availability zones <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#using-regions-availability-zones-describe>`_
-    and have a large enough number of IP addresses to accommodate the infrastructure
+    and have a large enough number of IP addresses to accommodate the infrastructure.
   - The VPC must have an `internet gateway <https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html>`_
-    enabled on it so that MozDef can reach the internet
-- An SQS queue receiving GuardDuty events.  At the time of writing this is not required but may be required in future.
+    enabled on it so that MozDef can reach the internet.
+- An SQS queue receiving GuardDuty events
+  - At the time of writing this is not required but may be required in future.
 
 
 Supported Regions

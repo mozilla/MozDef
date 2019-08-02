@@ -27,7 +27,8 @@ insert_simple.js
 Usage: `node ./insert_simple.js <processes> <totalInserts> <host1> [host2] [host3] [...]`
 
   * `processes`: Number of processes to spawn
-  * `totalInserts`: Number of inserts to perform, please note after a certain number node will slow down. You want to have a lower number if you are in this case.
+  * `totalInserts`: Number of inserts to perform
+     * Please note after a certain number node will slow down. You want to have a lower number if you are in this case.
   * `host1`, `host2`, `host3`, etc: Elasticsearch hosts to which you want to send the HTTP requests
 
 insert_bulk.js
@@ -39,7 +40,8 @@ Usage: `node ./insert_bulk.js <processes> <insertsPerQuery> <totalInserts> <host
 
   * `processes`: Number of processes to spawn
   * `insertsPerQuery`: Number of logs per request
-  * `totalInserts`: Number of inserts to perform, please note after a certain number node will slow down. You want to have a lower number if you are in this case.
+  * `totalInserts`: Number of inserts to perform
+     * Please note after a certain number node will slow down. You want to have a lower number if you are in this case.
   * `host1`, `host2`, `host3`, etc: Elasticsearch hosts to which you want to send the HTTP requests
 
 search_all_fulltext.js
@@ -50,7 +52,8 @@ search_all_fulltext.js
 Usage: `node ./search_all_fulltext.js <processes> <totalSearches> <host1> [host2] [host3] [...]`
 
   * `processes`: Number of processes to spawn
-  * `totalSearches`: Number of search requests to perform, please note after a certain number node will slow down. You want to have a lower number if you are in this case.
+  * `totalSearches`: Number of search requests to perform
+     * Please note after a certain number node will slow down. You want to have a lower number if you are in this case.
   * `host1`, `host2`, `host3`, etc: Elasticsearch hosts to which you want to send the HTTP requests
 
 

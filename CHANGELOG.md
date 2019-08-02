@@ -5,6 +5,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v3.1.1] - 2019-07-25
+
+### Added
+- Ability to get open indices in ElasticsearchClient
+- Documentation on installing dependencies on Mac OS X
+
+### Changed
+- AWS Managed Elasticsearch/Kibana version to 6.7
+
+### Fixed
+- Disk free/total in /about page shows at most 2 decimal places
+- Connections to SQS and S3 without access key and secret
+- Ability to block IPs and add to Watchlist
+
+
+## [v3.1.0] - 2019-07-18
+
+### Added
+- Captured the AWS CodeBuild CI/CD configuration in code with documentation
+- Support for HTTP Basic Auth in AWS deployment
+- Docker healthchecks to docker containers
+- Descriptions to all AWS Lambda functions
+- Support for alerts-* index in docker environment
+- Alert that detects excessive numbers of AWS API describe calls
+- Additional AWS infrastructure to support AWS re:Inforce 2019 workshop
+- Documentation specific to MozDef installation now that MozDef uses Python 3
+- Config setting for CloudTrail notification SQS queue polling time
+- Config setting for Slack bot welcome message
+
+### Changed
+- Kibana port from 9443 to 9090
+- AWS CloudFormation default values from "unset" to empty string
+- Simplify mozdef-mq logic determining AMQP endpoint URI
+- SQS to always use secure transport
+- CloudTrail alert unit tests
+- Incident summary placeholder text for greater clarity
+- Display of Veris data for easier viewing
+- All Dockerfiles to reduce image size, pin package signing keys and improve
+  clarity
+
+### Fixed
+- Workers starting before GeoIP data is available
+- Mismatched MozDefACMCertArn parameter name in CloudFormation template
+- Duplicate mozdefvpcflowlogs object
+- Hard coded AWS Availability Zone
+- httplib2 by updating to version to 0.13.0 for python3
+- mozdef_util by modifying bulk queue to acquire lock before saving events
+- Dashboard Kibana URL
+- Unnecessary and conflicting package dependencies from MozDef and mozdef_util
+- get_indices to include closed indices
+
+
 ## [v3.0.0] - 2019-07-08
 ### Added
 - Support for Python3
@@ -132,7 +184,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased]: https://github.com/mozilla/MozDef/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v3.1.1...HEAD
+[v3.1.1]: https://github.com/mozilla/MozDef/compare/v3.1.0...v3.1.1
+[v3.1.0]: https://github.com/mozilla/MozDef/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/mozilla/MozDef/compare/v2.0.1...v3.0.0
 [v2.0.1]: https://github.com/mozilla/MozDef/compare/v2.0.0...v2.0.1
 [v2.0.0]: https://github.com/mozilla/MozDef/compare/v1.40.0...v2.0.0

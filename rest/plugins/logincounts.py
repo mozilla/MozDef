@@ -5,12 +5,12 @@
 
 import json
 import os
-import sys
 from configlib import getConfig, OptionParser
 from datetime import datetime, timedelta
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, RangeMatch, Aggregation, ExistsMatch, PhraseMatch
 from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.logger import logger
 
 
 class message(object):
@@ -44,7 +44,7 @@ class message(object):
         self.configfile = './plugins/logincounts.conf'
         self.options = None
         if os.path.exists(self.configfile):
-            sys.stdout.write('found conf file {0}\n'.format(self.configfile))
+            logger.debug('found conf file {0}\n'.format(self.configfile))
         self.initConfiguration()
 
     def onMessage(self, request, response):

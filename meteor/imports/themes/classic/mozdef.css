@@ -287,19 +287,6 @@ caption, legend {
     color: var(--txt-secondary-color);
 }
 
-/* incident/investigation styles */
-.daterangepicker, .daterangepicker td {
-    color: var(--txt-secondary-color);
-}
-
-.tabcontent {
-    display: none;
-}
-
-.tabcontent.active {
-    display: block;
-}
-
 textarea {
     overflow: auto;
     vertical-align: top;
@@ -389,7 +376,12 @@ td {
 }
 
 .tabcontent {
+    display: none;
     margin-top: 20px;
+}
+
+.tabcontent.active {
+    display: block;
 }
 
 .tabnav a {

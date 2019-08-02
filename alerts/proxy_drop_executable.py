@@ -24,7 +24,7 @@ class AlertProxyDropExecutable(AlertTask):
         )
 
         # Only notify on certain file extensions from config
-        filename_regex = "/.*\.({0})/".format(self.config.extensions.replace(",", "|"))
+        filename_regex = r"/.*\.({0})/".format(self.config.extensions.replace(",", "|"))
         search_query.add_must(
             [QueryStringMatch("details.destination: {}".format(filename_regex))]
         )
