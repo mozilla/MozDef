@@ -162,8 +162,8 @@ class TestLocality(unittest.TestCase):
             ]),
         ]
 
-        merged = locality.merge(from_es, from_events)
-        user1 = [state for state in merged if state.username == 'user1'][0]
+        updates = locality.merge(from_es, from_events)
+        user1 = [u for u in updates if u.state.username == 'user1'][0]
 
         last_action = user1.localities[0].lastaction 
         hour_ago = datetime.utcnow() - timedelta(hours=1)
@@ -197,8 +197,8 @@ class TestLocality(unittest.TestCase):
             ]),
         ]
 
-        merged = locality.merge(from_es, from_events)
-        user1 = [state for state in merged if state.username == 'user1'][0]
+        updates = locality.merge(from_es, from_events)
+        user1 = [u for u in updates if u.state.username == 'user1'][0]
         user1_cities = [loc.city for loc in user1.localities]
 
         assert sorted(user1_cities) == ['Berlin', 'Toronto']
@@ -232,7 +232,7 @@ class TestLocality(unittest.TestCase):
             ]),
         ]
 
-        merged = locality.merge(from_es, from_events)
-        sorted_users = sorted([state.username for state in merged])
+        updates = locality.merge(from_es, from_events)
+        sorted_users = sorted([u.state.username for u in updates])
 
         assert sorted_users == ['user1', 'user3']
