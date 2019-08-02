@@ -165,9 +165,10 @@ class TestLocality(unittest.TestCase):
         updates = locality.merge(from_es, from_events)
         user1 = [u for u in updates if u.state.username == 'user1'][0]
 
-        last_action = user1.localities[0].lastaction 
+        last_action = user1.state.localities[0].lastaction 
         hour_ago = datetime.utcnow() - timedelta(hours=1)
 
+        assert user1.did_update
         assert last_action < hour_ago
 
     def test_merge_records_new_localities(self):
@@ -199,8 +200,9 @@ class TestLocality(unittest.TestCase):
 
         updates = locality.merge(from_es, from_events)
         user1 = [u for u in updates if u.state.username == 'user1'][0]
-        user1_cities = [loc.city for loc in user1.localities]
+        user1_cities = [loc.city for loc in user1.state.localities]
 
+        assert user1.did_update 
         assert sorted(user1_cities) == ['Berlin', 'Toronto']
 
     def test_merge_includes_new_user_states(self):
@@ -234,5 +236,7 @@ class TestLocality(unittest.TestCase):
 
         updates = locality.merge(from_es, from_events)
         sorted_users = sorted([u.state.username for u in updates])
+        user3 = [u for u in updates if u.state.username == 'user3'][0]
 
+        assert user3.did_update 
         assert sorted_users == ['user1', 'user3']
