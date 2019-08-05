@@ -1,6 +1,4 @@
-import os.path
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts"))
+from importlib import import_module
 
 from .alert_test_suite import AlertTestSuite
 
@@ -17,7 +15,8 @@ class AlertTestCase(object):
         self.full_events = []
 
     def run(self, alert_filename, alert_classname):
-        alert_file_module = __import__(alert_filename)
+        alert_file_module = import_module('alerts.{0}'.format(alert_filename))
+        import pdb; pdb.set_trace()
         alert_class_attr = getattr(alert_file_module, alert_classname)
 
         alert_task = alert_class_attr()

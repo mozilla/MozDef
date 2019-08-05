@@ -8,7 +8,7 @@
 # This code alerts on every successfully opened session for any user in the list
 
 import datetime
-from lib.alerttask import AlertTask
+from .lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, QueryStringMatch, RangeMatch
 
 

@@ -9,7 +9,7 @@
 # This is a very serious warning that must be acted upon as it means MFA failed and only one factor was validated (in
 # this case a VPN certificate)
 
-from lib.alerttask import AlertTask
+from .lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, PhraseMatch
 
 

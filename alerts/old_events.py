@@ -8,7 +8,7 @@
 # Looks for events that have an old timestamp
 # which could mean theres something wrong in the event pipeline
 
-from lib.alerttask import AlertTask
+from .lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, LessThanMatch
 
 from datetime import datetime, timedelta

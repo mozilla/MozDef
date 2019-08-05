@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-from lib.alerttask import AlertTask, add_hostname_to_ip
+from .lib.alerttask import AlertTask, add_hostname_to_ip
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 import re
 import netaddr
