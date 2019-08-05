@@ -8,12 +8,9 @@
 
 import pytest
 
-import os
-import sys
 from mozdef_util.utilities.dot_dict import DotDict
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
 
 
 class TestDotDict(UnitTestSuite):

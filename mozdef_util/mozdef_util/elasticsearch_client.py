@@ -7,9 +7,7 @@ from elasticsearch.helpers import bulk, BulkIndexError
 
 from .query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
 from .bulk_queue import BulkQueue
-
 from .utilities.logger import logger
-
 from .event import Event
 
 DOCUMENT_TYPE = '_doc'
