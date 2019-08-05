@@ -1,7 +1,4 @@
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../alerts/lib"))
-from alerttask import hostname_from_ip, add_hostname_to_ip
+from alerts.lib.alerttask import hostname_from_ip, add_hostname_to_ip
 
 import mock
 import socket

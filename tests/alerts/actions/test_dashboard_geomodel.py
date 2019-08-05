@@ -1,9 +1,6 @@
 import json
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../alerts/actions"))
-from dashboard_geomodel import message
+from alerts.actions.dashboard_geomodel import message
 
 
 class TestDashboardGeomodel(object):

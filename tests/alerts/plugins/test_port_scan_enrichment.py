@@ -3,13 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import os
-import sys
-
-plugin_path = os.path.join(os.path.dirname(__file__), '../../../alerts/plugins')
-sys.path.append(plugin_path)
-
-from port_scan_enrichment import enrich
+from alerts.plugins.port_scan_enrichment import enrich
 
 
 EXAMPLE_TIMESTAMP = '2016-07-13 22:33:31.625443+00:00'

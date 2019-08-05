@@ -8,20 +8,15 @@
 import os.path
 import sys
 import logging
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-
-from unit_test_suite import UnitTestSuite
-
-from freezegun import freeze_time
 import mock
-
 import copy
 import re
 import json
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
-from lib import alerttask
+from freezegun import freeze_time
+
+from tests.unit_test_suite import UnitTestSuite
+from alerts.lib import alerttask
 
 
 def mock_add_hostname_to_ip(ip):
