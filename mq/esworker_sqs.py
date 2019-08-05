@@ -28,8 +28,8 @@ from mozdef_util.utilities.remove_at import removeAt
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-from .lib.plugins import sendEventToPlugins, registerPlugins
-from .lib.sqs import connect_sqs
+from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 # running under uwsgi?
