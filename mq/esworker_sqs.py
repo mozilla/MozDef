@@ -28,9 +28,8 @@ from mozdef_util.utilities.remove_at import removeAt
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from mq.lib.plugins import sendEventToPlugins, registerPlugins
-from mq.lib.sqs import connect_sqs
+from .lib.plugins import sendEventToPlugins, registerPlugins
+from .lib.sqs import connect_sqs
 
 
 # running under uwsgi?

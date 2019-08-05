@@ -17,9 +17,6 @@ def utc_timezone():
 tzlocal.get_localzone = utc_timezone
 
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../mq"))
 from mq import esworker_eventtask
 
 

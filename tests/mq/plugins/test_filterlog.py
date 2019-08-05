@@ -3,10 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from filterlog import message
+from mq.plugins.filterlog import message
 
 
 class TestFilterlog():

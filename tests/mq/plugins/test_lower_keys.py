@@ -3,10 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from lower_keys import message
+from mq.plugins.lower_keys import message
 
 
 class TestLowerKeysPlugin():

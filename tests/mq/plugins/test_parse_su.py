@@ -3,11 +3,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from parse_su import message
 import copy
+
+from mq.plugins.parse_su import message
 
 session_su = {}
 session_su['utctimestamp'] = '2017-08-24T22:49:42+00:00'

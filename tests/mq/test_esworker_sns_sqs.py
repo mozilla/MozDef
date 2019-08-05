@@ -7,16 +7,12 @@
 
 import json
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../mq"))
-from mq.esworker_sns_sqs import taskConsumer
-
 from mozdef_util.utilities.dot_dict import DotDict
 from mozdef_util.query_models import SearchQuery, ExistsMatch
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-from unit_test_suite import UnitTestSuite
+from mq.esworker_sns_sqs import taskConsumer
+
+from tests.unit_test_suite import UnitTestSuite
 
 
 class TestEsworkerSNSSQS(UnitTestSuite):
