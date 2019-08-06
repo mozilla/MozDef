@@ -38,6 +38,7 @@ ENV PYCURL_SSL_LIBRARY=nss
 
 # Create python virtual environment and install dependencies
 COPY --chown=mozdef:mozdef requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
+COPY --chown=mozdef:mozdef setup.py /opt/mozdef/envs/mozdef/setup.py
 
 COPY --chown=mozdef:mozdef cron/update_geolite_db.py /opt/mozdef/envs/mozdef/cron/update_geolite_db.py
 COPY --chown=mozdef:mozdef cron/update_geolite_db.conf /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
@@ -50,6 +51,8 @@ RUN \
   virtualenv -p /usr/bin/python3.6 /opt/mozdef/envs/python && \
   source /opt/mozdef/envs/python/bin/activate && \
   pip install --requirement /opt/mozdef/envs/mozdef/requirements.txt && \
+  cd /opt/mozdef/envs/mozdef/ && \
+  pip install --editable . && \
   cd /opt/mozdef/envs/mozdef/mozdef_util && \
   pip install --editable . && \
   mkdir /opt/mozdef/envs/mozdef/data
