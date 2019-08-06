@@ -13,7 +13,7 @@ import time
 from operator import itemgetter
 from dateutil.parser import parse
 
-from .rest_test_suite import RestTestSuite
+from tests.rest.rest_test_suite import RestTestSuite
 
 
 class TestTestRoute(RestTestSuite):

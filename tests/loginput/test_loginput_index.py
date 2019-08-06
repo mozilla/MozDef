@@ -1,4 +1,4 @@
-from .loginput_test_suite import LoginputTestSuite
+from tests.loginput.loginput_test_suite import LoginputTestSuite
 
 
 class TestTestRoute(LoginputTestSuite):
