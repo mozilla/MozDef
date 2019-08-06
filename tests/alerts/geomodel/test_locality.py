@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import unittest
 
 import alerts.geomodel.config as config
+import alerts.geomodel.event as event 
 import alerts.geomodel.locality as locality
 import alerts.geomodel.query as query
 
@@ -46,6 +47,90 @@ class TestLocalityElasticSearch(UnitTestSuite):
         assert len(results) == 1
         assert usernames == ['tester1']
 
+
+class TestLocalityIntegrations(unittest.TestCase):
+    '''Integration tests for locality functionality.
+    '''
+
+    def test_locality_state_update(self):
+        loc_query = query_interface([
+            {
+                'type_': 'locality',
+                'username': 'tester1',
+                'localities': [
+                    {
+                        'sourceipaddress': '1.2.3.4',
+                        'city': 'Toronto',
+                        'country': 'CA',
+                        'lastaction': datetime.utcnow(),
+                        'latitude': 43.6529,
+                        'longitude': -79.3849,
+                        'radius': 50
+                    }
+                ]
+            }
+        ])
+        loc_cfg = config.Localities('localities', 30, 50.0)
+
+        evt_query = query_interface([
+            {
+                '_source': {
+                    'category': 'test',
+                    'sourceipaddress': '4.3.2.1',
+                    'utctimestamp': '2019-07-31T17:56:38.908000+00:00',
+                    'details': {
+                        'username': 'tester1'
+                    },
+                    'sourceipgeolocation': {
+                        'city': 'San Francisco',
+                        'country_code': 'US',
+                        'latitude': 37.773972,
+                        'longitude': -122.431297
+                    }
+                }
+            },
+            {
+                '_source': {
+                    'category': 'test',
+                    'sourceipaddress': '1.2.4.8',
+                    'utctimestamp': '2019-07-31T17:56:38.908000+00:00',
+                    'details': {
+                        'username': 'tester2'
+                    },
+                    'sourceipgeolocation': {
+                        'city': 'San Francisco',
+                        'country_code': 'US',
+                        'latitude': 37.773972,
+                        'longitude': -122.431297
+                    }
+                }
+            }
+        ])
+        evt_cfg = config.Events('events', config.SearchWindow(minutes=30), [
+            config.QuerySpec(
+                lucene='category: test',
+                username='_source.details.username')
+        ])
+
+        persisted = locality.find_all(loc_query, loc_cfg)
+        event_sourced = []
+
+        for result in event.find_all(evt_query, evt_cfg):
+            loc = event.extract_locality(result.event)
+
+            if loc is not None:
+                event_sourced.append(
+                    locality.State('locality', result.username, [loc]))
+
+        updates = locality.merge(persisted, event_sourced)
+
+        assert len(updates) == 2
+        assert updates[0].did_update and updates[1].did_update
+       
+        t1 = [u.state for u in updates if u.state.username == 'tester1'][0]
+        cities = sorted([loc.city for loc in t1.localities])
+
+        assert cities == ['San Francisco', 'Toronto']
 
 class TestLocality(unittest.TestCase):
     '''unit tests for the `locality` module.
