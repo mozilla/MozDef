@@ -14,6 +14,7 @@ class LoginputTestSuite(HTTPTestSuite):
         sample_config = DotDict()
         sample_config.configfile = os.path.join(os.path.dirname(__file__), 'index.conf')
         OptionParser.parse_args = mock.Mock(return_value=(sample_config, {}))
-        from loginput import index
-        self.application = index.application
+
+        from loginput.index import application as loginput_application
+        self.application = loginput_application
         super(LoginputTestSuite, self).setup()
