@@ -28,11 +28,9 @@ def mock_add_hostname_to_ip(ip):
 
 class AlertTestSuite(UnitTestSuite):
     def teardown(self):
-        os.chdir(self.orig_path)
         super(AlertTestSuite, self).teardown()
 
     def setup(self):
-        self.orig_path = os.getcwd()
         super(AlertTestSuite, self).setup()
 
         # Overwrite the ES and RABBITMQ configs for alerts
@@ -49,9 +47,6 @@ class AlertTestSuite(UnitTestSuite):
             'mqpassword': self.options.mqpassword,
             'mqalertserver': self.options.mqalertserver
         }
-
-        alerts_dir = os.path.join(os.path.dirname(__file__), "../../alerts/")
-        os.chdir(alerts_dir)
 
         if not hasattr(self, 'alert_classname'):
             self.alert_classname = (self.__class__.__name__[4:] if
@@ -86,7 +81,7 @@ class AlertTestSuite(UnitTestSuite):
         assert test_case.description is not ""
 
         # Verify alert_filename is a legit file
-        full_alert_file_path = "./" + self.alert_filename + ".py"
+        full_alert_file_path = "./alerts/" + self.alert_filename + ".py"
         assert os.path.isfile(full_alert_file_path) is True
 
         # Verify we're able to load in the alert_classname
