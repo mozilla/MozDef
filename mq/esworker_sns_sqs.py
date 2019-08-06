@@ -22,8 +22,8 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-from lib.plugins import sendEventToPlugins, registerPlugins
-from lib.sqs import connect_sqs
+from mq.lib.plugins import sendEventToPlugins, registerPlugins
+from mq.lib.sqs import connect_sqs
 
 
 # running under uwsgi?

@@ -26,7 +26,7 @@ from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 from mozdef_util.utilities.logger import logger, initLogger
 
-from lib.plugins import sendEventToPlugins, registerPlugins
+from mq.lib.plugins import sendEventToPlugins, registerPlugins
 
 
 # running under uwsgi?

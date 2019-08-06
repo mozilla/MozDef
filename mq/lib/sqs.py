@@ -1,5 +1,5 @@
 import boto3
-from .aws import get_aws_credentials
+from mq.lib.aws import get_aws_credentials
 
 
 def connect_sqs(region_name=None, aws_access_key_id=None,
