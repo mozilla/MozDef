@@ -9,15 +9,14 @@ import pytz
 import tzlocal
 import datetime
 
+from mq import esworker_eventtask
+
 
 def utc_timezone():
     return pytz.timezone('UTC')
 
 
 tzlocal.get_localzone = utc_timezone
-
-
-from mq import esworker_eventtask
 
 
 class MockOptions():
