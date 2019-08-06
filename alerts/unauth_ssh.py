@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2015 Mozilla Corporation
 
-from .lib.alerttask import AlertTask
+from alerts.lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch, PhraseMatch
 import re
 from configlib import getConfig, OptionParser

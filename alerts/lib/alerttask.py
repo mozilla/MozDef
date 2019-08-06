@@ -23,8 +23,8 @@ from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
 
-from .config import RABBITMQ, ES, ALERT_PLUGINS
-from .alert_plugin_set import AlertPluginSet
+from alerts.lib.config import RABBITMQ, ES, ALERT_PLUGINS
+from alerts.lib.alert_plugin_set import AlertPluginSet
 
 
 # utility functions used by AlertTask.mostCommon

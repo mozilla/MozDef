@@ -1,4 +1,4 @@
-from .alerttask import AlertTask
+from alerts.lib.alerttask import AlertTask
 
 
 class DeadmanAlertTask(AlertTask):

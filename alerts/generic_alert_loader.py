@@ -7,7 +7,7 @@
 
 # TODO: Dont use query_models, nicer fixes for AlertTask
 
-from .lib.alerttask import AlertTask
+from alerts.lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch
 from mozdef_util.utilities.dot_dict import DotDict
 from mozdef_util.utilities.logger import logger

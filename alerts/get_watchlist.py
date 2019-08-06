@@ -9,7 +9,7 @@
 import requests
 import json
 
-from .lib.alerttask import AlertTask
+from alerts.lib.alerttask import AlertTask
 from requests_jwt import JWTAuth
 from mozdef_util.utilities.logger import logger
 from mozdef_util.query_models import SearchQuery, QueryStringMatch

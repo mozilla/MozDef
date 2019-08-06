@@ -1,6 +1,6 @@
 from importlib import import_module
 
-from .alert_test_suite import AlertTestSuite
+from tests.alerts.alert_test_suite import AlertTestSuite
 
 
 class AlertTestCase(object):
@@ -16,7 +16,6 @@ class AlertTestCase(object):
 
     def run(self, alert_filename, alert_classname):
         alert_file_module = import_module('alerts.{0}'.format(alert_filename))
-        import pdb; pdb.set_trace()
         alert_class_attr = getattr(alert_file_module, alert_classname)
 
         alert_task = alert_class_attr()

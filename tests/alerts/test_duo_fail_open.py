@@ -1,7 +1,7 @@
-from .positive_alert_test_case import PositiveAlertTestCase
-from .negative_alert_test_case import NegativeAlertTestCase
+from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
+from tests.alerts.negative_alert_test_case import NegativeAlertTestCase
 
-from .alert_test_suite import AlertTestSuite
+from tests.alerts.alert_test_suite import AlertTestSuite
 
 
 class TestAlertDuoFailOpen(AlertTestSuite):
