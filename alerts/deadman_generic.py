@@ -6,7 +6,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 
-from lib.deadman_alerttask import DeadmanAlertTask
+from alerts.lib.deadman_alerttask import DeadmanAlertTask
 from mozdef_util.query_models import SearchQuery, QueryStringMatch
 from mozdef_util.utilities.logger import logger
 

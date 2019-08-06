@@ -8,7 +8,7 @@
 # a collection of alerts looking for the lack of events
 # to alert on a dead input source.
 
-from lib.deadman_alerttask import DeadmanAlertTask
+from alerts.lib.deadman_alerttask import DeadmanAlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 

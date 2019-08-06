@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-from lib.deadman_alerttask import DeadmanAlertTask
+from alerts.lib.deadman_alerttask import DeadmanAlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch
 
 
