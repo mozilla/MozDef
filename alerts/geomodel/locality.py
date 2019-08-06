@@ -122,7 +122,7 @@ def merge(persisted: List[State], event_sourced: List[State]) -> List[Update]:
         else:
             mapped[new_state.username] = Update(new_state, True)
 
-    return mapped.values()
+    return list(mapped.values())
 
 def remove_outdated(
         localities: List[Locality],
