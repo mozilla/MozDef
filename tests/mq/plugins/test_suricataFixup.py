@@ -1,13 +1,10 @@
-import os
-import sys
-from mozdef_util.utilities.toUTC import toUTC
-
 import json
 import random
 import string
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from suricataFixup import message
+from mozdef_util.utilities.toUTC import toUTC
+
+from mq.plugins.suricataFixup import message
 
 
 class TestSuricataFixup(object):

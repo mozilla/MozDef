@@ -1,8 +1,4 @@
-import os
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../mq/plugins'))
-from github_webhooks import message
+from mq.plugins.github_webhooks import message
 
 
 class TestSuricataFixup(object):
