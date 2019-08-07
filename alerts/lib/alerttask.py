@@ -118,8 +118,9 @@ class AlertTask(Task):
         myparser = OptionParser()
         self.config = None
         (self.config, args) = myparser.parse_args([])
+        full_config_filename = os.path.join(os.path.dirname(__file__), "../", config_filename)
         for config_key in config_keys:
-            temp_value = getConfig(config_key, "", config_filename)
+            temp_value = getConfig(config_key, "", full_config_filename)
             setattr(self.config, config_key, temp_value)
 
     def close_connections(self):
