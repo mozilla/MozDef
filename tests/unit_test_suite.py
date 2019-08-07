@@ -13,7 +13,7 @@ import sys
 
 from mozdef_util.utilities import toUTC
 
-from suite_helper import parse_config_file, parse_mapping_file, setup_es_client, setup_rabbitmq_client
+from tests.suite_helper import parse_config_file, parse_mapping_file, setup_es_client, setup_rabbitmq_client
 
 
 class UnitTestSuite(object):

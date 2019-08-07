@@ -9,7 +9,6 @@ import collections
 import json
 import kombu
 import os
-import sys
 import socket
 import netaddr
 
@@ -24,10 +23,7 @@ from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
 from lib.config import RABBITMQ, ES, ALERT_PLUGINS
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from lib.alert_plugin_set import AlertPluginSet
 
 
