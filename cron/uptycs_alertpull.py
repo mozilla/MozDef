@@ -26,8 +26,9 @@ except ImportError:
     utc = UTC()
 from configlib import getConfig, OptionParser
 import json
-import duo_client
 import mozdef_client as mozdef
+# TODO: to write/vendor this client
+# import uptycs_client
 import pickle
 
 
@@ -58,7 +59,7 @@ def normalize(details):
     return normalized
 
 
-def process_events(mozmsg, duo_events, etype, state):
+def process_alerts(mozmsg, uptycs_alerts):
     """
     Data format of duo_events in api_version == 2 (str):
     duo_events.metadata = {u'total_objects': 49198, u'next_offset': [u'1547244648000', u'4da7180c-b1e5-47b4-9f4d-ee10dc3b5ac8']}
@@ -143,32 +144,25 @@ def process_events(mozmsg, duo_events, etype, state):
 
 
 def main():
-    try:
-        state = pickle.load(open(options.statepath, "rb"))
-    except IOError:
-        # Oh, you're new.
-        # Note API v2 expect full, correct and within range timestamps in millisec so we start recently
-        # API v1 uses normal timestamps in seconds instead
-        state = {
-            "administration": 0,
-            "administration_offset": None,
-            "authentication": 1547000000000,
-            "authentication_offset": None,
-            "telephony": 0,
-            "telephony_offset": None,
-        }
+    # FYI: This doesn't actually work yet, just mocking out as a mix of real-code and pseudo code
+    api_call = UptycsRest(api_json_key=keyfile,
+                          verify_ssl=verify_ssl,
+                          suffix=options.DOMAIN,
+                          api='/alerts',
+                          method='GET',
+                          post_data=None,
+                          post_data_file=None)
 
-    # Convert v1 (sec) timestamp to v2 (ms)...
-    if state["authentication"] < 1547000000000:
-        state["authentication"] = int(str(state["authentication"]) + "000")
+    api_response = api_call.call_api()
 
-    duo = duo_client.Admin(ikey=options.IKEY, skey=options.SKEY, host=options.URL)
+    alerts = api_response['items']
+
     mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
-    mozmsg.tags = ["duosecurity"]
+    mozmsg.tags = ["uptycs"]
     if options.update_tags != "":
         mozmsg.tags.append(options.update_tags)
-    mozmsg.set_category("authentication")
-    mozmsg.source = "DuoSecurityAPI"
+    mozmsg.set_category("uptycs")
+    mozmsg.source = "UptycsAPI"
     if options.DEBUG:
         mozmsg.debug = options.DEBUG
         mozmsg.set_send_to_syslog(True, only_syslog=True)
@@ -177,38 +171,21 @@ def main():
     # log when this script was last called.
     # NOTE: If administration and telephone logs support a "v2" API in the future it will most likely need to have the
     # same code with `next_offset` as authentication uses.
-    state = process_events(
+    process_events(
         mozmsg,
         duo.get_administrator_log(mintime=state["administration"] + 1),
         "administration",
         state,
     )
-    state = process_events(
-        mozmsg,
-        duo.get_authentication_log(
-            api_version=2,
-            limit="1000",
-            sort="ts:asc",
-            mintime=state["authentication"] + 1,
-            next_offset=state["authentication_offset"],
-        ),
-        "authentication",
-        state,
-    )
-    state = process_events(
-        mozmsg,
-        duo.get_telephony_log(mintime=state["telephony"] + 1),
-        "telephony",
-        state,
-    )
-
-    pickle.dump(state, open(options.statepath, "wb"))
 
 
 def initConfig():
-    options.IKEY = getConfig("IKEY", "", options.configfile)
-    options.SKEY = getConfig("SKEY", "", options.configfile)
-    options.URL = getConfig("URL", "", options.configfile)
+    options.DOMAIN = getConfig("DOMAIN", "", options.configfile)
+    options.USERID = getConfig("USERID", "", options.configfile)
+    options.SECRET = getConfig("SECRET", "", options.configfile)
+    options.CUSTOMERID = getConfig("CUSTOMERID", "", options.configfile)
+    options.ID = getConfig("ID", "", options.configfile)
+    options.KEY = getConfig("KEY", "", options.configfile)
     options.MOZDEF_URL = getConfig("MOZDEF_URL", "", options.configfile)
     options.DEBUG = getConfig("DEBUG", True, options.configfile)
     options.statepath = getConfig("statepath", "", options.configfile)
