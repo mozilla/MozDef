@@ -1,8 +1,4 @@
-import sys
-import os
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../cron"))
-from auth02mozdef import process_msg
+from cron.auth02mozdef import process_msg
 
 import mozdef_client as mozdef
 
