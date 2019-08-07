@@ -106,8 +106,8 @@ To process a message, define an onMessage function within your class as follows:
 
     def onMessage(self, request, response):
         '''
-        request: http://bottlepy.org/docs/dev/api.html#the-request-object
-        response: http://bottlepy.org/docs/dev/api.html#the-response-object
+        request: https://bottlepy.org/docs/dev/api.html#the-request-object
+        response: https://bottlepy.org/docs/dev/api.html#the-response-object
 
         '''
         response.headers['X-PLUGIN'] = self.description

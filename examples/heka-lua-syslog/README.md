@@ -1,6 +1,6 @@
 # heka-lua-syslog
 
-This configuration for [heka](http://hekad.readthedocs.org/en/latest/) ships syslog-style logs stored in `/var/log/syslog/systems` to mozdef.
+This configuration for [heka](https://hekad.readthedocs.org/en/latest/) ships syslog-style logs stored in `/var/log/syslog/systems` to mozdef.
 
 To run it:
 
