@@ -128,7 +128,6 @@ def find_all(
 
     entries = []
     for result in results:
-        print(f'Got result {result}')
         state = to_state(result['_source'])
 
         if state is not None:
