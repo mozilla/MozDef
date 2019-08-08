@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import unittest
 
 from alerts.geomodel.alert import alert
@@ -17,7 +18,7 @@ class TestAlert(unittest.TestCase):
 
         assert alert_produced is None
 
-    def test_do_not_alert_on_whitelisted_ips(self)
+    def test_do_not_alert_on_whitelisted_ips(self):
         whitelist = config.Whitelist(users=[], cidrs=['1.2.3.0/8'])
         state = locality.State('locality', 'testuser', [
             locality.Locality(
@@ -26,7 +27,8 @@ class TestAlert(unittest.TestCase):
                 country='CA',
                 lastaction=datetime.utcnow() - timedelta(minutes=5),
                 latitude=43.6529,
-                longitude=-79.3849)
+                longitude=-79.3849,
+                radius=50)
         ])
 
         alert_produced = alert(state, whitelist)
@@ -42,14 +44,16 @@ class TestAlert(unittest.TestCase):
                 country='CA',
                 lastaction=datetime.utcnow() - timedelta(minutes=5),
                 latitude=43.6529,
-                longitude=-79.3849),
+                longitude=-79.3849,
+                radius=50),
             locality.Locality(
                 sourceipaddress='123.3.2.1',
                 city='San Francisco',
                 country='US',
                 lastaction=datetime.utcnow() - timedelta(hours=10),
                 latitude=37.773972,
-                longitude=-122.431297)
+                longitude=-122.431297,
+                radius=50)
         ])
 
         alert_produced = alert(state, whitelist)
@@ -65,14 +69,16 @@ class TestAlert(unittest.TestCase):
                 country='CA',
                 lastaction=datetime.utcnow() - timedelta(minutes=5),
                 latitude=43.6529,
-                longitude=-79.3849),
+                longitude=-79.3849,
+                radius=50),
             locality.Locality(
                 sourceipaddress='123.3.2.1',
                 city='San Francisco',
                 country='US',
                 lastaction=datetime.utcnow() - timedelta(hours=1),
                 latitude=37.773972,
-                longitude=-122.431297)
+                longitude=-122.431297,
+                radius=50)
         ])
 
         alert_produced = alert(state, whitelist)
