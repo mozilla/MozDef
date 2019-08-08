@@ -1,13 +1,9 @@
 import time
 
-import os
-import sys
 from mozdef_util.bulk_queue import BulkQueue
-
 from mozdef_util.query_models import SearchQuery, ExistsMatch
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
 
 
 class BulkQueueTest(UnitTestSuite):
