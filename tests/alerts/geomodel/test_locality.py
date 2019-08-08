@@ -47,7 +47,6 @@ class TestLocalityElasticSearch(UnitTestSuite):
         assert len(entries) == 1
         assert usernames == ['tester1']
 
-
 class TestLocalityIntegrations(unittest.TestCase):
     '''Integration tests for locality functionality.
     '''
