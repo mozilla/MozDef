@@ -2,16 +2,14 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import os.path
 import sys
 import logging
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
 
 from freezegun import freeze_time
 import mock
@@ -19,9 +17,6 @@ import mock
 import copy
 import re
 import json
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
-from lib import alerttask
 
 
 def mock_add_hostname_to_ip(ip):
@@ -35,10 +30,19 @@ class AlertTestSuite(UnitTestSuite):
     def teardown(self):
         os.chdir(self.orig_path)
         super(AlertTestSuite, self).teardown()
+        sys.path.remove(self.alerts_path)
+        sys.path.remove(self.alerts_lib_path)
+        if 'lib' in sys.modules:
+            del sys.modules['lib']
 
     def setup(self):
         self.orig_path = os.getcwd()
         super(AlertTestSuite, self).setup()
+        self.alerts_path = os.path.join(os.path.dirname(__file__), "../../alerts")
+        self.alerts_lib_path = os.path.join(os.path.dirname(__file__), "../../alerts/lib")
+        sys.path.insert(0, self.alerts_path)
+        sys.path.insert(0, self.alerts_lib_path)
+        from lib import alerttask
 
         # Overwrite the ES and RABBITMQ configs for alerts
         # since it pulls it from alerts/lib/config.py

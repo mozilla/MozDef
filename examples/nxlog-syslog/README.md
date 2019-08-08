@@ -1,6 +1,6 @@
 # beaver-syslog
 
-This configuration for [nxlog](http://nxlog-ce.sourceforge.net) ships syslog logs stored in `/var/log/*.log` to mozdef.
+This configuration for [nxlog](https://nxlog.org/download) ships syslog logs stored in `/var/log/*.log` to mozdef.
 
 To run it:
 

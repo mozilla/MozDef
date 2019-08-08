@@ -1,9 +1,8 @@
 import mock
-import os
-import sys
+
 from mozdef_util.utilities.toUTC import toUTC
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from squidFixup import message
+
+from mq.plugins.squidFixup import message
 
 
 class TestSquidFixup(object):
@@ -64,7 +63,7 @@ class TestSquidFixup(object):
         self.verify_defaults(result)
         self.verify_metadata(metadata)
 
-    @mock.patch('squidFixup.node')
+    @mock.patch('mq.plugins.squidFixup.node')
     def test_mozdefhostname_mock_string(self, mock_path):
         mock_path.return_value = 'samplehostname'
         event = {
@@ -76,7 +75,7 @@ class TestSquidFixup(object):
         result, metadata = plugin.onMessage(event, self.metadata)
         assert result['mozdefhostname'] == 'samplehostname'
 
-    @mock.patch('squidFixup.node')
+    @mock.patch('mq.plugins.squidFixup.node')
     def test_mozdefhostname_mock_exception(self, mock_path):
         mock_path.side_effect = ValueError
         event = {

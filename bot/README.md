@@ -40,6 +40,6 @@ KitnIRC is licensed under the MIT License (see `LICENSE` for details).
 
 Useful reference documents for those working with the IRC protocol as a client:
 
- * [RFC 2812](http://tools.ietf.org/html/rfc2812)
- * [ISUPPORT draft](http://tools.ietf.org/html/draft-brocklesby-irc-isupport-03)
+ * [RFC 2812](https://tools.ietf.org/html/rfc2812)
+ * [ISUPPORT draft](https://tools.ietf.org/html/draft-brocklesby-irc-isupport-03)
  * [List of numeric replies](https://www.alien.net.au/irc/irc2numerics.html)
