@@ -36,6 +36,8 @@ ES = {
     'servers': ['http://elasticsearch:9200']
 }
 
+MONGO_URL = "mongodb://mongodb:3002"
+
 OPTIONS = {
     'defaulttimezone': 'UTC',
 }

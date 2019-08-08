@@ -41,6 +41,8 @@ else:
         'servers': ['http://localhost:9200']
     }
 
+MONGO_URL = "mongodb://mongodb:3002"
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
