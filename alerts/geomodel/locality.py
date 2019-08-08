@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
+from mozdef_util.elasticsearch_client import ElasticsearchClient as ESClient
 from mozdef_util.query_models import SearchQuery, TermMatch
 
 import alerts.geomodel.config as config
@@ -34,6 +35,33 @@ class State(NamedTuple):
     username: str
     localities: List[Locality]
 
+class Entry(NamedTuple):
+    '''A top-level container for locality state that will be inserted into
+    ElasticSearch.
+    The `identifier` field here is the `_id` field of the ES document.  When
+    this id is `None`, a new document is inserted whereas when the id is known,
+    the existing document is updated.
+    '''
+
+    identifier: Optional[str]
+    state: State
+
+JournalInterface = Callable[[List[Entry], str], None]
+
+def wrap_journal(client: ESClient) -> JournalInterface:
+    '''Wrap an `ElasticsearchClient` in a closure of type `JournalInterface`.
+    '''
+
+    def wrapper(entries: List[Entry], esindex: str):
+        for entry in entries:
+            document = dict(entry.state._asdict())
+
+            client.save_object(
+                index=esindex,
+                body=document,
+                doc_id=entry.identifer)
+
+    return wrapper
 
 class Update(NamedTuple):
     '''Produced by calls to functions operating on lists of `State`s to
@@ -76,7 +104,7 @@ def _update(state: State, from_evt: State) -> Update:
 def find_all(
         query_es: query.QueryInterface,
         locality: config.Localities
-) -> List[State]:
+) -> List[Entry]:
     '''Retrieve all locality state from ElasticSearch.
     '''
 
@@ -98,9 +126,15 @@ def find_all(
 
     results = query_es(search, locality.es_index)
 
-    return list(filter(
-        lambda value: value is not None,
-        map(to_state, results)))
+    entries = []
+    for result in results:
+        print(f'Got result {result}')
+        state = to_state(result['_source'])
+
+        if state is not None:
+            entries.append(Entry(result['_id'], state))
+
+    return entries
 
 def merge(persisted: List[State], event_sourced: List[State]) -> List[Update]:
     '''Merge together a list of states already stored in ElasticSearch

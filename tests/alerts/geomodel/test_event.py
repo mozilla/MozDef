@@ -42,7 +42,7 @@ class TestEventElasticSearch(UnitTestSuite):
             [
                 config.QuerySpec(
                     lucene='category: geomodel',
-                    username='details.username')
+                    username='_source.details.username')
             ])
 
         results = event.find_all(query_iface, evt_cfg)
@@ -60,13 +60,17 @@ class TestEvent(unittest.TestCase):
     def test_find_all_retrieves_usernames(self):
         query_iface = query_interface([
             {
-                'details': {
-                    'username': 'testuser'
+                '_source': {
+                    'details': {
+                        'username': 'testuser'
+                    }
                 }
             },
             {
-                'details': {
-                    'username': 'test2'
+                '_source': {
+                    'details': {
+                        'username': 'test2'
+                    }
                 }
             }
         ])
@@ -76,7 +80,7 @@ class TestEvent(unittest.TestCase):
             [
                 config.QuerySpec(
                     lucene='test',
-                    username='details.username')
+                    username='_source.details.username')
             ])
 
         results = event.find_all(query_iface, evt_cfg)
@@ -88,13 +92,17 @@ class TestEvent(unittest.TestCase):
     def test_find_all_handles_bad_username_spec(self):
         query_iface = query_interface([
             {
-                'details': {
-                    'username': 'testuser'
+                '_source': {
+                    'details': {
+                        'username': 'testuser'
+                    }
                 }
             },
             {
-                'details': {
-                    'username': 'test2'
+                '_source': {
+                    'details': {
+                        'username': 'test2'
+                    }
                 }
             }
         ])
@@ -104,7 +112,7 @@ class TestEvent(unittest.TestCase):
             [
                 config.QuerySpec(
                     lucene='test',
-                    username='details.nottheusername')  # Wrong key
+                    username='_source.details.nottheusername')  # Wrong key
             ])
 
         results = event.find_all(query_iface, evt_cfg)
@@ -115,13 +123,17 @@ class TestEvent(unittest.TestCase):
     def test_find_all_makes_all_requests(self):
         query_iface = query_interface([
             {
-                'details': {
-                    'username': 'testuser'
+                '_source': {
+                    'details': {
+                        'username': 'testuser'
+                    }
                 }
             },
             {
-                'details': {
-                    'username': 'test2'
+                '_source': {
+                    'details': {
+                        'username': 'test2'
+                    }
                 }
             }
         ])
@@ -131,10 +143,10 @@ class TestEvent(unittest.TestCase):
             [
                 config.QuerySpec(
                     lucene='test',
-                    username='details.username'),
+                    username='_source.details.username'),
                 config.QuerySpec(
                     lucene='another',
-                    username='details.nottheusername')
+                    username='_source.details.nottheusername')
             ])
 
         results = event.find_all(query_iface, evt_cfg)
