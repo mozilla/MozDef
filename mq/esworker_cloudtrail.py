@@ -27,10 +27,9 @@ from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from mq.lib.aws import get_aws_credentials
-from mq.lib.plugins import sendEventToPlugins, registerPlugins
-from mq.lib.sqs import connect_sqs
+from lib.aws import get_aws_credentials
+from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 CLOUDTRAIL_VERB_REGEX = re.compile(r'^([A-Z][^A-Z]*)')

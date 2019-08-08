@@ -1,12 +1,9 @@
-import os
-import sys
 from mozdef_util.utilities.toUTC import toUTC
 
 import mock
 import json
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from broFixup import message
+from mq.plugins.broFixup import message
 
 
 class TestBroFixup(object):
@@ -73,7 +70,7 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert sorted(result['details'].keys()) == sorted(MESSAGE.keys())
 
-    @mock.patch('broFixup.node')
+    @mock.patch('mq.plugins.broFixup.node')
     def test_mozdefhostname_mock_string(self, mock_path):
         mock_path.return_value = 'samplehostname'
         event = {
@@ -85,7 +82,7 @@ class TestBroFixup(object):
         result, metadata = plugin.onMessage(event, self.metadata)
         assert result['mozdefhostname'] == 'samplehostname'
 
-    @mock.patch('broFixup.node')
+    @mock.patch('mq.plugins.broFixup.node')
     def test_mozdefhostname_mock_exception(self, mock_path):
         mock_path.side_effect = ValueError
         event = {

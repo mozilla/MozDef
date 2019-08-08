@@ -8,6 +8,8 @@
 import pytz
 import tzlocal
 import datetime
+import os
+import sys
 
 
 def utc_timezone():
@@ -17,12 +19,6 @@ def utc_timezone():
 tzlocal.get_localzone = utc_timezone
 
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../mq"))
-from mq import esworker_eventtask
-
-
 class MockOptions():
     @property
     def mozdefhostname(self):
@@ -30,7 +26,15 @@ class MockOptions():
 
 
 class TestKeyMapping():
+    def teardown(self):
+        sys.path.remove(self.mq_path)
+
     def setup(self):
+        if 'lib' in sys.modules:
+            del sys.modules['lib']
+        self.mq_path = os.path.join(os.path.dirname(__file__), "../../mq/")
+        sys.path.insert(0, self.mq_path)
+        from mq import esworker_eventtask
         mock_options = MockOptions()
         esworker_eventtask.options = mock_options
         self.key_mapping = esworker_eventtask.keyMapping
