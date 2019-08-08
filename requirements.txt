@@ -5,6 +5,7 @@ boto3==1.7.67
 bottle==0.12.4
 celery==4.1.0
 celery[sqs]==4.1.0
+celerybeat-mongo==0.1.0
 cffi==1.9.1
 configlib==2.0.4
 configparser==3.5.0b2
