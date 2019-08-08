@@ -54,11 +54,11 @@ def load_and_register_alerts(available_alerts, celery_app):
         found_alert_schedule = schedulers_db.find_one({'name': full_path_name})
         if not found_alert_schedule:
             alert_schedule['_id'] = ObjectId()
-            logger.info("Inserting {0} into mongodb".format(full_path_name))
+            logger.debug("Inserting schedule for {0} into mongodb".format(full_path_name))
             schedulers_db.insert(alert_schedule)
         else:
             if schedule_differs(alert_schedule, found_alert_schedule):
-                logger.info("Updating schedule for {0}".format(full_path_name))
+                logger.debug("Updating schedule for {0} in mongodb".format(full_path_name))
                 schedulers_db.replace_one({'name': found_alert_schedule['name']}, alert_schedule)
 
     # Handle any enabled via web UA and no longer in the alerts file
@@ -68,6 +68,29 @@ def load_and_register_alerts(available_alerts, celery_app):
         if alert_name not in available_alerts:
             logger.info("Removing {0} from mongodb".format(alert_name))
             schedulers_db.delete_one({'name': alert_name})
+
+    log_alert_schedule(schedulers_db)
+
+
+def log_alert_schedule(schedulers_db):
+    mongodb_alerts = schedulers_db.find()
+    logger.info("**** Current Alert Schedule ****")
+    for mongodb_alert in mongodb_alerts:
+        schedule_str = 'UNKNOWN'
+        if 'crontab' in mongodb_alert:
+            schedule_str = 'crontab: {0} {1} {2} {3} {4}'.format(
+                mongodb_alert['crontab']['minute'],
+                mongodb_alert['crontab']['hour'],
+                mongodb_alert['crontab']['day_of_week'],
+                mongodb_alert['crontab']['day_of_month'],
+                mongodb_alert['crontab']['month_of_year'],
+            )
+        elif 'interval' in mongodb_alert:
+            schedule_str = 'interval: {0} {1}'.format(
+                mongodb_alert['interval']['every'],
+                mongodb_alert['interval']['period'],
+            )
+        logger.info("\t{0}: {1}".format(mongodb_alert['name'], schedule_str))
 
 
 def schedule_differs(proposed_alert, found_db_alert):
