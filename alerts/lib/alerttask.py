@@ -9,7 +9,6 @@ import collections
 import json
 import kombu
 import os
-import sys
 import socket
 import netaddr
 
@@ -24,10 +23,7 @@ from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
 from lib.config import RABBITMQ, ES, ALERT_PLUGINS
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from lib.alert_plugin_set import AlertPluginSet
 
 
@@ -122,8 +118,9 @@ class AlertTask(Task):
         myparser = OptionParser()
         self.config = None
         (self.config, args) = myparser.parse_args([])
+        full_config_filename = os.path.join(os.path.dirname(__file__), "../", config_filename)
         for config_key in config_keys:
-            temp_value = getConfig(config_key, "", config_filename)
+            temp_value = getConfig(config_key, "", full_config_filename)
             setattr(self.config, config_key, temp_value)
 
     def close_connections(self):

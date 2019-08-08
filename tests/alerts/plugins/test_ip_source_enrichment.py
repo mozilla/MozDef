@@ -1,11 +1,4 @@
-import os
-import sys
-
-plugin_path = os.path.join(os.path.dirname(__file__), '../../../alerts/plugins')
-sys.path.append(plugin_path)
-
-from ip_source_enrichment import enrich
-
+from alerts.plugins.ip_source_enrichment import enrich
 
 good_ipv4 = '255.0.1.2'
 good_ipv6 = '3001:4d9c:b29:12f0::'
