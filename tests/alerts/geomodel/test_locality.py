@@ -85,6 +85,8 @@ class TestLocalityElasticSearch(UnitTestSuite):
         ]
 
         journal(entries, self.event_index_name)
+        
+        self.refresh(self.event_index_name)
 
         query_iface = query.wrap(self.es_client)
         loc_cfg = config.Localities(self.event_index_name, 30, 50.0)
