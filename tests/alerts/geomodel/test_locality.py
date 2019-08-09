@@ -47,6 +47,53 @@ class TestLocalityElasticSearch(UnitTestSuite):
         assert len(entries) == 1
         assert usernames == ['tester1']
 
+    def test_journaling(self):
+        journal = locality.wrap_journal(self.es_client)
+
+        entries = [
+            # A user named "t1" who travelled from Toronto to Berlin over the
+            # weekend.
+            locality.Entry('testingid1', locality.State('locality', 't1', [
+                locality.Locality(
+                    sourceipaddress='1.2.3.4',
+                    city='Toronto',
+                    country='CA',
+                    lastaction=datetime.utcnow() - timedelta(days=3),
+                    latitude=43.6529,
+                    longitude=-79.3849,
+                    radius=50),
+                locality.Locality(
+                    sourceipaddress='32.64.128.255',
+                    city='Berlin',
+                    country='DE',
+                    lastaction=datetime.utcnow() - timedelta(minutes=30),
+                    latitude=52.520008,
+                    longitude=13.404954,
+                    radius=50)
+            ])),
+            # A user named "t2" who only works out of London, UK.
+            locality.Entry('testingid2', locality.State('locality', 't2', [
+                locality.Locality(
+                    sourceipaddress='4.3.2.1',
+                    city='London',
+                    country='GB',
+                    lastaction=datetime.utcnow() - timedelta(minutes=13),
+                    latitude=51.509865,
+                    longitude=-0.118092,
+                    radius=50)
+            ]))
+        ]
+
+        journal(entries, self.event_index_name)
+
+        query_iface = query.wrap(self.es_client)
+        loc_cfg = config.Localities(self.event_index_name, 30, 50.0)
+
+        retrieved = locality.find_all(query_iface, loc_cfg)
+        usernames = [entry.state.username for entry in retrieved]
+
+        assert sorted(usernames) == ['t1', 't2']
+
 class TestLocalityIntegrations(unittest.TestCase):
     '''Integration tests for locality functionality.
     '''
