@@ -59,7 +59,7 @@ def wrap_journal(client: ESClient) -> JournalInterface:
             client.save_object(
                 index=esindex,
                 body=document,
-                doc_id=entry.identifer)
+                doc_id=entry.identifier)
 
     return wrapper
 
