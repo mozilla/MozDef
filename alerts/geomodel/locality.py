@@ -72,6 +72,17 @@ class Update(NamedTuple):
     state: State
     did_update: bool
 
+    def flat_map(fn: Callable[[State], 'Update'], u: 'Update') -> 'Update':
+        '''Apply a function to a `State` that produces an `Update` against the
+        state contained within an established `Update`.  The resulting `Update`
+        will have its `did_update` field set to `True` if either the original
+        or the new `Update` are `True`.
+        '''
+        
+        new = fn(u.state)
+
+        return Update(new.state, u.did_update or new.did_update)
+
 def _update(state: State, from_evt: State) -> Update:
     did_update = False
 
