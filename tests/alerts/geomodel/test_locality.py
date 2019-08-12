@@ -396,7 +396,7 @@ class TestLocality(unittest.TestCase):
         assert sorted_users == ['user1', 'user3']
 
     def test_remove_outdated_removes_old_localities(self):
-        test_localities = [
+        test_state = locality.State('locality', 'tester1', [
             locality.Locality(
                 sourceipaddress='32.64.128.255',
                 city='Berlin',
@@ -413,10 +413,11 @@ class TestLocality(unittest.TestCase):
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50)
-        ]
+        ])
 
-        new_localities = locality.remove_outdated(test_localities, 5)
+        update = locality.remove_outdated(test_state, 5)
 
-        assert len(test_localities) == 2
-        assert len(new_localities) == 1
-        assert new_localities[0].city == 'Toronto'
+        assert update.did_update
+        assert len(test_state.localities) == 2
+        assert len(update.state.localities) == 1
+        assert update.state.localities[0].city == 'Toronto'

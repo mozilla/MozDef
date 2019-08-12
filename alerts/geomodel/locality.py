@@ -157,18 +157,18 @@ def merge(persisted: List[State], event_sourced: List[State]) -> List[Update]:
 
     return list(mapped.values())
 
-def remove_outdated(
-        localities: List[Locality],
-        days_valid: int
-) -> List[Locality]:
-    '''Return a new list of localities with those that are considered
-    "outdated" removed.  A `Locality` is considered to be out of date when the
-    recorded last activity within that locality was greater than some number of
-    days ago.
+def remove_outdated(state: State, days_valid: int) -> Update:
+    '''Update a state by removing localities that are outdated, determined
+    by checking if the last activity within a given locality was at least
+    some number of days ago.
     '''
 
-    return [
+    new_localities = [
         loc
-        for loc in localities
+        for loc in state.localities
         if loc.lastaction >= datetime.utcnow() - timedelta(days=days_valid)
     ]
+
+    return Update(
+        state=State(state.type_, state.username, new_localities),
+        did_update=len(new_localities) != len(state.localities))
