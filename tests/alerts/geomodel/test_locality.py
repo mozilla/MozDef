@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import pytz
 import unittest
 
 import alerts.geomodel.config as config
@@ -168,7 +169,7 @@ class TestLocalityIntegrations(unittest.TestCase):
 
         event_sourced = []
         for result in event.find_all(evt_query, evt_cfg):
-            loc = event.extract_locality(result.event)
+            loc = locality.from_event(result.event)
 
             if loc is not None:
                 event_sourced.append(
@@ -442,3 +443,62 @@ class TestLocality(unittest.TestCase):
 
         assert len(new.state.localities) == 1
         assert new.did_update
+
+    def test_from_event_with_missing_data(self):
+        bad_events = [
+            {
+                '__source': 'invalid'
+            },
+            {
+                '_source': {
+                    'nottheipaddress': 'somethingelse'
+                }
+            },
+            {
+                '_source': {
+                    'sourceipaddress': '1.2.3.4',
+                    'notthegeolocation': 'uhoh'
+                }
+            }
+        ]
+
+        localities = [locality.from_event(evt) for evt in bad_events]
+
+        assert all([loc is None for loc in localities])
+
+    def test_from_event_provides_default_timestamp(self):
+        # Missing `utctimestamp`.
+        test_event = {
+            '_source': {
+                'sourceipaddress': '1.2.3.4',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3849
+                }
+            }
+        }
+
+        loc = locality.from_event(test_event)
+
+        assert loc.lastaction < datetime.utcnow().replace(tzinfo=pytz.UTC)
+
+    def test_from_event_parses_valid_timestamp(self):
+        test_event = {
+            '_source': {
+                'sourceipaddress': '1.2.3.4',
+                'utctimestamp': '2019-07-31T17:56:38.908000+00:00',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3849
+                }
+            }
+        }
+
+        loc = locality.from_event(test_event)
+
+        assert loc.sourceipaddress == '1.2.3.4'
+        assert loc.lastaction.day == 31
