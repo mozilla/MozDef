@@ -137,7 +137,8 @@ def process_alerts(mozmsg, uptycs_alerts):
         localdetails = normalize(details)
         mozmsg.details = localdetails
         mozmsg.summary = (
-            alert["eventtype"] + " " + alert["result"] + " for " + alert["username"]
+            "{} severity {} on {}".format(alert['severity'].capitalize(),
+                                          alert['displayName'], alert['asset']['hostName'])
         )
         mozmsg.send()
 
