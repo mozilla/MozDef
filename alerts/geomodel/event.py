@@ -40,18 +40,16 @@ def find_all(
     queries Geoodel has been configured with.
     '''
 
+    search = SearchQuery(minutes=evt_cfg.search_window.minutes)
+    search.add_must(QSMatch(evt_cfg.lucene_query))
+
+    search_results = query_es(search, evt_cfg.es_index)
+
     events = []
+    for result in search_results:
+        username = _lookup_path(result, evt_cfg.username_path)
 
-    for cfg in evt_cfg.queries:
-        search = SearchQuery(minutes=evt_cfg.search_window.minutes)
-        search.add_must(QSMatch(cfg.lucene))
-
-        search_results = query_es(search, evt_cfg.es_index)
-
-        for result in search_results:
-            username = _lookup_path(result, cfg.username)
-
-            events.append(QueryResult(username, result))
+        events.append(QueryResult(username, result))
 
     return events
 
