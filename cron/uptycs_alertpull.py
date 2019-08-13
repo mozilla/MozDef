@@ -97,28 +97,13 @@ def normalize(details):
     # Normalizes fields to conform to http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
     # This is mainly used for common field names to put inside the details structure
     # There might be faster ways to do this
-    # normalized = {}
+    normalized = {}
 
-    # for f in details:
-    #     if f in ("ip", "ip_address", "client_ip"):
-    #         normalized["sourceipaddress"] = details[f]
-    #         continue
-    #     if f == "result":
-    #         if details[f].lower() == "success":
-    #             normalized["success"] = True
-    #         else:
-    #             normalized["success"] = False
-    #     normalized[f] = details[f]
+    # TODO: identify, if any fields need to be normalized here
+    for item in details:
+        normalized[item] = details[item]
 
-    # if "user" in normalized and type(normalized["user"]) is dict:
-    #     if "name" in normalized["user"]:
-    #         normalized["username"] = normalized["user"]["name"]
-    #     if "key" in normalized["user"]:
-    #         normalized["userkey"] = normalized["user"]["key"]
-    #     del (normalized["user"])
-
-    # return normalized
-    return details
+    return normalized
 
 
 def process_alerts(mozmsg, uptycs_alerts):
@@ -129,15 +114,14 @@ def process_alerts(mozmsg, uptycs_alerts):
         dt = datetime.utcfromtimestamp(e["timestamp"])
         mozmsg.timestamp = dt.replace(tzinfo=utc).isoformat()
 
-        # TODO: Fix this so hostName is properly set
-        mozmsg.log["hostname"] = alert["host"]
+        mozmsg.log["hostname"] = alert["asset"]['hostName']
         for item in alert:
             details[item] = alert[item]
 
         localdetails = normalize(details)
         mozmsg.details = localdetails
         mozmsg.summary = (
-            "{} severity {} on {}".format(alert['severity'].capitalize(),
+            "{} severity {} on {}".format(alert['severity'],
                                           alert['displayName'], alert['asset']['hostName'])
         )
         mozmsg.send()
