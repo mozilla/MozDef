@@ -28,16 +28,10 @@ from configlib import getConfig, OptionParser
 import json
 import mozdef_client as mozdef
 import pickle
-import datetime
-import pdb
-import json
 import jwt
-import datetime
 import requests
 import urllib3
-import click
 import os
-import sys
 
 
 class UptycsFilter(object):
@@ -103,7 +97,7 @@ def normalize(details):
     # Normalizes fields to conform to http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
     # This is mainly used for common field names to put inside the details structure
     # There might be faster ways to do this
-    normalized = {}
+    # normalized = {}
 
     # for f in details:
     #     if f in ("ip", "ip_address", "client_ip"):
@@ -176,6 +170,13 @@ def main():
 
     # Query alerts that match the filter
     alerts = client.alerts(filter)
+    alert_ids = []
+    if len(alerts) > 0:
+        for alert in alerts:
+            if alert['id'] in last_alert_ids:
+                continue
+            else:
+                alert_ids.append(alert['id'])
 
     # Process all these alerts in MozDef
     process_alerts(mozmsg, alerts)
