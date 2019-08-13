@@ -5,17 +5,12 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient as ESClient
 from mozdef_util.query_models import SearchQuery, TermMatch
 
 import alerts.geomodel.config as config
-import alerts.geomodel.query as query
 
 
 # Default radius (in Kilometres) that a locality should have.
 _DEFAULT_RADIUS_KM = 50.0
 
 # TODO: Switch to dataclasses when we move to Python3.7+
-
-def _dict_take(dictionary, keys):
-    return {key: dictionary[key] for key in keys}
-
 
 class Locality(NamedTuple):
     '''Represents a specific locality.
@@ -28,7 +23,6 @@ class Locality(NamedTuple):
     latitude: float
     longitude: float
     radius: int
-
 
 class State(NamedTuple):
     '''Represents the state tracked for each user regarding their localities.
@@ -49,23 +43,6 @@ class Entry(NamedTuple):
     identifier: Optional[str]
     state: State
 
-JournalInterface = Callable[[List[Entry], str], None]
-
-def wrap_journal(client: ESClient) -> JournalInterface:
-    '''Wrap an `ElasticsearchClient` in a closure of type `JournalInterface`.
-    '''
-
-    def wrapper(entries: List[Entry], esindex: str):
-        for entry in entries:
-            document = dict(entry.state._asdict())
-
-            client.save_object(
-                index=esindex,
-                body=document,
-                doc_id=entry.identifier)
-
-    return wrapper
-
 class Update(NamedTuple):
     '''Produced by calls to functions operating on lists of `State`s to
     indicate when an update was applied without having to maintain distinct
@@ -85,6 +62,12 @@ class Update(NamedTuple):
         new = fn(u.state)
 
         return Update(new.state, u.did_update or new.did_update)
+
+JournalInterface = Callable[[List[Entry], str], None]
+QueryInterface = Callable[[SearchQuery, str], List[Entry]]
+
+def _dict_take(dictionary, keys):
+    return {key: dictionary[key] for key in keys}
 
 def _update(state: State, from_evt: State) -> Update:
     did_update = False
@@ -114,6 +97,52 @@ def _update(state: State, from_evt: State) -> Update:
             did_update = True
 
     return Update(state, did_update)
+
+def wrap_journal(client: ESClient) -> JournalInterface:
+    '''Wrap an `ElasticsearchClient` in a closure of type `JournalInterface`.
+    '''
+
+    def wrapper(entries: List[Entry], esindex: str):
+        for entry in entries:
+            document = dict(entry.state._asdict())
+
+            client.save_object(
+                index=esindex,
+                body=document,
+                doc_id=entry.identifier)
+
+    return wrapper
+
+def wrap_query(client: ESClient) -> QueryInterface:
+    '''Wrap an `ElasticsearchClient` in a closure of type `QueryInterface`.
+    '''
+
+    def to_state(result: Dict[str, Any]) -> Optional[State]:
+        try:
+            result['localities'] = [
+                Locality(**_dict_take(loc, Locality._fields))
+                for loc in result['localities']
+            ]
+
+            return State(**_dict_take(result, State._fields))
+        except TypeError:
+            return None
+        except KeyError:
+            return None
+
+    def wrapper(query: SearchQuery, esindex: str) -> List[Entry]:
+        results = query.execute(client, indices=[esindex]).get('hits', [])
+
+        entries = []
+        for event in results:
+            opt_state = to_state(event.get('_source', {}))
+
+            if opt_state is not None:
+                entries.append(Entry(event['_id'], opt_state))
+
+        return entries
+
+    return wrapper
 
 def from_event(
         event: Dict[str, Any],
@@ -151,38 +180,16 @@ def from_event(
         radius)
 
 def find_all(
-        query_es: query.QueryInterface,
+        query_es: QueryInterface,
         locality: config.Localities
 ) -> List[Entry]:
     '''Retrieve all locality state from ElasticSearch.
     '''
 
-    def to_state(result: Dict[str, Any]) -> Optional[State]:
-        try:
-            result['localities'] = [
-                Locality(**_dict_take(loc, Locality._fields))
-                for loc in result['localities']
-            ]
-
-            return State(**_dict_take(result, State._fields))
-        except TypeError:
-            return None
-        except KeyError:
-            return None
-
     search = SearchQuery()
     search.add_must([TermMatch('type_', 'locality')])
 
-    results = query_es(search, locality.es_index)
-
-    entries = []
-    for result in results:
-        state = to_state(result['_source'])
-
-        if state is not None:
-            entries.append(Entry(result['_id'], state))
-
-    return entries
+    return query_es(search, locality.es_index)
 
 def merge(persisted: List[State], event_sourced: List[State]) -> List[Update]:
     '''Merge together a list of states already stored in ElasticSearch

@@ -1,14 +1,24 @@
 from datetime import datetime, timedelta
 import pytz
+from typing import Any, Dict, List
 import unittest
+
+from mozdef_util.query_models import SearchQuery
 
 import alerts.geomodel.config as config
 import alerts.geomodel.locality as locality
-import alerts.geomodel.query as query
 
-from tests.alerts.geomodel.util import query_interface
 from tests.unit_test_suite import UnitTestSuite
 
+
+def query_interface(results: List[locality.Entry]) -> locality.QueryInterface:
+    '''Produce a `QueryInterface` that just returns the provided results.
+    '''
+
+    def closure(q: SearchQuery, esi: str) -> List[locality.Entry]:
+        return results
+
+    return closure
 
 class TestLocalityElasticSearch(UnitTestSuite):
     '''Tests for the `locality` module that interact with ES.
@@ -38,7 +48,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
 
         self.refresh(self.event_index_name)
 
-        query_iface = query.wrap(self.es_client)
+        query_iface = locality.wrap_query(self.es_client)
         loc_cfg = config.Localities(self.event_index_name, 30, 50.0)
 
         entries = locality.find_all(query_iface, loc_cfg)
@@ -88,7 +98,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
         
         self.refresh(self.event_index_name)
 
-        query_iface = query.wrap(self.es_client)
+        query_iface = locality.wrap_query(self.es_client)
         loc_cfg = config.Localities(self.event_index_name, 30, 50.0)
 
         retrieved = locality.find_all(query_iface, loc_cfg)
@@ -102,42 +112,26 @@ class TestLocality(unittest.TestCase):
 
     def test_find_all_retrieves_all_states(self):
         query_iface = query_interface([
-            {
-                '_id': 'id1',
-                '_source': {
-                    'type_': 'locality',
-                    'username': 'tester1',
-                    'localities': [
-                        {
-                            'sourceipaddress': '1.2.3.4',
-                            'city': 'Toronto',
-                            'country': 'CA',
-                            'lastaction': datetime.utcnow(),
-                            'latitude': 43.6529,
-                            'longitude': -79.3849,
-                            'radius': 50
-                        }
-                    ]
-                }
-            },
-            {
-                '_id': 'id2',
-                '_source': {
-                    'type_': 'locality',
-                    'username': 'tester2',
-                    'localities': [
-                        {
-                            'sourceipaddress': '4.3.2.1',
-                            'city': 'San Francisco',
-                            'country': 'USA',
-                            'lastaction': datetime.utcnow(),
-                            'latitude': 37.773972,
-                            'longitude': -122.431297,
-                            'radius': 50
-                        }
-                    ]
-                }
-            }
+            locality.Entry('id1', locality.State('locality', 'tester1', [
+                locality.Locality(
+                    sourceipaddress='1.2.3.4',
+                    city='Toronto',
+                    country='CA',
+                    lastaction=datetime.utcnow() - timedelta(minutes=3),
+                    latitude=43.6529,
+                    longitude=-79.3849,
+                    radius=50)
+            ])),
+            locality.Entry('id2', locality.State('locality', 'tester2', [
+                locality.Locality(
+                    sourceipaddress='4.3.2.1',
+                    city='San Francisco',
+                    country='USA',
+                    lastaction=datetime.utcnow(),
+                    latitude=37.773972,
+                    longitude=-122.431297,
+                    radius=50)
+            ]))
         ])
         loc_cfg = config.Localities('localities', 30, 50.0)
 
@@ -151,55 +145,6 @@ class TestLocality(unittest.TestCase):
         assert 'tester2' in usernames
         assert len(entries[0].state.localities) == 1
         assert len(entries[1].state.localities) == 1
-
-    def test_find_all_ignores_invalid_data(self):
-        query_iface = query_interface([
-            # Invalid top-level State
-            {
-                '_id': 'id1',
-                '_source': {
-                    'type__': 'locality',  # Should have only one underscore (_)
-                    'username': 'tester',
-                    'localities': []
-                }
-            },
-            # Valid State
-            {
-                '_id': 'id2',
-                '_source': {
-                    'type_': 'locality',
-                    'username': 'validtester',
-                    'localities': []
-                }
-            },
-            # Invalid locality data
-            {
-                '_id': 'id3',
-                '_source': {
-                    'type_': 'locality',
-                    'username': 'tester2',
-                    'localities': [
-                        {
-                            # Should be sourceipaddress; missing a 'd'
-                            'sourceipadress': '1.2.3.4',
-                            'city': 'San Francisco',
-                            'country': 'USA',
-                            'lastaction': datetime.utcnow(),
-                            'latitude': 37.773972,
-                            'longitude': -122.431297,
-                            'radius': 50
-                        }
-                    ]
-                }
-            }
-        ])
-        loc_cfg = config.Localities('localities', 30, 50.0)
-
-        entries = locality.find_all(query_iface, loc_cfg)
-        usernames = [entry.state.username for entry in entries]
-
-        assert len(entries) == 1
-        assert usernames == ['validtester']
 
     def test_merge_updates_localities(self):
         from_es = [
