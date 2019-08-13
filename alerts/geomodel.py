@@ -5,6 +5,83 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2015 Mozilla Corporation
 
+import json
+import sys
+import traceback
+j
+from lib.alerttask import AlertTask
+from mozdef_util.utilities.logger import logger
+
+import alerts.geomodel.config as config
+
+
+_CONFIG_FILE = './geomodel.json'
+
+
+class AlertGeoModel(AlertTask):
+    '''GeoModel alert runs a set of configured queries for events and
+    constructs locality state for users performing authenticated actions.
+    When activity is found that indicates a potential compromise of an
+    account, an alert is produced.
+    '''
+    
+    def main(self):
+        cfg = self._load_config()
+
+        for query_index in range(len(cfg.events)):
+            try:
+                self._process(cfg, query_index)
+            except Exception as err:
+                traceback.print_exc(file=sys.stdout)
+                logger.error(
+                    'Error process events; query="{0}"; error={1}'.format(
+                        cfg.events[query_index].lucene_query,
+                        err.message))
+
+    def onAggregation(self, agg):
+        username = agg['value']
+        events = agg['events']
+
+        return None
+
+    def _process(self, cfg: config.Config, qindex: int):
+        evt_cfg = cfg.events[qindex]
+
+        search = SearchQuery(minutes=evt_cfg.search_window.minutes)
+        search.add_must(QSMatch(evt_cfg.lucene_query))
+
+        self.filtersManual(search)
+        self.searchEventsAggregated(evt_cfg.username_path, samplesLimit=1)
+        self.walkAggregations(threshold=1, config=cfg)
+
+    def _load_config(self):
+        with open(_CONFIG_FILE) as cfg_file:
+            cfg = json.load(cfg_file)
+
+            cfg['localities'] = [
+                config.Localities(**dat)
+                for dat in cfg['localities']
+            ]
+            cfg['events']['search_window'] = config.SearchWindow(
+                **cfg['events']['search_window'])
+            cfg['events']['queries'] = [
+                config.QuerySpec(**dat)
+                for dat in cfg['events']['queries']
+            ]
+            cfg['events'] = [
+                config.Events(**dat)
+                for dat in cfg['events']
+            ]
+            cfg['alerts']['whitelist'] = config.Whitelist(
+                **cfg['alerts']['whitelist'])
+            cfg['alerts'] = [
+                config.Alerts(**dat)
+                for dat in cfg['alerts']
+            ]
+
+            return config.Config(**cfg)
+
+'''
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch
 
@@ -63,3 +140,4 @@ class AlertGeomodel(AlertTask):
             }
 
         return alert_dict
+'''
