@@ -29,7 +29,7 @@ CELERY_IGNORE_RESULT = True
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
-CELERYBEAT_SCHEDULER = "celerybeatmongo.schedulers.MongoScheduler"
+CELERYBEAT_SCHEDULER = "lib.celeryscheduler.schedulers.MongoScheduler"
 CELERY_MONGODB_SCHEDULER_DB = "alerts_celery"
 CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
 CELERY_MONGODB_SCHEDULER_URL = MONGO_URL
