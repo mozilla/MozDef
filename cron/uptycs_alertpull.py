@@ -30,7 +30,6 @@ import mozdef_client as mozdef
 import pickle
 import jwt
 import requests
-import urllib3
 import os
 
 
@@ -111,7 +110,7 @@ def process_alerts(mozmsg, uptycs_alerts):
         details = {}
         # Timestamp format: http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
         # Duo logs come as a UTC timestamp
-        dt = datetime.utcfromtimestamp(e["timestamp"])
+        dt = datetime.utcfromtimestamp(alert["alertTime"])
         mozmsg.timestamp = dt.replace(tzinfo=utc).isoformat()
 
         mozmsg.log["hostname"] = alert["asset"]['hostName']
