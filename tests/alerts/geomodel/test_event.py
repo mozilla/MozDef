@@ -39,11 +39,8 @@ class TestEventElasticSearch(UnitTestSuite):
         evt_cfg = config.Events(
             self.event_index_name,
             config.SearchWindow(minutes=30),
-            [
-                config.QuerySpec(
-                    lucene='category: geomodel',
-                    username='_source.details.username')
-            ])
+            'category: geomodel',
+            '_source.details.username')
 
         results = event.find_all(query_iface, evt_cfg)
         usernames = [result.username for result in results]
@@ -77,11 +74,8 @@ class TestEvent(unittest.TestCase):
         evt_cfg = config.Events(
             'test_index',
             config.SearchWindow(minutes=30),
-            [
-                config.QuerySpec(
-                    lucene='test',
-                    username='_source.details.username')
-            ])
+            'test',
+            '_source.details.username')
 
         results = event.find_all(query_iface, evt_cfg)
         usernames = [result.username for result in results]
@@ -109,53 +103,13 @@ class TestEvent(unittest.TestCase):
         evt_cfg = config.Events(
             'test_index',
             config.SearchWindow(minutes=30),
-            [
-                config.QuerySpec(
-                    lucene='test',
-                    username='_source.details.nottheusername')  # Wrong key
-            ])
+            'test',
+            '_source.details.nottheusername')  # Wrong key
 
         results = event.find_all(query_iface, evt_cfg)
         usernames = [result.username for result in results]
 
         assert usernames == [None, None]
-
-    def test_find_all_makes_all_requests(self):
-        query_iface = query_interface([
-            {
-                '_source': {
-                    'details': {
-                        'username': 'testuser'
-                    }
-                }
-            },
-            {
-                '_source': {
-                    'details': {
-                        'username': 'test2'
-                    }
-                }
-            }
-        ])
-        evt_cfg = config.Events(
-            'test_index',
-            config.SearchWindow(minutes=30),
-            [
-                config.QuerySpec(
-                    lucene='test',
-                    username='_source.details.username'),
-                config.QuerySpec(
-                    lucene='another',
-                    username='_source.details.nottheusername')
-            ])
-
-        results = event.find_all(query_iface, evt_cfg)
-        usernames = [result.username for result in results]
-
-        assert len(results) == 4
-        assert None in usernames
-        assert 'testuser' in usernames
-        assert 'test2' in usernames
 
     def test_extract_locality_with_missing_data(self):
         bad_events = [

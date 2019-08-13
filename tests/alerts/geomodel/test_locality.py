@@ -157,11 +157,11 @@ class TestLocalityIntegrations(unittest.TestCase):
                 }
             }
         ])
-        evt_cfg = config.Events('events', config.SearchWindow(minutes=30), [
-            config.QuerySpec(
-                lucene='category: test',
-                username='_source.details.username')
-        ])
+        evt_cfg = config.Events(
+            'events',
+            config.SearchWindow(minutes=30),
+            'category: test',
+            '_source.details.username')
 
         entries = locality.find_all(loc_query, loc_cfg)
         persisted = [entry.state for entry in entries]
