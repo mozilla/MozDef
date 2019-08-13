@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
 
@@ -24,7 +24,7 @@ class AlertProxyDropExecutable(AlertTask):
         )
 
         # Only notify on certain file extensions from config
-        filename_regex = "/.*\.({0})/".format(self.config.extensions.replace(",", "|"))
+        filename_regex = r"/.*\.({0})/".format(self.config.extensions.replace(",", "|"))
         search_query.add_must(
             [QueryStringMatch("details.destination: {}".format(filename_regex))]
         )

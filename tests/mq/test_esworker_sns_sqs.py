@@ -2,24 +2,24 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import json
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../mq"))
-from mq.esworker_sns_sqs import taskConsumer
-
 from mozdef_util.utilities.dot_dict import DotDict
 from mozdef_util.query_models import SearchQuery, ExistsMatch
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
+
+import os
+import sys
 
 
 class TestEsworkerSNSSQS(UnitTestSuite):
+    def teardown(self):
+        sys.path.remove(self.mq_path)
+
     def setup(self):
         super(TestEsworkerSNSSQS, self).setup()
         mq_conn = 'abc'
@@ -33,7 +33,12 @@ class TestEsworkerSNSSQS(UnitTestSuite):
                 'plugincheckfrequency': 120,
             }
         )
-        self.consumer = taskConsumer(mq_conn, es_connection, options)
+        if 'lib' in sys.modules:
+            del sys.modules['lib']
+        self.mq_path = os.path.join(os.path.dirname(__file__), "../../mq/")
+        sys.path.insert(0, self.mq_path)
+        from mq import esworker_sns_sqs
+        self.consumer = esworker_sns_sqs.taskConsumer(mq_conn, es_connection, options)
 
     def search_and_verify_event(self, expected_event):
         self.refresh('events')

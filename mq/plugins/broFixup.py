@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import netaddr
@@ -228,9 +228,10 @@ class message(object):
 
                 if logtype == 'dhcp':
                     if 'assigned_addr' not in newmessage['details']:
-                        newmessage['details']['assigned_addr'] = '0.0.0.0'
+                        newmessage['details']['assigned_addr'] = "0.0.0.0"
                     if 'mac' not in newmessage['details']:
-                        newmessage['details']['mac'] = '00:00:00:00:00:00'
+                        newmessage['details']['mac'] = "000000000000"
+                    newmessage['details']['mac'] = newmessage['details']['mac'].replace(':', '')
                     newmessage['summary'] = (
                         '{assigned_addr} assigned to '
                         '{mac}'

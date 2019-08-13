@@ -2,18 +2,15 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 
 import pytest
 
-import os
-import sys
 from mozdef_util.utilities.dot_dict import DotDict
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../"))
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
 
 
 class TestDotDict(UnitTestSuite):

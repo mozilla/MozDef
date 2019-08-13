@@ -17,7 +17,7 @@ During our tests, Elasticsearch recovered well after being pushed to the limits 
 The scripts for Elasticsearch benchmarking are in `benchmarking/es/`.
 They use `nodejs`_ to allow asynchronous HTTP requests.
 
-.. _nodejs: http://nodejs.org/
+.. _nodejs: https://nodejs.org/
 
 insert_simple.js
 ****************

@@ -1,12 +1,9 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import sys
-import os
 import re
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 
 
 class message(object):
@@ -22,7 +19,7 @@ class message(object):
 
     def onMessage(self, message, metadata):
 
-        self.session_regexp = re.compile('^pam_unix\(su(?:-l)?\:session\)\: session (?P<status>\w+) for user (?P<username>\w+)(?: (?:by (?:(?P<originuser>\w+))?\(uid\=(?P<uid>[0-9]+)\)?)?)?$')
+        self.session_regexp = re.compile(r'^pam_unix\(su(?:-l)?\:session\)\: session (?P<status>\w+) for user (?P<username>\w+)(?: (?:by (?:(?P<originuser>\w+))?\(uid\=(?P<uid>[0-9]+)\)?)?)?$')
 
         if 'details' in message:
             if 'program' in message['details']:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2016 Mozilla Corporation
 # Author: gdestuynder@mozilla.com
 
@@ -103,9 +103,6 @@ def process_msg(mozmsg, msg):
     See also https://auth0.com/docs/api/management/v2#!/Logs/get_logs
     """
     details = DotDict({})
-    # defaults
-    details.username = "UNKNOWN"
-    details.userid = "UNKNOWN"
 
     # key words used to set category and success/failure markers
     authentication_words = ["Login", "Logout", "Auth"]
@@ -182,8 +179,12 @@ def process_msg(mozmsg, msg):
     # set the summary
     if "auth" in mozmsg._category:
         # make summary be action/username (success login user@place.com)
-        mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.username)
-
+        # include UNKNOWN as username value in summary
+        # if no details.username field exists
+        tmp_username = "UNKNOWN"
+        if 'username' in details:
+            tmp_username = details.username
+        mozmsg.summary = "{event} {username}".format(event=details.eventname, username=tmp_username)
     else:
         # default summary as action and description (if it exists)
         mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.description)

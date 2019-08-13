@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import re
@@ -19,13 +19,13 @@ class message(object):
 
     def onMessage(self, message, metadata):
 
-        self.accepted_regex = re.compile('^(?P<authstatus>\w+) (?P<authmethod>\w+) for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5}) ssh2(\:\sRSA\s)?(?:(?P<rsakeyfingerprint>(\S+)))?$')
-        self.session_opened_regex = re.compile('^pam_unix\(sshd\:session\)\: session (opened|closed) for user (?P<username>[a-zA-Z0-9\@._-]+)(?: by \(uid\=\d*\))?$')
-        self.postponed_regex = re.compile('^Postponed (?P<authmethod>\w+) for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5}) ssh2(?: \[preauth\])?$')
-        self.starting_session_regex = re.compile('^Starting session: (?P<sessiontype>\w+)(?: on )?(?P<device>pts/0)? for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5})$')
-        self.unauthorized_user_regex = re.compile('^Invalid user (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?$')
-        self.userauth_request_regex = re.compile('^input_userauth_request: invalid user (?P<username>[a-zA-Z0-9\@._-]+) \[preauth\]')
-        self.disconnect_regex = re.compile('^Received disconnect from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}): (?P<sourceport>\d{1,5}): (|Bye Bye|Normal Shutdown, Thank you for playing) \[preauth\]')
+        self.accepted_regex = re.compile(r'^(?P<authstatus>\w+) (?P<authmethod>\w+) for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5}) ssh2(\:\sRSA\s)?(?:(?P<rsakeyfingerprint>(\S+)))?$')
+        self.session_opened_regex = re.compile(r'^pam_unix\(sshd\:session\)\: session (opened|closed) for user (?P<username>[a-zA-Z0-9\@._-]+)(?: by \(uid\=\d*\))?$')
+        self.postponed_regex = re.compile(r'^Postponed (?P<authmethod>\w+) for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5}) ssh2(?: \[preauth\])?$')
+        self.starting_session_regex = re.compile(r'^Starting session: (?P<sessiontype>\w+)(?: on )?(?P<device>pts/0)? for (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) port (?P<sourceport>\d{1,5})$')
+        self.unauthorized_user_regex = re.compile(r'^Invalid user (?P<username>[a-zA-Z0-9\@._-]+) from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?$')
+        self.userauth_request_regex = re.compile(r'^input_userauth_request: invalid user (?P<username>[a-zA-Z0-9\@._-]+) \[preauth\]')
+        self.disconnect_regex = re.compile(r'^Received disconnect from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}): (?P<sourceport>\d{1,5}): (|Bye Bye|Normal Shutdown, Thank you for playing) \[preauth\]')
 
         if 'processname' in message and message['processname'] == 'sshd':
             msg_unparsed = message['summary']

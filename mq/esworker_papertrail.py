@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2015 Mozilla Corporation
 
 # Reads from papertrail using the API and inserts log data into ES in
@@ -12,7 +12,6 @@
 import json
 import kombu
 import sys
-import os
 import socket
 import time
 from configlib import getConfig, OptionParser
@@ -27,8 +26,7 @@ from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 from mozdef_util.utilities.logger import logger, initLogger
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from mq.lib.plugins import sendEventToPlugins, registerPlugins
+from lib.plugins import sendEventToPlugins, registerPlugins
 
 
 # running under uwsgi?

@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 from lib.alerttask import AlertTask, add_hostname_to_ip
@@ -124,7 +124,7 @@ class SshLateral(AlertTask):
         source_ips = []
         users = []
         for x in aggreg['events']:
-            m = re.match('Accepted publickey for (\S+) from (\S+).*', x['_source']['summary'])
+            m = re.match(r'Accepted publickey for (\S+) from (\S+).*', x['_source']['summary'])
             if m is not None and len(m.groups()) == 2:
                 ipaddr = netaddr.IPAddress(m.group(2))
                 for y in self._config['alertifsource']:

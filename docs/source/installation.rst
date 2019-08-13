@@ -169,7 +169,7 @@ A simple way of doing this would be to use Bintray's repo located at: https://ww
 to download both the latest versions of rabbitmq and erlang.
 
 .. _RabbitMQ: https://www.rabbitmq.com/
-.. _EPEL repos: http://fedoraproject.org/wiki/EPEL/FAQ#howtouse
+.. _EPEL repos: https://fedoraproject.org/wiki/EPEL/FAQ#howtouse
 
 Meteor
 ******

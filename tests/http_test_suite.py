@@ -1,6 +1,6 @@
 from webtest import TestApp
 
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
 
 
 class HTTPTestSuite(UnitTestSuite):

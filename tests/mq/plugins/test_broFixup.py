@@ -1,12 +1,9 @@
-import os
-import sys
 from mozdef_util.utilities.toUTC import toUTC
 
 import mock
 import json
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from broFixup import message
+from mq.plugins.broFixup import message
 
 
 class TestBroFixup(object):
@@ -73,7 +70,7 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert sorted(result['details'].keys()) == sorted(MESSAGE.keys())
 
-    @mock.patch('broFixup.node')
+    @mock.patch('mq.plugins.broFixup.node')
     def test_mozdefhostname_mock_string(self, mock_path):
         mock_path.return_value = 'samplehostname'
         event = {
@@ -85,7 +82,7 @@ class TestBroFixup(object):
         result, metadata = plugin.onMessage(event, self.metadata)
         assert result['mozdefhostname'] == 'samplehostname'
 
-    @mock.patch('broFixup.node')
+    @mock.patch('mq.plugins.broFixup.node')
     def test_mozdefhostname_mock_exception(self, mock_path):
         mock_path.side_effect = ValueError
         event = {
@@ -550,7 +547,7 @@ class TestBroFixup(object):
             "uids": ["C6uJBE1z3CKfrA9FE4", "CdCBtl1fKEIMNvebrb", "CNJJ9g1HgefKR09ied", "CuXKNM1R5MEJ9GsMIi", "CMIYsm2weaHvzBRJIi", "C0vslbmXr3Psyy5Ff", "Ct0BRQ2Y84MWhag1Ik", "C5BNK71HlfhlXf8Pq", "C5ZrPG3DfQNzsiUMi2", "CMJHze3BH9o7yg9yM6", "CMSyg03ZZcdic8pTMc"],
             "client_addr": "10.251.255.10",
             "server_addr": "10.251.24.1",
-            "mac": "f0:18:98:55:0e:0e",
+            "mac": "f01898550e0e",
             "host_name": "aliczekkroliczek",
             "domain": "ala.ma.kota",
             "assigned_addr": "10.251.30.202",
@@ -569,7 +566,7 @@ class TestBroFixup(object):
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
-        assert result['summary'] == '10.251.30.202 assigned to f0:18:98:55:0e:0e'
+        assert result['summary'] == '10.251.30.202 assigned to f01898550e0e'
 
     def test_dhcp_log2(self):
         event = {
@@ -595,7 +592,7 @@ class TestBroFixup(object):
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
-        assert result['summary'] == '0.0.0.0 assigned to 00:00:00:00:00:00'
+        assert result['summary'] == '0.0.0.0 assigned to 000000000000'
 
     def test_ftp_log(self):
         event = {

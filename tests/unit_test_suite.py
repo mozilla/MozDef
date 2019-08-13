@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 from datetime import datetime, timedelta
@@ -13,7 +13,7 @@ import sys
 
 from mozdef_util.utilities import toUTC
 
-from suite_helper import parse_config_file, parse_mapping_file, setup_es_client, setup_rabbitmq_client
+from tests.suite_helper import parse_config_file, parse_mapping_file, setup_es_client, setup_rabbitmq_client
 
 
 class UnitTestSuite(object):

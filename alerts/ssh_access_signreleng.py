@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 from lib.alerttask import AlertTask
@@ -57,7 +57,7 @@ class AlertAuthSignRelengSSH(AlertTask):
                 sourceipaddress = x['details']['sourceipaddress']
 
         targetuser = 'unknown'
-        expr = re.compile('Accepted publickey for ([A-Za-z0-9]+) from')
+        expr = re.compile(r'Accepted publickey for ([A-Za-z0-9]+) from')
         m = expr.match(event['_source']['summary'])
         groups = m.groups()
         if len(groups) > 0:

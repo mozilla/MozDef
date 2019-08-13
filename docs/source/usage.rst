@@ -10,7 +10,7 @@ For authentication, MozDef supports local account creation.
 Meteor (the underlying UI framework) supports `many authentication options`_ including google, github, twitter, facebook, oath, native accounts, etc.
 
 .. _Meteor framework: https://www.meteor.com/
-.. _many authentication options: http://docs.meteor.com/#accounts_api
+.. _many authentication options: https://docs.meteor.com/#accounts_api
 
 Events visualizations
 *********************
@@ -45,8 +45,8 @@ We have `some configuration snippets`_
 
 .. _heka: https://github.com/mozilla-services/heka
 .. _beaver: https://github.com/josegonzalez/beaver
-.. _nxlog: http://nxlog-ce.sourceforge.net/
-.. _logstash: http://logstash.net/
+.. _nxlog: https://nxlog.org/download
+.. _logstash: https://www.elastic.co/products/logstash
 .. _native python code: https://github.com/gdestuynder/mozdef_lib
 .. _AWS cloudtrail: https://aws.amazon.com/cloudtrail/
 .. _some configuration snippets: https://github.com/mozilla/MozDef/tree/master/examples
