@@ -165,7 +165,7 @@ def main():
         last_alert_ids = state["last_alert_ids"]
     else:
         last_alert_ids = []
-        filter.start_time = utc_now - datetime.timedelta(days=30)
+        filter.start_time = utc_now - datetime.timedelta(days=2)
 
     filter.end_time = utc_now
 
