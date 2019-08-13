@@ -11,15 +11,6 @@ class Localities(NamedTuple):
     valid_duration_days: int
     radius_kilometres: float
 
-class QuerySpec(NamedTuple):
-    '''Contains a description of a query to run to retrieve specific events
-    as well as a dot-string path (e.g. `"hello.world"`) into an event used to
-    retrieve a username from the events returned by the aforementioned query.
-    '''
-
-    lucene: str
-    username: str
-
 class SearchWindow(NamedTuple):
     '''Contains parameters that specify the window of time to search for
     events in.
@@ -33,7 +24,8 @@ class Events(NamedTuple):
 
     es_index: str
     search_window: SearchWindow
-    queries: List[QuerySpec]
+    lucene_query: str
+    username_path: str
 
 class Whitelist(NamedTuple):
     '''Specifies configuration for whitelisting rules.
@@ -60,5 +52,5 @@ class Config(NamedTuple):
 
     elasticsearch_address: str
     localities: Localities
-    events: Events
+    events: List[Events]
     alerts: Alerts
