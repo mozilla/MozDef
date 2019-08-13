@@ -207,3 +207,82 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     initConfig()
     main()
+
+
+# Example Alert JSON
+#
+# {
+#   'displayName': 'File event (/private/var/run/resolv.conf)',
+#   'id': '2fea6dd1-726a-4eb1-8dde-4e5704415eb1',
+#   'customerId': 'REDACTED',
+#   'description': 'File event',
+#   'assetId': '0ce14bf2-0111-59c6-a891-cdc2e4e75aa8',
+#   'ruleId': 'a2f8a561-17c2-49a4-9537-4e9ef5868e2f',
+#   'eventId': '6ae55c36-b12d-59f6-a9b9-72095c556998',
+#   'alertId': 'dc738c4b-cbf6-5dbb-a259-d692cb8eac2a',
+#   'code': 'CRITICAL_FILE',
+#   'assignedTo': None,
+#   'status': 'open',
+#   'noteId': None,
+#   'severity': 'high',
+#   'alertTime': '2019-07-23T22:54:05.000Z',
+#   'grouping': 'Critical file',
+#   'key': 'path',
+#   'value': '/private/var/run/resolv.conf',
+#   'metadata': {
+#     'action': 'ROOT_CHANGED',
+#     'category': 'Mac critical files',
+#     'path': '/private/var/run/resolv.conf'
+#   },
+#   'exceptionMetadata': {
+#     'path': '/private/var/run/resolv.conf',
+#     'action': 'ROOT_CHANGED',
+#     'assetId': '0ce14bf2-0111-59c6-a891-cdc2e4e75aa8',
+#     'category': 'Mac critical files',
+#     'assetTags': [
+#       'all',
+#       'cpu=unknown',
+#       'darwin',
+#       'disk=low',
+#       'memory=unknown',
+#       'network=low',
+#       'upt-mac-edr'
+#     ],
+#     'alertGrouping': 'Critical file',
+#     'assetObjectGroupId': 'bf7b9ff6-1f67-426b-ae2a-3379375c9181'
+#   },
+#   'resolvedAt': None,
+#   'isTask': False,
+#   'groupId': None,
+#   'groupName': None,
+#   'resolutionDays': None,
+#   'lastActiveAt': None,
+#   'alertStatusReasonId': None,
+#   'createdAt': '2019-07-23T23:07:00.136Z',
+#   'hashKey': '3bbabb17-c2e2-5bf5-a5e4-ffea38ca36e8',
+#   'updatedAt': '2019-07-23T23:07:03.404Z',
+#   'updatedBy': None,
+#   'rowCount': 2,
+#   'lastOccuredAt': '2019-07-23T23:07:03.404Z',
+#   'note': None,
+#   'alertStatusReason': None,
+#   'asset': {
+#     'id': '0ce14bf2-0111-59c6-a891-cdc2e4e75aa8',
+#     'hostName': 'phroztbyte'
+#   },
+#   'alertRule': {
+#     'name': 'Critical file alerts'
+#   },
+#   'links': [
+#     {
+#       'rel': 'self',
+#       'title': 'Alert',
+#       'href': '/api/customers/REDACTED/alerts/2fea6dd1-726a-4eb1-8dde-4e5704415eb1'
+#     },
+#     {
+#       'rel': 'parent',
+#       'title': 'Alerts',
+#       'href': '/api/customers/REDACTED/alerts'
+#     }
+#   ]
+# }
