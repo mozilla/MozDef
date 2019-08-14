@@ -21,8 +21,8 @@ class TestAlertLdapPasswordSpray(AlertTestSuite):
                     {
                         'verb': 'BIND',
                         'details': [
-                            'dn="mail=jsmith@example.com,o=com,dc=example"',
                             'method=128'
+                            'dn="mail=jsmith@example.com,o=com,dc=example"',
                         ]
                     }
                 ],
