@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 import unittest
 
 from mozdef_util.query_models import SearchQuery
@@ -11,11 +11,11 @@ import alerts.geomodel.locality as locality
 from tests.unit_test_suite import UnitTestSuite
 
 
-def query_interface(results: List[locality.Entry]) -> locality.QueryInterface:
+def query_interface(results: locality.Entry) -> locality.QueryInterface:
     '''Produce a `QueryInterface` that just returns the provided results.
     '''
 
-    def closure(q: SearchQuery, esi: str) -> List[locality.Entry]:
+    def closure(q: SearchQuery, esi: str) -> Optional[locality.Entry]:
         return results
 
     return closure
@@ -51,19 +51,16 @@ class TestLocalityElasticSearch(UnitTestSuite):
         query_iface = locality.wrap_query(self.es_client)
         loc_cfg = config.Localities(self.event_index_name, 30, 50.0)
 
-        entries = locality.find_all(query_iface, 'tester1', loc_cfg)
-        usernames = [entry.state.username for entry in entries]
-
-        assert len(entries) == 1
-        assert usernames == ['tester1']
+        entry = locality.find(query_iface, 'tester1', loc_cfg.es_index)
+       
+        assert entry is not None
+        assert entry.state.username == 'tester1'
 
     def test_journaling(self):
         journal = locality.wrap_journal(self.es_client)
 
-        entries = [
-            # A user named "t1" who travelled from Toronto to Berlin over the
-            # weekend.
-            locality.Entry('testingid1', locality.State('locality', 't1', [
+        test_entry = locality.Entry(
+            'testingid1', locality.State('locality', 't1', [
                 locality.Locality(
                     sourceipaddress='1.2.3.4',
                     city='Toronto',
@@ -80,71 +77,23 @@ class TestLocalityElasticSearch(UnitTestSuite):
                     latitude=52.520008,
                     longitude=13.404954,
                     radius=50)
-            ])),
-            # A user named "t2" who only works out of London, UK.
-            locality.Entry('testingid2', locality.State('locality', 't2', [
-                locality.Locality(
-                    sourceipaddress='4.3.2.1',
-                    city='London',
-                    country='GB',
-                    lastaction=datetime.utcnow() - timedelta(minutes=13),
-                    latitude=51.509865,
-                    longitude=-0.118092,
-                    radius=50)
             ]))
-        ]
 
-        journal(entries, self.event_index_name)
+        journal(test_entry, self.event_index_name)
         
         self.refresh(self.event_index_name)
 
         query_iface = locality.wrap_query(self.es_client)
         loc_cfg = config.Localities(self.event_index_name, 30, 50.0)
 
-        retrieved = locality.find_all(query_iface, loc_cfg)
-        usernames = [entry.state.username for entry in retrieved]
+        entry = locality.find(query_iface, 't1', loc_cfg.es_index)
 
-        assert sorted(usernames) == ['t1', 't2']
+        assert entry is not None
+        assert entry.state.username == 't1'
 
 class TestLocality(unittest.TestCase):
     '''unit tests for the `locality` module.
     '''
-
-    def test_find_all_retrieves_all_states(self):
-        query_iface = query_interface([
-            locality.Entry('id1', locality.State('locality', 'tester1', [
-                locality.Locality(
-                    sourceipaddress='1.2.3.4',
-                    city='Toronto',
-                    country='CA',
-                    lastaction=datetime.utcnow() - timedelta(minutes=3),
-                    latitude=43.6529,
-                    longitude=-79.3849,
-                    radius=50)
-            ])),
-            locality.Entry('id2', locality.State('locality', 'tester2', [
-                locality.Locality(
-                    sourceipaddress='4.3.2.1',
-                    city='San Francisco',
-                    country='USA',
-                    lastaction=datetime.utcnow(),
-                    latitude=37.773972,
-                    longitude=-122.431297,
-                    radius=50)
-            ]))
-        ])
-        loc_cfg = config.Localities('localities', 30, 50.0)
-
-        entries = locality.find_all(query_iface, loc_cfg)
-        usernames = [entry.state.username for entry in entries]
-        identifiers = [entry.identifier for entry in entries]
-
-        assert sorted(identifiers) == ['id1', 'id2']
-        assert len(entries) == 2
-        assert 'tester1' in usernames
-        assert 'tester2' in usernames
-        assert len(entries[0].state.localities) == 1
-        assert len(entries[1].state.localities) == 1
 
     def test_merge_updates_localities(self):
         from_es = [

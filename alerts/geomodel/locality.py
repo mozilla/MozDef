@@ -63,53 +63,23 @@ class Update(NamedTuple):
 
         return Update(new.state, u.did_update or new.did_update)
 
-JournalInterface = Callable[[List[Entry], str], None]
-QueryInterface = Callable[[SearchQuery, str], List[Entry]]
+JournalInterface = Callable[[Entry, str], None]
+QueryInterface = Callable[[SearchQuery, str], Optional[Entry]]
 
 def _dict_take(dictionary, keys):
     return {key: dictionary[key] for key in keys}
-
-def _update(state: State, from_evt: State) -> Update:
-    did_update = False
-
-    for loc1 in from_evt.localities:
-        did_find = False
-
-        for index, loc2 in enumerate(state.localities):
-            # If we find that the new state's locality has been recorded
-            # for the user in question, we only want to update it if either
-            # their IP changed or the new time of activity is more recent.
-            if loc1.city == loc2.city and loc1.country == loc2.country:
-                did_find = True
-
-                new_more_recent = loc1.lastaction > loc2.lastaction
-                new_ip = loc1.sourceipaddress != loc2.sourceipaddress
-
-                if new_more_recent or new_ip:
-                    state.localities[index] = loc1
-                    did_update = True
-
-                # Stop looking for the locality in the records pulled from ES.
-                break
-        
-        if not did_find:
-            state.localities.append(loc1)
-            did_update = True
-
-    return Update(state, did_update)
 
 def wrap_journal(client: ESClient) -> JournalInterface:
     '''Wrap an `ElasticsearchClient` in a closure of type `JournalInterface`.
     '''
 
-    def wrapper(entries: List[Entry], esindex: str):
-        for entry in entries:
-            document = dict(entry.state._asdict())
+    def wrapper(entry: Entry, esindex: str):
+        document = dict(entry.state._asdict())
 
-            client.save_object(
-                index=esindex,
-                body=document,
-                doc_id=entry.identifier)
+        client.save_object(
+            index=esindex,
+            body=document,
+            doc_id=entry.identifier)
 
     return wrapper
 
@@ -117,30 +87,27 @@ def wrap_query(client: ESClient) -> QueryInterface:
     '''Wrap an `ElasticsearchClient` in a closure of type `QueryInterface`.
     '''
 
-    def to_state(result: Dict[str, Any]) -> Optional[State]:
+    def wrapper(query: SearchQuery, esindex: str) -> Optional[Entry]:
+        results = query.execute(client, indices=[esindex]).get('hits', [])
+
+        if len(results) == 0:
+            return None
+
+        state_dict = results[0].get('_source', {})
         try:
-            result['localities'] = [
+            state_dict['localities'] = [
                 Locality(**_dict_take(loc, Locality._fields))
-                for loc in result['localities']
+                for loc in state_dict['localities']
             ]
 
-            return State(**_dict_take(result, State._fields))
+            eid = results[0]['_id']
+            state = State(**_dict_take(state_dict, State._fields))
+
+            return Entry(eid, state)
         except TypeError:
             return None
         except KeyError:
             return None
-
-    def wrapper(query: SearchQuery, esindex: str) -> List[Entry]:
-        results = query.execute(client, indices=[esindex]).get('hits', [])
-
-        entries = []
-        for event in results:
-            opt_state = to_state(event.get('_source', {}))
-
-            if opt_state is not None:
-                entries.append(Entry(event['_id'], opt_state))
-
-        return entries
 
     return wrapper
 
@@ -179,11 +146,7 @@ def from_event(
         geo_data.get('longitude', 0.0),
         radius)
 
-def find_all(
-        query_es: QueryInterface,
-        username: str,
-        locality: config.Localities
-) -> List[Entry]:
+def find(qes: QueryInterface, username: str, index: str) -> Optional[Entry]:
     '''Retrieve all locality state from ElasticSearch.
     '''
 
@@ -193,29 +156,36 @@ def find_all(
         TermMatch('username', username)
     ])
 
-    return query_es(search, locality.es_index)
+    return qes(search, index)
 
-def merge(persisted: List[State], event_sourced: List[State]) -> List[Update]:
-    '''Merge together a list of states already stored in ElasticSearch
-    (obtained via `find_all`) and a list of new states extracted from events.
-    This process results in the creation of a new list of states wherein the
-    state for each user in either list has had their list of localities updated
-    to reflect:
+def update(state: State, from_evt: State) -> Update:
+    did_update = False
 
-        1. Observations of activity within known localities and
-        2. Observations of activity within new localities
-    '''
+    for loc1 in from_evt.localities:
+        did_find = False
 
-    mapped = {state.username: Update(state, False) for state in persisted}
+        for index, loc2 in enumerate(state.localities):
+            # If we find that the new state's locality has been recorded
+            # for the user in question, we only want to update it if either
+            # their IP changed or the new time of activity is more recent.
+            if loc1.city == loc2.city and loc1.country == loc2.country:
+                did_find = True
 
-    for new_state in event_sourced:
-        if new_state.username in mapped:
-            old_state = mapped[new_state.username].state
-            mapped[new_state.username] = _update(old_state, new_state)
-        else:
-            mapped[new_state.username] = Update(new_state, True)
+                new_more_recent = loc1.lastaction > loc2.lastaction
+                new_ip = loc1.sourceipaddress != loc2.sourceipaddress
 
-    return list(mapped.values())
+                if new_more_recent or new_ip:
+                    state.localities[index] = loc1
+                    did_update = True
+
+                # Stop looking for the locality in the records pulled from ES.
+                break
+        
+        if not did_find:
+            state.localities.append(loc1)
+            did_update = True
+
+    return Update(state, did_update)
 
 def remove_outdated(state: State, days_valid: int) -> Update:
     '''Update a state by removing localities that are outdated, determined
