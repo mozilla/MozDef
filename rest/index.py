@@ -238,6 +238,19 @@ def index():
     return response
 
 
+@route('/alertsschedules')
+@route('/alertsschedules/')
+@enable_cors
+def index():
+    '''an endpoint to return alerts schedules'''
+    if request.body:
+        request.body.read()
+        request.body.close()
+    response.content_type = "application/json"
+    sendMessgeToPlugins(request, response, 'alertsschedules')
+    return response
+
+
 @route('/plugins', methods=['GET'])
 @route('/plugins/', methods=['GET'])
 @route('/plugins/<endpoint>', methods=['GET'])
