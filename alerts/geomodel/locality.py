@@ -181,13 +181,17 @@ def from_event(
 
 def find_all(
         query_es: QueryInterface,
+        username: str,
         locality: config.Localities
 ) -> List[Entry]:
     '''Retrieve all locality state from ElasticSearch.
     '''
 
     search = SearchQuery()
-    search.add_must([TermMatch('type_', 'locality')])
+    search.add_must([
+        TermMatch('type_', 'locality'),
+        TermMatch('username', username)
+    ])
 
     return query_es(search, locality.es_index)
 

@@ -41,6 +41,35 @@ class AlertGeoModel(AlertTask):
     def onAggregation(self, agg):
         username = agg['value']
         events = agg['events']
+        cfg = agg['config']
+
+        localities = list(filter(map(locality.from_event, events)))
+        new_state = locality.State('locality', username, localities)
+
+        query = locality.wrap_query(self.es)
+        journal = locality.wrap_journal(self.es)
+
+        entry = locality.find(query, username, cfg.localities)
+        if entry is None:
+            entry = locality.Entry(
+                '', locality.State('localities', username, []))
+
+        updated = locality.Update.flat_map(
+            lambda state: locality.remove_outdated(
+                state,
+                cfg.localities.valid_duration_days),
+            locality.update(entry.state, new_state))
+
+        if updated.did_update:
+            entry.state = updated.state
+
+            journal(entry, cfg.localities.es_index)
+
+        alert_produced = alert.alert(entry.state, cfg.alerts.whitelist)
+
+        if alert_produced is not None:
+            # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
+            return alert_produced._asdict()
 
         return None
 

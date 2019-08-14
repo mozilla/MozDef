@@ -51,7 +51,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
         query_iface = locality.wrap_query(self.es_client)
         loc_cfg = config.Localities(self.event_index_name, 30, 50.0)
 
-        entries = locality.find_all(query_iface, loc_cfg)
+        entries = locality.find_all(query_iface, 'tester1', loc_cfg)
         usernames = [entry.state.username for entry in entries]
 
         assert len(entries) == 1
