@@ -12,7 +12,9 @@ j
 from lib.alerttask import AlertTask
 from mozdef_util.utilities.logger import logger
 
+import alerts.geomodel.alert as alert 
 import alerts.geomodel.config as config
+import alerts.geomodel.locality as locality
 
 
 _CONFIG_FILE = './geomodel.json'
