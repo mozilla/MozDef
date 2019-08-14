@@ -32,7 +32,7 @@ class AlertLdapPasswordSpray(AlertTask):
 
         for event in aggreg['allevents']:
             for request in event['_source']['details']['requests']:
-                for detail in details:
+                for detail in request['details']:
                     match_object = re.match(email_regex, detail)
                     if match_object:
                         email_list.add(match_object.group(1))
