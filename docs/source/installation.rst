@@ -530,7 +530,7 @@ Alternatively you can start the following services manually in this way from ins
 
   # alert worker
   (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/alerts
-  (mozdef) [mozdef@mozdev alerts]$ celery -A tasks worker --loglevel=info --beat
+  (mozdef) [mozdef@mozdev alerts]$ celery -A lib.tasks worker --loglevel=info --beat
 
 To initialize elasticsearch indices and load some sample data::
 

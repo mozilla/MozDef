@@ -1,7 +1,7 @@
 import os
 from logging.config import dictConfig
 
-from lib.config import LOGGING, RABBITMQ, MONGO_URL
+from lib.config import LOGGING, RABBITMQ, RESTAPI_URL
 
 
 # XXX TBD this should get wrapped into an object that provides pyconfig
@@ -29,10 +29,9 @@ CELERY_IGNORE_RESULT = True
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
-CELERYBEAT_SCHEDULER = "lib.celeryscheduler.schedulers.MongoScheduler"
-CELERY_MONGODB_SCHEDULER_DB = "alerts_celery"
-CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
-CELERY_MONGODB_SCHEDULER_URL = MONGO_URL
+# Custom Alert Scheduler
+CELERYBEAT_SCHEDULER = "lib.celery_scheduler.alerts_scheduler.AlertScheduler"
+CELERY_RESTAPI_URL = RESTAPI_URL
 
 # Load logging config
 dictConfig(LOGGING)

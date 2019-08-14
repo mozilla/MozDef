@@ -41,7 +41,7 @@ else:
         'servers': ['http://localhost:9200']
     }
 
-MONGO_URL = "mongodb://mongodb:3002"
+RESTAPI_URL = "http://rest:8081"
 
 LOGGING = {
     'version': 1,

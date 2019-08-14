@@ -20,6 +20,7 @@ from ipwhois import IPWhois
 from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
+from bson.objectid import ObjectId
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 from mozdef_util.query_models import SearchQuery, TermMatch
@@ -247,7 +248,62 @@ def index():
         request.body.read()
         request.body.close()
     response.content_type = "application/json"
-    sendMessgeToPlugins(request, response, 'alertsschedules')
+    mongoclient = MongoClient(options.mongohost, options.mongoport)
+    schedulers_db = mongoclient.meteor['alerts_schedules']
+
+    mongodb_alerts = schedulers_db.find()
+    alerts_schedules_dict = {}
+    for mongodb_alert in mongodb_alerts:
+        alerts_schedules_dict[mongodb_alert['name']] = {
+            '_id': str(mongodb_alert['_id']),
+            'name': mongodb_alert['name'],
+            'task': mongodb_alert['task'],
+            'enabled': mongodb_alert['enabled'],
+            'args': [],
+            'kwargs': [],
+        }
+        if 'args' in mongodb_alert:
+            alerts_schedules_dict[mongodb_alert['name']]['args'] = mongodb_alert['args']
+        if 'kwargs' in mongodb_alert:
+            alerts_schedules_dict[mongodb_alert['name']]['kwargs'] = mongodb_alert['kwargs']
+        if 'crontab' in mongodb_alert:
+            alerts_schedules_dict[mongodb_alert['name']]['schedule_type'] = 'crontab'
+            alerts_schedules_dict[mongodb_alert['name']]['crontab'] = mongodb_alert['crontab']
+        elif 'interval' in mongodb_alert:
+            alerts_schedules_dict[mongodb_alert['name']]['schedule_type'] = 'interval'
+            alerts_schedules_dict[mongodb_alert['name']]['interval'] = mongodb_alert['interval']
+
+    response.body = json.dumps(alerts_schedules_dict)
+    response.status = 200
+    return response
+
+
+@post('/updatealertsschedules', methods=['POST'])
+@post('/updatealertsschedules/', methods=['POST'])
+@enable_cors
+def update_alerts_schedules():
+    '''an endpoint to return alerts schedules'''
+    if not request.body:
+        response.status = 503
+        return response
+
+    alerts_schedules = json.loads(request.body.read())
+    request.body.close()
+
+    response.content_type = "application/json"
+    mongoclient = MongoClient(options.mongohost, options.mongoport)
+    schedulers_db = mongoclient.meteor['alerts_schedules']
+    schedulers_db.remove()
+
+    for alert_name, alert_schedule in alerts_schedules.items():
+        if '_id' not in alert_schedule:
+            alert_schedule['_id'] = ObjectId()
+        else:
+            alert_schedule['_id'] = ObjectId(alert_schedule['_id'])
+        logger.debug("Inserting schedule for {0} into mongodb".format(alert_name))
+        schedulers_db.insert(alert_schedule)
+
+    response.status = 200
     return response
 
 

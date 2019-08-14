@@ -41,7 +41,7 @@ ES = {
     'servers': [es_server]
 }
 
-MONGO_URL = "mongodb://localhost:3002"
+RESTAPI_URL = "http://localhost:8081"
 
 LOGGING = {
     'version': 1,

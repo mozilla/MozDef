@@ -97,7 +97,7 @@ services:
     volumes:
       - /opt/mozdef/docker/compose/mozdef_alerts/files/config.py:/opt/mozdef/envs/mozdef/alerts/lib/config.py
     restart: always
-    command: bash -c 'celery -A tasks worker --loglevel=info --beat'
+    command: bash -c 'celery -A lib.tasks worker --loglevel=info --beat'
     depends_on:
       - base
       - bootstrap
