@@ -159,6 +159,10 @@ def find(qes: QueryInterface, username: str, index: str) -> Optional[Entry]:
     return qes(search, index)
 
 def update(state: State, from_evt: State) -> Update:
+    '''Update the localities stored under an existing `State` against those
+    contained in a new `State` constructed from events.
+    '''
+
     did_update = False
 
     for loc1 in from_evt.localities:

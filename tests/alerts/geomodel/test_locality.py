@@ -95,111 +95,66 @@ class TestLocality(unittest.TestCase):
     '''unit tests for the `locality` module.
     '''
 
-    def test_merge_updates_localities(self):
-        from_es = [
-            locality.State('locality', 'user1', [
-                locality.Locality(
-                    sourceipaddress='1.2.3.4',
-                    city='Toronto',
-                    country='CA',
-                    lastaction=datetime.utcnow() - timedelta(days=3),
-                    latitude=43.6529,
-                    longitude=-79.3849,
-                    radius=50)
-            ]),
-        ]
+    def test_update_localities(self):
+        from_es = locality.State('locality', 'user1', [
+            locality.Locality(
+                sourceipaddress='1.2.3.4',
+                city='Toronto',
+                country='CA',
+                lastaction=datetime.utcnow() - timedelta(days=3),
+                latitude=43.6529,
+                longitude=-79.3849,
+                radius=50)
+            ])
 
-        from_events = [
-            locality.State('locality', 'user1', [
-                locality.Locality(
-                    sourceipaddress='1.2.3.4',
-                    city='Toronto',
-                    country='CA',
-                    lastaction=datetime.utcnow() - timedelta(minutes=30),
-                    latitude=43.6529,
-                    longitude=-79.3849,
-                    radius=50)
-            ]),
-        ]
+        from_events = locality.State('locality', 'user1', [
+            locality.Locality(
+                sourceipaddress='1.2.3.4',
+                city='Toronto',
+                country='CA',
+                lastaction=datetime.utcnow() - timedelta(minutes=30),
+                latitude=43.6529,
+                longitude=-79.3849,
+                radius=50)
+        ])
 
-        updates = locality.merge(from_es, from_events)
-        user1 = [u for u in updates if u.state.username == 'user1'][0]
+        update = locality.update(from_es, from_events)
 
-        last_action = user1.state.localities[0].lastaction 
+        last_action = update.state.localities[0].lastaction 
         hour_ago = datetime.utcnow() - timedelta(hours=1)
 
-        assert user1.did_update
+        assert update.did_update
+        assert update.state.username == 'user1'
         assert last_action > hour_ago
 
-    def test_merge_records_new_localities(self):
-        from_es = [
-            locality.State('locality', 'user1', [
-                locality.Locality(
-                    sourceipaddress='1.2.3.4',
-                    city='Toronto',
-                    country='CA',
-                    lastaction=datetime.utcnow() - timedelta(days=3),
-                    latitude=43.6529,
-                    longitude=-79.3849,
-                    radius=50)
-            ]),
-        ]
+    def test_update_records_new_localities(self):
+        from_es = locality.State('locality', 'user1', [
+            locality.Locality(
+                sourceipaddress='1.2.3.4',
+                city='Toronto',
+                country='CA',
+                lastaction=datetime.utcnow() - timedelta(days=3),
+                latitude=43.6529,
+                longitude=-79.3849,
+                radius=50)
+        ])
 
-        from_events = [
-            locality.State('locality', 'user1', [
-                locality.Locality(
-                    sourceipaddress='32.64.128.255',
-                    city='Berlin',
-                    country='DE',
-                    lastaction=datetime.utcnow() - timedelta(minutes=30),
-                    latitude=52.520008,
-                    longitude=13.404954,
-                    radius=50)
-            ]),
-        ]
+        from_events = locality.State('locality', 'user1', [
+            locality.Locality(
+                sourceipaddress='32.64.128.255',
+                city='Berlin',
+                country='DE',
+                lastaction=datetime.utcnow() - timedelta(minutes=30),
+                latitude=52.520008,
+                longitude=13.404954,
+                radius=50)
+        ])
 
-        updates = locality.merge(from_es, from_events)
-        user1 = [u for u in updates if u.state.username == 'user1'][0]
-        user1_cities = [loc.city for loc in user1.state.localities]
+        update = locality.update(from_es, from_events)
+        cities = [loc.city for loc in update.state.localities]
 
-        assert user1.did_update 
-        assert sorted(user1_cities) == ['Berlin', 'Toronto']
-
-    def test_merge_includes_new_user_states(self):
-        from_es = [
-            # Known user, user1
-            locality.State('locality', 'user1', [
-                locality.Locality(
-                    sourceipaddress='1.2.3.4',
-                    city='Toronto',
-                    country='CA',
-                    lastaction=datetime.utcnow() - timedelta(days=3),
-                    latitude=43.6529,
-                    longitude=-79.3849,
-                    radius=50)
-            ]),
-        ]
-
-        from_events = [
-            # New user, user3
-            locality.State('locality', 'user3', [
-                locality.Locality(
-                    sourceipaddress='32.64.128.255',
-                    city='Berlin',
-                    country='DE',
-                    lastaction=datetime.utcnow() - timedelta(minutes=30),
-                    latitude=52.520008,
-                    longitude=13.404954,
-                    radius=50)
-            ]),
-        ]
-
-        updates = locality.merge(from_es, from_events)
-        sorted_users = sorted([u.state.username for u in updates])
-        user3 = [u for u in updates if u.state.username == 'user3'][0]
-
-        assert user3.did_update 
-        assert sorted_users == ['user1', 'user3']
+        assert update.did_update
+        assert sorted(cities) == ['Berlin', 'Toronto']
 
     def test_remove_outdated_removes_old_localities(self):
         test_state = locality.State('locality', 'tester1', [
