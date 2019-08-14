@@ -32,9 +32,10 @@ class AlertLdapPasswordSpray(AlertTask):
 
         for event in aggreg['allevents']:
             for request in event['_source']['details']['requests']:
-                match_object = re.match(email_regex, request['details'][0])
-                if match_object:
-                    email_list.add(match_object.group(1))
+                for detail in details:
+                    match_object = re.match(email_regex, detail)
+                    if match_object:
+                        email_list.add(match_object.group(1))
 
         # If no emails, don't throw alert
         # if len(email_list) == 0:
