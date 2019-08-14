@@ -51,7 +51,7 @@ class AlertGeoModel(AlertTask):
         query = locality.wrap_query(self.es)
         journal = locality.wrap_journal(self.es)
 
-        entry = locality.find(query, username, cfg.localities)
+        entry = locality.find(query, username, cfg.localities.es_index)
         if entry is None:
             entry = locality.Entry(
                 '', locality.State('localities', username, []))
@@ -71,7 +71,7 @@ class AlertGeoModel(AlertTask):
 
         if alert_produced is not None:
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
-            return alert_produced._asdict()
+            return dict(alert_produced._asdict())
 
         return None
 
