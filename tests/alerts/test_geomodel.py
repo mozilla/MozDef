@@ -66,4 +66,4 @@ class TestAlertGeoModel(AlertTestSuite):
     ]
 
     def setup(self):
-        super()
+        super().setup()
