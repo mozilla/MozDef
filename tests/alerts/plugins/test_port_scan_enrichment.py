@@ -71,7 +71,7 @@ class TestPortScanEnrichment(object):
             search_window,
             max_conns)
 
-        assert len(enriched['recentconnections']) == 1
-        assert enriched['recentconnections'][0]['destinationipaddress'] in ['1.2.3.4', '4.3.2.1']
-        assert enriched['recentconnections'][0]['destinationport'] in [80, 443]
-        assert enriched['recentconnections'][0]['timestamp'] == EXAMPLE_TIMESTAMP
+        assert len(enriched['details']['recentconnections']) == 1
+        assert enriched['details']['recentconnections'][0]['destinationipaddress'] in ['1.2.3.4', '4.3.2.1']
+        assert enriched['details']['recentconnections'][0]['destinationport'] in [80, 443]
+        assert enriched['details']['recentconnections'][0]['timestamp'] == EXAMPLE_TIMESTAMP
