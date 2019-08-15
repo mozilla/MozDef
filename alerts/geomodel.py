@@ -67,11 +67,23 @@ class AlertGeoModel(AlertTask):
 
             journal(entry, cfg.localities.es_index)
 
-        alert_produced = alert.alert(entry.state, cfg.alerts.whitelist)
+        new = alert.alert(entry.state, cfg.alerts.whitelist)
 
-        if alert_produced is not None:
+        if new is not None:
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
-            return dict(alert_produced._asdict())
+            alert_dict = self.createAlertDict(
+                new.summary,
+                new.category,
+                new.tags,
+                events)
+
+            alert_dict['details'] = {
+                'username': new.username,
+                'sourceipaddress': new.sourceipaddress,
+                'origin': dict(new.origin._asdict())
+            }
+
+            return alert_dict
 
         return None
 
@@ -82,7 +94,7 @@ class AlertGeoModel(AlertTask):
         search.add_must(QSMatch(evt_cfg.lucene_query))
 
         self.filtersManual(search)
-        self.searchEventsAggregated(evt_cfg.username_path, samplesLimit=1)
+        self.searchEventsAggregated(evt_cfg.username_path, samplesLimit=1000)
         self.walkAggregations(threshold=1, config=cfg)
 
     def _load_config(self):
