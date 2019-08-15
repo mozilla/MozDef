@@ -9,14 +9,15 @@ from alerts.geomodel.config import Whitelist
 from alerts.geomodel.locality import State, Locality
 
 
-_AIR_TRAVEL_SPEED = 1000.0 # km/h
+_AIR_TRAVEL_SPEED = 1000.0  # km/h
 
-_EARTH_RADIUS = 6373.0 # km # approximate
+_EARTH_RADIUS = 6373.0  # km # approximate
 
 _DEFAULT_SUMMARY = 'Authenticated action taken by a user outside of any of '\
     'their known localities.'
 
 # TODO: Switch to dataclasses when we move to Python3.7+
+
 
 class Origin(NamedTuple):
     '''A description of a location.
@@ -27,6 +28,7 @@ class Origin(NamedTuple):
     latitude: float
     longitude: float
     geopoint: str
+
 
 class Alert(NamedTuple):
     '''A container for the data the alerts output by GeoModel contain.
@@ -62,6 +64,7 @@ class Alert(NamedTuple):
             tags=['geomodel'],
             summary=summary)
 
+
 def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
     '''Given two localities, determine whether it would be possible for a user
     to have travelled from the former to the latter in the time between when the
@@ -88,6 +91,7 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
     # We pad the time with an hour to account for things like planes being
     # slowed, network delays, etc.
     return (distance / _AIR_TRAVEL_SPEED) <= (hours_between - 1)
+
 
 def alert(user_state: State, whitelist: Whitelist) -> Optional[Alert]:
     '''Determine whether an alert should fired given a particular user's
@@ -127,4 +131,3 @@ def alert(user_state: State, whitelist: Whitelist) -> Optional[Alert]:
         user_state.username,
         ip,
         Origin(city, country, lat, lon, ''))
-

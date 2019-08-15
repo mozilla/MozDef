@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
-from typing import Any, Dict, Optional
+from typing import Optional
 import unittest
 
 from mozdef_util.query_models import SearchQuery
@@ -19,6 +19,7 @@ def query_interface(results: locality.Entry) -> locality.QueryInterface:
         return results
 
     return closure
+
 
 class TestLocalityElasticSearch(UnitTestSuite):
     '''Tests for the `locality` module that interact with ES.
@@ -52,7 +53,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
         loc_cfg = config.Localities(self.event_index_name, 30, 50.0)
 
         entry = locality.find(query_iface, 'tester1', loc_cfg.es_index)
-       
+
         assert entry is not None
         assert entry.state.username == 'tester1'
 
@@ -80,7 +81,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
             ]))
 
         journal(test_entry, self.event_index_name)
-        
+
         self.refresh(self.event_index_name)
 
         query_iface = locality.wrap_query(self.es_client)
@@ -90,6 +91,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
 
         assert entry is not None
         assert entry.state.username == 't1'
+
 
 class TestLocality(unittest.TestCase):
     '''unit tests for the `locality` module.
@@ -105,7 +107,7 @@ class TestLocality(unittest.TestCase):
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50)
-            ])
+        ])
 
         from_events = locality.State('locality', 'user1', [
             locality.Locality(
@@ -120,7 +122,7 @@ class TestLocality(unittest.TestCase):
 
         update = locality.update(from_es, from_events)
 
-        last_action = update.state.localities[0].lastaction 
+        last_action = update.state.localities[0].lastaction
         hour_ago = datetime.utcnow() - timedelta(hours=1)
 
         assert update.did_update

@@ -8,11 +8,12 @@
 import json
 import sys
 import traceback
-j
+
 from lib.alerttask import AlertTask
+from mozdef_util.query_models import SearchQuery, QueryStringMatch as QSMatch
 from mozdef_util.utilities.logger import logger
 
-import alerts.geomodel.alert as alert 
+import alerts.geomodel.alert as alert
 import alerts.geomodel.config as config
 import alerts.geomodel.locality as locality
 
@@ -26,7 +27,7 @@ class AlertGeoModel(AlertTask):
     When activity is found that indicates a potential compromise of an
     account, an alert is produced.
     '''
-    
+
     def main(self):
         cfg = self._load_config()
 

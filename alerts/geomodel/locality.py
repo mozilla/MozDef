@@ -4,13 +4,12 @@ from typing import Any, Callable, Dict, List, NamedTuple, Optional
 from mozdef_util.elasticsearch_client import ElasticsearchClient as ESClient
 from mozdef_util.query_models import SearchQuery, TermMatch
 
-import alerts.geomodel.config as config
-
 
 # Default radius (in Kilometres) that a locality should have.
 _DEFAULT_RADIUS_KM = 50.0
 
 # TODO: Switch to dataclasses when we move to Python3.7+
+
 
 class Locality(NamedTuple):
     '''Represents a specific locality.
@@ -24,6 +23,7 @@ class Locality(NamedTuple):
     longitude: float
     radius: int
 
+
 class State(NamedTuple):
     '''Represents the state tracked for each user regarding their localities.
     '''
@@ -31,6 +31,7 @@ class State(NamedTuple):
     type_: str
     username: str
     localities: List[Locality]
+
 
 class Entry(NamedTuple):
     '''A top-level container for locality state that will be inserted into
@@ -42,6 +43,7 @@ class Entry(NamedTuple):
 
     identifier: Optional[str]
     state: State
+
 
 class Update(NamedTuple):
     '''Produced by calls to functions operating on lists of `State`s to
@@ -58,16 +60,19 @@ class Update(NamedTuple):
         will have its `did_update` field set to `True` if either the original
         or the new `Update` are `True`.
         '''
-        
+
         new = fn(u.state)
 
         return Update(new.state, u.did_update or new.did_update)
 
+
 JournalInterface = Callable[[Entry, str], None]
 QueryInterface = Callable[[SearchQuery, str], Optional[Entry]]
 
+
 def _dict_take(dictionary, keys):
     return {key: dictionary[key] for key in keys}
+
 
 def wrap_journal(client: ESClient) -> JournalInterface:
     '''Wrap an `ElasticsearchClient` in a closure of type `JournalInterface`.
@@ -82,6 +87,7 @@ def wrap_journal(client: ESClient) -> JournalInterface:
             doc_id=entry.identifier)
 
     return wrapper
+
 
 def wrap_query(client: ESClient) -> QueryInterface:
     '''Wrap an `ElasticsearchClient` in a closure of type `QueryInterface`.
@@ -110,6 +116,7 @@ def wrap_query(client: ESClient) -> QueryInterface:
             return None
 
     return wrapper
+
 
 def from_event(
         event: Dict[str, Any],
@@ -146,6 +153,7 @@ def from_event(
         geo_data.get('longitude', 0.0),
         radius)
 
+
 def find(qes: QueryInterface, username: str, index: str) -> Optional[Entry]:
     '''Retrieve all locality state from ElasticSearch.
     '''
@@ -157,6 +165,7 @@ def find(qes: QueryInterface, username: str, index: str) -> Optional[Entry]:
     ])
 
     return qes(search, index)
+
 
 def update(state: State, from_evt: State) -> Update:
     '''Update the localities stored under an existing `State` against those
@@ -184,12 +193,13 @@ def update(state: State, from_evt: State) -> Update:
 
                 # Stop looking for the locality in the records pulled from ES.
                 break
-        
+
         if not did_find:
             state.localities.append(loc1)
             did_update = True
 
     return Update(state, did_update)
+
 
 def remove_outdated(state: State, days_valid: int) -> Update:
     '''Update a state by removing localities that are outdated, determined
