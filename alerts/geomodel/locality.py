@@ -44,6 +44,13 @@ class Entry(NamedTuple):
     identifier: Optional[str]
     state: State
 
+    def new(state: State) -> 'Entry':
+        '''Construct a new `Entry` that, when journaled, will result in a new
+        state entry being recorded rather than replacing an existing one.
+        '''
+
+        return Entry('', state)
+
 
 class Update(NamedTuple):
     '''Produced by calls to functions operating on lists of `State`s to
