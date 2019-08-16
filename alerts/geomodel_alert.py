@@ -6,6 +6,7 @@
 # Copyright (c) 2015 Mozilla Corporation
 
 import json
+import os
 import sys
 import traceback
 
@@ -18,7 +19,9 @@ import alerts.geomodel.config as config
 import alerts.geomodel.locality as locality
 
 
-_CONFIG_FILE = './geomodel.json'
+_CONFIG_FILE = os.path.join(
+    os.path.dirname(__file__),
+    'geomodel_alert.json')
 
 
 class AlertGeoModel(AlertTask):
@@ -102,25 +105,16 @@ class AlertGeoModel(AlertTask):
         with open(_CONFIG_FILE) as cfg_file:
             cfg = json.load(cfg_file)
 
-            cfg['localities'] = [
-                config.Localities(**dat)
-                for dat in cfg['localities']
-            ]
-            cfg['events']['search_window'] = config.SearchWindow(
-                **cfg['events']['search_window'])
-            cfg['events']['queries'] = [
-                config.QuerySpec(**dat)
-                for dat in cfg['events']['queries']
-            ]
-            cfg['events'] = [
-                config.Events(**dat)
-                for dat in cfg['events']
-            ]
+            cfg['localities'] = config.Localities(**cfg['localities'])
+
+            for i, event in enumerate(cfg['events']):
+                cfg['events'][i]['search_window'] = config.SearchWindow(
+                    **cfg['events'][i]['search_window'])
+
+            cfg['events'] = [config.Events(**dat) for dat in cfg['events']]
+
             cfg['alerts']['whitelist'] = config.Whitelist(
                 **cfg['alerts']['whitelist'])
-            cfg['alerts'] = [
-                config.Alerts(**dat)
-                for dat in cfg['alerts']
-            ]
+            cfg['alerts'] = config.Alerts(**cfg['alerts'])
 
             return config.Config(**cfg)
