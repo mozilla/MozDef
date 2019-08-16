@@ -4,11 +4,11 @@ from tests.alerts.alert_test_suite import AlertTestSuite
 from tests.alerts.negative_alert_test_case import NegativeAlertTestCase
 from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
 
-import alerts.geomodel as geomodel
+import alerts.geomodel.locality as geomodel
 
 
 class TestAlertGeoModel(AlertTestSuite):
-    alert_filename = 'geomodel'
+    alert_filename = 'geomodel_alert'
 
     # The test cases described herein depend on some locality state being
     # present before the tests run.
@@ -82,13 +82,13 @@ class TestAlertGeoModel(AlertTestSuite):
     def setup(self):
         super().setup()
 
-        journal = geomodel.locality.wrap_journal(self.es_client)
+        journal = geomodel.wrap_journal(self.es_client)
 
         def state(username, locs):
-            return geomodel.locality.State('locality', username, locs)
+            return geomodel.State('locality', username, locs)
 
         def locality(cfg):
-            return geomodel.locality.Locality(**cfg)
+            return geomodel.Locality(**cfg)
 
         test_states = [
             state('tester1', [
@@ -116,4 +116,4 @@ class TestAlertGeoModel(AlertTestSuite):
         ]
 
         for state in test_states:
-            journal(geomodel.locality.Entry.new(state), 'localities')
+            journal(geomodel.Entry.new(state), 'localities')
