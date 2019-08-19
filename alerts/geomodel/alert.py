@@ -59,7 +59,7 @@ class Alert(NamedTuple):
             type_='geomodel',
             username=username,
             sourceipaddress=sourceip,
-            timestamp=datetime.now(),
+            timestamp=datetime.utcnow(),
             origin=origin,
             tags=['geomodel'],
             summary=summary)
