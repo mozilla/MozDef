@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from freezegun import freeze_time
+
 from tests.alerts.alert_test_suite import AlertTestSuite
 from tests.alerts.negative_alert_test_case import NegativeAlertTestCase
 from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
@@ -80,6 +82,7 @@ class TestAlertGeoModel(AlertTestSuite):
             events=[no_change_event])
     ]
 
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
     def setup(self):
         super().setup()
 
