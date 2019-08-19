@@ -27,7 +27,7 @@ class Origin(NamedTuple):
     country: str
     latitude: float
     longitude: float
-    geopoint: str
+    #geopoint: str
 
 
 class Alert(NamedTuple):
@@ -130,4 +130,4 @@ def alert(user_state: State, whitelist: Whitelist) -> Optional[Alert]:
     return Alert.new(
         user_state.username,
         ip,
-        Origin(city, country, lat, lon, ''))
+        Origin(city, country, lat, lon))#, ''))
