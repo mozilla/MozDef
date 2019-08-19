@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import pytz
 from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient as ESClient
@@ -219,10 +220,13 @@ def remove_outdated(state: State, days_valid: int) -> Update:
     some number of days ago.
     '''
 
+    now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+    last_valid_date = now - timedelta(days=days_valid)
+
     new_localities = [
         loc
         for loc in state.localities
-        if loc.lastaction >= datetime.utcnow() - timedelta(days=days_valid)
+        if loc.lastaction >= last_valid_date
     ]
 
     return Update(
@@ -245,7 +249,7 @@ def _parse_datetime(datetime_str):
 
     for parser in parsers:
         try:
-            return parser(datetime_str)
+            return parser(datetime_str).replace(tzinfo=pytz.UTC)
         except ValueError:
             continue
 
