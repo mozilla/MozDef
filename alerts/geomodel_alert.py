@@ -42,14 +42,16 @@ class AlertGeoModel(AlertTask):
                 logger.error(
                     'Error process events; query="{0}"; error={1}'.format(
                         cfg.events[query_index].lucene_query,
-                        err.message))
+                        err))
 
     def onAggregation(self, agg):
         username = agg['value']
         events = agg['events']
         cfg = agg['config']
 
-        localities = list(filter(map(locality.from_event, events)))
+        localities = list(filter(
+            lambda state: state is not None,
+            map(locality.from_event, events)))
         new_state = locality.State('locality', username, localities)
 
         query = locality.wrap_query(self.es)
