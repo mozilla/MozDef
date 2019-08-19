@@ -1,0 +1,46 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+-->
+
+<template name="alertschedules">
+    <div class="alertschedules container">
+        <div class="fluid center">
+        <table class="table table-striped  table-hover table-condensed">
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Schedule Type</td>
+                <td>Schedule</td>
+                <td>Enabled</td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each alertschedulesitems}}
+                {{>each_alert_schedule}}
+            {{/each}}
+        </tbody>
+        </table>
+            {{> defaultBootstrapPaginator pagination=templatePagination limit=5 containerClass="text-center"}}
+        </div>
+    </div>
+</template>
+
+<template name="each_alert_schedule">
+    <tr class="tooltip-wrapper info-row" data-toggle="tooltip">
+        <td>{{name}}</td>
+        <td>{{schedule_type}}</td>
+        <td>{{schedule_string}}</td>
+    {{#if enabled}}
+        <td>Yes</td>
+        <td><button class="btn btn-xs btn-warning btnAlertAck"  data-target="{{_id}}">Disable</button></td>
+    {{else}}
+        <td>No</td>
+        <td><button class="btn btn-xs btn-warning btnAlertAcked" data-target="{{_id}}">Enable</button></td>
+    {{/if}}
+    </tr>
+
+</template>

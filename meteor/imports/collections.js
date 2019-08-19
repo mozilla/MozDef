@@ -32,6 +32,7 @@ Meteor.startup( () => {
     fqdnblocklist = new Mongo.Collection( "fqdnblocklist" );
     watchlist = new Mongo.Collection( "watchlist" );
     preferences = new Mongo.Collection( "preferences" );
+    alertschedules = new Mongo.Collection( "alertschedules" );
 
 
     if ( Meteor.isServer ) {
@@ -296,6 +297,10 @@ Meteor.startup( () => {
             return preferences.find( {}, { limit: 0 } );
         } )
 
+        Meteor.publish( "alertschedules", function() {
+            return alertschedules.find( {}, { limit: 0 } );
+        } );
+
         //access rules from clients
         //barebones to allow you to specify rules
 
@@ -402,6 +407,12 @@ Meteor.startup( () => {
                 return ( userId );
             },
             fetch: ['creator']
+        } );
+
+        alertschedules.allow( {
+            update: function( docId, doc, fields, modifier ) {
+                return ( docId );
+            }
         } );
 
         // since we store email from oidc calls in the profile

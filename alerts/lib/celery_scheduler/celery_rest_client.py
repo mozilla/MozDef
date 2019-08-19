@@ -4,6 +4,7 @@ from requests_jwt import JWTAuth
 import requests
 import json
 
+from bson.objectid import ObjectId
 from importlib import import_module
 from celery.schedules import crontab, timedelta
 from mozdef_util.utilities.logger import logger
@@ -36,7 +37,7 @@ class CeleryRestClient(object):
         schedule = self.fetch_schedule_dict()
         get_logger(__name__).info("**** Current Alert Schedule ****")
         for alert_name, details in schedule.items():
-            get_logger(__name__).info("\t{0}: {1}".format(alert_name, details['schedule_string']))
+            get_logger(__name__).info("\t{0}: {1} ({2})".format(alert_name, details['schedule_string'], details['enabled']))
 
     def load_and_register_alerts(self):
         existing_alert_schedules = self.fetch_schedule_dict()
@@ -59,6 +60,7 @@ class CeleryRestClient(object):
 
             full_path_name = "{0}.{1}".format(alert_module_name, alert_classname)
             alert_schedule = {
+                "_id": str(ObjectId()),
                 "_cls": "PeriodicTask",
                 "name": full_path_name,
                 "task": full_path_name,
@@ -107,7 +109,6 @@ class CeleryRestClient(object):
                 existing_alert_schedules[alert_name]['schedule_type'] = alert_schedule['schedule_type']
                 existing_alert_schedules[alert_name][alert_schedule['schedule_type']] = alert_schedule[alert_schedule['schedule_type']]
                 existing_alert_schedules[alert_name]['schedule_string'] = alert_schedule['schedule_string']
-                existing_alert_schedules[alert_name]['enabled'] = alert_schedule['enabled']
                 updated_alert_schedule = existing_alert_schedules[alert_name]
 
             alert_schedules[alert_name] = updated_alert_schedule

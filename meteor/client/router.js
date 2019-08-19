@@ -203,7 +203,7 @@ Router.map(function() {
 
     this.route('manage-alerts', {
         path: '/manage-alerts',
-        template: 'manage-alerts',
+        template: 'alertschedules',
         layoutTemplate: 'layout'
     });
 
