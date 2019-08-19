@@ -85,7 +85,6 @@ class TestAlertGeoModel(AlertTestSuite):
 
         self.es_client.delete_index('localities', True)
         self.es_client.create_index('localities')
-        print('Created localities index')
 
         journal = geomodel.wrap_journal(self.es_client)
 
