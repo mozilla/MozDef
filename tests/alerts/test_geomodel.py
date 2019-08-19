@@ -31,7 +31,8 @@ class TestAlertGeoModel(AlertTestSuite):
             },
             'details': {
                 'username': 'tester1'
-            }
+            },
+            'tags': ['auth0']
         }
     }
 
@@ -121,3 +122,5 @@ class TestAlertGeoModel(AlertTestSuite):
 
         for state in test_states:
             journal(geomodel.Entry.new(state), 'localities')
+
+        self.refresh('localities')
