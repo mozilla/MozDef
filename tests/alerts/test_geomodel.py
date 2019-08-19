@@ -75,6 +75,7 @@ class TestAlertGeoModel(AlertTestSuite):
         },
         'summary': 'Authenticated action taken by a user outside of any of '
         'their known localities.',
+        'severity': 'WARNING',
         'tags': ['geomodel']
     }
 
