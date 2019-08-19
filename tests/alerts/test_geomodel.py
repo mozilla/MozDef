@@ -61,20 +61,19 @@ class TestAlertGeoModel(AlertTestSuite):
     }
 
     default_alert = {
-        'source': 'geomodel',
         'category': 'geomodel',
-        'type_': 'geomodel',
-        'username': 'tester1',
-        'sourceipaddress': '1.2.3.4',
-        'timestamp': '2019-07-31T17:56:38.908000+00:00',
-        'origin': {
-            'city': 'Toronto',
-            'country': 'CA',
-            'latitude': 43.6529,
-            'longitude': -79.3849
-        },
         'summary': 'Authenticated action taken by a user outside of any of '
         'their known localities.',
+        'details': {
+            'username': 'tester1',
+            'sourceipaddress': '1.2.3.4',
+            'origin': {
+                'city': 'Toronto',
+                'country': 'CA',
+                'latitude': 43.6529,
+                'longitude': -79.3849
+            }
+        },
         'severity': 'WARNING',
         'tags': ['geomodel']
     }
