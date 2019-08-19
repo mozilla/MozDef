@@ -109,6 +109,13 @@ def wrap_query(client: ESClient) -> QueryInterface:
         state_dict = results[0].get('_source', {})
         try:
             state_dict['localities'] = [
+                {
+                    k: v if k != 'lastaction' else _parse_datetime(v)
+                    for k, v in loc.items()
+                }
+                for loc in state_dict['localities']
+            ]
+            state_dict['localities'] = [
                 Locality(**_dict_take(loc, Locality._fields))
                 for loc in state_dict['localities']
             ]
@@ -147,9 +154,7 @@ def from_event(
     # conversion back to a `datetime` as straightforward as possible.
     now = datetime.strftime(datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%f+00:00')
     active_time_str = _source.get('utctimestamp', now)
-    active_time = datetime.strptime(
-        ''.join(active_time_str.rsplit(':', 1)),
-        '%Y-%m-%dT%H:%M:%S.%f%z')
+    active_time = _parse_datetime(active_time_str)
 
     return Locality(
         source_ip,
@@ -223,3 +228,26 @@ def remove_outdated(state: State, days_valid: int) -> Update:
     return Update(
         state=State(state.type_, state.username, new_localities),
         did_update=len(new_localities) != len(state.localities))
+
+def _parse_datetime(datetime_str):
+    parsers = [
+        lambda s: datetime.strptime(
+            ''.join(s.rsplit(':', 1)),
+            '%Y-%m-%dT%H:%M:%S%z'),
+        lambda s: datetime.strptime(
+            ''.join(s.rsplit(':', 1)),
+            '%Y-%m-%dT%H:%M:%S.%f%z'),
+        lambda s: datetime.strptime(s, '%Y-%m-%dT%H:%M:%S%z'),
+        lambda s: datetime.strptime(s, '%Y-%m-%dT%H:%M:%S.%f%z'),
+        lambda s: datetime.strptime(s, '%Y-%m-%dT%H:%M:%S'),
+        lambda s: datetime.strptime(s, '%Y-%m-%dT%H:%M:%S.%f')
+    ]
+
+    for parser in parsers:
+        try:
+            return parser(datetime_str)
+        except ValueError:
+            continue
+
+    raise ValueError(
+        'Unexpected datetime string format: {}'.format(datetime_str))
