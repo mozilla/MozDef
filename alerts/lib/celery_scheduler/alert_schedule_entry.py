@@ -33,7 +33,7 @@ class AlertScheduleEntry(ScheduleEntry):
                 month_of_year=self._task['crontab']['month_of_year']
             )
         elif self._task['schedule_type'] == 'interval':
-            self.schedule = celery.schedules.schedule(datetime.timedelta(**{'seconds': self._task['interval']['every']}))
+            self.schedule = celery.schedules.schedule(datetime.timedelta(**{self._task['interval']['period']: self._task['interval']['every']}))
 
         self.args = self._task['args']
         self.kwargs = self._task['kwargs']
