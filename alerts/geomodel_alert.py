@@ -69,7 +69,7 @@ class AlertGeoModel(AlertTask):
             locality.update(entry.state, new_state))
 
         if updated.did_update:
-            entry.state = updated.state
+            entry = locality.Entry(entry.identifier, updated.state)
 
             journal(entry, cfg.localities.es_index)
 
