@@ -43,12 +43,6 @@ def parse_config_file():
         options.mqport = getConfig('mqport', 5672, options.configfile)
         options.mqack = getConfig('mqack', True, options.configfile)
 
-        options.extraindices = [
-            name
-            for name in getConfig('extraindices', '', options.configfile).split(',')
-            if len(name) > 0
-        ]
-
         CONFIG_FILE_CONTENTS = options
 
     return CONFIG_FILE_CONTENTS

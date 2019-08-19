@@ -57,11 +57,6 @@ class UnitTestSuite(object):
         self.es_client.save_object(index='events', body=event)
 
     def setup_elasticsearch(self):
-        for index in self.options.extraindices:
-            self.es_client.create_index(
-                index,
-                index_config=self.mapping_options)
-
         self.es_client.create_index(self.event_index_name, index_config=self.mapping_options)
         self.es_client.create_alias('events', self.event_index_name)
         self.es_client.create_index(self.previous_event_index_name, index_config=self.mapping_options)
@@ -71,9 +66,6 @@ class UnitTestSuite(object):
         self.es_client.create_alias('alerts', self.alert_index_name)
 
     def reset_elasticsearch(self):
-        for index in self.options.extraindices:
-            self.es_client.delete_index(index, True)
-
         self.es_client.delete_index(self.event_index_name, True)
         self.es_client.delete_index('events', True)
         self.es_client.delete_index(self.previous_event_index_name, True)
