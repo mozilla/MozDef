@@ -81,7 +81,8 @@ class AlertGeoModel(AlertTask):
                 new.summary,
                 new.category,
                 new.tags,
-                events)
+                events,
+                'WARNING')
 
             alert_dict['details'] = {
                 'username': new.username,
