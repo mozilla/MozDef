@@ -233,6 +233,7 @@ def remove_outdated(state: State, days_valid: int) -> Update:
         state=State(state.type_, state.username, new_localities),
         did_update=len(new_localities) != len(state.localities))
 
+
 def _parse_datetime(datetime_str):
     parsers = [
         lambda s: datetime.strptime(
