@@ -292,6 +292,7 @@ Meteor.startup( () => {
         publishPagination( fqdnblocklist );
         publishPagination( watchlist );
         publishPagination( alerts );
+        publishPagination( alertschedules );
 
         Meteor.publish( "preferences", function() {
             return preferences.find( {}, { limit: 0 } );
