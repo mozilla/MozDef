@@ -42,9 +42,15 @@ class TestPortScanEnrichment(object):
         }
 
         alert = {
-            'details': {
-                'sourceipaddress': '127.0.0.1'
-            }
+            'events': [
+                {
+                    'documentsource': {
+                        'details': {
+                            'sourceipaddress': '127.0.0.1'
+                        },
+                    }
+                }
+            ]
         }
 
         search_window = {
