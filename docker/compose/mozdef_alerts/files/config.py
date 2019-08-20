@@ -43,6 +43,8 @@ ES = {
 }
 
 RESTAPI_URL = "http://rest:8081"
+# Leave empty for no auth
+RESTAPI_TOKEN = ""
 
 LOGGING = {
     'version': 1,

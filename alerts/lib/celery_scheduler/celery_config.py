@@ -1,7 +1,7 @@
 import os
 from logging.config import dictConfig
 
-from lib.config import LOGGING, RABBITMQ, RESTAPI_URL
+from lib.config import LOGGING, RABBITMQ, RESTAPI_URL, RESTAPI_TOKEN
 
 
 # XXX TBD this should get wrapped into an object that provides pyconfig
@@ -32,6 +32,7 @@ CELERY_TASK_SERIALIZER = "json"
 # Custom Alert Scheduler
 CELERYBEAT_SCHEDULER = "lib.celery_scheduler.alerts_scheduler.AlertScheduler"
 CELERY_RESTAPI_URL = RESTAPI_URL
+CELERY_RESTAPI_JWT = RESTAPI_TOKEN
 
 # Load logging config
 dictConfig(LOGGING)

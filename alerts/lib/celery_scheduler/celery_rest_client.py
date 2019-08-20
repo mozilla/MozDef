@@ -13,7 +13,7 @@ from lib.config import ALERTS, RESTAPI_URL
 
 class CeleryRestClient(object):
     def __init__(self):
-        if hasattr(current_app.conf, "CELERY_RESTAPI_JWT"):
+        if hasattr(current_app.conf, "CELERY_RESTAPI_JWT") and current_app.conf.CELERY_RESTAPI_JWT != "":
             self._restapi_jwt = JWTAuth(current_app.conf.CELERY_RESTAPI_JWT)
             self._restapi_jwt.set_header_format('Bearer %s')
             get_logger(__name__).info("setting JWT value")
