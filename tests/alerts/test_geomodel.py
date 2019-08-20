@@ -71,7 +71,8 @@ class TestAlertGeoModel(AlertTestSuite):
                 'city': 'Toronto',
                 'country': 'CA',
                 'latitude': 43.6529,
-                'longitude': -79.3849
+                'longitude': -79.3849,
+                'geopoint': '43.6529,-79.3849'
             }
         },
         'severity': 'WARNING',
