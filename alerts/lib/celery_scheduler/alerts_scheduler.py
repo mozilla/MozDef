@@ -32,6 +32,7 @@ class AlertScheduler(Scheduler):
         self.max_interval = (kwargs.get('max_interval') or self.app.conf.CELERYBEAT_MAX_LOOP_INTERVAL or 5)
         self.celery_rest = CeleryRestClient()
         self.celery_rest.print_schedule()
+        self._schedule = self.fetch_schedule()
 
     def setup_schedule(self):
         pass
@@ -46,9 +47,15 @@ class AlertScheduler(Scheduler):
     @property
     def schedule(self):
         if self.requires_update():
-            self._schedule = self.fetch_schedule()
+            self.update_schedule()
             self._last_updated = datetime.datetime.now()
         return self._schedule
+
+    def update_schedule(self):
+        api_results = self.celery_rest.fetch_schedule_dict()
+        for name, entry in self._schedule.items():
+            if name in api_results:
+                entry._task['enabled'] = api_results[name]['enabled']
 
     def fetch_schedule(self):
         api_results = self.celery_rest.fetch_schedule_dict()

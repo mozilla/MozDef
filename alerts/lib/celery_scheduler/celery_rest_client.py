@@ -37,7 +37,7 @@ class CeleryRestClient(object):
         schedule = self.fetch_schedule_dict()
         get_logger(__name__).info("**** Current Alert Schedule ****")
         for alert_name, details in schedule.items():
-            get_logger(__name__).info("\t{0}: {1} ({2})".format(alert_name, details['schedule_string'], details['enabled']))
+            get_logger(__name__).info("\t{0}: {1} (enabled={2})".format(alert_name, details['schedule_string'], details['enabled']))
 
     def load_and_register_alerts(self):
         existing_alert_schedules = self.fetch_schedule_dict()
@@ -66,7 +66,7 @@ class CeleryRestClient(object):
                 "task": full_path_name,
                 "enabled": True,
                 "args": [],
-                "kwargs": [],
+                "kwargs": {},
             }
             if 'args' in params:
                 alert_schedule['args'] = params['args']
