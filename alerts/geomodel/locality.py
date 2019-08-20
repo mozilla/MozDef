@@ -29,7 +29,7 @@ class State(NamedTuple):
     '''Represents the state tracked for each user regarding their localities.
     '''
 
-    type_: str
+    type_: str  # Not used here, but we want it in ES.
     username: str
     localities: List[Locality]
 
@@ -110,14 +110,12 @@ def wrap_query(client: ESClient) -> QueryInterface:
         state_dict = results[0].get('_source', {})
         try:
             state_dict['localities'] = [
-                {
+                # Convert dictionary localities into `Locality`s after
+                # parsing the `datetime` from `lastaction`.
+                Locality(**_dict_take({
                     k: v if k != 'lastaction' else _parse_datetime(v)
                     for k, v in loc.items()
-                }
-                for loc in state_dict['localities']
-            ]
-            state_dict['localities'] = [
-                Locality(**_dict_take(loc, Locality._fields))
+                }, Locality._fields),
                 for loc in state_dict['localities']
             ]
 
@@ -149,26 +147,25 @@ def from_event(
     if source_ip is None or geo_data is None:
         return None
 
-    # Here we try to extract the time at which the event occurred.
-    # Because `%z` only got support for colon-separated UTC offsets
-    # (like +00:00) in Python 3.7, we do a little bit of tampering to make the
-    # conversion back to a `datetime` as straightforward as possible.
     now = datetime.strftime(datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%f+00:00')
     active_time_str = _source.get('utctimestamp', now)
     active_time = _parse_datetime(active_time_str)
 
-    return Locality(
-        source_ip,
-        geo_data.get('city', 'UNKNOWN'),
-        geo_data.get('country_code', 'UNKNOWN'),
-        active_time,
-        geo_data.get('latitude', 0.0),
-        geo_data.get('longitude', 0.0),
-        radius)
+    (city, country, lat, lon) = (
+        geo_data.get('city'),
+        geo_data.get('country_code'),
+        geo_data.get('latitude'),
+        geo_data.get('longitude')
+    )
+
+    if any([v is None for v in [city, country, lat, lon]]):
+        return None
+
+    return Locality(source_ip, city, country, active_time, lat, lon, radius)
 
 
 def find(qes: QueryInterface, username: str, index: str) -> Optional[Entry]:
-    '''Retrieve all locality state from ElasticSearch.
+    '''Retrieve the locality state for one user from ElasticSearch.
     '''
 
     search = SearchQuery()

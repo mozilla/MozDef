@@ -94,7 +94,7 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
 
 
 def alert(user_state: State, whitelist: Whitelist) -> Optional[Alert]:
-    '''Determine whether an alert should fired given a particular user's
+    '''Determine whether an alert should fire given a particular user's
     locality state.  If an alert should fire, an `Alert` is returned, otherwise
     this function returns `None`.
     '''
