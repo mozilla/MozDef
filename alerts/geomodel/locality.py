@@ -115,7 +115,7 @@ def wrap_query(client: ESClient) -> QueryInterface:
                 Locality(**_dict_take({
                     k: v if k != 'lastaction' else _parse_datetime(v)
                     for k, v in loc.items()
-                }, Locality._fields),
+                }, Locality._fields))
                 for loc in state_dict['localities']
             ]
 
