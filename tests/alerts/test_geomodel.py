@@ -94,8 +94,10 @@ class TestAlertGeoModel(AlertTestSuite):
     def setup(self):
         super().setup()
 
-        self.es_client.delete_index('localities', True)
-        self.es_client.create_index('localities')
+        index = 'localities'
+
+        self.es_client.delete_index(index, True)
+        self.es_client.create_index(index)
 
         journal = geomodel.wrap_journal(self.es_client)
 
@@ -131,6 +133,6 @@ class TestAlertGeoModel(AlertTestSuite):
         ]
 
         for state in test_states:
-            journal(geomodel.Entry.new(state), 'localities')
+            journal(geomodel.Entry.new(state), index)
 
-        self.refresh('localities')
+        self.refresh(index)
