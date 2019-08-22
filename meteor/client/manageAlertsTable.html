@@ -48,14 +48,20 @@ Copyright (c) 2014 Mozilla Corporation
         <td>Yes</td>
         <td>
             <span class="tooltip-wrapper" title="{{#if modifiedby}}Enabled by: {{modifiedby}} at {{modifiedat}}{{/if}}" data-toggle="tooltip">
+                <button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#disable{{_id}}">arm disable</button>
+                <div id="disable{{_id}}" class="collapse">
                     <button class="btn btn-xs btn-warning btnAlertAck"  data-target="{{_id}}">Disable</button>
+                </div>
             </span>
         </td>
     {{else}}
         <td>No</td>
         <td>
             <span class="tooltip-wrapper" title="{{#if modifiedby}}Disabled by: {{modifiedby}} at {{modifiedat}}{{/if}}" data-toggle="tooltip">
+                <button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#enable{{_id}}">arm enable</button>
+                <div id="enable{{_id}}" class="collapse">
                     <button class="btn btn-xs btn-warning btnAlertAcked" data-target="{{_id}}">Enable</button>
+                </div>
             </span>
         </td>
     {{/if}}
