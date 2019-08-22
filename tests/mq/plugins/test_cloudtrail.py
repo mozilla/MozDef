@@ -6,415 +6,69 @@
 from mq.plugins.cloudtrail import message
 
 
-class TestCloudtrailPlugin():
+class TestCloudtrailPluginBadEvents():
     def setup(self):
         self.plugin = message()
 
     def test_nonexistent_source(self):
         msg = {
-            'category': 'someother',
+            "category": "someother",
         }
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
         assert retmessage == msg
         assert retmeta == {}
 
-    def test_incorrect_source(self):
+    def test_bad_source(self):
         msg = {
-            'source': 'someother',
+            "source": "someother",
+            "hostname": "some.aws.amazon.com",
+            "details": {}
         }
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
         assert retmessage == msg
         assert retmeta == {}
 
-    def test_bad_details(self):
+    def test_nonexistent_hostname(self):
         msg = {
-            'details': 'someother',
+            "source": "cloudtrail",
+            "details": {}
         }
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
         assert retmessage == msg
-        assert 'raw_value' not in msg['details']
         assert retmeta == {}
 
-    def test_iamInstanceProfile(self):
+    def test_nonexistent_details(self):
         msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'iaminstanceprofile': 'astringvalue',
-                }
-            }
+            "source": "cloudtrail",
+            "hostname": "some.aws.amazon.com"
         }
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'iaminstanceprofile': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
+        assert retmessage == msg
         assert retmeta == {}
 
-    def test_attribute(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'attribute': 'astringvalue',
+
+class TestCloudtrailPlugin():
+    def setup(self):
+        self.plugin = message()
+        self.good_event = {
+            "source": "cloudtrail",
+            "hostname": "some.aws.amazon.com",
+            "details": {
+                "apiversion": "2015-12-01",
+                "requestparameters": {
+                    "somekey": "somevalue"
                 }
             }
         }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
 
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'attribute': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
+    def test_apiversion_moved(self):
+        (retmessage, retmeta) = self.plugin.onMessage(self.good_event, {})
+        assert 'apiversion' not in retmessage['details']
+        assert 'apiversion' in retmessage['details']['some.aws.amazon.com']
+        assert retmessage['details']['some.aws.amazon.com']['apiversion'] == "2015-12-01"
 
-    def test_description(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'description': 'astringvalue',
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'description': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_filter(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'filter': 'astringvalue',
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'filter': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_role(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'role': 'astringvalue',
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'role': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_additionaleventdata(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'additionaleventdata': 'astringvalue',
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'additionaleventdata': {
-                    'raw_value': 'astringvalue',
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_additionaleventdata_int(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'additionaleventdata': 1,
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'additionaleventdata': {
-                    'raw_value': '1',
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_serviceeventdetails(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'serviceeventdetails': 'astringvalue',
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'serviceeventdetails': {
-                    'raw_value': 'astringvalue',
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_rule(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'rule': 'astringvalue',
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'rule': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_subnets(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'subnets': 'astringvalue',
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'subnets': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_endpoint(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'endpoint': 'astringvalue',
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'endpoint': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_ebs_optimized(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'ebsoptimized': 'astringvalue',
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'ebsoptimized': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_securityGroups(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'securitygroups': 'astringvalue',
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'securitygroups': {
-                        'raw_value': 'astringvalue',
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_disableApiTermination(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'disableapitermination': 'astringvalue'
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'requestparameters': {
-                    'disableapitermination': {
-                        'raw_value': 'astringvalue'
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_responseelements_lastModified(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'lastmodified': 'astringvalue'
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'lastmodified': {
-                        'raw_value': 'astringvalue'
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
-
-    def test_unusual(self):
-        msg = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'findings': {
-                        'service': {
-                            'additionalinfo': {
-                                'unusual': 'astringvalue'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
-
-        expected_message = {
-            'source': 'cloudtrail',
-            'details': {
-                'responseelements': {
-                    'findings': {
-                        'service': {
-                            'additionalinfo': {
-                                'unusual': {
-                                    'raw_value': 'astringvalue'
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        assert retmessage == expected_message
-        assert retmeta == {}
+    def test_requestparameters_moved(self):
+        (retmessage, retmeta) = self.plugin.onMessage(self.good_event, {})
+        assert 'requestparameters' not in retmessage['details']
+        assert 'requestparameters' in retmessage['details']['some.aws.amazon.com']
+        assert retmessage['details']['some.aws.amazon.com']['requestparameters'] == {"somekey": "somevalue"}
