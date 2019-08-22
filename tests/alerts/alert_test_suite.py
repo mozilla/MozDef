@@ -29,7 +29,7 @@ def mock_add_hostname_to_ip(ip):
 class AlertTestSuite(UnitTestSuite):
     def teardown(self):
         os.chdir(self.orig_path)
-        super(AlertTestSuite, self).teardown()
+        super().teardown()
         sys.path.remove(self.alerts_path)
         sys.path.remove(self.alerts_lib_path)
         if 'lib' in sys.modules:
@@ -37,7 +37,7 @@ class AlertTestSuite(UnitTestSuite):
 
     def setup(self):
         self.orig_path = os.getcwd()
-        super(AlertTestSuite, self).setup()
+        super().setup()
         self.alerts_path = os.path.join(os.path.dirname(__file__), "../../alerts")
         self.alerts_lib_path = os.path.join(os.path.dirname(__file__), "../../alerts/lib")
         sys.path.insert(0, self.alerts_path)

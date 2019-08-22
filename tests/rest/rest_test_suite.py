@@ -30,4 +30,4 @@ class RestTestSuite(HTTPTestSuite):
         importlib.reload(plugins)
         from rest import index as rest_index
         self.application = rest_index.application
-        super(RestTestSuite, self).setup()
+        super().setup()

@@ -42,7 +42,7 @@ class TestHostnameFromIP(AlertTaskTest):
 
 class TestAddHostnameToIP(AlertTaskTest):
     def setup(self):
-        super(TestAddHostnameToIP, self).setup()
+        super().setup()
         self.formatted_string = '{0} ({1})'
 
     def test_internal_hostname(self):
