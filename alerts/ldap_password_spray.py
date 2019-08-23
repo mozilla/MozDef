@@ -45,5 +45,7 @@ class AlertLdapPasswordSpray(AlertTask):
             aggreg['value'],
             ",".join(sorted(email_list)[:10])
         )
+        if len(email_list) >= 10:
+            summary += '...'
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)
