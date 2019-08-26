@@ -31,7 +31,6 @@ class TestEsworkerSNSSQS(UnitTestSuite):
                 "esbulksize": 0,
                 "mozdefhostname": "unittest.hostname",
                 "taskexchange": task_queue,
-                'plugincheckfrequency': 120,
             }
         )
         if 'lib' in sys.modules:
