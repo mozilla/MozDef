@@ -125,15 +125,15 @@ def process_alerts(mozmsg, uptycs_alerts):
 
 
 def main():
-    mozmsg = mozdef.MozDefEvent(options.MOZDEF_URL)
+    mozmsg = mozdef.MozDefEvent(options.mozdef_url)
     mozmsg.tags = ["uptycs"]
     mozmsg.set_category("uptycs")
     mozmsg.source = "UptycsAPI"
     if options.DEBUG:
-        mozmsg.debug = options.DEBUG
+        mozmsg.debug = options.debug
         mozmsg.set_send_to_syslog(True, only_syslog=True)
 
-    client = UptycsClient(options.UPTYCS_API_JSON_FILE)
+    client = UptycsClient(options.uptycs_api_json_file)
 
     # Adjust the filter as needed to set proper search window
     filter = UptycsFilter()
@@ -144,9 +144,10 @@ def main():
         state = pickle.load(open(options.statepath, 'rb'))
         filter.start_time = state["last_run"]
         last_alert_ids = state["last_alert_ids"]
+    # Otherwise, we pick from a boostrap time window
     else:
         last_alert_ids = []
-        filter.start_time = utc_now - datetime.timedelta(days=2)
+        filter.start_time = utc_now - datetime.timedelta(days=int(options.bootstrap_search_depth))
 
     filter.end_time = utc_now
 
@@ -173,6 +174,7 @@ def main():
 def initConfig():
     options.uptycs_api_json_file = getConfig("uptycs_api_json_file", "", options.configfile)
     options.mozdef_url = getConfig("mozdef_url", "", options.configfile)
+    options.bootstrap_search_depth = getConfig("bootstrap_search_depth", "", options.configfile)
     options.debug = getConfig("debug", True, options.configfile)
     options.statepath = getConfig("statepath", "", options.configfile)
 
