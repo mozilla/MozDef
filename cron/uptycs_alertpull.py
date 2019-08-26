@@ -171,9 +171,9 @@ def main():
 
 
 def initConfig():
-    options.UPTYCS_API_JSON_FILE = getConfig("UPTYCS_API_JSON_FILE", "", options.configfile)
-    options.MOZDEF_URL = getConfig("MOZDEF_URL", "", options.configfile)
-    options.DEBUG = getConfig("DEBUG", True, options.configfile)
+    options.uptycs_api_json_file = getConfig("uptycs_api_json_file", "", options.configfile)
+    options.mozdef_url = getConfig("mozdef_url", "", options.configfile)
+    options.debug = getConfig("debug", True, options.configfile)
     options.statepath = getConfig("statepath", "", options.configfile)
 
 
