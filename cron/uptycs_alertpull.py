@@ -108,8 +108,6 @@ def normalize(details):
 def process_alerts(mozmsg, uptycs_alerts):
     for alert in uptycs_alerts:
         details = {}
-        # Timestamp format: http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
-        # Duo logs come as a UTC timestamp
         dt = datetime.utcfromtimestamp(alert["alertTime"])
         mozmsg.timestamp = dt.replace(tzinfo=utc).isoformat()
 
@@ -169,7 +167,7 @@ def main():
         "last_run": filter.end_time,
         "last_alert_ids": alert_ids,
     }
-    pickle.dump(state, open("poc.state", "wb"))
+    pickle.dump(state, open(options.statepath, "wb"))
 
 
 def initConfig():
