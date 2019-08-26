@@ -24,6 +24,8 @@ except ImportError:
             return timedelta(0)
 
     utc = UTC()
+
+from mozdef_util.utilities.logger import logger
 from configlib import getConfig, OptionParser
 import json
 import mozdef_client as mozdef
@@ -39,8 +41,6 @@ class UptycsFilter(object):
         self.start_time = utc_now - datetime.timedelta(days=2)
         self.end_time = utc_now
         self.sort_style = 'alertTime:desc'
-        self.limit = 100
-        self.offset = 0
 
     def filter_string(self):
         return json.dumps({
@@ -84,7 +84,7 @@ class UptycsClient(object):
                     [requests.codes.ok, requests.codes.bad]):
                 return response.json()
         except requests.exceptions.RequestException as e:
-            print("ERROR: {}".format(e))
+            logger.exception(e)
 
     def alerts(self, filter, sort='alertTime:desc&limit'):
         path = '/alerts?filters=' + filter.filter_string() + "&sort=" + sort
