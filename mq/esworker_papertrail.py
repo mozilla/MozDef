@@ -225,7 +225,7 @@ class taskConsumer(object):
         self.ptrequestor = ptRequestor
         self.esConnection = esConnection
         # calculate our initial request window
-        self.lastRequestTime = toUTC(datetime.now()) - timedelta(seconds=options.ptinterval) - \
+        self.lastRequestTime = toUTC(datetime.now()) - timedelta(seconds=options.sleep_time) - \
             timedelta(seconds=options.ptbackoff)
 
     def run(self):
@@ -263,7 +263,7 @@ class taskConsumer(object):
                     # process message
                     self.on_message(event, msgdict)
 
-                time.sleep(options.ptinterval)
+                time.sleep(options.sleep_time)
 
             except ValueError as e:
                 logger.exception('Exception while handling message: %r' % e)
@@ -376,17 +376,12 @@ def initConfig():
     # papertrail configuration
     options.ptapikey = getConfig('papertrailapikey', 'none', options.configfile)
     options.ptquery = getConfig('papertrailquery', '', options.configfile)
-    options.ptinterval = getConfig('papertrailinterval', 60, options.configfile)
     options.ptbackoff = getConfig('papertrailbackoff', 300, options.configfile)
     options.ptacctname = getConfig('papertrailaccount', 'unset', options.configfile)
     options.ptquerymax = getConfig('papertrailmaxevents', 2000, options.configfile)
 
-    # plugin options
-    # secs to pass before checking for new/updated plugins
-    # seems to cause memory leaks..
-    # regular updates are disabled for now,
-    # though we set the frequency anyway.
-    options.plugincheckfrequency = getConfig('plugincheckfrequency', 120, options.configfile)
+    # How long to sleep between polling
+    options.sleep_time = getConfig('sleep_time', 60, options.configfile)
 
 
 if __name__ == '__main__':

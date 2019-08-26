@@ -8,7 +8,7 @@ from tests.unit_test_suite import UnitTestSuite
 
 class BulkQueueTest(UnitTestSuite):
     def setup(self):
-        super(BulkQueueTest, self).setup()
+        super().setup()
 
     def num_objects_saved(self):
         self.refresh(self.event_index_name)
@@ -21,7 +21,7 @@ class BulkQueueTest(UnitTestSuite):
 class TestBasicInit(BulkQueueTest):
 
     def setup(self):
-        super(TestBasicInit, self).setup()
+        super().setup()
         self.queue = BulkQueue(self.es_client)
 
     def test_threshold(self):
@@ -44,7 +44,7 @@ class TestInitWithThreshold(BulkQueueTest):
 class TestAdd(BulkQueueTest):
 
     def setup(self):
-        super(TestAdd, self).setup()
+        super().setup()
         self.queue = BulkQueue(self.es_client, threshold=20)
 
     def test_basic_add(self):

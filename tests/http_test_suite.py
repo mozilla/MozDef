@@ -7,7 +7,7 @@ class HTTPTestSuite(UnitTestSuite):
 
     def setup(self):
         self.app = TestApp(self.application)
-        super(HTTPTestSuite, self).setup()
+        super().setup()
 
     def response_per_route(self, route):
         return self.app.get(route)

@@ -19,9 +19,10 @@ import sys
 class TestEsworkerSNSSQS(UnitTestSuite):
     def teardown(self):
         sys.path.remove(self.mq_path)
+        super().teardown()
 
     def setup(self):
-        super(TestEsworkerSNSSQS, self).setup()
+        super().setup()
         mq_conn = 'abc'
         task_queue = 'example-logs-mozdef'
         es_connection = self.es_client
@@ -30,7 +31,6 @@ class TestEsworkerSNSSQS(UnitTestSuite):
                 "esbulksize": 0,
                 "mozdefhostname": "unittest.hostname",
                 "taskexchange": task_queue,
-                'plugincheckfrequency': 120,
             }
         )
         if 'lib' in sys.modules:
