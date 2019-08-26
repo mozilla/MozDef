@@ -216,7 +216,7 @@ class taskConsumer(object):
 
                     # delete message from queue
                     msg.delete()
-                time.sleep(.1)
+                time.sleep(options.sleep_time)
 
             except ValueError as e:
                 logger.exception('Exception while handling message: %r' % e)
@@ -370,6 +370,9 @@ def initConfig():
     options.accesskey = getConfig('accesskey', '', options.configfile)
     options.secretkey = getConfig('secretkey', '', options.configfile)
     options.region = getConfig('region', '', options.configfile)
+
+    # How long to sleep between polling
+    options.sleep_time = getConfig('sleep_time', 0.1, options.configfile)
 
 
 if __name__ == '__main__':

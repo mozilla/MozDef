@@ -63,7 +63,7 @@ class taskConsumer(object):
                         logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
                         msg.delete()
                         continue
-                time.sleep(.1)
+                time.sleep(options.sleep_time)
             except (SSLEOFError, SSLError, socket.error):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
@@ -219,6 +219,9 @@ def initConfig():
     options.accesskey = getConfig('accesskey', '', options.configfile)
     options.secretkey = getConfig('secretkey', '', options.configfile)
     options.region = getConfig('region', '', options.configfile)
+
+    # How long to sleep between polling
+    options.sleep_time = getConfig('sleep_time', 0.1, options.configfile)
 
 
 if __name__ == '__main__':
