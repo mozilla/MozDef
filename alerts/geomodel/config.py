@@ -37,7 +37,6 @@ class Config(NamedTuple):
     '''The top-level configuration type.
     '''
 
-    elasticsearch_address: str
     localities: Localities
     events: List[Events]
     whitelist: Whitelist
