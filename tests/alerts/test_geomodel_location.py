@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 
 from freezegun import freeze_time
 
+from mozdef_util.uilities.toUTC import toUTC
+
 from tests.alerts.alert_test_suite import AlertTestSuite
 from tests.alerts.negative_alert_test_case import NegativeAlertTestCase
 from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
@@ -106,7 +108,7 @@ class TestAlertGeoModel(AlertTestSuite):
                     'sourceipaddress': '4.3.2.1',
                     'city': 'San Francisco',
                     'country': 'US',
-                    'lastaction': datetime.utcnow() - timedelta(minutes=16),
+                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=16),
                     'latitude': 37.773972,
                     'longitude': -122.431297,
                     'radius': 50
@@ -117,7 +119,7 @@ class TestAlertGeoModel(AlertTestSuite):
                     'sourceipaddress': '2.4.8.16',
                     'city': 'Toronto',
                     'country': 'CA',
-                    'lastaction': datetime.utcnow() - timedelta(hours=50),
+                    'lastaction': toUTC(datetime.now()) - timedelta(hours=50),
                     'latitude': 43.6529,
                     'longitude': -79.3849,
                     'radius': 50

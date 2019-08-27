@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import pytz
 from typing import Optional
 
+from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.query_models import SearchQuery
 
 import alerts.geomodel.config as config
@@ -20,10 +21,6 @@ def query_interface(results: locality.Entry) -> locality.QueryInterface:
     return closure
 
 
-def _now() -> datetime:
-    return datetime.utcnow().replace(tzinfo=pytz.UTC)
-
-
 class TestLocalityElasticSearch(UnitTestSuite):
     '''Tests for the `locality` module that interact with ES.
     '''
@@ -38,7 +35,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
                         'sourceipaddress': '1.2.3.4',
                         'city': 'Toronto',
                         'country': 'CA',
-                        'lastaction': _now(),
+                        'lastaction': toUTC(datetime.now()),
                         'latitude': 43.6529,
                         'longitude': -79.3849,
                         'radius': 50
@@ -69,7 +66,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
                     sourceipaddress='1.2.3.4',
                     city='Toronto',
                     country='CA',
-                    lastaction=_now() - timedelta(days=3),
+                    lastaction=toUTC(datetime.now()) - timedelta(days=3),
                     latitude=43.6529,
                     longitude=-79.3849,
                     radius=50),
@@ -77,7 +74,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
                     sourceipaddress='32.64.128.255',
                     city='Berlin',
                     country='DE',
-                    lastaction=_now() - timedelta(minutes=30),
+                    lastaction=toUTC(datetime.now()) - timedelta(minutes=30),
                     latitude=52.520008,
                     longitude=13.404954,
                     radius=50)
@@ -106,7 +103,7 @@ class TestLocality:
                 sourceipaddress='1.2.3.4',
                 city='Toronto',
                 country='CA',
-                lastaction=_now() - timedelta(days=3),
+                lastaction=toUTC(datetime.now()) - timedelta(days=3),
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50)
@@ -117,7 +114,7 @@ class TestLocality:
                 sourceipaddress='1.2.3.4',
                 city='Toronto',
                 country='CA',
-                lastaction=_now() - timedelta(minutes=30),
+                lastaction=toUTC(datetime.now()) - timedelta(minutes=30),
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50)
@@ -126,7 +123,7 @@ class TestLocality:
         update = locality.update(from_es, from_events)
 
         last_action = update.state.localities[0].lastaction
-        hour_ago = _now() - timedelta(hours=1)
+        hour_ago = toUTC(datetime.now()) - timedelta(hours=1)
 
         assert update.did_update
         assert update.state.username == 'user1'
@@ -138,7 +135,7 @@ class TestLocality:
                 sourceipaddress='1.2.3.4',
                 city='Toronto',
                 country='CA',
-                lastaction=_now() - timedelta(days=3),
+                lastaction=toUTC(datetime.now()) - timedelta(days=3),
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50)
@@ -149,7 +146,7 @@ class TestLocality:
                 sourceipaddress='32.64.128.255',
                 city='Berlin',
                 country='DE',
-                lastaction=_now() - timedelta(minutes=30),
+                lastaction=toUTC(datetime.now()) - timedelta(minutes=30),
                 latitude=52.520008,
                 longitude=13.404954,
                 radius=50)
@@ -167,7 +164,7 @@ class TestLocality:
                 sourceipaddress='32.64.128.255',
                 city='Berlin',
                 country='DE',
-                lastaction=_now() - timedelta(days=10),
+                lastaction=toUTC(datetime.now()) - timedelta(days=10),
                 latitude=52.520008,
                 longitude=13.404954,
                 radius=50),
@@ -175,7 +172,7 @@ class TestLocality:
                 sourceipaddress='1.2.3.4',
                 city='Toronto',
                 country='CA',
-                lastaction=_now() - timedelta(days=3),
+                lastaction=toUTC(datetime.now()) - timedelta(days=3),
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50)
@@ -197,7 +194,7 @@ class TestLocality:
                 sourceipaddress='32.64.128.255',
                 city='Berlin',
                 country='DE',
-                lastaction=_now() - timedelta(days=10),
+                lastaction=toUTC(datetime.now()) - timedelta(days=10),
                 latitude=52.520008,
                 longitude=13.404954,
                 radius=50))
@@ -247,7 +244,7 @@ class TestLocality:
 
         loc = locality.from_event(test_event)
 
-        assert loc.lastaction < _now()
+        assert loc.lastaction < toUTC(datetime.now())
 
     def test_from_event_parses_valid_timestamp(self):
         test_event = {

@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from mozdef_util.utilities.toUTC import toUTC
+
 from alerts.geomodel.alert import alert
 import alerts.geomodel.config as config
 import alerts.geomodel.locality as locality
@@ -24,7 +26,7 @@ class TestAlert:
                 sourceipaddress='1.2.3.123',
                 city='Toronto',
                 country='CA',
-                lastaction=datetime.utcnow() - timedelta(minutes=5),
+                lastaction=toUTC(datetime.now()) - timedelta(minutes=5),
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50)
@@ -41,7 +43,7 @@ class TestAlert:
                 sourceipaddress='1.2.3.123',
                 city='Toronto',
                 country='CA',
-                lastaction=datetime.utcnow() - timedelta(minutes=5),
+                lastaction=toUTC(datetime.now()) - timedelta(minutes=5),
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50),
@@ -49,7 +51,7 @@ class TestAlert:
                 sourceipaddress='123.3.2.1',
                 city='San Francisco',
                 country='US',
-                lastaction=datetime.utcnow() - timedelta(hours=10),
+                lastaction=toUTC(datetime.now()) - timedelta(hours=10),
                 latitude=37.773972,
                 longitude=-122.431297,
                 radius=50)
@@ -66,7 +68,7 @@ class TestAlert:
                 sourceipaddress='1.2.3.123',
                 city='Toronto',
                 country='CA',
-                lastaction=datetime.utcnow() - timedelta(minutes=5),
+                lastaction=toUTC(datetime.now()) - timedelta(minutes=5),
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50),
@@ -74,7 +76,7 @@ class TestAlert:
                 sourceipaddress='123.3.2.1',
                 city='San Francisco',
                 country='US',
-                lastaction=datetime.utcnow() - timedelta(hours=1),
+                lastaction=toUTC(datetime.now()) - timedelta(hours=1),
                 latitude=37.773972,
                 longitude=-122.431297,
                 radius=50)

@@ -1,4 +1,3 @@
-from datetime import datetime
 import math
 from operator import attrgetter
 from typing import List, NamedTuple, Optional

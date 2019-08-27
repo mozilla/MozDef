@@ -3,6 +3,7 @@ import pytz
 from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient as ESClient
+from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.query_models import SearchQuery, TermMatch
 
 
@@ -147,7 +148,7 @@ def from_event(
     if source_ip is None or geo_data is None:
         return None
 
-    now = datetime.strftime(datetime.utcnow(), '%Y-%m-%dT%H:%M:%S.%f+00:00')
+    now = toUTC(datetime.now()).isoformat()
     active_time_str = _source.get('utctimestamp', now)
     active_time = _parse_datetime(active_time_str)
 
@@ -217,7 +218,7 @@ def remove_outdated(state: State, days_valid: int) -> Update:
     some number of days ago.
     '''
 
-    now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+    now = toUTC(datetime.now())
     last_valid_date = now - timedelta(days=days_valid)
 
     new_localities = [
