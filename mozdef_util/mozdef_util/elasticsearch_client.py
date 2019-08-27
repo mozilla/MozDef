@@ -3,7 +3,7 @@ import json
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 from elasticsearch.exceptions import NotFoundError
-from elasticsearch.helpers import bulk, BulkIndexError
+from elasticsearch.helpers import bulk, BulkIndexError, RequestError
 
 from .query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
 from .bulk_queue import BulkQueue
@@ -128,7 +128,7 @@ class ElasticsearchClient():
             document['_type'] = DOCUMENT_TYPE
         try:
             bulk(self.es_connection, documents)
-        except BulkIndexError as e:
+        except (BulkIndexError, RequestError) as e:
             logger.error("Error bulk indexing: " + str(e))
 
     def finish_bulk(self):
