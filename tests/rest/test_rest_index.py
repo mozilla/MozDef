@@ -46,12 +46,12 @@ class TestKibanaDashboardsRoute(RestTestSuite):
         return self.es_client.save_object(body=dashboardjson, index='.kibana', doc_id=dashid)
 
     def teardown(self):
-        super(TestKibanaDashboardsRoute, self).teardown()
+        super().teardown()
         if self.config_delete_indexes:
             self.es_client.delete_index('.kibana', True)
 
     def setup(self):
-        super(TestKibanaDashboardsRoute, self).setup()
+        super().setup()
         if self.config_delete_indexes:
             self.es_client.delete_index('.kibana', True)
             self.es_client.create_index('.kibana')
@@ -84,14 +84,14 @@ class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
     status_code = 200
 
     def setup(self):
-        super(TestKibanaDashboardsRouteWithoutDashboards, self).setup()
+        super().setup()
         if self.config_delete_indexes:
             self.es_client.delete_index('.kibana', True)
             self.es_client.create_index('.kibana')
         time.sleep(0.2)
 
     def teardown(self):
-        super(TestKibanaDashboardsRouteWithoutDashboards, self).teardown()
+        super().teardown()
         if self.config_delete_indexes:
             self.es_client.delete_index('.kibana', True)
 
@@ -110,7 +110,7 @@ class TestLoginCountsRoute(RestTestSuite):
     status_code = 200
 
     def setup(self):
-        super(TestLoginCountsRoute, self).setup()
+        super().setup()
 
         # ttesterson test events
         for count in range(10):

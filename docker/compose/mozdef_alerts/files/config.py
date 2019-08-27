@@ -8,6 +8,7 @@
 from celery.schedules import crontab, timedelta
 import time
 import logging
+import os
 
 ALERTS = {
     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
@@ -32,13 +33,18 @@ RABBITMQ = {
     'alertqueue': 'mozdef.alert'
 }
 
+es_server = "http://elasticsearch:9200"
+
+if os.getenv('OPTIONS_ESSERVERS'):
+    es_server = os.getenv('OPTIONS_ESSERVERS')
+
 ES = {
-    'servers': ['http://elasticsearch:9200']
+    'servers': [es_server]
 }
 
-OPTIONS = {
-    'defaulttimezone': 'UTC',
-}
+RESTAPI_URL = "http://rest:8081"
+# Leave empty for no auth
+RESTAPI_TOKEN = ""
 
 LOGGING = {
     'version': 1,
@@ -69,7 +75,7 @@ LOGGING = {
     'loggers': {
         'celery': {
             'handlers': ['celery', 'console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     }
 }

@@ -16,4 +16,4 @@ class LoginputTestSuite(HTTPTestSuite):
         OptionParser.parse_args = mock.Mock(return_value=(sample_config, {}))
         from loginput import index as loginput_index
         self.application = loginput_index.application
-        super(LoginputTestSuite, self).setup()
+        super().setup()

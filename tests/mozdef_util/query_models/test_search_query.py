@@ -10,7 +10,7 @@ from tests.unit_test_suite import UnitTestSuite
 class SearchQueryUnitTest(UnitTestSuite):
 
     def setup(self):
-        super(SearchQueryUnitTest, self).setup()
+        super().setup()
         self.query = SearchQuery()
         assert self.query.must == []
         assert self.query.must_not == []

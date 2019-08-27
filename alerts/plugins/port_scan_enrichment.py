@@ -186,7 +186,7 @@ def enrich(alert, search_fn, search_window, max_connections):
         TermMatch('source', 'conn'),
         TermMatch(
             'details.sourceipaddress',
-            alert['details']['sourceipaddress'])
+            alert['events'][0]['documentsource']['details']['sourceipaddress'])
     ])
 
     results = search_fn(search_query)
@@ -196,7 +196,9 @@ def enrich(alert, search_fn, search_window, max_connections):
         for hit in results.get('hits', [])
     ]
 
-    alert['details']['recentconnections'] = []
+    alert['details'] = {
+        'recentconnections': []
+    }
 
     for event in take(events, max_connections):
         alert['details']['recentconnections'].append({

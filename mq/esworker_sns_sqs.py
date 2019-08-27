@@ -63,7 +63,7 @@ class taskConsumer(object):
                         logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
                         msg.delete()
                         continue
-                time.sleep(.1)
+                time.sleep(options.sleep_time)
             except (SSLEOFError, SSLError, socket.error):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
@@ -220,12 +220,8 @@ def initConfig():
     options.secretkey = getConfig('secretkey', '', options.configfile)
     options.region = getConfig('region', '', options.configfile)
 
-    # plugin options
-    # secs to pass before checking for new/updated plugins
-    # seems to cause memory leaks..
-    # regular updates are disabled for now,
-    # though we set the frequency anyway.
-    options.plugincheckfrequency = getConfig('plugincheckfrequency', 120, options.configfile)
+    # How long to sleep between polling
+    options.sleep_time = getConfig('sleep_time', 0.1, options.configfile)
 
 
 if __name__ == '__main__':
