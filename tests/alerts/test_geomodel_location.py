@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from freezegun import freeze_time
 
-from mozdef_util.uilities.toUTC import toUTC
+from mozdef_util.utilities.toUTC import toUTC
 
 from tests.alerts.alert_test_suite import AlertTestSuite
 from tests.alerts.negative_alert_test_case import NegativeAlertTestCase

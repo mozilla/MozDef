@@ -24,7 +24,7 @@ _DEFAULT_SUMMARY = 'Authenticated action taken by a user outside of any of '\
 
 _CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
-    'geomodel_alert.json')
+    'geomodel_location.json')
 
 
 class AlertGeoModel(AlertTask):
@@ -112,6 +112,11 @@ class AlertGeoModel(AlertTask):
             cfg = json.load(cfg_file)
 
             cfg['localities'] = config.Localities(**cfg['localities'])
+
+            cfg['events'] = [
+                config.Events(**evt_cfg)
+                for evt_cfg in cfg['events']
+            ]
 
             cfg['whitelist'] = config.Whitelist(**cfg['whitelist'])
 

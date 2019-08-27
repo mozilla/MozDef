@@ -1,5 +1,4 @@
 {
-  "elasticsearch_address": "",
   "localities": {
     "es_index": "localities",
     "valid_duration_days": 1,

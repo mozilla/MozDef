@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import pytz
 from typing import Optional
 
 from mozdef_util.utilities.toUTC import toUTC

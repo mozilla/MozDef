@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import pytz
 from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient as ESClient

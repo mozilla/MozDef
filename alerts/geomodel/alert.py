@@ -1,6 +1,6 @@
 import math
 from operator import attrgetter
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple, Optional
 
 import netaddr
 
