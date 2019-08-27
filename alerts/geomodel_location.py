@@ -100,7 +100,7 @@ class AlertGeoModel(AlertTask):
     def _process(self, cfg: config.Config, qindex: int):
         evt_cfg = cfg.events[qindex]
 
-        search = SearchQuery(minutes=evt_cfg.search_window.minutes)
+        search = SearchQuery(**evt_cfg.search_window)
         search.add_must(QSMatch(evt_cfg.lucene_query))
 
         self.filtersManual(search)
@@ -112,10 +112,6 @@ class AlertGeoModel(AlertTask):
             cfg = json.load(cfg_file)
 
             cfg['localities'] = config.Localities(**cfg['localities'])
-
-            for i, event in enumerate(cfg['events']):
-                cfg['events'][i]['search_window'] = config.SearchWindow(
-                    **cfg['events'][i]['search_window'])
 
             cfg['events'] = [config.Events(**dat) for dat in cfg['events']]
 

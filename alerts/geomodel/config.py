@@ -12,20 +12,12 @@ class Localities(NamedTuple):
     radius_kilometres: float
 
 
-class SearchWindow(NamedTuple):
-    '''Contains parameters that specify the window of time to search for
-    events in.
-    '''
-
-    minutes: int
-
-
 class Events(NamedTuple):
     '''Contains configuration required to query for events in ElasticSearch.
     '''
 
     es_index: str
-    search_window: SearchWindow
+    search_window: dict
     lucene_query: str
     username_path: str
 
