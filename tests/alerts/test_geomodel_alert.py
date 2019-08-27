@@ -9,12 +9,6 @@ from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
 import alerts.geomodel.locality as geomodel
 
 
-def _now() -> str:
-    now = datetime.utcnow()
-
-    return datetime.strftime(now, '%Y-%m-%dT%H:%M:%S.%f%z')
-
-
 class TestAlertGeoModel(AlertTestSuite):
     alert_filename = 'geomodel_alert'
 
@@ -31,7 +25,6 @@ class TestAlertGeoModel(AlertTestSuite):
     default_event = {
         '_source': {
             'sourceipaddress': '1.2.3.4',
-            'utctimestamp': _now,
             'sourceipgeolocation': {
                 'city': 'Toronto',
                 'country_code': 'CA',
