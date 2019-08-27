@@ -19,6 +19,9 @@ import alerts.geomodel.config as config
 import alerts.geomodel.locality as locality
 
 
+_DEFAULT_SUMMARY = 'Authenticated action taken by a user outside of any of '\
+    'their known localities.'
+
 _CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
     'geomodel_alert.json')
@@ -78,9 +81,9 @@ class AlertGeoModel(AlertTask):
         if new is not None:
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict = self.createAlertDict(
-                new.summary,
-                new.category,
-                new.tags,
+                _DEFAULT_SUMMARY,
+                'geomodel',
+                ['geomodel'],
                 events,
                 'WARNING')
 

@@ -13,9 +13,6 @@ _AIR_TRAVEL_SPEED = 1000.0  # km/h
 
 _EARTH_RADIUS = 6373.0  # km # approximate
 
-_DEFAULT_SUMMARY = 'Authenticated action taken by a user outside of any of '\
-    'their known localities.'
-
 # TODO: Switch to dataclasses when we move to Python3.7+
 
 
@@ -34,35 +31,9 @@ class Alert(NamedTuple):
     '''A container for the data the alerts output by GeoModel contain.
     '''
 
-    source: str
-    category: str
-    type_: str
     username: str
     sourceipaddress: str
-    timestamp: datetime
     origin: Origin
-    tags: List[str]
-    summary: str
-
-    def new(
-        username: str,
-        sourceip: str,
-        origin: Origin,
-        summary: str = _DEFAULT_SUMMARY
-    ) -> 'Alert':
-        '''Produce a new `Alert` with default values filled.
-        '''
-
-        return Alert(
-            source='geomodel',
-            category='geomodel',
-            type_='geomodel',
-            username=username,
-            sourceipaddress=sourceip,
-            timestamp=datetime.utcnow(),
-            origin=origin,
-            tags=['geomodel'],
-            summary=summary)
 
 
 def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
@@ -128,8 +99,6 @@ def alert(user_state: State, whitelist: Whitelist) -> Optional[Alert]:
     )
 
     geo = '{0},{1}'.format(lat, lon)
+    origin = Origin(city, country, lat, lon, geo)
 
-    return Alert.new(
-        user_state.username,
-        ip,
-        Origin(city, country, lat, lon, geo))
+    return Alert(user_state.username, ip, origin)
