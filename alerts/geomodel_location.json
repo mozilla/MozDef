@@ -7,7 +7,6 @@
   },
   "events": [
     {
-      "es_index": "events-*",
       "search_window": {
         "minutes": 5
       },

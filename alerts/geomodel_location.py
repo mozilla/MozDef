@@ -113,8 +113,6 @@ class AlertGeoModel(AlertTask):
 
             cfg['localities'] = config.Localities(**cfg['localities'])
 
-            cfg['events'] = [config.Events(**dat) for dat in cfg['events']]
-
             cfg['alerts']['whitelist'] = config.Whitelist(
                 **cfg['alerts']['whitelist'])
             cfg['alerts'] = config.Alerts(**cfg['alerts'])

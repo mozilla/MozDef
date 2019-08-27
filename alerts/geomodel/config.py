@@ -16,7 +16,6 @@ class Events(NamedTuple):
     '''Contains configuration required to query for events in ElasticSearch.
     '''
 
-    es_index: str
     search_window: dict
     lucene_query: str
     username_path: str
