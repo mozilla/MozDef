@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import pytz
 from typing import Optional
-import unittest
 
 from mozdef_util.query_models import SearchQuery
 
@@ -97,7 +96,7 @@ class TestLocalityElasticSearch(UnitTestSuite):
         assert entry.state.username == 't1'
 
 
-class TestLocality(unittest.TestCase):
+class TestLocality:
     '''unit tests for the `locality` module.
     '''
 

@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
-import unittest
 
 from alerts.geomodel.alert import alert
 import alerts.geomodel.config as config
 import alerts.geomodel.locality as locality
 
 
-class TestAlert(unittest.TestCase):
+class TestAlert:
     '''Unit tests for alert generation.
     '''
 
