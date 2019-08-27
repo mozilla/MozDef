@@ -2,8 +2,8 @@ import json
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
-from elasticsearch.exceptions import NotFoundError
-from elasticsearch.helpers import bulk, BulkIndexError, RequestError
+from elasticsearch.exceptions import NotFoundError, RequestError
+from elasticsearch.helpers import bulk, BulkIndexError
 
 from .query_models import SearchQuery, TermMatch, AggregatedResults, SimpleResults
 from .bulk_queue import BulkQueue
