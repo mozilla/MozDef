@@ -114,7 +114,7 @@ def wrap_query(client: ESClient) -> QueryInterface:
                 # Convert dictionary localities into `Locality`s after
                 # parsing the `datetime` from `lastaction`.
                 Locality(**_dict_take({
-                    k: v if k != 'lastaction' else _parse_datetime(v)
+                    k: v if k != 'lastaction' else toUTC(v)
                     for k, v in loc.items()
                 }, Locality._fields))
                 for loc in state_dict['localities']
@@ -150,7 +150,7 @@ def from_event(
 
     now = toUTC(datetime.now()).isoformat()
     active_time_str = _source.get('utctimestamp', now)
-    active_time = _parse_datetime(active_time_str)
+    active_time = toUTC(active_time_str)
 
     (city, country, lat, lon) = (
         geo_data.get('city'),
@@ -230,27 +230,3 @@ def remove_outdated(state: State, days_valid: int) -> Update:
     return Update(
         state=State(state.type_, state.username, new_localities),
         did_update=len(new_localities) != len(state.localities))
-
-
-def _parse_datetime(datetime_str):
-    parsers = [
-        lambda s: datetime.strptime(
-            ''.join(s.rsplit(':', 1)),
-            '%Y-%m-%dT%H:%M:%S%z'),
-        lambda s: datetime.strptime(
-            ''.join(s.rsplit(':', 1)),
-            '%Y-%m-%dT%H:%M:%S.%f%z'),
-        lambda s: datetime.strptime(s, '%Y-%m-%dT%H:%M:%S%z'),
-        lambda s: datetime.strptime(s, '%Y-%m-%dT%H:%M:%S.%f%z'),
-        lambda s: datetime.strptime(s, '%Y-%m-%dT%H:%M:%S'),
-        lambda s: datetime.strptime(s, '%Y-%m-%dT%H:%M:%S.%f')
-    ]
-
-    for parser in parsers:
-        try:
-            return parser(datetime_str).replace(tzinfo=pytz.UTC)
-        except ValueError:
-            continue
-
-    raise ValueError(
-        'Unexpected datetime string format: {}'.format(datetime_str))
