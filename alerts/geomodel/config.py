@@ -33,15 +33,6 @@ class Whitelist(NamedTuple):
     cidrs: List[str]
 
 
-class Alerts(NamedTuple):
-    '''Contains configuration required to generate and store alerts in
-    ElasticSearch.
-    '''
-
-    es_index: str
-    whitelist: Whitelist
-
-
 class Config(NamedTuple):
     '''The top-level configuration type.
     '''
@@ -49,4 +40,4 @@ class Config(NamedTuple):
     elasticsearch_address: str
     localities: Localities
     events: List[Events]
-    alerts: Alerts
+    whitelist: Whitelist

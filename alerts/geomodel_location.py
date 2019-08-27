@@ -76,7 +76,7 @@ class AlertGeoModel(AlertTask):
 
             journal(entry, cfg.localities.es_index)
 
-        new = alert.alert(entry.state, cfg.alerts.whitelist)
+        new = alert.alert(entry.state, cfg.whitelist)
 
         if new is not None:
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
@@ -113,8 +113,6 @@ class AlertGeoModel(AlertTask):
 
             cfg['localities'] = config.Localities(**cfg['localities'])
 
-            cfg['alerts']['whitelist'] = config.Whitelist(
-                **cfg['alerts']['whitelist'])
-            cfg['alerts'] = config.Alerts(**cfg['alerts'])
+            cfg['whitelist'] = config.Whitelist(**cfg['whitelist'])
 
             return config.Config(**cfg)

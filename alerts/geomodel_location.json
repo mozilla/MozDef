@@ -14,11 +14,8 @@
       "username_path": "details.username"
     }
   ],
-  "alerts": {
-    "es_index": "alerts-*",
-    "whitelist": {
-      "users": [],
-      "cidrs": []
-    }
+  "whitelist": {
+    "users": [],
+    "cidrs": []
   }
 }
