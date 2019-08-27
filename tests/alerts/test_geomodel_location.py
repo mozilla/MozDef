@@ -10,7 +10,7 @@ import alerts.geomodel.locality as geomodel
 
 
 class TestAlertGeoModel(AlertTestSuite):
-    alert_filename = 'geomodel_alert'
+    alert_filename = 'geomodel_location'
 
     # The test cases described herein depend on some locality state being
     # present before the tests run.
