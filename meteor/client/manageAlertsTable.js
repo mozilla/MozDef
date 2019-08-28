@@ -30,7 +30,7 @@ if ( Meteor.isClient ) {
             id = $( e.target ).attr( 'data-target' );
             alertschedules.update( {_id: id}, { $set: { 'enabled': true } } );
             // tag the alert with info about user who interacted
-            alertschedules.update( {_id: id}, { $set: { 'modifiedat': new Date() } } );
+            alertschedules.update( {_id: id}, { $set: { 'modifiedat': new Date().toString() } } );
             alertschedules.update( {_id: id}, { $set: { 'modifiedby': Meteor.user().profile.email } } );
         },
 
@@ -38,7 +38,7 @@ if ( Meteor.isClient ) {
             id = $( e.target ).attr( 'data-target' );
             alertschedules.update( {_id: id}, { $set: { 'enabled': false } } );
             // tag the alert with info about user who interacted
-            alertschedules.update( {_id: id}, { $set: { 'modifiedat': new Date() } } );
+            alertschedules.update( {_id: id}, { $set: { 'modifiedat': new Date().toString() } } );
             alertschedules.update( {_id: id}, { $set: { 'modifiedby': Meteor.user().profile.email } } );
         },
 
