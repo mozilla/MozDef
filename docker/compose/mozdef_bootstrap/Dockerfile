@@ -10,6 +10,6 @@ COPY --chown=mozdef:mozdef docker/compose/mozdef_cron/files/backup.conf /opt/moz
 
 COPY --chown=mozdef:mozdef scripts/setup /opt/mozdef/envs/mozdef/scripts/setup
 
-WORKDIR /opt/mozdef/envs/mozdef/scripts
+WORKDIR /opt/mozdef/envs/mozdef/scripts/setup
 
 USER mozdef

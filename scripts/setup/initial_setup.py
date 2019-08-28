@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 from time import sleep
 from configlib import getConfig
 import json
-import time
 import os
 import sys
 
@@ -20,12 +19,35 @@ import requests
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
+cron_dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../cron')
 
 parser = argparse.ArgumentParser(description='Create the correct indexes and aliases in elasticsearch')
 parser.add_argument('esserver', help='Elasticsearch server (ex: http://elasticsearch:9200)')
-parser.add_argument('default_mapping_file', help='The relative path to default mapping json file (ex: cron/defaultMappingTemplate.json)')
-parser.add_argument('state_mapping_file', help='The relative path to state mapping json file (ex: cron/mozdefStateDefaultMappingTemplate.json)')
-parser.add_argument('backup_conf_file', help='The relative path to backup.conf file (ex: cron/backup.conf)')
+
+default_file = os.path.realpath(cron_dir_path + '/defaultMappingTemplate.json')
+parser.add_argument(
+    'default_mapping_file',
+    help='The relative path to default mapping json file (default: {0})'.format(default_file),
+    default=default_file,
+    nargs='?'
+)
+
+default_file = os.path.realpath(cron_dir_path + '/mozdefStateDefaultMappingTemplate.json')
+parser.add_argument(
+    'state_mapping_file',
+    help='The relative path to state mapping json file (default: {0})'.format(default_file),
+    default=default_file,
+    nargs='?'
+)
+
+default_file = os.path.realpath(cron_dir_path + '/backup.json')
+parser.add_argument(
+    'backup_conf_file',
+    help='The relative path to backup.conf file (default: {0})'.format(default_file),
+    default=default_file,
+    nargs='?'
+)
+
 parser.add_argument('kibana_url', help='The URL of the kibana endpoint (ex: http://kibana:5601)')
 args = parser.parse_args()
 
@@ -189,7 +211,7 @@ if kibana_index_name in client.get_indices():
         sys.exit(0)
 
 # Create visualizations/dashboards
-dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources')
+dashboards_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'example_resources')
 listing = os.listdir(dashboards_path)
 for infile in listing:
     json_file_path = os.path.join(dashboards_path, infile)
