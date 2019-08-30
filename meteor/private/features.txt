@@ -11,4 +11,3 @@ attackers /attackers
 globe /globe
 about /about
 blockip /blockip
-manage-alerts /manage-alerts

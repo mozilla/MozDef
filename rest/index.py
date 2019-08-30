@@ -238,54 +238,6 @@ def index():
     return response
 
 
-@route('/alertschedules')
-@route('/alertschedules/')
-@enable_cors
-def index():
-    '''an endpoint to return alert schedules'''
-    if request.body:
-        request.body.read()
-        request.body.close()
-    response.content_type = "application/json"
-    mongoclient = MongoClient(options.mongohost, options.mongoport)
-    schedulers_db = mongoclient.meteor['alertschedules']
-
-    mongodb_alerts = schedulers_db.find()
-    alert_schedules_dict = {}
-    for mongodb_alert in mongodb_alerts:
-        mongodb_alert['_id'] = str(mongodb_alert['_id'])
-        alert_schedules_dict[mongodb_alert['name']] = mongodb_alert
-
-    response.body = json.dumps(alert_schedules_dict)
-    response.status = 200
-    return response
-
-
-@post('/updatealertschedules', methods=['POST'])
-@post('/updatealertschedules/', methods=['POST'])
-@enable_cors
-def update_alert_schedules():
-    '''an endpoint to return alerts schedules'''
-    if not request.body:
-        response.status = 503
-        return response
-
-    alert_schedules = json.loads(request.body.read())
-    request.body.close()
-
-    response.content_type = "application/json"
-    mongoclient = MongoClient(options.mongohost, options.mongoport)
-    schedulers_db = mongoclient.meteor['alertschedules']
-    schedulers_db.remove()
-
-    for alert_name, alert_schedule in alert_schedules.items():
-        logger.debug("Inserting schedule for {0} into mongodb".format(alert_name))
-        schedulers_db.insert(alert_schedule)
-
-    response.status = 200
-    return response
-
-
 @route('/plugins', methods=['GET'])
 @route('/plugins/', methods=['GET'])
 @route('/plugins/<endpoint>', methods=['GET'])

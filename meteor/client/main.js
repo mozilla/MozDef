@@ -33,8 +33,6 @@ import '/client/watchItem.js';
 import '/client/eventdetails.html';
 import '/client/fqdnBlocklistTable.html';
 import '/client/fqdnBlocklistTable.js';
-import '/client/manageAlertsTable.html';
-import '/client/manageAlertsTable.js';
 import '/client/globe.html';
 import '/client/globe.js';
 import '/client/incidentAdd.html';
