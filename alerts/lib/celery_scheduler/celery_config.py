@@ -30,7 +30,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
 # Custom Alert Scheduler
-CELERYBEAT_SCHEDULER = "lib.celery_scheduler.alerts_scheduler.AlertScheduler"
+CELERYBEAT_SCHEDULER = "lib.celery_scheduler.alerts_scheduler.AlertsScheduler"
 CELERY_RESTAPI_URL = RESTAPI_URL
 CELERY_RESTAPI_JWT = RESTAPI_TOKEN
 
