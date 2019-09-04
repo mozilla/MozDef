@@ -257,6 +257,8 @@ def index():
     for mongodb_alert in mongodb_alerts:
         if mongodb_alert['last_run_at']:
             mongodb_alert['last_run_at'] = mongodb_alert['last_run_at'].isoformat()
+        if 'modifiedat' in mongodb_alert:
+            mongodb_alert['modifiedat'] = mongodb_alert['modifiedat'].isoformat()
         alert_schedules_dict[mongodb_alert['name']] = mongodb_alert
 
     response.body = json.dumps(alert_schedules_dict)
