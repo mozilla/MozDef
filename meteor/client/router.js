@@ -78,7 +78,7 @@ Router.map(function() {
         path: '/watchlist',
         template: 'watchlist',
         layoutTemplate: 'layout'
-    }); 
+    });
 
     this.route('investigations', {
         path: '/investigations',
@@ -198,6 +198,12 @@ Router.map(function() {
         data: function() {
             Session.set('watchItem', this.params._watchcontent);
         },
+        layoutTemplate: 'layout'
+    });
+
+    this.route('manage-alerts', {
+        path: '/manage-alerts',
+        template: 'alertschedules',
         layoutTemplate: 'layout'
     });
 
