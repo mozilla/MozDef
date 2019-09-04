@@ -31,7 +31,7 @@ class Interval():
         }
 
     def to_str(self):
-        return "every {0} {1}".format(
+        return "{0} {1}".format(
             self.every,
             self.period
         )
@@ -65,7 +65,7 @@ class Crontab():
         }
 
     def to_str(self):
-        return "crontab {0} {1} {2} {3} {4}".format(
+        return "{0} {1} {2} {3} {4}".format(
             self.minute,
             self.hour,
             self.day_of_week,
