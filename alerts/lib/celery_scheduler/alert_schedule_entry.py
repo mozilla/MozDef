@@ -37,8 +37,9 @@ class AlertScheduleEntry(ScheduleEntry):
         self.total_run_count = self._task.total_run_count
 
         if not self._task.last_run_at:
-            self._task.last_run_at = self._default_now()
-        self.last_run_at = self._task.last_run_at
+            self.last_run_at = self._default_now()
+        else:
+            self.last_run_at = self._task.last_run_at
 
     def _default_now(self):
         return self.app.now()
