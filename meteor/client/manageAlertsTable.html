@@ -17,6 +17,7 @@ Copyright (c) 2014 Mozilla Corporation
                         <td>NAME</td>
                         <td>SCHEDULE TYPE</td>
                         <td>SCHEDULE</td>
+                        <td>LAST RUN</td>
                         <td>ENABLED</td>
                         <td></td>
                     </tr>
@@ -43,7 +44,8 @@ Copyright (c) 2014 Mozilla Corporation
     <tr class="tooltip-wrapper info-row" data-toggle="tooltip">
         <td>{{name}}</td>
         <td>{{schedule_type}}</td>
-        <td>{{schedule_string}}</td>
+        <td>{{schedule_str}}</td>
+        <td>{{last_run_at}}</td>
     {{#if enabled}}
         <td>Yes</td>
         <td>
