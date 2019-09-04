@@ -21,6 +21,7 @@ class AlertScheduleEntry(ScheduleEntry):
 
         self.enabled = self._task.enabled
         self.schedule_str = self._task.schedule_str
+        self.schedule_type = self._task.schedule_type
         self.schedule = self._task.schedule
 
         self.args = self._task.args

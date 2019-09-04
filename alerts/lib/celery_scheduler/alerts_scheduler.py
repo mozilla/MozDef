@@ -40,7 +40,7 @@ class AlertsScheduler(Scheduler):
     def print_schedule(self):
         get_logger(__name__).info("**** Current Alert Schedule ****")
         for name, schedule in self._schedule.items():
-            get_logger(__name__).info("\t{0}: {1}".format(name, schedule.schedule_str))
+            get_logger(__name__).info("\t{0}: {1} {2}".format(name, schedule.schedule_type, schedule.schedule_str))
         if len(self._schedule) == 0:
             get_logger(__name__).info("\tNo alerts are currently enabled.")
 
@@ -66,6 +66,7 @@ class AlertsScheduler(Scheduler):
         result = super().schedules_equal(old_schedules, new_schedules)
         if result is False:
             get_logger(__name__).info("Updating current alert schedule with new schedule")
+            self.print_schedule()
         return result
 
     @property
