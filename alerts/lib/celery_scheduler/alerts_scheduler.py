@@ -55,12 +55,16 @@ class AlertsScheduler(Scheduler):
         return self._last_updated + self.UPDATE_INTERVAL < datetime.datetime.now()
 
     def get_from_api(self):
-        d = {}
-        api_results = self.celery_rest.fetch_schedule_dict()
-        for name, doc in api_results.items():
-            if doc['enabled']:
-                d[name] = self.Entry(PeriodicTask(**doc))
-        return d
+        try:
+            d = {}
+            api_results = self.celery_rest.fetch_schedule_dict()
+            for name, doc in api_results.items():
+                if doc['enabled']:
+                    d[name] = self.Entry(PeriodicTask(**doc))
+            return d
+        except Exception as e:
+            get_logger(__name__).error("Received exception when fetching schedule: {0}".format(e))
+            return self._schedule
 
     def schedules_equal(self, old_schedules, new_schedules):
         result = super().schedules_equal(old_schedules, new_schedules)
@@ -84,4 +88,7 @@ class AlertsScheduler(Scheduler):
         dict_schedule = {}
         for name, alert_schedule in self._schedule.items():
             dict_schedule[name] = alert_schedule._task.to_dict()
-        self.celery_rest.sync_schedules(dict_schedule)
+        try:
+            self.celery_rest.sync_schedules(dict_schedule)
+        except Exception as e:
+            get_logger(__name__).error("Received exception during sync_schedules: {0}".format(e))
