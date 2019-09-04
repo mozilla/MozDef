@@ -12,7 +12,6 @@ from celery.beat import Scheduler
 from celery.utils.log import get_logger
 from .alert_schedule_entry import AlertScheduleEntry
 
-from mozdef_util.utilities.logger import logger
 from .periodic_task import PeriodicTask
 from .celery_rest_client import CeleryRestClient
 
@@ -82,7 +81,6 @@ class AlertsScheduler(Scheduler):
         return self._schedule
 
     def sync(self):
-        logger.debug("Scheduler syncing with datastore")
         for entry in self._schedule.values():
             entry.update()
         dict_schedule = {}
