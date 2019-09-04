@@ -1,4 +1,4 @@
-# Copyright 2018 Regents of the University of Michigan
+# Copyright 2013 Regents of the University of Michigan
 
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -8,14 +8,16 @@
 
 import datetime
 
-from .periodic_task import PeriodicTask
+from celery.beat import Scheduler
+from celery.utils.log import get_logger
 from .alert_schedule_entry import AlertScheduleEntry
+
+from mozdef_util.utilities.logger import logger
+from .periodic_task import PeriodicTask
 from .celery_rest_client import CeleryRestClient
 
-from celery.beat import Scheduler
 
-
-class AlertScheduler(Scheduler):
+class AlertsScheduler(Scheduler):
 
     #: how often should we sync in schedule information
     #: from the backend mongo database
@@ -23,7 +25,8 @@ class AlertScheduler(Scheduler):
 
     Entry = AlertScheduleEntry
 
-    Model = PeriodicTask
+    # The same as the web ui
+    SCHEDULER_DB = "meteor"
 
     def __init__(self, *args, **kwargs):
         self._schedule = {}
@@ -31,8 +34,15 @@ class AlertScheduler(Scheduler):
         Scheduler.__init__(self, *args, **kwargs)
         self.max_interval = (kwargs.get('max_interval') or self.app.conf.CELERYBEAT_MAX_LOOP_INTERVAL or 5)
         self.celery_rest = CeleryRestClient()
-        self.celery_rest.print_schedule()
-        self._schedule = self.fetch_schedule()
+        self._schedule = self.get_from_api()
+        self.print_schedule()
+
+    def print_schedule(self):
+        get_logger(__name__).info("**** Current Alert Schedule ****")
+        for name, schedule in self._schedule.items():
+            get_logger(__name__).info("\t{0}: {1}".format(name, schedule.schedule_str))
+        if len(self._schedule) == 0:
+            get_logger(__name__).info("\tNo alerts are currently enabled.")
 
     def setup_schedule(self):
         pass
@@ -44,22 +54,27 @@ class AlertScheduler(Scheduler):
             return True
         return self._last_updated + self.UPDATE_INTERVAL < datetime.datetime.now()
 
+    def get_from_api(self):
+        d = {}
+        api_results = self.celery_rest.fetch_schedule_dict()
+        for name, doc in api_results.items():
+            if doc['enabled']:
+                d[name] = self.Entry(PeriodicTask(**doc))
+        return d
+
     @property
     def schedule(self):
         if self.requires_update():
-            self.update_schedule()
+            self.sync()
+            self._schedule = self.get_from_api()
             self._last_updated = datetime.datetime.now()
         return self._schedule
 
-    def update_schedule(self):
-        api_results = self.celery_rest.fetch_schedule_dict()
-        for name, entry in self._schedule.items():
-            if name in api_results:
-                entry._task['enabled'] = api_results[name]['enabled']
-
-    def fetch_schedule(self):
-        api_results = self.celery_rest.fetch_schedule_dict()
-        schedule = {}
-        for name, doc in api_results.items():
-            schedule[name] = self.Entry(doc)
-        return schedule
+    def sync(self):
+        logger.debug("Scheduler syncing with datastore")
+        for entry in self._schedule.values():
+            entry.update()
+        dict_schedule = {}
+        for name, alert_schedule in self._schedule.items():
+            dict_schedule[name] = alert_schedule._task.to_dict()
+        self.celery_rest.sync_schedules(dict_schedule)
