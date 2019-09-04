@@ -98,7 +98,6 @@ class PeriodicTask():
             modifiedat=None,
             modifiedby=None):
 
-        # Is this needed?
         if _id is None:
             _id = str(ObjectId())
         self._id = _id
