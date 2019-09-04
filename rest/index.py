@@ -253,10 +253,37 @@ def index():
     mongodb_alerts = schedulers_db.find()
     alert_schedules_dict = {}
     for mongodb_alert in mongodb_alerts:
-        mongodb_alert['_id'] = str(mongodb_alert['_id'])
         alert_schedules_dict[mongodb_alert['name']] = mongodb_alert
 
     response.body = json.dumps(alert_schedules_dict)
+    response.status = 200
+    return response
+
+
+@post('/syncalertschedules', methods=['POST'])
+@post('/syncalertschedules/', methods=['POST'])
+@enable_cors
+def sync_alert_schedules():
+    '''an endpoint to return alerts schedules'''
+    if not request.body:
+        response.status = 503
+        return response
+
+    alert_schedules = json.loads(request.body.read())
+    request.body.close()
+
+    response.content_type = "application/json"
+    mongoclient = MongoClient(options.mongohost, options.mongoport)
+    schedulers_db = mongoclient.meteor['alertschedules']
+    results = schedulers_db.find()
+    for result in results:
+        if result['name'] in alert_schedules:
+            new_sched = alert_schedules[result['name']]
+            result['total_run_count'] = new_sched['total_run_count']
+            result['last_run_at'] = new_sched['last_run_at']
+            logger.debug("Inserting schedule for {0} into mongodb".format(result['name']))
+            schedulers_db.save(result)
+
     response.status = 200
     return response
 
