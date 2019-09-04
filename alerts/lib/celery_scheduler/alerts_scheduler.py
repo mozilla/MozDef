@@ -62,6 +62,12 @@ class AlertsScheduler(Scheduler):
                 d[name] = self.Entry(PeriodicTask(**doc))
         return d
 
+    def schedules_equal(self, old_schedules, new_schedules):
+        result = super().schedules_equal(old_schedules, new_schedules)
+        if result is False:
+            get_logger(__name__).info("Updating current alert schedule with new schedule")
+        return result
+
     @property
     def schedule(self):
         if self.requires_update():
