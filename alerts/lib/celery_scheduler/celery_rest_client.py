@@ -4,14 +4,15 @@ from requests_jwt import JWTAuth
 import requests
 import json
 
-from bson.objectid import ObjectId
 from importlib import import_module
 from celery.schedules import crontab, timedelta
 from mozdef_util.utilities.logger import logger
 from lib.config import ALERTS, RESTAPI_URL
 
+from .periodic_task import PeriodicTask
 
-class CeleryRestClient(object):
+
+class CeleryRestClient():
     def __init__(self):
         if hasattr(current_app.conf, "CELERY_RESTAPI_JWT") and current_app.conf.CELERY_RESTAPI_JWT != "":
             self._restapi_jwt = JWTAuth(current_app.conf.CELERY_RESTAPI_JWT)
@@ -29,15 +30,18 @@ class CeleryRestClient(object):
     def fetch_schedule_dict(self):
         resp = requests.get(self._restapi_url + "/alertschedules", auth=self._restapi_jwt)
         if not resp.ok:
-            raise Exception("Received error {0} from rest api when fetching alert schedules".format(resp.status_code))
-        api_results = json.loads(resp.text)
-        return api_results
+            raise Exception("Received error {0} from rest api when fetching alert schedules: {1}".format(resp.status_code, resp.text))
+        return json.loads(resp.text)
 
-    def print_schedule(self):
-        schedule = self.fetch_schedule_dict()
-        get_logger(__name__).info("**** Current Alert Schedule ****")
-        for alert_name, details in schedule.items():
-            get_logger(__name__).info("\t{0}: {1} (enabled={2})".format(alert_name, details['schedule_string'], details['enabled']))
+    def sync_schedules(self, current_schedule):
+        resp = requests.post(url=RESTAPI_URL + "/syncalertschedules", data=json.dumps(current_schedule), auth=self._restapi_jwt)
+        if not resp.ok:
+            raise Exception("Received error {0} from rest api when updating alerts schedules {1}".format(resp.status_code, resp.data))
+
+    def update_schedules(self, current_schedule):
+        resp = requests.post(url=RESTAPI_URL + "/updatealertschedules", data=json.dumps(current_schedule), auth=self._restapi_jwt)
+        if not resp.ok:
+            raise Exception("Received error {0} from rest api when updating alerts schedules {1}".format(resp.status_code, resp.data))
 
     def load_and_register_alerts(self):
         existing_alert_schedules = self.fetch_schedule_dict()
@@ -57,16 +61,10 @@ class CeleryRestClient(object):
             except Exception as e:
                 logger.exception("Generic error registering {0}: {1}".format(alert_name, e))
                 pass
-
-            full_path_name = "{0}.{1}".format(alert_module_name, alert_classname)
             alert_schedule = {
-                "_id": str(ObjectId()),
-                "_cls": "PeriodicTask",
-                "name": full_path_name,
-                "task": full_path_name,
+                "name": alert_name,
+                "task": alert_name,
                 "enabled": True,
-                "args": [],
-                "kwargs": {},
             }
             if 'args' in params:
                 alert_schedule['args'] = params['args']
@@ -75,43 +73,29 @@ class CeleryRestClient(object):
 
             if isinstance(params['schedule'], timedelta):
                 alert_schedule['schedule_type'] = 'interval'
-                alert_schedule['interval'] = {
+                alert_schedule['celery_schedule'] = {
                     "every": params['schedule'].total_seconds(),
                     "period": "seconds"
                 }
-                alert_schedule['schedule_string'] = "{0} {1}".format(
-                    params['schedule'].total_seconds(),
-                    "seconds"
-                )
             elif isinstance(params['schedule'], crontab):
                 alert_schedule['schedule_type'] = 'crontab'
-                alert_schedule['crontab'] = {
+                alert_schedule['celery_schedule'] = {
                     "minute": params['schedule']._orig_minute,
                     "hour": params['schedule']._orig_hour,
                     "day_of_week": params['schedule']._orig_day_of_week,
                     "day_of_month": params['schedule']._orig_day_of_month,
                     "month_of_year": params['schedule']._orig_month_of_year,
                 }
-                alert_schedule['schedule_string'] = "{0} {1} {2} {3} {4}".format(
-                    params['schedule']._orig_minute,
-                    params['schedule']._orig_hour,
-                    params['schedule']._orig_day_of_week,
-                    params['schedule']._orig_day_of_month,
-                    params['schedule']._orig_month_of_year,
-                )
 
             if alert_name not in existing_alert_schedules:
-                logger.debug("Inserting schedule for {0} into mongodb".format(full_path_name))
+                logger.debug("Inserting schedule for {0} into mongodb".format(alert_name))
                 updated_alert_schedule = alert_schedule
             else:
-                # Update schedule if it differs from file to api
-                del existing_alert_schedules[alert_name][existing_alert_schedules[alert_name]['schedule_type']]
-                existing_alert_schedules[alert_name]['schedule_type'] = alert_schedule['schedule_type']
-                existing_alert_schedules[alert_name][alert_schedule['schedule_type']] = alert_schedule[alert_schedule['schedule_type']]
-                existing_alert_schedules[alert_name]['schedule_string'] = alert_schedule['schedule_string']
-                updated_alert_schedule = existing_alert_schedules[alert_name]
+                existing_schedule = existing_alert_schedules[alert_name]
+                logger.debug("Updating existing schedule ({0}) with new information into mongodb".format(alert_name))
+                existing_schedule['schedule_type'] = alert_schedule['schedule_type']
+                existing_schedule['celery_schedule'] = alert_schedule['celery_schedule']
+                updated_alert_schedule = existing_schedule
 
-            alert_schedules[alert_name] = updated_alert_schedule
-        resp = requests.post(url=RESTAPI_URL + "/updatealertschedules", data=json.dumps(alert_schedules), auth=self._restapi_jwt)
-        if not resp.ok:
-            raise Exception("Received error {0} from rest api when updating alerts schedules".format(resp.status_code))
+            alert_schedules[alert_name] = PeriodicTask(**updated_alert_schedule).to_dict()
+        self.update_schedules(alert_schedules)

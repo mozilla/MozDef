@@ -1,801 +1,7 @@
-category.unauthorized access
-category.data disclosure
-category.data corruption
-category.denial of service
-category.lost or stolen device
-category.unauthorized use
-category.malware
-category.widespread vulnerability
-category.defacement
-category.fraud
-category.abuse
-category.application compromise
-category.other
-impact.loss.rating.Major
-impact.loss.rating.Moderate
-impact.loss.rating.Minor
-impact.loss.rating.None
-impact.loss.rating.Unknown
-impact.loss.variety.Asset and fraud
-impact.loss.variety.Brand damage
-impact.loss.variety.Business disruption
-impact.loss.variety.Operating costs
-impact.loss.variety.Legal and regulatory
-impact.loss.variety.Competitive advantage
-impact.loss.variety.Response and recovery
-impact.overall_rating.Insignificant
-impact.overall_rating.Distracting
-impact.overall_rating.Painful
-impact.overall_rating.Damaging
-impact.overall_rating.Catastrophic
-impact.overall_rating.Unknown
-iso_currency_code.AED
-iso_currency_code.AFN
-iso_currency_code.ALL
-iso_currency_code.AMD
-iso_currency_code.ANG
-iso_currency_code.AOA
-iso_currency_code.ARS
-iso_currency_code.AUD
-iso_currency_code.AWG
-iso_currency_code.AZN
-iso_currency_code.BAM
-iso_currency_code.BBD
-iso_currency_code.BDT
-iso_currency_code.BGN
-iso_currency_code.BHD
-iso_currency_code.BIF
-iso_currency_code.BMD
-iso_currency_code.BND
-iso_currency_code.BOB
-iso_currency_code.BRL
-iso_currency_code.BSD
-iso_currency_code.BTN
-iso_currency_code.BWP
-iso_currency_code.BYR
-iso_currency_code.BZD
-iso_currency_code.CAD
-iso_currency_code.CDF
-iso_currency_code.CHF
-iso_currency_code.CLP
-iso_currency_code.CNY
-iso_currency_code.COP
-iso_currency_code.CRC
-iso_currency_code.CUC
-iso_currency_code.CUP
-iso_currency_code.CVE
-iso_currency_code.CZK
-iso_currency_code.DJF
-iso_currency_code.DKK
-iso_currency_code.DOP
-iso_currency_code.DZD
-iso_currency_code.EGP
-iso_currency_code.ERN
-iso_currency_code.ETB
-iso_currency_code.EUR
-iso_currency_code.FJD
-iso_currency_code.FKP
-iso_currency_code.GBP
-iso_currency_code.GEL
-iso_currency_code.GGP
-iso_currency_code.GHS
-iso_currency_code.GIP
-iso_currency_code.GMD
-iso_currency_code.GNF
-iso_currency_code.GTQ
-iso_currency_code.GYD
-iso_currency_code.HKD
-iso_currency_code.HNL
-iso_currency_code.HRK
-iso_currency_code.HTG
-iso_currency_code.HUF
-iso_currency_code.IDR
-iso_currency_code.ILS
-iso_currency_code.IMP
-iso_currency_code.INR
-iso_currency_code.IQD
-iso_currency_code.IRR
-iso_currency_code.ISK
-iso_currency_code.JEP
-iso_currency_code.JMD
-iso_currency_code.JOD
-iso_currency_code.JPY
-iso_currency_code.KES
-iso_currency_code.KGS
-iso_currency_code.KHR
-iso_currency_code.KMF
-iso_currency_code.KPW
-iso_currency_code.KRW
-iso_currency_code.KWD
-iso_currency_code.KYD
-iso_currency_code.KZT
-iso_currency_code.LAK
-iso_currency_code.LBP
-iso_currency_code.LKR
-iso_currency_code.LRD
-iso_currency_code.LSL
-iso_currency_code.LTL
-iso_currency_code.LVL
-iso_currency_code.LYD
-iso_currency_code.MAD
-iso_currency_code.MDL
-iso_currency_code.MGA
-iso_currency_code.MKD
-iso_currency_code.MMK
-iso_currency_code.MNT
-iso_currency_code.MOP
-iso_currency_code.MRO
-iso_currency_code.MUR
-iso_currency_code.MVR
-iso_currency_code.MWK
-iso_currency_code.MXN
-iso_currency_code.MYR
-iso_currency_code.MZN
-iso_currency_code.NAD
-iso_currency_code.NGN
-iso_currency_code.NIO
-iso_currency_code.NOK
-iso_currency_code.NPR
-iso_currency_code.NZD
-iso_currency_code.OMR
-iso_currency_code.PAB
-iso_currency_code.PEN
-iso_currency_code.PGK
-iso_currency_code.PHP
-iso_currency_code.PKR
-iso_currency_code.PLN
-iso_currency_code.PYG
-iso_currency_code.QAR
-iso_currency_code.RON
-iso_currency_code.RSD
-iso_currency_code.RUB
-iso_currency_code.RWF
-iso_currency_code.SAR
-iso_currency_code.SBD
-iso_currency_code.SCR
-iso_currency_code.SDG
-iso_currency_code.SEK
-iso_currency_code.SGD
-iso_currency_code.SHP
-iso_currency_code.SLL
-iso_currency_code.SOS
-iso_currency_code.SPL
-iso_currency_code.SRD
-iso_currency_code.STD
-iso_currency_code.SVC
-iso_currency_code.SYP
-iso_currency_code.SZL
-iso_currency_code.THB
-iso_currency_code.TJS
-iso_currency_code.TMT
-iso_currency_code.TND
-iso_currency_code.TOP
-iso_currency_code.TRY
-iso_currency_code.TTD
-iso_currency_code.TVD
-iso_currency_code.TWD
-iso_currency_code.TZS
-iso_currency_code.UAH
-iso_currency_code.UGX
-iso_currency_code.USD
-iso_currency_code.UYU
-iso_currency_code.UZS
-iso_currency_code.VEF
-iso_currency_code.VND
-iso_currency_code.VUV
-iso_currency_code.WST
-iso_currency_code.XAF
-iso_currency_code.XCD
-iso_currency_code.XDR
-iso_currency_code.XOF
-iso_currency_code.XPF
-iso_currency_code.YER
-iso_currency_code.ZAR
-iso_currency_code.ZMK
-iso_currency_code.ZWD
-confidence.High
-confidence.Medium
-confidence.Low
-confidence.None
-targeted.Opportunistic
-targeted.Targeted
-targeted.Unknown
-targeted.NA
-attribute.integrity.variety.Created account
-attribute.integrity.variety.Defacement
-attribute.integrity.variety.Hardware tampering
-attribute.integrity.variety.Alter behavior
-attribute.integrity.variety.Fraudulent transaction
-attribute.integrity.variety.Log tampering
-attribute.integrity.variety.Repurpose
-attribute.integrity.variety.Misrepresentation
-attribute.integrity.variety.Modify configuration
-attribute.integrity.variety.Modify privileges
-attribute.integrity.variety.Modify data
-attribute.integrity.variety.Software installation
-attribute.integrity.variety.Unknown
-attribute.integrity.variety.Other
-attribute.availability.variety.Destruction
-attribute.availability.variety.Loss
-attribute.availability.variety.Interruption
-attribute.availability.variety.Degradation
-attribute.availability.variety.Acceleration
-attribute.availability.variety.Obscuration
-attribute.availability.variety.Unknown
-attribute.availability.variety.Other
-attribute.confidentiality.data_victim.Customer
-attribute.confidentiality.data_victim.Employee
-attribute.confidentiality.data_victim.Other
-attribute.confidentiality.data_victim.Partner
-attribute.confidentiality.data_victim.Patient
-attribute.confidentiality.data_victim.Student
-attribute.confidentiality.data_victim.Unknown
-attribute.confidentiality.state.Stored
-attribute.confidentiality.state.Stored encrypted
-attribute.confidentiality.state.Stored unencrypted
-attribute.confidentiality.state.Transmitted
-attribute.confidentiality.state.Transmitted encrypted
-attribute.confidentiality.state.Transmitted unencrypted
-attribute.confidentiality.state.Processed
-attribute.confidentiality.state.Unknown
-attribute.confidentiality.data.variety.Credentials
-attribute.confidentiality.data.variety.Bank
-attribute.confidentiality.data.variety.Classified
-attribute.confidentiality.data.variety.Copyrighted
-attribute.confidentiality.data.variety.Digital certificate
-attribute.confidentiality.data.variety.Medical
-attribute.confidentiality.data.variety.Payment
-attribute.confidentiality.data.variety.Personal
-attribute.confidentiality.data.variety.Internal
-attribute.confidentiality.data.variety.Source code
-attribute.confidentiality.data.variety.System
-attribute.confidentiality.data.variety.Secrets
-attribute.confidentiality.data.variety.Virtual currency
-attribute.confidentiality.data.variety.Unknown
-attribute.confidentiality.data.variety.Other
-attribute.confidentiality.data_disclosure.Yes
-attribute.confidentiality.data_disclosure.Potentially
-attribute.confidentiality.data_disclosure.No
-attribute.confidentiality.data_disclosure.Unknown
-discovery_method.Ext - actor disclosure
-discovery_method.Ext - fraud detection
-discovery_method.Ext - monitoring service
-discovery_method.Ext - customer
-discovery_method.Ext - audit
-discovery_method.Ext - unknown
-discovery_method.Int - antivirus
-discovery_method.Int - incident response
-discovery_method.Int - infrastructure monitoring
-discovery_method.Int - financial audit
-discovery_method.Int - fraud detection
-discovery_method.Int - HIDS
-discovery_method.Int - IT review
-discovery_method.Int - log review
-discovery_method.Int - NIDS
-discovery_method.Ext - law enforcement
-discovery_method.Int - security alarm
-discovery_method.Int - reported by employee
-discovery_method.Int - unknown
-discovery_method.Prt - monitoring service
-discovery_method.Prt - audit
-discovery_method.Prt - antivirus
-discovery_method.Prt - incident response
-discovery_method.Prt - unknown
-discovery_method.Prt - other
-discovery_method.Ext - incident response
-discovery_method.Ext - found documents
-discovery_method.Ext - suspicious traffic
-discovery_method.Ext - emergency response team
-discovery_method.Int - data loss prevention
-discovery_method.Unknown
-discovery_method.Other
-actor.motive.NA
-actor.motive.Espionage
-actor.motive.Fear
-actor.motive.Financial
-actor.motive.Fun
-actor.motive.Grudge
-actor.motive.Ideology
-actor.motive.Convenience
-actor.motive.Secondary
-actor.motive.Unknown
-actor.motive.Other
-actor.internal.job_change.Hired
-actor.internal.job_change.Promoted
-actor.internal.job_change.Lateral move
-actor.internal.job_change.Resigned
-actor.internal.job_change.Let go
-actor.internal.job_change.Demoted
-actor.internal.job_change.Passed over
-actor.internal.job_change.Unknown
-actor.internal.job_change.Other
-actor.internal.job_change.Reprimanded
-actor.internal.job_change.Job eval
-actor.internal.job_change.Personal issues
-actor.internal.variety.Auditor
-actor.internal.variety.Call center
-actor.internal.variety.Cashier
-actor.internal.variety.End-user
-actor.internal.variety.Executive
-actor.internal.variety.Finance
-actor.internal.variety.Helpdesk
-actor.internal.variety.Human resources
-actor.internal.variety.Maintenance
-actor.internal.variety.Manager
-actor.internal.variety.Guard
-actor.internal.variety.Developer
-actor.internal.variety.System admin
-actor.internal.variety.Unknown
-actor.internal.variety.Other
-actor.external.variety.Activist
-actor.external.variety.Auditor
-actor.external.variety.Competitor
-actor.external.variety.Customer
-actor.external.variety.Force majeure
-actor.external.variety.Former employee
-actor.external.variety.Nation-state
-actor.external.variety.Organized crime
-actor.external.variety.Acquaintance
-actor.external.variety.State-affiliated
-actor.external.variety.Terrorist
-actor.external.variety.Unaffiliated
-actor.external.variety.Unknown
-actor.external.variety.Other
-cost_corrective_action.Simple and cheap
-cost_corrective_action.Difficult and expensive
-cost_corrective_action.Something in-between
-cost_corrective_action.Unknown
-security_incident.Confirmed
-security_incident.Suspected
-security_incident.False positive
-security_incident.Near miss
-asset.governance.Personally owned
-asset.governance.3rd party owned
-asset.governance.3rd party managed
-asset.governance.3rd party hosted
-asset.governance.Internally isolated
-asset.governance.Unknown
-asset.cloud.Hypervisor
-asset.cloud.Partner application
-asset.cloud.Hosting governance
-asset.cloud.Customer attack
-asset.cloud.Hosting error
-asset.cloud.User breakout
-asset.cloud.Unknown
-asset.cloud.Other
-asset.variety.S - Authentication
-asset.variety.S - Backup
-asset.variety.S - Database
-asset.variety.S - DHCP
-asset.variety.S - Directory
-asset.variety.S - DCS
-asset.variety.S - DNS
-asset.variety.S - File
-asset.variety.S - Log
-asset.variety.S - Mail
-asset.variety.S - Mainframe
-asset.variety.S - Payment switch
-asset.variety.S - POS controller
-asset.variety.S - Print
-asset.variety.S - Proxy
-asset.variety.S - Remote access
-asset.variety.S - SCADA
-asset.variety.S - Web application
-asset.variety.S - Code repository
-asset.variety.S - VM host
-asset.variety.S - Other
-asset.variety.S - Unknown
-asset.variety.N - Access reader
-asset.variety.N - Camera
-asset.variety.N - Firewall
-asset.variety.N - HSM
-asset.variety.N - IDS
-asset.variety.N - Broadband
-asset.variety.N - PBX
-asset.variety.N - Private WAN
-asset.variety.N - PLC
-asset.variety.N - Public WAN
-asset.variety.N - RTU
-asset.variety.N - Router or switch
-asset.variety.N - SAN
-asset.variety.N - Telephone
-asset.variety.N - VoIP adapter
-asset.variety.N - LAN
-asset.variety.N - WLAN
-asset.variety.N - Other
-asset.variety.U - Auth token
-asset.variety.U - Desktop
-asset.variety.U - Laptop
-asset.variety.U - Media
-asset.variety.U - Mobile phone
-asset.variety.U - Peripheral
-asset.variety.U - POS terminal
-asset.variety.U - Tablet
-asset.variety.U - Telephone
-asset.variety.U - VoIP phone
-asset.variety.U - Other
-asset.variety.T - ATM
-asset.variety.T - PED pad
-asset.variety.T - Gas terminal
-asset.variety.T - Kiosk
-asset.variety.T - Other
-asset.variety.M - Tapes
-asset.variety.M - Disk media
-asset.variety.M - Documents
-asset.variety.M - Flash drive
-asset.variety.M - Disk drive
-asset.variety.M - Smart card
-asset.variety.M - Payment card
-asset.variety.M - Other
-asset.variety.P - System admin
-asset.variety.P - Auditor
-asset.variety.P - Call center
-asset.variety.P - Cashier
-asset.variety.P - Customer
-asset.variety.P - Developer
-asset.variety.P - End-user
-asset.variety.P - Executive
-asset.variety.P - Finance
-asset.variety.P - Former employee
-asset.variety.P - Guard
-asset.variety.P - Helpdesk
-asset.variety.P - Human resources
-asset.variety.P - Maintenance
-asset.variety.P - Manager
-asset.variety.P - Partner
-asset.variety.P - Other
-asset.variety.Unknown
-victim.employee_count.1 to 10
-victim.employee_count.11 to 100
-victim.employee_count.101 to 1000
-victim.employee_count.Small
-victim.employee_count.Large
-victim.employee_count.1001 to 10000
-victim.employee_count.10001 to 25000
-victim.employee_count.25001 to 50000
-victim.employee_count.50001 to 100000
-victim.employee_count.Over 100000
-victim.employee_count.Unknown
-country.AD
-country.AE
-country.AF
-country.AG
-country.AI
-country.AL
-country.AM
-country.AO
-country.AQ
-country.AR
-country.AS
-country.AT
-country.AU
-country.AW
-country.AX
-country.AZ
-country.BA
-country.BB
-country.BD
-country.BE
-country.BF
-country.BG
-country.BH
-country.BI
-country.BJ
-country.BL
-country.BM
-country.BN
-country.BO
-country.BQ
-country.BR
-country.BS
-country.BT
-country.BV
-country.BW
-country.BY
-country.BZ
-country.CA
-country.CC
-country.CD
-country.CF
-country.CG
-country.CH
-country.CI
-country.CK
-country.CL
-country.CM
-country.CN
-country.CO
-country.CR
-country.CU
-country.CV
-country.CW
-country.CX
-country.CY
-country.CZ
-country.DE
-country.DJ
-country.DK
-country.DM
-country.DO
-country.DZ
-country.EC
-country.EE
-country.EG
-country.EH
-country.ER
-country.ES
-country.ET
-country.FI
-country.FJ
-country.FK
-country.FM
-country.FO
-country.FR
-country.GA
-country.GB
-country.GD
-country.GE
-country.GF
-country.GG
-country.GH
-country.GI
-country.GL
-country.GM
-country.GN
-country.GP
-country.GQ
-country.GR
-country.GS
-country.GT
-country.GU
-country.GW
-country.GY
-country.HK
-country.HM
-country.HN
-country.HR
-country.HT
-country.HU
-country.ID
-country.IE
-country.IL
-country.IM
-country.IN
-country.IO
-country.IQ
-country.IR
-country.IS
-country.IT
-country.JE
-country.JM
-country.JO
-country.JP
-country.KE
-country.KG
-country.KH
-country.KI
-country.KM
-country.KN
-country.KP
-country.KR
-country.KW
-country.KY
-country.KZ
-country.LA
-country.LB
-country.LC
-country.LI
-country.LK
-country.LR
-country.LS
-country.LT
-country.LU
-country.LV
-country.LY
-country.MA
-country.MC
-country.MD
-country.ME
-country.MF
-country.MG
-country.MH
-country.MK
-country.ML
-country.MM
-country.MN
-country.MO
-country.MP
-country.MQ
-country.MR
-country.MS
-country.MT
-country.MU
-country.MV
-country.MW
-country.MX
-country.MY
-country.MZ
-country.NA
-country.NC
-country.NE
-country.NF
-country.NG
-country.NI
-country.NL
-country.NO
-country.NP
-country.NR
-country.NU
-country.NZ
-country.OM
-country.Other
-country.PA
-country.PE
-country.PF
-country.PG
-country.PH
-country.PK
-country.PL
-country.PM
-country.PN
-country.PR
-country.PS
-country.PT
-country.PW
-country.PY
-country.QA
-country.RE
-country.RO
-country.RS
-country.RU
-country.RW
-country.SA
-country.SB
-country.SC
-country.SD
-country.SE
-country.SG
-country.SH
-country.SI
-country.SJ
-country.SK
-country.SL
-country.SM
-country.SN
-country.SO
-country.SR
-country.SS
-country.ST
-country.SV
-country.SX
-country.SY
-country.SZ
-country.TC
-country.TD
-country.TF
-country.TG
-country.TH
-country.TJ
-country.TK
-country.TL
-country.TM
-country.TN
-country.TO
-country.TR
-country.TT
-country.TV
-country.TW
-country.TZ
-country.UA
-country.UG
-country.UM
-country.US
-country.UY
-country.UZ
-country.Unknown
-country.VA
-country.VC
-country.VE
-country.VG
-country.VI
-country.VN
-country.VU
-country.WF
-country.WS
-country.YE
-country.YT
-country.ZA
-country.ZM
-country.ZW
-action.malware.vector.Direct install
-action.malware.vector.Download by malware
-action.malware.vector.Email autoexecute
-action.malware.vector.Email link
-action.malware.vector.Email attachment
-action.malware.vector.Instant messaging
-action.malware.vector.Network propagation
-action.malware.vector.Remote injection
-action.malware.vector.Removable media
-action.malware.vector.Software update
-action.malware.vector.Web drive-by
-action.malware.vector.Web download
-action.malware.vector.Unknown
-action.malware.vector.Other
-action.malware.variety.Adware
-action.malware.variety.Backdoor
-action.malware.variety.Brute force
-action.malware.variety.Capture app data
-action.malware.variety.Capture stored data
-action.malware.variety.Client-side attack
-action.malware.variety.Click fraud
-action.malware.variety.C2
-action.malware.variety.Destroy data
-action.malware.variety.Disable controls
-action.malware.variety.DoS
-action.malware.variety.Downloader
-action.malware.variety.Exploit vuln
-action.malware.variety.Export data
-action.malware.variety.Packet sniffer
-action.malware.variety.Password dumper
-action.malware.variety.Ram scraper
-action.malware.variety.Ransomware
-action.malware.variety.Rootkit
-action.malware.variety.Scan network
-action.malware.variety.Spam
-action.malware.variety.Spyware/Keylogger
-action.malware.variety.SQL injection
-action.malware.variety.Adminware
-action.malware.variety.Worm
-action.malware.variety.Unknown
-action.malware.variety.Other
-action.social.vector.Documents
-action.social.vector.Email
-action.social.vector.In-person
-action.social.vector.IM
-action.social.vector.Phone
-action.social.vector.Removable media
-action.social.vector.SMS
-action.social.vector.Social media
-action.social.vector.Software
-action.social.vector.Website
-action.social.vector.Unknown
-action.social.vector.Other
-action.social.target.Auditor
-action.social.target.Call center
-action.social.target.Cashier
-action.social.target.Customer
-action.social.target.End-user
-action.social.target.Executive
-action.social.target.Finance
-action.social.target.Former employee
-action.social.target.Helpdesk
-action.social.target.Human resources
-action.social.target.Maintenance
-action.social.target.Manager
-action.social.target.Partner
-action.social.target.Guard
-action.social.target.Developer
-action.social.target.System admin
-action.social.target.Unknown
-action.social.target.Other
-action.social.variety.Baiting
-action.social.variety.Bribery
-action.social.variety.Elicitation
-action.social.variety.Extortion
-action.social.variety.Forgery
-action.social.variety.Influence
-action.social.variety.Scam
-action.social.variety.Phishing
-action.social.variety.Pretexting
-action.social.variety.Propaganda
-action.social.variety.Spam
-action.social.variety.Unknown
-action.social.variety.Other
 action.environmental.variety.Deterioration
 action.environmental.variety.Earthquake
 action.environmental.variety.EMI
 action.environmental.variety.ESD
-action.environmental.variety.Temperature
 action.environmental.variety.Fire
 action.environmental.variety.Flood
 action.environmental.variety.Hazmat
@@ -803,80 +9,56 @@ action.environmental.variety.Humidity
 action.environmental.variety.Hurricane
 action.environmental.variety.Ice
 action.environmental.variety.Landslide
+action.environmental.variety.Leak
 action.environmental.variety.Lightning
 action.environmental.variety.Meteorite
+action.environmental.variety.Other
 action.environmental.variety.Particulates
 action.environmental.variety.Pathogen
 action.environmental.variety.Power failure
+action.environmental.variety.Temperature
 action.environmental.variety.Tornado
 action.environmental.variety.Tsunami
+action.environmental.variety.Unknown
 action.environmental.variety.Vermin
 action.environmental.variety.Volcano
-action.environmental.variety.Leak
 action.environmental.variety.Wind
-action.environmental.variety.Unknown
-action.environmental.variety.Other
-action.error.vector.Random error
-action.error.vector.Carelessness
-action.error.vector.Inadequate personnel
-action.error.vector.Inadequate processes
-action.error.vector.Inadequate technology
-action.error.vector.Unknown
-action.error.vector.Other
+action.error.variety.Capacity shortage
 action.error.variety.Classification error
 action.error.variety.Data entry error
 action.error.variety.Disposal error
 action.error.variety.Gaffe
 action.error.variety.Loss
 action.error.variety.Maintenance error
+action.error.variety.Malfunction
 action.error.variety.Misconfiguration
 action.error.variety.Misdelivery
 action.error.variety.Misinformation
 action.error.variety.Omission
+action.error.variety.Other
 action.error.variety.Physical accidents
-action.error.variety.Capacity shortage
 action.error.variety.Programming error
 action.error.variety.Publishing error
-action.error.variety.Malfunction
 action.error.variety.Unknown
-action.error.variety.Other
-action.misuse.vector.Physical access
-action.misuse.vector.LAN access
-action.misuse.vector.Remote access
-action.misuse.vector.Non-corporate
-action.misuse.vector.Unknown
-action.misuse.vector.Other
-action.misuse.variety.Knowledge abuse
-action.misuse.variety.Privilege abuse
-action.misuse.variety.Possession abuse
-action.misuse.variety.Data mishandling
-action.misuse.variety.Email misuse
-action.misuse.variety.Net misuse
-action.misuse.variety.Illicit content
-action.misuse.variety.Unapproved workaround
-action.misuse.variety.Unapproved hardware
-action.misuse.variety.Unapproved software
-action.misuse.variety.Unknown
-action.misuse.variety.Other
-action.hacking.vector.3rd party desktop
-action.hacking.vector.Backdoor or C2
-action.hacking.vector.Desktop sharing
-action.hacking.vector.Physical access
-action.hacking.vector.Command shell
-action.hacking.vector.Partner
-action.hacking.vector.VPN
-action.hacking.vector.Web application
-action.hacking.vector.Unknown
-action.hacking.vector.Other
+action.error.vector.Carelessness
+action.error.vector.Inadequate personnel
+action.error.vector.Inadequate processes
+action.error.vector.Inadequate technology
+action.error.vector.Other
+action.error.vector.Random error
+action.error.vector.Unknown
+action.hacking.result.Elevate
+action.hacking.result.Exfiltrate
+action.hacking.result.Infiltrate
 action.hacking.variety.Abuse of functionality
 action.hacking.variety.Brute force
 action.hacking.variety.Buffer overflow
 action.hacking.variety.Cache poisoning
-action.hacking.variety.Session prediction
-action.hacking.variety.CSRF
-action.hacking.variety.XSS
 action.hacking.variety.Cryptanalysis
+action.hacking.variety.CSRF
 action.hacking.variety.DoS
+action.hacking.variety.Exploit misconfig
+action.hacking.variety.Exploit vuln
 action.hacking.variety.Footprinting
 action.hacking.variety.Forced browsing
 action.hacking.variety.Format string attack
@@ -892,72 +74,771 @@ action.hacking.variety.MitM
 action.hacking.variety.Null byte injection
 action.hacking.variety.Offline cracking
 action.hacking.variety.OS commanding
-action.hacking.variety.Pass-the-hash
+action.hacking.variety.Other
 action.hacking.variety.Path traversal
-action.hacking.variety.RFI
+action.hacking.variety.Phishing
 action.hacking.variety.Reverse engineering
+action.hacking.variety.RFI
 action.hacking.variety.Routing detour
 action.hacking.variety.Session fixation
+action.hacking.variety.Session prediction
 action.hacking.variety.Session replay
 action.hacking.variety.Soap array abuse
 action.hacking.variety.Special element injection
 action.hacking.variety.SQLi
 action.hacking.variety.SSI injection
+action.hacking.variety.Unknown
 action.hacking.variety.URL redirector abuse
 action.hacking.variety.Use of backdoor or C2
 action.hacking.variety.Use of stolen creds
+action.hacking.variety.Virtual machine escape
 action.hacking.variety.XML attribute blowup
 action.hacking.variety.XML entity expansion
 action.hacking.variety.XML external entities
 action.hacking.variety.XML injection
 action.hacking.variety.XPath injection
 action.hacking.variety.XQuery injection
-action.hacking.variety.Virtual machine escape
-action.hacking.variety.Unknown
-action.hacking.variety.Other
-action.physical.vector.Partner facility
-action.physical.vector.Partner vehicle
-action.physical.vector.Personal residence
-action.physical.vector.Personal vehicle
-action.physical.vector.Public facility
-action.physical.vector.Public vehicle
-action.physical.vector.Victim secure area
-action.physical.vector.Victim work area
-action.physical.vector.Victim public area
-action.physical.vector.Victim grounds
-action.physical.vector.Visitor privileges
-action.physical.vector.Uncontrolled location
-action.physical.vector.Privileged access
-action.physical.vector.Unknown
-action.physical.vector.Other
+action.hacking.variety.XSS
+action.hacking.vector.3rd party desktop
+action.hacking.vector.Backdoor or C2
+action.hacking.vector.Command shell
+action.hacking.vector.Desktop sharing
+action.hacking.vector.Desktop sharing software
+action.hacking.vector.Other
+action.hacking.vector.Partner
+action.hacking.vector.Physical access
+action.hacking.vector.Unknown
+action.hacking.vector.VPN
+action.hacking.vector.Web application
+action.malware.result.Elevate
+action.malware.result.Exfiltrate
+action.malware.result.Infiltrate
+action.malware.variety.Adminware
+action.malware.variety.Adware
+action.malware.variety.Backdoor
+action.malware.variety.Brute force
+action.malware.variety.C2
+action.malware.variety.Capture app data
+action.malware.variety.Capture stored data
+action.malware.variety.Click fraud
+action.malware.variety.Click fraud and Cryptocurrency mining
+action.malware.variety.Client-side attack
+action.malware.variety.Cryptocurrency mining
+action.malware.variety.Destroy data
+action.malware.variety.Disable controls
+action.malware.variety.DoS
+action.malware.variety.Downloader
+action.malware.variety.Exploit misconfig
+action.malware.variety.Exploit vuln
+action.malware.variety.Export data
+action.malware.variety.Modify data
+action.malware.variety.Other
+action.malware.variety.Packet sniffer
+action.malware.variety.Password dumper
+action.malware.variety.Ram scraper
+action.malware.variety.Ransomware
+action.malware.variety.Rootkit
+action.malware.variety.Scan network
+action.malware.variety.Spam
+action.malware.variety.Spyware/Keylogger
+action.malware.variety.SQL injection
+action.malware.variety.Unknown
+action.malware.variety.Worm
+action.malware.vector.Direct install
+action.malware.vector.Download by malware
+action.malware.vector.Email attachment
+action.malware.vector.Email autoexecute
+action.malware.vector.Email link
+action.malware.vector.Email unknown
+action.malware.vector.Instant messaging
+action.malware.vector.Network propagation
+action.malware.vector.Other
+action.malware.vector.Remote injection
+action.malware.vector.Removable media
+action.malware.vector.Software update
+action.malware.vector.Unknown
+action.malware.vector.Web download
+action.malware.vector.Web drive-by
+action.misuse.result.Elevate
+action.misuse.result.Exfiltrate
+action.misuse.result.Infiltrate
+action.misuse.variety.Data mishandling
+action.misuse.variety.Email misuse
+action.misuse.variety.Embezzlement
+action.misuse.variety.Illicit content
+action.misuse.variety.Knowledge abuse
+action.misuse.variety.Net misuse
+action.misuse.variety.Other
+action.misuse.variety.Possession abuse
+action.misuse.variety.Privilege abuse
+action.misuse.variety.Unapproved hardware
+action.misuse.variety.Unapproved software
+action.misuse.variety.Unapproved workaround
+action.misuse.variety.Unknown
+action.misuse.vector.LAN access
+action.misuse.vector.Non-corporate
+action.misuse.vector.Other
+action.misuse.vector.Physical access
+action.misuse.vector.Remote access
+action.misuse.vector.Unknown
+action.physical.result.Elevate
+action.physical.result.Exfiltrate
+action.physical.result.Infiltrate
 action.physical.variety.Assault
 action.physical.variety.Bypassed controls
+action.physical.variety.Connection
 action.physical.variety.Destruction
 action.physical.variety.Disabled controls
+action.physical.variety.Other
+action.physical.variety.Sabotage
 action.physical.variety.Skimmer
 action.physical.variety.Snooping
 action.physical.variety.Surveillance
 action.physical.variety.Tampering
 action.physical.variety.Theft
-action.physical.variety.Wiretapping
-action.physical.variety.Connection
 action.physical.variety.Unknown
-action.physical.variety.Other
-timeline.unit.NA
-timeline.unit.Seconds
-timeline.unit.Minutes
-timeline.unit.Hours
+action.physical.variety.Wiretapping
+action.physical.vector.Other
+action.physical.vector.Partner facility
+action.physical.vector.Partner vehicle
+action.physical.vector.Personal residence
+action.physical.vector.Personal vehicle
+action.physical.vector.Privileged Access
+action.physical.vector.Public facility
+action.physical.vector.Public vehicle
+action.physical.vector.Uncontrolled location
+action.physical.vector.Unknown
+action.physical.vector.Victim grounds
+action.physical.vector.Victim public area
+action.physical.vector.Victim secure area
+action.physical.vector.Victim work area
+action.physical.vector.Visitor privileges
+action.social.result.Elevate
+action.social.result.Exfiltrate
+action.social.result.Infiltrate
+action.social.target.Auditor
+action.social.target.Call center
+action.social.target.Cashier
+action.social.target.Customer
+action.social.target.Developer
+action.social.target.End-user
+action.social.target.Executive
+action.social.target.Finance
+action.social.target.Former employee
+action.social.target.Guard
+action.social.target.Helpdesk
+action.social.target.Human resources
+action.social.target.Maintenance
+action.social.target.Manager
+action.social.target.Other
+action.social.target.Partner
+action.social.target.System admin
+action.social.target.Unknown
+action.social.variety.Baiting
+action.social.variety.Bribery
+action.social.variety.Eavesdropping
+action.social.variety.Elicitation
+action.social.variety.Extortion
+action.social.variety.Forgery
+action.social.variety.Influence
+action.social.variety.Other
+action.social.variety.Phishing
+action.social.variety.Pretexting
+action.social.variety.Propaganda
+action.social.variety.Scam
+action.social.variety.Spam
+action.social.variety.Unknown
+action.social.vector.Documents
+action.social.vector.Email
+action.social.vector.IM
+action.social.vector.In-person
+action.social.vector.Other
+action.social.vector.Phone
+action.social.vector.Removable media
+action.social.vector.SMS
+action.social.vector.Social media
+action.social.vector.Software
+action.social.vector.Unknown
+action.social.vector.Website
+actor.motive.Convenience
+actor.motive.Espionage
+actor.motive.Fear
+actor.motive.Financial
+actor.motive.Fun
+actor.motive.Grudge
+actor.motive.Ideology
+actor.motive.NA
+actor.motive.Other
+actor.motive.Secondary
+actor.motive.Unknown
+actor.external.variety.Acquaintance
+actor.external.variety.Activist
+actor.external.variety.Auditor
+actor.external.variety.Competitor
+actor.external.variety.Customer
+actor.external.variety.Force majeure
+actor.external.variety.Former employee
+actor.external.variety.Nation-state
+actor.external.variety.Organized crime
+actor.external.variety.Other
+actor.external.variety.State-affiliated
+actor.external.variety.Terrorist
+actor.external.variety.Unaffiliated
+actor.external.variety.Unknown
+actor.internal.job_change.Demoted
+actor.internal.job_change.Hired
+actor.internal.job_change.Job eval
+actor.internal.job_change.Lateral move
+actor.internal.job_change.Other
+actor.internal.job_change.Passed over
+actor.internal.job_change.Personal issues
+actor.internal.job_change.Promoted
+actor.internal.job_change.Resigned
+actor.internal.job_change.Terminated
+actor.internal.job_change.Unknown
+actor.internal.variety.Auditor
+actor.internal.variety.Call center
+actor.internal.variety.Cashier
+actor.internal.variety.Developer
+actor.internal.variety.Doctor or nurse
+actor.internal.variety.End-user
+actor.internal.variety.Executive
+actor.internal.variety.Finance
+actor.internal.variety.Guard
+actor.internal.variety.Helpdesk
+actor.internal.variety.Human resources
+actor.internal.variety.Maintenance
+actor.internal.variety.Manager
+actor.internal.variety.Other
+actor.internal.variety.System admin
+actor.internal.variety.Unknown
+asset.accessibility.External
+asset.accessibility.Internal
+asset.accessibility.Isolated
+asset.accessibility.NA
+asset.accessibility.Unknown
+asset.cloud.Customer attack
+asset.cloud.Hosting error
+asset.cloud.Hosting governance
+asset.cloud.Hypervisor
+asset.cloud.Microservices
+asset.cloud.NA
+asset.cloud.Other
+asset.cloud.Partner application
+asset.cloud.Unknown
+asset.cloud.User breakout
+asset.hosting.External dedicated
+asset.hosting.External shared
+asset.hosting.External unknown
+asset.hosting.Internal dedicated
+asset.hosting.Internal shared
+asset.hosting.Internal unknown
+asset.hosting.NA
+asset.hosting.Unknown
+asset.management.Co-managed
+asset.management.External
+asset.management.Internal
+asset.management.NA
+asset.management.Unknown
+asset.ownership.Customer
+asset.ownership.Employee
+asset.ownership.NA
+asset.ownership.Partner
+asset.ownership.Unknown
+asset.ownership.Victim
+asset.variety.E - Other
+asset.variety.E - Telematics
+asset.variety.E - Telemetry
+asset.variety.E - Unknown
+asset.variety.M - Disk drive
+asset.variety.M - Disk media
+asset.variety.M - Documents
+asset.variety.M - Flash drive
+asset.variety.M - Other
+asset.variety.M - Payment card
+asset.variety.M - Smart card
+asset.variety.M - Tapes
+asset.variety.M - Unknown
+asset.variety.N - Access reader
+asset.variety.N - Broadband
+asset.variety.N - Camera
+asset.variety.N - Firewall
+asset.variety.N - HSM
+asset.variety.N - IDS
+asset.variety.N - LAN
+asset.variety.N - NAS
+asset.variety.N - Other
+asset.variety.N - PBX
+asset.variety.N - PLC
+asset.variety.N - Private WAN
+asset.variety.N - Public WAN
+asset.variety.N - Router or switch
+asset.variety.N - RTU
+asset.variety.N - SAN
+asset.variety.N - Telephone
+asset.variety.N - Unknown
+asset.variety.N - VoIP adapter
+asset.variety.N - WLAN
+asset.variety.P - Auditor
+asset.variety.P - Call center
+asset.variety.P - Cashier
+asset.variety.P - Customer
+asset.variety.P - Developer
+asset.variety.P - End-user
+asset.variety.P - Executive
+asset.variety.P - Finance
+asset.variety.P - Former employee
+asset.variety.P - Guard
+asset.variety.P - Helpdesk
+asset.variety.P - Human resources
+asset.variety.P - Maintenance
+asset.variety.P - Manager
+asset.variety.P - Other
+asset.variety.P - Partner
+asset.variety.P - System admin
+asset.variety.P - Unknown
+asset.variety.S - Authentication
+asset.variety.S - Backup
+asset.variety.S - Code repository
+asset.variety.S - Configuration
+asset.variety.S - Database
+asset.variety.S - DCS
+asset.variety.S - DHCP
+asset.variety.S - Directory
+asset.variety.S - DNS
+asset.variety.S - File
+asset.variety.S - ICS
+asset.variety.S - Log
+asset.variety.S - Mail
+asset.variety.S - Mainframe
+asset.variety.S - Other
+asset.variety.S - Patch management
+asset.variety.S - Payment switch
+asset.variety.S - POS controller
+asset.variety.S - Print
+asset.variety.S - Proxy
+asset.variety.S - Remote access
+asset.variety.S - SCADA
+asset.variety.S - Unknown
+asset.variety.S - VM host
+asset.variety.S - Web application
+asset.variety.T - ATM
+asset.variety.T - Gas terminal
+asset.variety.T - Kiosk
+asset.variety.T - Other
+asset.variety.T - PED pad
+asset.variety.T - Unknown
+asset.variety.U - Auth token
+asset.variety.U - Desktop
+asset.variety.U - Laptop
+asset.variety.U - Media
+asset.variety.U - Mobile phone
+asset.variety.U - Other
+asset.variety.U - Peripheral
+asset.variety.U - POS terminal
+asset.variety.U - Tablet
+asset.variety.U - Telephone
+asset.variety.U - Unknown
+asset.variety.U - VoIP phone
+asset.variety.Unknown
+attribute.availability.duration.unit.Days
+attribute.availability.duration.unit.Hours
+attribute.availability.duration.unit.Minutes
+attribute.availability.duration.unit.Months
+attribute.availability.duration.unit.NA
+attribute.availability.duration.unit.Never
+attribute.availability.duration.unit.Seconds
+attribute.availability.duration.unit.Unknown
+attribute.availability.duration.unit.Weeks
+attribute.availability.duration.unit.Years
+attribute.availability.variety.Acceleration
+attribute.availability.variety.Degradation
+attribute.availability.variety.Destruction
+attribute.availability.variety.Interruption
+attribute.availability.variety.Loss
+attribute.availability.variety.Obscuration
+attribute.availability.variety.Other
+attribute.availability.variety.Unknown
+attribute.confidentiality.data_disclosure.No
+attribute.confidentiality.data_disclosure.Potentially
+attribute.confidentiality.data_disclosure.Unknown
+attribute.confidentiality.data_disclosure.Yes
+attribute.confidentiality.data_victim.Customer
+attribute.confidentiality.data_victim.Employee
+attribute.confidentiality.data_victim.Other
+attribute.confidentiality.data_victim.Partner
+attribute.confidentiality.data_victim.Patient
+attribute.confidentiality.data_victim.Student
+attribute.confidentiality.data_victim.Unknown
+attribute.confidentiality.data_victim.Victim organization
+attribute.confidentiality.data.variety.Bank
+attribute.confidentiality.data.variety.Classified
+attribute.confidentiality.data.variety.Copyrighted
+attribute.confidentiality.data.variety.Credentials
+attribute.confidentiality.data.variety.Digital certificate
+attribute.confidentiality.data.variety.Internal
+attribute.confidentiality.data.variety.Medical
+attribute.confidentiality.data.variety.Other
+attribute.confidentiality.data.variety.Payment
+attribute.confidentiality.data.variety.Personal
+attribute.confidentiality.data.variety.Secrets
+attribute.confidentiality.data.variety.Source code
+attribute.confidentiality.data.variety.System
+attribute.confidentiality.data.variety.Unknown
+attribute.confidentiality.data.variety.Virtual currency
+attribute.confidentiality.state.Other
+attribute.confidentiality.state.Printed
+attribute.confidentiality.state.Processed
+attribute.confidentiality.state.Stored
+attribute.confidentiality.state.Stored encrypted
+attribute.confidentiality.state.Stored unencrypted
+attribute.confidentiality.state.Transmitted
+attribute.confidentiality.state.Transmitted encrypted
+attribute.confidentiality.state.Transmitted unencrypted
+attribute.confidentiality.state.Unknown
+attribute.integrity.variety.Alter behavior
+attribute.integrity.variety.Created account
+attribute.integrity.variety.Defacement
+attribute.integrity.variety.Fraudulent transaction
+attribute.integrity.variety.Hardware tampering
+attribute.integrity.variety.Log tampering
+attribute.integrity.variety.Misappropriation
+attribute.integrity.variety.Misrepresentation
+attribute.integrity.variety.Modify configuration
+attribute.integrity.variety.Modify data
+attribute.integrity.variety.Modify privileges
+attribute.integrity.variety.Other
+attribute.integrity.variety.Software installation
+attribute.integrity.variety.Unknown
+category.abuse
+category.application compromise
+category.data corruption
+category.data disclosure
+category.defacement
+category.denial of service
+category.fraud
+category.lost or stolen device
+category.malware
+category.other
+category.unauthorized access
+category.unauthorized use
+category.widespread vulnerability
+confidence.High
+confidence.Low
+confidence.Medium
+confidence.None
+cost_corrective_action.Difficult and expensive
+cost_corrective_action.Simple and cheap
+cost_corrective_action.Something in-between
+cost_corrective_action.Unknown
+discovery_method.external.variety.Actor disclosure
+discovery_method.external.variety.Audit
+discovery_method.external.variety.Customer
+discovery_method.external.variety.Emergency response team
+discovery_method.ext.variety.Found documents
+discovery_method.ext.variety.Fraud detection
+discovery_method.ext.variety.Incident respose
+discovery_method.ext.variety.Law enforcement
+discovery_method.ext.variety.Monitoring service
+discovery_method.ext.variety.Other
+discovery_method.ext.variety.Security researcher
+discovery_method.ext.variety.Suspicious traffic
+discovery_method.ext.variety.Unknown
+discovery_method.ext.variety.Unrelated third party
+discovery_method.int.variety.Antivirus
+discovery_method.int.variety.Break in discovered
+discovery_method.int.variety.Data loss prevention
+discovery_method.int.variety.Financial Audit
+discovery_method.int.variety.Fraud Detection
+discovery_method.int.variety.HIDS
+discovery_method.int.variety.Incident Response
+discovery_method.int.variety.Infrastructure monitoring
+discovery_method.int.variety.IT review
+discovery_method.int.variety.Log review
+discovery_method.int.variety.NIDS
+discovery_method.int.variety.Other
+discovery_method.int.variety.Reported by employee
+discovery_method.int.variety.Security alarm
+discovery_method.int.variety.Unknown
+discovery_method.partner.variety.Antivirus
+discovery_method.partner.variety.Audit
+discovery_method.partner.variety.Incident Response
+discovery_method.partner.variety.Monitoring service
+discovery_method.partner.variety.Other
+discovery_method.partner.variety.Unknown
+impact.loss.rating.Major
+impact.loss.rating.Minor
+impact.loss.rating.Moderate
+impact.loss.rating.None
+impact.loss.rating.Unknown
+impact.loss.variety.Asset and fraud
+impact.loss.variety.Brand damage
+impact.loss.variety.Business disruption
+impact.loss.variety.Competitive advantage
+impact.loss.variety.Legal and regulatory
+impact.loss.variety.Operating costs
+impact.loss.variety.Response and recovery
+impact.overall_rating.Catastrophic
+impact.overall_rating.Damaging
+impact.overall_rating.Distracting
+impact.overall_rating.Insignificant
+impact.overall_rating.Painful
+impact.overall_rating.Unknown
+security_incident.Confirmed
+security_incident.False positive
+security_incident.Near miss
+security_incident.Suspected
+targeted.NA
+targeted.Opportunistic
+targeted.Targeted
+targeted.Unknown
 timeline.unit.Days
-timeline.unit.Weeks
+timeline.unit.Hours
+timeline.unit.Minutes
 timeline.unit.Months
-timeline.unit.Years
+timeline.unit.NA
 timeline.unit.Never
+timeline.unit.Seconds
 timeline.unit.Unknown
-workeffort.Minutes
-workeffort.Hours
-workeffort.Days
-workeffort.Weeks
-workeffort.Months
-workeffort.Years
-workeffort.Never
-workeffort.Unknown
+timeline.unit.Weeks
+timeline.unit.Years
+value-chain.cash-out.variety.Cryptocurrency
+value-chain.cash-out.variety.Direct
+value-chain.cash-out.variety.Fraud
+value-chain.cash-out.variety.Hijacked rewards
+value-chain.cash-out.variety.NA
+value-chain.cash-out.variety.Other
+value-chain.cash-out.variety.Provide service
+value-chain.cash-out.variety.Sell stolen goods
+value-chain.cash-out.variety.Unknown
+value-chain.development.variety.Bot
+value-chain.development.variety.Exploit
+value-chain.development.variety.Exploit kits
+value-chain.development.variety.NA
+value-chain.development.variety.Other
+value-chain.development.variety.Payload
+value-chain.development.variety.Persona
+value-chain.development.variety.Ransomware
+value-chain.development.variety.Trojan
+value-chain.development.variety.Unknown
+value-chain.development.variety.Website
+value-chain.distribution.variety.Botnet
+value-chain.distribution.variety.Compromised server
+value-chain.distribution.variety.Email
+value-chain.distribution.variety.Loader
+value-chain.distribution.variety.NA
+value-chain.distribution.variety.Other
+value-chain.distribution.variety.Phone
+value-chain.distribution.variety.Unknown
+value-chain.distribution.variety.Website
+value-chain.money-laundering.variety.Bank
+value-chain.money-laundering.variety.Company
+value-chain.money-laundering.variety.Cryptocurrency tumbling
+value-chain.money-laundering.variety.Employment
+value-chain.money-laundering.variety.Gambling
+value-chain.money-laundering.variety.Physical
+value-chain.money-laundering.variety.Re-shipping
+value-chain.money-laundering.variety.Smurfing
+value-chain.non-distribution services.variety.Counter AV
+value-chain.non-distribution services.variety.DNS
+value-chain.non-distribution services.variety.Hashcracking
+value-chain.non-distribution services.variety.Marketplace
+value-chain.non-distribution services.variety.NA
+value-chain.non-distribution services.variety.Other
+value-chain.non-distribution services.variety.Proxy
+value-chain.non-distribution services.variety.Unknown
+value-chain.non-distribution services.variety.VPN
+value-chain.targeting.variety.Default credentials
+value-chain.targeting.variety.Email addresses
+value-chain.targeting.variety.Lost or stolen credentials
+value-chain.targeting.variety.Misconfigurations
+value-chain.targeting.variety.NA
+value-chain.targeting.variety.Organizational information
+value-chain.targeting.variety.Other
+value-chain.targeting.variety.Personal information
+value-chain.targeting.variety.Unknown
+value-chain.targeting.variety.Vulnerabilities
+value-chain.targeting.variety.Weaknesses
+victim.employee_count.1 to 10
+victim.employee_count.10001 to 25000
+victim.employee_count.1001 to 10000
+victim.employee_count.101 to 1000
+victim.employee_count.11 to 100
+victim.employee_count.25001 to 50000
+victim.employee_count.50001 to 100000
+victim.employee_count.Large
+victim.employee_count.Over 100000
+victim.employee_count.Small
+victim.employee_count.Unknown
+victim.revenue.iso_currency_code.AED
+victim.revenue.iso_currency_code.AFN
+victim.revenue.iso_currency_code.ALL
+victim.revenue.iso_currency_code.AMD
+victim.revenue.iso_currency_code.ANG
+victim.revenue.iso_currency_code.AOA
+victim.revenue.iso_currency_code.ARS
+victim.revenue.iso_currency_code.AUD
+victim.revenue.iso_currency_code.AWG
+victim.revenue.iso_currency_code.AZN
+victim.revenue.iso_currency_code.BAM
+victim.revenue.iso_currency_code.BBD
+victim.revenue.iso_currency_code.BDT
+victim.revenue.iso_currency_code.BGN
+victim.revenue.iso_currency_code.BHD
+victim.revenue.iso_currency_code.BIF
+victim.revenue.iso_currency_code.BMD
+victim.revenue.iso_currency_code.BND
+victim.revenue.iso_currency_code.BOB
+victim.revenue.iso_currency_code.BRL
+victim.revenue.iso_currency_code.BSD
+victim.revenue.iso_currency_code.BTN
+victim.revenue.iso_currency_code.BWP
+victim.revenue.iso_currency_code.BYR
+victim.revenue.iso_currency_code.BZD
+victim.revenue.iso_currency_code.CAD
+victim.revenue.iso_currency_code.CDF
+victim.revenue.iso_currency_code.CHF
+victim.revenue.iso_currency_code.CLP
+victim.revenue.iso_currency_code.CNY
+victim.revenue.iso_currency_code.COP
+victim.revenue.iso_currency_code.CRC
+victim.revenue.iso_currency_code.CUC
+victim.revenue.iso_currency_code.CUP
+victim.revenue.iso_currency_code.CVE
+victim.revenue.iso_currency_code.CZK
+victim.revenue.iso_currency_code.DJF
+victim.revenue.iso_currency_code.DKK
+victim.revenue.iso_currency_code.DOP
+victim.revenue.iso_currency_code.DZD
+victim.revenue.iso_currency_code.EGP
+victim.revenue.iso_currency_code.ERN
+victim.revenue.iso_currency_code.ETB
+victim.revenue.iso_currency_code.EUR
+victim.revenue.iso_currency_code.FJD
+victim.revenue.iso_currency_code.FKP
+victim.revenue.iso_currency_code.GBP
+victim.revenue.iso_currency_code.GEL
+victim.revenue.iso_currency_code.GGP
+victim.revenue.iso_currency_code.GHS
+victim.revenue.iso_currency_code.GIP
+victim.revenue.iso_currency_code.GMD
+victim.revenue.iso_currency_code.GNF
+victim.revenue.iso_currency_code.GTQ
+victim.revenue.iso_currency_code.GYD
+victim.revenue.iso_currency_code.HKD
+victim.revenue.iso_currency_code.HNL
+victim.revenue.iso_currency_code.HRK
+victim.revenue.iso_currency_code.HTG
+victim.revenue.iso_currency_code.HUF
+victim.revenue.iso_currency_code.IDR
+victim.revenue.iso_currency_code.ILS
+victim.revenue.iso_currency_code.IMP
+victim.revenue.iso_currency_code.INR
+victim.revenue.iso_currency_code.IQD
+victim.revenue.iso_currency_code.IRR
+victim.revenue.iso_currency_code.ISK
+victim.revenue.iso_currency_code.JEP
+victim.revenue.iso_currency_code.JMD
+victim.revenue.iso_currency_code.JOD
+victim.revenue.iso_currency_code.JPY
+victim.revenue.iso_currency_code.KES
+victim.revenue.iso_currency_code.KGS
+victim.revenue.iso_currency_code.KHR
+victim.revenue.iso_currency_code.KMF
+victim.revenue.iso_currency_code.KPW
+victim.revenue.iso_currency_code.KRW
+victim.revenue.iso_currency_code.KWD
+victim.revenue.iso_currency_code.KYD
+victim.revenue.iso_currency_code.KZT
+victim.revenue.iso_currency_code.LAK
+victim.revenue.iso_currency_code.LBP
+victim.revenue.iso_currency_code.LKR
+victim.revenue.iso_currency_code.LRD
+victim.revenue.iso_currency_code.LSL
+victim.revenue.iso_currency_code.LTL
+victim.revenue.iso_currency_code.LVL
+victim.revenue.iso_currency_code.LYD
+victim.revenue.iso_currency_code.MAD
+victim.revenue.iso_currency_code.MDL
+victim.revenue.iso_currency_code.MGA
+victim.revenue.iso_currency_code.MKD
+victim.revenue.iso_currency_code.MMK
+victim.revenue.iso_currency_code.MNT
+victim.revenue.iso_currency_code.MOP
+victim.revenue.iso_currency_code.MRO
+victim.revenue.iso_currency_code.MUR
+victim.revenue.iso_currency_code.MVR
+victim.revenue.iso_currency_code.MWK
+victim.revenue.iso_currency_code.MXN
+victim.revenue.iso_currency_code.MYR
+victim.revenue.iso_currency_code.MZN
+victim.revenue.iso_currency_code.NAD
+victim.revenue.iso_currency_code.NGN
+victim.revenue.iso_currency_code.NIO
+victim.revenue.iso_currency_code.NOK
+victim.revenue.iso_currency_code.NPR
+victim.revenue.iso_currency_code.NZD
+victim.revenue.iso_currency_code.OMR
+victim.revenue.iso_currency_code.PAB
+victim.revenue.iso_currency_code.PEN
+victim.revenue.iso_currency_code.PGK
+victim.revenue.iso_currency_code.PHP
+victim.revenue.iso_currency_code.PKR
+victim.revenue.iso_currency_code.PLN
+victim.revenue.iso_currency_code.PYG
+victim.revenue.iso_currency_code.QAR
+victim.revenue.iso_currency_code.RON
+victim.revenue.iso_currency_code.RSD
+victim.revenue.iso_currency_code.RUB
+victim.revenue.iso_currency_code.RWF
+victim.revenue.iso_currency_code.SAR
+victim.revenue.iso_currency_code.SBD
+victim.revenue.iso_currency_code.SCR
+victim.revenue.iso_currency_code.SDG
+victim.revenue.iso_currency_code.SEK
+victim.revenue.iso_currency_code.SGD
+victim.revenue.iso_currency_code.SHP
+victim.revenue.iso_currency_code.SLL
+victim.revenue.iso_currency_code.SOS
+victim.revenue.iso_currency_code.SPL
+victim.revenue.iso_currency_code.SRD
+victim.revenue.iso_currency_code.STD
+victim.revenue.iso_currency_code.SVC
+victim.revenue.iso_currency_code.SYP
+victim.revenue.iso_currency_code.SZL
+victim.revenue.iso_currency_code.THB
+victim.revenue.iso_currency_code.TJS
+victim.revenue.iso_currency_code.TMT
+victim.revenue.iso_currency_code.TND
+victim.revenue.iso_currency_code.TOP
+victim.revenue.iso_currency_code.TRY
+victim.revenue.iso_currency_code.TTD
+victim.revenue.iso_currency_code.TVD
+victim.revenue.iso_currency_code.TWD
+victim.revenue.iso_currency_code.TZS
+victim.revenue.iso_currency_code.UAH
+victim.revenue.iso_currency_code.UGX
+victim.revenue.iso_currency_code.USD
+victim.revenue.iso_currency_code.UYU
+victim.revenue.iso_currency_code.UZS
+victim.revenue.iso_currency_code.VEF
+victim.revenue.iso_currency_code.VND
+victim.revenue.iso_currency_code.VUV
+victim.revenue.iso_currency_code.WST
+victim.revenue.iso_currency_code.XAF
+victim.revenue.iso_currency_code.XCD
+victim.revenue.iso_currency_code.XDR
+victim.revenue.iso_currency_code.XOF
+victim.revenue.iso_currency_code.XPF
+victim.revenue.iso_currency_code.YER
+victim.revenue.iso_currency_code.ZAR
+victim.revenue.iso_currency_code.ZMK
+victim.revenue.iso_currency_code.ZWD
+workeffort.unit.Days
+workeffort.unit.Hours
+workeffort.unit.Minutes
+workeffort.unit.Months
+workeffort.unit.None
+workeffort.unit.Unknown
+workeffort.unit.Weeks
+workeffort.unit.Years

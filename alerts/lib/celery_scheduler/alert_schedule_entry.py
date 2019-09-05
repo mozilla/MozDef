@@ -1,4 +1,4 @@
-# Copyright 2018 Regents of the University of Michigan
+# Copyright 2013 Regents of the University of Michigan
 
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy
@@ -6,12 +6,8 @@
 
 # Vendored and modified from https://github.com/zmap/celerybeat-mongo
 
-import datetime
-
-from mozdef_util.utilities.toUTC import toUTC
 from celery.beat import Scheduler, ScheduleEntry
 from celery import current_app
-import celery.schedules
 
 
 class AlertScheduleEntry(ScheduleEntry):
@@ -20,61 +16,64 @@ class AlertScheduleEntry(ScheduleEntry):
         self._task = task
 
         self.app = current_app._get_current_object()
-        self.name = self._task['name']
-        self.task = self._task['name']
+        self.name = self._task.name
+        self.task = self._task.task
 
-        # Fill out schedule
-        if self._task['schedule_type'] == 'crontab':
-            self.schedule = celery.schedules.crontab(
-                minute=self._task['crontab']['minute'],
-                hour=self._task['crontab']['hour'],
-                day_of_week=self._task['crontab']['day_of_week'],
-                day_of_month=self._task['crontab']['day_of_month'],
-                month_of_year=self._task['crontab']['month_of_year']
-            )
-        elif self._task['schedule_type'] == 'interval':
-            self.schedule = celery.schedules.schedule(datetime.timedelta(**{self._task['interval']['period']: self._task['interval']['every']}))
+        self.enabled = self._task.enabled
+        self.schedule_str = self._task.schedule_str
+        self.schedule_type = self._task.schedule_type
+        self.schedule = self._task.schedule
 
-        self.args = self._task['args']
-        self.kwargs = self._task['kwargs']
+        self.args = self._task.args
+        self.kwargs = self._task.kwargs
         self.options = {
-            'enabled': self._task['enabled']
+            'queue': self._task.queue,
+            'exchange': self._task.exchange,
+            'routing_key': self._task.routing_key,
+            'expires': self._task.expires
         }
-        if 'last_run_at' not in self._task:
-            self._task['last_run_at'] = self._default_now()
-        self.last_run_at = toUTC(self._task['last_run_at'])
-        if 'run_immediately' not in self._task:
-            self._task['run_immediately'] = False
+        if self._task.total_run_count is None:
+            self._task.total_run_count = 0
+        self.total_run_count = self._task.total_run_count
+
+        if not self._task.last_run_at:
+            self.last_run_at = self._default_now()
+        else:
+            self.last_run_at = self._task.last_run_at
 
     def _default_now(self):
         return self.app.now()
 
     def next(self):
-        self._task['last_run_at'] = self.app.now()
-        self._task['run_immediately'] = False
+        self._task.last_run_at = self.app.now()
+        self._task.total_run_count += 1
+        self._task.run_immediately = False
         return self.__class__(self._task)
 
     __next__ = next
 
     def is_due(self):
-        if not self._task['enabled']:
+        if not self._task.enabled:
             return False, 5.0   # 5 second delay for re-enable.
-        if 'start_after' in self._task and self._task['start_after']:
-            if datetime.datetime.now() < self._task['start_after']:
-                return False, 5.0
-        if self._task['run_immediately']:
+        if self._task.run_immediately:
             # figure out when the schedule would run next anyway
             _, n = self.schedule.is_due(self.last_run_at)
             return True, n
         return self.schedule.is_due(self.last_run_at)
 
     def __repr__(self):
-        return (u'<{0} ({1} {2}(*{3}, **{4}) {{5}})>'.format(
-            self.__class__.__name__,
+        return '<AlertScheduleEntry ({0} {1}(*{2}, **{3}) {{4}})>'.format(
             self.name, self.task, self.args,
             self.kwargs, self.schedule,
-        ))
+        )
 
     def reserve(self, entry):
         new_entry = Scheduler.reserve(self, entry)
         return new_entry
+
+    def update(self):
+        if self.total_run_count > self._task.total_run_count:
+            self._task.total_run_count = self.total_run_count
+        if self.last_run_at and self._task.last_run_at and self.last_run_at > self._task.last_run_at:
+            self._task.last_run_at = self.last_run_at
+        self._task.run_immediately = False
