@@ -5,7 +5,7 @@
 #
 
 import sys
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta
 
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger
