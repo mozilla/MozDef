@@ -7,24 +7,7 @@
 import sys
 from datetime import datetime, timedelta, tzinfo
 
-try:
-    from datetime import timezone
-
-    utc = timezone.utc
-except ImportError:
-    # Hi there python2 user
-    class UTC(tzinfo):
-        def utcoffset(self, dt):
-            return timedelta(0)
-
-        def tzname(self, dt):
-            return "UTC"
-
-        def dst(self, dt):
-            return timedelta(0)
-
-    utc = UTC()
-
+from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger
 from configlib import getConfig, OptionParser
 import json
@@ -37,8 +20,8 @@ import os
 
 class UptycsFilter(object):
     def __init__(self):
-        utc_now = datetime.datetime.utcnow()
-        self.start_time = utc_now - datetime.timedelta(days=2)
+        utc_now = toUTC(datetime.now())
+        self.start_time = utc_now - timedelta(days=2)
         self.end_time = utc_now
         self.sort_style = 'alertTime:desc'
 
@@ -65,7 +48,7 @@ class UptycsClient(object):
 
     def auth_headers(self):
         headers = {}
-        utcnow = datetime.datetime.utcnow()
+        utcnow = toUTC(datetime.now())
         date = utcnow.strftime("%a, %d %b %Y %H:%M:%S GMT")
         authVar = jwt.encode({'iss': self.key}, self.secret, algorithm='HS256')
         authorization = "Bearer %s" % (authVar.decode('utf-8'))
@@ -86,8 +69,8 @@ class UptycsClient(object):
         except requests.exceptions.RequestException as e:
             logger.exception(e)
 
-    def alerts(self, filter, sort='alertTime:desc&limit'):
-        path = '/alerts?filters=' + filter.filter_string() + "&sort=" + sort
+    def alerts(self, uptycs_filter, sort='alertTime:desc&limit'):
+        path = '/alerts?filters=' + uptycs_filter.filter_string() + "&sort=" + sort
         alerts_json = self.get(path)
         return alerts_json['items']
 
@@ -108,8 +91,7 @@ def normalize(details):
 def process_alerts(mozmsg, uptycs_alerts):
     for alert in uptycs_alerts:
         details = {}
-        dt = datetime.utcfromtimestamp(alert["alertTime"])
-        mozmsg.timestamp = dt.replace(tzinfo=utc).isoformat()
+        mozmsg.timestamp = toUTC(alert["alertTime"]).isoformat()
 
         mozmsg.log["hostname"] = alert["asset"]['hostName']
         for item in alert:
@@ -129,30 +111,30 @@ def main():
     mozmsg.tags = ["uptycs"]
     mozmsg.set_category("uptycs")
     mozmsg.source = "UptycsAPI"
-    if options.DEBUG:
+    if options.debug:
         mozmsg.debug = options.debug
         mozmsg.set_send_to_syslog(True, only_syslog=True)
 
     client = UptycsClient(options.uptycs_api_json_file)
 
     # Adjust the filter as needed to set proper search window
-    filter = UptycsFilter()
-    utc_now = datetime.datetime.utcnow()
+    uptycs_filter = UptycsFilter()
+    utc_now = toUTC(datetime.now())
 
     # If an existing state file exists, set our start window to last run
     if os.path.exists(options.statepath):
         state = pickle.load(open(options.statepath, 'rb'))
-        filter.start_time = state["last_run"]
+        uptycs_filter.start_time = state["last_run"]
         last_alert_ids = state["last_alert_ids"]
     # Otherwise, we pick from a boostrap time window
     else:
         last_alert_ids = []
-        filter.start_time = utc_now - datetime.timedelta(days=int(options.bootstrap_search_depth))
+        uptycs_filter.start_time = utc_now - timedelta(days=int(options.bootstrap_search_depth))
 
-    filter.end_time = utc_now
+    uptycs_filter.end_time = utc_now
 
-    # Query alerts that match the filter
-    alerts = client.alerts(filter)
+    # Query alerts that match the uptycs_filter
+    alerts = client.alerts(uptycs_filter)
     alert_ids = []
     if len(alerts) > 0:
         for alert in alerts:
@@ -165,7 +147,7 @@ def main():
     process_alerts(mozmsg, alerts)
 
     state = {
-        "last_run": filter.end_time,
+        "last_run": uptycs_filter.end_time,
         "last_alert_ids": alert_ids,
     }
     pickle.dump(state, open(options.statepath, "wb"))
