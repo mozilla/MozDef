@@ -184,7 +184,7 @@ Once you've reference the containers, you can shell into the alerts container:
 Next, start celery
 ::
 
-  celery -A celeryconfig worker --loglevel=info --beat
+  celery -A lib.tasks worker --loglevel=info --beat
 
 If you need to send in adhoc events you can usually do it via curl as follows:
 ::

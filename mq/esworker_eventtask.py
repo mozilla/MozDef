@@ -2,14 +2,13 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
 
 import json
 import kombu
 import sys
-import os
 import socket
 from configlib import getConfig, OptionParser
 from datetime import datetime
@@ -23,8 +22,7 @@ from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from mq.lib.plugins import sendEventToPlugins, registerPlugins
+from lib.plugins import sendEventToPlugins, registerPlugins
 
 
 # running under uwsgi?
@@ -330,13 +328,6 @@ def initConfig():
     # also toggles transient/persistant delivery (messages in memory only or stored on disk)
     # ack=True sets persistant delivery, False sets transient delivery
     options.mqack = getConfig('mqack', True, options.configfile)
-
-    # plugin options
-    # secs to pass before checking for new/updated plugins
-    # seems to cause memory leaks..
-    # regular updates are disabled for now,
-    # though we set the frequency anyway.
-    options.plugincheckfrequency = getConfig('plugincheckfrequency', 120, options.configfile)
 
 
 if __name__ == '__main__':

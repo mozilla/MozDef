@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import time
@@ -10,19 +10,15 @@ import json
 
 import pytest
 
-import os
-import sys
-
 from mozdef_util.query_models import SearchQuery, TermMatch, Aggregation, ExistsMatch
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex, DOCUMENT_TYPE
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
 
 
 class ElasticsearchClientTest(UnitTestSuite):
     def setup(self):
-        super(ElasticsearchClientTest, self).setup()
+        super().setup()
         self.es_client = ElasticsearchClient(self.options.esservers, bulk_refresh_time=3)
 
     def get_num_events(self):
@@ -54,7 +50,7 @@ class MockTransportClass:
 
 class TestWriteWithRead(ElasticsearchClientTest):
     def setup(self):
-        super(TestWriteWithRead, self).setup()
+        super().setup()
 
         self.alert = {
             'category': 'correlatedalerts',
@@ -119,7 +115,7 @@ class TestNoResultsFound(ElasticsearchClientTest):
 class TestCloseIndex(ElasticsearchClientTest):
 
     def teardown(self):
-        super(TestCloseIndex, self).teardown()
+        super().teardown()
         if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
@@ -134,7 +130,7 @@ class TestCloseIndex(ElasticsearchClientTest):
 class TestWritingToClosedIndex(ElasticsearchClientTest):
 
     def teardown(self):
-        super(TestWritingToClosedIndex, self).teardown()
+        super().teardown()
         if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
@@ -151,7 +147,7 @@ class TestWritingToClosedIndex(ElasticsearchClientTest):
 class TestOpenIndex(ElasticsearchClientTest):
 
     def teardown(self):
-        super(TestOpenIndex, self).teardown()
+        super().teardown()
         if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
@@ -296,14 +292,14 @@ class TestSimpleWrites(ElasticsearchClientTest):
 class BulkTest(ElasticsearchClientTest):
 
     def setup(self):
-        super(BulkTest, self).setup()
+        super().setup()
         self.mock_class = MockTransportClass()
         self.mock_class.backup_function(self.es_client.es_connection.transport.perform_request)
         self.es_client.es_connection.transport.perform_request = self.mock_class.perform_request
 
     def teardown(self):
         self.es_client.finish_bulk()
-        super(BulkTest, self).teardown()
+        super().teardown()
 
 
 class TestBulkWrites(BulkTest):
@@ -403,7 +399,7 @@ class TestWriteWithIDExists(ElasticsearchClientTest):
 class TestGetIndices(ElasticsearchClientTest):
 
     def teardown(self):
-        super(TestGetIndices, self).teardown()
+        super().teardown()
         if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
@@ -433,7 +429,7 @@ class TestGetIndices(ElasticsearchClientTest):
 class TestIndexExists(ElasticsearchClientTest):
 
     def teardown(self):
-        super(TestIndexExists, self).teardown()
+        super().teardown()
         if self.config_delete_indexes:
             self.es_client.delete_index('test_index')
 
@@ -466,14 +462,14 @@ class TestClusterHealth(ElasticsearchClientTest):
 class TestCreatingAlias(ElasticsearchClientTest):
 
     def setup(self):
-        super(TestCreatingAlias, self).setup()
+        super().setup()
         if self.config_delete_indexes:
             self.es_client.delete_index('index1', True)
             self.es_client.delete_index('index2', True)
             self.es_client.delete_index('alias1', True)
 
     def teardown(self):
-        super(TestCreatingAlias, self).teardown()
+        super().teardown()
         if self.config_delete_indexes:
             self.es_client.delete_index('index1', True)
             self.es_client.delete_index('index2', True)
@@ -516,7 +512,7 @@ class TestCreatingAlias(ElasticsearchClientTest):
 class TestBulkInvalidFormatProblem(BulkTest):
 
     def setup(self):
-        super(TestBulkInvalidFormatProblem, self).setup()
+        super().setup()
 
         mapping = {
             "mappings": {

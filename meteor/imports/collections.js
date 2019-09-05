@@ -1,7 +1,7 @@
 /*
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at http://mozilla.org/MPL/2.0/.
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor'
@@ -32,6 +32,7 @@ Meteor.startup( () => {
     fqdnblocklist = new Mongo.Collection( "fqdnblocklist" );
     watchlist = new Mongo.Collection( "watchlist" );
     preferences = new Mongo.Collection( "preferences" );
+    alertschedules = new Mongo.Collection( "alertschedules" );
 
 
     if ( Meteor.isServer ) {
@@ -291,10 +292,15 @@ Meteor.startup( () => {
         publishPagination( fqdnblocklist );
         publishPagination( watchlist );
         publishPagination( alerts );
+        publishPagination( alertschedules );
 
         Meteor.publish( "preferences", function() {
             return preferences.find( {}, { limit: 0 } );
         } )
+
+        Meteor.publish( "alertschedules", function() {
+            return alertschedules.find( {}, { limit: 0 } );
+        } );
 
         //access rules from clients
         //barebones to allow you to specify rules
@@ -402,6 +408,12 @@ Meteor.startup( () => {
                 return ( userId );
             },
             fetch: ['creator']
+        } );
+
+        alertschedules.allow( {
+            update: function( docId, doc, fields, modifier ) {
+                return ( docId );
+            }
         } );
 
         // since we store email from oidc calls in the profile

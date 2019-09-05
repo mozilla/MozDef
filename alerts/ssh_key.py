@@ -2,12 +2,13 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch
 import re
+import os
 
 # This alert consumes data produced by the MIG sshkey module and mig-runner.
 # ssh key related events are compared against a whitelist which is the
@@ -46,7 +47,8 @@ class SSHKey(AlertTask):
     # Load whitelist from file system and store in object, path specifies the
     # path to load the whitelist from
     def _parse_whitelist(self, path):
-        with open(path) as fd:
+        full_config_filename = os.path.join(os.path.dirname(__file__), path)
+        with open(full_config_filename) as fd:
             lns = [x.strip() for x in fd.readlines()]
             for entry in lns:
                 try:

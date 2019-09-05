@@ -1,14 +1,12 @@
-import sys
 import os
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-from http_test_suite import HTTPTestSuite
+import sys
+import mock
+import importlib
+from configlib import OptionParser
 
 from mozdef_util.utilities.dot_dict import DotDict
 
-import mock
-from configlib import OptionParser
-import importlib
+from tests.http_test_suite import HTTPTestSuite
 
 
 class RestTestDict(DotDict):
@@ -18,16 +16,18 @@ class RestTestDict(DotDict):
 
 
 class RestTestSuite(HTTPTestSuite):
+    def teardown(self):
+        sys.path.remove(self.rest_path)
 
     def setup(self):
         sample_config = RestTestDict()
         sample_config.configfile = os.path.join(os.path.dirname(__file__), 'index.conf')
         OptionParser.parse_args = mock.Mock(return_value=(sample_config, {}))
 
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../rest"))
+        self.rest_path = os.path.join(os.path.dirname(__file__), "../../rest")
+        sys.path.insert(0, self.rest_path)
         import plugins
         importlib.reload(plugins)
-        from rest import index
-
-        self.application = index.application
-        super(RestTestSuite, self).setup()
+        from rest import index as rest_index
+        self.application = rest_index.application
+        super().setup()

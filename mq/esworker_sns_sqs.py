@@ -2,14 +2,13 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 
 import json
 
 import sys
-import os
 import socket
 import time
 from configlib import getConfig, OptionParser
@@ -23,9 +22,8 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from mq.lib.plugins import sendEventToPlugins, registerPlugins
-from mq.lib.sqs import connect_sqs
+from lib.plugins import sendEventToPlugins, registerPlugins
+from lib.sqs import connect_sqs
 
 
 # running under uwsgi?
@@ -65,7 +63,7 @@ class taskConsumer(object):
                         logger.error('Invalid message, not JSON <dropping message and continuing>: %r' % msg_body)
                         msg.delete()
                         continue
-                time.sleep(.1)
+                time.sleep(options.sleep_time)
             except (SSLEOFError, SSLError, socket.error):
                 logger.info('Received network related error...reconnecting')
                 time.sleep(5)
@@ -222,12 +220,8 @@ def initConfig():
     options.secretkey = getConfig('secretkey', '', options.configfile)
     options.region = getConfig('region', '', options.configfile)
 
-    # plugin options
-    # secs to pass before checking for new/updated plugins
-    # seems to cause memory leaks..
-    # regular updates are disabled for now,
-    # though we set the frequency anyway.
-    options.plugincheckfrequency = getConfig('plugincheckfrequency', 120, options.configfile)
+    # How long to sleep between polling
+    options.sleep_time = getConfig('sleep_time', 0.1, options.configfile)
 
 
 if __name__ == '__main__':

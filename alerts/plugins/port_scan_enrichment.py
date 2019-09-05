@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 
@@ -186,7 +186,7 @@ def enrich(alert, search_fn, search_window, max_connections):
         TermMatch('source', 'conn'),
         TermMatch(
             'details.sourceipaddress',
-            alert['details']['sourceipaddress'])
+            alert['events'][0]['documentsource']['details']['sourceipaddress'])
     ])
 
     results = search_fn(search_query)
@@ -196,7 +196,9 @@ def enrich(alert, search_fn, search_window, max_connections):
         for hit in results.get('hits', [])
     ]
 
-    alert['details']['recentconnections'] = []
+    alert['details'] = {
+        'recentconnections': []
+    }
 
     for event in take(events, max_connections):
         alert['details']['recentconnections'].append({

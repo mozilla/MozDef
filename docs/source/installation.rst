@@ -169,7 +169,7 @@ A simple way of doing this would be to use Bintray's repo located at: https://ww
 to download both the latest versions of rabbitmq and erlang.
 
 .. _RabbitMQ: https://www.rabbitmq.com/
-.. _EPEL repos: http://fedoraproject.org/wiki/EPEL/FAQ#howtouse
+.. _EPEL repos: https://fedoraproject.org/wiki/EPEL/FAQ#howtouse
 
 Meteor
 ******
@@ -530,7 +530,7 @@ Alternatively you can start the following services manually in this way from ins
 
   # alert worker
   (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/alerts
-  (mozdef) [mozdef@mozdev alerts]$ celery -A celeryconfig worker --loglevel=info --beat
+  (mozdef) [mozdef@mozdev alerts]$ celery -A lib.tasks worker --loglevel=info --beat
 
 To initialize elasticsearch indices and load some sample data::
 

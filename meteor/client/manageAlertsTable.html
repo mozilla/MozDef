@@ -1,0 +1,72 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+Copyright (c) 2014 Mozilla Corporation
+-->
+
+<template name="alertschedules">
+    <div class="alertschedules container">
+        <div class="fluid center">
+            <table class="table table-striped  table-hover table-condensed">
+                <caption><p class="lead">Alert Schedules</p>
+                </caption>
+            {{ #if isReady }}
+                <thead>
+                    <tr>
+                        <td>NAME</td>
+                        <td>SCHEDULE TYPE</td>
+                        <td>SCHEDULE</td>
+                        <td>LAST RUN</td>
+                        <td>ENABLED</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each documents}}
+                        {{>each_alert_schedule}}
+                    {{else}}
+                        {{#if query}}
+                            <tr><td colspan="7"><p class="alert alert-warning">Nothing found for {{query}}..</p></td></tr>
+                        {{/if}}
+                    {{/each}}
+                </tbody>
+            {{else}}
+                {{>loading}}
+            {{/if}}
+            </table>
+            {{> defaultBootstrapPaginator pagination=templatePagination limit=5 containerClass="text-center"}}
+        </div>
+    </div>
+</template>
+
+<template name="each_alert_schedule">
+    <tr class="tooltip-wrapper info-row" data-toggle="tooltip">
+        <td>{{name}}</td>
+        <td>{{schedule_type}}</td>
+        <td>{{schedule_str}}</td>
+        <td>{{last_run_at}}</td>
+    {{#if enabled}}
+        <td>Yes</td>
+        <td>
+            <span class="tooltip-wrapper" title="{{#if modifiedby}}Enabled by: {{modifiedby}} at {{modifiedat}}{{/if}}" data-toggle="tooltip">
+                <button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#disable{{_id}}">arm disable</button>
+                <div id="disable{{_id}}" class="collapse">
+                    <button class="btn btn-xs btn-warning btnAlertAck"  data-target="{{_id}}">Disable</button>
+                </div>
+            </span>
+        </td>
+    {{else}}
+        <td>No</td>
+        <td>
+            <span class="tooltip-wrapper" title="{{#if modifiedby}}Disabled by: {{modifiedby}} at {{modifiedat}}{{/if}}" data-toggle="tooltip">
+                <button class="btn btn-xs btn-warning" data-toggle="collapse" data-target="#enable{{_id}}">arm enable</button>
+                <div id="enable{{_id}}" class="collapse">
+                    <button class="btn btn-xs btn-warning btnAlertAcked" data-target="{{_id}}">Enable</button>
+                </div>
+            </span>
+        </td>
+    {{/if}}
+    </tr>
+
+</template>
