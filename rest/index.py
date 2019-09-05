@@ -20,11 +20,13 @@ from ipwhois import IPWhois
 from operator import itemgetter
 from pymongo import MongoClient
 from bson import json_util
+from bson.codec_options import CodecOptions
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
 from mozdef_util.query_models import SearchQuery, TermMatch
 
 from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.utilities.toUTC import toUTC
 
 
 options = None
@@ -235,6 +237,89 @@ def index():
         response.status = 500
 
     sendMessgeToPlugins(request, response, 'ipdshieldquery')
+    return response
+
+
+@route('/alertschedules')
+@route('/alertschedules/')
+@enable_cors
+def index():
+    '''an endpoint to return alert schedules'''
+    if request.body:
+        request.body.read()
+        request.body.close()
+    response.content_type = "application/json"
+    mongoclient = MongoClient(options.mongohost, options.mongoport)
+    schedulers_db = mongoclient.meteor['alertschedules'].with_options(codec_options=CodecOptions(tz_aware=True))
+
+    mongodb_alerts = schedulers_db.find()
+    alert_schedules_dict = {}
+    for mongodb_alert in mongodb_alerts:
+        if mongodb_alert['last_run_at']:
+            mongodb_alert['last_run_at'] = mongodb_alert['last_run_at'].isoformat()
+        if 'modifiedat' in mongodb_alert:
+            mongodb_alert['modifiedat'] = mongodb_alert['modifiedat'].isoformat()
+        alert_schedules_dict[mongodb_alert['name']] = mongodb_alert
+
+    response.body = json.dumps(alert_schedules_dict)
+    response.status = 200
+    return response
+
+
+@post('/syncalertschedules', methods=['POST'])
+@post('/syncalertschedules/', methods=['POST'])
+@enable_cors
+def sync_alert_schedules():
+    '''an endpoint to return alerts schedules'''
+    if not request.body:
+        response.status = 503
+        return response
+
+    alert_schedules = json.loads(request.body.read())
+    request.body.close()
+
+    response.content_type = "application/json"
+    mongoclient = MongoClient(options.mongohost, options.mongoport)
+    schedulers_db = mongoclient.meteor['alertschedules'].with_options(codec_options=CodecOptions(tz_aware=True))
+    results = schedulers_db.find()
+    for result in results:
+        if result['name'] in alert_schedules:
+            new_sched = alert_schedules[result['name']]
+            result['total_run_count'] = new_sched['total_run_count']
+            result['last_run_at'] = new_sched['last_run_at']
+            if result['last_run_at']:
+                result['last_run_at'] = toUTC(result['last_run_at'])
+            logger.debug("Inserting schedule for {0} into mongodb".format(result['name']))
+            schedulers_db.save(result)
+
+    response.status = 200
+    return response
+
+
+@post('/updatealertschedules', methods=['POST'])
+@post('/updatealertschedules/', methods=['POST'])
+@enable_cors
+def update_alert_schedules():
+    '''an endpoint to return alerts schedules'''
+    if not request.body:
+        response.status = 503
+        return response
+
+    alert_schedules = json.loads(request.body.read())
+    request.body.close()
+
+    response.content_type = "application/json"
+    mongoclient = MongoClient(options.mongohost, options.mongoport)
+    schedulers_db = mongoclient.meteor['alertschedules'].with_options(codec_options=CodecOptions(tz_aware=True))
+    schedulers_db.remove()
+
+    for alert_name, alert_schedule in alert_schedules.items():
+        if alert_schedule['last_run_at']:
+            alert_schedule['last_run_at'] = toUTC(alert_schedule['last_run_at'])
+        logger.debug("Inserting schedule for {0} into mongodb".format(alert_name))
+        schedulers_db.insert(alert_schedule)
+
+    response.status = 200
     return response
 
 
