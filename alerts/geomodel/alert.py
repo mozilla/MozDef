@@ -4,8 +4,8 @@ from typing import NamedTuple, Optional
 
 import netaddr
 
-from alerts.geomodel.config import Whitelist
-from alerts.geomodel.locality import State, Locality
+from .config import Whitelist
+from .locality import State, Locality
 
 
 _AIR_TRAVEL_SPEED = 1000.0  # km/h

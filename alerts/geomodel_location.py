@@ -14,9 +14,9 @@ from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, QueryStringMatch as QSMatch
 from mozdef_util.utilities.logger import logger
 
-import alerts.geomodel.alert as alert
-import alerts.geomodel.config as config
-import alerts.geomodel.locality as locality
+import geomodel.alert as alert
+import geomodel.config as config
+import geomodel.locality as locality
 
 
 _DEFAULT_SUMMARY = 'Authenticated action taken by a user outside of any of '\
