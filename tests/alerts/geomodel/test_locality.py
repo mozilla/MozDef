@@ -217,8 +217,10 @@ class TestLocality:
             },
             {
                 '_source': {
-                    'sourceipaddress': '1.2.3.4',
-                    'notthegeolocation': 'uhoh'
+                    'details': {
+                        'sourceipaddress': '1.2.3.4',
+                        'notthegeolocation': 'uhoh'
+                    }
                 }
             }
         ]
@@ -231,12 +233,14 @@ class TestLocality:
         # Missing `utctimestamp`.
         test_event = {
             '_source': {
-                'sourceipaddress': '1.2.3.4',
-                'sourceipgeolocation': {
-                    'city': 'Toronto',
-                    'country_code': 'CA',
-                    'latitude': 43.6529,
-                    'longitude': -79.3849
+                'details': {
+                    'sourceipaddress': '1.2.3.4',
+                    'sourceipgeolocation': {
+                        'city': 'Toronto',
+                        'country_code': 'CA',
+                        'latitude': 43.6529,
+                        'longitude': -79.3849
+                    }
                 }
             }
         }
@@ -248,13 +252,15 @@ class TestLocality:
     def test_from_event_parses_valid_timestamp(self):
         test_event = {
             '_source': {
-                'sourceipaddress': '1.2.3.4',
                 'utctimestamp': '2019-07-31T17:56:38.908000+00:00',
-                'sourceipgeolocation': {
-                    'city': 'Toronto',
-                    'country_code': 'CA',
-                    'latitude': 43.6529,
-                    'longitude': -79.3849
+                'details': {
+                    'sourceipaddress': '1.2.3.4',
+                    'sourceipgeolocation': {
+                        'city': 'Toronto',
+                        'country_code': 'CA',
+                        'latitude': 43.6529,
+                        'longitude': -79.3849
+                    }
                 }
             }
         }
