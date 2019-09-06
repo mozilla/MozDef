@@ -22,6 +22,7 @@ def handle_event(event):
     event['tags'] += 'demodata'
     return event
 
+
 def handle_events(sample_events, num_picked, es_client):
     selected_events = []
     if num_picked == 0:
@@ -33,6 +34,7 @@ def handle_events(sample_events, num_picked, es_client):
     for event in selected_events:
         event = handle_event(event)
         es_client.save_event(event)
+
 
 def run(num_rounds, num_events, sleep_time, es_client):
     sample_events_dir = os.path.join(os.path.dirname(__file__), "sample_events")
