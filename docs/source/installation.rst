@@ -539,12 +539,11 @@ To initialize elasticsearch indices and create sample kibana dashboards::
 
 To add some sample data::
 
-  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/examples/demo
-  (mozdef) [mozdef@mozdev es-docs]$ python inject.py
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/scripts/demo
+  (mozdef) [mozdef@mozdev demo]$ python populate_sample_events.py --num-rounds=1
 
-To add more sample data you can run the following from inside the venv::
+To continously add sample data::
 
-  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/examples/demo
-  (mozdef) [mozdef@mozdev demo]$ ./syncalerts.sh
-  (mozdef) [mozdef@mozdev demo]$ ./sampleevents.sh
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/scripts/demo
+  (mozdef) [mozdef@mozdev demo]$ python populate_sample_events.py
 

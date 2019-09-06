@@ -20,7 +20,6 @@ Table of Contents
   cloud_deployment
   advanced_settings
   code
-  benchmarking
   cicd
   contributors
 
