@@ -26,14 +26,14 @@ class TestAlertGeoModel(AlertTestSuite):
 
     default_event = {
         '_source': {
-            'sourceipaddress': '1.2.3.4',
-            'sourceipgeolocation': {
-                'city': 'Toronto',
-                'country_code': 'CA',
-                'latitude': 43.6529,
-                'longitude': -79.3849
-            },
             'details': {
+                'sourceipaddress': '1.2.3.4',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3849
+                },
                 'username': 'tester1'
             },
             'tags': ['auth0']
@@ -42,14 +42,14 @@ class TestAlertGeoModel(AlertTestSuite):
 
     no_change_event = {
         '_source': {
-            'sourceipaddress': '4.3.2.1',
-            'sourceipgeolocation': {
-                'city': 'Toronto',
-                'country_code': 'CA',
-                'latitude': 43.6529,
-                'longitude': -79.3849
-            },
             'details': {
+                'sourceipaddress': '4.3.2.1',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3849
+                },
                 'username': 'tester2'
             }
         }
