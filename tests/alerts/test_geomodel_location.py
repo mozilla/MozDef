@@ -57,8 +57,7 @@ class TestAlertGeoModel(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'Authenticated action taken by a user outside of any of '
-        'their known localities.',
+        'summary': 'tester1 is now active in Toronto,CA. Previously San Francisco,US',
         'details': {
             'username': 'tester1',
             'sourceipaddress': '1.2.3.4',
