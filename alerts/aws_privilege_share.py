@@ -14,6 +14,10 @@ _AGGREGATE_KEY = 'details.requestparameters.username'
 
 _IAM_USER_KEY = 'details.useridentity.sessioncontext.sessionissuer.username'
 
+_AWS_EVENT_KEY = 'details.eventname'
+
+_ATTACH_POLICY_ACTION = 'AttachUserPolicy'
+
 
 class AlertAWSPrivilegeShare(AlertTask):
     '''An alert that fires when any of a configured list of AWS IAM users
@@ -25,16 +29,15 @@ class AlertAWSPrivilegeShare(AlertTask):
         with open(_CONFIG_FILE) as cfg_file:
             self.config = json.load(cfg_file)
 
-        print('loaded config {}'.format(self.config))
-
-        query_string = '{key}: ({values})'.format(
-            key=_IAM_USER_KEY,
-            values=' '.join(self.config['rootUsers']))
+        query_string = ' OR '.join([
+            '{0}: {1}'.format(_IAM_USER_KEY, user)
+            for user in self.config['rootUsers']
+        ])
 
         query = SearchQuery(**self.config['searchWindow'])
         query.add_must([
             QueryStringMatch(query_string),
-            TermMatch('details.eventname', 'AttachUserPolicy')
+            TermMatch(_AWS_EVENT_KEY, _ATTACH_POLICY_ACTION)
         ])
 
         self.filtersManual(query)
@@ -42,7 +45,7 @@ class AlertAWSPrivilegeShare(AlertTask):
         self.walkAggregations(threshold=1)
 
 
-    def onAggregation(self):
+    def onAggregation(self, aggreg):
         # Index all the way into the first event to get the name of the IAM
         # user that attached a new policy to another user.
         issuing_user = reduce(
