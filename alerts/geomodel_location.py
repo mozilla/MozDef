@@ -14,13 +14,10 @@ from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, QueryStringMatch as QSMatch
 from mozdef_util.utilities.logger import logger
 
-import alerts.geomodel.alert as alert
-import alerts.geomodel.config as config
-import alerts.geomodel.locality as locality
+import geomodel.alert as alert
+import geomodel.config as config
+import geomodel.locality as locality
 
-
-_DEFAULT_SUMMARY = 'Authenticated action taken by a user outside of any of '\
-    'their known localities.'
 
 _CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
@@ -37,6 +34,8 @@ class AlertGeoModel(AlertTask):
     def main(self):
         cfg = self._load_config()
 
+        if not self.es.index_exists('localities'):
+            self.es.create_index('localities')
         for query_index in range(len(cfg.events)):
             try:
                 self._process(cfg, query_index)
@@ -80,8 +79,15 @@ class AlertGeoModel(AlertTask):
 
         if new is not None:
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
+            summary = "{0} is now active in {1},{2}. Previously {3},{4}".format(
+                username,
+                entry.state.localities[-1].city,
+                entry.state.localities[-1].country,
+                entry.state.localities[-2].city,
+                entry.state.localities[-2].country,
+            )
             alert_dict = self.createAlertDict(
-                _DEFAULT_SUMMARY,
+                summary,
                 'geomodel',
                 ['geomodel'],
                 events,
