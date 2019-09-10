@@ -140,9 +140,9 @@ def from_event(
     '''
 
     _source = event.get('_source', {})
-    _details = _source.get('details')
-    source_ip = _details.get('sourceipaddress')
-    geo_data = _details.get('sourceipgeolocation')
+    details = _source.get('details', {})
+    source_ip = details.get('sourceipaddress')
+    geo_data = details.get('sourceipgeolocation')
 
     if source_ip is None or geo_data is None:
         return None
