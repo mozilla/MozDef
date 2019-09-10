@@ -43,7 +43,7 @@ class AlertLdapPasswordSpray(AlertTask):
 
         summary = 'LDAP Password Spray Attack in Progress from {0} targeting the following account(s): {1}'.format(
             aggreg['value'],
-            ",".join(sorted(email_list)[:10])
+            ", ".join(sorted(email_list)[:10])
         )
         if len(email_list) >= 10:
             summary += '...'

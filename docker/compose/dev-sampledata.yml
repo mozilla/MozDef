@@ -6,7 +6,7 @@ services:
       context: ../../
       dockerfile: docker/compose/mozdef_sampledata/Dockerfile
     restart: always
-    command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && /opt/mozdef/envs/mozdef/examples/demo/sampleevents.sh'
+    command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && /opt/mozdef/envs/mozdef/scripts/demo/populate_sample_events.sh'
     links:
       - elasticsearch
     depends_on:
@@ -17,4 +17,4 @@ services:
     networks:
       - default
     volumes:
-      - ../../examples:/opt/mozdef/envs/mozdef/examples
+      - ../../scripts/demo:/opt/mozdef/envs/mozdef/scripts/demo

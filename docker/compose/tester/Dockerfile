@@ -6,7 +6,7 @@ RUN pip install -r /opt/mozdef/envs/mozdef/tests/requirements_tests.txt
 COPY alerts /opt/mozdef/envs/mozdef/alerts
 COPY bot /opt/mozdef/envs/mozdef/bot
 COPY cron /opt/mozdef/envs/mozdef/cron
-COPY examples /opt/mozdef/envs/mozdef/examples
+COPY scripts /opt/mozdef/envs/mozdef/scripts
 COPY loginput /opt/mozdef/envs/mozdef/loginput
 COPY mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
 COPY mq /opt/mozdef/envs/mozdef/mq
