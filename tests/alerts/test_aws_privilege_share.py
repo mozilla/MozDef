@@ -15,7 +15,7 @@ class TestAlertAWSPrivilegeShare(AlertTestSuite):
                 },
                 'useridentity': {
                     'sessioncontext': {
-                        'sessionuser': {
+                        'sessionissuer': {
                             'username': 'InfosecAdmin'
                         }
                     }
@@ -33,7 +33,7 @@ class TestAlertAWSPrivilegeShare(AlertTestSuite):
                 },
                 'useridentity': {
                     'sessioncontext': {
-                        'sessionuser': {
+                        'sessionissuer': {
                             'username': 'NotAdmin'
                         }
                     }
@@ -51,7 +51,7 @@ class TestAlertAWSPrivilegeShare(AlertTestSuite):
                 },
                 'useridentity': {
                     'sessioncontext': {
-                        'sessionuser': {
+                        'sessionissuer': {
                             'username': 'InfosecAdmin'
                         }
                     }
