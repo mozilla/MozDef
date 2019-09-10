@@ -35,7 +35,6 @@ class AlertSensitiveUserUID0(AlertTask):
         self.searchEventsSimple()
         self.walkEvents()
 
-
     def onEvent(self, event):
         '''Construct an alert for each event found.
         '''
