@@ -64,7 +64,6 @@ class TestAlertAWSPrivilegeShare(AlertTestSuite):
         'category': 'privileges',
         'tags': ['aws', 'privileges'],
         'severity': 'NOTICE',
-        #'summary': 'InfosecAdmin granted permissions to tester in AWS'
     }
 
     test_cases = [

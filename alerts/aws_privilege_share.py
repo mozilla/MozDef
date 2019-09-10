@@ -44,7 +44,6 @@ class AlertAWSPrivilegeShare(AlertTask):
         self.searchEventsAggregated(_AGGREGATE_KEY, samplesLimit=10)
         self.walkAggregations(threshold=1)
 
-
     def onAggregation(self, aggreg):
         # Index all the way into the first event to get the name of the IAM
         # user that attached a new policy to another user.
