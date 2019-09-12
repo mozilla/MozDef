@@ -88,8 +88,8 @@ class TestAlertGeoModel(AlertTestSuite):
     def setup(self):
         super().setup()
 
+        index = 'localities'
         if self.config_delete_indexes:
-            index = 'localities'
             self.es_client.delete_index(index, True)
             self.es_client.create_index(index)
 
@@ -134,3 +134,4 @@ class TestAlertGeoModel(AlertTestSuite):
     def teardown(self):
         if self.config_delete_indexes:
             self.es_client.delete_index('localities', True)
+        super().teardown()
