@@ -62,7 +62,7 @@ class AlertGeoModel(AlertTask):
         entry = locality.find(query, username, cfg.localities.es_index)
         if entry is None:
             entry = locality.Entry(
-                '', locality.State('localities', username, []))
+                '', locality.State('locality', username, []))
 
         updated = locality.Update.flat_map(
             lambda state: locality.remove_outdated(
