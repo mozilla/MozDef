@@ -21,6 +21,7 @@ Table of Contents
   advanced_settings
   code
   cicd
+  references
   contributors
 
 
