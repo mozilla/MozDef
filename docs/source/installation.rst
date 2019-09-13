@@ -530,16 +530,20 @@ Alternatively you can start the following services manually in this way from ins
 
   # alert worker
   (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/alerts
-  (mozdef) [mozdef@mozdev alerts]$ celery -A celeryconfig worker --loglevel=info --beat
+  (mozdef) [mozdef@mozdev alerts]$ celery -A lib.tasks worker --loglevel=info --beat
 
-To initialize elasticsearch indices and load some sample data::
+To initialize elasticsearch indices and create sample kibana dashboards::
 
-  (mozdef) [mozdef@mozdev mozdef]$ cd examples/es-docs/
-  (mozdef) [mozdef@mozdev es-docs]$ python inject.py
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/scripts/setup
+  (mozdef) [mozdef@mozdev setup$ python initial_setup.py http://<elasticsearch_host>:9200 http://<kibana_host>:5601
 
-To add more sample data you can run the following from inside the venv::
+To add some sample data::
 
-  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/examples/demo
-  (mozdef) [mozdef@mozdev demo]$ ./syncalerts.sh
-  (mozdef) [mozdef@mozdev demo]$ ./sampleevents.sh
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/scripts/demo
+  (mozdef) [mozdef@mozdev demo]$ python populate_sample_events.py --num-rounds=1
+
+To continously add sample data::
+
+  (mozdef) [mozdef@mozdev mozdef]$ cd ~/mozdef/scripts/demo
+  (mozdef) [mozdef@mozdev demo]$ python populate_sample_events.py
 

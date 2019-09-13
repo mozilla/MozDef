@@ -5,7 +5,7 @@ discovery.type: single-node
 action.destructive_requires_name: true
 
 # Disable auto creation unless these indexes
-action.auto_create_index:  .watches,.triggered_watches,.watcher-history-*,.kibana_*
+action.auto_create_index:  .watches,.triggered_watches,.watcher-history-*,.kibana_*,localities
 
 # Add these to prevent requiring a user/pass and termination of ES when looking for "ingest" assignments.
 # The watcher directive allows for the deletion of failed watcher indices as they sometimes get created with glitches.

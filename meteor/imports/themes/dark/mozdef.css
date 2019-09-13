@@ -36,6 +36,15 @@ body{
 
 
 /*mozdef custom */
+
+.calendar-table, .available {
+    color: black;
+}
+
+.daterangepicker_input {
+    color: black;
+}
+
 .upperwhite {
     color: #FFF;
     text-transform: uppercase;

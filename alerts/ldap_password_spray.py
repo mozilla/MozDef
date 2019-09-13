@@ -32,9 +32,10 @@ class AlertLdapPasswordSpray(AlertTask):
 
         for event in aggreg['allevents']:
             for request in event['_source']['details']['requests']:
-                match_object = re.match(email_regex, request['details'][0])
-                if match_object:
-                    email_list.add(match_object.group(1))
+                for detail in request['details']:
+                    match_object = re.match(email_regex, detail)
+                    if match_object:
+                        email_list.add(match_object.group(1))
 
         # If no emails, don't throw alert
         # if len(email_list) == 0:
@@ -42,7 +43,9 @@ class AlertLdapPasswordSpray(AlertTask):
 
         summary = 'LDAP Password Spray Attack in Progress from {0} targeting the following account(s): {1}'.format(
             aggreg['value'],
-            ",".join(sorted(email_list))
+            ", ".join(sorted(email_list)[:10])
         )
+        if len(email_list) >= 10:
+            summary += '...'
 
         return self.createAlertDict(summary, category, tags, aggreg['events'], severity)

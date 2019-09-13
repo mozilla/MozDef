@@ -42,6 +42,7 @@ def parse_config_file():
         options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
         options.mqport = getConfig('mqport', 5672, options.configfile)
         options.mqack = getConfig('mqack', True, options.configfile)
+
         CONFIG_FILE_CONTENTS = options
 
     return CONFIG_FILE_CONTENTS
