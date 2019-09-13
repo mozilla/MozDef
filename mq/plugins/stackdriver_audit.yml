@@ -1,0 +1,24 @@
+---
+  data_access:
+    details.username: details.gaudit.authenticationInfo.principalEmail
+    details.action: details.gaudit.methodName
+    details.service: details.gaudit.serviceName
+    details.serviceData: details.gaudit.serviceData
+    details.resourcename: details.gaudit.resourceName
+    details.resourcetype: details.resource.type
+    details.projectid: details.resource.labels.project_id
+    details.logname: details.logName
+    details.sdreceivetimestamp: details.receiveTimestamp
+    details.sourceipaddress: details.gaudit.requestMetadata.callerIp
+
+  activity:
+    details.username: details.gaudit.authenticationInfo.principalEmail
+    details.action: details.gaudit.methodName
+    details.service: details.gaudit.serviceName
+    details.serviceData: details.gaudit.serviceData
+    details.resourcename: details.gaudit.resourceName
+    details.resourcetype: details.resource.type
+    details.projectid: details.resource.labels.project_id
+    details.logname: details.logName
+    details.sdreceivetimestamp: details.receiveTimestamp
+    details.sourceipaddress: details.gaudit.requestMetadata.callerIp
