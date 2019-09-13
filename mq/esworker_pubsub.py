@@ -7,18 +7,11 @@
 
 # Check if projectID has been defined in the config
 # Check if subscriptionName has been defined in the config
-# Write a message handler -> ACK and process the message (but wrap processing in a try/catch)
 # Check if the message's fields + metadata are present and of a correct type - https://github.com/mozilla/fxa/blob/master/packages/fxa-customs-server/lib/dataflow.js#L130
-# See https://docs.google.com/document/d/1ESuraiNM5nPlicQ5zLFwOYZktTV-i8tqwbnwmxdJzyk
-# for expected metadata fields
 # Catch https://googleapis.dev/python/pubsub/latest/subscriber/api/futures.html#google.cloud.pubsub_v1.subscriber.futures.StreamingPullFuture
 # Set the flow_control in the subscribe(subscription, callback, flow_control=(), scheduler=None) call
 # https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/pubsub/cloud-client/subscriber.py
 # https://github.com/mozilla/fxa/blob/master/packages/fxa-customs-server/lib/dataflow.js#L155
-# Admin Activity audit logs
-# Data Access audit logs
-# System Event audit logs
-# https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
 
 import json
 
@@ -42,7 +35,6 @@ from google.cloud import pubsub
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
 from mq.lib.plugins import sendEventToPlugins, registerPlugins
-from mq.lib.sqs import connect_sqs
 
 # running under uwsgi?
 try:
