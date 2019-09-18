@@ -91,7 +91,7 @@ class AlertGeoModel(AlertTask):
                 'geomodel',
                 ['geomodel'],
                 events,
-                'WARNING')
+                'INFO')
 
             alert_dict['details'] = {
                 'username': new.username,
