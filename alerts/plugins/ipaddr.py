@@ -3,9 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-from configlib import getConfig, OptionParser
 import netaddr
-import os
 
 
 def isIPv4(ip):
@@ -36,23 +34,9 @@ class message(object):
         uses heuristic to find and attach the source IP address of the alert
         '''
 
-        # set my own conf file
-        # relative path to the rest index.py file
-        self.configfile = os.path.join(os.path.dirname(__file__), 'ipaddr.conf')
-        self.options = None
-        if os.path.exists(self.configfile):
-            self.initConfiguration()
-
-        self.registration = self.options.keywords.split(" ")
+        # Match on all alerts
+        self.registration = ['*']
         self.priority = 1
-
-    def initConfiguration(self):
-        myparser = OptionParser()
-        # setup self.options by sending empty list [] to parse_args
-        (self.options, args) = myparser.parse_args([])
-
-        # fill self.options with plugin-specific options
-        self.options.keywords = getConfig('keywords', 'localhost', self.configfile)
 
     def onMessage(self, message):
         '''

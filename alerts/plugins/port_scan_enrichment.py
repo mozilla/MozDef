@@ -7,6 +7,7 @@
 import json
 import os
 
+from lib.config import ES
 from mozdef_util.query_models import SearchQuery, TermMatch
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
@@ -14,10 +15,6 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient
 CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
     'port_scan_enrichment.json')
-
-MISSING_REQUIRED_KEY_ERR_MSG = 'invalid configuration; '\
-    'missing key "elasticSearchAddress" must be a URL '\
-    'pointing to the ElasticSearch instance used by MozDef'
 
 
 class message(object):
@@ -32,7 +29,6 @@ class message(object):
 
     ```json
     {
-      "elasticSearchAddress": "http://127.0.0.1:9200",
       "indicesToSearch": [
         "events-weekly"
       ],
@@ -48,8 +44,6 @@ class message(object):
     }
     ```
 
-    `elasticSearchAddress` must be provided and must be a URL pointing
-    to the ElasticSearch instance containing MozDef alerts.
     `indicesToSearch` is an array of names of indices to search in ES.
     If not provided or else an empty array, it defaults to `["events-weekly"]`.
     `maxConnections` is the maximum number of successful
@@ -93,12 +87,7 @@ class message(object):
 
         config = _load_config(CONFIG_FILE)
 
-        try:
-            es_address = config['elasticSearchAddress']
-        except KeyError:
-            raise KeyError(MISSING_REQUIRED_KEY_ERR_MSG)
-
-        es_client = ElasticsearchClient(es_address)
+        es_client = ElasticsearchClient(ES['servers'])
 
         search_indices = config.get('searchIndices', [])
 
