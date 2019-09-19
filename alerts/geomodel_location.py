@@ -11,7 +11,7 @@ import sys
 import traceback
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, QueryStringMatch as QSMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, SubnetMatch, QueryStringMatch as QSMatch
 from mozdef_util.utilities.logger import logger
 
 import geomodel.alert as alert
@@ -93,7 +93,7 @@ class AlertGeoModel(AlertTask):
 
             journal(entry, cfg.localities.es_index)
 
-        new = alert.alert(entry.state, cfg.whitelist)
+        new = alert.alert(entry.state)
 
         if new is not None:
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
@@ -131,6 +131,9 @@ class AlertGeoModel(AlertTask):
         # Ignore whitelisted usernames
         for whitelisted_username in cfg.whitelist.users:
             search.add_must_not(TermMatch(evt_cfg.username_path, whitelisted_username))
+        # Ignore whitelisted subnets
+        for whitelisted_subnet in cfg.whitelist.cidrs:
+            search.add_must_not(SubnetMatch('details.sourceipaddress', whitelisted_subnet))
 
         self.filtersManual(search)
         self.searchEventsAggregated(evt_cfg.username_path, samplesLimit=1000)
