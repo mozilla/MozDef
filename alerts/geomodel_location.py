@@ -51,6 +51,9 @@ class AlertGeoModel(AlertTask):
         events = agg['events']
         cfg = agg['config']
 
+        if username == '':
+            return None
+
         localities = list(filter(
             lambda state: state is not None,
             map(locality.from_event, events)))
