@@ -2,9 +2,6 @@ import math
 from operator import attrgetter
 from typing import NamedTuple, Optional
 
-import netaddr
-
-from .config import Whitelist
 from .locality import State, Locality
 
 
