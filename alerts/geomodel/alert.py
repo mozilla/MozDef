@@ -63,23 +63,13 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
     return (distance / _AIR_TRAVEL_SPEED) <= (hours_between - 1)
 
 
-def alert(user_state: State, whitelist: Whitelist) -> Optional[Alert]:
+def alert(user_state: State) -> Optional[Alert]:
     '''Determine whether an alert should fire given a particular user's
     locality state.  If an alert should fire, an `Alert` is returned, otherwise
     this function returns `None`.
     '''
 
-    ignore_cidrs = [netaddr.IPSet([cidr]) for cidr in whitelist.cidrs]
-
-    if user_state.username in whitelist.users:
-        return None
-
-    locs_to_consider = []
-    for loc in sorted(user_state.localities, key=attrgetter('lastaction')):
-        ip = netaddr.IPAddress(loc.sourceipaddress)
-
-        if all([ip not in cidr for cidr in ignore_cidrs]):
-            locs_to_consider.append(loc)
+    locs_to_consider = sorted(user_state.localities, key=attrgetter('lastaction'))
 
     if len(locs_to_consider) < 2:
         return None
