@@ -1,0 +1,33 @@
+---
+  windowseventlogs:
+    channel: Channel
+    severityvalue: SeverityValue
+    eventid: EventID
+    providerguid: ProviderGuid
+    version: Version
+    task: Task
+    opcodevalue: OpcodeValur
+    recordnumber: RecordNumber
+    processid: ProcessID
+    threadid: ThreadID
+    category: Category
+    opcode: Opcode
+    packagename: PackageName
+    targetusername: TargetUserName
+    status: Status
+    subjectusersid: SubjectUserSid
+    subjectusername: SubjectUserName
+    subjectdomainname: SubjectDomainName
+    subjectlogonid: SubjectLogonId
+    targetusersid: TargetUserSid
+    targetdomainname: TargetDomainName
+    targetlogonid: TargetLogonId
+    logontype: LogonType
+    logonprocessname: LogonProcessName
+    authenticationpackagename: AuthenticationPackageName
+    workstationname: WorkstationName
+    logonguid: LogonGuid
+    transmittedservices: TransmittedServices
+    processname: ProcessName
+    sourceipaddress: IpAddress
+    sourceport: IpPort
