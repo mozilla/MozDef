@@ -7,6 +7,7 @@ from .query_string_match import QueryStringMatch
 from .range_match import RangeMatch
 from .search_query import SearchQuery
 from .simple_results import SimpleResults
+from .subnet_match import SubnetMatch
 from .term_match import TermMatch
 from .terms_match import TermsMatch
 from .wildcard_match import WildcardMatch

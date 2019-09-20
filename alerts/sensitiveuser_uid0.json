@@ -1,0 +1,8 @@
+{
+  "sensitiveUsers": [
+    "sensitive"
+  ],
+  "searchWindow": {
+    "minutes": 30
+  }
+}
