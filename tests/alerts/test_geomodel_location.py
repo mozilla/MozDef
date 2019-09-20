@@ -135,3 +135,71 @@ class TestAlertGeoModel(AlertTestSuite):
         if self.config_delete_indexes:
             self.es_client.delete_index('localities', True)
         super().teardown()
+
+
+class TestFailingAlertGeoModel(AlertTestSuite):
+    alert_filename = 'geomodel_location'
+    alert_classname = "AlertGeoModel"
+
+    default_event = {
+        "_source": {
+            "details": {
+                "sourceipaddress": "1.2.3.4",
+                "username": "ttesterson@test.com",
+                "sourceipgeolocation": {
+                    "city": "Durham",
+                    "country_code": "US",
+                    "latitude": 35.961,
+                    "longitude": -78.9291,
+                },
+            },
+            "tags": ["auth0"],
+        }
+    }
+
+    test_cases = [
+        NegativeAlertTestCase(
+            description='Alert should not fire if new city is most recent',
+            events=[default_event])
+    ]
+
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
+    def setup(self):
+        super().setup()
+
+        index = 'localities'
+        if self.config_delete_indexes:
+            self.es_client.delete_index(index, True)
+            self.es_client.create_index(index)
+
+            preloaded_locality = {
+                "type_": "locality",
+                "username": "ttesterson@test.com",
+                "localities": [
+                    {
+                        "sourceipaddress": "1.2.3.4",
+                        "city": "Durham",
+                        "country": "US",
+                        "lastaction": toUTC(datetime.now()) - timedelta(minutes=3),
+                        "latitude": 35.961,
+                        "longitude": -78.9291,
+                        "radius": 50.0
+                    },
+                    {
+                        "sourceipaddress": "9.8.7.6",
+                        "city": "Concord",
+                        "country": "US",
+                        "lastaction": toUTC(datetime.now()) - timedelta(minutes=8),
+                        "latitude": 35.4155,
+                        "longitude": -80.6143,
+                        "radius": 50.0
+                    }
+                ]
+            }
+            self.es_client.save_object(preloaded_locality, index=index)
+            self.refresh(index)
+
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index('localities', True)
+        super().teardown()
