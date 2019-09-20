@@ -2,7 +2,7 @@ import math
 from operator import attrgetter
 from typing import List, NamedTuple, Optional
 
-from .locality import State, Locality
+from .locality import Locality
 
 
 _AIR_TRAVEL_SPEED = 1000.0  # km/h

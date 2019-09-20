@@ -68,14 +68,14 @@ class AlertGeoModel(AlertTask):
         username = agg['value']
         events = agg['events']
         cfg = agg['config']
-        
+
         query = locality.wrap_query(self.es)
         journal = locality.wrap_journal(self.es)
 
         locs_from_evts = list(filter(
             lambda state: state is not None,
             map(locality.from_event, events)))
-        
+
         entry_from_es = locality.find(query, username, cfg.localities.es_index)
 
         new_state = locality.State('locality', username, locs_from_evts)
