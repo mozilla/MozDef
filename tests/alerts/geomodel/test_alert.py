@@ -30,7 +30,7 @@ class TestAlert:
                 radius=50)
         ])
 
-        alert_produced = alert(state)
+        alert_produced = alert(state.username, state.localities)
 
         assert alert_produced is None
 
@@ -54,7 +54,7 @@ class TestAlert:
                 radius=50)
         ])
 
-        alert_produced = alert(state)
+        alert_produced = alert(state.username, state.localities)
 
         assert alert_produced is not None
         assert alert_produced.username == 'testuser'
