@@ -1,6 +1,6 @@
 import math
 from operator import attrgetter
-from typing import NamedTuple, Optional
+from typing import List, NamedTuple, Optional
 
 from .locality import State, Locality
 
@@ -60,13 +60,13 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
     return (distance / _AIR_TRAVEL_SPEED) <= (hours_between - 1)
 
 
-def alert(user_state: State) -> Optional[Alert]:
+def alert(username: str, locs: List[Locality]) -> Optional[Alert]:
     '''Determine whether an alert should fire given a particular user's
     locality state.  If an alert should fire, an `Alert` is returned, otherwise
     this function returns `None`.
     '''
 
-    locs_to_consider = sorted(user_state.localities, key=attrgetter('lastaction'))
+    locs_to_consider = sorted(locs, key=attrgetter('lastaction'))
 
     if len(locs_to_consider) < 2:
         return None
@@ -87,4 +87,4 @@ def alert(user_state: State) -> Optional[Alert]:
     geo = '{0},{1}'.format(lat, lon)
     origin = Origin(city, country, lat, lon, geo)
 
-    return Alert(user_state.username, ip, origin)
+    return Alert(username, ip, origin)

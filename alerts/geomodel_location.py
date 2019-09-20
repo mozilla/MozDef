@@ -68,41 +68,46 @@ class AlertGeoModel(AlertTask):
         username = agg['value']
         events = agg['events']
         cfg = agg['config']
-
-        localities = list(filter(
-            lambda state: state is not None,
-            map(locality.from_event, events)))
-        new_state = locality.State('locality', username, localities)
-
+        
         query = locality.wrap_query(self.es)
         journal = locality.wrap_journal(self.es)
 
-        entry = locality.find(query, username, cfg.localities.es_index)
-        if entry is None:
-            entry = locality.Entry(
+        locs_from_evts = list(filter(
+            lambda state: state is not None,
+            map(locality.from_event, events)))
+        
+        entry_from_es = locality.find(query, username, cfg.localities.es_index)
+
+        new_state = locality.State('locality', username, locs_from_evts)
+
+        if entry_from_es is None:
+            entry_from_es = locality.Entry(
                 '', locality.State('locality', username, []))
+
+        # Determine if we should trigger an alert before updating the state.
+        new_alert = alert.alert(
+            entry_from_es.state.username,
+            locs_from_evts + entry_from_es.state.localities)
 
         updated = locality.Update.flat_map(
             lambda state: locality.remove_outdated(
                 state,
                 cfg.localities.valid_duration_days),
-            locality.update(entry.state, new_state))
+            locality.update(entry_from_es.state, new_state))
 
         if updated.did_update:
-            entry = locality.Entry(entry.identifier, updated.state)
+            entry_from_es = locality.Entry(entry_from_es.identifier, updated.state)
 
-            journal(entry, cfg.localities.es_index)
+            journal(entry_from_es, cfg.localities.es_index)
 
-        new = alert.alert(entry.state)
-
-        if new is not None:
+        if new_alert is not None:
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             summary = "{0} is now active in {1},{2}. Previously {3},{4}".format(
                 username,
-                entry.state.localities[-1].city,
-                entry.state.localities[-1].country,
-                entry.state.localities[-2].city,
-                entry.state.localities[-2].country,
+                entry_from_es.state.localities[-1].city,
+                entry_from_es.state.localities[-1].country,
+                entry_from_es.state.localities[-2].city,
+                entry_from_es.state.localities[-2].country,
             )
             alert_dict = self.createAlertDict(
                 summary,
@@ -112,9 +117,9 @@ class AlertGeoModel(AlertTask):
                 'INFO')
 
             alert_dict['details'] = {
-                'username': new.username,
-                'sourceipaddress': new.sourceipaddress,
-                'origin': dict(new.origin._asdict())
+                'username': new_alert.username,
+                'sourceipaddress': new_alert.sourceipaddress,
+                'origin': dict(new_alert.origin._asdict())
             }
 
             return alert_dict

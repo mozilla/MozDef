@@ -137,7 +137,12 @@ class TestAlertGeoModel(AlertTestSuite):
         super().teardown()
 
 
-class TestFailingAlertGeoModel(AlertTestSuite):
+class TestUpdateOrdering(AlertTestSuite):
+    '''Alerts will trigger unexpectedly if locality state updates are applied
+    before determining whether a user's location has changed by comparing
+    localities from events against those in a recorded state.
+    '''
+
     alert_filename = 'geomodel_location'
     alert_classname = "AlertGeoModel"
 
