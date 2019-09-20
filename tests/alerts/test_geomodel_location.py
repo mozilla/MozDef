@@ -152,10 +152,10 @@ class TestUpdateOrdering(AlertTestSuite):
                 "sourceipaddress": "1.2.3.4",
                 "username": "ttesterson@test.com",
                 "sourceipgeolocation": {
-                    "city": "Durham",
+                    "city": "San Francisco",
                     "country_code": "US",
-                    "latitude": 35.961,
-                    "longitude": -78.9291,
+                    'latitude': 37.773972,
+                    'longitude': -122.431297,
                 },
             },
             "tags": ["auth0"],
@@ -177,32 +177,40 @@ class TestUpdateOrdering(AlertTestSuite):
             self.es_client.delete_index(index, True)
             self.es_client.create_index(index)
 
-            preloaded_locality = {
-                "type_": "locality",
-                "username": "ttesterson@test.com",
-                "localities": [
-                    {
-                        "sourceipaddress": "1.2.3.4",
-                        "city": "Durham",
-                        "country": "US",
-                        "lastaction": toUTC(datetime.now()) - timedelta(minutes=3),
-                        "latitude": 35.961,
-                        "longitude": -78.9291,
-                        "radius": 50.0
-                    },
-                    {
-                        "sourceipaddress": "9.8.7.6",
-                        "city": "Concord",
-                        "country": "US",
-                        "lastaction": toUTC(datetime.now()) - timedelta(minutes=8),
-                        "latitude": 35.4155,
-                        "longitude": -80.6143,
-                        "radius": 50.0
-                    }
-                ]
-            }
-            self.es_client.save_object(preloaded_locality, index=index)
-            self.refresh(index)
+        journal = geomodel.wrap_journal(self.es_client)
+
+        def state(username, locs):
+            return geomodel.State('locality', username, locs)
+
+        def locality(cfg):
+            return geomodel.Locality(**cfg)
+
+        test_states = [
+            state('tester1', [
+                locality({
+                    'sourceipaddress': '1.2.3.4',
+                    'city': 'San Francisco',
+                    'country': 'US',
+                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=3),
+                    'latitude': 37.773972,
+                    'longitude': -122.431297,
+                    'radius': 50
+                }),
+                locality({
+                    'sourceipaddress': '9.8.7.6',
+                    'city': 'Toronto',
+                    'country': 'CA',
+                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=5),
+                    'latitude': 43.6529,
+                    'longitude': -79.3849,
+                    'radius': 50
+                })
+            ])
+        ]
+
+        for state in test_states:
+            journal(geomodel.Entry.new(state), index)
+        self.refresh(index)
 
     def teardown(self):
         if self.config_delete_indexes:
