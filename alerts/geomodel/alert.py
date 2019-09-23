@@ -2,12 +2,11 @@ import math
 from operator import attrgetter
 from typing import List, NamedTuple, Optional
 
-from .locality import Locality
+from .locality import Locality, distance as geo_distance
 
 
-_AIR_TRAVEL_SPEED = 1000.0  # km/h
-
-_EARTH_RADIUS = 6373.0  # km # approximate
+_AIR_TRAVEL_SPEED = 277.778  # m/s
+#_AIR_TRAVEL_SPEED = 1000.0  # km/h
 
 # TODO: Switch to dataclasses when we move to Python3.7+
 
@@ -38,26 +37,15 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
     actions took place.
     '''
 
-    lat1 = math.radians(loc1.latitude)
-    lat2 = math.radians(loc2.latitude)
-    lon1 = math.radians(loc1.longitude)
-    lon2 = math.radians(loc2.longitude)
-
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    a = math.sin(dlat / 2.0) ** 2 +\
-        math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2.0) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    distance = c * _EARTH_RADIUS
+    dist_traveled = 1000 * geo_distance(loc1, loc2)  # Convert to metres
 
     seconds_between = (loc2.lastaction - loc1.lastaction).total_seconds()
-    hours_between = math.ceil(seconds_between / 60.0 / 60.0)
 
     # We pad the time with an hour to account for things like planes being
     # slowed, network delays, etc.
-    return (distance / _AIR_TRAVEL_SPEED) <= (hours_between - 1)
+    ttt = (dist_traveled / _AIR_TRAVEL_SPEED)  # Time to travel the distance.
+    pad = math.ceil((1000 * min(loc1.radius, loc2.radius)) / _AIR_TRAVEL_SPEED)
+    return (ttt + pad) <= seconds_between
 
 
 def alert(username: str, locs: List[Locality]) -> Optional[Alert]:

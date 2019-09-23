@@ -1,3 +1,4 @@
+import math
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
@@ -8,6 +9,8 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 
 # Default radius (in Kilometres) that a locality should have.
 _DEFAULT_RADIUS_KM = 50.0
+
+_EARTH_RADIUS = 6373.0  # km # approximate
 
 # TODO: Switch to dataclasses when we move to Python3.7+
 
@@ -191,7 +194,7 @@ def update(state: State, from_evt: State) -> Update:
             # If we find that the new state's locality has been recorded
             # for the user in question, we only want to update it if either
             # their IP changed or the new time of activity is more recent.
-            if loc1.city == loc2.city and loc1.country == loc2.country:
+            if distance(loc1, loc2) <= min(loc1.radius, loc2.radius):
                 did_find = True
 
                 new_more_recent = loc1.lastaction > loc2.lastaction
@@ -229,3 +232,23 @@ def remove_outdated(state: State, days_valid: int) -> Update:
     return Update(
         state=State(state.type_, state.username, new_localities),
         did_update=len(new_localities) != len(state.localities))
+
+
+def distance(loc1: Locality, loc2: Locality) -> float:
+    '''Compute the distance between two localities, returning the geographical
+    distance in kilometres (KM).
+    '''
+
+    lat1 = math.radians(loc1.latitude)
+    lat2 = math.radians(loc2.latitude)
+    lon1 = math.radians(loc1.longitude)
+    lon2 = math.radians(loc2.longitude)
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = math.sin(dlat / 2.0) ** 2 +\
+        math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2.0) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    return c * _EARTH_RADIUS
