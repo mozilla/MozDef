@@ -457,10 +457,9 @@ class TestSameCitiesOutsideRange(AlertTestSuite):
         AlertTestSuite.create_event(same_city_event)
     ]
     test_cases = [
-        PositiveAlertTestCase(
-            description='Alert fires if cities are same but geopoints are outside range',
-            events=events,
-            expected_alert=default_alert),
+        NegativeAlertTestCase(
+            description='Does not fire within the same actual city',
+            events=events)
     ]
 
     @freeze_time("2017-01-01 01:00:00", tz_offset=0)
