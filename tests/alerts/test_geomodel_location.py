@@ -436,10 +436,10 @@ class TestSameCitiesOutsideRange(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 is now active in Sherbrooke,CA. Previously San Francisco,US',
+        'summary': 'tester1 is now active in Sherbrooke,CA. Previously Sherbrooke,CA',
         'details': {
             'username': 'tester1',
-            'sourceipaddress': '1.2.3.4',
+            'sourceipaddress': '5.6.7.8',
             'origin': {
                 'city': 'Sherbrooke',
                 'country': 'CA',
