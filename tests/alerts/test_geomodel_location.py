@@ -150,7 +150,7 @@ class TestUpdateOrdering(AlertTestSuite):
         "_source": {
             "details": {
                 "sourceipaddress": "1.2.3.4",
-                "username": "ttesterson@test.com",
+                "username": "tester1",
                 "sourceipgeolocation": {
                     "city": "San Francisco",
                     "country_code": "US",
@@ -219,11 +219,6 @@ class TestUpdateOrdering(AlertTestSuite):
 
 
 class TestOnePreviousLocality(AlertTestSuite):
-    '''Alerts will trigger unexpectedly if locality state updates are applied
-    before determining whether a user's location has changed by comparing
-    localities from events against those in a recorded state.
-    '''
-
     alert_filename = 'geomodel_location'
     alert_classname = "AlertGeoModel"
 
@@ -231,7 +226,7 @@ class TestOnePreviousLocality(AlertTestSuite):
         "_source": {
             "details": {
                 "sourceipaddress": "1.2.3.4",
-                "username": "ttesterson@test.com",
+                "username": "tester1",
                 "sourceipgeolocation": {
                     "city": "San Francisco",
                     "country_code": "US",
@@ -245,16 +240,16 @@ class TestOnePreviousLocality(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 is now active in Toronto,CA. Previously San Francisco,US',
+        'summary': 'tester1 is now active in San Francisco,US. Previously Toronto,CA',
         'details': {
             'username': 'tester1',
             'sourceipaddress': '1.2.3.4',
             'origin': {
-                'city': 'Toronto',
-                'country': 'CA',
-                'latitude': 43.6529,
-                'longitude': -79.3849,
-                'geopoint': '43.6529,-79.3849'
+                'city': 'San Francisco',
+                'country': 'US',
+                'latitude': 37.773972,
+                'longitude': -122.431297,
+                'geopoint': '37.773972,-122.431297'
             }
         },
         'severity': 'INFO',
@@ -287,6 +282,101 @@ class TestOnePreviousLocality(AlertTestSuite):
 
         test_states = [
             state('tester1', [
+                locality({
+                    'sourceipaddress': '9.8.7.6',
+                    'city': 'Toronto',
+                    'country': 'CA',
+                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=5),
+                    'latitude': 43.6529,
+                    'longitude': -79.3849,
+                    'radius': 50
+                })
+            ])
+        ]
+
+        for state in test_states:
+            journal(geomodel.Entry.new(state), index)
+        self.refresh(index)
+
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index('localities', True)
+        super().teardown()
+
+
+class TestInitialLocalityPositiveAlert(AlertTestSuite):
+    alert_filename = 'geomodel_location'
+    alert_classname = "AlertGeoModel"
+
+    default_event = {
+        "_source": {
+            "details": {
+                "sourceipaddress": "5.6.7.8",
+                "username": "tester1",
+                "sourceipgeolocation": {
+                    "city": "Toronto",
+                    "country_code": "CA",
+                    'latitude': 43.6529,
+                    'longitude': -79.3849,
+                },
+            },
+            "tags": ["auth0"],
+        }
+    }
+
+    default_alert = {
+        'category': 'geomodel',
+        'summary': 'tester1 is now active in Toronto,CA. Previously San Francisco,US',
+        'details': {
+            'username': 'tester1',
+            'sourceipaddress': '5.6.7.8',
+            'origin': {
+                'city': 'Toronto',
+                'country': 'CA',
+                'latitude': 43.6529,
+                'longitude': -79.3849,
+                'geopoint': '43.6529,-79.3849'
+            }
+        },
+        'severity': 'INFO',
+        'tags': ['geomodel']
+    }
+
+    test_cases = [
+        PositiveAlertTestCase(
+            description='Alert fires when flipping between original and new locality',
+            events=[default_event],
+            expected_alert=default_alert),
+    ]
+
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
+    def setup(self):
+        super().setup()
+
+        index = 'localities'
+        if self.config_delete_indexes:
+            self.es_client.delete_index(index, True)
+            self.es_client.create_index(index)
+
+        journal = geomodel.wrap_journal(self.es_client)
+
+        def state(username, locs):
+            return geomodel.State('locality', username, locs)
+
+        def locality(cfg):
+            return geomodel.Locality(**cfg)
+
+        test_states = [
+            state('tester1', [
+                locality({
+                    'sourceipaddress': '1.2.3.4',
+                    'city': 'San Francisco',
+                    'country': 'US',
+                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=3),
+                    'latitude': 37.773972,
+                    'longitude': -122.431297,
+                    'radius': 50
+                }),
                 locality({
                     'sourceipaddress': '9.8.7.6',
                     'city': 'Toronto',
