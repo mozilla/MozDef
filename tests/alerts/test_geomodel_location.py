@@ -397,3 +397,82 @@ class TestInitialLocalityPositiveAlert(AlertTestSuite):
         if self.config_delete_indexes:
             self.es_client.delete_index('localities', True)
         super().teardown()
+
+
+class TestSameCitiesOutsideRange(AlertTestSuite):
+    alert_filename = 'geomodel_location'
+    alert_classname = "AlertGeoModel"
+
+    default_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '1.2.3.4',
+                'sourceipgeolocation': {
+                    'city': 'Sherbrooke',
+                    'country_code': 'CA',
+                    'latitude': 45.3397,
+                    'longitude': -72.013
+                },
+                'username': 'tester1'
+            },
+            'tags': ['auth0']
+        }
+    }
+    same_city_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '5.6.7.8',
+                'sourceipgeolocation': {
+                    'city': 'Sherbrooke',
+                    'country_code': 'CA',
+                    'latitude': 45.3879,
+                    'longitude': -71.8988
+                },
+                'username': 'tester1'
+            },
+            'tags': ['auth0']
+        }
+    }
+
+    default_alert = {
+        'category': 'geomodel',
+        'summary': 'tester1 is now active in Sherbrooke,CA. Previously San Francisco,US',
+        'details': {
+            'username': 'tester1',
+            'sourceipaddress': '1.2.3.4',
+            'origin': {
+                'city': 'Sherbrooke',
+                'country': 'CA',
+                'latitude': 45.3879,
+                'longitude': -71.8988,
+                'geopoint': '45.3879,-71.8988'
+            }
+        },
+        'severity': 'INFO',
+        'tags': ['geomodel']
+    }
+
+    events = [
+        AlertTestSuite.create_event(default_event),
+        AlertTestSuite.create_event(same_city_event)
+    ]
+    test_cases = [
+        PositiveAlertTestCase(
+            description='Alert fires if cities are same but geopoints are outside range',
+            events=events,
+            expected_alert=default_alert),
+    ]
+
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
+    def setup(self):
+        super().setup()
+
+        index = 'localities'
+        if self.config_delete_indexes:
+            self.es_client.delete_index(index, True)
+            self.es_client.create_index(index)
+
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index('localities', True)
+        super().teardown()
