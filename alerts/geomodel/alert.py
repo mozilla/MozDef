@@ -44,7 +44,8 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
     # slowed, network delays, etc.
     ttt = (dist_traveled / _AIR_TRAVEL_SPEED)  # Time to travel the distance.
     pad = math.ceil((1000 * min(loc1.radius, loc2.radius)) / _AIR_TRAVEL_SPEED)
-    return seconds_between <= (ttt + pad)
+
+    return (ttt - pad) <= seconds_between
 
 
 def alert(username: str, locs: List[Locality]) -> Optional[Alert]:
