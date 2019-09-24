@@ -24,7 +24,7 @@ all:
 	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
 
 .PHONY: lint
-lint:
+lint: ## Run the flake8 linter over the entire codebase
 	flake8 --config .flake8 ./
 
 .PHONY: run
