@@ -206,8 +206,7 @@ def update(state: State, from_evt: State) -> Update:
 def remove_outdated(state: State, days_valid: int) -> Update:
     '''Update a state by removing localities that are outdated, determined
     by checking if the last activity within a given locality was at least
-    
-some number of days ago.
+    some number of days ago.
     '''
 
     now = toUTC(datetime.now())

@@ -6,7 +6,6 @@ from .locality import Locality, distance as geo_distance
 
 
 _AIR_TRAVEL_SPEED = 277.778  # m/s
-#_AIR_TRAVEL_SPEED = 1000.0  # km/h
 
 # TODO: Switch to dataclasses when we move to Python3.7+
 
