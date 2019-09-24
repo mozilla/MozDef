@@ -3,13 +3,8 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-from mozdef_util.utilities.key_exists import key_exists
 from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.utilities.dot_dict import DotDict
-import os
-import yaml
-import jmespath
-import urllib.parse
+from platform import node
 
 
 class message(object):

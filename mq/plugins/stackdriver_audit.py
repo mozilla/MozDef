@@ -3,13 +3,11 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-from mozdef_util.utilities.key_exists import key_exists
 from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.utilities.dot_dict import DotDict
+from platform import node
 import os
 import yaml
 import jmespath
-import urllib.parse
 
 # activity for Admin Activity audit logs
 # data_access for Data Access audit logs

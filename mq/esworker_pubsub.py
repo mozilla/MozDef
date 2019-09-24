@@ -18,9 +18,6 @@ import json
 import sys
 import os
 import socket
-import time
-import pytz
-import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from mozdef_util.utilities.toUTC import toUTC
@@ -66,7 +63,6 @@ class PubSubtaskConsumer(object):
             raise
 
     def onMessage(self, message):
-        message_json = json.loads(message.data.decode("UTF-8"))
         try:
             # default elastic search metadata for an event
             metadata = {"index": "events", "id": None}
@@ -217,4 +213,3 @@ if __name__ == "__main__":
         if options.esbulksize != 0:
             es.finish_bulk()
         raise
-
