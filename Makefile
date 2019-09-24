@@ -23,7 +23,7 @@ all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
 
-.PHONE: lint
+.PHONY: lint
 lint:
 	flake8 --config .flake8 ./
 
