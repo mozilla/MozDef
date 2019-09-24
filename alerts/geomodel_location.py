@@ -84,16 +84,15 @@ class AlertGeoModel(AlertTask):
             entry_from_es = locality.Entry(
                 '', locality.State('locality', username, []))
 
+        cleaned = locality.remove_outdated(
+            entry_from_es.state, cfg.localities.valid_duration_days)
+
         # Determine if we should trigger an alert before updating the state.
         new_alert = alert.alert(
-            entry_from_es.state.username,
-            locs_from_evts + entry_from_es.state.localities)
+            cleaned.state.username,
+            new_state.localities + cleaned.state.localities)
 
-        updated = locality.Update.flat_map(
-            lambda state: locality.remove_outdated(
-                state,
-                cfg.localities.valid_duration_days),
-            locality.update(entry_from_es.state, new_state))
+        updated = locality.update(cleaned.state, new_state)
 
         if updated.did_update:
             entry_from_es = locality.Entry(entry_from_es.identifier, updated.state)
