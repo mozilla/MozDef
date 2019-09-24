@@ -67,7 +67,7 @@ class AlertGeoModel(AlertTask):
 
     def onAggregation(self, agg):
         username = agg['value']
-        events = agg['events']
+        events = sorted(agg['events'], key=lambda x: x['_source']['utctimestamp'], reverse=False)
         cfg = agg['config']
 
         query = locality.wrap_query(self.es)
