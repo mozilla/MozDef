@@ -23,6 +23,10 @@ all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
 
+.PHONY: lint
+lint: ## Run the flake8 linter over the entire codebase
+	flake8 --config .flake8 ./
+
 .PHONY: run
 run: build ## Run all MozDef containers
 	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d
