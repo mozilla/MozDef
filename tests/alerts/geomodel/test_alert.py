@@ -58,7 +58,6 @@ class TestAlert:
 
         assert alert_produced is not None
         assert alert_produced.username == 'testuser'
-        assert alert_produced.sourceipaddress == '1.2.3.123'
         assert alert_produced.hops[0].origin.city == 'San Francisco'
         assert alert_produced.hops[0].destination.city == 'Toronto'
 
