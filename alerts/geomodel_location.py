@@ -9,6 +9,7 @@ import json
 import os
 import sys
 import traceback
+from operator import attrgetter
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, SubnetMatch, QueryStringMatch as QSMatch
@@ -101,13 +102,14 @@ class AlertGeoModel(AlertTask):
             journal(entry_from_es, cfg.localities.es_index)
 
         if new_alert is not None:
+            sorted_locs = sorted(entry_from_es.state.localities, key=attrgetter('lastaction'))
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             summary = "{0} is now active in {1},{2}. Previously {3},{4}".format(
                 username,
-                entry_from_es.state.localities[-1].city,
-                entry_from_es.state.localities[-1].country,
-                entry_from_es.state.localities[-2].city,
-                entry_from_es.state.localities[-2].country,
+                sorted_locs[-1].city,
+                sorted_locs[-1].country,
+                sorted_locs[-2].city,
+                sorted_locs[-2].country,
             )
             alert_dict = self.createAlertDict(
                 summary,
