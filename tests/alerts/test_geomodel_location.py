@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import itertools
 
 from freezegun import freeze_time
 
@@ -9,6 +10,57 @@ from tests.alerts.negative_alert_test_case import NegativeAlertTestCase
 from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
 
 import alerts.geomodel.locality as geomodel
+
+
+def _summary_from_events(events):
+    hops = ' then '.join([
+        '{0},{1}'.format(
+            event['_source']['details']['city'],
+            event['_source']['details']['country_code'])
+        for event in events
+    ])
+
+    return '{0} seen in {1}'.format(
+        events[0]['_source']['details']['username'],
+        hops)
+
+
+def _hops_from_events(events):
+    details = [
+        event['_source']['details']
+        for event in events
+    ]
+
+    pairs = [
+        (details[i], details[i + 1])
+        for i in range(len(details) - 1)
+    ]
+
+    return [
+        {
+            'origin': {
+                'ip': orig['sourceipaddress'],
+                'city': orig['sourceipgeolocation']['city'],
+                'country': orig['sourceipgeolocation']['country_code'],
+                'latitude': orig['sourceipgeolocation']['latitude'],
+                'longitude': orig['sourceipgeolocation']['longitude'],
+                'geopoint': '{0},{1}'.format(
+                    orig['sourceipgeolocation']['latitude'],
+                    orig['sourceipgeolocation']['longitude'])
+            },
+            'destination': {
+                'ip': dest['sourceipaddress'],
+                'city': dest['sourceipgeolocation']['city'],
+                'country': dest['sourceipgeolocation']['country_code'],
+                'latitude': dest['sourceipgeolocation']['latitude'],
+                'longitude': dest['sourceipgeolocation']['longitude'],
+                'geopoint': '{0},{1}'.format(
+                    dest['sourceipgeolocation']['latitude'],
+                    dest['sourceipgeolocation']['longitude'])
+            }
+        }
+        for (orig, dest) in pairs
+    ]
 
 
 class TestAlertGeoModel(AlertTestSuite):
@@ -57,17 +109,9 @@ class TestAlertGeoModel(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 is now active in Toronto,CA. Previously San Francisco,US',
+        'summary': 'tester1 seen in Toronto,CA then Francisco,US',
         'details': {
-            'username': 'tester1',
-            'sourceipaddress': '1.2.3.4',
-            'origin': {
-                'city': 'Toronto',
-                'country': 'CA',
-                'latitude': 43.6529,
-                'longitude': -79.3849,
-                'geopoint': '43.6529,-79.3849'
-            }
+            'username': 'tester1'
         },
         'severity': 'INFO',
         'tags': ['geomodel']
@@ -240,17 +284,9 @@ class TestOnePreviousLocality(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 is now active in San Francisco,US. Previously Toronto,CA',
+        'summary': 'tester1 seen in San Francisco,US then Toronto,CA',
         'details': {
-            'username': 'tester1',
-            'sourceipaddress': '1.2.3.4',
-            'origin': {
-                'city': 'San Francisco',
-                'country': 'US',
-                'latitude': 37.773972,
-                'longitude': -122.431297,
-                'geopoint': '37.773972,-122.431297'
-            }
+            'username': 'tester1'
         },
         'severity': 'INFO',
         'tags': ['geomodel']
@@ -326,17 +362,9 @@ class TestInitialLocalityPositiveAlert(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 is now active in Toronto,CA. Previously San Francisco,US',
+        'summary': 'tester1 seen in Toronto,CA then San Francisco,US',
         'details': {
             'username': 'tester1',
-            'sourceipaddress': '5.6.7.8',
-            'origin': {
-                'city': 'Toronto',
-                'country': 'CA',
-                'latitude': 43.6529,
-                'longitude': -79.3849,
-                'geopoint': '43.6529,-79.3849'
-            }
         },
         'severity': 'INFO',
         'tags': ['geomodel']
@@ -436,17 +464,9 @@ class TestSameCitiesOutsideRange(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 is now active in Sherbrooke,CA. Previously Sherbrooke,CA',
+        'summary': 'tester1 seen in Sherbrooke,CA then Sherbrooke,CA',
         'details': {
-            'username': 'tester1',
-            'sourceipaddress': '5.6.7.8',
-            'origin': {
-                'city': 'Sherbrooke',
-                'country': 'CA',
-                'latitude': 45.3879,
-                'longitude': -71.8988,
-                'geopoint': '45.3879,-71.8988'
-            }
+            'username': 'tester1'
         },
         'severity': 'INFO',
         'tags': ['geomodel']
@@ -514,17 +534,9 @@ class TestMultipleEventsInWindow(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 is now active in San Francisco,US. Previously Toronto,CA',
+        'summary': 'tester1 seen in San Francisco,US then Toronto,CA',
         'details': {
-            'username': 'tester1',
-            'sourceipaddress': '1.2.3.4',
-            'origin': {
-                'city': 'San Francisco',
-                'country': 'US',
-                'latitude': 37.773972,
-                'longitude': -122.431297,
-                'geopoint': '37.773972,-122.431297'
-            }
+            'username': 'tester1'
         },
         'severity': 'INFO',
         'tags': ['geomodel']
@@ -667,17 +679,9 @@ class TestSameCitiesFarAway(AlertTestSuite):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 is now active in Portland,US. Previously Portland,US',
+        'summary': 'tester1 seen in Portland,US then Portland,US',
         'details': {
-            'username': 'tester1',
-            'sourceipaddress': '1.2.3.4',
-            'origin': {
-                'city': 'Portland',
-                'country': 'US',
-                'latitude': 45.5234,
-                'longitude': -122.6762,
-                'geopoint': '45.5234,-122.6762'
-            }
+            'username': 'tester1'
         },
         'severity': 'INFO',
         'tags': ['geomodel']
@@ -710,3 +714,87 @@ class TestSameCitiesFarAway(AlertTestSuite):
         if self.config_delete_indexes:
             self.es_client.delete_index('localities', True)
         super().teardown()
+
+
+class TestMultipleImpossibleJourneys(AlertTestSuite):
+    alert_filename = 'geomodel_location'
+    alert_classname = 'AlertGeoModel'
+
+    # Portland, Oregon
+    default_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '1.2.3.4',
+                'username': 'tester1',
+                'sourceipgeolocation': {
+                    'city': 'Portland',
+                    'country_code': 'US',
+                    'latitude': 45.5234,
+                    'longitude': -122.6762
+                }
+            },
+            'tags': ['auth0']
+        }
+    }
+
+    # Toronto, Ontario
+    toronto_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '5.4.3.2',
+                'username': 'tester1',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3843
+                }
+            },
+            'tags': ['auth0']
+        }
+    }
+
+    st_petersburg_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '12.34.45.56',
+                'username': 'tester1',
+                'sourceipgeolocation': {
+                    'city': 'Saint Petersburg',
+                    'country_code': 'RU',
+                    'latitude': 59.9343,
+                    'longitude': 30.3351
+                }
+            },
+            'tags': ['auth0']
+        }
+    }
+    
+    events = [
+        AlertTestSuite.create_event(evt)
+        for evt in [default_event, toronto_event, st_petersburg_event]
+    ]
+
+    default_alert = {
+        'category': 'geomodel',
+        'summary': _summary_from_events(events),
+        'details': {
+            'username': 'tester1',
+            'hops': _hops_from_events(events)
+        },
+        'severity': 'INFO',
+        'tags': ['geomodel']
+    }
+
+    # Set Toronto and Saint Petersburg 5 and 10 minutes after Portland.
+    keys = ('utctimestamp', 'receivedtimestamp')
+    for (i, k) in itertools.product((1, 2), keys):
+        events[i]['_source'][k] = AlertTestSuite.subtract_from_timestamp_lambda(
+            {'minutes': 5 * i})
+
+    test_cases = [
+        PositiveAlertTestCase(
+            description='Alert fires with two hops for three different cities',
+            events=events,
+            expected_alert=default_alert)
+    ]
