@@ -558,3 +558,155 @@ class TestMultipleEventsInWindow(AlertTestSuite):
         if self.config_delete_indexes:
             self.es_client.delete_index('localities', True)
         super().teardown()
+
+
+class TestExpiredState(AlertTestSuite):
+    alert_filename = 'geomodel_location'
+    alert_classname = "AlertGeoModel"
+
+    default_event = {
+        "_source": {
+            "details": {
+                "sourceipaddress": "5.6.7.8",
+                "username": "tester1",
+                "sourceipgeolocation": {
+                    "city": "Toronto",
+                    "country_code": "CA",
+                    'latitude': 43.6529,
+                    'longitude': -79.3849,
+                },
+            },
+            "tags": ["auth0"],
+        }
+    }
+
+    test_cases = [
+        NegativeAlertTestCase(
+            description='Does not fire if state is expired',
+            events=[default_event])
+    ]
+
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
+    def setup(self):
+        super().setup()
+
+        index = 'localities'
+        if self.config_delete_indexes:
+            self.es_client.delete_index(index, True)
+            self.es_client.create_index(index)
+
+        journal = geomodel.wrap_journal(self.es_client)
+
+        def state(username, locs):
+            return geomodel.State('locality', username, locs)
+
+        def locality(cfg):
+            return geomodel.Locality(**cfg)
+
+        test_states = [
+            state('tester1', [
+                locality({
+                    'sourceipaddress': '1.2.3.4',
+                    'city': 'San Francisco',
+                    'country': 'US',
+                    'lastaction': toUTC(datetime.now()) - timedelta(days=2),
+                    'latitude': 37.773972,
+                    'longitude': -122.431297,
+                    'radius': 50
+                })
+            ])
+        ]
+
+        for state in test_states:
+            journal(geomodel.Entry.new(state), index)
+        self.refresh(index)
+
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index('localities', True)
+        super().teardown()
+
+
+class TestSameCitiesFarAway(AlertTestSuite):
+    alert_filename = 'geomodel_location'
+    alert_classname = "AlertGeoModel"
+
+    # Portland Maine
+    default_event = {
+        "_source": {
+            "details": {
+                "sourceipaddress": "5.6.7.8",
+                "username": "tester1",
+                "sourceipgeolocation": {
+                    "city": "Portland",
+                    "country_code": "US",
+                    'latitude': 43.6614,
+                    'longitude': -70.2553,
+                },
+            },
+            "tags": ["auth0"],
+        }
+    }
+
+    # Portland, Oregon
+    oregon_event = {
+        "_source": {
+            "details": {
+                "sourceipaddress": "1.2.3.4",
+                "username": "tester1",
+                "sourceipgeolocation": {
+                    "city": "Portland",
+                    "country_code": "US",
+                    'latitude': 45.5234,
+                    'longitude': -122.6762,
+                },
+            },
+            "tags": ["auth0"],
+        }
+    }
+
+    default_alert = {
+        'category': 'geomodel',
+        'summary': 'tester1 is now active in Portland,US. Previously Portland,US',
+        'details': {
+            'username': 'tester1',
+            'sourceipaddress': '1.2.3.4',
+            'origin': {
+                'city': 'Portland',
+                'country': 'US',
+                'latitude': 45.5234,
+                'longitude': -122.6762,
+                'geopoint': '45.5234,-122.6762'
+            }
+        },
+        'severity': 'INFO',
+        'tags': ['geomodel']
+    }
+
+    events = [
+        AlertTestSuite.create_event(default_event),
+        AlertTestSuite.create_event(oregon_event)
+    ]
+    events[0]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
+    events[0]['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 3})
+
+    test_cases = [
+        PositiveAlertTestCase(
+            description='Does fire if events from same cities but not geographic location',
+            events=events,
+            expected_alert=default_alert),
+    ]
+
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
+    def setup(self):
+        super().setup()
+
+        index = 'localities'
+        if self.config_delete_indexes:
+            self.es_client.delete_index(index, True)
+            self.es_client.create_index(index)
+
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index('localities', True)
+        super().teardown()
