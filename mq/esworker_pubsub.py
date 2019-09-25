@@ -5,14 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-# Check if projectID has been defined in the config
-# Check if subscriptionName has been defined in the config
-# Check if the message's fields + metadata are present and of a correct type - https://github.com/mozilla/fxa/blob/master/packages/fxa-customs-server/lib/dataflow.js#L130
-# Catch https://googleapis.dev/python/pubsub/latest/subscriber/api/futures.html#google.cloud.pubsub_v1.subscriber.futures.StreamingPullFuture
-# Set the flow_control in the subscribe(subscription, callback, flow_control=(), scheduler=None) call
-# https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/pubsub/cloud-client/subscriber.py
-# https://github.com/mozilla/fxa/blob/master/packages/fxa-customs-server/lib/dataflow.js#L155
-
 import json
 
 import sys
@@ -58,9 +50,14 @@ class PubSubtaskConsumer(object):
         res = subscriber.subscribe(self.options.resource_name, callback=self.onMessage)
         try:
             res.result()
-        except Exception as ex:
-            # res.close()
-            raise
+        except Exception as e:
+            logger.exception(e)
+            logger.error(
+                "Received error during subscribing - killing self and my background thread in 5 seconds for uwsgi to bring me back"
+            )
+            time.sleep(5)
+            res.cancel()
+            sys.exit(1)
 
     def onMessage(self, message):
         try:
@@ -71,13 +68,14 @@ class PubSubtaskConsumer(object):
             event["receivedtimestamp"] = toUTC(datetime.now()).isoformat()
             event["mozdefhostname"] = self.options.mozdefhostname
 
-            if "tags" in event:
+            event["details"] = json.loads(message.data.decode("UTF-8"))
+
+            if "tags" in message:
                 event["tags"].extend([self.options.resource_name])
             else:
                 event["tags"] = [self.options.resource_name]
             event["tags"].extend(["pubsub"])
 
-            event["details"] = json.loads(message.data.decode("UTF-8"))
             (event, metadata) = sendEventToPlugins(event, metadata, self.pluginList)
             # Drop message if plugins set to None
             if event is None:
@@ -117,8 +115,9 @@ class PubSubtaskConsumer(object):
                 try:
                     self.esConnection = esConnect()
                     return
-                # XXX: ain't no kombu here but maybe pubsub errors?
-                except kombu.exceptions.MessageStateError:
+                # XXX: WTF is kombu doing here? Should not it be (ElasticsearchBadServer, ElasticsearchInvalidIndex)
+                # except kombu.exceptions.MessageStateError:
+                except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                     return
             except ElasticsearchException as e:
                 logger.exception(
