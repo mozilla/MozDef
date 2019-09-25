@@ -125,6 +125,19 @@ Uses a custom query string to generate the "match" based on (Similar to what you
    QueryStringMatch('summary: test')
 
 
+SubnetMatch
+^^^^^^^^^^^^^^^^
+
+Checks if an IP field is within the bounds of a subnet
+
+.. code-block:: python
+   :linenos:
+
+   from mozdef_util.query_models import SubnetMatch
+
+   SubnetMatch('details.sourceipaddress', '10.1.1.0/24')
+
+
 Aggregation
 ^^^^^^^^^^^
 

@@ -69,7 +69,7 @@ class TestAlertGeoModel(AlertTestSuite):
                 'geopoint': '43.6529,-79.3849'
             }
         },
-        'severity': 'WARNING',
+        'severity': 'INFO',
         'tags': ['geomodel']
     }
 

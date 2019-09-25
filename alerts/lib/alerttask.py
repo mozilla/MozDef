@@ -106,6 +106,8 @@ class AlertTask(Task):
         self._configureES()
 
         self.event_indices = ['events', 'events-previous']
+        plugin_dir = os.path.join(os.path.dirname(__file__), "../plugins")
+        self.plugin_set = AlertPluginSet(plugin_dir, ALERT_PLUGINS)
 
     def classname(self):
         return self.__class__.__name__
@@ -415,10 +417,7 @@ class AlertTask(Task):
         """
         Send alerts through a plugin system
         """
-
-        plugin_dir = os.path.join(os.path.dirname(__file__), "../plugins")
-        plugin_set = AlertPluginSet(plugin_dir, ALERT_PLUGINS)
-        alertDict = plugin_set.run_plugins(alert)[0]
+        alertDict = self.plugin_set.run_plugins(alert)[0]
 
         return alertDict
 
