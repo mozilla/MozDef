@@ -68,7 +68,8 @@ class AlertGeoModel(AlertTask):
 
     def onAggregation(self, agg):
         username = agg['value']
-        events = sorted(agg['events'], key=lambda x: x['_source']['utctimestamp'], reverse=False)
+        #events = sorted(agg['events'], key=lambda x: x['_source']['utctimestamp'], reverse=False)
+        events = agg['events']
         cfg = agg['config']
 
         query = locality.wrap_query(self.es)
@@ -100,6 +101,8 @@ class AlertGeoModel(AlertTask):
             entry_from_es = locality.Entry(entry_from_es.identifier, updated.state)
 
             journal(entry_from_es, cfg.localities.es_index)
+
+        import pdb; pdb.set_trace()
 
         if new_alert is not None:
             summary = '{} seen in {},{}'.format(
