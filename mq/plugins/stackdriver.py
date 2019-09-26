@@ -3,6 +3,8 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
+import urllib
+from platform import node
 from mozdef_util.utilities.toUTC import toUTC
 
 
@@ -21,10 +23,16 @@ class message(object):
             pass
 
     def onMessage(self, message, metadata):
+        # trust no one mr mulder
+        if "tags" not in message:
+            return (message, metadata)
         if "pubsub" not in message["tags"]:
+            return (message, metadata)
+        if "details" not in message:
             return (message, metadata)
 
         event = message["details"]
+
         if "logName" not in event:
             return (message, metadata)
         else:

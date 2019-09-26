@@ -6,10 +6,10 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 import json
-
 import sys
 import os
 import socket
+import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 from mozdef_util.utilities.toUTC import toUTC
@@ -70,8 +70,10 @@ class PubSubtaskConsumer(object):
 
             event["details"] = json.loads(message.data.decode("UTF-8"))
 
-            if "tags" in message:
-                event["tags"].extend([self.options.resource_name])
+            if "tags" in event["details"]:
+                event["tags"] = event["details"]["tags"].extend(
+                    [self.options.resource_name]
+                )
             else:
                 event["tags"] = [self.options.resource_name]
             event["tags"].extend(["pubsub"])
@@ -115,9 +117,16 @@ class PubSubtaskConsumer(object):
                 try:
                     self.esConnection = esConnect()
                     return
-                # XXX: WTF is kombu doing here? Should not it be (ElasticsearchBadServer, ElasticsearchInvalidIndex)
-                # except kombu.exceptions.MessageStateError:
-                except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
+                except (
+                    ElasticsearchBadServer,
+                    ElasticsearchInvalidIndex,
+                    ElasticsearchException,
+                ) as e:
+                    logger.exception(
+                        "ElasticSearchException: {0} reported while indexing event".format(
+                            e
+                        )
+                    )
                     return
             except ElasticsearchException as e:
                 logger.exception(
@@ -151,9 +160,6 @@ def initConfig():
     )
     options.esbulksize = getConfig("esbulksize", 0, options.configfile)
     options.esbulktimeout = getConfig("esbulktimeout", 30, options.configfile)
-
-    # XXX: change it to the GCP threshold and make it optional
-    options.prefetch = getConfig("prefetch", 10, options.configfile)
 
     # GCP PubSub options
     options.resource_name = getConfig("resource_name", "", options.configfile)
