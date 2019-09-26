@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import itertools
 
 from freezegun import freeze_time
 

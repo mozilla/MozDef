@@ -11,7 +11,7 @@ class TestAlert:
     '''
 
     def test_do_not_alert_when_travel_possible(self):
-        state = locality.State('locality', 'testuser', [
+        evts = [
             locality.Locality(
                 sourceipaddress='1.2.3.123',
                 city='Toronto',
@@ -28,14 +28,14 @@ class TestAlert:
                 latitude=37.773972,
                 longitude=-122.431297,
                 radius=50)
-        ])
+        ]
 
-        alert_produced = alert(state.username, state.localities)
+        alert_produced = alert('tester1', evts, [])
 
         assert alert_produced is None
 
     def test_do_alert_when_travel_impossible(self):
-        state = locality.State('locality', 'testuser', [
+        evts = [
             locality.Locality(
                 sourceipaddress='1.2.3.123',
                 city='Toronto',
@@ -52,9 +52,9 @@ class TestAlert:
                 latitude=37.773972,
                 longitude=-122.431297,
                 radius=50)
-        ])
+        ]
 
-        alert_produced = alert(state.username, state.localities)
+        alert_produced = alert('testuser', evts, [])
 
         assert alert_produced is not None
         assert alert_produced.username == 'testuser'
@@ -62,7 +62,7 @@ class TestAlert:
         assert alert_produced.hops[0].destination.city == 'Toronto'
 
     def test_alerts_include_all_impossible_hops(self):
-        state = locality.State('locality', 'testuser', [
+        evts = [
             locality.Locality(
                 sourceipaddress='1.2.3.123',
                 city='Toronto',
@@ -87,9 +87,9 @@ class TestAlert:
                 latitude=37.773972,
                 longitude=-122.431297,
                 radius=50)
-        ])
+        ]
 
-        alert_produced = alert(state.username, state.localities)
+        alert_produced = alert('tester', evts, [])
 
         assert alert_produced is not None
         assert len(alert_produced.hops) == 2

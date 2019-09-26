@@ -9,7 +9,6 @@ import json
 import os
 import sys
 import traceback
-from operator import attrgetter
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, SubnetMatch, QueryStringMatch as QSMatch
@@ -68,7 +67,6 @@ class AlertGeoModel(AlertTask):
 
     def onAggregation(self, agg):
         username = agg['value']
-        #events = sorted(agg['events'], key=lambda x: x['_source']['utctimestamp'], reverse=False)
         events = agg['events']
         cfg = agg['config']
 

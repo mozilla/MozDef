@@ -74,7 +74,7 @@ def alert(
 
     if len(locs_to_consider) < 2:
         return None
-    
+
     pairs = [
         (locs_to_consider[i], locs_to_consider[i + 1])
         for i in range(len(locs_to_consider) - 1)
