@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2016 Mozilla Corporation
-# Author: gdestuynder@mozilla.com
 
 # Imports auth0.com logs into MozDef
 
@@ -29,7 +28,7 @@ def fatal(msg):
 # The logs have the acronym, but not the description
 # but do include a 'description' field that is additional detailed words
 # about what happened.
-# See also: https://github.com/auth0/auth0-logs-to-logentries/blob/master/index.js (MIT)
+# See also: https://auth0.com/docs/logs#log-data-event-listing
 # levels
 #     0 = Debug
 #     1 = Info
@@ -89,6 +88,7 @@ log_types = DotDict(
         "limit_mu": {"event": "Blocked IP Address", "level": 3},
         "sepft": {"event": "Success Exchange (Password for Access Token)", "level": 1},
         "fcoa": {"event": "Failed Cross Origin Authentication", "level": 3},
+        "depnote": {"event": "Deprecation Note", "level": 1},
     }
 )
 
