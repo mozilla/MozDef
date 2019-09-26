@@ -71,7 +71,7 @@ class TestAlert:
                 latitude=43.6529,
                 longitude=-79.3849,
                 radius=50),
-            locality.locality(
+            locality.Locality(
                 sourceipaddress='52.32.127.3',
                 city='Saint Petersburg',
                 country='RU',
