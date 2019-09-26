@@ -93,7 +93,8 @@ class AlertGeoModel(AlertTask):
         # Determine if we should trigger an alert before updating the state.
         new_alert = alert.alert(
             cleaned.state.username,
-            new_state.localities + cleaned.state.localities)
+            new_state.localities,
+            cleaned.state.localities)
 
         updated = locality.update(cleaned.state, new_state)
 
