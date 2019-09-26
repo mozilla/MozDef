@@ -770,7 +770,7 @@ class TestMultipleImpossibleJourneys(AlertTestSuite):
         }
     }
     
-    events = [default_event] + [
+    events = [
         AlertTestSuite.create_event(evt)
         for evt in [default_event, toronto_event, st_petersburg_event]
     ]
@@ -787,16 +787,14 @@ class TestMultipleImpossibleJourneys(AlertTestSuite):
     }
 
     # Set Toronto and Saint Petersburg 5 and 10 minutes after Portland.
-    '''
+    events[0]['_source']['utctimestamp'] =\
+        AlertTestSuite.subtract_from_timestamp_lambda({ 'minutes': 5 })
+    events[0]['_source']['receivedtimestamp'] =\
+        AlertTestSuite.subtract_from_timestamp_lambda({ 'minutes': 5 })
     events[1]['_source']['utctimestamp'] =\
-        AlertTestSuite.subtract_from_timestamp_lambda({ 'minutes': 5 })
+        AlertTestSuite.subtract_from_timestamp_lambda({ 'minutes': 2 })
     events[1]['_source']['receivedtimestamp'] =\
-        AlertTestSuite.subtract_from_timestamp_lambda({ 'minutes': 5 })
-    events[2]['_source']['utctimestamp'] =\
-        AlertTestSuite.subtract_from_timestamp_lambda({ 'minutes': 10 })
-    events[2]['_source']['receivedtimestamp'] =\
-        AlertTestSuite.subtract_from_timestamp_lambda({ 'minutes': 10 })
-    '''
+        AlertTestSuite.subtract_from_timestamp_lambda({ 'minutes': 2 })
 
     test_cases = [
         PositiveAlertTestCase(
@@ -804,3 +802,19 @@ class TestMultipleImpossibleJourneys(AlertTestSuite):
             events=events,
             expected_alert=default_alert)
     ]
+
+    @freeze_time("2017-01-01 01:00:00", tz_offset=0)
+    def setup(self):
+        super().setup()
+
+        index = 'localities'
+        if self.config_delete_indexes:
+            self.es_client.delete_index(index, True)
+
+        self.es_client.create_index(index)
+        self.refresh(index)
+
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index('localities', True)
+        super().teardown()
