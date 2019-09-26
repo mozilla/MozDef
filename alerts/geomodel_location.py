@@ -61,7 +61,7 @@ class AlertGeoModel(AlertTask):
                 self.error_thrown = err
                 traceback.print_exc(file=sys.stdout)
                 logger.exception(
-                    'Error process events; query='{0}'; error={1}'.format(
+                    'Error process events; query=\'{0}\'; error={1}'.format(
                         cfg.events[query_index].lucene_query,
                         err))
 
