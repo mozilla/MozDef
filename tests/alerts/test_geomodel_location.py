@@ -967,3 +967,100 @@ class TestMultipleImpossibleJourneys(AlertTestSuite):
         if self.config_delete_indexes:
             self.es_client.delete_index('localities', True)
         super().teardown()
+
+
+class TestDifferentIPsSameLocation(AlertTestSuite):
+    alert_filename = 'geomodel_location'
+    alert_classname = 'AlertGeoModel'
+
+    default_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '1.2.3.4',
+                'username': 'tester1',
+                'sourceipgeolocation': {
+                    'city': 'Portland',
+                    'country_code': 'US',
+                    'latitude': 45.5234,
+                    'longitude': -122.6762,
+                },
+            },
+            'tags': ['auth0'],
+        }
+    }
+
+    another_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '53.12.88.76',
+                'username': 'tester1',
+                'sourceipgeolocation': {
+                    'city': 'Portland',
+                    'country_code': 'US',
+                    'latitude': 45.5234,
+                    'longitude': -122.6762,
+                },
+            },
+            'tags': ['auth0'],
+        }
+    }
+
+    test_cases = [
+        NegativeAlertTestCase(
+            description='Should not fire for event & state in the same location',
+            events=[default_event]),
+        NegativeAlertTestCase(
+            description='Should not fire for events in the same location',
+            events=[default_event, another_event]),
+    ]
+
+
+    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
+    def setup(self):
+        super().setup()
+        
+        index = 'localities'
+        if self.config_delete_indexes:
+            self.es_client.delete_index(index, True)
+            self.es_client.create_index(index)
+        
+        journal = geomodel.wrap_journal(self.es_client)
+
+        def state(username, locs):
+            return geomodel.State('locality', username, locs)
+
+        def locality(cfg):
+            return geomodel.Locality(**cfg)
+
+        test_state = state('tester1', [
+            locality(
+                {
+                    'sourceipaddress': '53.12.88.76',
+                    'city': 'Portland',
+                    'country': 'US',
+                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=2),
+                    'latitude': 45.5234,
+                    'longitude': -122.6762,
+                    'radius': 50,
+                }
+            ),
+            locality(
+                {
+                    'sourceipaddress': '1.2.3.4',
+                    'city': 'Portland',
+                    'country': 'US',
+                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=3),
+                    'latitude': 45.5234,
+                    'longitude': -122.6762,
+                    'radius': 50,
+                }
+            )
+        ])
+            
+        journal(geomodel.Entry.new(test_state), index)
+    
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index('localities', True)
+        super().teardown()
+
