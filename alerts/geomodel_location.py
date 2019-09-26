@@ -102,26 +102,22 @@ class AlertGeoModel(AlertTask):
             journal(entry_from_es, cfg.localities.es_index)
 
         if new_alert is not None:
-            sorted_locs = sorted(entry_from_es.state.localities, key=attrgetter('lastaction'))
-            # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
-            summary = "{0} is now active in {1},{2}. Previously {3},{4}".format(
+            summary = '{} seen in {},{}'.format(
                 username,
-                sorted_locs[-1].city,
-                sorted_locs[-1].country,
-                sorted_locs[-2].city,
-                sorted_locs[-2].country,
-            )
-            alert_dict = self.createAlertDict(
-                summary,
-                'geomodel',
-                ['geomodel'],
-                events,
-                'INFO')
+                new_alert.hops[0].origin.city,
+                new_alert.hops[0].origin.country)
 
+            for hop in new_alert.hops:
+                summary += ' then {},{}'.format(
+                    hop.destination.city, hop.destination.country)
+
+            alert_dict = self.createAlertDict(
+                summary, 'geomodel', ['geomodel'], events, 'INFO')
+
+            # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict['details'] = {
                 'username': new_alert.username,
-                'sourceipaddress': new_alert.sourceipaddress,
-                'origin': dict(new_alert.origin._asdict())
+                'hops': [dict(hop._asdict()) for hop in new_alert.hops]
             }
 
             return alert_dict

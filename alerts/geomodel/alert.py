@@ -14,6 +14,7 @@ class Origin(NamedTuple):
     '''A description of a location.
     '''
 
+    ip: str
     city: str
     country: str
     latitude: float
@@ -21,13 +22,22 @@ class Origin(NamedTuple):
     geopoint: str
 
 
+class Hop(NamedTuple):
+    '''Describes a hop from one location to another that would be
+    physically impossible in the time between a user's activity in each
+    location.
+    '''
+
+    origin: Origin
+    destination: Origin
+
+
 class Alert(NamedTuple):
     '''A container for the data the alerts output by GeoModel contain.
     '''
 
     username: str
-    sourceipaddress: str
-    origin: Origin
+    hops: List[Hop]
 
 
 def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
@@ -58,21 +68,33 @@ def alert(username: str, locs: List[Locality]) -> Optional[Alert]:
 
     if len(locs_to_consider) < 2:
         return None
+    
+    pairs = [
+        (locs_to_consider[i], locs_to_consider[i + 1])
+        for i in range(len(locs_to_consider) - 1)
+    ]
 
-    locations = locs_to_consider[-2:]
+    hops = [
+        Hop(
+            Origin(
+                o.sourceipaddress,
+                o.city,
+                o.country,
+                o.latitude,
+                o.longitude,
+                '{},{}'.format(o.latitude, o.longitude)),
+            Origin(
+                d.sourceipaddress,
+                d.city,
+                d.country,
+                d.latitude,
+                d.longitude,
+                '{},{}'.format(d.latitude, d.longitude)))
+        for (o, d) in pairs
+        if not _travel_possible(o, d)
+    ]
 
-    if _travel_possible(*locations):
+    if len(hops) == 0:
         return None
 
-    (ip, city, country, lat, lon) = (
-        locations[1].sourceipaddress,
-        locations[1].city,
-        locations[1].country,
-        locations[1].latitude,
-        locations[1].longitude
-    )
-
-    geo = '{0},{1}'.format(lat, lon)
-    origin = Origin(city, country, lat, lon, geo)
-
-    return Alert(username, ip, origin)
+    return Alert(username, hops)
