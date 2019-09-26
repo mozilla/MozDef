@@ -58,13 +58,19 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
     return (ttt - pad) <= seconds_between
 
 
-def alert(username: str, locs: List[Locality]) -> Optional[Alert]:
+def alert(
+        username: str,
+        from_evts: List[Locality],
+        from_es: List[Locality]
+) -> Optional[Alert]:
     '''Determine whether an alert should fire given a particular user's
     locality state.  If an alert should fire, an `Alert` is returned, otherwise
     this function returns `None`.
     '''
 
-    locs_to_consider = sorted(locs, key=attrgetter('lastaction'))
+    relevant_es = sorted(from_es, key=attrgetter('lastaction'), reverse=True)[0:1]
+    all_evts = sorted(from_evts, key=attrgetter('lastaction'))
+    locs_to_consider = relevant_es + all_evts
 
     if len(locs_to_consider) < 2:
         return None
