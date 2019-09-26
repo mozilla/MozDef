@@ -102,8 +102,6 @@ class AlertGeoModel(AlertTask):
 
             journal(entry_from_es, cfg.localities.es_index)
 
-        import pdb; pdb.set_trace()
-
         if new_alert is not None:
             summary = '{} seen in {},{}'.format(
                 username,
