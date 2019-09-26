@@ -36,16 +36,16 @@ class AlertGeoModel(AlertTask):
 
         if not self.es.index_exists('localities'):
             settings = {
-                "mappings": {
-                    "_doc": {
-                        "dynamic_templates": [
+                'mappings': {
+                    '_doc': {
+                        'dynamic_templates': [
                             {
-                                "string_fields": {
-                                    "mapping": {
-                                        "type": "keyword"
+                                'string_fields': {
+                                    'mapping': {
+                                        'type': 'keyword'
                                     },
-                                    "match": "*",
-                                    "match_mapping_type": "string"
+                                    'match': '*',
+                                    'match_mapping_type': 'string'
                                 }
                             },
                         ]
@@ -61,7 +61,7 @@ class AlertGeoModel(AlertTask):
                 self.error_thrown = err
                 traceback.print_exc(file=sys.stdout)
                 logger.exception(
-                    'Error process events; query="{0}"; error={1}'.format(
+                    'Error process events; query='{0}'; error={1}'.format(
                         cfg.events[query_index].lucene_query,
                         err))
 
