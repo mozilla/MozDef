@@ -230,14 +230,26 @@ preferred naming scheme.
 
     {
       "username": string,
-      "sourceipaddress": string,
-      "origin": {
-        "city": string,
-        "country": string,
-        "latitude": number,
-        "longitude": number,
-        "geopoint": GeoPoint
-      },
+      "hops": [
+        {
+          "origin": {
+            "ip": string,
+            "city": string,
+            "country": string,
+            "latitude": number,
+            "longitude": number,
+            "geopoint": GeoPoint
+          }
+          "destination": {
+            "ip": string,
+            "city": string,
+            "country": string,
+            "latitude": number,
+            "longitude": number,
+            "geopoint": GeoPoint
+          }
+        }
+      ]
     }
 
 Note in the above that the ``origin.geopoint`` field uses ElasticSearch's
