@@ -73,6 +73,6 @@ class message(object):
                 )
                 # JMESPath likes to silently return a None object
                 if mappedvalue is not None:
-                    newmessage[key] = mappedvalue
+                    newmessage["details"][key] = mappedvalue
 
         return (newmessage, metadata)
