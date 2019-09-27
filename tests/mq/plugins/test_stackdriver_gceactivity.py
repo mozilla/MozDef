@@ -82,7 +82,7 @@ class TestStackdriverAudit(object):
                     },
                     "request": {
                         "body": "null",
-                        "url": "https://clients6.google.com/compute/v1/projects/mcd-001-252615/zones/us-west2-a/instances/mozdefdevvm1/reset?key=AIzaSyCI-zsRP85UVOi0DjtiCwWBwQ1djDy741g",
+                        "url": "https://clients6.google.com/compute/v1/projects/mcd-001-252615/zones/us-west2-a/instances/mozdefdevvm1/reset?key=",
                     },
                     "resource": {
                         "id": "3401561556013842918",
