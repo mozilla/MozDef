@@ -14,10 +14,11 @@ class AlertLdapBruteforce(AlertTask):
     def main(self):
         self.parse_config('ldap_bruteforce.conf', ['threshold_count', 'search_depth_min'])
         search_query = SearchQuery(minutes=int(self.config.search_depth_min))
+        search_query.add_must_not(TermMatch('details.user', ''))
         search_query.add_must([
             TermMatch('category', 'ldap'),
             TermMatch('details.response.error', 'LDAP_INVALID_CREDENTIALS'),
-            TermMatch('details.authenticated', 'False')
+            TermMatch('details.authenticated', 'False'),
         ])
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.user', samplesLimit=10)
