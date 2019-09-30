@@ -18,7 +18,6 @@ import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
 import base64
-import kombu
 from ssl import SSLEOFError, SSLError
 
 from mozdef_util.utilities.toUTC import toUTC

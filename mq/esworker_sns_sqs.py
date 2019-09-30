@@ -7,15 +7,13 @@
 
 
 import json
-
 import sys
 import socket
 import time
-from configlib import getConfig, OptionParser
-from datetime import datetime
 import pytz
 
-import kombu
+from configlib import getConfig, OptionParser
+from datetime import datetime
 from ssl import SSLEOFError, SSLError
 
 from mozdef_util.utilities.toUTC import toUTC
