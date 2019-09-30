@@ -46,7 +46,8 @@ class PubSubtaskConsumer(object):
         self.credentials_file = options.credentials_file
 
     def run(self):
-        subscriber = pubsub.SubscriberClient()
+        # XXX: fetch from the config file
+        subscriber = pubsub.SubscriberClient.from_service_account_file(self.options.credentials_file)
         res = subscriber.subscribe(self.options.resource_name, callback=self.onMessage)
         try:
             res.result()

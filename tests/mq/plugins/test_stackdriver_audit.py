@@ -40,7 +40,6 @@ class TestStackdriverAudit(object):
 
     # Should never match and be modified by the plugin
     def test_notoneofcats(self):
-        cats = ["activity", "data_access"]
 
         metadata = {"index": "events"}
         event = {"key1": "syslog", "tags": "audit"}
@@ -243,7 +242,6 @@ class TestStackdriverAudit(object):
             },
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
-        print(result)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
         assert result["category"] == "data_access"
@@ -324,7 +322,6 @@ class TestStackdriverAudit(object):
             },
         }
         result, metadata = self.plugin.onMessage(event, self.metadata)
-        print(result)
         self.verify_defaults(result)
         self.verify_metadata(metadata)
         assert result["category"] == "activity"

@@ -40,7 +40,6 @@ class TestStackdriverAudit(object):
 
     # Should never match and be modified by the plugin
     def test_notoneofcats(self):
-        cats = ["gceactivity"]
 
         metadata = {"index": "events"}
         event = {"key1": "syslog", "tags": "audit"}
