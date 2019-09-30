@@ -26,7 +26,6 @@ class TestAlertLdapBruteforce(AlertTestSuite):
                         ]
                     }
                 ],
-                "authentication": "False",
                 "user": "jsmith@example.com",
                 "response": {
                     "error": 'LDAP_INVALID_CREDENTIALS',

@@ -18,7 +18,6 @@ class AlertLdapBruteforce(AlertTask):
         search_query.add_must([
             TermMatch('category', 'ldap'),
             TermMatch('details.response.error', 'LDAP_INVALID_CREDENTIALS'),
-            TermMatch('details.authenticated', 'False'),
         ])
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.user', samplesLimit=10)
