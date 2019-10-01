@@ -53,7 +53,7 @@ class TestAlertLdapBruteforce(AlertTestSuite):
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
-            events=AlertTestSuite.create_events(default_event, 1),
+            events=AlertTestSuite.create_events(default_event, 10),
             expected_alert=default_alert,
         )
     )
