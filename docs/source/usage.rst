@@ -38,6 +38,7 @@ Most modern log shippers support json output. MozDef is tested with support for:
 * `beaver`_
 * `nxlog`_
 * `logstash`_
+* `rsyslog`_
 * `native python code`_
 * `AWS cloudtrail`_ (via native python)
 
@@ -47,6 +48,7 @@ We have `some configuration snippets`_
 .. _beaver: https://github.com/josegonzalez/beaver
 .. _nxlog: https://nxlog.org/download
 .. _logstash: https://www.elastic.co/products/logstash
+.. _rsyslog: https://www.rsyslog.com/doc/master/configuration/modules/omhttp.html
 .. _native python code: https://github.com/gdestuynder/mozdef_lib
 .. _AWS cloudtrail: https://aws.amazon.com/cloudtrail/
 .. _some configuration snippets: https://github.com/mozilla/MozDef/tree/master/examples
