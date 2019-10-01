@@ -140,7 +140,7 @@ def from_event(
         return None
 
     now = toUTC(datetime.now()).isoformat()
-    active_time_str = _source.get('utctimestamp', now)
+    active_time_str = _source.get('receivedtimestamp', now)
     active_time = toUTC(active_time_str)
 
     (city, country, lat, lon) = (

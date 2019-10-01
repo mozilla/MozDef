@@ -209,7 +209,7 @@ class TestLocality:
         assert all([loc is None for loc in localities])
 
     def test_from_event_provides_default_timestamp(self):
-        # Missing `utctimestamp`.
+        # Missing `receivedtimestamp`.
         test_event = {
             '_source': {
                 'details': {
@@ -231,7 +231,7 @@ class TestLocality:
     def test_from_event_parses_valid_timestamp(self):
         test_event = {
             '_source': {
-                'utctimestamp': '2019-07-31T17:56:38.908000+00:00',
+                'receivedtimestamp': '2019-07-31T17:56:38.908000+00:00',
                 'details': {
                     'sourceipaddress': '1.2.3.4',
                     'sourceipgeolocation': {
