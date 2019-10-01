@@ -18,7 +18,6 @@ class Events(NamedTuple):
 
     search_window: dict
     lucene_query: str
-    username_path: str
 
 
 class Whitelist(NamedTuple):
@@ -38,5 +37,5 @@ class Config(NamedTuple):
     '''
 
     localities: Localities
-    events: List[Events]
+    events: Events
     whitelist: Whitelist

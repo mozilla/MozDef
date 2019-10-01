@@ -23,6 +23,11 @@ _CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
     'geomodel_location.json')
 
+# We expect that, no matter what query GeoModel is configured to run that the
+# usernames of users taking actions represented by events retrieved will be
+# stored in `event['_source']['details']['username']`.
+USERNAME_PATH = 'details.username'
+
 
 class AlertGeoModel(AlertTask):
     '''GeoModel alert runs a set of configured queries for events and
@@ -54,16 +59,31 @@ class AlertGeoModel(AlertTask):
             }
             self.es.create_index('localities', settings)
 
-        for query_index in range(len(cfg.events)):
-            try:
-                self._process(cfg, query_index)
-            except Exception as err:
-                self.error_thrown = err
-                traceback.print_exc(file=sys.stdout)
-                logger.exception(
-                    'Error process events; query=\'{0}\'; error={1}'.format(
-                        cfg.events[query_index].lucene_query,
-                        err))
+        search = SearchQuery(**cfg.events.search_window)
+        search.add_must(QSMatch(cfg.events.lucene_query))
+
+        # Ignore empty usernames
+        search.add_must_not(TermMatch(USERNAME_PATH, ''))
+
+        # Ignore whitelisted usernames
+        for whitelisted_username in cfg.whitelist.users:
+            search.add_must_not(TermMatch(USERNAME_PATH, whitelisted_username))
+
+        # Ignore whitelisted subnets
+        for whitelisted_subnet in cfg.whitelist.cidrs:
+            search.add_must_not(SubnetMatch('details.sourceipaddress', whitelisted_subnet))
+
+        self.filtersManual(search)
+        self.searchEventsAggregated(USERNAME_PATH, samplesLimit=1000)
+        try:
+            self.walkAggregations(threshold=1, config=cfg)
+        except Exception as err:
+            self.error_thrown = err
+            traceback.print_exc(file=sys.stdout)
+            logger.exception(
+                'Error process events; query=\'{0}\'; error={1}'.format(
+                    cfg.events[query_index].lucene_query,
+                    err))
 
     def onAggregation(self, agg):
         username = agg['value']
@@ -130,16 +150,16 @@ class AlertGeoModel(AlertTask):
         search = SearchQuery(**evt_cfg.search_window)
         search.add_must(QSMatch(evt_cfg.lucene_query))
         # Ignore empty usernames
-        search.add_must_not(TermMatch(evt_cfg.username_path, ''))
+        search.add_must_not(TermMatch(USERNAME_PATH, ''))
         # Ignore whitelisted usernames
         for whitelisted_username in cfg.whitelist.users:
-            search.add_must_not(TermMatch(evt_cfg.username_path, whitelisted_username))
+            search.add_must_not(TermMatch(USERNAME_PATH, whitelisted_username))
         # Ignore whitelisted subnets
         for whitelisted_subnet in cfg.whitelist.cidrs:
             search.add_must_not(SubnetMatch('details.sourceipaddress', whitelisted_subnet))
 
         self.filtersManual(search)
-        self.searchEventsAggregated(evt_cfg.username_path, samplesLimit=1000)
+        self.searchEventsAggregated(USERNAME_PATH, samplesLimit=1000)
         self.walkAggregations(threshold=1, config=cfg)
 
     def _load_config(self):
@@ -148,10 +168,7 @@ class AlertGeoModel(AlertTask):
 
             cfg['localities'] = config.Localities(**cfg['localities'])
 
-            cfg['events'] = [
-                config.Events(**evt_cfg)
-                for evt_cfg in cfg['events']
-            ]
+            cfg['events'] = config.Events(**cfg['events'])
 
             cfg['whitelist'] = config.Whitelist(**cfg['whitelist'])
 

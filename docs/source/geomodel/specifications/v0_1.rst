@@ -115,10 +115,9 @@ following.
         "valid_duration_days": number,
         "radius_kilometres": number
       },
-      "events": Array<{ 
+      "events": { 
         "search_window": object,
         "lucene_query": string,
-        "username_path": string
       },
       "whitelist": {
         "users": Array<string>,
