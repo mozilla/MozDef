@@ -7,12 +7,9 @@
 
 import json
 import os
-import sys
-import traceback
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch, SubnetMatch, QueryStringMatch as QSMatch
-from mozdef_util.utilities.logger import logger
 
 import geomodel.alert as alert
 import geomodel.config as config
@@ -75,15 +72,7 @@ class AlertGeoModel(AlertTask):
 
         self.filtersManual(search)
         self.searchEventsAggregated(USERNAME_PATH, samplesLimit=1000)
-        try:
-            self.walkAggregations(threshold=1, config=cfg)
-        except Exception as err:
-            self.error_thrown = err
-            traceback.print_exc(file=sys.stdout)
-            logger.exception(
-                'Error process events; query=\'{0}\'; error={1}'.format(
-                    cfg.events[query_index].lucene_query,
-                    err))
+        self.walkAggregations(threshold=1, config=cfg)
 
     def onAggregation(self, agg):
         username = agg['value']
@@ -143,24 +132,6 @@ class AlertGeoModel(AlertTask):
             return alert_dict
 
         return None
-
-    def _process(self, cfg: config.Config, qindex: int):
-        evt_cfg = cfg.events[qindex]
-
-        search = SearchQuery(**evt_cfg.search_window)
-        search.add_must(QSMatch(evt_cfg.lucene_query))
-        # Ignore empty usernames
-        search.add_must_not(TermMatch(USERNAME_PATH, ''))
-        # Ignore whitelisted usernames
-        for whitelisted_username in cfg.whitelist.users:
-            search.add_must_not(TermMatch(USERNAME_PATH, whitelisted_username))
-        # Ignore whitelisted subnets
-        for whitelisted_subnet in cfg.whitelist.cidrs:
-            search.add_must_not(SubnetMatch('details.sourceipaddress', whitelisted_subnet))
-
-        self.filtersManual(search)
-        self.searchEventsAggregated(USERNAME_PATH, samplesLimit=1000)
-        self.walkAggregations(threshold=1, config=cfg)
 
     def _load_config(self):
         with open(_CONFIG_FILE) as cfg_file:
