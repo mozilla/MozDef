@@ -1089,7 +1089,6 @@ class TestAlreadyProcessedEvents(AlertTestSuite):
         AlertTestSuite.create_event(default_event),
     ]
     events[0]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
-    events[0]['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
 
     test_cases = [
         NegativeAlertTestCase(

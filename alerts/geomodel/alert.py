@@ -48,7 +48,7 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
 
     dist_traveled = 1000 * geo_distance(loc1, loc2)  # Convert to metres
 
-    seconds_between = (loc2.lastaction - loc1.lastaction).total_seconds()
+    seconds_between = abs((loc2.lastaction - loc1.lastaction).total_seconds())
 
     # We pad the time with an hour to account for things like planes being
     # slowed, network delays, etc.
@@ -69,13 +69,7 @@ def alert(
     '''
 
     relevant_es = sorted(from_es, key=attrgetter('lastaction'), reverse=True)[0:1]
-    if len(relevant_es) == 0:
-        all_evts = from_evts
-    else:
-        all_evts = list(filter(
-            lambda loc: loc.lastaction > relevant_es[0].lastaction,
-            from_evts))
-    all_evts = sorted(all_evts, key=attrgetter('lastaction'))
+    all_evts = sorted(from_evts, key=attrgetter('lastaction'))
     locs_to_consider = relevant_es + all_evts
 
     if len(locs_to_consider) < 2:

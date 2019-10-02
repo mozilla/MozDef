@@ -8,8 +8,11 @@
 import json
 import os
 
+from mozdef_util.utilities.toUTC import toUTC
+from datetime import datetime, timedelta
+
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, SubnetMatch, QueryStringMatch as QSMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, RangeMatch, SubnetMatch, QueryStringMatch as QSMatch
 
 import geomodel.alert as alert
 import geomodel.config as config
@@ -32,6 +35,24 @@ class AlertGeoModel(AlertTask):
     When activity is found that indicates a potential compromise of an
     account, an alert is produced.
     '''
+
+    def get_last_executed_time(self):
+        search = SearchQuery()
+        search.add_must(TermMatch('type_', 'execution_state'))
+        result = search.execute(self.es, indices=['localities'])
+        if len(result['hits']) == 0:
+            return None
+        return result['hits'][0]
+
+    def save_last_executed_time(self):
+        doc_id = None
+        if self.last_executed_doc:
+            doc_id = self.last_executed_doc['_id']
+        executed_state = {
+            "type_": "execution_state",
+            "execution_time": self.executed_time.isoformat()
+        }
+        self.es.save_object(body=executed_state, index='localities', doc_id=doc_id)
 
     def main(self):
         cfg = self._load_config()
@@ -56,7 +77,18 @@ class AlertGeoModel(AlertTask):
             }
             self.es.create_index('localities', settings)
 
-        search = SearchQuery(**cfg.events.search_window)
+        self.last_executed_doc = self.get_last_executed_time()
+        self.executed_time = toUTC(datetime.now())
+
+        search = SearchQuery()
+        end_date = self.executed_time
+        if self.last_executed_doc:
+            begin_date = toUTC(self.last_executed_doc['_source']['execution_time'])
+        else:
+            begin_date = toUTC(datetime.now()) - timedelta(**cfg.events.search_window)
+        received_range_query = RangeMatch('receivedtimestamp', begin_date, end_date)
+        search.add_must(received_range_query)
+
         search.add_must(QSMatch(cfg.events.lucene_query))
 
         # Ignore empty usernames
@@ -73,6 +105,8 @@ class AlertGeoModel(AlertTask):
         self.filtersManual(search)
         self.searchEventsAggregated(USERNAME_PATH, samplesLimit=1000)
         self.walkAggregations(threshold=1, config=cfg)
+
+        self.save_last_executed_time()
 
     def onAggregation(self, agg):
         username = agg['value']
