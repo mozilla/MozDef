@@ -9,6 +9,7 @@ from tests.alerts.negative_alert_test_case import NegativeAlertTestCase
 from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
 
 import alerts.geomodel.locality as geomodel
+import alerts.geomodel.execution as execution
 
 
 def _summary_from_events(events):
@@ -1202,11 +1203,10 @@ class TestSearchWindowDynamic(AlertTestSuite):
         def locality(cfg):
             return geomodel.Locality(**cfg)
 
-        executed_state = {
-            "type_": "execution_state",
-            "execution_time": (toUTC(datetime.now()) - timedelta(minutes=2)).isoformat()
-        }
-        self.es_client.save_object(body=executed_state, index='localities')
+        record = execution.Record.new(execution.ExecutionState.new(
+            toUTC(datetime.now()) - timedelta(minutes=2)))
+        execution.store(self.es_client)(record, index)
+        
         self.refresh(index)
 
     def teardown(self):
