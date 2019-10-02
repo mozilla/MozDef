@@ -12,13 +12,17 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 
 class AlertLdapBruteforce(AlertTask):
     def main(self):
-        self.parse_config('ldap_bruteforce.conf', ['threshold_count', 'search_depth_min'])
+        self.parse_config('ldap_bruteforce.conf', ['threshold_count', 'search_depth_min', 'host_exclusions'])
         search_query = SearchQuery(minutes=int(self.config.search_depth_min))
         search_query.add_must_not(TermMatch('details.user', ''))
         search_query.add_must([
             TermMatch('category', 'ldap'),
             TermMatch('details.response.error', 'LDAP_INVALID_CREDENTIALS'),
         ])
+
+        for host_exclusion in self.config.host_exclusion.split(","):
+            search_query.add_must_not([TermMatch("hostname", host_exclusion)])
+
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.user', samplesLimit=10)
         self.walkAggregations(threshold=int(self.config.threshold_count))
