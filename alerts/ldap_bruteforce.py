@@ -21,7 +21,7 @@ class AlertLdapBruteforce(AlertTask):
         ])
 
         for host_exclusion in self.config.host_exclusion.split(","):
-            search_query.add_must_not([TermMatch("hostname", host_exclusion)])
+            search_query.add_must_not([TermMatch("details.server", host_exclusion)])
 
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.user', samplesLimit=10)
