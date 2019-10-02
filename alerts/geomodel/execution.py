@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Callable, NamedTuple, Optional
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient as ESClient
+from mozdef_util.query_models import SearchQuery, TermMatch
 from mozdef_util.utilities.toUTC import toUTC
 
 

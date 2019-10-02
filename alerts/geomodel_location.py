@@ -12,7 +12,12 @@ from mozdef_util.utilities.toUTC import toUTC
 from datetime import datetime, timedelta
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, RangeMatch, SubnetMatch, QueryStringMatch as QSMatch
+from mozdef_util.query_models import\
+    SearchQuery,\
+    TermMatch,\
+    RangeMatch,\
+    SubnetMatch,
+    QueryStringMatch as QSMatch
 
 import geomodel.alert as alert
 import geomodel.config as config
