@@ -1135,3 +1135,81 @@ class TestAlreadyProcessedEvents(AlertTestSuite):
         if self.config_delete_indexes:
             self.es_client.delete_index('localities', True)
         super().teardown()
+
+
+class TestSearchWindowDynamic(AlertTestSuite):
+    alert_filename = 'geomodel_location'
+    alert_classname = 'AlertGeoModel'
+
+    default_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '5.6.7.8',
+                'username': 'tester1',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3849,
+                },
+            },
+            'tags': ['auth0'],
+        }
+    }
+    outside_distance_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '1.2.3.4',
+                'username': 'tester1',
+                'sourceipgeolocation': {
+                    'city': 'San Francisco',
+                    'country_code': 'US',
+                    'latitude': 37.773972,
+                    'longitude': -122.431297,
+                },
+            },
+            'tags': ['auth0'],
+        }
+    }
+
+    events = [
+        AlertTestSuite.create_event(default_event),
+        AlertTestSuite.create_event(outside_distance_event),
+    ]
+    events[0]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
+    events[0]['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
+    test_cases = [
+        NegativeAlertTestCase(
+            description='Does not fire if one event is outside of dynamic search window',
+            events=events
+        )
+    ]
+
+    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
+    def setup(self):
+        super().setup()
+
+        index = 'localities'
+        if self.config_delete_indexes:
+            self.es_client.delete_index(index, True)
+            self.es_client.create_index(index)
+
+        journal = geomodel.wrap_journal(self.es_client)
+
+        def state(username, locs):
+            return geomodel.State('locality', username, locs)
+
+        def locality(cfg):
+            return geomodel.Locality(**cfg)
+
+        executed_state = {
+            "type_": "execution_state",
+            "execution_time": (toUTC(datetime.now()) - timedelta(minutes=2)).isoformat()
+        }
+        self.es_client.save_object(body=executed_state, index='localities')
+        self.refresh(index)
+
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index('localities', True)
+        super().teardown()
