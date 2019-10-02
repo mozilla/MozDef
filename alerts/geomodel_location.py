@@ -28,6 +28,9 @@ _CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
     'geomodel_location.json')
 
+# The ES index in which we record the last time this alert was run.
+_EXEC_INDEX = 'localities'
+
 # We expect that, no matter what query GeoModel is configured to run that the
 # usernames of users taking actions represented by events retrieved will be
 # stored in `event['_source']['details']['username']`.
@@ -82,36 +85,40 @@ class AlertGeoModel(AlertTask):
             }
             self.es.create_index('localities', settings)
 
-        self.last_executed_doc = self.get_last_executed_time()
-        self.executed_time = toUTC(datetime.now())
+        last_execution_record = execution.load(self.es_client)(_EXEC_INDEX)
 
-        search = SearchQuery()
-        end_date = self.executed_time
-        if self.last_executed_doc:
-            begin_date = toUTC(self.last_executed_doc['_source']['execution_time'])
+        if last_execution_record is not None:
+            search_range_start = last_execution_record.state.execution_time
         else:
-            begin_date = toUTC(datetime.now()) - timedelta(**cfg.events.search_window)
-        received_range_query = RangeMatch('receivedtimestamp', begin_date, end_date)
-        search.add_must(received_range_query)
+            cfg_offset = timedelta(**cfg.events.search_window)
+            range_start = toUTC(datetime.now()) - cfg_offset
 
-        search.add_must(QSMatch(cfg.events.lucene_query))
+        range_end = toUTC(datetime.now())
+
+        query = SearchQuery()
+        query.add_must(RangeMatch('receivedtimestamp', range_start, range_end))
+        query.add_must(QSMatch(cfg.events.lucene_query))
 
         # Ignore empty usernames
-        search.add_must_not(TermMatch(USERNAME_PATH, ''))
+        query.add_must_not(TermMatch(USERNAME_PATH, ''))
 
         # Ignore whitelisted usernames
         for whitelisted_username in cfg.whitelist.users:
-            search.add_must_not(TermMatch(USERNAME_PATH, whitelisted_username))
+            query.add_must_not(TermMatch(USERNAME_PATH, whitelisted_username))
 
         # Ignore whitelisted subnets
         for whitelisted_subnet in cfg.whitelist.cidrs:
-            search.add_must_not(SubnetMatch('details.sourceipaddress', whitelisted_subnet))
+            query.add_must_not(SubnetMatch('details.sourceipaddress', whitelisted_subnet))
 
-        self.filtersManual(search)
+        self.filtersManual(query)
         self.searchEventsAggregated(USERNAME_PATH, samplesLimit=1000)
         self.walkAggregations(threshold=1, config=cfg)
 
-        self.save_last_executed_time()
+        updated_exec = execution.Record(
+            last_execution_record.identifier,
+            execution.ExecutionState.new(range_end))
+
+        execution.store(self.es_client)(updated_exec, _EXEC_INDEX)
 
     def onAggregation(self, agg):
         username = agg['value']
