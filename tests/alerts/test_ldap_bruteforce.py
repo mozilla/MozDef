@@ -26,6 +26,7 @@ class TestAlertLdapBruteforce(AlertTestSuite):
                         ]
                     }
                 ],
+                "server": "ldap.example.com",
                 "user": "jsmith@example.com",
                 "response": {
                     "error": 'LDAP_INVALID_CREDENTIALS',

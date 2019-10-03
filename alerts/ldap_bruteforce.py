@@ -20,7 +20,7 @@ class AlertLdapBruteforce(AlertTask):
             TermMatch('details.response.error', 'LDAP_INVALID_CREDENTIALS'),
         ])
 
-        for host_exclusion in self.config.host_exclusion.split(","):
+        for host_exclusion in self.config.host_exclusions.split(","):
             search_query.add_must_not([TermMatch("details.server", host_exclusion)])
 
         self.filtersManual(search_query)
