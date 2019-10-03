@@ -20,7 +20,6 @@ class ExecutionState(NamedTuple):
     #  alert_name: str
     execution_time: datetime
 
-
     def new(executed_at: Optional[datetime]=None) -> 'ExecutionState':
         '''Construct a new `ExecutionState` representing the execution of an
         alert at a specific time.
@@ -40,7 +39,6 @@ class Record(NamedTuple):
 
     identifier: Optional[str]
     state: ExecutionState
-
 
     def new(state: ExecutionState) -> 'Record':
         '''Construct a new `Record` that, when stored, will result in a new
