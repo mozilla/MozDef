@@ -1196,6 +1196,7 @@ class TestSearchWindowDynamic(AlertTestSuite):
             self.es_client.create_index(index)
 
         journal = geomodel.wrap_journal(self.es_client)
+        exec_state_store = execution.store(self.es_client)
 
         def state(username, locs):
             return geomodel.State('locality', username, locs)
@@ -1205,7 +1206,7 @@ class TestSearchWindowDynamic(AlertTestSuite):
 
         record = execution.Record.new(execution.ExecutionState.new(
             toUTC(datetime.now()) - timedelta(minutes=2)))
-        execution.store(self.es_client)(record, index)
+        exec_state_store(record, index)
         
         self.refresh(index)
 
