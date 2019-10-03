@@ -27,10 +27,10 @@ class ExecutionState(NamedTuple):
         called if not explicitly provided.
         '''
 
-        if execution_time is None:
-            execution_time = toUTC(datetime.now())
+        if executed_at is None:
+            executed_at = toUTC(datetime.now())
 
-        return ExecutionState(execution_time)
+        return ExecutionState(executed_at)
 
 
 class Record(NamedTuple):

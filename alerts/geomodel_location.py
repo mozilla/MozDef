@@ -16,11 +16,12 @@ from mozdef_util.query_models import\
     SearchQuery,\
     TermMatch,\
     RangeMatch,\
-    SubnetMatch,
+    SubnetMatch,\
     QueryStringMatch as QSMatch
 
 import geomodel.alert as alert
 import geomodel.config as config
+import geomodel.execution as execution
 import geomodel.locality as locality
 
 
@@ -43,24 +44,6 @@ class AlertGeoModel(AlertTask):
     When activity is found that indicates a potential compromise of an
     account, an alert is produced.
     '''
-
-    def get_last_executed_time(self):
-        search = SearchQuery()
-        search.add_must(TermMatch('type_', 'execution_state'))
-        result = search.execute(self.es, indices=['localities'])
-        if len(result['hits']) == 0:
-            return None
-        return result['hits'][0]
-
-    def save_last_executed_time(self):
-        doc_id = None
-        if self.last_executed_doc:
-            doc_id = self.last_executed_doc['_id']
-        executed_state = {
-            "type_": "execution_state",
-            "execution_time": self.executed_time.isoformat()
-        }
-        self.es.save_object(body=executed_state, index='localities', doc_id=doc_id)
 
     def main(self):
         cfg = self._load_config()
@@ -85,13 +68,13 @@ class AlertGeoModel(AlertTask):
             }
             self.es.create_index('localities', settings)
 
-        last_execution_record = execution.load(self.es_client)(_EXEC_INDEX)
+        last_execution_record = execution.load(self.es)(_EXEC_INDEX)
 
-        if last_execution_record is not None:
-            search_range_start = last_execution_record.state.execution_time
-        else:
+        if last_execution_record is None:
             cfg_offset = timedelta(**cfg.events.search_window)
             range_start = toUTC(datetime.now()) - cfg_offset
+        else:
+            range_start = last_execution_record.state.execution_time
 
         range_end = toUTC(datetime.now())
 
@@ -114,11 +97,15 @@ class AlertGeoModel(AlertTask):
         self.searchEventsAggregated(USERNAME_PATH, samplesLimit=1000)
         self.walkAggregations(threshold=1, config=cfg)
 
-        updated_exec = execution.Record(
-            last_execution_record.identifier,
-            execution.ExecutionState.new(range_end))
+        if last_execution_record is None:
+            updated_exec = execution.Record.new(
+                execution.ExecutionState.new(range_end))
+        else:
+            updated_exec = execution.Record(
+                last_execution_record.identifier,
+                execution.ExecutionState.new(range_end))
 
-        execution.store(self.es_client)(updated_exec, _EXEC_INDEX)
+        execution.store(self.es)(updated_exec, _EXEC_INDEX)
 
     def onAggregation(self, agg):
         username = agg['value']
