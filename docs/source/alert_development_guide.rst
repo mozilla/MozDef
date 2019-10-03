@@ -2,17 +2,7 @@ Alert Development Guide
 =======================
 
 
-This guide is for someone seeking to write a MozDef alert.
-
-
-Starting a feature branch
--------------------------
-
-Before you do anything else, start by checking out the MozDef repo and starting a feature branch::
-
-  git clone git@github.com:mozilla/MozDef.git
-  cd MozDef
-  git checkout -b name_of_alert_you_want_to_create
+This guide is for someone seeking to write a MozDef alert
 
 
 How to start developing your new alert

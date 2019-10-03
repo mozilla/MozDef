@@ -27,6 +27,7 @@ class message(object):
             'details.requestparameters.bucketpolicy.statement.principal.aws',
             'details.requestparameters.callerreference',
             'details.requestparameters.description',
+            'details.requestparameters.describehostsrequest',
             'details.requestparameters.describeflowlogsrequest.filter.value',
             'details.requestparameters.disableapitermination',
             'details.requestparameters.distributionconfig.callerreference',
