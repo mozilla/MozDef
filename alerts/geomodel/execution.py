@@ -16,6 +16,7 @@ class ExecutionState(NamedTuple):
     configured amount of time in the past.
     '''
 
+    type_: str
     #  alert_name: str
     execution_time: datetime
 
@@ -30,7 +31,7 @@ class ExecutionState(NamedTuple):
         if executed_at is None:
             executed_at = toUTC(datetime.now())
 
-        return ExecutionState(executed_at)
+        return ExecutionState(_TYPE_NAME, executed_at)
 
 
 class Record(NamedTuple):
@@ -90,7 +91,7 @@ def load(client: ESClient) -> LoadInterface:
         eid = results['hits'][0]['_id']
 
         state = ExecutionState(**_dict_take(
-            results['hits'][0],
+            results['hits'][0].get('_source', {}),
             ExecutionState._fields))
 
         return Record(eid, state)
