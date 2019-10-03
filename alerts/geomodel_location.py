@@ -7,21 +7,35 @@
 
 import json
 import os
-import sys
-import traceback
+
+from mozdef_util.utilities.toUTC import toUTC
+from datetime import datetime, timedelta
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, SubnetMatch, QueryStringMatch as QSMatch
-from mozdef_util.utilities.logger import logger
+from mozdef_util.query_models import\
+    SearchQuery,\
+    TermMatch,\
+    RangeMatch,\
+    SubnetMatch,\
+    QueryStringMatch as QSMatch
 
 import geomodel.alert as alert
 import geomodel.config as config
+import geomodel.execution as execution
 import geomodel.locality as locality
 
 
 _CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
     'geomodel_location.json')
+
+# The ES index in which we record the last time this alert was run.
+_EXEC_INDEX = 'localities'
+
+# We expect that, no matter what query GeoModel is configured to run that the
+# usernames of users taking actions represented by events retrieved will be
+# stored in `event['_source']['details']['username']`.
+USERNAME_PATH = 'details.username'
 
 
 class AlertGeoModel(AlertTask):
@@ -36,16 +50,16 @@ class AlertGeoModel(AlertTask):
 
         if not self.es.index_exists('localities'):
             settings = {
-                "mappings": {
-                    "_doc": {
-                        "dynamic_templates": [
+                'mappings': {
+                    '_doc': {
+                        'dynamic_templates': [
                             {
-                                "string_fields": {
-                                    "mapping": {
-                                        "type": "keyword"
+                                'string_fields': {
+                                    'mapping': {
+                                        'type': 'keyword'
                                     },
-                                    "match": "*",
-                                    "match_mapping_type": "string"
+                                    'match': '*',
+                                    'match_mapping_type': 'string'
                                 }
                             },
                         ]
@@ -54,90 +68,103 @@ class AlertGeoModel(AlertTask):
             }
             self.es.create_index('localities', settings)
 
-        for query_index in range(len(cfg.events)):
-            try:
-                self._process(cfg, query_index)
-            except Exception as err:
-                traceback.print_exc(file=sys.stdout)
-                logger.error(
-                    'Error process events; query="{0}"; error={1}'.format(
-                        cfg.events[query_index].lucene_query,
-                        err))
+        last_execution_record = execution.load(self.es)(_EXEC_INDEX)
+
+        if last_execution_record is None:
+            cfg_offset = timedelta(**cfg.events.search_window)
+            range_start = toUTC(datetime.now()) - cfg_offset
+        else:
+            range_start = last_execution_record.state.execution_time
+
+        range_end = toUTC(datetime.now())
+
+        query = SearchQuery()
+        query.add_must(RangeMatch('receivedtimestamp', range_start, range_end))
+        query.add_must(QSMatch(cfg.events.lucene_query))
+
+        # Ignore empty usernames
+        query.add_must_not(TermMatch(USERNAME_PATH, ''))
+
+        # Ignore whitelisted usernames
+        for whitelisted_username in cfg.whitelist.users:
+            query.add_must_not(TermMatch(USERNAME_PATH, whitelisted_username))
+
+        # Ignore whitelisted subnets
+        for whitelisted_subnet in cfg.whitelist.cidrs:
+            query.add_must_not(SubnetMatch('details.sourceipaddress', whitelisted_subnet))
+
+        self.filtersManual(query)
+        self.searchEventsAggregated(USERNAME_PATH, samplesLimit=1000)
+        self.walkAggregations(threshold=1, config=cfg)
+
+        if last_execution_record is None:
+            updated_exec = execution.Record.new(
+                execution.ExecutionState.new(range_end))
+        else:
+            updated_exec = execution.Record(
+                last_execution_record.identifier,
+                execution.ExecutionState.new(range_end))
+
+        execution.store(self.es)(updated_exec, _EXEC_INDEX)
 
     def onAggregation(self, agg):
         username = agg['value']
         events = agg['events']
         cfg = agg['config']
 
-        localities = list(filter(
-            lambda state: state is not None,
-            map(locality.from_event, events)))
-        new_state = locality.State('locality', username, localities)
-
         query = locality.wrap_query(self.es)
         journal = locality.wrap_journal(self.es)
 
-        entry = locality.find(query, username, cfg.localities.es_index)
-        if entry is None:
-            entry = locality.Entry(
+        locs_from_evts = list(filter(
+            lambda state: state is not None,
+            map(locality.from_event, events)))
+
+        entry_from_es = locality.find(query, username, cfg.localities.es_index)
+
+        new_state = locality.State('locality', username, locs_from_evts)
+
+        if entry_from_es is None:
+            entry_from_es = locality.Entry(
                 '', locality.State('locality', username, []))
 
-        updated = locality.Update.flat_map(
-            lambda state: locality.remove_outdated(
-                state,
-                cfg.localities.valid_duration_days),
-            locality.update(entry.state, new_state))
+        cleaned = locality.remove_outdated(
+            entry_from_es.state, cfg.localities.valid_duration_days)
+
+        # Determine if we should trigger an alert before updating the state.
+        new_alert = alert.alert(
+            cleaned.state.username,
+            new_state.localities,
+            cleaned.state.localities)
+
+        updated = locality.update(cleaned.state, new_state)
 
         if updated.did_update:
-            entry = locality.Entry(entry.identifier, updated.state)
+            entry_from_es = locality.Entry(entry_from_es.identifier, updated.state)
 
-            journal(entry, cfg.localities.es_index)
+            journal(entry_from_es, cfg.localities.es_index)
 
-        new = alert.alert(entry.state)
-
-        if new is not None:
-            # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
-            summary = "{0} is now active in {1},{2}. Previously {3},{4}".format(
+        if new_alert is not None:
+            summary = '{} seen in {},{}'.format(
                 username,
-                entry.state.localities[-1].city,
-                entry.state.localities[-1].country,
-                entry.state.localities[-2].city,
-                entry.state.localities[-2].country,
-            )
-            alert_dict = self.createAlertDict(
-                summary,
-                'geomodel',
-                ['geomodel'],
-                events,
-                'INFO')
+                new_alert.hops[0].origin.city,
+                new_alert.hops[0].origin.country)
 
+            for hop in new_alert.hops:
+                summary += ' then {},{}'.format(
+                    hop.destination.city, hop.destination.country)
+
+            alert_dict = self.createAlertDict(
+                summary, 'geomodel', ['geomodel'], events, 'INFO')
+
+            # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict['details'] = {
-                'username': new.username,
-                'sourceipaddress': new.sourceipaddress,
-                'origin': dict(new.origin._asdict())
+                'username': new_alert.username,
+                'hops': [dict(hop._asdict()) for hop in new_alert.hops]
             }
 
             return alert_dict
 
         return None
-
-    def _process(self, cfg: config.Config, qindex: int):
-        evt_cfg = cfg.events[qindex]
-
-        search = SearchQuery(**evt_cfg.search_window)
-        search.add_must(QSMatch(evt_cfg.lucene_query))
-        # Ignore empty usernames
-        search.add_must_not(TermMatch(evt_cfg.username_path, ''))
-        # Ignore whitelisted usernames
-        for whitelisted_username in cfg.whitelist.users:
-            search.add_must_not(TermMatch(evt_cfg.username_path, whitelisted_username))
-        # Ignore whitelisted subnets
-        for whitelisted_subnet in cfg.whitelist.cidrs:
-            search.add_must_not(SubnetMatch('details.sourceipaddress', whitelisted_subnet))
-
-        self.filtersManual(search)
-        self.searchEventsAggregated(evt_cfg.username_path, samplesLimit=1000)
-        self.walkAggregations(threshold=1, config=cfg)
 
     def _load_config(self):
         with open(_CONFIG_FILE) as cfg_file:
@@ -145,10 +172,7 @@ class AlertGeoModel(AlertTask):
 
             cfg['localities'] = config.Localities(**cfg['localities'])
 
-            cfg['events'] = [
-                config.Events(**evt_cfg)
-                for evt_cfg in cfg['events']
-            ]
+            cfg['events'] = config.Events(**cfg['events'])
 
             cfg['whitelist'] = config.Whitelist(**cfg['whitelist'])
 

@@ -1,13 +1,11 @@
 import math
 from operator import attrgetter
-from typing import NamedTuple, Optional
+from typing import List, NamedTuple, Optional
 
-from .locality import State, Locality
+from .locality import Locality, distance as geo_distance
 
 
-_AIR_TRAVEL_SPEED = 1000.0  # km/h
-
-_EARTH_RADIUS = 6373.0  # km # approximate
+_AIR_TRAVEL_SPEED = 277.778  # m/s
 
 # TODO: Switch to dataclasses when we move to Python3.7+
 
@@ -16,6 +14,7 @@ class Origin(NamedTuple):
     '''A description of a location.
     '''
 
+    ip: str
     city: str
     country: str
     latitude: float
@@ -23,13 +22,22 @@ class Origin(NamedTuple):
     geopoint: str
 
 
+class Hop(NamedTuple):
+    '''Describes a hop from one location to another that would be
+    physically impossible in the time between a user's activity in each
+    location.
+    '''
+
+    origin: Origin
+    destination: Origin
+
+
 class Alert(NamedTuple):
     '''A container for the data the alerts output by GeoModel contain.
     '''
 
     username: str
-    sourceipaddress: str
-    origin: Origin
+    hops: List[Hop]
 
 
 def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
@@ -38,53 +46,61 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
     actions took place.
     '''
 
-    lat1 = math.radians(loc1.latitude)
-    lat2 = math.radians(loc2.latitude)
-    lon1 = math.radians(loc1.longitude)
-    lon2 = math.radians(loc2.longitude)
+    dist_traveled = 1000 * geo_distance(loc1, loc2)  # Convert to metres
 
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    a = math.sin(dlat / 2.0) ** 2 +\
-        math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2.0) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    distance = c * _EARTH_RADIUS
-
-    seconds_between = (loc2.lastaction - loc1.lastaction).total_seconds()
-    hours_between = math.ceil(seconds_between / 60.0 / 60.0)
+    seconds_between = abs((loc2.lastaction - loc1.lastaction).total_seconds())
 
     # We pad the time with an hour to account for things like planes being
     # slowed, network delays, etc.
-    return (distance / _AIR_TRAVEL_SPEED) <= (hours_between - 1)
+    ttt = (dist_traveled / _AIR_TRAVEL_SPEED)  # Time to travel the distance.
+    pad = math.ceil((1000 * min(loc1.radius, loc2.radius)) / _AIR_TRAVEL_SPEED)
+
+    return (ttt - pad) <= seconds_between
 
 
-def alert(user_state: State) -> Optional[Alert]:
+def alert(
+        username: str,
+        from_evts: List[Locality],
+        from_es: List[Locality]
+) -> Optional[Alert]:
     '''Determine whether an alert should fire given a particular user's
     locality state.  If an alert should fire, an `Alert` is returned, otherwise
     this function returns `None`.
     '''
 
-    locs_to_consider = sorted(user_state.localities, key=attrgetter('lastaction'))
+    relevant_es = sorted(from_es, key=attrgetter('lastaction'), reverse=True)[0:1]
+    all_evts = sorted(from_evts, key=attrgetter('lastaction'))
+    locs_to_consider = relevant_es + all_evts
 
     if len(locs_to_consider) < 2:
         return None
 
-    locations = locs_to_consider[-2:]
+    pairs = [
+        (locs_to_consider[i], locs_to_consider[i + 1])
+        for i in range(len(locs_to_consider) - 1)
+    ]
 
-    if _travel_possible(*locations):
+    hops = [
+        Hop(
+            Origin(
+                o.sourceipaddress,
+                o.city,
+                o.country,
+                o.latitude,
+                o.longitude,
+                '{},{}'.format(o.latitude, o.longitude)),
+            Origin(
+                d.sourceipaddress,
+                d.city,
+                d.country,
+                d.latitude,
+                d.longitude,
+                '{},{}'.format(d.latitude, d.longitude)))
+        for (o, d) in pairs
+        if not _travel_possible(o, d)
+    ]
+
+    if len(hops) == 0:
         return None
 
-    (ip, city, country, lat, lon) = (
-        locations[1].sourceipaddress,
-        locations[1].city,
-        locations[1].country,
-        locations[1].latitude,
-        locations[1].longitude
-    )
-
-    geo = '{0},{1}'.format(lat, lon)
-    origin = Origin(city, country, lat, lon, geo)
-
-    return Alert(user_state.username, ip, origin)
+    return Alert(username, hops)
