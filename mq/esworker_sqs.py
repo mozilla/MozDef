@@ -158,9 +158,7 @@ def keyMapping(aDict):
 
 def esConnect():
     """open or re-open a connection to elastic search"""
-    return ElasticsearchClient(
-        (list("{0}".format(s) for s in options.esservers)), options.esbulksize
-    )
+    return ElasticsearchClient((list("{0}".format(s) for s in options.esservers)), options.esbulksize)
 
 
 class taskConsumer(object):
@@ -171,9 +169,7 @@ class taskConsumer(object):
     def run(self):
         while True:
             try:
-                records = self.sqs_queue.receive_messages(
-                    MaxNumberOfMessages=options.prefetch
-                )
+                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=options.prefetch)
                 for msg in records:
                     # msg.id is the id,
                     # get_body() should be json
@@ -189,8 +185,7 @@ class taskConsumer(object):
                             msgbody = json.loads(tmp)
                         except Exception as e:
                             logger.error(
-                                "Invalid message, not JSON <dropping message and continuing>: %r"
-                                % msg.get_body()
+                                "Invalid message, not JSON <dropping message and continuing>: %r" % msg.get_body()
                             )
                             msg.delete()
                             continue
@@ -233,12 +228,7 @@ class taskConsumer(object):
             except (SSLEOFError, SSLError, socket.error):
                 logger.info("Received network related error...reconnecting")
                 time.sleep(5)
-                self.sqs_queue = connect_sqs(
-                    options.region,
-                    options.accesskey,
-                    options.secretkey,
-                    options.taskexchange,
-                )
+                self.sqs_queue = connect_sqs(options.region, options.accesskey, options.secretkey, options.taskexchange)
 
     def on_message(self, body, message):
         # print("RECEIVED MESSAGE: %r" % (body, ))
@@ -264,9 +254,7 @@ class taskConsumer(object):
             if "customendpoint" in bodyDict and bodyDict["customendpoint"]:
                 # custom document
                 # send to plugins to allow them to modify it if needed
-                (normalizedDict, metadata) = sendEventToPlugins(
-                    bodyDict, metadata, pluginList
-                )
+                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
             else:
                 # normalize the dict
                 # to the mozdef events standard
@@ -274,9 +262,7 @@ class taskConsumer(object):
 
                 # send to plugins to allow them to modify it if needed
                 if normalizedDict is not None and isinstance(normalizedDict, dict):
-                    (normalizedDict, metadata) = sendEventToPlugins(
-                        normalizedDict, metadata, pluginList
-                    )
+                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
 
             # drop the message if a plug in set it to None
             # signaling a discard
@@ -292,12 +278,7 @@ class taskConsumer(object):
                 if options.esbulksize != 0:
                     bulk = True
 
-                self.esConnection.save_event(
-                    index=metadata["index"],
-                    doc_id=metadata["id"],
-                    body=jbody,
-                    bulk=bulk,
-                )
+                self.esConnection.save_event(index=metadata["index"], doc_id=metadata["id"], body=jbody, bulk=bulk)
 
             except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
@@ -305,26 +286,16 @@ class taskConsumer(object):
                     self.esConnection = esConnect()
                     # message.requeue()
                     return
-                except (
-                    ElasticsearchBadServer,
-                    ElasticsearchInvalidIndex,
-                    ElasticsearchException,
-                ):
+                except (ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException):
                     # there's no requeue and we drop several messages
                     # state may be already set.
                     logger.exception(
-                        "ElasticSearchException: {0} reported while indexing event, messages lost".format(
-                            e
-                        )
+                        "ElasticSearchException: {0} reported while indexing event, messages lost".format(e)
                     )
                     return
             except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
-                logger.exception(
-                    "ElasticSearchException: {0} reported while indexing event, messages lost".format(
-                        e
-                    )
-                )
+                logger.exception("ElasticSearchException: {0} reported while indexing event, messages lost".format(e))
                 # there's no requeue and we drop several messages
                 # message.requeue()
                 return
@@ -359,14 +330,10 @@ def main():
 
 def initConfig():
     # capture the hostname
-    options.mozdefhostname = getConfig(
-        "mozdefhostname", socket.gethostname(), options.configfile
-    )
+    options.mozdefhostname = getConfig("mozdefhostname", socket.gethostname(), options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
-    options.esservers = list(
-        getConfig("esservers", "http://localhost:9200", options.configfile).split(",")
-    )
+    options.esservers = list(getConfig("esservers", "http://localhost:9200", options.configfile).split(","))
     options.esbulksize = getConfig("esbulksize", 0, options.configfile)
     options.esbulktimeout = getConfig("esbulktimeout", 30, options.configfile)
 
@@ -403,10 +370,7 @@ if __name__ == "__main__":
     # configure ourselves
     parser = OptionParser()
     parser.add_option(
-        "-c",
-        dest="configfile",
-        default=sys.argv[0].replace(".py", ".conf"),
-        help="configuration file to use",
+        "-c", dest="configfile", default=sys.argv[0].replace(".py", ".conf"), help="configuration file to use"
     )
     (options, args) = parser.parse_args()
     initConfig()

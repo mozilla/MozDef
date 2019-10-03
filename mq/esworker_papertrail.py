@@ -78,22 +78,14 @@ class PTRequestor(object):
             if resp.status_code == 200:
                 break
             else:
-                logger.debug(
-                    "Received invalid status code: {0}: {1}".format(
-                        resp.status_code, resp.text
-                    )
-                )
+                logger.debug("Received invalid status code: {0}: {1}".format(resp.status_code, resp.text))
                 total_retries += 1
                 if total_retries < max_retries:
                     logger.debug("Sleeping a bit then retrying")
                     time.sleep(2)
                 else:
                     logger.error("Received too many error messages...exiting")
-                    logger.error(
-                        "Last malformed response: {0}: {1}".format(
-                            resp.status_code, resp.text
-                        )
-                    )
+                    logger.error("Last malformed response: {0}: {1}".format(resp.status_code, resp.text))
                     sys.exit(1)
 
         return self.parse_events(resp.json())
@@ -228,9 +220,7 @@ def keyMapping(aDict):
 
 def esConnect():
     """open or re-open a connection to elastic search"""
-    return ElasticsearchClient(
-        (list("{0}".format(s) for s in options.esservers)), options.esbulksize
-    )
+    return ElasticsearchClient((list("{0}".format(s) for s in options.esservers)), options.esbulksize)
 
 
 class taskConsumer(object):
@@ -239,20 +229,14 @@ class taskConsumer(object):
         self.esConnection = esConnection
         # calculate our initial request window
         self.lastRequestTime = (
-            toUTC(datetime.now())
-            - timedelta(seconds=options.sleep_time)
-            - timedelta(seconds=options.ptbackoff)
+            toUTC(datetime.now()) - timedelta(seconds=options.sleep_time) - timedelta(seconds=options.ptbackoff)
         )
 
     def run(self):
         while True:
             try:
-                curRequestTime = toUTC(datetime.now()) - timedelta(
-                    seconds=options.ptbackoff
-                )
-                records = self.ptrequestor.request(
-                    options.ptquery, self.lastRequestTime, curRequestTime
-                )
+                curRequestTime = toUTC(datetime.now()) - timedelta(seconds=options.ptbackoff)
+                records = self.ptrequestor.request(options.ptquery, self.lastRequestTime, curRequestTime)
                 # update last request time for the next request
                 self.lastRequestTime = curRequestTime
                 for msgid in records:
@@ -260,18 +244,14 @@ class taskConsumer(object):
 
                     # strip any line feeds from the message itself, we just convert them
                     # into spaces
-                    msgdict["message"] = (
-                        msgdict["message"].replace("\n", " ").replace("\r", "")
-                    )
+                    msgdict["message"] = msgdict["message"].replace("\n", " ").replace("\r", "")
 
                     event = dict()
                     event["tags"] = ["papertrail", options.ptacctname]
                     event["details"] = msgdict
 
                     if "generated_at" in event["details"]:
-                        event["utctimestamp"] = toUTC(
-                            event["details"]["generated_at"]
-                        ).isoformat()
+                        event["utctimestamp"] = toUTC(event["details"]["generated_at"]).isoformat()
                     if "hostname" in event["details"]:
                         event["hostname"] = event["details"]["hostname"]
                     if "message" in event["details"]:
@@ -305,9 +285,7 @@ class taskConsumer(object):
                     bodyDict = json.loads(body)  # lets assume it's json
                 except ValueError as e:
                     # not json..ack but log the message
-                    logger.error(
-                        "esworker exception: unknown body type received %r" % body
-                    )
+                    logger.error("esworker exception: unknown body type received %r" % body)
                     # message.ack()
                     return
             else:
@@ -318,9 +296,7 @@ class taskConsumer(object):
             if "customendpoint" in bodyDict and bodyDict["customendpoint"]:
                 # custom document
                 # send to plugins to allow them to modify it if needed
-                (normalizedDict, metadata) = sendEventToPlugins(
-                    bodyDict, metadata, pluginList
-                )
+                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
             else:
                 # normalize the dict
                 # to the mozdef events standard
@@ -328,9 +304,7 @@ class taskConsumer(object):
 
                 # send to plugins to allow them to modify it if needed
                 if normalizedDict is not None and isinstance(normalizedDict, dict):
-                    (normalizedDict, metadata) = sendEventToPlugins(
-                        normalizedDict, metadata, pluginList
-                    )
+                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
 
             # drop the message if a plug in set it to None
             # signaling a discard
@@ -346,12 +320,7 @@ class taskConsumer(object):
                 if options.esbulksize != 0:
                     bulk = True
 
-                self.esConnection.save_event(
-                    index=metadata["index"],
-                    doc_id=metadata["id"],
-                    body=jbody,
-                    bulk=bulk,
-                )
+                self.esConnection.save_event(index=metadata["index"], doc_id=metadata["id"], body=jbody, bulk=bulk)
 
             except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
@@ -360,24 +329,14 @@ class taskConsumer(object):
                     # messages are dropped here
                     # message.requeue()
                     return
-                except (
-                    ElasticsearchBadServer,
-                    ElasticsearchInvalidIndex,
-                    ElasticsearchException,
-                ):
+                except (ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException):
                     logger.exception(
-                        "ElasticSearchException: {0} reported while indexing event, messages lost".format(
-                            e
-                        )
+                        "ElasticSearchException: {0} reported while indexing event, messages lost".format(e)
                     )
                     return
             except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
-                logger.exception(
-                    "ElasticSearchException: {0} reported while indexing event, messages lost".format(
-                        e
-                    )
-                )
+                logger.exception("ElasticSearchException: {0} reported while indexing event, messages lost".format(e))
                 # messages are dropped here
                 # message.requeue()
                 return
@@ -401,14 +360,10 @@ def main():
 
 def initConfig():
     # capture the hostname
-    options.mozdefhostname = getConfig(
-        "mozdefhostname", socket.gethostname(), options.configfile
-    )
+    options.mozdefhostname = getConfig("mozdefhostname", socket.gethostname(), options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
-    options.esservers = list(
-        getConfig("esservers", "http://localhost:9200", options.configfile).split(",")
-    )
+    options.esservers = list(getConfig("esservers", "http://localhost:9200", options.configfile).split(","))
     options.esbulksize = getConfig("esbulksize", 0, options.configfile)
     options.esbulktimeout = getConfig("esbulktimeout", 30, options.configfile)
 
@@ -427,10 +382,7 @@ if __name__ == "__main__":
     # configure ourselves
     parser = OptionParser()
     parser.add_option(
-        "-c",
-        dest="configfile",
-        default=sys.argv[0].replace(".py", ".conf"),
-        help="configuration file to use",
+        "-c", dest="configfile", default=sys.argv[0].replace(".py", ".conf"), help="configuration file to use"
     )
     (options, args) = parser.parse_args()
     initConfig()

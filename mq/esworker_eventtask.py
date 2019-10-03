@@ -92,13 +92,7 @@ def keyMapping(aDict):
                         returndict["tags"].append(v)
 
             # nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
-            if k in (
-                "syslogseverity",
-                "severity",
-                "severityvalue",
-                "level",
-                "priority",
-            ):
+            if k in ("syslogseverity", "severity", "severityvalue", "level", "priority"):
                 returndict["severity"] = toUnicode(v).upper()
 
             if k in ("facility", "syslogfacility"):
@@ -170,9 +164,7 @@ def keyMapping(aDict):
 
 def esConnect():
     """open or re-open a connection to elastic search"""
-    return ElasticsearchClient(
-        (list("{0}".format(s) for s in options.esservers)), options.esbulksize
-    )
+    return ElasticsearchClient((list("{0}".format(s) for s in options.esservers)), options.esbulksize)
 
 
 class taskConsumer(ConsumerMixin):
@@ -189,10 +181,7 @@ class taskConsumer(ConsumerMixin):
 
     def get_consumers(self, Consumer, channel):
         consumer = Consumer(
-            self.taskQueue,
-            callbacks=[self.on_message],
-            accept=["json", "text/plain"],
-            no_ack=(not options.mqack),
+            self.taskQueue, callbacks=[self.on_message], accept=["json", "text/plain"], no_ack=(not options.mqack)
         )
         consumer.qos(prefetch_count=options.prefetch)
         return [consumer]
@@ -221,9 +210,7 @@ class taskConsumer(ConsumerMixin):
             if "customendpoint" in bodyDict and bodyDict["customendpoint"]:
                 # custom document
                 # send to plugins to allow them to modify it if needed
-                (normalizedDict, metadata) = sendEventToPlugins(
-                    bodyDict, metadata, pluginList
-                )
+                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
             else:
                 # normalize the dict
                 # to the mozdef events standard
@@ -231,9 +218,7 @@ class taskConsumer(ConsumerMixin):
 
                 # send to plugins to allow them to modify it if needed
                 if normalizedDict is not None and isinstance(normalizedDict, dict):
-                    (normalizedDict, metadata) = sendEventToPlugins(
-                        normalizedDict, metadata, pluginList
-                    )
+                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
 
             # drop the message if a plug in set it to None
             # signaling a discard
@@ -249,12 +234,7 @@ class taskConsumer(ConsumerMixin):
                 if options.esbulksize != 0:
                     bulk = True
 
-                self.esConnection.save_event(
-                    index=metadata["index"],
-                    doc_id=metadata["id"],
-                    body=jbody,
-                    bulk=bulk,
-                )
+                self.esConnection.save_event(index=metadata["index"], doc_id=metadata["id"], body=jbody, bulk=bulk)
 
             except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
@@ -265,24 +245,20 @@ class taskConsumer(ConsumerMixin):
                 except kombu.exceptions.MessageStateError:
                     # state may be already set.
                     logger.exception(
-                        "Elastic Search and RabbitMQ exception (messages lost) while indexing event: %r"
-                        % e
+                        "Elastic Search and RabbitMQ exception (messages lost) while indexing event: %r" % e
                     )
                     return
             except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
                 try:
-                    logger.exception(
-                        "ElasticSearchException while indexing event: %r" % e
-                    )
+                    logger.exception("ElasticSearchException while indexing event: %r" % e)
                     logger.error("Malformed message body: %r" % body)
                     message.requeue()
                     return
                 except kombu.exceptions.MessageStateError:
                     # state may be already set.
                     logger.exception(
-                        "Elastic Search and RabbitMQ exception (messages lost) while indexing event: %r"
-                        % e
+                        "Elastic Search and RabbitMQ exception (messages lost) while indexing event: %r" % e
                     )
                     return
             # post the dict (kombu serializes it to json) to the events topic queue
@@ -300,11 +276,7 @@ def main():
     # only py-amqp supports ssl and doesn't recognize amqps
     # so fix up the connection string accordingly
     connString = "amqp://{0}:{1}@{2}:{3}/{4}".format(
-        options.mquser,
-        options.mqpassword,
-        options.mqserver,
-        options.mqport,
-        options.mqvhost,
+        options.mquser, options.mqpassword, options.mqserver, options.mqport, options.mqvhost
     )
     if options.mqprotocol == "amqps":
         mqSSL = True
@@ -314,14 +286,10 @@ def main():
     # Task Exchange for events sent via http for us to normalize and post to elastic search
     if options.mqack:
         # conservative, store msgs to disk, ack each message
-        eventTaskExchange = Exchange(
-            name=options.taskexchange, type="direct", durable=True, delivery_mode=2
-        )
+        eventTaskExchange = Exchange(name=options.taskexchange, type="direct", durable=True, delivery_mode=2)
     else:
         # fast, transient delivery, store in memory only, auto-ack messages
-        eventTaskExchange = Exchange(
-            name=options.taskexchange, type="direct", durable=True, delivery_mode=1
-        )
+        eventTaskExchange = Exchange(name=options.taskexchange, type="direct", durable=True, delivery_mode=1)
     eventTaskExchange(mqConn).declare()
     # Queue for the exchange
     if options.mqack:
@@ -343,9 +311,7 @@ def main():
     eventTaskQueue(mqConn).declare()
 
     # topic exchange for anyone who wants to queue and listen for mozdef.event
-    eventTopicExchange = Exchange(
-        name=options.eventexchange, type="topic", durable=False, delivery_mode=1
-    )
+    eventTopicExchange = Exchange(name=options.eventexchange, type="topic", durable=False, delivery_mode=1)
     eventTopicExchange(mqConn).declare()
 
     if hasUWSGI:
@@ -358,14 +324,10 @@ def main():
 
 def initConfig():
     # capture the hostname
-    options.mozdefhostname = getConfig(
-        "mozdefhostname", socket.gethostname(), options.configfile
-    )
+    options.mozdefhostname = getConfig("mozdefhostname", socket.gethostname(), options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
-    options.esservers = list(
-        getConfig("esservers", "http://localhost:9200", options.configfile).split(",")
-    )
+    options.esservers = list(getConfig("esservers", "http://localhost:9200", options.configfile).split(","))
     options.esbulksize = getConfig("esbulksize", 0, options.configfile)
     options.esbulktimeout = getConfig("esbulktimeout", 30, options.configfile)
 
@@ -391,10 +353,7 @@ if __name__ == "__main__":
     # configure ourselves
     parser = OptionParser()
     parser.add_option(
-        "-c",
-        dest="configfile",
-        default=sys.argv[0].replace(".py", ".conf"),
-        help="configuration file to use",
+        "-c", dest="configfile", default=sys.argv[0].replace(".py", ".conf"), help="configuration file to use"
     )
     (options, args) = parser.parse_args()
     initConfig()

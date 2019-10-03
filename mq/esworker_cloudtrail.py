@@ -72,14 +72,8 @@ def keyMapping(aDict):
     if "eventName" in aDict:
         # Uppercase first character
         aDict["eventName"] = aDict["eventName"][0].upper() + aDict["eventName"][1:]
-        returndict["details"]["eventVerb"] = CLOUDTRAIL_VERB_REGEX.findall(
-            aDict["eventName"]
-        )[0]
-        returndict["details"]["eventReadOnly"] = returndict["details"]["eventVerb"] in [
-            "Describe",
-            "Get",
-            "List",
-        ]
+        returndict["details"]["eventVerb"] = CLOUDTRAIL_VERB_REGEX.findall(aDict["eventName"])[0]
+        returndict["details"]["eventReadOnly"] = returndict["details"]["eventVerb"] in ["Describe", "Get", "List"]
     # set the timestamp when we received it, i.e. now
     returndict["receivedtimestamp"] = toUTC(datetime.now()).isoformat()
     returndict["mozdefhostname"] = options.mozdefhostname
@@ -125,13 +119,7 @@ def keyMapping(aDict):
                         returndict["tags"].append(v)
 
             # nxlog keeps the severity name in syslogseverity,everyone else should use severity or level.
-            elif k in (
-                "syslogseverity",
-                "severity",
-                "severityvalue",
-                "level",
-                "priority",
-            ):
+            elif k in ("syslogseverity", "severity", "severityvalue", "level", "priority"):
                 returndict["severity"] = toUnicode(v).upper()
 
             elif k in ("facility", "syslogfacility"):
@@ -222,15 +210,8 @@ class taskConsumer(object):
         # eventually this gets set by aws response
         self.flush_wait_time = 1800
         if options.cloudtrail_arn not in ["<cloudtrail_arn>", "cloudtrail_arn"]:
-            client = boto3.client(
-                "sts",
-                aws_access_key_id=options.accesskey,
-                aws_secret_access_key=options.secretkey,
-            )
-            response = client.assume_role(
-                RoleArn=options.cloudtrail_arn,
-                RoleSessionName="MozDef-CloudTrail-Reader",
-            )
+            client = boto3.client("sts", aws_access_key_id=options.accesskey, aws_secret_access_key=options.secretkey)
+            response = client.assume_role(RoleArn=options.cloudtrail_arn, RoleSessionName="MozDef-CloudTrail-Reader")
             role_creds = {
                 "aws_access_key_id": response["Credentials"]["AccessKeyId"],
                 "aws_secret_access_key": response["Credentials"]["SecretAccessKey"],
@@ -238,9 +219,7 @@ class taskConsumer(object):
             }
             current_time = toUTC(datetime.now())
             # Let's remove 3 seconds from the flush wait time just in case
-            self.flush_wait_time = (
-                response["Credentials"]["Expiration"] - current_time
-            ).seconds - 3
+            self.flush_wait_time = (response["Credentials"]["Expiration"] - current_time).seconds - 3
         else:
             role_creds = {}
         role_creds["region_name"] = options.region
@@ -262,17 +241,13 @@ class taskConsumer(object):
     def run(self):
         while True:
             try:
-                records = self.sqs_queue.receive_messages(
-                    MaxNumberOfMessages=options.prefetch
-                )
+                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=options.prefetch)
                 for msg in records:
                     body_message = msg.body
                     event = json.loads(body_message)
 
                     if not event["Message"]:
-                        logger.error(
-                            "Invalid message format for cloudtrail SQS messages"
-                        )
+                        logger.error("Invalid message format for cloudtrail SQS messages")
                         logger.error("Malformed Message: %r" % body_message)
                         continue
 
@@ -283,18 +258,14 @@ class taskConsumer(object):
                     message_json = json.loads(event["Message"])
 
                     if "s3ObjectKey" not in message_json:
-                        logger.error(
-                            "Invalid message format, expecting an s3ObjectKey in Message"
-                        )
+                        logger.error("Invalid message format, expecting an s3ObjectKey in Message")
                         logger.error("Malformed Message: %r" % body_message)
                         continue
 
                     s3_log_files = message_json["s3ObjectKey"]
                     for log_file in s3_log_files:
                         logger.debug("Downloading and parsing " + log_file)
-                        s3_obj = self.s3_client.get_object(
-                            Bucket=message_json["s3Bucket"], Key=log_file
-                        )
+                        s3_obj = self.s3_client.get_object(Bucket=message_json["s3Bucket"], Key=log_file)
                         events = self.parse_s3_file(s3_obj)
                         for event in events:
                             self.on_message(event)
@@ -333,9 +304,7 @@ class taskConsumer(object):
             if "customendpoint" in bodyDict and bodyDict["customendpoint"]:
                 # custom document
                 # send to plugins to allow them to modify it if needed
-                (normalizedDict, metadata) = sendEventToPlugins(
-                    bodyDict, metadata, pluginList
-                )
+                (normalizedDict, metadata) = sendEventToPlugins(bodyDict, metadata, pluginList)
             else:
                 # normalize the dict
                 # to the mozdef events standard
@@ -343,9 +312,7 @@ class taskConsumer(object):
 
                 # send to plugins to allow them to modify it if needed
                 if normalizedDict is not None and isinstance(normalizedDict, dict):
-                    (normalizedDict, metadata) = sendEventToPlugins(
-                        normalizedDict, metadata, pluginList
-                    )
+                    (normalizedDict, metadata) = sendEventToPlugins(normalizedDict, metadata, pluginList)
 
             # drop the message if a plug in set it to None
             # signaling a discard
@@ -361,36 +328,21 @@ class taskConsumer(object):
                     bulk = True
 
                 bulk = False
-                self.esConnection.save_event(
-                    index=metadata["index"],
-                    doc_id=metadata["id"],
-                    body=jbody,
-                    bulk=bulk,
-                )
+                self.esConnection.save_event(index=metadata["index"], doc_id=metadata["id"], body=jbody, bulk=bulk)
 
             except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
                 try:
                     self.esConnection = esConnect()
                     return
-                except (
-                    ElasticsearchBadServer,
-                    ElasticsearchInvalidIndex,
-                    ElasticsearchException,
-                ):
+                except (ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException):
                     logger.exception(
-                        "ElasticSearchException: {0} reported while indexing event, messages lost".format(
-                            e
-                        )
+                        "ElasticSearchException: {0} reported while indexing event, messages lost".format(e)
                     )
                     return
             except ElasticsearchException as e:
                 # exception target for queue capacity issues reported by elastic search so catch the error, report it and retry the message
-                logger.exception(
-                    "ElasticSearchException: {0} reported while indexing event, messages lost".format(
-                        e
-                    )
-                )
+                logger.exception("ElasticSearchException: {0} reported while indexing event, messages lost".format(e))
                 return
         except Exception as e:
             logger.exception(e)
@@ -422,21 +374,15 @@ def main():
 
 def initConfig():
     # capture the hostname
-    options.mozdefhostname = getConfig(
-        "mozdefhostname", socket.gethostname(), options.configfile
-    )
+    options.mozdefhostname = getConfig("mozdefhostname", socket.gethostname(), options.configfile)
 
     # output our log to stdout or syslog
     options.output = getConfig("output", "stdout", options.configfile)
-    options.sysloghostname = getConfig(
-        "sysloghostname", "localhost", options.configfile
-    )
+    options.sysloghostname = getConfig("sysloghostname", "localhost", options.configfile)
     options.syslogport = getConfig("syslogport", 514, options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
-    options.esservers = list(
-        getConfig("esservers", "http://localhost:9200", options.configfile).split(",")
-    )
+    options.esservers = list(getConfig("esservers", "http://localhost:9200", options.configfile).split(","))
     options.esbulksize = getConfig("esbulksize", 0, options.configfile)
     options.esbulktimeout = getConfig("esbulktimeout", 30, options.configfile)
 
@@ -461,9 +407,7 @@ def initConfig():
     options.region = getConfig("region", "", options.configfile)
 
     # This is the full ARN that the s3 bucket lives under
-    options.cloudtrail_arn = getConfig(
-        "cloudtrail_arn", "cloudtrail_arn", options.configfile
-    )
+    options.cloudtrail_arn = getConfig("cloudtrail_arn", "cloudtrail_arn", options.configfile)
 
     # How long to sleep between iterations of querying AWS
     options.sleep_time = getConfig("sleep_time", 0.1, options.configfile)
@@ -473,10 +417,7 @@ if __name__ == "__main__":
     # configure ourselves
     parser = OptionParser()
     parser.add_option(
-        "-c",
-        dest="configfile",
-        default=sys.argv[0].replace(".py", ".conf"),
-        help="configuration file to use",
+        "-c", dest="configfile", default=sys.argv[0].replace(".py", ".conf"), help="configuration file to use"
     )
     (options, args) = parser.parse_args()
     initConfig()

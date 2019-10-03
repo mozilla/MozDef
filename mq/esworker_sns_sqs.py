@@ -40,9 +40,7 @@ except ImportError as e:
 
 def esConnect():
     """open or re-open a connection to elastic search"""
-    return ElasticsearchClient(
-        (list("{0}".format(s) for s in options.esservers)), options.esbulksize
-    )
+    return ElasticsearchClient((list("{0}".format(s) for s in options.esservers)), options.esbulksize)
 
 
 class taskConsumer(object):
@@ -55,9 +53,7 @@ class taskConsumer(object):
     def run(self):
         while True:
             try:
-                records = self.sqs_queue.receive_messages(
-                    MaxNumberOfMessages=options.prefetch
-                )
+                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=options.prefetch)
                 for msg in records:
                     msg_body = msg.body
                     try:
@@ -67,22 +63,14 @@ class taskConsumer(object):
                         # delete message from queue
                         msg.delete()
                     except ValueError:
-                        logger.error(
-                            "Invalid message, not JSON <dropping message and continuing>: %r"
-                            % msg_body
-                        )
+                        logger.error("Invalid message, not JSON <dropping message and continuing>: %r" % msg_body)
                         msg.delete()
                         continue
                 time.sleep(options.sleep_time)
             except (SSLEOFError, SSLError, socket.error):
                 logger.info("Received network related error...reconnecting")
                 time.sleep(5)
-                self.sqs_queue = connect_sqs(
-                    options.region,
-                    options.accesskey,
-                    options.secretkey,
-                    options.taskexchange,
-                )
+                self.sqs_queue = connect_sqs(options.region, options.accesskey, options.secretkey, options.taskexchange)
 
     def on_message(self, message):
         try:
@@ -105,10 +93,7 @@ class taskConsumer(object):
                 if "Message" == message_key:
                     try:
                         message_json = json.loads(message_value)
-                        for (
-                            inside_message_key,
-                            inside_message_value,
-                        ) in message_json.items():
+                        for (inside_message_key, inside_message_value) in message_json.items():
                             if inside_message_key in ("type", "category"):
                                 event["category"] = inside_message_value
                                 # add type subcategory for filtering after
@@ -124,19 +109,9 @@ class taskConsumer(object):
                             elif inside_message_key in ("hostname"):
                                 event["hostname"] = inside_message_value
                             elif inside_message_key in ("time", "timestamp"):
-                                event["timestamp"] = toUTC(
-                                    inside_message_value
-                                ).isoformat()
-                                event["utctimestamp"] = (
-                                    toUTC(event["timestamp"])
-                                    .astimezone(pytz.utc)
-                                    .isoformat()
-                                )
-                            elif inside_message_key in (
-                                "summary",
-                                "payload",
-                                "message",
-                            ):
+                                event["timestamp"] = toUTC(inside_message_value).isoformat()
+                                event["utctimestamp"] = toUTC(event["timestamp"]).astimezone(pytz.utc).isoformat()
+                            elif inside_message_key in ("summary", "payload", "message"):
                                 event["summary"] = inside_message_value.lstrip()
                             elif inside_message_key in ("source"):
                                 event["source"] = inside_message_value
@@ -145,17 +120,10 @@ class taskConsumer(object):
                                     event["details"]["message"] = inside_message_value
                                 else:
                                     if len(inside_message_value) > 0:
-                                        for (
-                                            details_key,
-                                            details_value,
-                                        ) in inside_message_value.items():
-                                            event["details"][
-                                                details_key
-                                            ] = details_value
+                                        for (details_key, details_value) in inside_message_value.items():
+                                            event["details"][details_key] = details_value
                             else:
-                                event["details"][
-                                    inside_message_key
-                                ] = inside_message_value
+                                event["details"][inside_message_key] = inside_message_value
                     except ValueError:
                         event["summary"] = message_value
             (event, metadata) = sendEventToPlugins(event, metadata, self.pluginList)
@@ -182,35 +150,20 @@ class taskConsumer(object):
                 if self.options.esbulksize != 0:
                     bulk = True
 
-                self.esConnection.save_event(
-                    index=metadata["index"],
-                    doc_id=metadata["id"],
-                    body=jbody,
-                    bulk=bulk,
-                )
+                self.esConnection.save_event(index=metadata["index"], doc_id=metadata["id"], body=jbody, bulk=bulk)
 
             except (ElasticsearchBadServer, ElasticsearchInvalidIndex) as e:
                 # handle loss of server or race condition with index rotation/creation/aliasing
                 try:
                     self.esConnection = esConnect()
                     return
-                except (
-                    ElasticsearchBadServer,
-                    ElasticsearchInvalidIndex,
-                    ElasticsearchException,
-                ):
+                except (ElasticsearchBadServer, ElasticsearchInvalidIndex, ElasticsearchException):
                     logger.exception(
-                        "ElasticSearchException: {0} reported while indexing event, messages lost".format(
-                            e
-                        )
+                        "ElasticSearchException: {0} reported while indexing event, messages lost".format(e)
                     )
                     return
             except ElasticsearchException as e:
-                logger.exception(
-                    "ElasticSearchException: {0} reported while indexing event, messages lost".format(
-                        e
-                    )
-                )
+                logger.exception("ElasticSearchException: {0} reported while indexing event, messages lost".format(e))
                 logger.error("Malformed jbody: %r" % jbody)
                 return
         except Exception as e:
@@ -240,14 +193,10 @@ def main():
 
 def initConfig():
     # capture the hostname
-    options.mozdefhostname = getConfig(
-        "mozdefhostname", socket.gethostname(), options.configfile
-    )
+    options.mozdefhostname = getConfig("mozdefhostname", socket.gethostname(), options.configfile)
 
     # elastic search options. set esbulksize to a non-zero value to enable bulk posting, set timeout to post no matter how many events after X seconds.
-    options.esservers = list(
-        getConfig("esservers", "http://localhost:9200", options.configfile).split(",")
-    )
+    options.esservers = list(getConfig("esservers", "http://localhost:9200", options.configfile).split(","))
     options.esbulksize = getConfig("esbulksize", 0, options.configfile)
     options.esbulktimeout = getConfig("esbulktimeout", 30, options.configfile)
 
@@ -272,10 +221,7 @@ if __name__ == "__main__":
     # configure ourselves
     parser = OptionParser()
     parser.add_option(
-        "-c",
-        dest="configfile",
-        default=sys.argv[0].replace(".py", ".conf"),
-        help="configuration file to use",
+        "-c", dest="configfile", default=sys.argv[0].replace(".py", ".conf"), help="configuration file to use"
     )
     (options, args) = parser.parse_args()
     initConfig()
