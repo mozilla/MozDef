@@ -16,7 +16,7 @@ class AlertLdapPasswordSpray(AlertTask):
         self.parse_config('ldap_password_spray.conf', ['threshold_count', 'search_depth_min', 'host_exclusions'])
         search_query = SearchQuery(minutes=int(self.config.search_depth_min))
 
-        for host_exclusion in self.config.host_exclusion.split(","):
+        for host_exclusion in self.config.host_exclusions.split(","):
             search_query.add_must_not([TermMatch("details.server", host_exclusion)])
 
         search_query.add_must([

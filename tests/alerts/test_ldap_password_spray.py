@@ -26,6 +26,7 @@ class TestAlertLdapPasswordSpray(AlertTestSuite):
                         ]
                     }
                 ],
+                "server": "ldap.example.com",
                 "response": {
                     "error": 'LDAP_INVALID_CREDENTIALS',
                 }
