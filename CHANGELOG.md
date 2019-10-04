@@ -5,6 +5,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [v3.1.2] - 2019-10-04
+
+### Added
+- Alerts can be turned on/off via web ui
+- GeoModel alert to compare locations and determine if travel is possible
+- New Query model (SubnetMatch) to match documents on ip and subnets
+- LDAP Bruteforce Alert 
+- Make target (lint) for running pep8 checks against codebase
+- Uptycs alert event cron script
+
+### Fixed
+- Modified regex statements to be proper python3 statements
+- Auth0 script to consume new depnote events
+
+### Changed
+- Moved benchmark and examples directory into scripts directory with sample ingest scripts
+
+
 ## [v3.1.1] - 2019-07-25
 
 ### Added
@@ -184,7 +202,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Added checks on sending SQS messages to only accept intra-account messages
 - Improved docker performance and disk space requirements
 
-[Unreleased]: https://github.com/mozilla/MozDef/compare/v3.1.1...HEAD
+[Unreleased]: https://github.com/mozilla/MozDef/compare/v3.1.2...HEAD
+[v3.1.2]: https://github.com/mozilla/MozDef/compare/v3.1.1...v3.1.2
 [v3.1.1]: https://github.com/mozilla/MozDef/compare/v3.1.0...v3.1.1
 [v3.1.0]: https://github.com/mozilla/MozDef/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/mozilla/MozDef/compare/v2.0.1...v3.0.0
