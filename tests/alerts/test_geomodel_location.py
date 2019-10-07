@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 
-from freezegun import freeze_time
-
 from mozdef_util.utilities.toUTC import toUTC
 
 from tests.alerts.alert_test_suite import AlertTestSuite
@@ -12,6 +10,7 @@ import alerts.geomodel.locality as geomodel
 import alerts.geomodel.execution as execution
 
 
+# Time at which tests are "frozen" using freezegun.
 _NOW = toUTC(datetime(2017, 1, 1, 1, 0, 0, 0))
 
 
@@ -995,7 +994,6 @@ class TestSearchWindowDynamic(GeoModelTest):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
     def setup(self):
         super().setup()
 
