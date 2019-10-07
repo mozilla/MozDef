@@ -84,22 +84,22 @@ class GeoModelTest(AlertTestSuite):
         if self.config_delete_indexes:
             self.es_client.delete_index(GeoModelTest.localities_index, True)
             self.es_client.create_index(GeoModelTest.localities_index)
-    
+
         journal = geomodel.wrap_journal(self.es_client)
 
         states = self.test_states if hasattr(self, 'test_states') else []
-        
+
         for state in states:
             journal(geomodel.Entry.new(state), GeoModelTest.localities_index)
 
         self.refresh(GeoModelTest.localities_index)
-    
 
     def teardown(self):
         if self.config_delete_indexes:
             self.es_client.delete_index(GeoModelTest.localities_index, True)
 
         super().teardown()
+
 
 class TestAlertGeoModel(GeoModelTest):
     alert_filename = 'geomodel_location'
@@ -174,7 +174,7 @@ class TestAlertGeoModel(GeoModelTest):
         'severity': 'INFO',
         'tags': ['geomodel'],
     }
-        
+
     test_states = [
         state(
             'tester1',
