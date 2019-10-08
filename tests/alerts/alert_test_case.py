@@ -19,4 +19,9 @@ class AlertTestCase(object):
         alert_task = alert_class_attr()
         alert_task.run()
         alert_task.close_connections()
+        # for alerts that run multiple iterations
+        # we want to know if an exception was thrown/caught
+        # so we can bubble that up via pytest
+        if hasattr(alert_task, 'error_thrown'):
+            raise alert_task.error_thrown
         return alert_task

@@ -1,0 +1,17 @@
+{
+  "localities": {
+    "es_index": "localities",
+    "valid_duration_days": 1,
+    "radius_kilometres": 50
+  },
+  "events": {
+      "search_window": {
+        "minutes": 5
+      },
+      "lucene_query": "tags:auth0"
+  },
+  "whitelist": {
+    "users": [],
+    "cidrs": []
+  }
+}

@@ -1,0 +1,294 @@
+:orphan:
+
+##################################
+GeoModel Version 0.1 Specification
+##################################
+
+The first release version of GeoModel will be a minimum viable product (MVP)
+containing features that replace the functionality of the
+`existing implementation <https://github.com/ameihm0912/geomodel>`_ along with a
+few new requirements.
+
+Terminology
+###########
+
+Locality
+--------
+
+The locality of a user is a geographical region from which most of that user's
+online activity originates.
+
+Authenticated Actions
+---------------------
+
+An event produced as a result of any user taking any action that required they
+be authenticated e.g. authenticating to a service with Duo, activity in the
+AWS web console etc.
+
+Primary Interface
+#################
+
+GeoModel v0.1 is an alert built into MozDef that:
+
+1. Processes authentication-related events.
+2. Updates user locality information.
+3. Emits alerts when some specific conditions are met.
+
+Data Stores
+-----------
+
+GeoModel interacts with MozDef to both query for events as well as store new
+alerts.
+
+GeoModel also maintains its own user locality information.  Version 0.1 will
+store this information in the same ElasticSearch instance that MozDef uses,
+under a configured index.
+
+Functional Components
+---------------------
+
+GeoModel v0.1 can be thought of as consisting of two core "components" that are
+each responsible for a distinct set of responsibilities.  These two components
+interact in a pipeline.
+
+Because GeoModel v0.1 is implemented as an
+`Alert in MozDef <https://mozdef.readthedocs.io/en/latest/alert_development_guide.html>`_,
+it is essentially a distinct Python program run by MozDef's ``AlertTask``
+scheduler.
+
+Analysis Engine
+^^^^^^^^^^^^^^^
+
+The first component handles the analysis of events pertaining to authenticated
+actions made by users.  These events are retrieved from MozDef and analyzed to
+determine locality of users which is then persisted in a data store.
+
+This component has the following responsibilities:
+
+1. Run configured queries to retrieve events describing authenticated actions
+   taken by users from MozDef.
+2. Load locality state from ElasticSearch.
+3. Remove outdated locality information.
+4. Update locality state with information from retrieved events.
+
+Alert Emitter
+^^^^^^^^^^^^^
+
+The second component handles the creation of alerts and communicating of those
+alerts to MozDef.
+
+This component has the following responsibilities:
+
+1. Inspect localities produced by the Analysis Engine to produce alerts.
+2. Store alerts in MozDef's ElasticSearch instance.
+
+The Alert Emitter will, given a set of localities for a user, produce an alert
+if and only if both:
+  
+1. User activity is found to originate from a location outside of all
+   previously known localities.
+2. It would **not** be possible for the user to have travelled to a new
+   locality from the one they were last active in.
+
+Data Models
+-----------
+
+The following models describe what data is required to implement the features
+that each component is responsible for.  They are described using a JSON-based
+format where keys indicidate the names of values and values are strings
+containing those values' types, which are represented using
+`TypeScript <https://www.typescriptlang.org/docs/handbook/advanced-types.html>`_
+notation. We use this notation because configuration data as well as data stored in
+ElasticSearch are represented as JSON and JSON-like objects respectively.
+
+General Configuration
+^^^^^^^^^^^^^^^^^^^^^
+
+The top-level configuration for GeoModel version 0.1 must contain the
+following.
+
+.. code-block:: typescript
+
+    {
+      "localities": {
+        "es_index": string,
+        "valid_duration_days": number,
+        "radius_kilometres": number
+      },
+      "events": { 
+        "search_window": object,
+        "lucene_query": string,
+      },
+      "whitelist": {
+        "users": Array<string>,
+        "cidrs": Array<string>
+      }
+    }
+
+Using the information above, GeoModel can determine:
+
+* What index to store locality documents in.
+* What index to read events from.
+* What index to write alerts to.
+* What queries to run in order to retrieve a complete set of events.
+* When a user locality is considered outdated and should be removed.
+* The radius that localities should have.
+* Whitelisting rules to apply.
+
+In the above, note that ``events.queries`` describes an array of objects. Each of
+these objects are expected to contain a query for ElasticSearch using
+`Lucene syntax <http://www.lucenetutorial.com/lucene-query-syntax.html>`_.  The
+``username`` field is expected to be a string describing the path into
+the result dictionary your query will return that will produce the username of
+the user taking an authenticated action.
+
+The ``search_window`` object can contain any of the keywords passed to Python's
+`timedelta <https://docs.python.org/3/library/datetime.html#datetime.timedelta>`_
+constructor.
+
+So for example the following:
+
+.. code-block:: json
+
+    {
+      "events": [
+        {
+          "search_window": {
+            "minutes": 30
+          },
+          "lucene_query": "tags:auth0",
+          "username_path": "details.username"
+        }
+      ]
+    }
+
+would query ElasticSearch for all events tagged ``auth0`` and try to extract
+the ``username`` from ``result["details"]["username"]`` where ``result`` is one of
+the results produced by executing the query.
+
+The ``alerts.whitelist`` portion of the configuration specifies a couple of
+parameters for whitelisting acitivity:
+
+1. From any of a list of users (based on ``events.queries.username``).
+2. From any IPs within the range of any of a list of CIDRs.
+
+For example, the following whitelist configurations would instruct GeoModel
+**not** to produce alerts for actions taken by "testuser" **or** for any users
+originating from an IP in either the ranges ``1.2.3.0/8`` and ``192.168.0.0/16``.
+
+.. code-block:: json
+
+    {
+      "alerts": {
+        "whitelist": {
+          "users": ["testuser"],
+          "cidrs": ["1.2.3.0/8", "192.168.0.0/16"]:
+        }
+      }
+    }
+
+**Note** however that GeoModel **will still retain locality information for
+whitelisted users and users originating from whitelisted IPs**.
+
+User Locality State
+^^^^^^^^^^^^^^^^^^^
+
+GeoModel version 0.1 uses one ElasticSearch Type (similar to a table in a
+relational database) to represent locality information.  Under this type,
+one document exists per user describing that user's locality information.
+
+.. code-block:: typescript
+
+    {
+      "type_": "locality",
+      "username": string,
+      "localities": Array<{
+        "sourceipaddress": string,
+        "city": string,
+        "country": string,
+        "lastaction": date,
+        "latitude": number,
+        "longitude": number,
+        "radius": number
+      }>
+    }
+
+Using the information above, GeoModel can determine:
+
+* All of the localities of a user.
+* Whether a locality is older than some amount of time.
+* How far outside of any localities a given location is.
+
+Alerts
+^^^^^^
+
+Alerts emitted to the configured index are intended to cohere to MozDef's
+preferred naming scheme.
+
+.. code-block:: typescript
+
+    {
+      "username": string,
+      "hops": [
+        {
+          "origin": {
+            "ip": string,
+            "city": string,
+            "country": string,
+            "latitude": number,
+            "longitude": number,
+            "geopoint": GeoPoint
+          }
+          "destination": {
+            "ip": string,
+            "city": string,
+            "country": string,
+            "latitude": number,
+            "longitude": number,
+            "geopoint": GeoPoint
+          }
+        }
+      ]
+    }
+
+Note in the above that the ``origin.geopoint`` field uses ElasticSearch's
+`GeoPoint <https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html>`_
+type.
+
+User Stories
+############
+
+User stories here make references to the following categories of users:
+
+* An **operator** is anyone responsible for deploying or maintaining a
+  deployment of MozDef that includes GeoModel.
+* An **investigator** is anyone responsible for viewing and taking action
+  based on alerts emitted by GeoModel.
+
+Potential Compromises Detected
+------------------------------
+
+As an investigator, I expect that if a user is found to have performed some
+authenticated action in one location and then, some short amount of time later,
+in another that an alert will be emitted by GeoModel.
+
+Realistic Travel Excluded
+-------------------------
+
+As an investigator, I expect that if someone starts working somehwere, gets
+on a plane and continues working after arriving in their destination that an
+alert will **not** be emitted by GeoModel.
+
+Diversity of Indicators
+-----------------------
+
+As an operator, I expect that GeoModel will fetch events pertaining to
+authenticated actions from new sources (Duo, Auth0, etc.) after I deploy
+MozDef with GeoModel configured with queries targeting those sources.
+
+Old Data Removed Automatically
+------------------------------
+
+As an operator, I expect that  GeoModel will forget about localities attributed
+to users that have not been in those geographic regions for a configured amount
+of time.
