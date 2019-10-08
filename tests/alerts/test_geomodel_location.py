@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 
-from freezegun import freeze_time
-
 from mozdef_util.utilities.toUTC import toUTC
 
 from tests.alerts.alert_test_suite import AlertTestSuite
@@ -10,6 +8,18 @@ from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
 
 import alerts.geomodel.locality as geomodel
 import alerts.geomodel.execution as execution
+
+
+# Time at which tests are "frozen" using freezegun.
+_NOW = toUTC(datetime(2017, 1, 1, 1, 0, 0, 0))
+
+
+def state(username, locs):
+    return geomodel.State('locality', username, locs)
+
+
+def locality(cfg):
+    return geomodel.Locality(**cfg)
 
 
 def _summary_from_events(events):
@@ -60,7 +70,38 @@ def _hops_from_events(events):
     ]
 
 
-class TestAlertGeoModel(AlertTestSuite):
+class GeoModelTest(AlertTestSuite):
+    '''A specialized base class for GeoModel tests that may want to create a
+    `test_states` class attribute specifying states to populate ElasticSearch
+    with before running a test.
+    '''
+
+    localities_index = 'localities'
+
+    def setup(self):
+        super().setup()
+
+        if self.config_delete_indexes:
+            self.es_client.delete_index(GeoModelTest.localities_index, True)
+            self.es_client.create_index(GeoModelTest.localities_index)
+
+        journal = geomodel.wrap_journal(self.es_client)
+
+        states = self.test_states if hasattr(self, 'test_states') else []
+
+        for state in states:
+            journal(geomodel.Entry.new(state), GeoModelTest.localities_index)
+
+        self.refresh(GeoModelTest.localities_index)
+
+    def teardown(self):
+        if self.config_delete_indexes:
+            self.es_client.delete_index(GeoModelTest.localities_index, True)
+
+        super().teardown()
+
+
+class TestAlertGeoModel(GeoModelTest):
     alert_filename = 'geomodel_location'
 
     # The test cases described herein depend on some locality state being
@@ -134,6 +175,41 @@ class TestAlertGeoModel(AlertTestSuite):
         'tags': ['geomodel'],
     }
 
+    test_states = [
+        state(
+            'tester1',
+            [
+                locality(
+                    {
+                        'sourceipaddress': '4.3.2.1',
+                        'city': 'San Francisco',
+                        'country': 'US',
+                        'lastaction': _NOW - timedelta(minutes=16),
+                        'latitude': 37.773972,
+                        'longitude': -122.431297,
+                        'radius': 50,
+                    }
+                )
+            ],
+        ),
+        state(
+            'tester2',
+            [
+                locality(
+                    {
+                        'sourceipaddress': '2.4.8.16',
+                        'city': 'Toronto',
+                        'lastaction': _NOW - timedelta(hours=50),
+                        'country': 'CA',
+                        'latitude': 43.6529,
+                        'longitude': -79.3849,
+                        'radius': 50,
+                    }
+                )
+            ],
+        ),
+    ]
+
     test_cases = [
         PositiveAlertTestCase(
             description='Alert fires when impossible travel between two '
@@ -147,70 +223,8 @@ class TestAlertGeoModel(AlertTestSuite):
         ),
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
 
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-        journal = geomodel.wrap_journal(self.es_client)
-
-        def state(username, locs):
-            return geomodel.State('locality', username, locs)
-
-        def locality(cfg):
-            return geomodel.Locality(**cfg)
-
-        test_states = [
-            state(
-                'tester1',
-                [
-                    locality(
-                        {
-                            'sourceipaddress': '4.3.2.1',
-                            'city': 'San Francisco',
-                            'country': 'US',
-                            'lastaction': toUTC(datetime.now()) - timedelta(minutes=16),
-                            'latitude': 37.773972,
-                            'longitude': -122.431297,
-                            'radius': 50,
-                        }
-                    )
-                ],
-            ),
-            state(
-                'tester2',
-                [
-                    locality(
-                        {
-                            'sourceipaddress': '2.4.8.16',
-                            'city': 'Toronto',
-                            'country': 'CA',
-                            'lastaction': toUTC(datetime.now()) - timedelta(hours=50),
-                            'latitude': 43.6529,
-                            'longitude': -79.3849,
-                            'radius': 50,
-                        }
-                    )
-                ],
-            ),
-        ]
-
-        for state in test_states:
-            journal(geomodel.Entry.new(state), index)
-
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
-
-
-class TestUpdateOrdering(AlertTestSuite):
+class TestUpdateOrdering(GeoModelTest):
     '''Alerts will trigger unexpectedly if locality state updates are applied
     before determining whether a user's location has changed by comparing
     localities from events against those in a recorded state.
@@ -242,64 +256,38 @@ class TestUpdateOrdering(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
-
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-        journal = geomodel.wrap_journal(self.es_client)
-
-        def state(username, locs):
-            return geomodel.State('locality', username, locs)
-
-        def locality(cfg):
-            return geomodel.Locality(**cfg)
-
-        test_states = [
-            state(
-                'tester1',
-                [
-                    locality(
-                        {
-                            'sourceipaddress': '1.2.3.4',
-                            'city': 'San Francisco',
-                            'country': 'US',
-                            'lastaction': toUTC(datetime.now()) - timedelta(minutes=3),
-                            'latitude': 37.773972,
-                            'longitude': -122.431297,
-                            'radius': 50,
-                        }
-                    ),
-                    locality(
-                        {
-                            'sourceipaddress': '9.8.7.6',
-                            'city': 'Toronto',
-                            'country': 'CA',
-                            'lastaction': toUTC(datetime.now()) - timedelta(minutes=5),
-                            'latitude': 43.6529,
-                            'longitude': -79.3849,
-                            'radius': 50,
-                        }
-                    ),
-                ],
-            )
-        ]
-
-        for state in test_states:
-            journal(geomodel.Entry.new(state), index)
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
+    test_states = [
+        state(
+            'tester1',
+            [
+                locality(
+                    {
+                        'sourceipaddress': '1.2.3.4',
+                        'city': 'San Francisco',
+                        'country': 'US',
+                        'lastaction': _NOW - timedelta(minutes=3),
+                        'latitude': 37.773972,
+                        'longitude': -122.431297,
+                        'radius': 50,
+                    }
+                ),
+                locality(
+                    {
+                        'sourceipaddress': '9.8.7.6',
+                        'city': 'Toronto',
+                        'country': 'CA',
+                        'lastaction': _NOW - timedelta(minutes=5),
+                        'latitude': 43.6529,
+                        'longitude': -79.3849,
+                        'radius': 50,
+                    }
+                ),
+            ],
+        )
+    ]
 
 
-class TestOnePreviousLocality(AlertTestSuite):
+class TestOnePreviousLocality(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -357,53 +345,27 @@ class TestOnePreviousLocality(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
-
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-        journal = geomodel.wrap_journal(self.es_client)
-
-        def state(username, locs):
-            return geomodel.State('locality', username, locs)
-
-        def locality(cfg):
-            return geomodel.Locality(**cfg)
-
-        test_states = [
-            state(
-                'tester1',
-                [
-                    locality(
-                        {
-                            'sourceipaddress': '9.8.7.6',
-                            'city': 'Toronto',
-                            'country': 'CA',
-                            'lastaction': toUTC(datetime.now()) - timedelta(minutes=5),
-                            'latitude': 43.6529,
-                            'longitude': -79.3849,
-                            'radius': 50,
-                        }
-                    )
-                ],
-            )
-        ]
-
-        for state in test_states:
-            journal(geomodel.Entry.new(state), index)
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
+    test_states = [
+        state(
+            'tester1',
+            [
+                locality(
+                    {
+                        'sourceipaddress': '9.8.7.6',
+                        'city': 'Toronto',
+                        'country': 'CA',
+                        'lastaction': _NOW - timedelta(minutes=5),
+                        'latitude': 43.6529,
+                        'longitude': -79.3849,
+                        'radius': 50,
+                    }
+                )
+            ],
+        )
+    ]
 
 
-class TestInitialLocalityPositiveAlert(AlertTestSuite):
+class TestInitialLocalityPositiveAlert(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -461,64 +423,38 @@ class TestInitialLocalityPositiveAlert(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
-
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-        journal = geomodel.wrap_journal(self.es_client)
-
-        def state(username, locs):
-            return geomodel.State('locality', username, locs)
-
-        def locality(cfg):
-            return geomodel.Locality(**cfg)
-
-        test_states = [
-            state(
-                'tester1',
-                [
-                    locality(
-                        {
-                            'sourceipaddress': '1.2.3.4',
-                            'city': 'San Francisco',
-                            'country': 'US',
-                            'lastaction': toUTC(datetime.now()) - timedelta(minutes=3),
-                            'latitude': 37.773972,
-                            'longitude': -122.431297,
-                            'radius': 50,
-                        }
-                    ),
-                    locality(
-                        {
-                            'sourceipaddress': '9.8.7.6',
-                            'city': 'Toronto',
-                            'country': 'CA',
-                            'lastaction': toUTC(datetime.now()) - timedelta(minutes=5),
-                            'latitude': 43.6529,
-                            'longitude': -79.3849,
-                            'radius': 50,
-                        }
-                    ),
-                ],
-            )
-        ]
-
-        for state in test_states:
-            journal(geomodel.Entry.new(state), index)
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
+    test_states = [
+        state(
+            'tester1',
+            [
+                locality(
+                    {
+                        'sourceipaddress': '1.2.3.4',
+                        'city': 'San Francisco',
+                        'country': 'US',
+                        'lastaction': _NOW - timedelta(minutes=3),
+                        'latitude': 37.773972,
+                        'longitude': -122.431297,
+                        'radius': 50,
+                    }
+                ),
+                locality(
+                    {
+                        'sourceipaddress': '9.8.7.6',
+                        'city': 'Toronto',
+                        'country': 'CA',
+                        'lastaction': _NOW - timedelta(minutes=5),
+                        'latitude': 43.6529,
+                        'longitude': -79.3849,
+                        'radius': 50,
+                    }
+                ),
+            ],
+        )
+    ]
 
 
-class TestSameCitiesOutsideRange(AlertTestSuite):
+class TestSameCitiesOutsideRange(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -571,22 +507,8 @@ class TestSameCitiesOutsideRange(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
 
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
-
-
-class TestMultipleEventsInWindow(AlertTestSuite):
+class TestMultipleEventsInWindow(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -675,22 +597,8 @@ class TestMultipleEventsInWindow(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
 
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
-
-
-class TestExpiredState(AlertTestSuite):
+class TestExpiredState(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -716,53 +624,27 @@ class TestExpiredState(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
-
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-        journal = geomodel.wrap_journal(self.es_client)
-
-        def state(username, locs):
-            return geomodel.State('locality', username, locs)
-
-        def locality(cfg):
-            return geomodel.Locality(**cfg)
-
-        test_states = [
-            state(
-                'tester1',
-                [
-                    locality(
-                        {
-                            'sourceipaddress': '1.2.3.4',
-                            'city': 'San Francisco',
-                            'country': 'US',
-                            'lastaction': toUTC(datetime.now()) - timedelta(days=2),
-                            'latitude': 37.773972,
-                            'longitude': -122.431297,
-                            'radius': 50,
-                        }
-                    )
-                ],
-            )
-        ]
-
-        for state in test_states:
-            journal(geomodel.Entry.new(state), index)
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
+    test_states = [
+        state(
+            'tester1',
+            [
+                locality(
+                    {
+                        'sourceipaddress': '1.2.3.4',
+                        'city': 'San Francisco',
+                        'country': 'US',
+                        'lastaction': _NOW - timedelta(days=2),
+                        'latitude': 37.773972,
+                        'longitude': -122.431297,
+                        'radius': 50,
+                    }
+                )
+            ],
+        )
+    ]
 
 
-class TestSameCitiesFarAway(AlertTestSuite):
+class TestSameCitiesFarAway(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -849,22 +731,8 @@ class TestSameCitiesFarAway(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
 
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
-
-
-class TestMultipleImpossibleJourneys(AlertTestSuite):
+class TestMultipleImpossibleJourneys(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -953,24 +821,8 @@ class TestMultipleImpossibleJourneys(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
 
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-
-        self.es_client.create_index(index)
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
-
-
-class TestDifferentIPsSameLocation(AlertTestSuite):
+class TestDifferentIPsSameLocation(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -1015,30 +867,14 @@ class TestDifferentIPsSameLocation(AlertTestSuite):
             events=[default_event, another_event]),
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
-
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-        journal = geomodel.wrap_journal(self.es_client)
-
-        def state(username, locs):
-            return geomodel.State('locality', username, locs)
-
-        def locality(cfg):
-            return geomodel.Locality(**cfg)
-
-        test_state = state('tester1', [
+    test_states = [
+        state('tester1', [
             locality(
                 {
                     'sourceipaddress': '53.12.88.76',
                     'city': 'Portland',
                     'country': 'US',
-                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=2),
+                    'lastaction': _NOW - timedelta(minutes=2),
                     'latitude': 45.5234,
                     'longitude': -122.6762,
                     'radius': 50,
@@ -1049,24 +885,17 @@ class TestDifferentIPsSameLocation(AlertTestSuite):
                     'sourceipaddress': '1.2.3.4',
                     'city': 'Portland',
                     'country': 'US',
-                    'lastaction': toUTC(datetime.now()) - timedelta(minutes=3),
+                    'lastaction': _NOW - timedelta(minutes=3),
                     'latitude': 45.5234,
                     'longitude': -122.6762,
                     'radius': 50,
                 }
             )
         ])
-
-        journal(geomodel.Entry.new(test_state), index)
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
+    ]
 
 
-class TestAlreadyProcessedEvents(AlertTestSuite):
+class TestAlreadyProcessedEvents(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -1098,24 +927,8 @@ class TestAlreadyProcessedEvents(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
-    def setup(self):
-        super().setup()
-
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
-        journal = geomodel.wrap_journal(self.es_client)
-
-        def state(username, locs):
-            return geomodel.State('locality', username, locs)
-
-        def locality(cfg):
-            return geomodel.Locality(**cfg)
-
-        test_state = state('tester1', [
+    test_states = [
+        state('tester1', [
             locality(
                 {
                     'sourceipaddress': '1.2.3.4',
@@ -1128,17 +941,10 @@ class TestAlreadyProcessedEvents(AlertTestSuite):
                 }
             )
         ])
-
-        journal(geomodel.Entry.new(test_state), index)
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
+    ]
 
 
-class TestSearchWindowDynamic(AlertTestSuite):
+class TestSearchWindowDynamic(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
@@ -1186,30 +992,13 @@ class TestSearchWindowDynamic(AlertTestSuite):
         )
     ]
 
-    @freeze_time('2017-01-01 01:00:00', tz_offset=0)
     def setup(self):
         super().setup()
 
-        index = 'localities'
-        if self.config_delete_indexes:
-            self.es_client.delete_index(index, True)
-            self.es_client.create_index(index)
-
         exec_state_store = execution.store(self.es_client)
 
-        def state(username, locs):
-            return geomodel.State('locality', username, locs)
+        record = execution.Record.new(execution.ExecutionState.new(_NOW - timedelta(minutes=2)))
 
-        def locality(cfg):
-            return geomodel.Locality(**cfg)
+        exec_state_store(record, GeoModelTest.localities_index)
 
-        record = execution.Record.new(execution.ExecutionState.new(
-            toUTC(datetime.now()) - timedelta(minutes=2)))
-        exec_state_store(record, index)
-
-        self.refresh(index)
-
-    def teardown(self):
-        if self.config_delete_indexes:
-            self.es_client.delete_index('localities', True)
-        super().teardown()
+        self.refresh(GeoModelTest.localities_index)
