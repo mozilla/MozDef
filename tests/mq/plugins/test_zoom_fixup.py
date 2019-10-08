@@ -20,7 +20,7 @@ class TestZoomFixupPlugin():
                         'topic': 'zoomroom',
                         'account_id': 'ABCDEFG123456',
                         'id': '123456789',
-                        'type': '4'
+                        'type': '4',
                         'uuid': 'aodij/OWIE9241048='
                     }
                 }
@@ -36,7 +36,7 @@ class TestZoomFixupPlugin():
                     'object': {
                         'account_id': 'ABCDEFG123456',
                         'id': '123456789',
-                        'type': '4'
+                        'type': '4',
                         'uuid': 'aodij/OWIE9241048='
                     }
                 }
