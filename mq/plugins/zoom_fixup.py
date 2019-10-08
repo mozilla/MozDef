@@ -10,8 +10,8 @@ class message(object):
            as a list of lower case strings or values to match with an event's dictionary of keys or values
            set the priority if you have a preference for order of plugins to run. 0 goes first, 100 is assumed/default if not sent
         '''
-        # get auditd data
-        self.registration = ['zoom', 'mozdef-event-framework-zoom-dev']
+        # get zoom event data
+        self.registration = ['zoom']
         self.priority = 2
 
     def onMessage(self, message, metadata):
