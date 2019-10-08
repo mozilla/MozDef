@@ -21,7 +21,7 @@ class TestZoomFixupPlugin():
                         'account_id': 'ABCDEFG123456',
                         'id': '123456789',
                         'type': '4'
-                        'uuid': 'aodij/OWIE9241048=',
+                        'uuid': 'aodij/OWIE9241048='
                     }
                 }
             }
@@ -37,7 +37,7 @@ class TestZoomFixupPlugin():
                         'account_id': 'ABCDEFG123456',
                         'id': '123456789',
                         'type': '4'
-                        'uuid': 'aodij/OWIE9241048=',
+                        'uuid': 'aodij/OWIE9241048='
                     }
                 }
             }
