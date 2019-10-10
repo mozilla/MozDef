@@ -25,15 +25,15 @@ class message(object):
                 del message['details']['payload']['object']['topic']
 
         # rewrite summary to be more informative
-        if key_exists('details.event', message) and key_exists('details.payload.object.participant.user_name'):
+        if key_exists('details.event', message) and key_exists('details.payload.object.participant.user_name', message):
             message['summary'] = "zoom: {0} triggered by user {1}".format(message['details']['event'], message['details']['payload']['object']['participant']['user_name'])
-        elif key_exists('details.event', message) and key_exists('details.payload.operator'):
+        elif key_exists('details.event', message) and key_exists('details.payload.operator', message):
             message['summary'] = "zoom: {0} triggered by user {1}".format(message['details']['event'], message['details']['payload']['operator'])
         else:
             message['summary'] = "zoom: {0}".format(message['details']['event'])
 
         # drop duplicated account_id field
-        if key_exists('details.payload.account_id', message) and key_exists('details.payload.object.account_id'):
+        if key_exists('details.payload.account_id', message) and key_exists('details.payload.object.account_id', message):
             if message.get('details.payload.account_id') == message.get('details.payload.object.account_id'):
                     del message['details']['payload']['object']['account_id'] 
 
