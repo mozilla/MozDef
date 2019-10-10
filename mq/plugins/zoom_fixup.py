@@ -3,6 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+from mozdef_util.utilities.key_exists import key_exists
 
 class message(object):
     def __init__(self):
@@ -20,22 +21,20 @@ class message(object):
         # to drop unecessary expansion
 
         # omit "topic" field
-        if 'details' in message and isinstance(message['details'], dict):
-            if 'topic' in message['details']['payload']['object']:
+        if key_exists('details.payload.object.topic', message):
                 del message['details']['payload']['object']['topic']
-            # rewrite summary to be more informative
-            if 'event' in message['details'] and 'user_name' in message['details']['payload']['object']['participant']:
-                message['summary'] = message['details']['event']
-                temp = " triggered by user "
-                temp2 = message['details']['payload']['object']['participant']['user_name']
-                message['summary'] += temp
-                message['summary'] += temp2
-                del temp
-                del temp2
-            # drop duplicated account_id field
-            if 'payload' in message['details'] and isinstance(message['details']['payload'], dict):
-                if 'account_id' in message['details']['payload'] and 'account_id' in message['details']['payload']['object']:
-                    if message.get('details.payload.account_id') == message.get('details.payload.object.account_id'):
-                        del message['details']['payload']['object']['account_id'] 
+
+        # rewrite summary to be more informative
+        if key_exists('details.event', message) and key_exists('details.payload.object.participant.user_name'):
+            message['summary'] = "zoom: {0} triggered by user {1}".format(message['details']['event'], message['details']['payload']['object']['participant']['user_name'])
+        elif key_exists('details.event', message) and key_exists('details.payload.operator'):
+            message['summary'] = "zoom: {0} triggered by user {1}".format(message['details']['event'], message['details']['payload']['operator'])
+        else:
+            message['summary'] = "zoom: {0}".format(message['details']['event'])
+
+        # drop duplicated account_id field
+        if key_exists('details.payload.account_id', message) and key_exists('details.payload.object.account_id'):
+            if message.get('details.payload.account_id') == message.get('details.payload.object.account_id'):
+                    del message['details']['payload']['object']['account_id'] 
 
         return (message, metadata)
