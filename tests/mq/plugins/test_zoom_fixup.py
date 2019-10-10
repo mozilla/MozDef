@@ -12,6 +12,7 @@ class TestZoomFixupPlugin():
 
     def test_topic_removal(self):
         msg = {
+            'summary': 'zoom_event',
             'source': 'api_aws_lambda',
             'details': {
                 'event': 'meeting.ended',
@@ -29,6 +30,7 @@ class TestZoomFixupPlugin():
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
 
         expected_message = {
+            'summary': 'zoom: meeting.ended',
             'source': 'api_aws_lambda',
             'details': {
                 'event': 'meeting.ended',
