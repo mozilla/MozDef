@@ -5,6 +5,7 @@
 
 from mozdef_util.utilities.key_exists import key_exists
 
+
 class message(object):
     def __init__(self):
         '''register our criteria for being passed a message
@@ -35,6 +36,6 @@ class message(object):
         # drop duplicated account_id field
         if key_exists('details.payload.account_id', message) and key_exists('details.payload.object.account_id', message):
             if message.get('details.payload.account_id') == message.get('details.payload.object.account_id'):
-                    del message['details']['payload']['object']['account_id'] 
+                    del message['details']['payload']['object']['account_id']
 
         return (message, metadata)
