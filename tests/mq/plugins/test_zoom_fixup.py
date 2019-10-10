@@ -46,3 +46,48 @@ class TestZoomFixupPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_summary_user_name(self):
+        msg = {
+            'summary': 'zoom_event',
+            'source': 'api_aws_lambda',
+            'details': {
+                'event': 'meeting.sharing_ended',
+                'payload': {
+                    'object': {
+                        'topic': 'zoomroom',
+                        'account_id': 'ABCDEFG123456',
+                        'id': '123456789',
+                        'type': '4',
+                        'uuid': 'aodij/OWIE9241048=',
+                        "participant": {
+                            'user_id': '12039103',
+                            'user_name': 'Random User',
+                        }
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'summary': 'zoom: meeting.sharing_ended triggered by user Random User',
+            'source': 'api_aws_lambda',
+            'details': {
+                'event': 'meeting.sharing_ended',
+                'payload': {
+                    'object': {
+                        'account_id': 'ABCDEFG123456',
+                        'id': '123456789',
+                        'type': '4',
+                        'uuid': 'aodij/OWIE9241048=',
+                        "participant": {
+                            'user_id': '12039103',
+                            'user_name': 'Random User',
+                        }
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
