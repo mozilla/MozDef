@@ -91,3 +91,90 @@ class TestZoomFixupPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_summary_operator(self):
+        msg = {
+            'summary': 'zoom_event',
+            'source': 'api_aws_lambda',
+            'details': {
+                'event': 'meeting.created',
+                'payload': {
+                    'account_id': 'ABCDEFG123456',
+                    'operator': 'randomuser@randomco.com',
+                    'operator_id': '12o3i-294jo24jad',
+                    'object': {
+                        'id': '123456789',
+                        'type': '2',
+                        'uuid': 'aodij/OWIE9241048=',
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'summary': 'zoom: meeting.created triggered by user randomuser@randomco.com',
+            'source': 'api_aws_lambda',
+            'details': {
+                'event': 'meeting.created',
+                'payload': {
+                    'account_id': 'ABCDEFG123456',
+                    'operator': 'randomuser@randomco.com',
+                    'operator_id': '12o3i-294jo24jad',
+                    'object': {
+                        'id': '123456789',
+                        'type': '2',
+                        'uuid': 'aodij/OWIE9241048=',
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
+    def test_remove_duplicate_account_id(self):
+        msg = {
+            'summary': 'zoom_event',
+            'source': 'api_aws_lambda',
+            'details': {
+                'event': 'meeting.created',
+                'payload': {
+                    'account_id': 'ABCDEFG123456',
+                    'object': {
+                        'account_id': 'ABCDEFG123456',
+                        'id': '123456789',
+                        'type': '2',
+                        'uuid': 'aodij/OWIE9241048=',
+                        "participant": {
+                            'user_id': '12039103',
+                            'user_name': 'Random User',
+                        }
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'summary': 'zoom: meeting.created triggered by user randomuser@randomco.com',
+            'source': 'api_aws_lambda',
+            'details': {
+                'event': 'meeting.created',
+                'payload': {
+                    'account_id': 'ABCDEFG123456',
+                    'operator': 'randomuser@randomco.com',
+                    'operator_id': '12o3i-294jo24jad',
+                    'object': {
+                        'id': '123456789',
+                        'type': '2',
+                        'uuid': 'aodij/OWIE9241048=',
+                        "participant": {
+                            'user_id': '12039103',
+                            'user_name': 'Random User',
+                        }
+                    }
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
