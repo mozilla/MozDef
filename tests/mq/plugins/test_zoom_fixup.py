@@ -144,11 +144,7 @@ class TestZoomFixupPlugin():
                         'account_id': 'ABCDEFG123456',
                         'id': '123456789',
                         'type': '2',
-                        'uuid': 'aodij/OWIE9241048=',
-                        "participant": {
-                            'user_id': '12039103',
-                            'user_name': 'Random User',
-                        }
+                        'uuid': 'aodij/OWIE9241048='
                     }
                 }
             }
@@ -167,11 +163,7 @@ class TestZoomFixupPlugin():
                     'object': {
                         'id': '123456789',
                         'type': '2',
-                        'uuid': 'aodij/OWIE9241048=',
-                        "participant": {
-                            'user_id': '12039103',
-                            'user_name': 'Random User',
-                        }
+                        'uuid': 'aodij/OWIE9241048='
                     }
                 }
             }
