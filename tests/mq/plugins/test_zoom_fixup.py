@@ -152,14 +152,12 @@ class TestZoomFixupPlugin():
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
 
         expected_message = {
-            'summary': 'zoom: meeting.created triggered by user randomuser@randomco.com',
+            'summary': 'zoom: meeting.created',
             'source': 'api_aws_lambda',
             'details': {
                 'event': 'meeting.created',
                 'payload': {
                     'account_id': 'ABCDEFG123456',
-                    'operator': 'randomuser@randomco.com',
-                    'operator_id': '12o3i-294jo24jad',
                     'object': {
                         'id': '123456789',
                         'type': '2',
