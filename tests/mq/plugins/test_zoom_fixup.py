@@ -14,6 +14,7 @@ class TestZoomFixupPlugin():
         msg = {
             'summary': 'zoom_event',
             'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
             'details': {
                 'event': 'meeting.ended',
                 'payload': {
@@ -32,6 +33,7 @@ class TestZoomFixupPlugin():
         expected_message = {
             'summary': 'zoom: meeting.ended',
             'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
             'details': {
                 'event': 'meeting.ended',
                 'payload': {
@@ -51,6 +53,7 @@ class TestZoomFixupPlugin():
         msg = {
             'summary': 'zoom_event',
             'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
             'details': {
                 'event': 'meeting.sharing_ended',
                 'payload': {
@@ -73,6 +76,7 @@ class TestZoomFixupPlugin():
         expected_message = {
             'summary': 'zoom: meeting.sharing_ended triggered by user Random User',
             'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
             'details': {
                 'event': 'meeting.sharing_ended',
                 'payload': {
@@ -96,6 +100,7 @@ class TestZoomFixupPlugin():
         msg = {
             'summary': 'zoom_event',
             'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
             'details': {
                 'event': 'meeting.created',
                 'payload': {
@@ -115,6 +120,7 @@ class TestZoomFixupPlugin():
         expected_message = {
             'summary': 'zoom: meeting.created triggered by user randomuser@randomco.com',
             'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
             'details': {
                 'event': 'meeting.created',
                 'payload': {
@@ -136,6 +142,7 @@ class TestZoomFixupPlugin():
         msg = {
             'summary': 'zoom_event',
             'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
             'details': {
                 'event': 'meeting.created',
                 'payload': {
@@ -154,6 +161,7 @@ class TestZoomFixupPlugin():
         expected_message = {
             'summary': 'zoom: meeting.created',
             'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
             'details': {
                 'event': 'meeting.created',
                 'payload': {
