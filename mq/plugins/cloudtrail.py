@@ -30,6 +30,7 @@ class message(object):
             'details.requestparameters.describehostsrequest',
             'details.requestparameters.describeflowlogsrequest',
             'details.requestparameters.describeflowlogsrequest.filter.value',
+            'details.requestparameters.describenatgatewaysrequest',
             'details.requestparameters.disableapitermination',
             'details.requestparameters.distributionconfig.callerreference',
             'details.requestparameters.domainname',
