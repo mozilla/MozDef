@@ -13,7 +13,7 @@ class message(object):
            set the priority if you have a preference for order of plugins to run. 0 goes first, 100 is assumed/default if not sent
         '''
         # get zoom event data
-        self.registration = ['zoom']
+        self.registration = ['zoom_host']
         self.priority = 2
 
     def onMessage(self, message, metadata):
