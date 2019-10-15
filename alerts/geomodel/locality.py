@@ -235,8 +235,8 @@ def remove_outdated(state: State, days_valid: int) -> Update:
 
 
 def distance(loc1: Coordinates, loc2: Coordinates) -> float:
-    '''Compute the distance between two localities, returning the geographical
-    distance in kilometres (KM).
+    '''Compute the distance between two points on the Earth, returning the
+    geographical distance in kilometres (KM).
     '''
 
     lat1 = math.radians(loc1.latitude)
