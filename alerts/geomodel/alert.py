@@ -99,37 +99,32 @@ def summary(alert: Alert) -> str:
     described in an alert.
     '''
 
-    locs = [
-        '{},{} then {},{}'.format(
-            hop.origin.city,
-            hop.origin.country,
-            hop.destination.city,
-            hop.destination.country)
-        for hop in alert.hops
-    ]
-
-    dists = [
+    _d = [
         geo_distance(_coordinates(hop.origin), _coordinates(hop.destination))
         for hop in alert.hops
     ]
 
-    times = [_time_str(hop) for hop in alert.hops]
+    dists = ['{:.2f} KM'.format(d) for d in _d]
 
-    sum_str = '{} seen in {},{} ({} in {})'.format(
-        alert.username,
-        locs[0].city,
-        locs[0].country,
-        dists[0],
-        times[0])
+    _t = [
+        (hop.origin.observed - hop.destination.observed).total_seconds()
+        for hop in alert.hops
+    ]
 
-    for i in range(1, len(alert.hops)):
-        sum_str += ' then {},{} ({} in {})'.format(
-            locs[i].city,
-            locs[i].country,
-            dists[i],
-            times[i])
+    times = ['{:.2f} minutes'.format(abs(t) / 60.0) for t in _t]
 
-    return sum_str
+    hops = [
+        '{},{} then {},{} ({} in {})'.format(
+           alert.hops[i].origin.city,
+           alert.hops[i].origin.country,
+           alert.hops[i].destination.city,
+           alert.hops[i].destination.country,
+           dists[i],
+           times[i])
+        for i in range(len(alert.hops))
+    ]
+
+    return '{} seen in {}'.format(alert.username, '; '.join(hops))
 
 
 def _coordinates(orig: Origin) -> Coordinates:
@@ -145,7 +140,3 @@ def _to_origin(loc: Locality) -> Origin:
         loc.longitude,
         loc.lastaction,
         '{},{}'.format(loc.latitude, loc.longitude))
-
-
-def _time_str(hop: Hop) -> str:
-    return ''

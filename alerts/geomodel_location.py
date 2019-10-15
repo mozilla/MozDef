@@ -144,14 +144,7 @@ class AlertGeoModel(AlertTask):
             journal(entry_from_es, cfg.localities.es_index)
 
         if new_alert is not None:
-            summary = '{} seen in {},{}'.format(
-                username,
-                new_alert.hops[0].origin.city,
-                new_alert.hops[0].origin.country)
-
-            for hop in new_alert.hops:
-                summary += ' then {},{}'.format(
-                    hop.destination.city, hop.destination.country)
+            summary = alert.summary(new_alert)
 
             alert_dict = self.createAlertDict(
                 summary, 'geomodel', ['geomodel'], events, 'INFO')
