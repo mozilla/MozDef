@@ -372,10 +372,6 @@ caption, legend {
   border-color: var(--ack-edit-border-color);
 }
 
-.btn-primary {
-  height: 30px;
-}
-
 input[type="search"] {
   border-radius: 15px;
 }
