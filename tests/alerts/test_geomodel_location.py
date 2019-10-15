@@ -99,8 +99,8 @@ class TestAlertGeoModel(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in San Francisco,US then Toronto,CA '\
-                '(3645.78 KM in 16.00 minutes)',
+        'summary': 'tester1 seen in San Francisco,US then Toronto,CA '
+        '(3645.78 KM in 16.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -264,8 +264,8 @@ class TestOnePreviousLocality(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in Toronto,CA then San Francisco,US '\
-                '(3645.78 KM in 5.00 minutes)',
+        'summary': 'tester1 seen in Toronto,CA then San Francisco,US '
+        '(3645.78 KM in 5.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -345,8 +345,8 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in San Francisco,US then Toronto,CA '\
-                '(3645.78 KM in 3.00 minutes)',
+        'summary': 'tester1 seen in San Francisco,US then Toronto,CA '
+        '(3645.78 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -506,8 +506,8 @@ class TestMultipleEventsInWindow(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in Toronto,CA then San Francisco,US '\
-                '(3645.78 KM in 3.00 minutes)',
+        'summary': 'tester1 seen in Toronto,CA then San Francisco,US '
+        '(3645.78 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -648,8 +648,8 @@ class TestSameCitiesFarAway(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in Portland,US then Portland,US '\
-                '(4082.65 KM in 3.00 minutes)',
+        'summary': 'tester1 seen in Portland,US then Portland,US '
+        '(4082.65 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -774,9 +774,9 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in Portland,US then Toronto,CA '\
-                '(3393.90 KM in 3.00 minutes); Toronto,CA then Saint '\
-                'Petersburg,RU (6855.53 KM in 2.00 minutes)',
+        'summary': 'tester1 seen in Portland,US then Toronto,CA '
+        '(3393.90 KM in 3.00 minutes); Toronto,CA then Saint '
+        'Petersburg,RU (6855.53 KM in 2.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [

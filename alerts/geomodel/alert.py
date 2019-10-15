@@ -115,12 +115,12 @@ def summary(alert: Alert) -> str:
 
     hops = [
         '{},{} then {},{} ({} in {})'.format(
-           alert.hops[i].origin.city,
-           alert.hops[i].origin.country,
-           alert.hops[i].destination.city,
-           alert.hops[i].destination.country,
-           dists[i],
-           times[i])
+            alert.hops[i].origin.city,
+            alert.hops[i].origin.country,
+            alert.hops[i].destination.city,
+            alert.hops[i].destination.country,
+            dists[i],
+            times[i])
         for i in range(len(alert.hops))
     ]
 
