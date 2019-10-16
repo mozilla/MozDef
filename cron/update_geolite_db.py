@@ -38,7 +38,6 @@ def fetch_db_data(db_download_location):
 
 
 def save_db_data(save_path, db_data):
-
     temp_save_path = save_path + ".tmp"
     logger.debug("Saving db data to " + temp_save_path)
     with open(temp_save_path, "wb+") as text_file:
