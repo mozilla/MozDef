@@ -15,12 +15,12 @@ Table of Contents
   installation
   alert_development_guide
   mozdef_util
-  screenshots
   usage
   cloud_deployment
   advanced_settings
   code
   cicd
+  screenshots
   references
   contributors
 
