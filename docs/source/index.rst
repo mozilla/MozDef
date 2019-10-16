@@ -13,13 +13,10 @@ Table of Contents
   introduction
   demo
   installation
-  alert_development_guide
-  mozdef_util
   usage
   cloud_deployment
   advanced_settings
-  code
-  cicd
+  development
   screenshots
   references
   contributors
