@@ -11,7 +11,7 @@ from configlib import getConfig, OptionParser
 
 import requests
 import tempfile
-import tarfile
+import gzip
 
 from mozdef_util.geo_ip import GeoIP
 from mozdef_util.utilities.logger import logger, initLogger
@@ -19,22 +19,26 @@ from mozdef_util.utilities.logger import logger, initLogger
 
 def fetch_db_data(db_download_location):
     logger.debug('Fetching db data from ' + db_download_location)
-    response = requests.get(db_download_location)
-
+    auth_creds = None
+    if options.account_id != '' and options.license_key != '':
+        logger.debug('Using credentials for maxmind')
+        auth_creds = (options.account_id, options.license_key)
+    response = requests.get(db_download_location, auth=auth_creds)
+    if not response.ok:
+        raise Exception("Received bad response from maxmind server: {0}".format(response.text))
     db_raw_data = response.content
     with tempfile.NamedTemporaryFile(mode='wb') as temp:
         logger.debug('Writing compressed gzip to temp file: ' + temp.name)
         temp.write(db_raw_data)
         temp.flush()
         logger.debug('Extracting gzip data from ' + temp.name)
-        tar = tarfile.open(temp.name)
-        for tarinfo in tar:
-            if tarinfo.name.endswith('GeoLite2-City.mmdb'):
-                extracted_file = tar.extractfile(tarinfo.name)
-                return extracted_file.read()
+        gfile = gzip.GzipFile(temp.name, "rb")
+        data = gfile.read()
+        return data
 
 
 def save_db_data(save_path, db_data):
+
     temp_save_path = save_path + ".tmp"
     logger.debug("Saving db data to " + temp_save_path)
     with open(temp_save_path, "wb+") as text_file:
@@ -62,6 +66,9 @@ def initConfig():
 
     options.db_download_location = getConfig('db_download_location', '', options.configfile)
     options.db_location = getConfig('db_location', '', options.configfile)
+
+    options.account_id = getConfig('account_id', '', options.configfile)
+    options.license_key = getConfig('license_key', '', options.configfile)
 
 
 if __name__ == '__main__':
