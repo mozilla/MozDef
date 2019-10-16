@@ -12,7 +12,6 @@ Table of Contents
   cloud_deployment
   advanced_settings
   development
-  screenshots
   references
   contributors
 
