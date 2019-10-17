@@ -12,7 +12,7 @@ class message(object):
         rewrites ldap's details.tls field and sets source
         '''
 
-        self.registration = ['ldapChange', 'ldif']
+        self.registration = ['ldapChange', 'ldif', 'LDAP-Humanizer']
         self.priority = 5
 
     def onMessage(self, message, metadata):
