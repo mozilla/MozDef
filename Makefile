@@ -139,3 +139,12 @@ rebuild: clean build-from-cwd
 .PHONY: new-alert
 new-alert: ## Create an example alert and working alert unit test
 	python tests/alert_templater.py
+
+.PHONY: run-docs
+run-docs: stop-docs ## Start container to serve up documentation for development
+	docker-compose -f docker/compose/dev-docs.yml up -d
+	@echo "Visit http://localhost:8000 - Feel free to update source code and then refresh webpage!"
+
+.PHONY: stop-docs
+stop-docs: ## Stop the docs development container if running
+	-docker-compose -f docker/compose/dev-docs.yml stop
