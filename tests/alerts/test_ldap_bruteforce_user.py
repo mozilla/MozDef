@@ -8,8 +8,8 @@ from .negative_alert_test_case import NegativeAlertTestCase
 from .alert_test_suite import AlertTestSuite
 
 
-class TestAlertLdapPasswordSpray(AlertTestSuite):
-    alert_filename = "ldap_password_spray"
+class TestAlertLdapBruteforceUser(AlertTestSuite):
+    alert_filename = "ldap_bruteforce_user"
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
@@ -27,6 +27,7 @@ class TestAlertLdapPasswordSpray(AlertTestSuite):
                     }
                 ],
                 "server": "ldap.example.com",
+                "user": "jsmith@example.com",
                 "response": {
                     "error": 'LDAP_INVALID_CREDENTIALS',
                 }
@@ -36,24 +37,24 @@ class TestAlertLdapPasswordSpray(AlertTestSuite):
 
     # This alert is the expected result from running this task
     default_alert = {
-        "category": "ldap",
+        "category": "bruteforce",
         "tags": ["ldap"],
         "severity": "WARNING",
-        "summary": "LDAP Password Spray Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com",
+        "summary": "LDAP Bruteforce Attack in Progress against user (jsmith@example.com) from the following source ip(s): 1.2.3.4",
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
         "summary"
-    ] = "LDAP Password Spray Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com"
+    ] = "LDAP Bruteforce Attack in Progress against user (jsmith@example.com) from the following source ip(s): 1.2.3.4"
 
     test_cases = []
 
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
-            events=AlertTestSuite.create_events(default_event, 1),
+            events=AlertTestSuite.create_events(default_event, 10),
             expected_alert=default_alert,
         )
     )
@@ -69,15 +70,6 @@ class TestAlertLdapPasswordSpray(AlertTestSuite):
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event["_source"]["details"]["response"]["error"] = "LDAP_SUCCESS"
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test with default negative event", events=events
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
-        event["_source"]["details"]["server"] = "foo.example.com"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test with default negative event", events=events
