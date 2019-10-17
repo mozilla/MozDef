@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 from platform import node
 from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.key_exists import key_exists
 
 
 def isIPv4(ip):
@@ -267,6 +268,9 @@ class message(object):
                         '{destinationipaddress}:'
                         '{destinationport}'
                     ).format(**newmessage['details'])
+                    if key_exists('details.tls', newmessage):
+                        newmessage['details']['tls_encrypted'] = newmessage['details']['tls']
+                        del(newmessage['details']['tls'])
                     return (newmessage, metadata)
 
                 if logtype == 'ssh':
