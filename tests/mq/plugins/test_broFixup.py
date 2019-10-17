@@ -779,6 +779,8 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'tls' not in result['details']
+        assert result['details']['tls_encrypted'] == 'false'
         assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
 
     def test_smtp_log2(self):
@@ -818,6 +820,8 @@ class TestBroFixup(object):
         assert 'from' not in result['details']
         assert 'to' not in result['details']
         assert 'msg_id' not in result['details']
+        assert 'tls' not in result['details']
+        assert result['details']['tls_encrypted'] == 'false'
         assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
 
     def test_smtp_unicode(self):
