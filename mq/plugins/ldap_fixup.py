@@ -12,20 +12,20 @@ class message(object):
         rewrites ldap's details.tls field and sets source
         '''
 
-        self.registration = ['ldapChange', 'ldif', 'LDAP-Humanizer']
+        self.registration = ['LDAP-Humanizer']
         self.priority = 5
 
     def onMessage(self, message, metadata):
 
-        # check for category like 'ldap'
+        # check for category like 'ldap' and rename the tls field
         if key_exists('category', message):
-            if message.get['category'] == "ldap":
+            data = message.get('category')
+            if data == 'ldap':
                 if key_exists('details.tls', message):
-                    message['details.tls_encrypted'] = message['details.tls']
-                    del message['details']['tls']
+                    message['details']['tls_encrypted'] = message['details']['tls']
+                    del(message['details']['tls'])
 
         if 'source' not in message:
-            message['source'] = "ldap"
-            return (message, metadata)
+            message['source'] = 'ldap'
 
         return (message, metadata)
