@@ -11,9 +11,9 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 import re
 
 
-class AlertLdapPasswordSpray(AlertTask):
+class AlertLdapBruteforceGlobal(AlertTask):
     def main(self):
-        self.parse_config('ldap_password_spray.conf', ['threshold_count', 'search_depth_min', 'host_exclusions'])
+        self.parse_config('ldap_bruteforce_global.conf', ['threshold_count', 'search_depth_min', 'host_exclusions'])
         search_query = SearchQuery(minutes=int(self.config.search_depth_min))
 
         for host_exclusion in self.config.host_exclusions.split(","):
@@ -45,7 +45,7 @@ class AlertLdapPasswordSpray(AlertTask):
         # if len(email_list) == 0:
         #     return None
 
-        summary = 'LDAP Password Spray Attack in Progress from {0} targeting the following account(s): {1}'.format(
+        summary = 'Global LDAP Bruteforce Attack in Progress from {0} targeting the following account(s): {1}'.format(
             aggreg['value'],
             ", ".join(sorted(email_list)[:10])
         )

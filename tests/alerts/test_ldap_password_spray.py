@@ -8,8 +8,8 @@ from .negative_alert_test_case import NegativeAlertTestCase
 from .alert_test_suite import AlertTestSuite
 
 
-class TestAlertLdapPasswordSpray(AlertTestSuite):
-    alert_filename = "ldap_password_spray"
+class TestAlertLdapBruteforceGlobal(AlertTestSuite):
+    alert_filename = "ldap_bruteforce_global"
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
