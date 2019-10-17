@@ -269,9 +269,8 @@ class message(object):
                         '{destinationport}'
                     ).format(**newmessage['details'])
                     if key_exists('details.tls', newmessage):
-                        if key_exists('details.tls', newmessage):
-                            newmessage['details']['tls_encrypted'] = newmessage['details']['tls']
-                            del(newmessage['details']['tls'])
+                        newmessage['details']['tls_encrypted'] = newmessage['details']['tls']
+                        del(newmessage['details']['tls'])
                     return (newmessage, metadata)
 
                 if logtype == 'ssh':
