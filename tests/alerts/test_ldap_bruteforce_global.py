@@ -36,17 +36,17 @@ class TestAlertLdapBruteforceGlobal(AlertTestSuite):
 
     # This alert is the expected result from running this task
     default_alert = {
-        "category": "ldap",
+        "category": "bruteforce",
         "tags": ["ldap"],
         "severity": "WARNING",
-        "summary": "LDAP Password Spray Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com",
+        "summary": "Global LDAP Bruteforce Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com",
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
         "summary"
-    ] = "LDAP Password Spray Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com"
+    ] = "Global LDAP Bruteforce Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com"
 
     test_cases = []
 

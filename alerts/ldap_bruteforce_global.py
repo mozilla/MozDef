@@ -28,7 +28,7 @@ class AlertLdapBruteforceGlobal(AlertTask):
         self.walkAggregations(threshold=int(self.config.threshold_count))
 
     def onAggregation(self, aggreg):
-        category = 'ldap'
+        category = 'bruteforce'
         tags = ['ldap']
         severity = 'WARNING'
         email_list = set()

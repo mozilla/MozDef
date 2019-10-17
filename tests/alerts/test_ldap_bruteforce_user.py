@@ -37,7 +37,7 @@ class TestAlertLdapBruteforceUser(AlertTestSuite):
 
     # This alert is the expected result from running this task
     default_alert = {
-        "category": "ldap",
+        "category": "bruteforce",
         "tags": ["ldap"],
         "severity": "WARNING",
         "summary": "LDAP Bruteforce Attack in Progress against user (jsmith@example.com) from the following source ip(s): 1.2.3.4",
