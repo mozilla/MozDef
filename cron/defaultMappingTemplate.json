@@ -90,7 +90,7 @@
               "type": "geo_point"
             },
             "success": {
-              "type": "boolean"
+              "type": "keyword"
             },
             "sourceport": {
               "type": "keyword"
