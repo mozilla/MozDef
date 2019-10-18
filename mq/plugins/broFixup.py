@@ -519,7 +519,7 @@ class message(object):
                     if 'service' not in newmessage['details']:
                         newmessage['details']['service'] = 'unknown'
                     if 'success' not in newmessage['details']:
-                        newmessage['details']['success'] = 'unknown'
+                        newmessage['details']['successful'] = 'unknown'
                     if 'error_msg' not in newmessage['details']:
                         newmessage['details']['error_msg'] = ''
                     newmessage['summary'] = (
@@ -527,7 +527,7 @@ class message(object):
                         '{destinationipaddress}:'
                         '{destinationport} '
                         'request {request_type} '
-                        'success {success}'
+                        'success {successful}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
 
@@ -549,14 +549,14 @@ class message(object):
                     else:
                         newmessage['details']['ntlm']['username'] = 'unknown'
                     if 'success' not in newmessage['details']:
-                        newmessage['details']['success'] = 'unknown'
+                        newmessage['details']['successful'] = 'unknown'
                     if 'status' not in newmessage['details']:
                         newmessage['details']['status'] = 'unknown'
                     newmessage['summary'] = (
                         'NTLM: {sourceipaddress} -> '
                         '{destinationipaddress}:'
                         '{destinationport} '
-                        'success {success} '
+                        'success {successful} '
                         'status {status}'
                     ).format(**newmessage['details'])
                     return (newmessage, metadata)
