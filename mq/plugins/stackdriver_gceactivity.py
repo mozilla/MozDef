@@ -20,12 +20,6 @@ class message(object):
         self.registration = ["stackdriver"]
         self.priority = 16
 
-        try:
-            self.mozdefhostname = "{0}".format(node())
-        except:
-            self.mozdefhostname = "failed to fetch mozdefhostname"
-            pass
-
         with open(os.path.join(os.path.dirname(__file__), "stackdriver_gceactivity.yml"), "r") as f:
             mapping_map = f.read()
 

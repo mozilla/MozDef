@@ -15,12 +15,6 @@ class message(object):
         self.registration = ["stackdriver"]
         self.priority = 15
 
-        try:
-            self.mozdefhostname = "{0}".format(node())
-        except:
-            self.mozdefhostname = "failed to fetch mozdefhostname"
-            pass
-
     def onMessage(self, message, metadata):
         if "stackdriver" not in message["tags"]:
             return (message, metadata)

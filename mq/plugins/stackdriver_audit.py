@@ -9,36 +9,6 @@ import os
 import yaml
 import jmespath
 
-# activity for Admin Activity audit logs
-# data_access for Data Access audit logs
-# system_events for System Event audit logs.
-# https://cloud.google.com/logging/docs/api/v2/resource-list
-
-# organization
-# project
-# timestamp
-# authenticationInfo
-# logName
-# protoPayload.serviceName <- what service wrote the audit log
-# protoPayload.methodName <- what operation is being audited
-# protoPayload.serviceData <- more information about the operation being audited
-# resource.type <- What resource is being audited
-# resource.labels.project_id <- What resource is being audited
-# details.gaudit.status.code
-# details.gaudit.status.message
-
-# GCE activity logs
-# set category if jsonPayload in details and logname ends with activity
-# move details.jsonPayload somewhere else
-# details.jsonPayload.actor.user
-# details.jsonPayload.event_subtype
-# details.jsonPayload.event_type
-# details.jsonPayload.ip_address
-# details.logName
-
-# XXX: should I implement a lookup table to map
-
-
 class message(object):
     def __init__(self):
         """
@@ -46,12 +16,6 @@ class message(object):
         """
         self.registration = ["stackdriver"]
         self.priority = 15
-
-        try:
-            self.mozdefhostname = "{0}".format(node())
-        except:
-            self.mozdefhostname = "failed to fetch mozdefhostname"
-            pass
 
         with open(os.path.join(os.path.dirname(__file__), "stackdriver_audit.yml"), "r") as f:
             mapping_map = f.read()

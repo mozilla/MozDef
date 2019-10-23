@@ -16,12 +16,6 @@ class message(object):
         self.registration = ["pubsub"]
         self.priority = 5
 
-        try:
-            self.mozdefhostname = "{0}".format(node())
-        except:
-            self.mozdefhostname = "failed to fetch mozdefhostname"
-            pass
-
     def onMessage(self, message, metadata):
         # trust no one mr mulder
         if "tags" not in message:
@@ -38,7 +32,9 @@ class message(object):
         else:
             # XXX: implement filtering of audit types that we want to see (yaml)
             newmessage = dict()
-            logtype = urllib.parse.unquote(event["logName"]).split("/")[-1].strip()
+            logtype = "UNKNOWN"
+            if "logName" in event:
+                logtype = urllib.parse.unquote(event["logName"]).split("/")[-1].strip()
             if "protoPayload" in event:
                 if "@type" in event["protoPayload"]:
                     if event["protoPayload"]["@type"] == "type.googleapis.com/google.cloud.audit.AuditLog":
