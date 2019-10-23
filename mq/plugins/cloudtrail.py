@@ -50,6 +50,7 @@ class message(object):
             'details.responseelements.role',
             'details.responseelements.policy',
             'details.requestparameters.rule',
+            'details.responseelements.createddate',
             'details.responseelements.credentials',
             'details.responseelements.subnets',
             'details.responseelements.endpoint',
