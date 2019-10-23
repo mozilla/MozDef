@@ -4,7 +4,6 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 import urllib
-from platform import node
 from mozdef_util.utilities.toUTC import toUTC
 
 

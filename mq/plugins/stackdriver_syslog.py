@@ -4,7 +4,6 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 from mozdef_util.utilities.toUTC import toUTC
-from platform import node
 
 
 class message(object):

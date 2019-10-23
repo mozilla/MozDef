@@ -4,10 +4,10 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 from mozdef_util.utilities.toUTC import toUTC
-from platform import node
 import os
 import yaml
 import jmespath
+
 
 class message(object):
     def __init__(self):

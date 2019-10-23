@@ -4,12 +4,9 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 from mozdef_util.utilities.toUTC import toUTC
-from platform import node
 import os
 import yaml
 import jmespath
-
-# XXX: should I implement a lookup table to map
 
 
 class message(object):
