@@ -35,6 +35,7 @@ class message(object):
             'details.requestparameters.describevpcendpointsrequest.filter',
             'details.requestparameters.describevpcendpointsrequest.filter.value',
             'details.requestparameters.describevpcendpointsrequest.vpcendpointid',
+            'details.requestparameters.describevpcendpointserviceconfigurationsrequest',
             'details.requestparameters.disableapitermination',
             'details.requestparameters.distributionconfig.callerreference',
             'details.requestparameters.domainname',
