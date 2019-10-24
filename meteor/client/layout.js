@@ -10,6 +10,10 @@ import { Session } from 'meteor/session';
 import { Tracker } from 'meteor/tracker';
 
 if (Meteor.isClient) {
+    let pageIsUnloading = false;
+    document.addEventListener('readystatechange', event => {
+        pageIsUnloading = true;
+    });
     //events that could fire in any sub template
     Template.layout.events({
         "click .ipmenu-copy": function(e,t){
@@ -77,7 +81,7 @@ if (Meteor.isClient) {
                 // Verify a user is actually logged in and Meteor is running
                 if ((Meteor.user() !== null) && (Meteor.status().connected)) {
                     // Status 0 means the request failed (CORS denies access)
-                    if (xhrInstance.readyState == 4 && (xhrInstance.status == 302 || xhrInstance.status == 0)) {
+                    if (xhrInstance.readyState == 4 && (xhrInstance.status == 302 || xhrInstance.status == 0) && !pageIsUnloading) {
                             location.reload();
                     }
                 }
