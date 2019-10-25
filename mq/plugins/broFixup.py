@@ -520,22 +520,16 @@ class message(object):
                         newmessage['details']['service'] = 'unknown'
                     if 'error_msg' not in newmessage['details']:
                         newmessage['details']['error_msg'] = ''
-                    if 'success' not in newmessage['details']:
-                        newmessage['summary'] = (
-                            '{sourceipaddress} -> '
-                            '{destinationipaddress}:'
-                            '{destinationport} '
-                            'request {request_type} '
-                            'success unknown'
-                        ).format(**newmessage['details'])
+                    newmessage['summary'] = (
+                        '{sourceipaddress} -> '
+                        '{destinationipaddress}:'
+                        '{destinationport} '
+                        'request {request_type}'
+                    ).format(**newmessage['details'])
+                    if 'success' in newmessage['details']:
+                        newmessage['summary'] += ' success {0}'.format(newmessage['details']['success'])
                     else:
-                        newmessage['summary'] = (
-                            '{sourceipaddress} -> '
-                            '{destinationipaddress}:'
-                            '{destinationport} '
-                            'request {request_type} '
-                            'success {success}'
-                        ).format(**newmessage['details'])
+                        newmessage['summary'] += ' success unknown'
                     return (newmessage, metadata)
 
                 if logtype == 'ntlm':
@@ -557,22 +551,15 @@ class message(object):
                         newmessage['details']['ntlm']['username'] = 'unknown'
                     if 'status' not in newmessage['details']:
                         newmessage['details']['status'] = 'unknown'
-                    if 'success' not in newmessage['details']:
-                        newmessage['summary'] = (
-                            'NTLM: {sourceipaddress} -> '
-                            '{destinationipaddress}:'
-                            '{destinationport} '
-                            'success unknown '
-                            'status {status}'
-                        ).format(**newmessage['details'])
+                    newmessage['summary'] = (
+                        'NTLM: {sourceipaddress} -> '
+                        '{destinationipaddress}:'
+                        '{destinationport} '
+                    ).format(**newmessage['details'])
+                    if 'success' in newmessage['details']:
+                        newmessage['summary'] += 'success {0} status {1}'.format(newmessage['details']['success'],newmessage['details']['status'])
                     else:
-                        newmessage['summary'] = (
-                            'NTLM: {sourceipaddress} -> '
-                            '{destinationipaddress}:'
-                            '{destinationport} '
-                            'success {success} '
-                            'status {status}'
-                        ).format(**newmessage['details'])
+                        newmessage['summary'] += 'success unknown status {0}'.format(newmessage['details']['status'])
                     return (newmessage, metadata)
 
                 if logtype == 'smb_files':
