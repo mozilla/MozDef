@@ -56,7 +56,8 @@ class message(object):
                             message['details'][geo_key] = self.ipLocation(ipText)
                             # Add a geo_point coordinates if latitude and longitude exist
                             if 'latitude' in message['details'][geo_key] and 'longitude' in message['details'][geo_key]:
-                                if message['details'][geo_key]['latitude'] != '' and message['details'][geo_key]['longitude'] != '':
+                                if message['details'][geo_key]['latitude'] != '' and message['details'][geo_key]['latitude'].lower() != 'none' and \
+                                   message['details'][geo_key]['longitude'] != '' and message['details'][geo_key]['latitude'].lower() != 'none':
                                     geopoint_key = '{0}ipgeopoint'.format(key)
                                     message['details'][geopoint_key] = '{0},{1}'.format(
                                         message['details'][geo_key]['latitude'],
