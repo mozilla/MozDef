@@ -111,7 +111,7 @@ class TestAlertGeoModel(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': _NOW - timedelta(minutes=16),
+                        'observed': (_NOW - timedelta(minutes=16)).isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                     'destination': {
@@ -120,7 +120,7 @@ class TestAlertGeoModel(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
-                        'observed': _NOW,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '43.6529,-79.3849',
                     },
                 }
@@ -276,7 +276,7 @@ class TestOnePreviousLocality(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
-                        'observed': _NOW - timedelta(minutes=5),
+                        'observed': (_NOW - timedelta(minutes=5)).isoformat(),
                         'geopoint': '43.6529,-79.3849',
                     },
                     'destination': {
@@ -285,7 +285,7 @@ class TestOnePreviousLocality(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': _NOW,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                 }
@@ -357,7 +357,7 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': _NOW - timedelta(minutes=3),
+                        'observed': (_NOW - timedelta(minutes=3)).isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                     'destination': {
@@ -366,7 +366,7 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
-                        'observed': _NOW,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '43.6529,-79.3849',
                     },
                 }
@@ -518,7 +518,7 @@ class TestMultipleEventsInWindow(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
-                        'observed': _NOW - timedelta(minutes=4),
+                        'observed': (_NOW - timedelta(minutes=4)).isoformat(),
                         'geopoint': '43.6529,-79.3849',
                     },
                     'destination': {
@@ -527,7 +527,7 @@ class TestMultipleEventsInWindow(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': _NOW - timedelta(minutes=1),
+                        'observed': (_NOW - timedelta(minutes=1)).isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                 }
@@ -660,7 +660,7 @@ class TestSameCitiesFarAway(GeoModelTest):
                         'country': 'US',
                         'latitude': 43.6614,
                         'longitude': -70.2553,
-                        'observed': _NOW - timedelta(minutes=3),
+                        'observed': (_NOW - timedelta(minutes=3)).isoformat(),
                         'geopoint': '43.6614,-70.2553',
                     },
                     'destination': {
@@ -669,7 +669,7 @@ class TestSameCitiesFarAway(GeoModelTest):
                         'country': 'US',
                         'latitude': 45.5234,
                         'longitude': -122.6762,
-                        'observed': _NOW,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '45.5234,-122.6762',
                     },
                 }
@@ -787,7 +787,7 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                         'country': 'US',
                         'latitude': 45.5234,
                         'longitude': -122.6762,
-                        'observed': _NOW - timedelta(minutes=5),
+                        'observed': (_NOW - timedelta(minutes=5)).isoformat(),
                         'geopoint': '45.5234,-122.6762',
                     },
                     'destination': {
@@ -796,7 +796,7 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3843,
-                        'observed': _NOW - timedelta(minutes=2),
+                        'observed': (_NOW - timedelta(minutes=2)).isoformat(),
                         'geopoint': '43.6529,-79.3843',
                     },
                 },
@@ -807,7 +807,7 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3843,
-                        'observed': _NOW - timedelta(minutes=2),
+                        'observed': (_NOW - timedelta(minutes=2)).isoformat(),
                         'geopoint': '43.6529,-79.3843',
                     },
                     'destination': {
@@ -816,13 +816,13 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                         'country': 'RU',
                         'latitude': 59.9343,
                         'longitude': 30.3351,
-                        'observed': _NOW,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '59.9343,30.3351',
                     },
                 },
             ],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
