@@ -1,8 +1,9 @@
+from datetime import datetime
 import math
 from operator import attrgetter
 from typing import List, NamedTuple, Optional
 
-from .locality import Locality, distance as geo_distance
+from .locality import Coordinates, Locality, distance as geo_distance
 
 
 _AIR_TRAVEL_SPEED = 277.778  # m/s
@@ -19,6 +20,7 @@ class Origin(NamedTuple):
     country: str
     latitude: float
     longitude: float
+    observed: datetime
     geopoint: str
 
 
@@ -81,21 +83,7 @@ def alert(
     ]
 
     hops = [
-        Hop(
-            Origin(
-                o.sourceipaddress,
-                o.city,
-                o.country,
-                o.latitude,
-                o.longitude,
-                '{},{}'.format(o.latitude, o.longitude)),
-            Origin(
-                d.sourceipaddress,
-                d.city,
-                d.country,
-                d.latitude,
-                d.longitude,
-                '{},{}'.format(d.latitude, d.longitude)))
+        Hop(_to_origin(o), _to_origin(d))
         for (o, d) in pairs
         if not _travel_possible(o, d)
     ]
@@ -104,3 +92,51 @@ def alert(
         return None
 
     return Alert(username, hops)
+
+
+def summary(alert: Alert) -> str:
+    '''Produces a human-readable summary of the 'hops' between locations
+    described in an alert.
+    '''
+
+    _d = [
+        geo_distance(_coordinates(hop.origin), _coordinates(hop.destination))
+        for hop in alert.hops
+    ]
+
+    dists = ['{:.2f} KM'.format(d) for d in _d]
+
+    _t = [
+        (hop.origin.observed - hop.destination.observed).total_seconds()
+        for hop in alert.hops
+    ]
+
+    times = ['{:.2f} minutes'.format(abs(t) / 60.0) for t in _t]
+
+    hops = [
+        '{},{} then {},{} ({} in {})'.format(
+            alert.hops[i].origin.city,
+            alert.hops[i].origin.country,
+            alert.hops[i].destination.city,
+            alert.hops[i].destination.country,
+            dists[i],
+            times[i])
+        for i in range(len(alert.hops))
+    ]
+
+    return '{} seen in {}'.format(alert.username, '; '.join(hops))
+
+
+def _coordinates(orig: Origin) -> Coordinates:
+    return Coordinates(orig.latitude, orig.longitude)
+
+
+def _to_origin(loc: Locality) -> Origin:
+    return Origin(
+        loc.sourceipaddress,
+        loc.city,
+        loc.country,
+        loc.latitude,
+        loc.longitude,
+        loc.lastaction,
+        '{},{}'.format(loc.latitude, loc.longitude))

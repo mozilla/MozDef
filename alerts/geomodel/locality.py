@@ -15,6 +15,14 @@ _EARTH_RADIUS = 6373.0  # km # approximate
 # TODO: Switch to dataclasses when we move to Python3.7+
 
 
+class Coordinates(NamedTuple):
+    '''Represents geographical coordinates used for distance calculations.
+    '''
+
+    latitude: float
+    longitude: float
+
+
 class Locality(NamedTuple):
     '''Represents a specific locality.
     '''
@@ -183,7 +191,10 @@ def update(state: State, from_evt: State) -> Update:
             # If we find that the new state's locality has been recorded
             # for the user in question, we only want to update it if either
             # their IP changed or the new time of activity is more recent.
-            if distance(loc1, loc2) <= min(loc1.radius, loc2.radius):
+            coord1 = _coordinates(loc1)
+            coord2 = _coordinates(loc2)
+
+            if distance(coord1, coord2) <= min(loc1.radius, loc2.radius):
                 did_find = True
 
                 new_more_recent = loc1.lastaction > loc2.lastaction
@@ -223,9 +234,9 @@ def remove_outdated(state: State, days_valid: int) -> Update:
         did_update=len(new_localities) != len(state.localities))
 
 
-def distance(loc1: Locality, loc2: Locality) -> float:
-    '''Compute the distance between two localities, returning the geographical
-    distance in kilometres (KM).
+def distance(loc1: Coordinates, loc2: Coordinates) -> float:
+    '''Compute the distance between two points on the Earth, returning the
+    geographical distance in kilometres (KM).
     '''
 
     lat1 = math.radians(loc1.latitude)
@@ -241,3 +252,7 @@ def distance(loc1: Locality, loc2: Locality) -> float:
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
     return c * _EARTH_RADIUS
+
+
+def _coordinates(loc: Locality) -> Coordinates:
+    return Coordinates(loc.latitude, loc.longitude)

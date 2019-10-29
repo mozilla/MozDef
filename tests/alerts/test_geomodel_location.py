@@ -10,7 +10,7 @@ import alerts.geomodel.locality as geomodel
 import alerts.geomodel.execution as execution
 
 
-# Time at which tests are "frozen" using freezegun.
+# Time at which tests are 'frozen' using freezegun.
 _NOW = toUTC(datetime(2017, 1, 1, 1, 0, 0, 0))
 
 
@@ -20,54 +20,6 @@ def state(username, locs):
 
 def locality(cfg):
     return geomodel.Locality(**cfg)
-
-
-def _summary_from_events(events):
-    hops = ' then '.join(
-        [
-            '{0},{1}'.format(
-                event['_source']['details']['sourceipgeolocation']['city'],
-                event['_source']['details']['sourceipgeolocation']['country_code'],
-            )
-            for event in events
-        ]
-    )
-
-    return '{0} seen in {1}'.format(events[0]['_source']['details']['username'], hops)
-
-
-def _hops_from_events(events):
-    details = [event['_source']['details'] for event in events]
-
-    pairs = [(details[i], details[i + 1]) for i in range(len(details) - 1)]
-
-    return [
-        {
-            'origin': {
-                'ip': orig['sourceipaddress'],
-                'city': orig['sourceipgeolocation']['city'],
-                'country': orig['sourceipgeolocation']['country_code'],
-                'latitude': orig['sourceipgeolocation']['latitude'],
-                'longitude': orig['sourceipgeolocation']['longitude'],
-                'geopoint': '{0},{1}'.format(
-                    orig['sourceipgeolocation']['latitude'],
-                    orig['sourceipgeolocation']['longitude'],
-                ),
-            },
-            'destination': {
-                'ip': dest['sourceipaddress'],
-                'city': dest['sourceipgeolocation']['city'],
-                'country': dest['sourceipgeolocation']['country_code'],
-                'latitude': dest['sourceipgeolocation']['latitude'],
-                'longitude': dest['sourceipgeolocation']['longitude'],
-                'geopoint': '{0},{1}'.format(
-                    dest['sourceipgeolocation']['latitude'],
-                    dest['sourceipgeolocation']['longitude'],
-                ),
-            },
-        }
-        for (orig, dest) in pairs
-    ]
 
 
 class GeoModelTest(AlertTestSuite):
@@ -147,7 +99,8 @@ class TestAlertGeoModel(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in San Francisco,US then Toronto,CA',
+        'summary': 'tester1 seen in San Francisco,US then Toronto,CA '
+        '(3645.78 KM in 16.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -158,6 +111,7 @@ class TestAlertGeoModel(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
+                        'observed': (_NOW - timedelta(minutes=16)).isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                     'destination': {
@@ -166,6 +120,7 @@ class TestAlertGeoModel(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '43.6529,-79.3849',
                     },
                 }
@@ -309,7 +264,8 @@ class TestOnePreviousLocality(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in Toronto,CA then San Francisco,US',
+        'summary': 'tester1 seen in Toronto,CA then San Francisco,US '
+        '(3645.78 KM in 5.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -320,6 +276,7 @@ class TestOnePreviousLocality(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
+                        'observed': (_NOW - timedelta(minutes=5)).isoformat(),
                         'geopoint': '43.6529,-79.3849',
                     },
                     'destination': {
@@ -328,6 +285,7 @@ class TestOnePreviousLocality(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                 }
@@ -387,7 +345,8 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in San Francisco,US then Toronto,CA',
+        'summary': 'tester1 seen in San Francisco,US then Toronto,CA '
+        '(3645.78 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -398,6 +357,7 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
+                        'observed': (_NOW - timedelta(minutes=3)).isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                     'destination': {
@@ -406,6 +366,7 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '43.6529,-79.3849',
                     },
                 }
@@ -545,7 +506,8 @@ class TestMultipleEventsInWindow(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in Toronto,CA then San Francisco,US',
+        'summary': 'tester1 seen in Toronto,CA then San Francisco,US '
+        '(3645.78 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -556,6 +518,7 @@ class TestMultipleEventsInWindow(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
+                        'observed': (_NOW - timedelta(minutes=4)).isoformat(),
                         'geopoint': '43.6529,-79.3849',
                     },
                     'destination': {
@@ -564,6 +527,7 @@ class TestMultipleEventsInWindow(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
+                        'observed': (_NOW - timedelta(minutes=1)).isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                 }
@@ -684,7 +648,8 @@ class TestSameCitiesFarAway(GeoModelTest):
 
     default_alert = {
         'category': 'geomodel',
-        'summary': 'tester1 seen in Portland,US then Portland,US',
+        'summary': 'tester1 seen in Portland,US then Portland,US '
+        '(4082.65 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
             'hops': [
@@ -695,6 +660,7 @@ class TestSameCitiesFarAway(GeoModelTest):
                         'country': 'US',
                         'latitude': 43.6614,
                         'longitude': -70.2553,
+                        'observed': (_NOW - timedelta(minutes=3)).isoformat(),
                         'geopoint': '43.6614,-70.2553',
                     },
                     'destination': {
@@ -703,6 +669,7 @@ class TestSameCitiesFarAway(GeoModelTest):
                         'country': 'US',
                         'latitude': 45.5234,
                         'longitude': -122.6762,
+                        'observed': _NOW.isoformat(),
                         'geopoint': '45.5234,-122.6762',
                     },
                 }
@@ -791,14 +758,6 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
         for evt in [default_event, toronto_event, st_petersburg_event]
     ]
 
-    default_alert = {
-        'category': 'geomodel',
-        'summary': _summary_from_events(events),
-        'details': {'username': 'tester1', 'hops': _hops_from_events(events)},
-        'severity': 'WARNING',
-        'tags': ['geomodel'],
-    }
-
     # Set Toronto and Saint Petersburg 5 and 10 minutes after Portland.
     events[0]['_source'][
         'utctimestamp'
@@ -812,6 +771,60 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
     events[1]['_source'][
         'receivedtimestamp'
     ] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 2})
+
+    default_alert = {
+        'category': 'geomodel',
+        'summary': 'tester1 seen in Portland,US then Toronto,CA '
+        '(3393.90 KM in 3.00 minutes); Toronto,CA then Saint '
+        'Petersburg,RU (6855.53 KM in 2.00 minutes)',
+        'details': {
+            'username': 'tester1',
+            'hops': [
+                {
+                    'origin': {
+                        'ip': '1.2.3.4',
+                        'city': 'Portland',
+                        'country': 'US',
+                        'latitude': 45.5234,
+                        'longitude': -122.6762,
+                        'observed': (_NOW - timedelta(minutes=5)).isoformat(),
+                        'geopoint': '45.5234,-122.6762',
+                    },
+                    'destination': {
+                        'ip': '5.4.3.2',
+                        'city': 'Toronto',
+                        'country': 'CA',
+                        'latitude': 43.6529,
+                        'longitude': -79.3843,
+                        'observed': (_NOW - timedelta(minutes=2)).isoformat(),
+                        'geopoint': '43.6529,-79.3843',
+                    },
+                },
+                {
+                    'origin': {
+                        'ip': '5.4.3.2',
+                        'city': 'Toronto',
+                        'country': 'CA',
+                        'latitude': 43.6529,
+                        'longitude': -79.3843,
+                        'observed': (_NOW - timedelta(minutes=2)).isoformat(),
+                        'geopoint': '43.6529,-79.3843',
+                    },
+                    'destination': {
+                        'ip': '12.34.45.56',
+                        'city': 'Saint Petersburg',
+                        'country': 'RU',
+                        'latitude': 59.9343,
+                        'longitude': 30.3351,
+                        'observed': _NOW.isoformat(),
+                        'geopoint': '59.9343,30.3351',
+                    },
+                },
+            ],
+        },
+        'severity': 'WARNING',
+        'tags': ['geomodel'],
+    }
 
     test_cases = [
         PositiveAlertTestCase(
@@ -861,37 +874,42 @@ class TestDifferentIPsSameLocation(GeoModelTest):
     test_cases = [
         NegativeAlertTestCase(
             description='Should not fire for event & state in the same location',
-            events=[default_event]),
+            events=[default_event],
+        ),
         NegativeAlertTestCase(
             description='Should not fire for events in the same location',
-            events=[default_event, another_event]),
+            events=[default_event, another_event],
+        ),
     ]
 
     test_states = [
-        state('tester1', [
-            locality(
-                {
-                    'sourceipaddress': '53.12.88.76',
-                    'city': 'Portland',
-                    'country': 'US',
-                    'lastaction': _NOW - timedelta(minutes=2),
-                    'latitude': 45.5234,
-                    'longitude': -122.6762,
-                    'radius': 50,
-                }
-            ),
-            locality(
-                {
-                    'sourceipaddress': '1.2.3.4',
-                    'city': 'Portland',
-                    'country': 'US',
-                    'lastaction': _NOW - timedelta(minutes=3),
-                    'latitude': 45.5234,
-                    'longitude': -122.6762,
-                    'radius': 50,
-                }
-            )
-        ])
+        state(
+            'tester1',
+            [
+                locality(
+                    {
+                        'sourceipaddress': '53.12.88.76',
+                        'city': 'Portland',
+                        'country': 'US',
+                        'lastaction': _NOW - timedelta(minutes=2),
+                        'latitude': 45.5234,
+                        'longitude': -122.6762,
+                        'radius': 50,
+                    }
+                ),
+                locality(
+                    {
+                        'sourceipaddress': '1.2.3.4',
+                        'city': 'Portland',
+                        'country': 'US',
+                        'lastaction': _NOW - timedelta(minutes=3),
+                        'latitude': 45.5234,
+                        'longitude': -122.6762,
+                        'radius': 50,
+                    }
+                ),
+            ],
+        )
     ]
 
 
@@ -915,32 +933,35 @@ class TestAlreadyProcessedEvents(GeoModelTest):
         }
     }
 
-    events = [
-        AlertTestSuite.create_event(default_event),
-    ]
-    events[0]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
+    events = [AlertTestSuite.create_event(default_event)]
+    events[0]['_source'][
+        'utctimestamp'
+    ] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
 
     test_cases = [
         NegativeAlertTestCase(
             description='Should not fire if encounters older events than state file',
-            events=events
+            events=events,
         )
     ]
 
     test_states = [
-        state('tester1', [
-            locality(
-                {
-                    'sourceipaddress': '1.2.3.4',
-                    'city': 'Portland',
-                    'country': 'US',
-                    'lastaction': toUTC(datetime.now()),
-                    'latitude': 45.5234,
-                    'longitude': -122.6762,
-                    'radius': 50,
-                }
-            )
-        ])
+        state(
+            'tester1',
+            [
+                locality(
+                    {
+                        'sourceipaddress': '1.2.3.4',
+                        'city': 'Portland',
+                        'country': 'US',
+                        'lastaction': toUTC(datetime.now()),
+                        'latitude': 45.5234,
+                        'longitude': -122.6762,
+                        'radius': 50,
+                    }
+                )
+            ],
+        )
     ]
 
 
@@ -983,12 +1004,16 @@ class TestSearchWindowDynamic(GeoModelTest):
         AlertTestSuite.create_event(default_event),
         AlertTestSuite.create_event(outside_distance_event),
     ]
-    events[0]['_source']['utctimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
-    events[0]['_source']['receivedtimestamp'] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
+    events[0]['_source'][
+        'utctimestamp'
+    ] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
+    events[0]['_source'][
+        'receivedtimestamp'
+    ] = AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 4})
     test_cases = [
         NegativeAlertTestCase(
             description='Does not fire if one event is outside of dynamic search window',
-            events=events
+            events=events,
         )
     ]
 
@@ -997,7 +1022,9 @@ class TestSearchWindowDynamic(GeoModelTest):
 
         exec_state_store = execution.store(self.es_client)
 
-        record = execution.Record.new(execution.ExecutionState.new(_NOW - timedelta(minutes=2)))
+        record = execution.Record.new(
+            execution.ExecutionState.new(_NOW - timedelta(minutes=2))
+        )
 
         exec_state_store(record, GeoModelTest.localities_index)
 
