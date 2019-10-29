@@ -1,8 +1,3 @@
-.. MozDef documentation master file, created by
-   sphinx-quickstart on Wed Mar 19 10:09:37 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Table of Contents
 =================
 
@@ -13,24 +8,13 @@ Table of Contents
   introduction
   demo
   installation
-  alert_development_guide
-  mozdef_util
-  screenshots
   usage
   cloud_deployment
   advanced_settings
-  code
-  cicd
+  development
   references
   contributors
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 License
 =======

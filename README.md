@@ -36,7 +36,7 @@ The Mozilla Enterprise Defense Platform (MozDef) seeks to automate the security 
 
 MozDef is in production at Mozilla where we are using it to process over 300 million events per day.
 
-[1]: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/v3.1.1/mozdef-parent.yml
+[1]: https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=mozdef-for-aws&templateURL=https://s3-us-west-2.amazonaws.com/public.us-west-2.infosec.mozilla.org/mozdef/cf/v3.1.2/mozdef-parent.yml
 
 ## Survey & Contacting us
 

@@ -115,10 +115,9 @@ following.
         "valid_duration_days": number,
         "radius_kilometres": number
       },
-      "events": Array<{ 
+      "events": { 
         "search_window": object,
         "lucene_query": string,
-        "username_path": string
       },
       "whitelist": {
         "users": Array<string>,
@@ -230,14 +229,26 @@ preferred naming scheme.
 
     {
       "username": string,
-      "sourceipaddress": string,
-      "origin": {
-        "city": string,
-        "country": string,
-        "latitude": number,
-        "longitude": number,
-        "geopoint": GeoPoint
-      },
+      "hops": [
+        {
+          "origin": {
+            "ip": string,
+            "city": string,
+            "country": string,
+            "latitude": number,
+            "longitude": number,
+            "geopoint": GeoPoint
+          }
+          "destination": {
+            "ip": string,
+            "city": string,
+            "country": string,
+            "latitude": number,
+            "longitude": number,
+            "geopoint": GeoPoint
+          }
+        }
+      ]
     }
 
 Note in the above that the ``origin.geopoint`` field uses ElasticSearch's

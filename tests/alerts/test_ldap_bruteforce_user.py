@@ -8,41 +8,53 @@ from .negative_alert_test_case import NegativeAlertTestCase
 from .alert_test_suite import AlertTestSuite
 
 
-class TestAlertProxyDropIP(AlertTestSuite):
-    alert_filename = "proxy_drop_ip"
+class TestAlertLdapBruteforceUser(AlertTestSuite):
+    alert_filename = "ldap_bruteforce_user"
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
         "_source": {
-            "category": "proxy",
+            "category": "ldap",
             "details": {
-                "sourceipaddress": "1.2.3.4",
-                "host": "1.2.3.5",
-                "proxyaction": "TCP_DENIED",
-            },
-        },
+                "client": "1.2.3.4",
+                "requests": [
+                    {
+                        'verb': 'BIND',
+                        'details': [
+                            'method=128'
+                            'dn="mail=jsmith@example.com,o=com,dc=example"',
+                        ]
+                    }
+                ],
+                "server": "ldap.example.com",
+                "user": "jsmith@example.com",
+                "response": {
+                    "error": 'LDAP_INVALID_CREDENTIALS',
+                }
+            }
+        }
     }
 
     # This alert is the expected result from running this task
     default_alert = {
-        "category": "squid",
-        "tags": ["squid", "proxy"],
+        "category": "bruteforce",
+        "tags": ["ldap"],
         "severity": "WARNING",
-        "summary": "Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following IP-based destination(s): 1.2.3.5",
+        "summary": "LDAP Bruteforce Attack in Progress against user (jsmith@example.com) from the following source ip(s): 1.2.3.4",
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
         "summary"
-    ] = "Suspicious Proxy DROP event(s) detected from 1.2.3.4 to the following IP-based destination(s): 1.2.3.5"
+    ] = "LDAP Bruteforce Attack in Progress against user (jsmith@example.com) from the following source ip(s): 1.2.3.4"
 
     test_cases = []
 
     test_cases.append(
         PositiveAlertTestCase(
             description="Positive test with default events and default alert expected",
-            events=AlertTestSuite.create_events(default_event, 1),
+            events=AlertTestSuite.create_events(default_event, 10),
             expected_alert=default_alert,
         )
     )
@@ -57,29 +69,10 @@ class TestAlertProxyDropIP(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
-        event["_source"]["details"]["host"] = "idonotexist.com"
+        event["_source"]["details"]["response"]["error"] = "LDAP_SUCCESS"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test with default negative event", events=events
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
-        event["_source"]["details"]["host"] = "169.254.169.254"
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test with default negative event", events=events
-        )
-    )
-
-    events = AlertTestSuite.create_events(default_event, 10)
-    for event in events:
-        event["_source"]["details"]["host"] = "1.idonotexist.com"
-    test_cases.append(
-        NegativeAlertTestCase(
-            description="Negative test with a negative event for an FQDN with starting with a number",
-            events=events,
         )
     )
 

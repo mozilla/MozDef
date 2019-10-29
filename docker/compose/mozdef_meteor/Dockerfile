@@ -31,7 +31,6 @@ RUN \
      gcc \
      gcc-c++ \
      libstdc++ \
-     libffi-devel \
      zlib-devel \
      nodejs && \
   yum clean all && \
