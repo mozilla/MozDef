@@ -154,7 +154,7 @@ class AlertGeoModel(AlertTask):
                     hop.destination.city, hop.destination.country)
 
             alert_dict = self.createAlertDict(
-                summary, 'geomodel', ['geomodel'], events, 'INFO')
+                summary, 'geomodel', ['geomodel'], events, 'WARNING')
 
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict['details'] = {
