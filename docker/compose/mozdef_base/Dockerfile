@@ -16,7 +16,6 @@ RUN \
      glibc-devel \
      gcc \
      libstdc++ \
-     libffi-devel \
      zlib-devel \
      libcurl-devel \
      openssl \

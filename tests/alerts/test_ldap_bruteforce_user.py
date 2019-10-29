@@ -8,8 +8,8 @@ from .negative_alert_test_case import NegativeAlertTestCase
 from .alert_test_suite import AlertTestSuite
 
 
-class TestAlertLdapBruteforce(AlertTestSuite):
-    alert_filename = "ldap_bruteforce"
+class TestAlertLdapBruteforceUser(AlertTestSuite):
+    alert_filename = "ldap_bruteforce_user"
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
@@ -37,7 +37,7 @@ class TestAlertLdapBruteforce(AlertTestSuite):
 
     # This alert is the expected result from running this task
     default_alert = {
-        "category": "ldap",
+        "category": "bruteforce",
         "tags": ["ldap"],
         "severity": "WARNING",
         "summary": "LDAP Bruteforce Attack in Progress against user (jsmith@example.com) from the following source ip(s): 1.2.3.4",

@@ -111,7 +111,7 @@ class TestAlertGeoModel(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': '2017-01-01T05:44:00+00:00',
+                        'observed': _NOW - timedelta(minutes=16),
                         'geopoint': '37.773972,-122.431297',
                     },
                     'destination': {
@@ -120,13 +120,13 @@ class TestAlertGeoModel(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
-                        'observed': '2017-01-01T06:00:00+00:00',
+                        'observed': _NOW,
                         'geopoint': '43.6529,-79.3849',
                     },
                 }
             ],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -276,7 +276,7 @@ class TestOnePreviousLocality(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
-                        'observed': '2017-01-01T05:55:00+00:00',
+                        'observed': _NOW - timedelta(minutes=5),
                         'geopoint': '43.6529,-79.3849',
                     },
                     'destination': {
@@ -285,13 +285,13 @@ class TestOnePreviousLocality(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': '2017-01-01T06:00:00+00:00',
+                        'observed': _NOW,
                         'geopoint': '37.773972,-122.431297',
                     },
                 }
             ],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -357,7 +357,7 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': '2017-01-01T05:57:00+00:00',
+                        'observed': _NOW - timedelta(minutes=3),
                         'geopoint': '37.773972,-122.431297',
                     },
                     'destination': {
@@ -366,13 +366,13 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
-                        'observed': '2017-01-01T06:00:00+00:00',
+                        'observed': _NOW,
                         'geopoint': '43.6529,-79.3849',
                     },
                 }
             ],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -454,7 +454,7 @@ class TestSameCitiesOutsideRange(GeoModelTest):
         'category': 'geomodel',
         'summary': 'tester1 seen in Sherbrooke,CA then Sherbrooke,CA',
         'details': {'username': 'tester1'},
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -518,7 +518,7 @@ class TestMultipleEventsInWindow(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3849,
-                        'observed': '2017-01-01T05:56:00+00:00',
+                        'observed': _NOW - timedelta(minutes=4),
                         'geopoint': '43.6529,-79.3849',
                     },
                     'destination': {
@@ -527,13 +527,13 @@ class TestMultipleEventsInWindow(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': '2017-01-01T05:59:00+00:00',
+                        'observed': _NOW - timedelta(minutes=1),
                         'geopoint': '37.773972,-122.431297',
                     },
                 }
             ],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -660,7 +660,7 @@ class TestSameCitiesFarAway(GeoModelTest):
                         'country': 'US',
                         'latitude': 43.6614,
                         'longitude': -70.2553,
-                        'observed': '2017-01-01T05:57:00+00:00',
+                        'observed': _NOW - timedelta(minutes=3),
                         'geopoint': '43.6614,-70.2553',
                     },
                     'destination': {
@@ -669,13 +669,13 @@ class TestSameCitiesFarAway(GeoModelTest):
                         'country': 'US',
                         'latitude': 45.5234,
                         'longitude': -122.6762,
-                        'observed': '2017-01-01T06:00:00+00:00',
+                        'observed': _NOW,
                         'geopoint': '45.5234,-122.6762',
                     },
                 }
             ],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -787,7 +787,7 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                         'country': 'US',
                         'latitude': 45.5234,
                         'longitude': -122.6762,
-                        'observed': '2017-01-01T05:55:00+00:00',
+                        'observed': _NOW - timedelta(minutes=5),
                         'geopoint': '45.5234,-122.6762',
                     },
                     'destination': {
@@ -796,7 +796,7 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3843,
-                        'observed': '2017-01-01T05:58:00+00:00',
+                        'observed': _NOW - timedelta(minutes=2),
                         'geopoint': '43.6529,-79.3843',
                     },
                 },
@@ -807,7 +807,7 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                         'country': 'CA',
                         'latitude': 43.6529,
                         'longitude': -79.3843,
-                        'observed': '2017-01-01T05:58:00+00:00',
+                        'observed': _NOW - timedelta(minutes=2),
                         'geopoint': '43.6529,-79.3843',
                     },
                     'destination': {
@@ -816,7 +816,7 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                         'country': 'RU',
                         'latitude': 59.9343,
                         'longitude': 30.3351,
-                        'observed': '2017-01-01T06:00:00+00:00',
+                        'observed': _NOW,
                         'geopoint': '59.9343,30.3351',
                     },
                 },

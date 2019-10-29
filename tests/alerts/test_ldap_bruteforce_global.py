@@ -8,8 +8,8 @@ from .negative_alert_test_case import NegativeAlertTestCase
 from .alert_test_suite import AlertTestSuite
 
 
-class TestAlertLdapPasswordSpray(AlertTestSuite):
-    alert_filename = "ldap_password_spray"
+class TestAlertLdapBruteforceGlobal(AlertTestSuite):
+    alert_filename = "ldap_bruteforce_global"
     # This event is the default positive event that will cause the
     # alert to trigger
     default_event = {
@@ -26,6 +26,7 @@ class TestAlertLdapPasswordSpray(AlertTestSuite):
                         ]
                     }
                 ],
+                "server": "ldap.example.com",
                 "response": {
                     "error": 'LDAP_INVALID_CREDENTIALS',
                 }
@@ -35,17 +36,17 @@ class TestAlertLdapPasswordSpray(AlertTestSuite):
 
     # This alert is the expected result from running this task
     default_alert = {
-        "category": "ldap",
+        "category": "bruteforce",
         "tags": ["ldap"],
         "severity": "WARNING",
-        "summary": "LDAP Password Spray Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com",
+        "summary": "Global LDAP Bruteforce Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com",
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
         "summary"
-    ] = "LDAP Password Spray Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com"
+    ] = "Global LDAP Bruteforce Attack in Progress from 1.2.3.4 targeting the following account(s): jsmith@example.com"
 
     test_cases = []
 
@@ -68,6 +69,15 @@ class TestAlertLdapPasswordSpray(AlertTestSuite):
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event["_source"]["details"]["response"]["error"] = "LDAP_SUCCESS"
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test with default negative event", events=events
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event["_source"]["details"]["server"] = "foo.example.com"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test with default negative event", events=events

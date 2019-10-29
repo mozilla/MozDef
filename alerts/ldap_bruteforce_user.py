@@ -10,9 +10,9 @@ from lib.alerttask import AlertTask
 from mozdef_util.query_models import SearchQuery, TermMatch
 
 
-class AlertLdapBruteforce(AlertTask):
+class AlertLdapBruteforceUser(AlertTask):
     def main(self):
-        self.parse_config('ldap_bruteforce.conf', ['threshold_count', 'search_depth_min', 'host_exclusions'])
+        self.parse_config('ldap_bruteforce_user.conf', ['threshold_count', 'search_depth_min', 'host_exclusions'])
         search_query = SearchQuery(minutes=int(self.config.search_depth_min))
         search_query.add_must_not(TermMatch('details.user', ''))
         search_query.add_must([
@@ -28,7 +28,7 @@ class AlertLdapBruteforce(AlertTask):
         self.walkAggregations(threshold=int(self.config.threshold_count))
 
     def onAggregation(self, aggreg):
-        category = 'ldap'
+        category = 'bruteforce'
         tags = ['ldap']
         severity = 'WARNING'
         client_list = set()
