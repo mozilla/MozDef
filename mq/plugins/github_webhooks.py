@@ -7,6 +7,7 @@ import os
 import jmespath
 import yaml
 from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.key_exists import key_exists
 
 
 class message(object):
@@ -38,11 +39,11 @@ class message(object):
         newmessage['category'] = 'github'
         newmessage['tags'] = ['github', 'webhook']
         newmessage['eventsource'] = 'githubeventsqs'
-        if 'event' in message['details']:
+        if key_exists('details.event', message):
             newmessage['source'] = message['details']['event']
         else:
             newmessage['source'] = 'UNKNOWN'
-        if 'request_id' in message['details']:
+        if key_exists('details.request_id', message):
             newmessage['details']['request_id'] = message['details']['request_id']
         else:
             newmessage['details']['request_id'] = 'UNKNOWN'
@@ -54,6 +55,14 @@ class message(object):
                 # JMESPath likes to silently return a None object
                 if mappedvalue is not None:
                     newmessage['details'][key] = mappedvalue
+            if key_exists('details.username', newmessage) and key_exists('details.action', newmessage) and key_exists('details.repo_name', newmessage):
+                if newmessage.get('source') == 'pull_request':
+                    newmessage['summary'] = "github repo {0} received a(n) {1} action on a {2} by user {3}".format(newmessage['details']['repo_name'], newmessage['details']['action'], newmessage['source'], newmessage['details']['user'])
+                else:
+                    newmessage['summary'] = "github repo {0} received a {1} by user {2}".format(newmessage['details']['repo_name'], newmessage['source'], newmessage['details']['username'])
+            if key_exists('details.action', newmessage):
+                if newmessage.get('source') == 'security_advisory':
+                    newmessage['summary'] = "Security Advisory {0} for {1} ".format(newmessage['details']['action'], newmessage['details']['alert_description'])
             if 'commit_ts' in newmessage['details']:
                 newmessage['timestamp'] = newmessage['details']['commit_ts']
                 newmessage['utctimestamp'] = toUTC(newmessage['details']['commit_ts']).isoformat()

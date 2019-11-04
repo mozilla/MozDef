@@ -1,7 +1,7 @@
 from mq.plugins.github_webhooks import message
 
 
-class TestSuricataFixup(object):
+class TestGithubWebhooksFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
@@ -357,7 +357,6 @@ class TestSuricataFixup(object):
         assert result['details']['commit_msg'] == message['body']['head_commit']['message']
         assert result['details']['commit_ts'] == message['body']['head_commit']['timestamp']
         assert result['details']['commit_url'] == message['body']['head_commit']['url']
-        assert result['details']['email'] == message['body']['pusher']['email']
 
     def test_delete(self):
         message = {
@@ -950,6 +949,7 @@ class TestSuricataFixup(object):
         self.verify_metadata(metadata)
         assert result['source'] == 'security_advisory'
         assert result['details']['action'] == message['body']['action']
+        assert result['details']['alert_description'] == message['body']['security_advisory']['description']
 
     def test_repository(self):
         message = {
@@ -1859,6 +1859,7 @@ class TestSuricataFixup(object):
         self.verify_metadata(metadata)
         self.verify_meta(message, result)
         self.verify_actor(message, result)
+        self.verify_repo(message, result)
         self.verify_org(message, result)
         assert result['source'] == 'organization'
         assert result['details']['action'] == message['body']['action']
@@ -2173,6 +2174,8 @@ class TestSuricataFixup(object):
         self.verify_meta(message, result)
         self.verify_repo(message, result)
         assert result['source'] == 'public'
+        assert result['details']['username'] == message['body']['sender']['login']
+        assert result['details']['repo_name'] == message['body']['repository']['name']
 
     def test_repository_import(self):
         message = {
@@ -2322,6 +2325,8 @@ class TestSuricataFixup(object):
         self.verify_org(message, result)
         self.verify_repo(message, result)
         assert result['source'] == 'repository_import'
+        assert result['details']['username'] == message['body']['sender']['login']
+        assert result['details']['repo_name'] == message['body']['repository']['name']
 
     def test_release(self):
         message = {
@@ -2515,6 +2520,8 @@ class TestSuricataFixup(object):
         assert result['details']['release_author_node_id'] == message['body']['release']['author']['node_id']
         assert result['details']['release_author_type'] == message['body']['release']['author']['type']
         assert result['details']['release_author_site_admin'] == message['body']['release']['author']['site_admin']
+        assert result['details']['username'] == message['body']['sender']['login']
+        assert result['details']['repo_name'] == message['body']['repository']['name']
 
     def test_org_block(self):
         message = {
