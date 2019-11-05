@@ -2174,8 +2174,6 @@ class TestGithubWebhooksFixup(object):
         self.verify_meta(message, result)
         self.verify_repo(message, result)
         assert result['source'] == 'public'
-        assert result['details']['username'] == message['body']['sender']['login']
-        assert result['details']['repo_name'] == message['body']['repository']['name']
 
     def test_repository_import(self):
         message = {
@@ -2325,8 +2323,6 @@ class TestGithubWebhooksFixup(object):
         self.verify_org(message, result)
         self.verify_repo(message, result)
         assert result['source'] == 'repository_import'
-        assert result['details']['username'] == message['body']['sender']['login']
-        assert result['details']['repo_name'] == message['body']['repository']['name']
 
     def test_release(self):
         message = {
@@ -2520,8 +2516,6 @@ class TestGithubWebhooksFixup(object):
         assert result['details']['release_author_node_id'] == message['body']['release']['author']['node_id']
         assert result['details']['release_author_type'] == message['body']['release']['author']['type']
         assert result['details']['release_author_site_admin'] == message['body']['release']['author']['site_admin']
-        assert result['details']['username'] == message['body']['sender']['login']
-        assert result['details']['repo_name'] == message['body']['repository']['name']
 
     def test_org_block(self):
         message = {
