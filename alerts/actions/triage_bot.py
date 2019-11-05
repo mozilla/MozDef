@@ -74,12 +74,19 @@ def try_make_outbound(message: Alert) -> Optional[AlertTriageRequest]:
     '''
 
     _source = message.get('_source', {})
+    category = _source.get('category')
+    tags = _source.get('tags', [])
 
-    is_ssh_access = 'session' in _source.get('tags', []) and\
-        _source.get('category') == 'session'
+    is_ssh_access = 'session' in tags and category  == 'session'
+
+    is_duo_codes_generated = 'duosecurity' in tags and category == 'duo' and\
+        'codes generated' in _source.get('summary', '')
 
     if is_ssh_access:
         return _make_ssh_access(message)
+
+    if is_duo_codes_generated:
+        return _make_duo_code_gen(message)
 
     return None
 
@@ -108,3 +115,7 @@ def _make_ssh_access(alert: Alert) -> Optional[AlertTriageRequest]:
         AlertLabel.SSH_ACCESS_SIGN_RELENG,
         _source.get('summary', 'SSH access to a sensitive host'),
         email)
+
+
+def _make_duo_code_gen(alert: Alert) -> Optional[AlertTriageRequest]:
+    return None
