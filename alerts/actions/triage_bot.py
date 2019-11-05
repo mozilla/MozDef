@@ -129,12 +129,30 @@ def _make_sensitive_host_access(alert: Alert) -> Optional[AlertTriageRequest]:
 
 
 def _make_duo_code_gen(alert: Alert) -> Optional[AlertTriageRequest]:
-    return None
+    _source = alert.get('_source', {})
+
+    return AlertTriageRequest(
+        alert['_id'],
+        AlertLabel.DUO_BYPASS_CODES_GENERATED,
+        _source.get('summary', 'Duo bypass codes generated'),
+        '')
 
 
 def _make_duo_code_used(alert: Alert) -> Optional[AlertTriageRequest]:
-    return None
+    _source = alert.get('_source', {})
+
+    return AlertTriageRequest(
+        alert['_id'],
+        AlertLabel.DUO_BYPASS_CODES_USED,
+        _source.get('summary', 'Duo bypass code used to log in'),
+        '')
 
 
 def _make_ssh_access_releng(alert: Alert) -> Optional[AlertTriageRequest]:
-    return None
+    _source = alert.get('_source', {})
+
+    return AlertTriageRequest(
+        alert['_id'],
+        AlertLabel.SSH_ACCESS_SIGN_RELENG,
+        _source.get('summary', 'SSH access to a RelEng signing host'),
+        '')
