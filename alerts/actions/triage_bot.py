@@ -5,12 +5,16 @@
 
 from enum import Enum
 import os
-from typing import NamedTuple, Optional, Tuple
+from typing import Any, Dict, NamedTuple, Optional, Tuple
 
 import hjson
 
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
+
+Alert = Dict[Any, Any]
+
+Email = str
 
 
 class AlertLabel(Enum):
@@ -23,8 +27,6 @@ class AlertLabel(Enum):
     SSH_ACCESS_SIGN_RELENG = 'ssh_access_sign_releng'
 
 # TODO: Change to a dataclass when Python 3.7+ is adopted.
-
-Email = str
 
 class AlertTriageRequest(NamedTuple):
     '''A message bound for the AWS lambda function that interfaces with Slack.
@@ -57,12 +59,52 @@ class message(object):
         describing an alert.
         '''
 
+        request = try_make_outbound(message)
+
+        if request is not None:
+            self._test_flag = True
+            print(request)
+
         return message
 
 
-def try_make_outbound(message) -> Optional[AlertTriageRequest]:
+def try_make_outbound(message: Alert) -> Optional[AlertTriageRequest]:
     '''Attempt to determine the kind of alert contained in `message` in
     order to produce an `AlertTriageRequest` destined for the web server comp.
     '''
 
+    _source = message.get('_source', {})
+
+    is_ssh_access = 'session' in _source.get('tags', []) and\
+        _source.get('category') == 'session'
+
+    if is_ssh_access:
+        return _make_ssh_access(message)
+
     return None
+
+
+def _make_ssh_access(alert: Alert) -> Optional[AlertTriageRequest]:
+    null = {
+        'documentsource': {
+            'details': {
+                'username': None
+            }
+        }
+    }
+
+    _source = alert.get('_source', {})
+    _events = _source.get('events', [null])
+
+    user = _events[0]['documentsource']['details']['username']
+
+    if user is None or user == '':
+        return None
+
+    email = user + '@mozilla.com'
+
+    return AlertTriageRequest(
+        alert['_id'],
+        AlertLabel.SSH_ACCESS_SIGN_RELENG,
+        _source.get('summary', 'SSH access to a sensitive host'),
+        email)
