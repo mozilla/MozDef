@@ -77,7 +77,7 @@ def try_make_outbound(message: Alert) -> Optional[AlertTriageRequest]:
     category = _source.get('category')
     tags = _source.get('tags', [])
 
-    is_ssh_access = 'session' in tags and category  == 'session'
+    is_sensitive_host_access = 'session' in tags and category  == 'session'
 
     is_duo_codes_generated = 'duosecurity' in tags and category == 'duo' and\
         'codes generated' in _source.get('summary', '')
@@ -85,8 +85,10 @@ def try_make_outbound(message: Alert) -> Optional[AlertTriageRequest]:
     is_duo_bypass_codes_used = 'duo_bypass_codes_used' in tags and\
         category == 'bypassused'
 
-    if is_ssh_access:
-        return _make_ssh_access(message)
+    is_ssh_access_releng = 'ssh' in tags and category == 'access'
+
+    if is_sensitive_host_access:
+        return _make_sensitive_host_access(message)
 
     if is_duo_codes_generated:
         return _make_duo_code_gen(message)
@@ -94,10 +96,13 @@ def try_make_outbound(message: Alert) -> Optional[AlertTriageRequest]:
     if is_duo_bypass_codes_used:
         return _make_duo_code_used(message)
 
+    if is_ssh_access_releng:
+        return _make_ssh_access_releng(message)
+
     return None
 
 
-def _make_ssh_access(alert: Alert) -> Optional[AlertTriageRequest]:
+def _make_sensitive_host_access(alert: Alert) -> Optional[AlertTriageRequest]:
     null = {
         'documentsource': {
             'details': {
@@ -128,4 +133,8 @@ def _make_duo_code_gen(alert: Alert) -> Optional[AlertTriageRequest]:
 
 
 def _make_duo_code_used(alert: Alert) -> Optional[AlertTriageRequest]:
+    return None
+
+
+def _make_ssh_access_releng(alert: Alert) -> Optional[AlertTriageRequest]:
     return None

@@ -266,6 +266,110 @@ def _duo_bypass_code_used_alert():
     }
 
 
+def _ssh_access_releng_alert():
+    return {
+      '_index': 'alerts-201911',
+      '_type': '_doc',
+      '_id': '8UtbAqm0dFl4qd9GwkA2',
+      '_version': 1,
+      '_score': None,
+      '_source': {
+        'utctimestamp': '2019-11-05T01:14:57.912292+00:00',
+        'severity': 'NOTICE',
+        'summary': 'SSH login from 10.49.48.100 on releng.website.com as user tester',
+        'category': 'access',
+        'tags': [
+          'ssh'
+        ],
+        'events': [
+          {
+            'documentindex': 'events-20191105',
+            'documentsource': {
+              'receivedtimestamp': '2019-11-05T01:13:25.818826+00:00',
+              'mozdefhostname': 'mozdef4.private.mdc1.mozilla.com',
+              'details': {
+                'id': '9637193494562349801',
+                'source_ip': '4.3.2.1',
+                'program': 'sshd',
+                'message': 'Accepted publickey for tester from 4.3.2.1 port 36998 ssh2',
+                'received_at': '2019-11-05T01:08:17Z',
+                'generated_at': '2019-11-04T17:08:17Z',
+                'display_received_at': 'Nov 05 01:08:17',
+                'source_id': 835214730,
+                'source_name': 'other.website.com',
+                'hostname': 'releng.website.com',
+                'severity': 'Info',
+                'facility': 'Auth',
+                'sourceipaddress': '4.3.2.1',
+                'sourceipv4address': '4.3.2.1'
+              },
+              'tags': [
+                'papertrail',
+                'releng'
+              ],
+              'utctimestamp': '2019-11-04T17:08:17+00:00',
+              'timestamp': '2019-11-04T17:08:17+00:00',
+              'hostname': 'releng.website.com',
+              'summary': 'Accepted publickey for tester from 4.3.2.1 port 36998 ssh2',
+              'severity': 'INFO',
+              'category': 'syslog',
+              'type': 'event',
+              'plugins': [
+                'parse_sshd',
+                'parse_su',
+                'sshdFindIP',
+                'ipFixup',
+                'geoip'
+              ],
+              'processid': 'UNKNOWN',
+              'processname': 'UNKNOWN',
+              'source': 'UNKNOWN'
+            },
+            'documentid': 'hsudfg92123ASDf234rm'
+          }
+        ],
+        'ircchannel': 'infosec-releng-alerts',
+        'notify_mozdefbot': True,
+        'details': {
+          'sourceipv4address': '4.3.2.1',
+          'sourceipaddress': '4.3.2.1',
+          'sites': []
+        }
+      },
+      'fields': {
+        'utctimestamp': [
+          '2019-11-05T01:14:57.912Z'
+        ],
+        'events.documentsource.details.generated_at': [
+          '2019-11-04T17:08:17.000Z'
+        ],
+        'events.documentsource.details.received_at': [
+          '2019-11-05T01:08:17.000Z'
+        ],
+        'events.documentsource.utctimestamp': [
+          '2019-11-04T17:08:17.000Z'
+        ],
+        'events.documentsource.receivedtimestamp': [
+          '2019-11-05T01:13:25.818Z'
+        ],
+        'events.documentsource.timestamp': [
+          '2019-11-04T17:08:17.000Z'
+        ]
+      },
+      'highlight': {
+        'category': [
+          '@kibana-highlighted-field@access@/kibana-highlighted-field@'
+        ],
+        'tags': [
+          '@kibana-highlighted-field@ssh@/kibana-highlighted-field@'
+        ]
+      },
+      'sort': [
+        1572916497912
+      ]
+    }
+
+
 class TestTriageBot(object):
     def test_declines_unrecognized_alert(self):
         msg = _ssh_sensitive_host_alert()
@@ -307,4 +411,14 @@ class TestTriageBot(object):
         action._test_flag = False
         action.onMessage(msg)
         
+        assert action._test_flag
+
+
+    def test_recognizes_ssh_access_releng(self):
+        msg = _ssh_access_releng_alert()
+
+        action = message()
+        action._test_flag = False
+        action.onMessage(msg)
+
         assert action._test_flag
