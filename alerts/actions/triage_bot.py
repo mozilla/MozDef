@@ -118,7 +118,7 @@ def _make_ssh_access(alert: Alert) -> Optional[AlertTriageRequest]:
 
     return AlertTriageRequest(
         alert['_id'],
-        AlertLabel.SSH_ACCESS_SIGN_RELENG,
+        AlertLabel.SENSITIVE_HOST_SESSION,
         _source.get('summary', 'SSH access to a sensitive host'),
         email)
 

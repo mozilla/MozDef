@@ -1,7 +1,7 @@
 from alerts.actions.triage_bot import message
 
 
-def _ssh_access_sign_releng_alert():
+def _ssh_sensitive_host_alert():
     return {
       '_index': 'alerts-201911',
       '_type': '_doc',
@@ -268,7 +268,7 @@ def _duo_bypass_code_used_alert():
 
 class TestTriageBot(object):
     def test_declines_unrecognized_alert(self):
-        msg = _ssh_access_sign_releng_alert()
+        msg = _ssh_sensitive_host_alert()
 
         # Without the `session` tag, the alert should not fire.
         msg['_source']['tags'] = ['test']
@@ -280,8 +280,8 @@ class TestTriageBot(object):
         assert not action._test_flag
 
 
-    def test_recognizes_ssh_access_sign_releng(self):
-        msg = _ssh_access_sign_releng_alert()
+    def test_recognizes_ssh_sensitive_host(self):
+        msg = _ssh_sensitive_host_alert()
 
         action = message()
         action._test_flag = False
