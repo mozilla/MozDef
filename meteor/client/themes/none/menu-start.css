@@ -25,7 +25,7 @@ body{
 }
 
 .col-xs-offset-3 {
-margin-left: 30%;
+  margin-left: 30%;
 }
 
 footer {
@@ -39,18 +39,18 @@ footer {
 }
 
 footer .footer__link:hover {
-color: inherit;
+  color: inherit;
 }
 
 footer .footer__link {
-text-decoration: none;
-display: inline-block;
-vertical-align: middle;
-padding: .9em 1.5em;
-margin: .7em .5em;
-border-radius: 2em;
-line-height: 1;
-margin-right: .75em;
+  text-decoration: none;
+  display: inline-block;
+  vertical-align: middle;
+  padding: .9em 1.5em;
+  margin: .7em .5em;
+  border-radius: 2em;
+  line-height: 1;
+  margin-right: .75em;
 }
 
 footer .footer__link svg {
@@ -65,13 +65,13 @@ footer .footer__link svg {
 }
 
 footer .footer__link:hover {
-display: inline-block;
-vertical-align: middle;
-padding: .9em 1.5em;
-background: var(--txt-secondary-color);
-border-radius: 100%;
-color: var(--txt-primary-color);
-box-sizing: initial;
+  display: inline-block;
+  vertical-align: middle;
+  padding: .9em 1.5em;
+  background: var(--txt-secondary-color);
+  border-radius: 100%;
+  color: var(--txt-primary-color);
+  box-sizing: initial;
 }
 
 footer .footer__link:hover svg {
