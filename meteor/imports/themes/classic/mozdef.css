@@ -221,7 +221,8 @@ caption, legend {
     border-radius: 0 6px 6px 6px;
 }
 
-.dropdown-submenu:active>.dropdown-menu, .dropdown-submenu:hover>.dropdown-menu {
+.dropdown-submenu:active>.dropdown-menu,
+.dropdown-submenu:hover>.dropdown-menu {
     display: block;
     right: 162px;
 }
@@ -363,7 +364,8 @@ textarea {
 
 /*bootstrap overrides*/
 
-h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
     color: var(--txt-secondary-color);
 }
 
@@ -803,7 +805,8 @@ sidenav {
 
 /* Second-level Menu Items */
 
-#nav-main li:hover ul, .js #nav-main li.hover ul {
+#nav-main li:hover ul,
+.js #nav-main li.hover ul {
     margin-top: 2.5em;
     left: 0;
     opacity: 1;
