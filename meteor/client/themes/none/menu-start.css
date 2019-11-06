@@ -12,8 +12,8 @@
 }
 
 html{
-background: none;
-min-height: 100%;
+  background: none;
+  min-height: 100%;
 }
 
 body{
@@ -88,6 +88,6 @@ footer .footer__link:hover svg {
 }
 
 .mozdeflogo{
-padding-top: 30%;
-width: 100%;
+  padding-top: 30%;
+  width: 100%;
 }
