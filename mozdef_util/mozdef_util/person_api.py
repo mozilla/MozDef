@@ -20,6 +20,7 @@ class AuthParams(NamedTuple):
     client_id: str
     client_secret: str
     audience: str
+    scope: str
     grants: str
 
 
@@ -56,6 +57,7 @@ def authenticate(url: Url, params: AuthParams) -> Optional[Token]:
         'client_id': params.client_id,
         'client_secret': params.client_secret,
         'audience': params.audience,
+        'scope': params.scope,
         'grant_type': params.grants
     }
 
