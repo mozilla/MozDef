@@ -40,7 +40,7 @@ parser.add_argument(
     nargs='?'
 )
 
-default_file = os.path.realpath(cron_dir_path + '/backup.json')
+default_file = os.path.realpath(cron_dir_path + '/backup.conf')
 parser.add_argument(
     'backup_conf_file',
     help='The relative path to backup.conf file (default: {0})'.format(default_file),
