@@ -11,24 +11,16 @@ import json
 import sys
 import os
 import socket
-import time
 from configlib import getConfig, OptionParser
 from datetime import datetime
-import pytz
-
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
-from mozdef_util.elasticsearch_client import (
-    ElasticsearchClient,
-    ElasticsearchBadServer,
-    ElasticsearchInvalidIndex,
-    ElasticsearchException,
-)
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from mq.lib.plugins import sendEventToPlugins, registerPlugins
-from mq.lib.sqs import connect_sqs
 from esworker_sns_sqs import taskConsumer
+from mq.lib.plugins import sendEventToPlugins
+from mq.lib.sqs import connect_sqs
+from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 
 # running under uwsgi?
@@ -79,7 +71,6 @@ class GDtaskConsumer(taskConsumer):
 
     def on_message(self, message_raw):
         if "Message" in message_raw:
-            event = {}
             message = json.loads(message_raw["Message"])
             if "details" in message:
                 if "finding" in message["details"]:

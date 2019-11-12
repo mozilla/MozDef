@@ -3,12 +3,11 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-from mozdef_util.utilities.key_exists import key_exists
-from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.utilities.dot_dict import DotDict
 import os
 import yaml
 import jmespath
+from mozdef_util.utilities.toUTC import toUTC
+from platform import node
 
 
 class message(object):
@@ -82,10 +81,12 @@ class message(object):
                 newmessage["details"][date_key] = toUTC(newmessage["details"][date_key]).isoformat()
 
         # Handle some special cases
+
         # Propagate domain
         if "miscinfo" in newmessage["details"]:
             if "domain" in newmessage["details"]["miscinfo"]:
                 newmessage["details"]["query"] = newmessage["details"]["miscinfo"]["domain"]
+
         # Flatten tags
         if "tags" in newmessage["details"]:
             newmessage["details"]["awstags"] = []
@@ -93,16 +94,15 @@ class message(object):
                 for k, v in tagkve.items():
                     newmessage["details"]["awstags"].append(v.lower())
             del newmessage["details"]["tags"]
+
         # Find something that remotely resembles an FQDN
         if "publicdnsname" in newmessage["details"]:
             newmessage["hostname"] = newmessage["details"]["publicdnsname"]
         elif "privatednsname" in newmessage["details"]:
             newmessage["hostname"] = newmessage["details"]["privatednsname"]
+
         # Flip IP addresses in we are the source of attacks
-        if (
-            newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/RDPBruteForce"
-            or newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/SSHBruteForce"
-        ):
+        if (newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/RDPBruteForce" or newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/SSHBruteForce"):
             if newmessage["details"]["direction"] == "OUTBOUND":
                 # could be more optimized here but need to be careful
                 truedstip = "0.0.0.0"
