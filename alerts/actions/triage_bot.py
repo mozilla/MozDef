@@ -3,18 +3,32 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+from datetime import datetime
 from enum import Enum
 import os
-from typing import Any, Dict, NamedTuple, Optional, Tuple
+import typing as types
+from urllib.parse import urljoin
 
 import hjson
+import requests
 
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
 
-Alert = Dict[Any, Any]
+# We define some types to serve as 'interfaces' that can be referenced for
+# higher level functions and testing purposes.
+# This module defines implementations of each interface.
 
+Alert = types.Dict[types.Any, types.Any]
 Email = str
+
+Url = str
+Token = str
+Username = str
+AuthInterface = types.Callable[[Url, AuthParams], types.Optional[Token]]
+UserByNameInterface = types.Callable[
+    [Url, Token, Username],
+    types.Optional[User]]
 
 
 class AlertLabel(Enum):
@@ -28,7 +42,7 @@ class AlertLabel(Enum):
 
 # TODO: Change to a dataclass when Python 3.7+ is adopted.
 
-class AlertTriageRequest(NamedTuple):
+class AlertTriageRequest(types.NamedTuple):
     '''A message bound for the AWS lambda function that interfaces with Slack.
     '''
 
@@ -37,6 +51,30 @@ class AlertTriageRequest(NamedTuple):
     summary: str
     user: Email
 
+
+class AuthParams(types.NamedTuple):
+    '''Configuration parameters required to authenticate using OAuth in order
+    to retrieve credentials used to further authenticate to the Person API.
+    '''
+
+    client_id: str
+    client_secret: str
+    audience: str
+    scope: str
+    grants: str
+
+
+class User(types.NamedTuple):
+    '''A container for information describing a user profile that is not
+    security critical.
+    '''
+
+    created: datetime
+    first_name: str
+    last_name: str
+    alternative_name: str
+    primary_email: str
+    mozilla_ldap_primary_email: str
 
 class message(object):
     '''The main interface to the alert action.
@@ -68,7 +106,7 @@ class message(object):
         return message
 
 
-def try_make_outbound(message: Alert) -> Optional[AlertTriageRequest]:
+def try_make_outbound(message: Alert) -> types.Optional[AlertTriageRequest]:
     '''Attempt to determine the kind of alert contained in `message` in
     order to produce an `AlertTriageRequest` destined for the web server comp.
     '''
@@ -102,7 +140,75 @@ def try_make_outbound(message: Alert) -> Optional[AlertTriageRequest]:
     return None
 
 
-def _make_sensitive_host_access(alert: Alert) -> Optional[AlertTriageRequest]:
+def authenticate(url: Url, params: AuthParams) -> Optional[Token]:
+    '''An `AuthInterface` that uses the `requests` library to make a POST
+    request to the Person API containing the required credentials formatted as
+    JSON.
+    '''
+
+    payload = {
+        'client_id': params.client_id,
+        'client_secret': params.client_secret,
+        'audience': params.audience,
+        'scope': params.scope,
+        'grant_type': params.grants
+    }
+
+    try:
+        resp = requests.post(url, json=payload)
+    except requests.exceptions.RequestException:
+        return None
+
+    return resp.json().get('access_token')
+
+
+def primary_username(base: Url, tkn: Token, uname: Username) -> Optional[User]:
+    '''An `UserByNameInterface` that uses the `requests` library to make a GET
+    request to the Person API in order to fetch a user profile given that
+    user's primary username.
+
+    The `base` argument is the base URL for the Person API such as
+    `https://person.api.com`.  This function will invoke the appropriate route.
+
+    `tkn` must be an authenticated session token produced by an `AuthInterface`.
+
+    `uname` is the string username of the user whose account to retrieve.
+    '''
+
+    route = '/v2/user/primary_username/{}'.format(uname)
+    full_url = urljoin(base, route)
+
+    headers = {
+        'Authorization': 'Bearer {}'.format(tkn)
+    }
+
+    try:
+        resp = requests.get(full_url, headers=headers)
+    except requests.exceptions.RequestException:
+        return None
+
+    data = resp.json()
+
+    try:
+        created = datetime.strptime(
+            data['created'].get('value', ''),
+            '%Y-%m-%dT%H:%M:%S.%fZ')
+    except ValueError:
+        return None
+
+    ldap_email = data['identities']['mozilla_ldap_primary_email'].get('value')
+    if ldap_email is None:
+        return None
+
+    return User(
+        created=created,
+        first_name=data['first_name'].get('value', 'N/A'),
+        last_name=data['last_name'].get('value', 'N/A'),
+        alternative_name=data['alternative_name'].get('value', 'N/A'),
+        primary_email=data['primary_email'].get('value', 'N/A'),
+        mozilla_ldap_primary_email=ldap_email)
+
+def _make_sensitive_host_access(a: Alert) -> types.Optional[AlertTriageRequest]:
     null = {
         'documentsource': {
             'details': {
@@ -111,7 +217,7 @@ def _make_sensitive_host_access(alert: Alert) -> Optional[AlertTriageRequest]:
         }
     }
 
-    _source = alert.get('_source', {})
+    _source = a.get('_source', {})
     _events = _source.get('events', [null])
 
     user = _events[0]['documentsource']['details']['username']
@@ -122,13 +228,13 @@ def _make_sensitive_host_access(alert: Alert) -> Optional[AlertTriageRequest]:
     email = user + '@mozilla.com'
 
     return AlertTriageRequest(
-        alert['_id'],
+        a['_id'],
         AlertLabel.SENSITIVE_HOST_SESSION,
         _source.get('summary', 'SSH access to a sensitive host'),
         email)
 
 
-def _make_duo_code_gen(alert: Alert) -> Optional[AlertTriageRequest]:
+def _make_duo_code_gen(alert: Alert) -> types.Optional[AlertTriageRequest]:
     _source = alert.get('_source', {})
 
     return AlertTriageRequest(
@@ -138,7 +244,7 @@ def _make_duo_code_gen(alert: Alert) -> Optional[AlertTriageRequest]:
         '')
 
 
-def _make_duo_code_used(alert: Alert) -> Optional[AlertTriageRequest]:
+def _make_duo_code_used(alert: Alert) -> types.Optional[AlertTriageRequest]:
     _source = alert.get('_source', {})
 
     return AlertTriageRequest(
@@ -148,7 +254,7 @@ def _make_duo_code_used(alert: Alert) -> Optional[AlertTriageRequest]:
         '')
 
 
-def _make_ssh_access_releng(alert: Alert) -> Optional[AlertTriageRequest]:
+def _make_ssh_access_releng(alert: Alert) -> types.Optional[AlertTriageRequest]:
     _source = alert.get('_source', {})
 
     return AlertTriageRequest(
