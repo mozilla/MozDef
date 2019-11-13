@@ -64,6 +64,19 @@ class User(types.NamedTuple):
     primary_email: str
     mozilla_ldap_primary_email: str
 
+
+class DispatchConfig(types.NamedTuple):
+    '''A container for the configuration parameters required to invoke an
+    AWS Lambda function for the purposes of dispatching an
+    `AlertTriageRequest`.
+    '''
+
+    access_key_id: str
+    secret_access_key: str
+    region: str
+    function_name: str
+
+
 # We define some types to serve as 'interfaces' that can be referenced for
 # higher level functions and testing purposes.
 # This module defines implementations of each interface.
@@ -71,11 +84,14 @@ class User(types.NamedTuple):
 Url = str
 Token = str
 Username = str
+StatusCode = int
 AuthInterface = types.Callable[[Url, AuthParams], types.Optional[Token]]
 UserByNameInterface = types.Callable[
     [Url, Token, Username],
     types.Optional[User]]
-
+DispatchInterface = types.Callable[
+    [DispatchConfig, AlertTriageRequest],
+    StatusCode]
 
 class message(object):
     '''The main interface to the alert action.
@@ -211,6 +227,14 @@ def primary_username(
         alternative_name=data['alternative_name'].get('value', 'N/A'),
         primary_email=data['primary_email'].get('value', 'N/A'),
         mozilla_ldap_primary_email=ldap_email)
+
+
+def dispatch(cfg: DispatchConfig, req: AlertTriageRequest) -> StatusCode:
+    '''A `DispatchInterface` that uses `boto3` to invoke an AWS Lambda function
+    that will accept an `AlertTriageRequest`.
+    '''
+
+    return 200
 
 
 def _make_sensitive_host_access(a: Alert) -> types.Optional[AlertTriageRequest]:
