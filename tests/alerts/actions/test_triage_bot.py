@@ -374,6 +374,31 @@ def _ssh_access_releng_alert():
     }
 
 
+def _person_api_profile():
+    return {
+        'created': {
+            'value': '2019-02-27T11:23:00.000Z',
+        },
+        'identities': {
+            'mozilla_ldap_primary_email': {
+                'value': 'test@email.com'
+            }
+        },
+        'first_name': {
+            'value': 'tester'
+        },
+        'last_name': {
+            'value': 'mctestperson'
+        },
+        'alternative_name': {
+            'value': 'testing'
+        },
+        'primary_email': {
+            'value': 'test@email.com'
+        }
+    }
+
+
 class TestTriageBot(object):
     '''Unit tests for the triage bot alert plugin.
     '''
@@ -435,7 +460,7 @@ class TestPersonAPI:
     '''Unit tests for the Person API client code specific to the triage bot.
     '''
 
-    def test_authenticate_sends_well_formed_requests(self):
+    def test_authenticate_handles_well_formed_responses(self):
         params = bot.AuthParams(
             client_id='testid',
             client_secret='secret',
@@ -453,13 +478,43 @@ class TestPersonAPI:
             assert tkn == 'testtoken'
 
 
-    def test_authenticate_handles_unexpected_body(self):
-        assert True
+    def test_authenticate_handles_unexpected_response(self):
+        params = bot.AuthParams(
+            client_id='testid',
+            client_secret='secret',
+            audience='wonderful',
+            scope='client:read',
+            grants='read_acccess')
+
+        with requests_mock.mock() as mock_http:
+            mock_http.post('http://person.api.com', text='Not authenticated')
+
+            tkn = bot.authenticate('http://person.api.com', params)
+
+            assert tkn is None
 
 
-    def test_primary_username_sends_well_formed_requests(self):
-        assert True
+    def test_primary_username_handles_well_formed_responses(self):
+        with requests_mock.mock() as mock_http:
+            mock_http.get(
+                'http://person.api.com/v2/user/primary_username/testuser',
+                json=_person_api_profile())
+
+            profile = bot.primary_username(
+                'http://person.api.com', 'testtoken', 'testuser')
+
+            assert profile.primary_email == 'test@email.com'
+            assert profile.first_name == 'tester'
+            assert profile.alternative_name == 'testing'
 
 
-    def test_primary_username_handles_unexpected_body(self):
-        assert True
+    def test_primary_username_handles_unexpected_response(self):
+        with requests_mock.mock() as mock_http:
+            mock_http.get(
+                'http://person.api.com/v2/user/primary_username/testuser',
+                json={})
+
+            profile = bot.primary_username(
+                'http://person.api.com', 'testtoken', 'testuser')
+
+            assert profile is None

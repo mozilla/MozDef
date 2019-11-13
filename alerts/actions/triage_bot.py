@@ -157,10 +157,9 @@ def authenticate(url: Url, params: AuthParams) -> types.Optional[Token]:
 
     try:
         resp = requests.post(url, json=payload)
-    except requests.exceptions.RequestException:
+        return resp.json().get('access_token')
+    except:
         return None
-
-    return resp.json().get('access_token')
 
 
 def primary_username(
@@ -196,7 +195,7 @@ def primary_username(
 
     try:
         created = datetime.strptime(
-            data['created'].get('value', ''),
+            data.get('created', {}).get('value', ''),
             '%Y-%m-%dT%H:%M:%S.%fZ')
     except ValueError:
         return None
