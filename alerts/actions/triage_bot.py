@@ -15,20 +15,8 @@ import requests
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
 
-# We define some types to serve as 'interfaces' that can be referenced for
-# higher level functions and testing purposes.
-# This module defines implementations of each interface.
-
 Alert = types.Dict[types.Any, types.Any]
 Email = str
-
-Url = str
-Token = str
-Username = str
-AuthInterface = types.Callable[[Url, AuthParams], types.Optional[Token]]
-UserByNameInterface = types.Callable[
-    [Url, Token, Username],
-    types.Optional[User]]
 
 
 class AlertLabel(Enum):
@@ -75,6 +63,19 @@ class User(types.NamedTuple):
     alternative_name: str
     primary_email: str
     mozilla_ldap_primary_email: str
+
+# We define some types to serve as 'interfaces' that can be referenced for
+# higher level functions and testing purposes.
+# This module defines implementations of each interface.
+
+Url = str
+Token = str
+Username = str
+AuthInterface = types.Callable[[Url, AuthParams], types.Optional[Token]]
+UserByNameInterface = types.Callable[
+    [Url, Token, Username],
+    types.Optional[User]]
+
 
 class message(object):
     '''The main interface to the alert action.
@@ -140,7 +141,7 @@ def try_make_outbound(message: Alert) -> types.Optional[AlertTriageRequest]:
     return None
 
 
-def authenticate(url: Url, params: AuthParams) -> Optional[Token]:
+def authenticate(url: Url, params: AuthParams) -> types.Optional[Token]:
     '''An `AuthInterface` that uses the `requests` library to make a POST
     request to the Person API containing the required credentials formatted as
     JSON.
@@ -162,7 +163,11 @@ def authenticate(url: Url, params: AuthParams) -> Optional[Token]:
     return resp.json().get('access_token')
 
 
-def primary_username(base: Url, tkn: Token, uname: Username) -> Optional[User]:
+def primary_username(
+    base: Url,
+    tkn: Token,
+    uname: Username
+    ) -> types.Optional[User]:
     '''An `UserByNameInterface` that uses the `requests` library to make a GET
     request to the Person API in order to fetch a user profile given that
     user's primary username.
@@ -207,6 +212,7 @@ def primary_username(base: Url, tkn: Token, uname: Username) -> Optional[User]:
         alternative_name=data['alternative_name'].get('value', 'N/A'),
         primary_email=data['primary_email'].get('value', 'N/A'),
         mozilla_ldap_primary_email=ldap_email)
+
 
 def _make_sensitive_host_access(a: Alert) -> types.Optional[AlertTriageRequest]:
     null = {

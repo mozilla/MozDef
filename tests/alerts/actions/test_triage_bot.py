@@ -1,4 +1,8 @@
-from alerts.actions.triage_bot import message
+from unittest.mock import patch
+
+import alerts.actions.triage_bot as bot
+
+import requests_mock
 
 
 def _ssh_sensitive_host_alert():
@@ -371,13 +375,16 @@ def _ssh_access_releng_alert():
 
 
 class TestTriageBot(object):
+    '''Unit tests for the triage bot alert plugin.
+    '''
+
     def test_declines_unrecognized_alert(self):
         msg = _ssh_sensitive_host_alert()
 
         # Without the `session` tag, the alert should not fire.
         msg['_source']['tags'] = ['test']
 
-        action = message()
+        action = bot.message()
         action._test_flag = False
         action.onMessage(msg)
 
@@ -387,7 +394,7 @@ class TestTriageBot(object):
     def test_recognizes_ssh_sensitive_host(self):
         msg = _ssh_sensitive_host_alert()
 
-        action = message()
+        action = bot.message()
         action._test_flag = False
         action.onMessage(msg)
 
@@ -397,7 +404,7 @@ class TestTriageBot(object):
     def test_recognizes_duo_bypass_codes_generated(self):
         msg = _duo_bypass_code_gen_alert()
 
-        action = message()
+        action = bot.message()
         action._test_flag = False
         action.onMessage(msg)
 
@@ -407,7 +414,7 @@ class TestTriageBot(object):
     def test_recognizes_duo_bypass_codes_used(self):
         msg = _duo_bypass_code_used_alert()
 
-        action = message()
+        action = bot.message()
         action._test_flag = False
         action.onMessage(msg)
         
@@ -417,8 +424,42 @@ class TestTriageBot(object):
     def test_recognizes_ssh_access_releng(self):
         msg = _ssh_access_releng_alert()
 
-        action = message()
+        action = bot.message()
         action._test_flag = False
         action.onMessage(msg)
 
         assert action._test_flag
+
+
+class TestPersonAPI:
+    '''Unit tests for the Person API client code specific to the triage bot.
+    '''
+
+    def test_authenticate_sends_well_formed_requests(self):
+        params = bot.AuthParams(
+            client_id='testid',
+            client_secret='secret',
+            audience='wonderful',
+            scope='client:read',
+            grants='read_acccess')
+
+        with requests_mock.mock() as mock_http:
+            mock_http.post('http://person.api.com', json={
+                'access_token': 'testtoken'
+            })
+
+            tkn = bot.authenticate('http://person.api.com', params)
+
+            assert tkn == 'testtoken'
+
+
+    def test_authenticate_handles_unexpected_body(self):
+        assert True
+
+
+    def test_primary_username_sends_well_formed_requests(self):
+        assert True
+
+
+    def test_primary_username_handles_unexpected_body(self):
+        assert True
