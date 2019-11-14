@@ -101,7 +101,7 @@ class message(object):
         with open(CONFIG_FILE) as cfg_file:
             self._config = json.load(cfg_file)
 
-        self._aws_session = boto3.session.Session(
+        self._boto_session = boto3.session.Session(
             region_name=self._config['aws_region'],
             aws_access_key_id=self._config['aws_access_key_id'],
             aws_secret_access_key=self._config['aws_secret_access_key']
@@ -117,6 +117,9 @@ class message(object):
         '''
 
         request = try_make_outbound(message)
+
+        print(self._boto_session)
+        dispatch = _dispatcher(self._boto_session)
 
         if request is not None:
             self._test_flag = True
@@ -231,8 +234,8 @@ def primary_username(
         mozilla_ldap_primary_email=ldap_email)
 
 
-def _dispatcher(aws_session) -> DispatchInterface:
-    lambda_ = aws_session.client('lambda')
+def _dispatcher(boto_session) -> DispatchInterface:
+    lambda_ = boto_session.client('lambda')
 
     def dispatch(req: AlertTriageRequest, fn_name: str) -> DispatchResult:
         # Enum variants are not directly JSON-serializable and converting Thing.B
