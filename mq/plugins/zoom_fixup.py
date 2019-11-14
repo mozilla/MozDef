@@ -3,40 +3,79 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+import os
+import jmespath
+import yaml
 from mozdef_util.utilities.key_exists import key_exists
 
 
 class message(object):
     def __init__(self):
-        '''register our criteria for being passed a message
-           as a list of lower case strings or values to match with an event's dictionary of keys or values
-           set the priority if you have a preference for order of plugins to run. 0 goes first, 100 is assumed/default if not sent
         '''
+        register our criteria for being passed a message
+        as a list of lower case strings or values to match with an event's dictionary of keys or values
+        set the priority if you have a preference for order of plugins to run. 0 goes first, 100 is assumed/default if not sent
+        '''
+
         # get zoom event data
         self.registration = ['zoom_host']
         self.priority = 2
 
-    def onMessage(self, message, metadata):
-        # check for messages we have vetted as n/a and prevalent
-        # from a sec standpoint and drop them also rewrite fields
-        # to drop unecessary expansion
+        with open(os.path.join(os.path.dirname(__file__), 'zoom_mapping.yml'), 'r') as f:
+            mapping_map = f.read()
 
-        # omit "topic" field
-        if key_exists('details.payload.object.topic', message):
-                del message['details']['payload']['object']['topic']
+        yap = yaml.safe_load(mapping_map)
+        self.eventtypes = list(yap.keys())
+        self.yap = yap
+        del(mapping_map)
+
+    def onMessage(self, message, metadata):
+
+        if key_exists('tags', message):
+            if 'zoom' not in message['tags']:
+                return (message, metadata)
+
+        newmessage = {}
+        newmessage['details'] = {}
+
+        newmessage['category'] = 'zoom'
+        newmessage['eventsource'] = 'MozDef-EF-zoom'
+        newmessage['source'] = 'api_aws_lambda'
+        newmessage['hostname'] = 'zoom_host'
+        newmessage['severity'] = 'info'
+        newmessage['processname'] = 'zoom_webhook_api'
+        if key_exists('tags', message):
+            newmessage['tags'] = message['tags']
+        if key_exists('details.event', message):
+            newmessage['details']['event'] = message['details']['event']
+        else:
+            newmessage['details']['event'] = 'UNKNOWN'
+        if key_exists('details.payload.account_id', message):
+            newmessage['details']['account_id'] = message['details']['payload']['account_id']
+            if key_exists('details.payload.object.account_id', message):
+                if newmessage.get('details.account_id') != message.get('details.payload.object.account_id'):
+                    newmessage['details']['meeting_account_id'] = message['details']['payload']['object']['account_id']
+        elif key_exists('details.payload.object.account_id', message):
+            newmessage['details']['account_id'] = message['details']['payload']['object']['account_id']
 
         # rewrite summary to be more informative
-        message['summary'] = ""
-        if key_exists('details.event', message):
-            message['summary'] = "zoom: {0}".format(message['details']['event'])
+        newmessage['summary'] = ""
+        if key_exists('details.event', newmessage):
+            newmessage['summary'] = "zoom: {0}".format(message['details']['event'])
             if key_exists('details.payload.object.participant.user_name', message):
-                message['summary'] += " triggered by user {0}".format(message['details']['payload']['object']['participant']['user_name'])
+                newmessage['summary'] += " triggered by user {0}".format(message['details']['payload']['object']['participant']['user_name'])
             elif key_exists('details.payload.operator', message):
-                message['summary'] += " triggered by user {0}".format(message['details']['payload']['operator'])
+                newmessage['summary'] += " triggered by user {0}".format(message['details']['payload']['operator'])
 
-        # drop duplicated account_id field
-        if key_exists('details.payload.account_id', message) and key_exists('details.payload.object.account_id', message):
-            if message.get('details.payload.account_id') == message.get('details.payload.object.account_id'):
-                    del message['details']['payload']['object']['account_id']
+        # iterate through top level keys - push, etc
+        if newmessage['source'] in self.eventtypes:
+            for key in self.yap[newmessage['source']]:
+                mappedvalue = jmespath.search(self.yap[newmessage['source']][key], message)
+                # JMESPath likes to silently return a None object
+                if mappedvalue is not None:
+                    newmessage['details'][key] = mappedvalue
 
-        return (message, metadata)
+        else:
+            newmessage = None
+
+        return (newmessage, metadata)
