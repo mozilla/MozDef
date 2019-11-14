@@ -1,11 +1,8 @@
-import io
+import json
 from unittest.mock import patch
-import zipfile
 
 import alerts.actions.triage_bot as bot
 
-import boto3
-import moto
 import requests_mock
 
 
@@ -524,18 +521,26 @@ class TestPersonAPI:
             assert profile is None
 
 
-    @moto.mock_lambda
     def test_dispatch(self):
         region = 'us-west-2'
         fn_name = 'test_fn'
 
-        raw_code = 'def lambda_handler(event, context):\n\treturn event'
-        zip_output = io.BytesIO()
-        zip_file = zipfile.ZipFile(zip_output, 'w', zipfile.ZIP_DEFLATED)
-        zip_file.writestr('lambda_function.py', raw_code)
-        zip_file.close()
-        zip_output.seek(0)
-        code = zip_output.read()
+        class MockLambda:
+            def __init__(self, sess):
+                self.session = sess
+
+            def invoke(self, **kwargs):
+                self.session.calls.append(kwargs)
+                return {'StatusCode': 200}
+
+
+        class MockSession:
+            def __init__(self):
+                self.calls = []
+
+            def client(self, _service_name):
+                return MockLambda(self)
+
 
         request = bot.AlertTriageRequest(
             identifier='abcdef0123',
@@ -544,25 +549,16 @@ class TestPersonAPI:
             user='test@user.com'
         )
 
-        sess = boto3.session.Session(
-            region_name=region,
-            aws_access_key_id='',
-            aws_secret_access_key=''
-        )
-        conn = sess.client('lambda')
-        conn.create_function(
-            FunctionName=fn_name,
-            Runtime='python3.6',
-            Role='test-iam-role',
-            Handler='lambda_function.lambda_handler',
-            Code={'ZipFile': code},
-            Description='Test function',
-            Timeout=5,
-            MemorySize=128,
-            Publish=True
-        )
-
+        sess = MockSession()
         dispatch = bot._dispatcher(sess)
         status = dispatch(request, fn_name)
 
         assert status == bot.DispatchResult.SUCCESS
+        assert len(sess.calls) == 1
+        assert sess.calls[0]['FunctionName'] == fn_name
+        assert json.loads(sess.calls[0]['Payload']) == {
+            'identifier': 'abcdef0123',
+            'alert': 'ssh_access_sign_releng',
+            'summary': 'test alert',
+            'user': 'test@user.com'
+        }
