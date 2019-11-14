@@ -265,7 +265,7 @@ def dispatch(req: AlertTriageRequest, cfg: DispatchConfig) -> DispatchResult:
     status = 200
 
     try:
-        resp = lambda_.invoke(FunctionName=cfg.function_name, payload=payload)
+        resp = lambda_.invoke(FunctionName=cfg.function_name, Payload=payload)
         status = resp.get('StatusCode', 400)
     except:
         status = 500
