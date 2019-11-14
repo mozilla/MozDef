@@ -1,7 +1,11 @@
+import io
 from unittest.mock import patch
+import zipfile
 
 import alerts.actions.triage_bot as bot
 
+import boto3
+import moto
 import requests_mock
 
 
@@ -518,3 +522,48 @@ class TestPersonAPI:
                 'http://person.api.com', 'testtoken', 'testuser')
 
             assert profile is None
+
+
+    @moto.mock_lambda
+    def test_dispatch(self):
+        region = 'us-west-2'
+        fn_name = 'test_fn'
+
+        raw_code = 'def lambda_handler(event, context):\n\treturn event'
+        zip_output = io.BytesIO()
+        zip_file = zipfile.ZipFile(zip_output, 'w', zipfile.ZIP_DEFLATED)
+        zip_file.writestr('lambda_function.py', raw_code)
+        zip_file.close()
+        zip_output.seek(0)
+        code = zip_output.read()
+
+        cfg = bot.DispatchConfig(
+            access_key_id='',
+            secret_access_key='',
+            region=region,
+            function_name=fn_name
+        )
+
+        request = bot.AlertTriageRequest(
+            identifier='abcdef0123',
+            alert=bot.AlertLabel.SSH_ACCESS_SIGN_RELENG,
+            summary='test alert',
+            user='test@user.com'
+        )
+
+        conn = boto3.client('lambda', region)
+        conn.create_function(
+            FunctionName=fn_name,
+            Runtime='python3.6',
+            Role='test-iam-role',
+            Handler='lambda_function.lambda_handler',
+            Code={'ZipFile': code},
+            Description='Test function',
+            Timeout=5,
+            MemorySize=128,
+            Publish=True
+        )
+
+        status = bot.dispatch(request, cfg)
+
+        assert status == bot.DispatchResult.SUCCESS
