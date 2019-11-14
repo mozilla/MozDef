@@ -537,13 +537,6 @@ class TestPersonAPI:
         zip_output.seek(0)
         code = zip_output.read()
 
-        cfg = bot.DispatchConfig(
-            access_key_id='',
-            secret_access_key='',
-            region=region,
-            function_name=fn_name
-        )
-
         request = bot.AlertTriageRequest(
             identifier='abcdef0123',
             alert=bot.AlertLabel.SSH_ACCESS_SIGN_RELENG,
@@ -551,7 +544,12 @@ class TestPersonAPI:
             user='test@user.com'
         )
 
-        conn = boto3.client('lambda', region)
+        sess = boto3.session.Session(
+            region_name=region,
+            aws_access_key_id='',
+            aws_secret_access_key=''
+        )
+        conn = sess.client('lambda')
         conn.create_function(
             FunctionName=fn_name,
             Runtime='python3.6',
@@ -564,6 +562,7 @@ class TestPersonAPI:
             Publish=True
         )
 
-        status = bot.dispatch(request, cfg)
+        dispatch = bot._dispatcher(sess)
+        status = dispatch(request, fn_name)
 
         assert status == bot.DispatchResult.SUCCESS

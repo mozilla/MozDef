@@ -66,18 +66,6 @@ class User(types.NamedTuple):
     mozilla_ldap_primary_email: str
 
 
-class DispatchConfig(types.NamedTuple):
-    '''A container for the configuration parameters required to invoke an
-    AWS Lambda function for the purposes of dispatching an
-    `AlertTriageRequest`.
-    '''
-
-    access_key_id: str
-    secret_access_key: str
-    region: str
-    function_name: str
-
-
 class DispatchResult(Enum):
     '''A ternary good / bad / unknown result type indicating whether a dispatch
     to AWS Lambda was successful.
@@ -99,9 +87,7 @@ AuthInterface = types.Callable[[Url, AuthParams], types.Optional[Token]]
 UserByNameInterface = types.Callable[
     [Url, Token, Username],
     types.Optional[User]]
-DispatchInterface = types.Callable[
-    [DispatchConfig, AlertTriageRequest],
-    DispatchResult]
+DispatchInterface = types.Callable[[AlertTriageRequest, str], DispatchResult]
 
 class message(object):
     '''The main interface to the alert action.
@@ -115,6 +101,12 @@ class message(object):
         with open(CONFIG_FILE) as cfg_file:
             self._config = json.load(cfg_file)
 
+        self._aws_session = boto3.session.Session(
+            region_name=self._config['aws_region'],
+            aws_access_key_id=self._config['aws_access_key_id'],
+            aws_secret_access_key=self._config['aws_secret_access_key']
+        )
+
         self.registration = '*'
         self.priority = 1
 
@@ -125,6 +117,8 @@ class message(object):
         '''
 
         request = try_make_outbound(message)
+
+        dispatch = _dispatcher(self._aws_session)
 
         if request is not None:
             self._test_flag = True
@@ -239,44 +233,36 @@ def primary_username(
         mozilla_ldap_primary_email=ldap_email)
 
 
-def dispatch(req: AlertTriageRequest, cfg: DispatchConfig) -> DispatchResult:
-    '''A `DispatchInterface` that uses `boto3` to invoke an AWS Lambda function
-    that will accept an `AlertTriageRequest`.
-    '''
+def _dispatcher(aws: boto3.session.Session) -> DispatchInterface:
+    lambda_ = aws.client('lambda')
 
-    # Enum variants are not directly JSON-serializable and converting Thing.B
-    # to a string produces 'Thing.B'.  We just want the variant name, 'B' in
-    # this case, so we pull it out here.
-    payload_dict = dict(req._asdict())
-    payload_dict['alert'] = str(payload_dict['alert'])
-    dot_ind = payload_dict['alert'].index('.')
-    payload_dict['alert'] = payload_dict['alert'][dot_ind + 1:]
+    def dispatch(req: AlertTriageRequest, fn_name: str) -> DispatchResult:
+        # Enum variants are not directly JSON-serializable and converting Thing.B
+        # to a string produces 'Thing.B'.  We just want the variant name, 'B' in
+        # this case, so we pull it out here.
+        payload_dict = dict(req._asdict())
+        payload_dict['alert'] = str(payload_dict['alert'])
+        dot_ind = payload_dict['alert'].index('.')
+        payload_dict['alert'] = payload_dict['alert'][dot_ind + 1:]
 
-    payload = bytes(json.dumps(payload_dict), 'utf-8')
+        payload = bytes(json.dumps(payload_dict), 'utf-8')
 
-    aws_session = boto3.session.Session(
-        region_name=cfg.region,
-        aws_access_key_id=cfg.access_key_id,
-        aws_secret_access_key=cfg.secret_access_key
-    )
+        status = 200
 
-    lambda_ = aws_session.client('lambda')
+        try:
+            resp = lambda_.invoke(FunctionName=fn_name, Payload=payload)
+            status = resp.get('StatusCode', 400)
+        except:
+            status = 500
 
-    status = 200
+        if status >= 400:
+            return DispatchResult.FAILURE
+        elif status < 300:
+            return DispatchResult.SUCCESS
 
-    try:
-        resp = lambda_.invoke(FunctionName=cfg.function_name, Payload=payload)
-        status = resp.get('StatusCode', 400)
-    except:
-        status = 500
+        return DispatchResult.INDETERMINATE
 
-    if status >= 400:
-        return DispatchResult.FAILURE
-    elif status < 300:
-        return DispatchResult.SUCCESS
-
-    return DispatchResult.INDETERMINATE
-
+    return dispatch
 
 def _make_sensitive_host_access(a: Alert) -> types.Optional[AlertTriageRequest]:
     null = {
