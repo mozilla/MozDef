@@ -5,11 +5,12 @@
 
 from datetime import datetime
 from enum import Enum
+import json
 import os
 import typing as types
 from urllib.parse import urljoin
 
-import hjson
+import boto3
 import requests
 
 
@@ -77,6 +78,16 @@ class DispatchConfig(types.NamedTuple):
     function_name: str
 
 
+class DispatchResult(Enum):
+    '''A ternary good / bad / unknown result type indicating whether a dispatch
+    to AWS Lambda was successful.
+    '''
+
+    SUCCESS = 'success'
+    FAILURE = 'failure'
+    INDETERMINATE = 'indeterminate'
+
+
 # We define some types to serve as 'interfaces' that can be referenced for
 # higher level functions and testing purposes.
 # This module defines implementations of each interface.
@@ -84,14 +95,13 @@ class DispatchConfig(types.NamedTuple):
 Url = str
 Token = str
 Username = str
-StatusCode = int
 AuthInterface = types.Callable[[Url, AuthParams], types.Optional[Token]]
 UserByNameInterface = types.Callable[
     [Url, Token, Username],
     types.Optional[User]]
 DispatchInterface = types.Callable[
     [DispatchConfig, AlertTriageRequest],
-    StatusCode]
+    DispatchResult]
 
 class message(object):
     '''The main interface to the alert action.
@@ -103,7 +113,7 @@ class message(object):
         '''
 
         with open(CONFIG_FILE) as cfg_file:
-            self._config = hjson.load(cfg_file)
+            self._config = json.load(cfg_file)
 
         self.registration = '*'
         self.priority = 1
@@ -229,12 +239,20 @@ def primary_username(
         mozilla_ldap_primary_email=ldap_email)
 
 
-def dispatch(req: AlertTriageRequest, cfg: DispatchConfig) -> StatusCode:
+def dispatch(req: AlertTriageRequest, cfg: DispatchConfig) -> DispatchResult:
     '''A `DispatchInterface` that uses `boto3` to invoke an AWS Lambda function
     that will accept an `AlertTriageRequest`.
     '''
 
-    payload = bytes(json.dumps(req._asdict()), 'utf-8')
+    # Enum variants are not directly JSON-serializable and converting Thing.B
+    # to a string produces 'Thing.B'.  We just want the variant name, 'B' in
+    # this case, so we pull it out here.
+    payload_dict = dict(req._asdict())
+    payload_dict['alert'] = str(payload_dict['alert'])
+    dot_ind = payload_dict['alert'].index('.')
+    payload_dict['alert'] = payload_dict['alert'][dot_ind + 1:]
+
+    payload = bytes(json.dumps(payload_dict), 'utf-8')
 
     aws_session = boto3.session.Session(
         region_name=cfg.region,
@@ -242,14 +260,22 @@ def dispatch(req: AlertTriageRequest, cfg: DispatchConfig) -> StatusCode:
         aws_secret_access_key=cfg.secret_access_key
     )
 
-    lambda_ = aws_session.resource('lambda')
+    lambda_ = aws_session.client('lambda')
+
+    status = 200
 
     try:
         resp = lambda_.invoke(FunctionName=cfg.function_name, payload=payload)
-
-        return resp.StatusCode
+        status = resp.get('StatusCode', 400)
     except:
-        return 500
+        status = 500
+
+    if status >= 400:
+        return DispatchResult.FAILURE
+    elif status < 300:
+        return DispatchResult.SUCCESS
+
+    return DispatchResult.INDETERMINATE
 
 
 def _make_sensitive_host_access(a: Alert) -> types.Optional[AlertTriageRequest]:
