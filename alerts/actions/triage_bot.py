@@ -229,12 +229,27 @@ def primary_username(
         mozilla_ldap_primary_email=ldap_email)
 
 
-def dispatch(cfg: DispatchConfig, req: AlertTriageRequest) -> StatusCode:
+def dispatch(req: AlertTriageRequest, cfg: DispatchConfig) -> StatusCode:
     '''A `DispatchInterface` that uses `boto3` to invoke an AWS Lambda function
     that will accept an `AlertTriageRequest`.
     '''
 
-    return 200
+    payload = bytes(json.dumps(req._asdict()), 'utf-8')
+
+    aws_session = boto3.session.Session(
+        region_name=cfg.region,
+        aws_access_key_id=cfg.access_key_id,
+        aws_secret_access_key=cfg.secret_access_key
+    )
+
+    lambda_ = aws_session.resource('lambda')
+
+    try:
+        resp = lambda_.invoke(FunctionName=cfg.function_name, payload=payload)
+
+        return resp.StatusCode
+    except:
+        return 500
 
 
 def _make_sensitive_host_access(a: Alert) -> types.Optional[AlertTriageRequest]:
