@@ -15,6 +15,12 @@ import requests
 
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
+OAUTH_URL = 'https://auth.mozilla.auth0.com/oauth/token'
+PERSON_API_BASE = 'https://person.api.sso.mozilla.com'
+PERSON_API_AUDIENCE = ''
+PERSON_API_SCOPE = ''
+PERSON_API_GRANTS = ''
+TOKEN_VALIDITY_WINDOW_MINUTES = 18 * 60
 
 Alert = types.Dict[types.Any, types.Any]
 Email = str
@@ -76,6 +82,15 @@ class DispatchResult(Enum):
     INDETERMINATE = 'indeterminate'
 
 
+class AuthFailure(Exception):
+    '''Raised by the `message` class in the case that authentication to the
+    Person API fails.
+    '''
+
+    def __init__(self):
+        super().__init__('Failed to authenticate to the Person API')
+
+
 # We define some types to serve as 'interfaces' that can be referenced for
 # higher level functions and testing purposes.
 # This module defines implementations of each interface.
@@ -107,6 +122,19 @@ class message(object):
             aws_secret_access_key=self._config['aws_secret_access_key']
         )
 
+        self._person_api_session = authenticate(OAUTH_URL, AuthParams(
+            client_id=self._config['person_api_client_id'],
+            client_secret=self._config['person_api_client_secret'],
+            audience=PERSON_API_AUDIENCE,
+            scope=PERSON_API_SCOPE,
+            grants=PERSON_API_GRANTS
+        ))
+
+        if self._person_api_session is None:
+            raise AuthFailure()
+
+        self._last_authenticated = datetime.now()
+
         self.registration = '*'
         self.priority = 1
 
@@ -116,13 +144,31 @@ class message(object):
         describing an alert.
         '''
 
+        # Refresh our oauth token periodically.
+        delta = datetime.now() - self._last_authenticated
+        mins_since_auth = delta.total_seconds() / 60.0
+        if mins_since_auth > TOKEN_VALIDITY_WINDOW_MINUTES:
+            self._person_api_session = authenticate(OAUTH_URL, AuthParams(
+                client_id=self._config['person_api_client_id'],
+                client_secret=self._config['person_api_client_secret'],
+                audience=PERSON_API_AUDIENCE,
+                scope=PERSON_API_SCOPE,
+                grants=PERSON_API_GRANTS
+            ))
+
+            if self._person_api_session is None:
+                raise AuthFailure()
+
+            self._last_authenticated = datetime.now()
+
         request = try_make_outbound(message)
 
         dispatch = _dispatcher(self._boto_session)
 
         if request is not None:
             self._test_flag = True
-            print(request)
+            # TODO: What can/should we do with the result?
+            dispatch(request, self._config['aws_lambda_function'])
 
         return message
 
