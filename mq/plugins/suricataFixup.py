@@ -166,6 +166,10 @@ class message(object):
                     if 'app_proto' in newmessage['details']:
                         newmessage['details']['service'] = newmessage['details']['app_proto']
                         del(newmessage['details']['app_proto'])
+                    if 'email' in newmessage['details'] and type(newmessage['details']['email']) == dict:
+                        # If smtp info is already defined, just delete the email list
+                        if 'smtp' in newmessage['details']:
+                            del(newmessage['details']['email'])
                     # Make sure details.vars.flowbits exceptions are handled
                     if 'vars' in newmessage['details']:
                         if 'flowbits' in newmessage['details']['vars']:
