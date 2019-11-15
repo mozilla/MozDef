@@ -49,7 +49,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -72,7 +71,6 @@
     repo_id:  details.body.repository.id
     repo_name: details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -140,16 +138,13 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
+    repo_private: details.body.repository.private
     sender_node_id:  details.body.sender.node_id
     sender_site_admin:  details.body.sender.site_admin
     sender_type: details.body.sender.type
-    org_id:  details.body.organization.id
-    org_login:  details.body.organization.login
-    org_node_id:  details.body.organization.node_id
 
   repository_vulnerability_alert:
     username: details.body.sender.login
@@ -168,7 +163,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -226,7 +220,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -250,7 +243,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -273,7 +265,6 @@
   team_add:
     username: details.body.sender.login
     id: details.body.sender.id
-    action: details.body.action
     org_id:  details.body.organization.id
     org_login:  details.body.organization.login
     org_node_id:  details.body.organization.node_id
@@ -281,7 +272,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -312,7 +302,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -362,7 +351,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -373,6 +361,7 @@
   repository_import:
     username: details.body.sender.login
     id: details.body.sender.id
+    status: details.body.status
     org_id:  details.body.organization.id
     org_login:  details.body.organization.login
     org_node_id:  details.body.organization.node_id
@@ -380,7 +369,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
@@ -399,7 +387,6 @@
     repo_id:  details.body.repository.id
     repo_name:  details.body.repository.name
     repo_owner_id:  details.body.repository.owner.id
-    repo_owner_name:  details.body.repository.owner.name
     repo_owner_login: details.body.repository.owner.login
     repo_owner_node_id:  details.body.repository.owner.node_id
     repo_owner_site_admin:  details.body.repository.owner.site_admin
