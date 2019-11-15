@@ -118,7 +118,6 @@ class message(object):
 
         request = try_make_outbound(message)
 
-        print(self._boto_session)
         dispatch = _dispatcher(self._boto_session)
 
         if request is not None:
