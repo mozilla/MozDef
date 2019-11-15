@@ -173,7 +173,10 @@ class message(object):
         return message
 
 
-def try_make_outbound(message: Alert) -> types.Optional[AlertTriageRequest]:
+def try_make_outbound(
+    message: Alert,
+    oauth_tkn: Token
+    ) -> types.Optional[AlertTriageRequest]:
     '''Attempt to determine the kind of alert contained in `message` in
     order to produce an `AlertTriageRequest` destined for the web server comp.
     '''
@@ -193,16 +196,16 @@ def try_make_outbound(message: Alert) -> types.Optional[AlertTriageRequest]:
     is_ssh_access_releng = 'ssh' in tags and category == 'access'
 
     if is_sensitive_host_access:
-        return _make_sensitive_host_access(message)
+        return _make_sensitive_host_access(message, oauth_tkn)
 
     if is_duo_codes_generated:
-        return _make_duo_code_gen(message)
+        return _make_duo_code_gen(message, oauth_tkn)
 
     if is_duo_bypass_codes_used:
-        return _make_duo_code_used(message)
+        return _make_duo_code_used(message, oauth_tkn)
 
     if is_ssh_access_releng:
-        return _make_ssh_access_releng(message)
+        return _make_ssh_access_releng(message, oauth_tkn)
 
     return None
 
@@ -310,7 +313,11 @@ def _dispatcher(boto_session) -> DispatchInterface:
 
     return dispatch
 
-def _make_sensitive_host_access(a: Alert) -> types.Optional[AlertTriageRequest]:
+
+def _make_sensitive_host_access(
+    a: Alert,
+    tkn: Token
+    ) -> types.Optional[AlertTriageRequest]:
     null = {
         'documentsource': {
             'details': {
@@ -327,40 +334,89 @@ def _make_sensitive_host_access(a: Alert) -> types.Optional[AlertTriageRequest]:
     if user is None or user == '':
         return None
 
-    email = user + '@mozilla.com'
+
+    profile = primary_username(PERSON_API_BASE, tkn, user)
+    if profile is None:
+        return None
 
     return AlertTriageRequest(
         a['_id'],
         AlertLabel.SENSITIVE_HOST_SESSION,
         _source.get('summary', 'SSH access to a sensitive host'),
-        email)
+        profile.primary_email)
 
 
-def _make_duo_code_gen(alert: Alert) -> types.Optional[AlertTriageRequest]:
+def _make_duo_code_gen(
+    alert: Alert,
+    tkn: Token
+    ) -> types.Optional[AlertTriageRequest]:
+    null = {
+        'documentsource': {
+            'details': {
+                'object': None
+            }
+        }
+    }
+
     _source = alert.get('_source', {})
+    _events = _source.get('events', [null])
+
+    email = _events[0]['documentsource']['details']['object']
+
+    if email is None or email == '':
+        return None
 
     return AlertTriageRequest(
         alert['_id'],
         AlertLabel.DUO_BYPASS_CODES_GENERATED,
         _source.get('summary', 'Duo bypass codes generated'),
-        '')
+        email)
 
 
-def _make_duo_code_used(alert: Alert) -> types.Optional[AlertTriageRequest]:
+def _make_duo_code_used(
+    alert: Alert,
+    tkn: Token
+    ) -> types.Optional[AlertTriageRequest]:
+    null = {
+        'documentsource': {
+            'details': {
+                'object': None
+            }
+        }
+    }
+
     _source = alert.get('_source', {})
+    _events = _source.get('events', [null])
+
+    email = _events[0]['documentsource']['details']['object']
+
+    if email is None or email == '':
+        return None
 
     return AlertTriageRequest(
         alert['_id'],
         AlertLabel.DUO_BYPASS_CODES_USED,
         _source.get('summary', 'Duo bypass code used to log in'),
-        '')
+        email)
 
 
-def _make_ssh_access_releng(alert: Alert) -> types.Optional[AlertTriageRequest]:
+def _make_ssh_access_releng(
+    alert: Alert,
+    tkn: Token
+    ) -> types.Optional[AlertTriageRequest]:
     _source = alert.get('_source', {})
+
+    user = _source.get('summary', '').split(' ')[-1]
+
+    if user == '':
+        return None
+
+    profile = primary_username(PERSON_API_BASE, tkn, user)
+    if profile is None:
+        return None
 
     return AlertTriageRequest(
         alert['_id'],
         AlertLabel.SSH_ACCESS_SIGN_RELENG,
         _source.get('summary', 'SSH access to a RelEng signing host'),
-        '')
+        profile.primary_email)
