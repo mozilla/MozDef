@@ -27,7 +27,7 @@ class message(object):
         self.userauth_request_regex = re.compile(r'^input_userauth_request: invalid user (?P<username>[a-zA-Z0-9\@._-]+) \[preauth\]')
         self.disconnect_regex = re.compile(r'^Received disconnect from (?P<sourceipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}): (?P<sourceport>\d{1,5}): (|Bye Bye|Normal Shutdown, Thank you for playing) \[preauth\]')
 
-        if 'processname' in message and message['processname'] == 'sshd':
+        if 'processname' in message and message['processname'] == 'sshd' or 'program' in message and message['program'] == 'sshd':
             msg_unparsed = message['summary']
             if msg_unparsed.startswith('Accepted'):
                 accepted_search = re.search(self.accepted_regex, msg_unparsed)

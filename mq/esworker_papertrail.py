@@ -29,6 +29,7 @@ from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.to_unicode import toUnicode
 from mozdef_util.utilities.remove_at import removeAt
 from mozdef_util.utilities.logger import logger, initLogger
+from mozdef_util.utilities.key_exists import key_exists
 
 from lib.plugins import sendEventToPlugins, registerPlugins
 
@@ -158,7 +159,7 @@ def keyMapping(aDict):
                 returndict["processid"] = toUnicode(v)
 
             # nxlog sets sourcename to the processname (i.e. sshd), everyone else should call it process name or pname
-            if k in ("pname", "processname", "sourcename"):
+            if k in ("pname", "processname", "sourcename", "program"):
                 returndict["processname"] = toUnicode(v)
 
             # the file, or source
@@ -194,6 +195,18 @@ def keyMapping(aDict):
                     returndict["details"][str(newName)] = float(v)
                 else:
                     returndict["details"][str(newName)] = toUnicode(v)
+                # resolve missing source and processname fields where
+                # the data is in the details
+                if key_exists('details.facility', returndict):
+                    if returndict.get('details.facility') == 'Auth':
+                        returndict['source'] = 'authpriv'
+                if key_exists('details.program', returndict):
+                    program_value = returndict.get('details.program')
+                    if program_value[-4:] == '.log':
+                        returndict['source'] = program_value
+                if key_exists('details.program', returndict):
+                    if returndict.get('details.program') == 'sshd':
+                        returndict['processname'] = 'sshd'
 
         # nxlog windows log handling
         if "Domain" in aDict and "SourceModuleType" in aDict:
