@@ -63,11 +63,12 @@ class message(object):
 
         # This is a hack to let the following code match and extract useful information about local network configuration
         # Sometimes AWS does not feel like sending it at all or sends an empty list or a single element list or a multiple-elements list or a dictionary - so try to handle them all
-        if "networkInterfaces" in message["details"]["resource"]["instanceDetails"]:
-            nic = message["details"]["resource"]["instanceDetails"]["networkInterfaces"]
-            if isinstance(nic, list):
-                if len(nic) > 0:
-                    message["details"]["resource"]["instanceDetails"]["networkInterfaces"] = nic[0]
+        if message["details"]["finding"]["action"]["actionType"] != "AWS_API_CALL":
+            if "networkInterfaces" in message["details"]["resource"]["instanceDetails"]:
+                nic = message["details"]["resource"]["instanceDetails"]["networkInterfaces"]
+                if isinstance(nic, list):
+                    if len(nic) > 0:
+                        message["details"]["resource"]["instanceDetails"]["networkInterfaces"] = nic[0]
         if message["details"]["category"] in self.eventtypes:
             for key in self.yap[newmessage["details"]["finding"]]:
                 mappedvalue = jmespath.search(self.yap[newmessage["details"]["finding"]][key], message)
@@ -122,10 +123,13 @@ class message(object):
             "Recon:EC2/PortProbeUnprotectedPort": "INBOUND",
             "CryptoCurrency:EC2/BitcoinTool.B!DNS": "INBOUND",
             "Trojan:EC2/DGADomainRequest.B": "INBOUND",
+            "UnauthorizedAccess:IAMUser/TorIPCaller": "INBOUND",
+            "Persistence:IAMUser/ResourcePermissions": "INBOUND",
+            "Persistence:IAMUser/NetworkPermissions": "INBOUND",
+            "Persistence:IAMUser/UserPermissions": "INBOUND",
         }
         if "direction" not in newmessage["details"]:
             newmessage["details"]["direction"] = attdir[newmessage["details"]["finding"]]
-            print(newmessage["details"]["direction"])
         if newmessage["details"]["direction"] == "INBOUND":
             if "destinationipaddress" not in newmessage["details"]:
                 if "publicip" in newmessage["details"]:

@@ -16,11 +16,11 @@ from datetime import datetime
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger, initLogger
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
 from esworker_sns_sqs import taskConsumer
-from mq.lib.plugins import sendEventToPlugins
-from mq.lib.sqs import connect_sqs
+from lib.plugins import sendEventToPlugins
+from lib.sqs import connect_sqs
 from mozdef_util.elasticsearch_client import ElasticsearchClient
+from mozdef_util.utilities.key_exists import key_exists
 
 
 # running under uwsgi?
@@ -72,26 +72,22 @@ class GDtaskConsumer(taskConsumer):
     def on_message(self, message_raw):
         if "Message" in message_raw:
             message = json.loads(message_raw["Message"])
-            if "details" in message:
-                if "finding" in message["details"]:
-                    if "action" in message["details"]["finding"]:
-                        if "actionType" in message["details"]["finding"]["action"]:
-                            if message["details"]["finding"]["action"]["actionType"] == "PORT_PROBE":
-                                if "portProbeAction" in message["details"]["finding"]["action"]:
-                                    if "portProbeDetails" in message["details"]["finding"]["action"]["portProbeAction"]:
-                                        for probe in message["details"]["finding"]["action"]["portProbeAction"][
-                                            "portProbeDetails"
-                                        ]:
-                                            isolatedmessage = message
-                                            del isolatedmessage["details"]["finding"]["action"]["portProbeAction"][
-                                                "portProbeDetails"
-                                            ]
-                                            isolatedmessage["details"]["finding"]["action"]["portProbeAction"][
-                                                "portProbeDetails"
-                                            ] = probe
-                                            self.build_submit_message(message)
-                            else:
-                                self.build_submit_message(message)
+            if key_exists('details.finding.action.actionType', message):
+                if message["details"]["finding"]["action"]["actionType"] == "PORT_PROBE":
+                    if "portProbeDetails" in message["details"]["finding"]["action"]["portProbeAction"]:
+                        for probe in message["details"]["finding"]["action"]["portProbeAction"]["portProbeDetails"]:
+                            isolatedmessage = message
+                            isolatedmessage["details"]["finding"]["probeevent"] = probe
+                            self.build_submit_message(isolatedmessage)
+                elif message["details"]["finding"]["action"]["actionType"] == "AWS_API_CALL":
+                    if "recentApiCalls" in message["details"]["finding"]["additionalInfo"]:
+                        message["details"]["finding"]["additionalInfo"]["apiCalls"] = message["details"]["finding"]["additionalInfo"]["recentApiCalls"]
+                    for call in message["details"]["finding"]["additionalInfo"]["apiCalls"]:
+                        isolatedmessage = message
+                        isolatedmessage["details"]["finding"]["apicalls"] = call
+                        self.build_submit_message(isolatedmessage)
+                    else:
+                        self.build_submit_message(message)
 
 
 def esConnect():
