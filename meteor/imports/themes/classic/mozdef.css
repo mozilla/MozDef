@@ -57,6 +57,10 @@ body {
     color: black;
 }
 
+.container {
+    margin-bottom: 3%;
+}
+
 footer {
     text-align: center;
     position: fixed;
