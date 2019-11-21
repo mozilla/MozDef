@@ -7,9 +7,7 @@
 
 
 import json
-
 import sys
-import os
 import socket
 from configlib import getConfig, OptionParser
 from datetime import datetime
@@ -81,7 +79,9 @@ class GDtaskConsumer(taskConsumer):
                             self.build_submit_message(isolatedmessage)
                 elif message["details"]["finding"]["action"]["actionType"] == "AWS_API_CALL":
                     if "recentApiCalls" in message["details"]["finding"]["additionalInfo"]:
-                        message["details"]["finding"]["additionalInfo"]["apiCalls"] = message["details"]["finding"]["additionalInfo"]["recentApiCalls"]
+                        message["details"]["finding"]["additionalInfo"]["apiCalls"] = message["details"]["finding"][
+                            "additionalInfo"
+                        ]["recentApiCalls"]
                     for call in message["details"]["finding"]["additionalInfo"]["apiCalls"]:
                         isolatedmessage = message
                         isolatedmessage["details"]["finding"]["apicalls"] = call
