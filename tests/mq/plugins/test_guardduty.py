@@ -444,7 +444,7 @@ class TestGuardDuty(object):
         assert result["details"]["state"] == "running"
         assert result["details"]["az"] == "us-west-2a"
         assert result["details"]["imageid"] == "ami-036f90c73e6fd5387"
-        assert result["details"]["imagedesc"] == "Gecko tester for Windows 10 64 bit; worker-type: gecko-t-win10-64-gpu-s, source: https://github.com/mozilla-releng/OpenCloudConfig/commit/c78696d, deploy: https  ://tools.taskcluster.net/tasks/RCdbVWvgR42rSHZIjzlL4A"
+        assert result["details"]["imagedesc"] == "Gecko tester for Windows 10 64 bit; worker-type: gecko-t-win10-64-gpu-s, source: https://github.com/mozilla-releng/OpenCloudConfig/commit/c78696d, deploy: https://tools.taskcluster.net/tasks/RCdbVWvgR42rSHZIjzlL4A"
         assert result["details"]["detectorid"] == "90b4e5d7bef5a2adc076a62bd3d88c78"
         assert result["details"]["sourceipaddress"] == "185.209.0.81"
         assert result["details"]["sourceport"] == 1239
@@ -552,21 +552,13 @@ class TestGuardDuty(object):
 
         assert result["category"] == "guardduty"
         assert result["source"] == "guardduty"
-        assert result["details"]["findingid"] == "eeb6396cc2ac43cef0d3e77204f202ce"
-        assert result["details"]["arn"] == "arn:aws:guardduty:us-west-2:371522382791:detector/7ab01139c0b81403b3c8ec8e08cf939c/finding/eeb6396cc2ac43cef0d3e77204f202ce"
+        assert result["details"]["findingid"] == "8eb6396cc2adef8cc8f846c46a920c35"
+        assert result["details"]["arn"] == "arn:aws:guardduty:us-west-2:371522382791:detector/7ab01139c0b81403b3c8ec8e08cf939c/finding/8eb6396cc2adef8cc8f846c46a920c35"
         assert result["details"]["awsaccountid"] == "371522382791"
         assert result["details"]["awsregion"] == "us-west-2"
-        assert result["details"]["resourcetype"] == "Instance"
-        assert result["details"]["instanceid"] == "i-99999999"
-        assert result["details"]["instancetype"] == "m3.xlarge"
-        assert result["details"]["launchtime"] == "2016-08-02T02:05:06Z"
-        assert result["details"]["iamprofilearn"] == "GeneratedFindingInstanceProfileArn"
-        assert result["details"]["iamprofileid"] == "GeneratedFindingInstanceProfileId"
+        assert result["details"]["resourcetype"] == "AccessKey"
         assert result["details"]["detectorid"] == "7ab01139c0b81403b3c8ec8e08cf939c"
         assert result["details"]["sourceipaddress"] == "198.51.100.0"
-        assert result["details"]["sourceport"] == 39677
-        assert result["details"]["destinationport"] == 80
-        assert result["details"]["proto"] == "TCP"
 
     def test_toroutbound(self):
         event = {
