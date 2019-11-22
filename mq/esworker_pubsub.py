@@ -21,9 +21,7 @@ from mozdef_util.elasticsearch_client import (
     ElasticsearchException,
 )
 from google.cloud import pubsub
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-from mq.lib.plugins import sendEventToPlugins, registerPlugins
+from lib.plugins import sendEventToPlugins, registerPlugins
 
 # running under uwsgi?
 try:
