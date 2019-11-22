@@ -8,8 +8,6 @@ import json
 import os
 import typing as types
 
-from mozdef_util.utilities.logger import logger
-
 import boto3
 import requests
 
@@ -89,56 +87,47 @@ def update_alert_status(alert_id: str, status: AlertStatus, api: RESTConfig):
     try:
         resp = requests.post(url, headers=headers, data=payload)
     except:
-        logger.exception('Failed to send request to MozDef REST API')
-        return
+        return False
 
-    if resp.status_code >= 300:
-        logger.error('Update of alert {} status failed'.format(alert_id))
+    return resp.status_code < 300
 
 
-def process(msg, api_cfg):
+def process(msg, meta, api_cfg):
     '''Inspect a message expected to contain a `UserResponseMessage` and invoke
     the MozDef REST API to update the status of the identified alert.
     '''
 
     try:
-        response = UserResponseMessage(**json.loads(msg.body))
+        response = UserResponseMessage(**msg)
     except:
-        logger.error('Invalid message format{}'.format(msg.body))
-        return
+        return (None, None)
 
     status = new_status(response.response)
 
-    update_alert_status(response.identifier, status, api_cfg)
+    update_succeeded = update_alert_status(response.identifier, status, api_cfg)
+
+    if not update_succeeded:
+        return (None, None)
+
+    return (msg, meta)
 
 
-def main():
-    with open(_CONFIG_FILE) as cfg_file:
-        config = json.load(cfg_file)
+class message:
+    '''Updates the status of alerts when users respond to messages on Slack.
+    '''
 
-    aws_creds = {
-        'aws_access_key_id': config['aws_access_key_id'],
-        'aws_secret_access_key': config['aws_secret_access_key']
-    }
+    def __init__(self):
+        self.registration = 'triagebot'
+        self.priority = 5
+    
+        with open(_CONFIG_FILE) as cfg_file:
+            config = json.load(cfg_file)
 
-    api_cfg = RESTConfig(config['rest_api_url'], config['rest_api_token'])
-
-    sqs = boto3.resource('sqs', region=config['aws_region'], **aws_creds)
-
-    queue = sqs.get_queue_by_name(QueueName=config['sqs_queue_name'])
-
-    while True:
-        try:
-            messages = queue.receive_messages(MaxNumberOfMessages=10)
-
-            for message in messages:
-                process(message, api_cfg)
-                message.delete()
-        except KeyboardInterrupt:
-            logger.info('Exiting triage_bot_sqs worker')
-        except Exception as e:
-            logger.exception('Error in triage_bot_sqs: {}'.format(e.message))
+        self.api_cfg = RESTConfig(
+            config['rest_api_url'],
+            config['rest_api_token']
+        )
 
 
-if __name__ == '__main__':
-    main()
+    def onMessage(self, message, metadata):
+        return process(message, metadata, self.api_cfg)
