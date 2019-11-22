@@ -286,13 +286,8 @@ def _dispatcher(boto_session) -> DispatchInterface:
     lambda_ = boto_session.client('lambda')
 
     def dispatch(req: AlertTriageRequest, fn_name: str) -> DispatchResult:
-        # Enum variants are not directly JSON-serializable and converting Thing.B
-        # to a string produces 'Thing.B'.  We just want the variant name, in
-        # lowercase 'b' in this case, so we pull it out here.
         payload_dict = dict(req._asdict())
-        payload_dict['alert'] = str(payload_dict['alert'])
-        dot_ind = payload_dict['alert'].index('.')
-        payload_dict['alert'] = payload_dict['alert'][dot_ind + 1:].lower()
+        payload_dict['alert'] = req.alert.value
 
         payload = bytes(json.dumps(payload_dict), 'utf-8')
 
