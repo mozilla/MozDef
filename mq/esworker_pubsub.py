@@ -7,7 +7,6 @@
 
 import json
 import sys
-import os
 import socket
 import time
 from configlib import getConfig, OptionParser
