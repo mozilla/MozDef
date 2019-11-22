@@ -8,10 +8,10 @@ class TestStackDriverAudit(object):
         self.metadata = {"index": "events"}
 
     # Should never match and be modified by the plugin
-    def test_nodetails_log(self):
+    def test_notags_log(self):
         metadata = {"index": "events"}
         event = {
-            "tags": "pubsub",
+            "source": "stackdriver",
             "details": {"logName": "projects/mcd-001-252615/logs/cloudaudit.googleapis.com%2Fdata_access"},
         }
 
@@ -19,10 +19,13 @@ class TestStackDriverAudit(object):
         # in = out - plugin didn't touch it
         assert result == event
 
-    # Should never match and be modified by the plugin
-    def test_nodetails_log(self):
+    def test_wrongtags_log(self):
         metadata = {"index": "events"}
-        event = {"tags": "pubsub"}
+        event = {
+            "tags": "audit",    
+            "source": "stackdriver",
+            "details": {"logName": "projects/mcd-001-252615/logs/cloudaudit.googleapis.com%2Fdata_access"},
+        }
 
         result, metadata = self.plugin.onMessage(event, metadata)
         # in = out - plugin didn't touch it
@@ -223,10 +226,7 @@ class TestStackDriverAudit(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result["category"] == "data_access"
         assert result["details"]["action"] == "beta.compute.instances.aggregatedList"
-        assert (
-            result["details"]["gaudit"]["authenticationInfo"]["principalEmail"]
-            == "732492844671-compute@developer.gserviceaccount.com"
-        )
+        assert result["details"]["gaudit"]["authenticationInfo"]["principalEmail"] == "732492844671-compute@developer.gserviceaccount.com"
         assert result["details"]["gaudit"]["methodName"] == "beta.compute.instances.aggregatedList"
         assert result["details"]["projectid"] == "mcd-001-252615"
         assert result["details"]["service"] == "compute.googleapis.com"
@@ -313,10 +313,7 @@ class TestStackDriverAudit(object):
         result, metadata = self.plugin.onMessage(event, self.metadata)
         assert result["category"] == "activity"
         assert result["details"]["action"] == "v1.compute.instances.reset"
-        assert (
-            result["details"]["gaudit"]["authenticationInfo"]["principalEmail"]
-            == "onceuponatime@inagalaxynottoofaraway.com"
-        )
+        assert result["details"]["gaudit"]["authenticationInfo"]["principalEmail"] == "onceuponatime@inagalaxynottoofaraway.com"
         assert result["details"]["gaudit"]["methodName"] == "v1.compute.instances.reset"
         assert result["details"]["operation"]["producer"] == "type.googleapis.com"
         assert result["details"]["projectid"] == "mcd-001-252615"
@@ -326,4 +323,3 @@ class TestStackDriverAudit(object):
         assert result["details"]["username"] == "onceuponatime@inagalaxynottoofaraway.com"
 
         assert "protoPayload" not in result["details"]
-
