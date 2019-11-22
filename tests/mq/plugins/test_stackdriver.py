@@ -10,18 +10,6 @@ class TestStackDriver(object):
     # Should never match and be modified by the plugin
     def test_nodetails_log(self):
         metadata = {"index": "events"}
-        event = {
-            "tags": "pubsub",
-            "details": {"logName": "projects/mcd-001-252615/logs/cloudaudit.googleapis.com%2Fdata_access"},
-        }
-
-        result, metadata = self.plugin.onMessage(event, metadata)
-        # in = out - plugin didn't touch it
-        assert result == event
-
-    # Should never match and be modified by the plugin
-    def test_nodetails_log(self):
-        metadata = {"index": "events"}
         event = {"tags": "pubsub"}
 
         result, metadata = self.plugin.onMessage(event, metadata)

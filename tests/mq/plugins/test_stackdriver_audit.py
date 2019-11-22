@@ -22,7 +22,7 @@ class TestStackDriverAudit(object):
     def test_wrongtags_log(self):
         metadata = {"index": "events"}
         event = {
-            "tags": "audit",    
+            "tags": "audit",
             "source": "stackdriver",
             "details": {"logName": "projects/mcd-001-252615/logs/cloudaudit.googleapis.com%2Fdata_access"},
         }

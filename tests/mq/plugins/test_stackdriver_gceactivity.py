@@ -242,4 +242,3 @@ class TestStackDriverGCEActivity(object):
         assert result["details"]["username"] == "luke@or.not"
         assert result["details"]["service"] == "compute.googleapis.com"
         assert "jsonPayload" not in result["details"]
-

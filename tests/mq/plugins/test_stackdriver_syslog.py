@@ -2,7 +2,7 @@ from mozdef_util.utilities.toUTC import toUTC
 from mq.plugins.stackdriver_syslog import message
 
 
-class TestStackDriverAudit(object):
+class TestStackDriverSyslog(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {"index": "events"}
@@ -24,6 +24,10 @@ class TestStackDriverAudit(object):
             "tags": "audit",
             "source": "stackdriver",
         }
+
+        result, metadata = self.plugin.onMessage(event, metadata)
+        # in = out - plugin didn't touch it
+        assert result == event
 
     def test_wrongcategory_log(self):
         metadata = {"index": "events"}
