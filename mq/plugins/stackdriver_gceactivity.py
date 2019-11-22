@@ -26,6 +26,8 @@ class message(object):
         del (mapping_map)
 
     def onMessage(self, message, metadata):
+        if "tags" not in message:
+            return (message, metadata)
         if "stackdriver" not in message["tags"]:
             return (message, metadata)
         if "category" not in message:
