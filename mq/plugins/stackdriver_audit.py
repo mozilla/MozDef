@@ -23,7 +23,7 @@ class message(object):
         yap = yaml.safe_load(mapping_map)
         self.eventtypes = list(yap.keys())
         self.yap = yap
-        del (mapping_map)
+        del mapping_map
 
     def onMessage(self, message, metadata):
         if "tags" not in message:
@@ -50,19 +50,25 @@ class message(object):
         newmessage["details"] = {}
         newmessage["details"] = message["details"]
         newmessage["details"]["gaudit"] = newmessage["details"]["protoPayload"]
-        del (newmessage["details"]["protoPayload"])
+        del newmessage["details"]["protoPayload"]
+        # Stuff fields that will be used as a summary with something, anything. The mapping function will hopefuly find something to overwrite it with.
+        newmessage["details"]["username"] = "UNKNOWN"
+        newmessage["details"]["resourcename"] = "UNKNOWN"
         if "request" in newmessage["details"]["gaudit"]:
             if "resource" in newmessage["details"]["gaudit"]["request"]:
                 if type(newmessage["details"]["gaudit"]["request"]["resource"]) is not dict:
-                    del (newmessage["details"]["gaudit"]["request"]["resource"])
+                    del newmessage["details"]["gaudit"]["request"]["resource"]
 
-        todel = set()
         if message["category"] in self.eventtypes:
             for key in self.yap[newmessage["category"]]:
                 mappedvalue = jmespath.search(self.yap[newmessage["category"]][key], newmessage)
-                todel.add(self.yap[newmessage["category"]][key])
                 # JMESPath likes to silently return a None object
                 if mappedvalue is not None:
                     newmessage["details"][key] = mappedvalue
+
+        # This is redundant
+        newmessage["summary"] = "{0} called {1} on {2}".format(
+            newmessage["details"]["username"], newmessage["details"]["action"], newmessage["details"]["resourcename"]
+        )
 
         return (newmessage, metadata)

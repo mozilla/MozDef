@@ -23,7 +23,7 @@ class message(object):
         yap = yaml.safe_load(mapping_map)
         self.eventtypes = list(yap.keys())
         self.yap = yap
-        del (mapping_map)
+        del mapping_map
 
     def onMessage(self, message, metadata):
         if "tags" not in message:
@@ -52,8 +52,12 @@ class message(object):
         newmessage["details"] = {}
         newmessage["details"] = message["details"]
         newmessage["details"]["gceactivity"] = newmessage["details"]["jsonPayload"]
-        del (newmessage["details"]["jsonPayload"])
+        del newmessage["details"]["jsonPayload"]
+        # This is fake
         newmessage["details"]["service"] = "compute.googleapis.com"
+        # Stuff fields that will be used as a summary with something, anything. The mapping function will hopefuly find something to overwrite it with.
+        newmessage["details"]["username"] = "UNKNOWN"
+        newmessage["details"]["resourcename"] = "UNKNOWN"
 
         if message["category"] in self.eventtypes:
             for key in self.yap[newmessage["category"]]:
@@ -61,5 +65,10 @@ class message(object):
                 # JMESPath likes to silently return a None object
                 if mappedvalue is not None:
                     newmessage["details"][key] = mappedvalue
+
+        # This is redundant
+        newmessage["summary"] = "{0} called {1} on {2}".format(
+            newmessage["details"]["username"], newmessage["details"]["action"], newmessage["details"]["resourcename"],
+        )
 
         return (newmessage, metadata)
