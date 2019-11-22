@@ -129,11 +129,11 @@ def main():
 
     while True:
         try:
-            messages = queue.receive_messages(
-                MaxNumberOfMessages=cfg['sqs_message_bulk_size']
-            )
+            messages = queue.receive_messages(MaxNumberOfMessages=10)
+
             for message in messages:
                 process(message, api_cfg)
+                message.delete()
         except KeyboardInterrupt:
             logger.info('Exiting triage_bot_sqs worker')
         except Exception as e:
