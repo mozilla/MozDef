@@ -82,8 +82,12 @@ def update_alert_status(alert_id: str, status: AlertStatus, api: RESTConfig):
         'status': status.value
     }
 
+    headers = {
+        'Authorization': 'Bearer {}'.format(api.token)
+    }
+
     try:
-        resp = requests.post(url, data=payload)
+        resp = requests.post(url, headers=headers, data=payload)
     except:
         logger.exception('Failed to send request to MozDef REST API')
         return
