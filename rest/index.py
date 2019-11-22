@@ -19,7 +19,7 @@ from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
 from operator import itemgetter
 from pymongo import MongoClient
-from bson import json_util
+from bson import json_util, ObjectId
 from bson.codec_options import CodecOptions
 
 from mozdef_util.elasticsearch_client import ElasticsearchClient, ElasticsearchInvalidIndex
@@ -500,6 +500,88 @@ def createIncident():
                                     message='Incident: <{}> added.'.format(
                                         incident['summary'])
                                     ))
+    return response
+
+
+@post('/alertstatus')
+@post('/alertstatus/')
+def update_alert_status():
+    '''Update the status of an alert.
+
+    Requests are expected to take the following (JSON) form:
+
+    ```
+    {
+        "alert": str,
+        "status": str
+    }
+    ```
+
+    Where:
+        * `"alert"` is the unique identifier fo the alert whose status
+        we are to update.
+        * `"status"` is one of "manual", "inProgress", "acknowledged"
+        or "escalated".
+
+    This function writes back a response containing the following JSON.
+
+    ```
+    {
+        "error": Optional[str]
+    }
+    ```
+
+    If an error occurs and the alert's status is not able to be updated, then
+    the "error" field will contain a string message describing the issue.
+    Otherwise, this field will simply be `null`.
+
+    Responses will also use status codes to indicate success / failure / error.
+    '''
+
+    ok = 200
+    bad_request = 400
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    alerts = mongo['alerts']
+
+    response.content_type = 'appliation/json'
+
+    try:
+        req = json.loads(request.body.read())
+        request.body.close()
+    except ValueError:
+        response.status = bad_request
+        response.body = json.dumps({
+            'error': 'Missing or invalid request body'
+        })
+        return response
+
+    valid_statuses = ['manual', 'inProgress', 'acknowledged', 'escalated']
+
+    if req['status'] not in valid_statuses: 
+        response.status = bad_request
+        response.body = json.dumps({
+            'error': 'Status not one of {}'.format(' or '.join(valid_statuses))
+        })
+        return response
+
+    _id = ObjectId(req['alert'])
+
+    result = alerts.update_one(
+        {'_id': _id},
+        {'$set': {'details.status': req['status']}}
+    )
+
+    if result.modified_count < 1:
+        response.status = bad_request
+        response.body = json.dumps({
+            'error': 'Alert not found'
+        })
+        return response
+
+    response.status = ok
+    response.body = json.dumps({'error': None})
+
     return response
 
 
