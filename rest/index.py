@@ -569,7 +569,7 @@ def update_alert_status():
 
     result = alerts.update_one(
         {'_id': _id},
-        {'$set': {'details.status': req['status']}}
+        {'$set': {'status': req['status']}}
     )
 
     if result.modified_count < 1:

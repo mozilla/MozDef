@@ -27,6 +27,8 @@ from lib.config import RABBITMQ, ES, ALERT_PLUGINS
 from lib.alert_plugin_set import AlertPluginSet
 
 
+DEFAULT_STATUS = "manual"
+
 # utility functions used by AlertTask.mostCommon
 # determine most common values
 # in a list of dicts
@@ -442,6 +444,7 @@ class AlertTask(Task):
             "tags": tags,
             "events": [],
             "ircchannel": ircchannel,
+            "status": DEFAULT_STATUS
         }
         if url:
             alert["url"] = url
