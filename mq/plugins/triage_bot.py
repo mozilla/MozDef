@@ -85,7 +85,7 @@ def update_alert_status(alert_id: str, status: AlertStatus, api: RESTConfig):
     }
 
     try:
-        resp = requests.post(url, headers=headers, data=payload)
+        resp = requests.post(api.url, headers=headers, data=payload)
     except:
         return False
 
@@ -98,7 +98,9 @@ def process(msg, meta, api_cfg):
     '''
 
     try:
-        response = UserResponseMessage(**msg)
+        ident = msg['identifier']
+        resp = UserResponse(msg['response'])
+        response = UserResponseMessage(ident, resp)
     except:
         return (None, None)
 
