@@ -185,14 +185,13 @@ def try_make_outbound(
     order to produce an `AlertTriageRequest` destined for the web server comp.
     '''
 
-    _source = message.get('_source', {})
-    category = _source.get('category')
-    tags = _source.get('tags', [])
+    category = message.get('category')
+    tags = message.get('tags', [])
 
     is_sensitive_host_access = 'session' in tags and category  == 'session'
 
     is_duo_codes_generated = 'duosecurity' in tags and category == 'duo' and\
-        'codes generated' in _source.get('summary', '')
+        'codes generated' in message.get('summary', '')
 
     is_duo_bypass_codes_used = 'duo_bypass_codes_used' in tags and\
         category == 'bypassused'
@@ -314,7 +313,7 @@ def _dispatcher(boto_session) -> DispatchInterface:
 
 
 def _make_sensitive_host_access(
-    a: Alert,
+    alert: Alert,
     tkn: Token
     ) -> types.Optional[AlertTriageRequest]:
     null = {
@@ -328,8 +327,7 @@ def _make_sensitive_host_access(
         }
     }
 
-    _source = a.get('_source', {})
-    _events = _source.get('events', [null])
+    _events = alert.get('events', [null])
 
     user = _events[0]['documentsource']['details']['username']
     host = _events[0]['documentsource']['hostname']
@@ -345,7 +343,7 @@ def _make_sensitive_host_access(
     'by your user account.').format(host)
 
     return AlertTriageRequest(
-        a['_id'],
+        alert['_id'],
         AlertLabel.SENSITIVE_HOST_SESSION,
         summary,
         profile.primary_email)
@@ -363,8 +361,7 @@ def _make_duo_code_gen(
         }
     }
 
-    _source = alert.get('_source', {})
-    _events = _source.get('events', [null])
+    _events = alert.get('events', [null])
 
     email = _events[0]['documentsource']['details']['object']
 
@@ -393,8 +390,7 @@ def _make_duo_code_used(
         }
     }
 
-    _source = alert.get('_source', {})
-    _events = _source.get('events', [null])
+    _events = alert.get('events', [null])
 
     email = _events[0]['documentsource']['details']['object']
 
@@ -424,10 +420,9 @@ def _make_ssh_access_releng(
         }
     }
 
-    _source = alert.get('_source', {})
-    _events = _source.get('events', [null])
+    _events = alert.get('events', [null])
 
-    user = _source.get('summary', '').split(' ')[-1]
+    user = alert.get('summary', '').split(' ')[-1]
     host = _events[0]['documentsource']['details']['hostname']
 
     if user == '' or host is None or host == '':
