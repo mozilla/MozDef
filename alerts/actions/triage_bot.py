@@ -143,11 +143,17 @@ class message(object):
         '''The main entrypoint to the alert action invoked with a message
         describing an alert.
         '''
+       
+        request = try_make_outbound(message)
 
         # Refresh our oauth token periodically.
         delta = datetime.now() - self._last_authenticated
         mins_since_auth = delta.total_seconds() / 60.0
-        if mins_since_auth > TOKEN_VALIDITY_WINDOW_MINUTES:
+
+        have_request = request is not None
+        should_refresh = mins_since_auth > TOKEN_VALIDITY_WINDOW_MINUTES
+
+        if have_request and should_refresh:
             self._person_api_session = authenticate(OAUTH_URL, AuthParams(
                 client_id=self._config['person_api_client_id'],
                 client_secret=self._config['person_api_client_secret'],
@@ -161,11 +167,9 @@ class message(object):
 
             self._last_authenticated = datetime.now()
 
-        request = try_make_outbound(message)
-
         dispatch = _dispatcher(self._boto_session)
 
-        if request is not None:
+        if have_request:
             self._test_flag = True
             # TODO: What can/should we do with the result?
             dispatch(request, self._config['aws_lambda_function'])
@@ -328,7 +332,6 @@ def _make_sensitive_host_access(
 
     if user is None or user == '':
         return None
-
 
     profile = primary_username(PERSON_API_BASE, tkn, user)
     if profile is None:
