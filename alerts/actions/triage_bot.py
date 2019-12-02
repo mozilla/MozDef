@@ -144,7 +144,7 @@ class message(object):
         describing an alert.
         '''
        
-        request = try_make_outbound(message)
+        request = try_make_outbound(message, self._person_api_session)
 
         # Refresh our oauth token periodically.
         delta = datetime.now() - self._last_authenticated
