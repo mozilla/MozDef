@@ -20,7 +20,7 @@ class RESTConfig(types.NamedTuple):
     '''
 
     url: str
-    token: str
+    token: types.Optional[str]
 
 
 class UserResponse(enum.Enum):
@@ -80,9 +80,10 @@ def update_alert_status(alert_id: str, status: AlertStatus, api: RESTConfig):
         'status': status.value
     }
 
-    headers = {
-        'Authorization': 'Bearer {}'.format(api.token)
-    }
+    headers = {}
+
+    if api.token is not None:
+        headers['Authorization'] = 'Bearer {}'.format(api.token)
 
     try:
         resp = requests.post(api.url, headers=headers, data=payload)
