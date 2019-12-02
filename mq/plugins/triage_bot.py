@@ -132,4 +132,7 @@ class message:
 
 
     def onMessage(self, message, metadata):
-        return process(message, metadata, self.api_cfg)
+        if message['category'] == 'triagebot':
+            return process(message, metadata, self.api_cfg)
+
+        return (message, metadata)
