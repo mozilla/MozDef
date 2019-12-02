@@ -321,7 +321,10 @@ def _make_sensitive_host_access(
         'documentsource': {
             'details': {
                 'username': None
-            }
+            },
+            # This field will never be referenced.  We provide it
+            # here for completeness.
+            'hostname': None
         }
     }
 
@@ -329,6 +332,7 @@ def _make_sensitive_host_access(
     _events = _source.get('events', [null])
 
     user = _events[0]['documentsource']['details']['username']
+    host = _events[0]['documentsource']['hostname']
 
     if user is None or user == '':
         return None
@@ -337,10 +341,13 @@ def _make_sensitive_host_access(
     if profile is None:
         return None
 
+    summary = ('An SSH session to a potentially sensitive host {} was made '
+    'by your user account.').format(host)
+
     return AlertTriageRequest(
         a['_id'],
         AlertLabel.SENSITIVE_HOST_SESSION,
-        _source.get('summary', 'SSH access to a sensitive host'),
+        summary,
         profile.primary_email)
 
 
@@ -364,10 +371,13 @@ def _make_duo_code_gen(
     if email is None or email == '':
         return None
 
+    summary = 'DUO bypass codes have been generated for your account. '
+    'These credentials should be secured carefully.'
+
     return AlertTriageRequest(
         alert['_id'],
         AlertLabel.DUO_BYPASS_CODES_GENERATED,
-        _source.get('summary', 'Duo bypass codes generated'),
+        summary,
         email)
 
 
@@ -391,10 +401,14 @@ def _make_duo_code_used(
     if email is None or email == '':
         return None
 
+    summary = 'DUO bypass codes belonging to your account have been used to '
+    'authenticate.  This should only happen in the case of the loss of other '
+    'less secret credentials.'
+
     return AlertTriageRequest(
         alert['_id'],
         AlertLabel.DUO_BYPASS_CODES_USED,
-        _source.get('summary', 'Duo bypass code used to log in'),
+        summary,
         email)
 
 
@@ -402,19 +416,32 @@ def _make_ssh_access_releng(
     alert: Alert,
     tkn: Token
     ) -> types.Optional[AlertTriageRequest]:
+    null = {
+        'documentsource': {
+            'details': {
+                'hostname': None
+            }
+        }
+    }
+
     _source = alert.get('_source', {})
+    _events = _source.get('events', [null])
 
     user = _source.get('summary', '').split(' ')[-1]
+    host = _events[0]['documentsource']['details']['hostname']
 
-    if user == '':
+    if user == '' or host is None or host == '':
         return None
 
     profile = primary_username(PERSON_API_BASE, tkn, user)
     if profile is None:
         return None
 
+    summary = ('An SSH session was established to host {} by your user
+    account.').format(host)
+
     return AlertTriageRequest(
         alert['_id'],
         AlertLabel.SSH_ACCESS_SIGN_RELENG,
-        _source.get('summary', 'SSH access to a RelEng signing host'),
+        summary,
         profile.primary_email)
