@@ -437,8 +437,8 @@ def _make_ssh_access_releng(
     if profile is None:
         return None
 
-    summary = ('An SSH session was established to host {} by your user
-    account.').format(host)
+    summary = ('An SSH session was established to host {} by your user '
+    'account.').format(host)
 
     return AlertTriageRequest(
         alert['_id'],
