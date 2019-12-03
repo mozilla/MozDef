@@ -127,9 +127,14 @@ class message(object):
             "Persistence:IAMUser/ResourcePermissions": "INBOUND",
             "Persistence:IAMUser/NetworkPermissions": "INBOUND",
             "Persistence:IAMUser/UserPermissions": "INBOUND",
+            "Recon:IAMUser/ResourcePermissions": "INBOUND",
+            "Recon:EC2/PortProbeEMRUnprotectedPort": "INBOUND",
+            "PrivilegeEscalation:IAMUser/AdministrativePermissions": "INBOUND",
         }
         if "direction" not in newmessage["details"]:
-            newmessage["details"]["direction"] = attdir[newmessage["details"]["finding"]]
+            newmessage["details"]["direction"] = "INBOUND"
+            if newmessage["details"]["finding"] in attdir:
+                newmessage["details"]["direction"] = attdir[newmessage["details"]["finding"]]
         if newmessage["details"]["direction"] == "INBOUND":
             if "destinationipaddress" not in newmessage["details"]:
                 if "publicip" in newmessage["details"]:

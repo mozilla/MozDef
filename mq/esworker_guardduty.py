@@ -82,6 +82,10 @@ class GDtaskConsumer(taskConsumer):
                         message["details"]["finding"]["additionalInfo"]["apiCalls"] = message["details"]["finding"][
                             "additionalInfo"
                         ]["recentApiCalls"]
+                    if "apiCalls" not in message["details"]["finding"]["additionalInfo"]:
+                        message["details"]["finding"]["additionalInfo"]["apiCalls"] = message["details"]["finding"][
+                            "action"
+                        ]["awsApiCallAction"]
                     for call in message["details"]["finding"]["additionalInfo"]["apiCalls"]:
                         isolatedmessage = message
                         isolatedmessage["details"]["finding"]["apicalls"] = call
