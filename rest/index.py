@@ -513,7 +513,12 @@ def update_alert_status():
     ```
     {
         "alert": str,
-        "status": str
+        "status": str,
+        "user": {
+            "email": str,
+            "slack": str
+        },
+        "response": str
     }
     ```
 
@@ -531,9 +536,11 @@ def update_alert_status():
     }
     ```
 
-    If an error occurs and the alert's status is not able to be updated, then
+    If an error occurs and the alert is not able to be updated, then
     the "error" field will contain a string message describing the issue.
-    Otherwise, this field will simply be `null`.
+    Otherwise, this field will simply be `null`.  This function will,
+    along with updating the alert's status, append information about the
+    user and their response to `alert['details']['triage']`.
 
     Responses will also use status codes to indicate success / failure / error.
     '''
@@ -567,12 +574,24 @@ def update_alert_status():
 
     _id = ObjectId(req['alert'])
 
-    result = alerts.update_one(
+    triage = {
+        'user': req['user'],
+        'response': req['response']
+    }
+
+    modified_count = 0
+
+    modified_count += alerts.update_one(
         {'_id': _id},
         {'$set': {'status': req['status']}}
-    )
+    ).modified_count
 
-    if result.modified_count < 1:
+    modified_count += alerts.update_one(
+        {'_id': _id},
+        {'$set': {'details': {'triage': triage}}}
+    ).modified_count
+
+    if modified_count < 2:
         response.status = bad_request
         response.body = json.dumps({
             'error': 'Alert not found'
