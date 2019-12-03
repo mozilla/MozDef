@@ -42,7 +42,11 @@ class message(object):
         except:
             self.options.docs = {}
 
-    def onMessage(self, message):
+    def onMessage(self, alert):
+        # As of Dec. 3, 2019, alert actions are given entire alerts rather
+        # than just their source
+        message = alert['_source']
+
         # here is where you do something with the incoming alert message
         doclink = 'unknown'
         if message['category'] in self.options.docs:
