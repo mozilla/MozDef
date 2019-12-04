@@ -572,8 +572,6 @@ def update_alert_status():
         })
         return response
 
-    _id = ObjectId(req['alert'])
-
     triage = {
         'user': req['user'],
         'response': req['response']
@@ -582,12 +580,12 @@ def update_alert_status():
     modified_count = 0
 
     modified_count += alerts.update_one(
-        {'_id': _id},
+        {'esmetadata': {'id': req['alert']}},
         {'$set': {'status': req['status']}}
     ).modified_count
 
     modified_count += alerts.update_one(
-        {'_id': _id},
+        {'esmetadata': {'id': req['alert']}},
         {'$set': {'details': {'triage': triage}}}
     ).modified_count
 
