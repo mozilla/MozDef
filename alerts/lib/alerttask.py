@@ -540,8 +540,8 @@ class AlertTask(Task):
         return json_obj
 
     def generate_full_doc(self, alert_body, alert_es):
-        full_alert = {}
-        full_alert['_id'] = alert_es['_id']
-        full_alert['_index'] = alert_es['_index']
-        full_alert['_source'] = alert_body
-        return full_alert
+        return {
+            '_id': alert_es['_id'],
+            '_index': alert_es['_index'],
+            '_source': alert_body
+        }
