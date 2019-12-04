@@ -53,7 +53,7 @@ class taskConsumer(object):
     def run(self):
         while True:
             try:
-                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=options.prefetch)
+                records = self.sqs_queue.receive_messages(MaxNumberOfMessages=self.options.prefetch)
                 for msg in records:
                     msg_body = msg.body
                     try:
@@ -66,7 +66,7 @@ class taskConsumer(object):
                         logger.error("Invalid message, not JSON <dropping message and continuing>: %r" % msg_body)
                         msg.delete()
                         continue
-                time.sleep(options.sleep_time)
+                time.sleep(self.options.sleep_time)
             except (SSLEOFError, SSLError, socket.error):
                 logger.info("Received network related error...reconnecting")
                 time.sleep(5)
