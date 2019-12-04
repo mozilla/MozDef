@@ -139,12 +139,12 @@ class message(object):
         self.priority = 1
 
 
-    def onMessage(self, message):
+    def onMessage(self, alert):
         '''The main entrypoint to the alert action invoked with a message
         describing an alert.
         '''
-       
-        request = try_make_outbound(message, self._person_api_session)
+
+        request = try_make_outbound(alert, self._person_api_session)
 
         # Refresh our oauth token periodically.
         delta = datetime.now() - self._last_authenticated
@@ -178,7 +178,7 @@ class message(object):
 
 
 def try_make_outbound(
-    message: Alert,
+    alert: Alert,
     oauth_tkn: Token
     ) -> types.Optional[AlertTriageRequest]:
     '''Attempt to determine the kind of alert contained in `message` in
@@ -199,16 +199,16 @@ def try_make_outbound(
     is_ssh_access_releng = 'ssh' in tags and category == 'access'
 
     if is_sensitive_host_access:
-        return _make_sensitive_host_access(message, oauth_tkn)
+        return _make_sensitive_host_access(alert, oauth_tkn)
 
     if is_duo_codes_generated:
-        return _make_duo_code_gen(message, oauth_tkn)
+        return _make_duo_code_gen(alert, oauth_tkn)
 
     if is_duo_bypass_codes_used:
-        return _make_duo_code_used(message, oauth_tkn)
+        return _make_duo_code_used(alert, oauth_tkn)
 
     if is_ssh_access_releng:
-        return _make_ssh_access_releng(message, oauth_tkn)
+        return _make_ssh_access_releng(alert, oauth_tkn)
 
     return None
 
@@ -327,7 +327,8 @@ def _make_sensitive_host_access(
         }
     }
 
-    _events = alert.get('events', [null])
+    _source = alert.get('_source', {})
+    _events = _source.get('events', [null])
 
     user = _events[0]['documentsource']['details']['username']
     host = _events[0]['documentsource']['hostname']
@@ -361,7 +362,8 @@ def _make_duo_code_gen(
         }
     }
 
-    _events = alert.get('events', [null])
+    _source = alert.get('_source', {})
+    _events = _source.get('events', [null])
 
     email = _events[0]['documentsource']['details']['object']
 
@@ -390,7 +392,8 @@ def _make_duo_code_used(
         }
     }
 
-    _events = alert.get('events', [null])
+    _source = alert.get('_source', {})
+    _events = _source.get('events', [null])
 
     email = _events[0]['documentsource']['details']['object']
 
@@ -420,9 +423,10 @@ def _make_ssh_access_releng(
         }
     }
 
-    _events = alert.get('events', [null])
+    _source = alert.get('_source', {})
+    _events = _source.get('events', [null])
 
-    user = alert.get('summary', '').split(' ')[-1]
+    user = _source.get('summary', '').split(' ')[-1]
     host = _events[0]['documentsource']['details']['hostname']
 
     if user == '' or host is None or host == '':
