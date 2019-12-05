@@ -140,8 +140,7 @@ class message(object):
 
 
     def onMessage(self, alert):
-        '''The main entrypoint to the alert action invoked with a message
-        describing an alert.
+        '''The main entrypoint to the alert action invoked with an alert.
         '''
 
         request = try_make_outbound(alert, self._person_api_session)
@@ -158,8 +157,7 @@ class message(object):
                 client_id=self._config['person_api_client_id'],
                 client_secret=self._config['person_api_client_secret'],
                 audience=PERSON_API_AUDIENCE,
-                scope=PERSON_API_SCOPE,
-                grants=PERSON_API_GRANTS
+                scope=PERSON_API_SCOPE
             ))
 
             if self._person_api_session is None:
@@ -174,24 +172,25 @@ class message(object):
             # TODO: What can/should we do with the result?
             dispatch(request, self._config['aws_lambda_function'])
 
-        return message
+        return alert
 
 
 def try_make_outbound(
     alert: Alert,
     oauth_tkn: Token
     ) -> types.Optional[AlertTriageRequest]:
-    '''Attempt to determine the kind of alert contained in `message` in
+    '''Attempt to determine the kind of alert contained in `alert` in
     order to produce an `AlertTriageRequest` destined for the web server comp.
     '''
 
-    category = message.get('category')
-    tags = message.get('tags', [])
+    _source = alert.get('_source', {})
+    category = _source.get('category')
+    tags = _source.get('tags', [])
 
     is_sensitive_host_access = 'session' in tags and category  == 'session'
 
     is_duo_codes_generated = 'duosecurity' in tags and category == 'duo' and\
-        'codes generated' in message.get('summary', '')
+        'codes generated' in _source.get('summary', '')
 
     is_duo_bypass_codes_used = 'duo_bypass_codes_used' in tags and\
         category == 'bypassused'
