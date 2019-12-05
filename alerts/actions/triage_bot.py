@@ -16,10 +16,10 @@ import requests
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
 OAUTH_URL = 'https://auth.mozilla.auth0.com/oauth/token'
-PERSON_API_BASE = 'https://person.api.sso.mozilla.com'
-PERSON_API_AUDIENCE = ''
-PERSON_API_SCOPE = ''
-PERSON_API_GRANTS = ''
+PERSON_API_BASE = 'https://person-api.sso.mozilla.com'
+PERSON_API_AUDIENCE = 'api.sso.mozilla.com'
+PERSON_API_SCOPE = 'classification:public display:all display:public display:none search:all'
+PERSON_API_GRANTS = 'client_credentials'
 TOKEN_VALIDITY_WINDOW_MINUTES = 18 * 60
 
 Alert = types.Dict[types.Any, types.Any]
