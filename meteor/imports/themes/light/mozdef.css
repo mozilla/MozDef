@@ -35,8 +35,8 @@ body {
     text-align: left;
 }
 
-.container {
-    margin-bottom: 3%;
+.pagination-container.text-center {
+    padding-bottom: 1%;
 }
 
 footer {
@@ -89,10 +89,6 @@ footer .footer__link:hover {
 footer .footer__link:hover svg {
     background-color: var(--txt-primary-color);
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> parent of 33150231... Revert "Adding footer to mozdef"
 
 /*mozdef custom */
 
@@ -116,7 +112,7 @@ footer .footer__link:hover svg {
 
 caption,
 legend {
-    color: var(--txt-secondary-color);
+    color: var(--txt-primary-color);
     ;
 }
 
@@ -135,7 +131,7 @@ legend {
     align-items: center;
     justify-content: center;
     width: 1200px;
-    padding-bottom: 30px;
+    padding-bottom: 2%;
 }
 
 #header a.mozilla {
@@ -164,6 +160,9 @@ legend {
     vertical-align: middle;
 }
 
+div.dc-chart {
+    padding-bottom: 1%;
+}
 
 /* dc-chart empty color */
 
@@ -447,11 +446,6 @@ input[type="search"] {
 .center {
     margin: 0 auto;
     float: none;
-}
-
-.dc-chart .empty-chart .pie-slice path {
-    fill: #e3e3e3;
-    cursor: default;
 }
 
 .table-striped tbody>tr:nth-child(odd)>td,

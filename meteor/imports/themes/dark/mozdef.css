@@ -44,8 +44,12 @@ body {
     color: black;
 }
 
-.container {
-    margin-bottom: 3%;
+.pagination-container.text-center {
+    padding-bottom: 1%;
+}
+
+div.dc-chart {
+    padding-bottom: 1%;
 }
 
 footer {
@@ -132,7 +136,7 @@ legend {
     align-items: center;
     justify-content: center;
     width: 1200px;
-    padding-bottom: 30px;
+    padding-bottom: 2%;
 }
 
 #header a.mozilla {
