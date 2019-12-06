@@ -289,11 +289,11 @@ class alertConsumer(ConsumerMixin):
         try:
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
-                bodyDict = body
+                full_body = body
             elif isinstance(body, str):
                 try:
-                    bodyDict = json.loads(body)  # lets assume it's json
-                except ValueError as e:
+                    full_body = json.loads(body)  # lets assume it's json
+                except ValueError:
                     # not json..ack but log the message
                     logger.exception(
                         "alertworker exception: unknown body type received %r" % body)
@@ -302,6 +302,8 @@ class alertConsumer(ConsumerMixin):
                 logger.exception(
                     "alertworker exception: unknown body type received %r" % body)
                 return
+
+            bodyDict = full_body['_source']
 
             if 'notify_mozdefbot' in bodyDict and bodyDict['notify_mozdefbot'] is False:
                 # If the alert tells us to not notify, then don't post to IRC

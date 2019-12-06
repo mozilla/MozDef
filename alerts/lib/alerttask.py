@@ -218,18 +218,7 @@ class AlertTask(Task):
         Send alert to the kombu based message queue.  The default is rabbitmq.
         """
         try:
-            # cherry pick items from the alertDict to send to the alerts messageQueue
-            mqAlert = dict(severity="INFO", category="")
-            if "severity" in alertDict:
-                mqAlert["severity"] = alertDict["severity"]
-            if "category" in alertDict:
-                mqAlert["category"] = alertDict["category"]
-            if "utctimestamp" in alertDict:
-                mqAlert["utctimestamp"] = alertDict["utctimestamp"]
-            if "eventtimestamp" in alertDict:
-                mqAlert["eventtimestamp"] = alertDict["eventtimestamp"]
-            mqAlert["summary"] = alertDict["summary"]
-            self.log.debug(mqAlert)
+            self.log.debug(alertDict)
             ensurePublish = self.mqConn.ensure(
                 self.mqproducer, self.mqproducer.publish, max_retries=10
             )
@@ -379,7 +368,8 @@ class AlertTask(Task):
                     alert = self.alertPlugins(alert)
                     alertResultES = self.alertToES(alert)
                     self.tagEventsAlert([i], alertResultES)
-                    self.alertToMessageQueue(alert)
+                    full_alert_doc = self.generate_full_doc(alert, alertResultES)
+                    self.alertToMessageQueue(full_alert_doc)
                     self.hookAfterInsertion(alert)
                     self.saveAlertID(alertResultES)
         # did we not match anything?
@@ -390,7 +380,8 @@ class AlertTask(Task):
                 alert = self.tagBotNotify(alert)
                 self.log.debug(alert)
                 alertResultES = self.alertToES(alert)
-                self.alertToMessageQueue(alert)
+                full_alert_doc = self.generate_full_doc(alert, alertResultES)
+                self.alertToMessageQueue(full_alert_doc)
                 self.hookAfterInsertion(alert)
                 self.saveAlertID(alertResultES)
 
@@ -408,11 +399,12 @@ class AlertTask(Task):
                         self.log.debug(alert)
                         alert = self.alertPlugins(alert)
                         alertResultES = self.alertToES(alert)
+                        full_alert_doc = self.generate_full_doc(alert, alertResultES)
                         # even though we only sample events in the alert
                         # tag all events as alerted to avoid re-alerting
                         # on events we've already processed.
                         self.tagEventsAlert(aggregation["allevents"], alertResultES)
-                        self.alertToMessageQueue(alert)
+                        self.alertToMessageQueue(full_alert_doc)
                         self.saveAlertID(alertResultES)
 
     def alertPlugins(self, alert):
@@ -549,3 +541,10 @@ class AlertTask(Task):
                 logger.error("FAILED to open the configuration file\n")
 
         return json_obj
+
+    def generate_full_doc(self, alert_body, alert_es):
+        return {
+            '_id': alert_es['_id'],
+            '_index': alert_es['_index'],
+            '_source': alert_body
+        }
