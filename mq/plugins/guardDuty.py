@@ -103,7 +103,10 @@ class message(object):
             newmessage["hostname"] = newmessage["details"]["privatednsname"]
 
         # Flip IP addresses in we are the source of attacks
-        if (newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/RDPBruteForce" or newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/SSHBruteForce"):
+        if (
+            newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/RDPBruteForce"
+            or newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/SSHBruteForce"
+        ):
             if newmessage["details"]["direction"] == "OUTBOUND":
                 # could be more optimized here but need to be careful
                 truedstip = "0.0.0.0"
@@ -121,15 +124,6 @@ class message(object):
         # Fake it till you make it
         attdir = {
             "Recon:EC2/PortProbeUnprotectedPort": "INBOUND",
-            "CryptoCurrency:EC2/BitcoinTool.B!DNS": "INBOUND",
-            "Trojan:EC2/DGADomainRequest.B": "INBOUND",
-            "UnauthorizedAccess:IAMUser/TorIPCaller": "INBOUND",
-            "Persistence:IAMUser/ResourcePermissions": "INBOUND",
-            "Persistence:IAMUser/NetworkPermissions": "INBOUND",
-            "Persistence:IAMUser/UserPermissions": "INBOUND",
-            "Recon:IAMUser/ResourcePermissions": "INBOUND",
-            "Recon:EC2/PortProbeEMRUnprotectedPort": "INBOUND",
-            "PrivilegeEscalation:IAMUser/AdministrativePermissions": "INBOUND",
         }
         if "direction" not in newmessage["details"]:
             newmessage["details"]["direction"] = "INBOUND"
