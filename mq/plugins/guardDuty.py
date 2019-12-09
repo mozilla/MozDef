@@ -103,10 +103,7 @@ class message(object):
             newmessage["hostname"] = newmessage["details"]["privatednsname"]
 
         # Flip IP addresses in we are the source of attacks
-        if (
-            newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/RDPBruteForce"
-            or newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/SSHBruteForce"
-        ):
+        if (newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/RDPBruteForce" or newmessage["details"]["finding"] == "UnauthorizedAccess:EC2/SSHBruteForce"):
             if newmessage["details"]["direction"] == "OUTBOUND":
                 # could be more optimized here but need to be careful
                 truedstip = "0.0.0.0"
