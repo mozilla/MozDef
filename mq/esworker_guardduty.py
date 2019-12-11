@@ -78,6 +78,7 @@ class GDtaskConsumer(taskConsumer):
                             isolatedmessage["details"]["finding"]["probeevent"] = probe
                             self.build_submit_message(isolatedmessage)
                 elif message["details"]["finding"]["action"]["actionType"] == "AWS_API_CALL":
+                    # Fixup the api call data somewhat, depending on what we were given
                     if "recentApiCalls" in message["details"]["finding"]["additionalInfo"]:
                         message["details"]["finding"]["additionalInfo"]["apiCalls"] = message["details"]["finding"][
                             "additionalInfo"
@@ -90,8 +91,8 @@ class GDtaskConsumer(taskConsumer):
                         isolatedmessage = message
                         isolatedmessage["details"]["finding"]["apicalls"] = call
                         self.build_submit_message(isolatedmessage)
-                    else:
-                        self.build_submit_message(message)
+                else:
+                    self.build_submit_message(message)
 
 
 def esConnect():

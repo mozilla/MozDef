@@ -1054,7 +1054,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1073,7 +1073,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1092,7 +1092,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1103,15 +1103,13 @@
     findingid: details.id
     arn: details.arn
     awsaccountid: details.accountId
-    awsregion: details.region
     resourcetype: details.resource.resourceType
     accesskeyid: details.resource.accessKeyDetails.accessKeyId
     principalid: details.resource.accessKeyDetails.principalId
     usertype: details.resource.accessKeyDetails.userType
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
-    evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1130,7 +1128,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1149,7 +1147,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1168,7 +1166,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1187,7 +1185,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1206,7 +1204,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1225,7 +1223,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1244,7 +1242,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1263,7 +1261,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1282,7 +1280,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1301,7 +1299,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1320,7 +1318,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1450,7 +1448,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1469,7 +1467,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1488,7 +1486,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1507,7 +1505,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1526,7 +1524,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1545,7 +1543,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1564,7 +1562,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1583,7 +1581,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1602,7 +1600,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1621,7 +1619,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -1640,7 +1638,7 @@
     username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
     evidence: details.finding.evidence
-    apiname: details.finding.apicalls.name
+    apiname: details.finding.apicalls.api
     sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
