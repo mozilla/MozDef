@@ -303,9 +303,9 @@ class alertConsumer(ConsumerMixin):
                     "alertworker exception: unknown body type received %r" % body)
                 return
 
-            bodyDict = full_body['_source']
+            body_dict = full_body['_source']
 
-            if 'notify_mozdefbot' in bodyDict and bodyDict['notify_mozdefbot'] is False:
+            if 'notify_mozdefbot' in body_dict and body_dict['notify_mozdefbot'] is False:
                 # If the alert tells us to not notify, then don't post to IRC
                 message.ack()
                 return
@@ -313,9 +313,9 @@ class alertConsumer(ConsumerMixin):
             # process valid message
             # see where we send this alert
             ircchannel = options.alertircchannel
-            if 'ircchannel' in bodyDict:
-                if bodyDict['ircchannel'] in options.join.split(","):
-                    ircchannel = bodyDict['ircchannel']
+            if 'ircchannel' in body_dict:
+                if body_dict['ircchannel'] in options.join.split(","):
+                    ircchannel = body_dict['ircchannel']
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
@@ -326,11 +326,11 @@ class alertConsumer(ConsumerMixin):
                     sys.stdout.write('throttling before writing next alert\n')
                     time.sleep(1)
             self.lastalert = toUTC(datetime.now())
-            if len(bodyDict['summary']) > 450:
+            if len(body_dict['summary']) > 450:
                 sys.stdout.write('alert is more than 450 bytes, truncating\n')
-                bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
+                body_dict['summary'] = body_dict['summary'][:450] + ' truncated...'
 
-            self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
+            self.ircBot.client.msg(ircchannel, formatAlert(body_dict))
 
             message.ack()
         except ValueError as e:

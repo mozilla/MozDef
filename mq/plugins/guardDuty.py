@@ -121,15 +121,6 @@ class message(object):
         # Fake it till you make it
         attdir = {
             "Recon:EC2/PortProbeUnprotectedPort": "INBOUND",
-            "CryptoCurrency:EC2/BitcoinTool.B!DNS": "INBOUND",
-            "Trojan:EC2/DGADomainRequest.B": "INBOUND",
-            "UnauthorizedAccess:IAMUser/TorIPCaller": "INBOUND",
-            "Persistence:IAMUser/ResourcePermissions": "INBOUND",
-            "Persistence:IAMUser/NetworkPermissions": "INBOUND",
-            "Persistence:IAMUser/UserPermissions": "INBOUND",
-            "Recon:IAMUser/ResourcePermissions": "INBOUND",
-            "Recon:EC2/PortProbeEMRUnprotectedPort": "INBOUND",
-            "PrivilegeEscalation:IAMUser/AdministrativePermissions": "INBOUND",
         }
         if "direction" not in newmessage["details"]:
             newmessage["details"]["direction"] = "INBOUND"

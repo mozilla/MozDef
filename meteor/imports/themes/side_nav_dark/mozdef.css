@@ -58,9 +58,15 @@ body {
 
 .container {
     margin-top: 1%;
-    margin-bottom: 3%;
 }
 
+.pagination-container.text-center {
+    padding-bottom: 1%;
+}
+
+div.dc-chart {
+    padding-bottom: 1%;
+}
 
 /*mozdef custom */
 
