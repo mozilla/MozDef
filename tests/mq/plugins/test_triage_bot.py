@@ -13,9 +13,14 @@ class TestTriageBot:
         with requests_mock.mock() as mock:
             url = 'http://mock.site/updatealert'
             cfg = bot.RESTConfig(url, 'token')
+            msg = bot.UserResponseMessage(
+                'id',
+                bot.UserInfo('test@site.com', 'tester'),
+                bot.Confidence.HIGH,
+                bot.UserResponse.YES)
 
             mock.post(url, json={'error': None})
-            succeeded = bot.update_alert_status('id', bot.AlertStatus.MANUAL, cfg)
+            succeeded = bot.update_alert_status(msg, cfg)
 
             assert succeeded
     
@@ -24,15 +29,19 @@ class TestTriageBot:
         with requests_mock.mock() as mock:
             url = 'http://mock.site/updatealert'
             cfg = bot.RESTConfig(url, 'token')
+            msg = bot.UserResponseMessage(
+                'id',
+                bot.UserInfo('test@site.com', 'tester'),
+                bot.Confidence.HIGH,
+                bot.UserResponse.YES)
 
             mock.post(url, json={'error': None}, status_code=400)
-            succeeded = bot.update_alert_status('id', bot.AlertStatus.MANUAL, cfg)
+            succeeded = bot.update_alert_status(msg, cfg)
 
             assert not succeeded
 
 
     def test_process_rejects_bad_messages(self):
-        # Missing 'response' field.
         msg = {
             'identifier': 'test'
         }
@@ -47,6 +56,11 @@ class TestTriageBot:
     def test_process_invokes_update_for_good_messages(self):
         msg = {
             'identifier': 'id',
+            'user': {
+                'email': 'tester@site.com',
+                'slack': 'tester'
+            },
+            'identityConfidence': 'high',
             'response': 'yes'
         }
         cfg = bot.RESTConfig('http://mock.site/updatealert', 'token')

@@ -107,7 +107,7 @@ def update_alert_status(msg: UserResponseMessage, api: RESTConfig):
             'slack': msg.user.slack
         },
         'identityConfidence': msg.identityConfidence.value,
-        'response': msg.response
+        'response': msg.response.value
     }
 
     headers = {}
@@ -132,7 +132,7 @@ def process(msg, meta, api_cfg):
     user = msg.get('user', {})
     email = user.get('email')
     slack = user.get('slack')
-    confidence = Confidence(msg.get('confidence', 'lowest'))
+    confidence = Confidence(msg.get('identityConfidence', 'lowest'))
     resp = UserResponse(msg.get('response', 'wrongUser'))
 
     if any([v is None for v in [ident, email, slack]]):
