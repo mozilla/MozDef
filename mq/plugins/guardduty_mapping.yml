@@ -1048,18 +1048,15 @@
     awsaccountid: details.accountId
     awsregion: details.region
     resourcetype: details.resource.resourceType
-    accesskeyid: details.resource.accessKeyDetails.accessKeyId
-    principalid: details.resource.accessKeyDetails.principalId
-    usertype: details.resource.accessKeyDetails.userType
-    username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
-    evidence: details.finding.evidence
-    apiname: details.finding.apicalls.api
-    sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
     gdeventfirstseents: details.finding.eventFirstSeen
     gdeventlastseents: details.finding.eventLastSeen
+    direction: details.finding.action.networkConnectionAction.connectionDirection
+    apiname: details.finding.apicalls.name
+    accesskeyid: details.resource.accessKeyDetails.accessKeyId
+    principalid: details.resource.accessKeyDetails.principalId
   
   Recon:IAMUser/MaliciousIPCaller.Custom:
     findingid: details.id
@@ -1067,18 +1064,15 @@
     awsaccountid: details.accountId
     awsregion: details.region
     resourcetype: details.resource.resourceType
-    accesskeyid: details.resource.accessKeyDetails.accessKeyId
-    principalid: details.resource.accessKeyDetails.principalId
-    usertype: details.resource.accessKeyDetails.userType
-    username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
-    evidence: details.finding.evidence
-    apiname: details.finding.apicalls.api
-    sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
     gdeventfirstseents: details.finding.eventFirstSeen
     gdeventlastseents: details.finding.eventLastSeen
+    direction: details.finding.action.networkConnectionAction.connectionDirection
+    apiname: details.finding.apicalls.name
+    accesskeyid: details.resource.accessKeyDetails.accessKeyId
+    principalid: details.resource.accessKeyDetails.principalId
   
   Recon:IAMUser/MaliciousIPCaller:
     findingid: details.id
@@ -1086,35 +1080,31 @@
     awsaccountid: details.accountId
     awsregion: details.region
     resourcetype: details.resource.resourceType
-    accesskeyid: details.resource.accessKeyDetails.accessKeyId
-    principalid: details.resource.accessKeyDetails.principalId
-    usertype: details.resource.accessKeyDetails.userType
-    username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
-    evidence: details.finding.evidence
-    apiname: details.finding.apicalls.api
-    sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
     gdeventfirstseents: details.finding.eventFirstSeen
     gdeventlastseents: details.finding.eventLastSeen
+    direction: details.finding.action.networkConnectionAction.connectionDirection
+    apiname: details.finding.apicalls.name
+    accesskeyid: details.resource.accessKeyDetails.accessKeyId
+    principalid: details.resource.accessKeyDetails.principalId
   
   Recon:IAMUser/NetworkPermissions:
     findingid: details.id
     arn: details.arn
     awsaccountid: details.accountId
+    awsregion: details.region
     resourcetype: details.resource.resourceType
-    accesskeyid: details.resource.accessKeyDetails.accessKeyId
-    principalid: details.resource.accessKeyDetails.principalId
-    usertype: details.resource.accessKeyDetails.userType
-    username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
-    apiname: details.finding.apicalls.api
-    sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
     gdeventfirstseents: details.finding.eventFirstSeen
     gdeventlastseents: details.finding.eventLastSeen
+    direction: details.finding.action.networkConnectionAction.connectionDirection
+    apiname: details.finding.apicalls.name
+    accesskeyid: details.resource.accessKeyDetails.accessKeyId
+    principalid: details.resource.accessKeyDetails.principalId
   
   Recon:IAMUser/ResourcePermissions:
     findingid: details.id
@@ -1122,18 +1112,15 @@
     awsaccountid: details.accountId
     awsregion: details.region
     resourcetype: details.resource.resourceType
-    accesskeyid: details.resource.accessKeyDetails.accessKeyId
-    principalid: details.resource.accessKeyDetails.principalId
-    usertype: details.resource.accessKeyDetails.userType
-    username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
-    evidence: details.finding.evidence
-    apiname: details.finding.apicalls.api
-    sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
     gdeventfirstseents: details.finding.eventFirstSeen
     gdeventlastseents: details.finding.eventLastSeen
+    direction: details.finding.action.networkConnectionAction.connectionDirection
+    apiname: details.finding.apicalls.name
+    accesskeyid: details.resource.accessKeyDetails.accessKeyId
+    principalid: details.resource.accessKeyDetails.principalId
   
   Recon:IAMUser/UserPermissions:
     findingid: details.id
@@ -1141,18 +1128,15 @@
     awsaccountid: details.accountId
     awsregion: details.region
     resourcetype: details.resource.resourceType
-    accesskeyid: details.resource.accessKeyDetails.accessKeyId
-    principalid: details.resource.accessKeyDetails.principalId
-    usertype: details.resource.accessKeyDetails.userType
-    username: details.resource.accessKeyDetails.userName
     detectorid: details.finding.detectorId
-    evidence: details.finding.evidence
-    apiname: details.finding.apicalls.api
-    sourceipaddress: details.finding.action.awsApiCallAction.remoteIpDetails.ipAddressV4
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
     gdeventfirstseents: details.finding.eventFirstSeen
     gdeventlastseents: details.finding.eventLastSeen
+    direction: details.finding.action.networkConnectionAction.connectionDirection
+    apiname: details.finding.apicalls.name
+    accesskeyid: details.resource.accessKeyDetails.accessKeyId
+    principalid: details.resource.accessKeyDetails.principalId
   
   Persistence:IAMUser/ResourcePermissions:
     findingid: details.id

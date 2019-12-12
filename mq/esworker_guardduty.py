@@ -87,9 +87,16 @@ class GDtaskConsumer(taskConsumer):
                         message["details"]["finding"]["additionalInfo"]["apiCalls"] = message["details"]["finding"][
                             "action"
                         ]["awsApiCallAction"]
-                    for call in message["details"]["finding"]["additionalInfo"]["apiCalls"]:
+                    if type(message["details"]["finding"]["additionalInfo"]["apiCalls"]) == list:
+                        for call in message["details"]["finding"]["additionalInfo"]["apiCalls"]:
+                            isolatedmessage = message
+                            isolatedmessage["details"]["finding"]["apicalls"] = call
+                            self.build_submit_message(isolatedmessage)
+                    else:
                         isolatedmessage = message
-                        isolatedmessage["details"]["finding"]["apicalls"] = call
+                        isolatedmessage["details"]["finding"]["apicalls"] = message["details"]["finding"][
+                            "additionalInfo"
+                        ]["apiCalls"]
                         self.build_submit_message(isolatedmessage)
                 else:
                     self.build_submit_message(message)
