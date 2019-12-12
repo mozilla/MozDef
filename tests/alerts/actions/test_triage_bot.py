@@ -410,7 +410,11 @@ class TestTriageBot(object):
         # Without the `session` tag, the alert should not fire.
         msg['_source']['tags'] = ['test']
 
-        action = bot.message()
+        with requests_mock.mock() as mock:
+            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
+            
+            action = bot.message()
+        
         action._test_flag = False
         action.onMessage(msg)
 
@@ -420,7 +424,11 @@ class TestTriageBot(object):
     def test_recognizes_ssh_sensitive_host(self):
         msg = _ssh_sensitive_host_alert()
 
-        action = bot.message()
+        with requests_mock.mock() as mock:
+            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
+            
+            action = bot.message()
+        
         action._test_flag = False
         action.onMessage(msg)
 
@@ -430,7 +438,11 @@ class TestTriageBot(object):
     def test_recognizes_duo_bypass_codes_generated(self):
         msg = _duo_bypass_code_gen_alert()
 
-        action = bot.message()
+        with requests_mock.mock() as mock:
+            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
+            
+            action = bot.message()
+        
         action._test_flag = False
         action.onMessage(msg)
 
@@ -439,8 +451,12 @@ class TestTriageBot(object):
 
     def test_recognizes_duo_bypass_codes_used(self):
         msg = _duo_bypass_code_used_alert()
+        
+        with requests_mock.mock() as mock:
+            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
+            
+            action = bot.message()
 
-        action = bot.message()
         action._test_flag = False
         action.onMessage(msg)
         
@@ -449,8 +465,12 @@ class TestTriageBot(object):
 
     def test_recognizes_ssh_access_releng(self):
         msg = _ssh_access_releng_alert()
+        
+        with requests_mock.mock() as mock:
+            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
+            
+            action = bot.message()
 
-        action = bot.message()
         action._test_flag = False
         action.onMessage(msg)
 
@@ -546,7 +566,8 @@ class TestPersonAPI:
             identifier='abcdef0123',
             alert=bot.AlertLabel.SSH_ACCESS_SIGN_RELENG,
             summary='test alert',
-            user='test@user.com'
+            user='test@user.com',
+            identityConfidence=bot.Confidence.HIGH
         )
 
         sess = MockSession()
@@ -560,5 +581,6 @@ class TestPersonAPI:
             'identifier': 'abcdef0123',
             'alert': 'ssh_access_sign_releng',
             'summary': 'test alert',
-            'user': 'test@user.com'
+            'user': 'test@user.com',
+            'identityConfidence': 'high'
         }
