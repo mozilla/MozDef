@@ -35,6 +35,18 @@ class AlertLabel(Enum):
     DUO_BYPASS_CODES_GENERATED = 'duo_bypass_codes_generated'
     SSH_ACCESS_SIGN_RELENG = 'ssh_access_sign_releng'
 
+
+class Confidence(Enum):
+    '''Enumerates the levels of confidence that this action is in the
+    correctness of the email address determined to belong to a user.
+    '''
+
+    HIGHEST = 'highest'
+    HIGH = 'high'
+    MODERATE = 'moderate'
+    LOW = 'low'
+    LOWEST = 'lowest'
+
 # TODO: Change to a dataclass when Python 3.7+ is adopted.
 
 class AlertTriageRequest(types.NamedTuple):
@@ -45,6 +57,7 @@ class AlertTriageRequest(types.NamedTuple):
     alert: AlertLabel
     summary: str
     user: Email
+    identityConfidence: Confidence
 
 
 class AuthParams(types.NamedTuple):
@@ -290,6 +303,7 @@ def _dispatcher(boto_session) -> DispatchInterface:
     def dispatch(req: AlertTriageRequest, fn_name: str) -> DispatchResult:
         payload_dict = dict(req._asdict())
         payload_dict['alert'] = req.alert.value
+        payload_dict['identityConfidence'] = req.identityConfidence.value
 
         payload = bytes(json.dumps(payload_dict), 'utf-8')
 
@@ -335,9 +349,20 @@ def _make_sensitive_host_access(
     if user is None or user == '':
         return None
 
+    confidence = Confidence.HIGHEST
     profile = primary_username(PERSON_API_BASE, tkn, user)
+
     if profile is None:
-        return None
+        profile = User(
+            created=datetime.now(),
+            first_name='',
+            last_name='',
+            alternative_name='',
+            primary_email='{}@mozilla.com'.format(user),
+            mozilla_ldap_primary_email='')
+
+        confidence = Confidence.LOW
+
 
     summary = ('An SSH session to a potentially sensitive host {} was made '
     'by your user account.').format(host)
@@ -346,7 +371,8 @@ def _make_sensitive_host_access(
         alert['_id'],
         AlertLabel.SENSITIVE_HOST_SESSION,
         summary,
-        profile.primary_email)
+        profile.primary_email,
+        confidence)
 
 
 def _make_duo_code_gen(
@@ -376,7 +402,8 @@ def _make_duo_code_gen(
         alert['_id'],
         AlertLabel.DUO_BYPASS_CODES_GENERATED,
         summary,
-        email)
+        email,
+        Confidence.HIGHEST)
 
 
 def _make_duo_code_used(
@@ -407,7 +434,8 @@ def _make_duo_code_used(
         alert['_id'],
         AlertLabel.DUO_BYPASS_CODES_USED,
         summary,
-        email)
+        email,
+        Confidence.HIGHEST)
 
 
 def _make_ssh_access_releng(
@@ -431,9 +459,19 @@ def _make_ssh_access_releng(
     if user == '' or host is None or host == '':
         return None
 
+    confidence = Confidence.HIGH
     profile = primary_username(PERSON_API_BASE, tkn, user)
+
     if profile is None:
-        return None
+        profile = User(
+            created=datetime.now(),
+            first_name='',
+            last_name='',
+            alternative_name='',
+            primary_email='{}@mozilla.com'.format(user),
+            mozilla_ldap_primary_email='')
+
+        confidence = Confidence.LOW
 
     summary = ('An SSH session was established to host {} by your user '
     'account.').format(host)
@@ -442,4 +480,5 @@ def _make_ssh_access_releng(
         alert['_id'],
         AlertLabel.SSH_ACCESS_SIGN_RELENG,
         summary,
-        profile.primary_email)
+        profile.primary_email,
+        confidence)
