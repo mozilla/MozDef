@@ -49,12 +49,34 @@ class AlertStatus(enum.Enum):
     ESCALATED = 'escalated'
 
 
+class Confidence(enum.Enum):
+    '''Enumerates levels of confidence in the successful lookup of a user
+    identity.
+    '''
+
+    HIGHEST = 'highest'
+    HIGH = 'high'
+    MODERATE = 'moderate'
+    LOW = 'low'
+    LOWEST = 'lowest'
+
+
+class UserInfo(types.NamedTuple):
+    '''Information about the user contacted on Slack.
+    '''
+
+    email: str
+    slack: str
+
+
 class UserResponseMessage(types.NamedTuple):
     '''The message type sent by the web server component informing MozDef of
     a user's response to an inquiry about an alert.
     '''
 
     identifier: str
+    user: UserInfo
+    identityConfidence: Confidence
     response: UserResponse
 
 
@@ -71,13 +93,21 @@ def new_status(resp: UserResponse) -> AlertStatus:
     return mapping.get(resp, AlertStatus.MANUAL)
 
 
-def update_alert_status(alert_id: str, status: AlertStatus, api: RESTConfig):
+def update_alert_status(msg: UserResponseMessage, api: RESTConfig):
     '''Invoke the MozDef REST API to update the status of an alert.
     '''
 
+    status = new_status(msg.response)
+
     payload = {
-        'alert': alert_id,
-        'status': status.value
+        'alert': msg.identifier,
+        'status': status.value,
+        'user': {
+            'email': msg.user.email,
+            'slack': msg.user.slack
+        },
+        'identityConfidence': msg.identityConfidence.value,
+        'response': msg.response
     }
 
     headers = {}
@@ -86,7 +116,7 @@ def update_alert_status(alert_id: str, status: AlertStatus, api: RESTConfig):
         headers['Authorization'] = 'Bearer {}'.format(api.token)
 
     try:
-        resp = requests.post(api.url, headers=headers, data=payload)
+        resp = requests.post(api.url, headers=headers, json=payload)
     except:
         return False
 
@@ -98,16 +128,20 @@ def process(msg, meta, api_cfg):
     the MozDef REST API to update the status of the identified alert.
     '''
 
-    try:
-        ident = msg['identifier']
-        resp = UserResponse(msg['response'])
-        response = UserResponseMessage(ident, resp)
-    except:
+    ident = msg.get('identifier')
+    user = msg.get('user', {})
+    email = user.get('email')
+    slack = user.get('slack')
+    confidence = Confidence(msg.get('confidence', 'lowest'))
+    resp = UserResponse(msg.get('response', 'wrongUser'))
+
+    if any([v is None for v in [ident, email, slack]]):
         return (None, None)
 
-    status = new_status(response.response)
+    response = UserResponseMessage(
+        ident, UserInfo(email, slack), confidence, resp)
 
-    update_succeeded = update_alert_status(response.identifier, status, api_cfg)
+    update_succeeded = update_alert_status(response, api_cfg)
 
     if not update_succeeded:
         return (None, None)
