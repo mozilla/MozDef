@@ -518,6 +518,7 @@ def update_alert_status():
             "email": str,
             "slack": str
         },
+        "identityConfidence": str
         "response": str
     }
     ```
@@ -527,6 +528,9 @@ def update_alert_status():
         we are to update.
         * `"status"` is one of "manual", "inProgress", "acknowledged"
         or "escalated".
+        * `confidence` is one of "highest", "high", "moderate", "low",
+        or "lowest".
+
 
     This function writes back a response containing the following JSON.
 
@@ -569,6 +573,16 @@ def update_alert_status():
         response.status = bad_request
         response.body = json.dumps({
             'error': 'Status not one of {}'.format(' or '.join(valid_statuses))
+        })
+        return response
+
+    valid_confidences = ['highest', 'high', 'moderate', 'low', 'lowest']
+
+    if req['user']['confidence'] not in valid_confidences:
+        response.status = bad_request
+        response.body = json.dumps({
+            'error': 'user.confidence not one of {}'.format(
+                ' or '.join(valid_confidences))
         })
         return response
 
