@@ -204,9 +204,6 @@ def keyMapping(aDict):
                     program_value = returndict.get('details.program')
                     if program_value[-4:] == '.log':
                         returndict['source'] = program_value
-                if key_exists('details.program', returndict):
-                    if returndict.get('details.program') == 'sshd':
-                        returndict['processname'] = 'sshd'
 
         # nxlog windows log handling
         if "Domain" in aDict and "SourceModuleType" in aDict:
