@@ -50,11 +50,7 @@ class message(object):
     def write_db_entry(self, alert_record):
         self.dynamodb.put_item(Item=alert_record)
 
-    def onMessage(self, alert):
-        # As of Dec. 3, 2019, alert actions are given entire alerts rather
-        # than just their source
-        message = alert['_source']
-
+    def onMessage(self, message):
         if 'details' not in message:
             return message
 
