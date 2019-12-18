@@ -289,11 +289,11 @@ class alertConsumer(ConsumerMixin):
         try:
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
-                full_body = body
+                bodyDict = body
             elif isinstance(body, str):
                 try:
-                    full_body = json.loads(body)  # lets assume it's json
-                except ValueError:
+                    bodyDict = json.loads(body)  # lets assume it's json
+                except ValueError as e:
                     # not json..ack but log the message
                     logger.exception(
                         "alertworker exception: unknown body type received %r" % body)
@@ -303,9 +303,7 @@ class alertConsumer(ConsumerMixin):
                     "alertworker exception: unknown body type received %r" % body)
                 return
 
-            body_dict = full_body['_source']
-
-            if 'notify_mozdefbot' in body_dict and body_dict['notify_mozdefbot'] is False:
+            if 'notify_mozdefbot' in bodyDict and bodyDict['notify_mozdefbot'] is False:
                 # If the alert tells us to not notify, then don't post to IRC
                 message.ack()
                 return
@@ -313,9 +311,9 @@ class alertConsumer(ConsumerMixin):
             # process valid message
             # see where we send this alert
             ircchannel = options.alertircchannel
-            if 'ircchannel' in body_dict:
-                if body_dict['ircchannel'] in options.join.split(","):
-                    ircchannel = body_dict['ircchannel']
+            if 'ircchannel' in bodyDict:
+                if bodyDict['ircchannel'] in options.join.split(","):
+                    ircchannel = bodyDict['ircchannel']
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
@@ -326,11 +324,11 @@ class alertConsumer(ConsumerMixin):
                     sys.stdout.write('throttling before writing next alert\n')
                     time.sleep(1)
             self.lastalert = toUTC(datetime.now())
-            if len(body_dict['summary']) > 450:
+            if len(bodyDict['summary']) > 450:
                 sys.stdout.write('alert is more than 450 bytes, truncating\n')
-                body_dict['summary'] = body_dict['summary'][:450] + ' truncated...'
+                bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
 
-            self.ircBot.client.msg(ircchannel, formatAlert(body_dict))
+            self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
 
             message.ack()
         except ValueError as e:
