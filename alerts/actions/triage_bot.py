@@ -364,7 +364,7 @@ def _make_sensitive_host_access(
         confidence = Confidence.LOW
 
 
-    summary = ('An SSH session to a potentially sensitive host {} was made '
+    summary = ('An SSH session to a potentially sensitive host {} was made '\
     'by your user account.').format(host)
 
     return AlertTriageRequest(
@@ -395,7 +395,7 @@ def _make_duo_code_gen(
     if email is None or email == '':
         return None
 
-    summary = 'DUO bypass codes have been generated for your account. '
+    summary = 'DUO bypass codes have been generated for your account. '\
     'These credentials should be secured carefully.'
 
     return AlertTriageRequest(
@@ -426,8 +426,8 @@ def _make_duo_code_used(
     if email is None or email == '':
         return None
 
-    summary = 'DUO bypass codes belonging to your account have been used to '
-    'authenticate.  This should only happen in the case of the loss of other '
+    summary = 'DUO bypass codes belonging to your account have been used to '\
+    'authenticate.  This should only happen in the case of the loss of other '\
     'less secret credentials.'
 
     return AlertTriageRequest(
@@ -473,7 +473,7 @@ def _make_ssh_access_releng(
 
         confidence = Confidence.LOW
 
-    summary = ('An SSH session was established to host {} by your user '
+    summary = ('An SSH session was established to host {} by your user '\
     'account.').format(host)
 
     return AlertTriageRequest(
