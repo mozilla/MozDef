@@ -12,7 +12,7 @@ import boto3
 import requests
 
 
-_CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot_sqs.json')
+_CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
 
 
 class RESTConfig(types.NamedTuple):
