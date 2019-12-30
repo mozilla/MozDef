@@ -43,7 +43,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'MozDef'
+project = 'Mozilla Enterprise Defense Platform'
 copyright = '{0}, Mozilla'.format(datetime.datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
