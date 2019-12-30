@@ -1,7 +1,7 @@
 Tests
 =====
 
-Our test suite builds and runs entirely in `docker`, so a Docker daemon is required to be running locally.
+Our test suite builds and runs entirely in `docker`, so a Docker daemon is required to be running locally. The test suite requires a local Elasticsearch and RabbitMQ service to run, but will be started automatically as containers as part of the tests make targets.
 
 Run tests
 ---------
