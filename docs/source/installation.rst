@@ -24,21 +24,6 @@ You're done! Now go to:
    `make` targets for `multiple-*` and `single-*` have been replaced by the above commands (`make run`, etc.)
    Just type `make` to get a list of available targets.
 
-Run tests
----------
-
-Simply run::
-
-  make test
-
-
-Note, if you end up with a clobbered ES index, or anything like that which might end up in failing tests, you can clean
-the environment with::
-
-  make clean
-
-Then run the tests again.
-
 
 Manual Installation for Yum or Apt based distros
 ----------------------------------------------------
