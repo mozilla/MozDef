@@ -1,3 +1,4 @@
+import datetime
 # -*- coding: utf-8 -*-
 #
 # MozDef documentation build configuration file, created by
@@ -43,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'MozDef'
-copyright = '2014, Mozilla'
+copyright = '{0}, Mozilla'.format(datetime.datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
