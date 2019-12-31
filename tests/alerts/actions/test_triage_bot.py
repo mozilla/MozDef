@@ -511,71 +511,59 @@ class TestPersonAPI:
             assert profile is None
 
 
+class TestLambda:
+    class MockLambda:
+        def __init__(self, sess):
+            self.session = sess
+
+        def invoke(self, **kwargs):
+            self.session.calls['invoke'].append(kwargs)
+            return {'StatusCode': 200}
+
+        def list_functions(self, **kwargs):
+            self.session.calls['list_functions'].append(kwargs)
+            dummy1 = {
+                'FunctionName': 'test1',
+                'FunctionArn': 'abc123',
+                'Description': 'First test function'
+            }
+            dummy2 = {
+                'FunctionName': 'test2',
+                'FunctionArn': 'def321',
+                'Description': 'Second test function'
+            }
+
+            if len(self.session.calls['list_functions']) < 2:
+                return {'NextMarker': 'test', 'Functions': [dummy1]}
+
+            return {'Functions': [dummy2]}
+
+
+    class MockSession:
+        def __init__(self):
+            self.calls = {
+                'list_functions': [],
+                'invoke': []
+            }
+
+        def client(self, _service_name):
+            return TestLambda.MockLambda(self)
+    
+
     def test_discover(self):
-        class MockLambda:
-            def __init__(self, sess):
-                self.session = sess
-
-            def list_functions(self, **kwargs):
-                self.session.calls.append(kwargs)
-                dummy1 = {
-                    'FunctionName': 'test1',
-                    'FunctionArn': 'abc123',
-                    'Description': 'First test function'
-                }
-                dummy2 = {
-                    'FunctionName': 'test2',
-                    'FunctionArn': 'def321',
-                    'Description': 'Second test function'
-                }
-
-                if len(self.session.calls) < 2:
-                    return {'NextMarker': 'test', 'Functions': [dummy1]}
-
-                return {'Functions': [dummy2]}
-
-
-        class MockSession:
-            def __init__(self):
-                self.calls = []
-
-            def client(self, _service_name):
-                return MockLambda(self)
-
-
-        sess = MockSession()
+        sess = TestLambda.MockSession()
         discover = bot._discovery(sess)
         functions = discover()
 
         assert len(functions) == 2
         assert functions[0].name == 'test1'
         assert functions[1].name == 'test2'
-        assert len(sess.calls) == 2
-        assert 'Marker' not in sess.calls[0]
-        assert sess.calls[1]['Marker'] == 'test'
+        assert len(sess.calls['list_functions']) == 2
+        assert 'Marker' not in sess.calls['list_functions'][0]
+        assert sess.calls['list_functions'][1]['Marker'] == 'test'
 
 
     def test_dispatch(self):
-        region = 'us-west-2'
-        fn_name = 'test_fn'
-
-        class MockLambda:
-            def __init__(self, sess):
-                self.session = sess
-
-            def invoke(self, **kwargs):
-                self.session.calls.append(kwargs)
-                return {'StatusCode': 200}
-
-
-        class MockSession:
-            def __init__(self):
-                self.calls = []
-
-            def client(self, _service_name):
-                return MockLambda(self)
-
-
         request = bot.AlertTriageRequest(
             identifier='abcdef0123',
             alert=bot.AlertLabel.SSH_ACCESS_SIGN_RELENG,
@@ -584,14 +572,14 @@ class TestPersonAPI:
             identityConfidence=bot.Confidence.HIGH
         )
 
-        sess = MockSession()
+        sess = TestLambda.MockSession()
         dispatch = bot._dispatcher(sess)
-        status = dispatch(request, fn_name)
+        status = dispatch(request, 'test_fn')
 
         assert status == bot.DispatchResult.SUCCESS
-        assert len(sess.calls) == 1
-        assert sess.calls[0]['FunctionName'] == fn_name
-        assert json.loads(sess.calls[0]['Payload']) == {
+        assert len(sess.calls['invoke']) == 1
+        assert sess.calls['invoke'][0]['FunctionName'] == 'test_fn'
+        assert json.loads(sess.calls['invoke'][0]['Payload']) == {
             'identifier': 'abcdef0123',
             'alert': 'ssh_access_sign_releng',
             'summary': 'test alert',
