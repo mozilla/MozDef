@@ -310,6 +310,10 @@ def primary_username(
 
 
 def _discovery(boto_session) -> DiscoveryInterface:
+    '''Produces a function that, when called, retrieves a list of descriptions
+    of AWS Lambda functions visible to the owner of the session provided.
+    '''
+
     lambda_ = boto_session.client('lambda')
 
     def discover() -> types.List[LambdaFunction]:
@@ -323,7 +327,7 @@ def _discovery(boto_session) -> DiscoveryInterface:
         funs = []
 
         # Use a record of the last request's response as well as the
-        #(updated ) state of the payload to determine when we've paged
+        # (updated) state of the payload to determine when we've paged
         # through all available results.
         while len(resp) == 0 or payload.get('Marker') not in ['', None]:
             resp = lambda_.list_functions(**payload)
@@ -344,6 +348,11 @@ def _discovery(boto_session) -> DiscoveryInterface:
 
 
 def _dispatcher(boto_session) -> DispatchInterface:
+    '''Produces a function that, when called, dispatches an
+    `AlertTriageRequest` to an AWS Lambda function identified by the provided
+    function name.
+    '''
+
     lambda_ = boto_session.client('lambda')
 
     def dispatch(req: AlertTriageRequest, fn_name: str) -> DispatchResult:
