@@ -13,6 +13,8 @@ import requests
 
 
 _CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
+SLACK_BOT_FUNCTION_NAME_PREFIX = 'MozDefSlackTraigeBotAPI-SlackTriageBotApiFunction'
+L_FN_NAME_VALIDITY_WINDOW_SECONDS = 24 * 60 * 60
 
 
 class RESTConfig(types.NamedTuple):
@@ -78,6 +80,65 @@ class UserResponseMessage(types.NamedTuple):
     user: UserInfo
     identityConfidence: Confidence
     response: UserResponse
+
+
+SQSQueueURL = str
+DiscoveryInterface = types.Callable[[], types.Optional[SQSQueueURL]]
+
+
+def _discovery(boto_session) -> DiscoveryInterface:
+    '''Produces a function that, when called, attempts to discover the URL of
+    the SQS Queue that the Triage Bot's web server component (Lambda function)
+    writes to by:
+    1. Finding that Lambda function and
+    2. Invoking it with a special payload to request the Queue URL.
+    '''
+
+    lambda_ = boto_session.client('lambda')
+
+    def discover() -> types.Optional[SQSQueueURL]:
+        payload = {
+            'MasterRegion': 'ALL',
+            'FunctionVersion': 'ALL',
+            'MaxItems': 50
+        }
+
+        resp = {}
+        fn_names = []
+
+        # First, discover the name of the Lambda function to invoke.
+        while len(resp) == 0 or payload.get('Marker') not in ['', None]:
+            resp = lambda_.list_functions(**payload)
+
+            fn_names.extend([
+                fn.get('FunctionName')
+                for fn in resp.get('Functions', [])
+            ])
+
+            payload['Marker'] = resp.get('NextMarker')
+
+        valid_names = [
+            name
+            for name in fn_names
+            if name.startswith(SLACK_BOT_FUNCTION_NAME_PREFIX)
+        ]
+
+        if len(valid_names) == 0:
+            return None
+
+        payload = bytes(
+            json.dumps({'action': 'discover-sqs-queue-url'}),
+            'utf-8')
+
+        try:
+            resp = lambda_.invoke(FunctionName=valid_names[0], Payload=payload)
+            resp_data = json.loads(resp['Payload'].read())
+
+            return resp_data.get('result')
+        except Exception as ex:
+            return None
+
+    return discover
 
 
 def new_status(resp: UserResponse) -> AlertStatus:
