@@ -85,6 +85,16 @@ class User(types.NamedTuple):
     mozilla_ldap_primary_email: str
 
 
+class LambdaFunction(types.NamedTuple):
+    '''Contains information identifying lambda functions visible to the owner
+    of a boto session that calls an implementation of a `DiscoveryInterface`.
+    '''
+
+    name: str
+    arn: str
+    description: str
+
+
 class DispatchResult(Enum):
     '''A ternary good / bad / unknown result type indicating whether a dispatch
     to AWS Lambda was successful.
@@ -115,7 +125,9 @@ AuthInterface = types.Callable[[Url, AuthParams], types.Optional[Token]]
 UserByNameInterface = types.Callable[
     [Url, Token, Username],
     types.Optional[User]]
+DiscoveryInterface = types.Callable[[], types.List[LambdaFunction]]
 DispatchInterface = types.Callable[[AlertTriageRequest, str], DispatchResult]
+
 
 class message(object):
     '''The main interface to the alert action.
@@ -295,6 +307,40 @@ def primary_username(
         alternative_name=data['alternative_name'].get('value', 'N/A'),
         primary_email=data['primary_email'].get('value', 'N/A'),
         mozilla_ldap_primary_email=ldap_email)
+
+
+def _discovery(boto_session) -> DiscoveryInterface:
+    lambda_ = boto_session.client('lambda')
+
+    def discover() -> types.List[LambdaFunction]:
+        payload = {
+            'MasterRegion': 'ALL',
+            'FunctionVersion': 'ALL',
+            'MaxItems': 50
+        }
+
+        resp = {}
+        funs = []
+
+        # Use a record of the last request's response as well as the
+        #(updated ) state of the payload to determine when we've paged
+        # through all available results.
+        while len(resp) == 0 or payload.get('Marker') not in ['', None]:
+            resp = lambda_.list_functions(**payload)
+
+            funs.extend([
+                LambdaFunction(
+                    name=fn.get('FunctionName'),
+                    arn=fn.get('FunctionArn'),
+                    description=fn.get('Description'))
+                for fn in resp.get('Functions', [])
+            ])
+
+            payload['Marker'] = resp.get('NextMarker')
+
+        return funs
+
+    return discover
 
 
 def _dispatcher(boto_session) -> DispatchInterface:

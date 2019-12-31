@@ -541,6 +541,50 @@ class TestPersonAPI:
             assert profile is None
 
 
+    def test_discover(self):
+        class MockLambda:
+            def __init__(self, sess):
+                self.session = sess
+
+            def list_functions(self, **kwargs):
+                self.session.calls.append(kwargs)
+                dummy1 = {
+                    'FunctionName': 'test1',
+                    'FunctionArn': 'abc123',
+                    'Description': 'First test function'
+                }
+                dummy2 = {
+                    'FunctionName': 'test2',
+                    'FunctionArn': 'def321',
+                    'Description': 'Second test function'
+                }
+
+                if len(self.session.calls) < 2:
+                    return {'NextMarker': 'test', 'Functions': [dummy1]}
+
+                return {'Functions': [dummy2]}
+
+
+        class MockSession:
+            def __init__(self):
+                self.calls = []
+
+            def client(self, _service_name):
+                return MockLambda(self)
+
+
+        sess = MockSession()
+        discover = bot._discovery(sess)
+        functions = discover()
+
+        assert len(functions) == 2
+        assert functions[0].name == 'test1'
+        assert functions[1].name == 'test2'
+        assert len(sess.calls) == 2
+        assert 'Marker' not in sess.calls[0]
+        assert sess.calls[1]['Marker'] == 'test'
+
+
     def test_dispatch(self):
         region = 'us-west-2'
         fn_name = 'test_fn'
