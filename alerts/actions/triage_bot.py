@@ -21,6 +21,8 @@ PERSON_API_AUDIENCE = 'api.sso.mozilla.com'
 PERSON_API_SCOPE = 'classification:public display:all display:public display:none search:all'
 PERSON_API_GRANTS = 'client_credentials'
 TOKEN_VALIDITY_WINDOW_MINUTES = 18 * 60
+SLACK_BOT_FUNCTION_NAME_PREFIX = 'MozDefSlackTraigeBotAPI-SlackTriageBotApiFunction'
+L_FN_NAME_VALIDITY_WINDOW_SECONDS = 24 * 60 * 60
 
 Alert = types.Dict[types.Any, types.Any]
 Email = str
@@ -114,6 +116,16 @@ class AuthFailure(Exception):
         super().__init__('Failed to authenticate to the Person API')
 
 
+class DiscoveryFailure(Exception):
+    '''Raised by the `message` class in the case that discovery of the
+    appropriate Lambda function to invoke (whose name changes when it's
+    updated) fails.
+    '''
+
+    def __init__(self):
+        super().__init__('Failed to discover the correct Lambda function')
+
+
 # We define some types to serve as 'interfaces' that can be referenced for
 # higher level functions and testing purposes.
 # This module defines implementations of each interface.
@@ -141,12 +153,14 @@ class message(object):
         with open(CONFIG_FILE) as cfg_file:
             self._config = json.load(cfg_file)
 
+        # The Boto session does not need to be renewed manually.
         self._boto_session = boto3.session.Session(
             region_name=self._config['aws_region'],
             aws_access_key_id=self._config['aws_access_key_id'],
             aws_secret_access_key=self._config['aws_secret_access_key']
         )
 
+        # The OAuth session for the Person API is refreshed periodically.
         self._person_api_session = authenticate(OAUTH_URL, AuthParams(
             client_id=self._config['person_api_client_id'],
             client_secret=self._config['person_api_client_secret'],
@@ -159,6 +173,21 @@ class message(object):
             raise AuthFailure()
 
         self._last_authenticated = datetime.now()
+
+        # The name of the Lambda function to invoke is discovered periodically
+        # in response to the fact that new deployments result in a change.
+        functions = [
+            function
+            for function in _discovery(self._boto_session)()
+            if function.name.startswith(SLACK_BOT_FUNCTION_NAME_PREFIX)
+        ]
+
+        if len(functions) == 0:
+            raise DiscoveryFailure()
+
+        self._lambda_function_name = functions[0].name
+
+        self._last_discovery = datetime.now()
 
         self.registration = '*'
         self.priority = 1
@@ -189,13 +218,34 @@ class message(object):
                 raise AuthFailure()
 
             self._last_authenticated = datetime.now()
+       
+        # Re-discover the lambda function name to invoke periodically.
+        last_discovery = (datetime.now() - self._last_discovery).total_seconds()
+        if last_discover > L_FN_NAME_VALIDITY_WINDOW_SECONDS:
+            functions = [
+                function
+                for function in _discovery(self._boto_session)()
+                if function.name.startswith(SLACK_BOT_FUNCTION_NAME_PREFIX)
+            ]
+
+            if len(functions) == 0:
+                raise DiscoveryFailure()
+
+            self._lambda_function_name = functions[0].name
+
+            self._last_discovery = datetime.now()
 
         dispatch = _dispatcher(self._boto_session)
 
         if have_request:
             self._test_flag = True
-            # TODO: What can/should we do with the result?
-            dispatch(request, self._config['aws_lambda_function'])
+            result = dispatch(request, self._lambda_function_name)
+
+            # In the case that dispatch fails, attempt to re-discover the name
+            # of the lambda function to invoke in case it was replaced.
+            if result != DispatchResult.SUCCESS:
+                reset = timedelta(seconds=L_FN_NAME_VALIDITY_WINDOW_SECONDS)
+                self._last_discovery = datetime.now() - reset
 
         return alert
 
