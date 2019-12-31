@@ -238,7 +238,6 @@ class message(object):
         dispatch = _dispatcher(self._boto_session)
 
         if have_request:
-            self._test_flag = True
             result = dispatch(request, self._lambda_function_name)
 
             # In the case that dispatch fails, attempt to re-discover the name

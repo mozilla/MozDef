@@ -400,7 +400,7 @@ def _person_api_profile():
     }
 
 
-class TestTriageBot(object):
+class TestAlertRecognition(object):
     '''Unit tests for the triage bot alert plugin.
     '''
 
@@ -410,71 +410,41 @@ class TestTriageBot(object):
         # Without the `session` tag, the alert should not fire.
         msg['_source']['tags'] = ['test']
 
-        with requests_mock.mock() as mock:
-            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
-            
-            action = bot.message()
-        
-        action._test_flag = False
-        action.onMessage(msg)
+        result = bot.try_make_outbound(msg, '')
 
-        assert not action._test_flag
+        assert result is None
 
 
     def test_recognizes_ssh_sensitive_host(self):
         msg = _ssh_sensitive_host_alert()
 
-        with requests_mock.mock() as mock:
-            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
-            
-            action = bot.message()
-        
-        action._test_flag = False
-        action.onMessage(msg)
+        result = bot.try_make_outbound(msg, '')
 
-        assert action._test_flag
+        assert result is not None
 
 
     def test_recognizes_duo_bypass_codes_generated(self):
         msg = _duo_bypass_code_gen_alert()
 
-        with requests_mock.mock() as mock:
-            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
-            
-            action = bot.message()
-        
-        action._test_flag = False
-        action.onMessage(msg)
+        result = bot.try_make_outbound(msg, '')
 
-        assert action._test_flag
+        assert result is not None
 
 
     def test_recognizes_duo_bypass_codes_used(self):
         msg = _duo_bypass_code_used_alert()
-        
-        with requests_mock.mock() as mock:
-            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
-            
-            action = bot.message()
 
-        action._test_flag = False
-        action.onMessage(msg)
-        
-        assert action._test_flag
+        result = bot.try_make_outbound(msg, '')
+
+        assert result is not None
 
 
     def test_recognizes_ssh_access_releng(self):
         msg = _ssh_access_releng_alert()
         
-        with requests_mock.mock() as mock:
-            mock.post(bot.OAUTH_URL, json={'access_token': 'token'})
-            
-            action = bot.message()
+        result = bot.try_make_outbound(msg, '')
 
-        action._test_flag = False
-        action.onMessage(msg)
-
-        assert action._test_flag
+        assert result is not None
 
 
 class TestPersonAPI:
