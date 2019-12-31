@@ -9,7 +9,6 @@ Table of Contents
   installation
   usage
   cloud_deployment
-  advanced_settings
   development
   references
   contributors
