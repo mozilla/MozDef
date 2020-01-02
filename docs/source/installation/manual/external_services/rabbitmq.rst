@@ -3,35 +3,21 @@ RabbitMQ
 
 `RabbitMQ`_ is used on workers to have queues of events waiting to be inserted into the Elasticsearch cluster (storage).
 
-RabbitMQ does provide a zero-dependency RPM that you can find for RedHat/CentOS here::
-https://github.com/rabbitmq/erlang-rpm
 
-For Debian/Ubuntu based distros you would need to install erlang separately.
+RabbitMQ requires `EPEL repos`_ so we need to first install that::
 
-To install it, first make sure you enabled `EPEL repos`_. Then you need to install an Erlang environment.
+  yum  -y install epel-release
 
-If you prefer to install all the dependencies on a Red Hat based system you can do the following::
-On Yum-based systems::
+Download and install Rabbitmq::
 
-  yum install erlang
-
-You can then install the rabbitmq server::
-
+  wget https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.1/rabbitmq-server-3.6.1-1.noarch.rpm
   rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
-  yum install rabbitmq-server
+  yum install rabbitmq-server-3.6.1-1.noarch.rpm
 
-To start rabbitmq at startup::
+Start Service::
 
-  systemctl enable rabbitmq-server
-
-On APT-based systems ::
-
-  sudo apt-get install rabbitmq-server
-  sudo invoke-rc.d rabbitmq-server start
-
-We do advise using rabbitmq and erlang's latest versions if you plan on using TLS protected connections with Rabbitmq.
-A simple way of doing this would be to use Bintray's repo located at: https://www.rabbitmq.com/install-rpm.html#bintray
-to download both the latest versions of rabbitmq and erlang.
+  systemctl start rabbitmq-server.service
+  systemctl enable rabbitmq-server.service
 
 .. _RabbitMQ: https://www.rabbitmq.com/
 .. _EPEL repos: https://fedoraproject.org/wiki/EPEL/FAQ#howtouse
