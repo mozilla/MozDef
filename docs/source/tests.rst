@@ -14,6 +14,6 @@ If you want to only run a specific test file/directory, you can specify the `TES
 
   make tests TEST_CASE=tests/mq/plugins/test_github_webhooks.py
 
-.. note:: Note, if you end up with a clobbered ES index, or anything like that which might end up in failing tests, you can clean the environment with `make clean`. Then run the tests again.
+.. note:: If you end up with a clobbered ES index, or anything like that which might end up in failing tests, you can clean the environment with `make clean`. Then run the tests again.
 
 .. _docker: https://www.docker.io/
