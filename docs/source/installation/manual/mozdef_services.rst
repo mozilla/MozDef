@@ -37,3 +37,4 @@ MozDef services can be broken up into 3 different groups (Alert, Ingest, Web). E
     mozdef_services/loginput
     mozdef_services/mq_workers
     mozdef_services/nginx
+    mozdef_services/final_steps
