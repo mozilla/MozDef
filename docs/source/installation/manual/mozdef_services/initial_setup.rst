@@ -38,7 +38,7 @@ Install MozDef python requirements::
   PYCURL_SSL_LIBRARY=nss pip install -r requirements.txt
 
 
-Setup Syslog
+Syslog Setup
 ************
 
 Copy over mozdef syslog file::
