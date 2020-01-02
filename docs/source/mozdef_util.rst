@@ -17,13 +17,11 @@ If you're using Mac OS X::
 
 
 
-If you're using Mac OS X::
+If you're using CentOS::
 
   git clone https://github.com/mozilla/mozdef mozdef
   cd ./mozdef
-  export PYCURL_SSL_LIBRARY=openssl
-  export LDFLAGS=-L/usr/local/opt/openssl/lib;export CPPFLAGS=-I/usr/local/opt/openssl/include
-  pip install -r requirements.txt
+  PYCURL_SSL_LIBRARY=nss pip install -r requirements.txt
 
 
 Usage
