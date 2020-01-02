@@ -16,8 +16,8 @@ Download and install Rabbitmq::
 
 Start Service::
 
-  systemctl start rabbitmq-server.service
-  systemctl enable rabbitmq-server.service
+  systemctl start rabbitmq-server
+  systemctl enable rabbitmq-server
 
 .. _RabbitMQ: https://www.rabbitmq.com/
 .. _EPEL repos: https://fedoraproject.org/wiki/EPEL/FAQ#howtouse

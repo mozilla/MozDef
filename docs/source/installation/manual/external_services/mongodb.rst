@@ -5,7 +5,12 @@ MongoDB
 
 .. note:: It's preferred to run this service on the same host that the Web UI will be running on, so you don't need to expose this service externally.
 
-Create /etc/yum.repos.d/mongo.repo::
+
+Create yum repo file::
+
+  vim /etc/yum.repos.d/mongodb.repo
+
+With the following contents::
 
   [mongodb-org-3.4]
   name=MongoDB Repository
@@ -16,4 +21,11 @@ Create /etc/yum.repos.d/mongo.repo::
 
 Then you can install mongodb::
 
-  yum install mongodb-org
+  yum install -y mongodb-org
+
+Start Service::
+
+  systemctl start mongod
+  systemctl enable mongod
+
+.. _Mongodb: https://www.mongodb.com/

@@ -48,4 +48,4 @@ Once the services seems to have finished starting up, we can verify using curl::
 
 You should see some information in JSON about the Elasticsearch endpoint (version, build date, etc). This means Elasticsearch is all setup, and ready to go!
 
-.. _Elasticsearch website: https://www.elastic.co/products/elasticsearch
+.. _Elasticsearch: https://www.elastic.co/products/elasticsearch
