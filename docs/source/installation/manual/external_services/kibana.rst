@@ -3,13 +3,15 @@ Kibana
 
 `Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data.
 
-
 Import public signing key of yum repo::
 
   rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 
+Create yum repo file::
 
-Create the repo file in /etc/yum.repos.d/kibana.repo::
+  vim /etc/yum.repos.d/kibana.repo
+
+With the following contents::
 
   [kibana-6.x]
   name=Kibana repository for 6.x packages
@@ -20,13 +22,11 @@ Create the repo file in /etc/yum.repos.d/kibana.repo::
   autorefresh=1
   type=rpm-md
 
-::
+Install kibana::
 
   yum install -y kibana
 
-Now you'll need to configure kibana to work with your system:
-
-Verify Kibana configuration settings::
+Kibana should work just fine out of the box, but we should take a look at what settings are available::
 
   cat /etc/kibana/kibana.yml
 

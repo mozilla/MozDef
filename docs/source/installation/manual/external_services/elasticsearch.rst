@@ -17,7 +17,6 @@ Create yum repo file::
 
   vim /etc/yum.repos.d/elasticsearch.repo
 
-
 With the following contents::
 
   [elasticsearch-6.x]
