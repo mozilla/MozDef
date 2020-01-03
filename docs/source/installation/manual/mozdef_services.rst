@@ -1,5 +1,5 @@
 MozDef Services
----------------
+===============
 
 MozDef services can be broken up into 3 different groups (Alert, Ingest, Web). Each group of services should be run on the same machine, with all of the Ingest services able to run on N number of machines, allowing for a more distrubuted environment.
 

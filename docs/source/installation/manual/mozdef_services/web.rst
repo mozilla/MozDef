@@ -1,5 +1,5 @@
 Web
-****
+***
 
 `Meteor`_ is a javascript framework used for the realtime aspect of the web interface.
 
