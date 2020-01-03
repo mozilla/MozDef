@@ -41,4 +41,13 @@ Then you can start the service::
   systemctl start kibana
   systemctl enable kibana
 
+
+Now that Kibana and Elasticsearch are setup, we can populate the MozDef indices and Kibana settings::
+
+  su mozdef
+  source /opt/mozdef/envs/python/bin/activate
+  cd /opt/mozdef/envs/mozdef/scripts/setup
+  python initial_setup.py http://localhost:9200 http://localhost:5601
+
+
 .. _Kibana: https://www.elastic.co/products/kibana
