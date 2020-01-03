@@ -35,6 +35,7 @@ Install MozDef python requirements (as mozdef user)::
   source /opt/mozdef/envs/python/bin/activate
   cd /opt/mozdef/envs/mozdef
   PYCURL_SSL_LIBRARY=nss pip install -r requirements.txt
+  mkdir /opt/mozdef/envs/mozdef/data
 
 
 Syslog Setup
