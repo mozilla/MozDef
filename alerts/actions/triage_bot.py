@@ -21,7 +21,7 @@ PERSON_API_AUDIENCE = 'api.sso.mozilla.com'
 PERSON_API_SCOPE = 'classification:public display:all display:public display:none search:all'
 PERSON_API_GRANTS = 'client_credentials'
 TOKEN_VALIDITY_WINDOW_MINUTES = 18 * 60
-SLACK_BOT_FUNCTION_NAME_PREFIX = 'MozDefSlackTraigeBotAPI-SlackTriageBotApiFunction'
+SLACK_BOT_FUNCTION_NAME_PREFIX = 'MozDefSlackTriageBotAPI-SlackTriageBotApiFunction'
 L_FN_NAME_VALIDITY_WINDOW_SECONDS = 24 * 60 * 60
 
 Alert = types.Dict[types.Any, types.Any]
@@ -160,34 +160,8 @@ class message(object):
             aws_secret_access_key=self._config['aws_secret_access_key']
         )
 
-        # The OAuth session for the Person API is refreshed periodically.
-        self._person_api_session = authenticate(OAUTH_URL, AuthParams(
-            client_id=self._config['person_api_client_id'],
-            client_secret=self._config['person_api_client_secret'],
-            audience=PERSON_API_AUDIENCE,
-            scope=PERSON_API_SCOPE,
-            grants=PERSON_API_GRANTS
-        ))
-
-        if self._person_api_session is None:
-            raise AuthFailure()
-
-        self._last_authenticated = datetime.now()
-
-        # The name of the Lambda function to invoke is discovered periodically
-        # in response to the fact that new deployments result in a change.
-        functions = [
-            function
-            for function in _discovery(self._boto_session)()
-            if function.name.startswith(SLACK_BOT_FUNCTION_NAME_PREFIX)
-        ]
-
-        if len(functions) == 0:
-            raise DiscoveryFailure()
-
-        self._lambda_function_name = functions[0].name
-
-        self._last_discovery = datetime.now()
+        self._oauth_handshake()
+        self._discover_lambda_fn()
 
         self.registration = '*'
         self.priority = 1
@@ -207,33 +181,12 @@ class message(object):
         should_refresh = mins_since_auth > TOKEN_VALIDITY_WINDOW_MINUTES
 
         if have_request and should_refresh:
-            self._person_api_session = authenticate(OAUTH_URL, AuthParams(
-                client_id=self._config['person_api_client_id'],
-                client_secret=self._config['person_api_client_secret'],
-                audience=PERSON_API_AUDIENCE,
-                scope=PERSON_API_SCOPE
-            ))
-
-            if self._person_api_session is None:
-                raise AuthFailure()
-
-            self._last_authenticated = datetime.now()
+            self._oauth_handshake()
        
         # Re-discover the lambda function name to invoke periodically.
         last_discovery = (datetime.now() - self._last_discovery).total_seconds()
-        if last_discover > L_FN_NAME_VALIDITY_WINDOW_SECONDS:
-            functions = [
-                function
-                for function in _discovery(self._boto_session)()
-                if function.name.startswith(SLACK_BOT_FUNCTION_NAME_PREFIX)
-            ]
-
-            if len(functions) == 0:
-                raise DiscoveryFailure()
-
-            self._lambda_function_name = functions[0].name
-
-            self._last_discovery = datetime.now()
+        if last_discovery > L_FN_NAME_VALIDITY_WINDOW_SECONDS:
+            self._discover_lambda_fn()
 
         dispatch = _dispatcher(self._boto_session)
 
@@ -247,6 +200,36 @@ class message(object):
                 self._last_discovery = datetime.now() - reset
 
         return alert
+
+
+    def _oauth_handshake(self):
+        self._person_api_session = authenticate(OAUTH_URL, AuthParams(
+            client_id=self._config['person_api_client_id'],
+            client_secret=self._config['person_api_client_secret'],
+            audience=PERSON_API_AUDIENCE,
+            scope=PERSON_API_SCOPE,
+            grants=PERSON_API_GRANTS
+        ))
+
+        if self._person_api_session is None:
+            raise AuthFailure()
+
+        self._last_authenticated = datetime.now()
+
+
+    def _discover_lambda_fn(self):
+        functions = [
+            function
+            for function in _discovery(self._boto_session)()
+            if function.name.startswith(SLACK_BOT_FUNCTION_NAME_PREFIX)
+        ]
+
+        if len(functions) == 0:
+            raise DiscoveryFailure()
+
+        self._lambda_function_name = functions[0].name
+
+        self._last_discovery = datetime.now()
 
 
 def try_make_outbound(
@@ -366,11 +349,7 @@ def _discovery(boto_session) -> DiscoveryInterface:
     lambda_ = boto_session.client('lambda')
 
     def discover() -> types.List[LambdaFunction]:
-        payload = {
-            'MasterRegion': 'ALL',
-            'FunctionVersion': 'ALL',
-            'MaxItems': 50
-        }
+        payload = {}
 
         resp = {}
         funs = []
