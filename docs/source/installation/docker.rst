@@ -5,10 +5,16 @@ Docker
 
 .. note:: MozDef consists of ~10 containers, so it's encouraged to have at least 4GB of memory provided to the Docker daemon.
 
-
-You can quickly install and run MozDef with a few make commands::
+If you have MozDef source code downloaded locally, you can build the docker containers locally::
 
   make build
+
+If you want to use pre-built images that are on docker-hub::
+
+  make build BUILD_MODE=pull
+
+Start MozDef::
+
   make run
 
 You're done! Now go to:
