@@ -25,12 +25,6 @@ Copy over systemd file::
   cp /opt/mozdef/envs/mozdef/systemdfiles/alert/mozdefalerts.service /usr/lib/systemd/system/mozdefalerts.service
 
 
-Ensure log directory is created::
-
-  mkdir -p /var/log/mozdef/supervisord
-  chown -R mozdef:mozdef /var/log/mozdef
-
-
 Start alerts service::
 
   systemctl start mozdefalerts

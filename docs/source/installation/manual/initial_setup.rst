@@ -4,7 +4,7 @@ Initial Setup
 System Setup
 ************
 
-Create the  user::
+Create the user::
 
   adduser mozdef -d /opt/mozdef
   mkdir /opt/mozdef/envs
@@ -45,6 +45,14 @@ Copy over mozdef syslog file::
 
   cp /opt/mozdef/envs/mozdef/config/50-mozdef-filter.conf /etc/rsyslog.d/50-mozdef-filter.conf
 
+
+Ensure log directory is created::
+
+  mkdir -p /var/log/mozdef/supervisord
+  chown -R mozdef:mozdef /var/log/mozdef
+
+
 Restart rsyslog::
 
   systemctl restart rsyslog
+

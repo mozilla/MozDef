@@ -6,13 +6,13 @@ RabbitMQ
 
 RabbitMQ requires `EPEL repos`_ so we need to first install that::
 
-  yum  -y install epel-release
+  yum -y install epel-release
 
 Download and install Rabbitmq::
 
   wget https://www.rabbitmq.com/releases/rabbitmq-server/v3.6.1/rabbitmq-server-3.6.1-1.noarch.rpm
   rpm --import https://www.rabbitmq.com/rabbitmq-signing-key-public.asc
-  yum install rabbitmq-server-3.6.1-1.noarch.rpm
+  yum install -y rabbitmq-server-3.6.1-1.noarch.rpm
 
 Start Service::
 
