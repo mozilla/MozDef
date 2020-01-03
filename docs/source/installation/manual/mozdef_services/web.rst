@@ -1,36 +1,44 @@
-Web Services
-============
-
-Meteor
-******
+Web
+****
 
 `Meteor`_ is a javascript framework used for the realtime aspect of the web interface.
 
-For meteor installation follow these steps::
+Install requirements::
 
-  sudo -i -u mozdef -g mozdef
-  curl https://install.meteor.com/?release=1.8 | sh
+  export NODE_VERSION=8.11.4
+  export METEOR_VERSION=1.8
 
-For node you can exit from the mozdef user::
+  cd /opt/mozdef
+  gpg="gpg --no-default-keyring --secret-keyring /dev/null --keyring /dev/null --no-option --keyid-format 0xlong"
+  rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+  rpm -qi gpg-pubkey-f4a80eb5 | $gpg | grep 0x24C6A8A7F4A80EB5
+  curl --silent --location https://rpm.nodesource.com/setup_8.x | bash -
+  rpmkeys --import /etc/pki/rpm-gpg/NODESOURCE-GPG-SIGNING-KEY-EL
+  rpm -qi gpg-pubkey-34fa74dd | $gpg | grep 0x5DDBE8D434FA74DD
+  yum install -y \
+     make \
+     glibc-devel \
+     gcc \
+     gcc-c++ \
+     libstdc++ \
+     zlib-devel \
+     nodejs
+  curl --silent --location https://static-meteor.netdna-ssl.com/packages-bootstrap/$METEOR_VERSION/meteor-bootstrap-os.linux.x86_64.tar.gz \
+    | tar --extract --gzip --directory /opt/mozdef .meteor
+  ln --symbolic /opt/mozdef/.meteor/packages/meteor-tool/*/mt-os.linux.x86_64/scripts/admin/launch-meteor /usr/bin/meteor
+  install --owner mozdef --group mozdef --directory /opt/mozdef/envs /opt/mozdef/envs/mozdef
+  chown -R mozdef:mozdef /opt/mozdef/envs/mozdef/meteor
+  chown -R mozdef:mozdef /opt/mozdef/.meteor
 
-  wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
-  tar xvzf node-v8.12.0.tar.gz
-  cd node-v8.12.0
-  ./configure
-  make
-  sudo make install
 
-Then from the meteor subdirectory of this git repository (/opt/mozdef/meteor) run as the mozdef user with venv activated::
+Let's edit the configuration file::
 
-  sudo -i -u mozdef -g mozdef
-  source envs/python/bin/activate
-  meteor add iron-router
+  vim /opt/mozdef/envs/mozdef/meteor/imports/settings.js
 
-If you wish to use meteor as the authentication handler you'll also need to install the Accounts-Password pkg::
 
-  meteor add accounts-password
+.. note:: We'll need to modify the rootURL and kibanaURL variables in settings.js
 
-You may want to edit the /meteor/imports/settings.js file to properly configure the URLs and Authentication
+
 The default setting will use Meteor Accounts, but you can just as easily install an external provider like Github, Google, Facebook or your own OIDC::
 
   mozdef = {
@@ -47,129 +55,43 @@ or for an OIDC implementation that passes a header to the nginx reverse proxy (f
     ...
   }
 
-Then start meteor with::
-
-  meteor
-
-.. _Meteor: https://guide.meteor.com/
-.. _meteor-accounts: https://guide.meteor.com/accounts.html
-
-
-Node
-****
-
-Alternatively you can run the meteor UI in 'deployment' mode using a native node installation.
-
-First install node::
-
-    yum install bzip2 gcc gcc-c++ sqlite sqlite-devel
-    wget https://nodejs.org/dist/v8.12.0/node-v8.12.0.tar.gz
-    tar xvzf node-v8.12.0.tar.gz
-    cd node-v8.12.0
-    ./configure
-    make
-    sudo make install
-
-Then bundle the meteor portion of mozdef to deploy on another server::
-
-  cd <your meteor mozdef directory>
-  meteor bundle mozdef.tgz
-
-You can then deploy the meteor UI for mozdef as necessary::
-
-  scp mozdef.tgz to your target host
-  tar -xvzf mozdef.tgz
-
-This will create a 'bundle' directory with the entire UI code below that directory.
-
-If you didn't update the settings.js before bundling the meteor installation, you will need to update the settings.js file to match your servername/port::
-
-  vim bundle/programs/server/app/imports/settings.js
-
-If your development OS is different than your production OS you will also need to update
-the fibers node module::
-
-  cd bundle/programs/server/node_modules
-  rm -rf fibers
-  sudo npm install fibers@1.0.1
-
-Or you can bundle the meteor portion of mozdef to deploy on into a different directory.
-In this example we place it in /opt/mozdef/envs/meteor/mozdef::
-
-  #!/bin/bash
-
-  if [ -d /opt/mozdef/meteor ]
-  then
-      cd /opt/mozdef/meteor
-      source /opt/mozdef/envs/python/bin/activate
-      mkdir -p /opt/mozdef/envs/meteor/mozdef
-
-      meteor npm install
-      meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef/
-      cp -r node_modules /opt/mozdef/envs/meteor/mozdef/node_modules
-  else
-    echo "Meteor does not exist on this host."
-    exit 0
-  fi
-
-There are systemd unit files available in the systemd directory of the public repo you can use to start mongo, meteor (mozdefweb), and the restapi (mozdefrestapi).
-These systemd files are pointing to the bundled alternative directory we just mentioned.
-
-If you aren't using systemd, or didn't bundle to the alternative directory, then run the mozdef UI via node manually::
-
-  export MONGO_URL=mongodb://mongoservername:3002/meteor
-  export ROOT_URL=http://meteorUIservername/
-  export PORT=443
-  node bundle/main.js
-
-
-Nginx
-*****
-
-We use the `nginx`_ webserver to serve the Web UI, Kibana, RestAPI, and Loginput::
-
-  yum install nginx
-
-.. _nginx: http://nginx.org/
-
-
-Kibana
-******
-
-`Kibana`_ is a webapp to visualize and search your Elasticsearch cluster data
-
-Create the repo file in /etc/yum/repos.d/kibana.repo::
-
-  [kibana-5.x]
-  name=Kibana repository for 5.x packages
-  baseurl=https://artifacts.elastic.co/packages/5.x/yum
-  gpgcheck=1
-  gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-  enabled=1
-  autorefresh=1
-  type=rpm-md
+In addition, environment variables can also be set instead of requiring modification of the settings.js file.:
 
 ::
 
-  yum install kibana
+    OPTIONS_METEOR_ROOTURL is "http://localhost" by default and should be set to the dns name of the UI where you will run MozDef
+    OPTIONS_METEOR_PORT is 80 by default and is the port on which the UI will run
+    OPTIONS_METEOR_ROOTAPI is http://rest:8081 by default and should resolve to the location of the rest api
+    OPTIONS_METEOR_KIBANAURL is http://localhost:9090/app/kibana# by default and should resolve to your kibana installation
+    OPTIONS_METEOR_ENABLECLIENTACCOUNTCREATION is true by default and governs whether accounts can be created
+    OPTIONS_METEOR_AUTHENTICATIONTYPE is meteor-password by default and can be set to oidc to allow for oidc authentication
+    OPTIONS_REMOVE_FEATURES is empty by default, but if you pass a comma separated list of features you'd like to remove they will no longer be available.
 
-Now you'll need to configure kibana to work with your system:
-You can set the various settings in /etc/kibana/kibana.yml.
-Some of the settings you'll want to configure are:
 
-* server.name (your server's hostname)
-* elasticsearch.url (the url to your elasticsearch instance and port)
-* logging.dest ( /path/to/kibana.log so you can easily troubleshoot any issues)
+Install mozdef meteor project::
 
-Then you can start the service::
+  su mozdef
+  export MONGO_URL=mongodb://localhost:3002/meteor
+  export ROOT_URL=http://localhost
+  export PORT=3000
 
-  service kibana start
-  service kibana enable
+  mkdir -p /opt/mozdef/envs/meteor/mozdef
+  cd /opt/mozdef/envs/mozdef/meteor
+  meteor npm install
+  meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef
+  ln --symbolic /opt/mozdef/envs/meteor/mozdef/node_modules /opt/mozdef/envs/mozdef/meteor/node_modules
+  cd /opt/mozdef/envs/meteor/mozdef/bundle/programs/server
+  npm install
 
-.. _Kibana: https://www.elastic.co/products/kibana
 
-RestAPI
-*******
+Copy over systemd file (as root)::
 
-Crontab
-*******
+  cp /opt/mozdef/envs/mozdef/systemdfiles/web/mozdefweb.service /usr/lib/systemd/system/mozdefweb.service
+  systemctl daemon-reload
+
+Start loginput service::
+
+  systemctl start mozdefweb
+  systemctl enable mozdefweb
+
+.. _Meteor: https://guide.meteor.com/
