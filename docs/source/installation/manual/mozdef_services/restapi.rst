@@ -14,4 +14,9 @@ Start loginput service::
   systemctl enable mozdefrestapi
 
 
-This service won't be publicly accessible out of the gate, we'll put an Nginx proxy in front of it to solve that problem!
+Verify service is working::
+
+  curl http://localhost:8081/status
+
+
+You should see some json returned!
