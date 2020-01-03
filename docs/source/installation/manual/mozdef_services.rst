@@ -25,14 +25,11 @@ MozDef services can be broken up into 3 different groups (Alert, Ingest, Web). E
 | Kibana           | Web                    | Elasticsearch, Nginx                     |
 +------------------+------------------------+------------------------------------------+
 
-.. toctree::
-    :maxdepth: 2
-
-    mozdef_services/restapi
-    mozdef_services/alerts
-    mozdef_services/alertactions
-    mozdef_services/bot
-    mozdef_services/cron
-    mozdef_services/loginput
-    mozdef_services/mq_workers
-    mozdef_services/web
+.. include:: mozdef_services/restapi.rst
+.. include:: mozdef_services/alerts.rst
+.. include:: mozdef_services/alertactions.rst
+.. include:: mozdef_services/bot.rst
+.. include:: mozdef_services/cron.rst
+.. include:: mozdef_services/loginput.rst
+.. include:: mozdef_services/mq_workers.rst
+.. include:: mozdef_services/web.rst
