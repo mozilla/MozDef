@@ -19,3 +19,6 @@ Start bot service::
   systemctl start mozdefbot
   systemctl enable mozdefbot
 
+Look at logs::
+
+  tail -f /var/log/mozdef/mozdefbot.log

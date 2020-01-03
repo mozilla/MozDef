@@ -29,4 +29,4 @@ Start alert actions service::
 
 Look at logs::
 
-  tail -f /var/log/mozdef/supervisord/alert_errors.log
+  tail -f /var/log/mozdef/alertactions.log
