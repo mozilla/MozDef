@@ -23,6 +23,11 @@ Then you can install mongodb::
 
   yum install -y mongodb-org
 
+Overwrite config file::
+
+  cp /opt/mozdef/envs/mozdef/config/mongod.conf /etc/mongod.conf
+
+
 Start Service::
 
   systemctl start mongod
