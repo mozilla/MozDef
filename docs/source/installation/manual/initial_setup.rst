@@ -21,7 +21,7 @@ Clone repository::
 Python Setup
 ************
 
-Setting up a Python 3.6 virtual environment::
+Setting up a Python 3.6 virtual environment (as root)::
 
   yum install -y epel-release
   yum install -y python36 python36-devel python3-pip libcurl-devel gcc
@@ -30,9 +30,8 @@ Setting up a Python 3.6 virtual environment::
   cd /opt/mozdef/envs
   /usr/local/bin/virtualenv -p /bin/python3 /opt/mozdef/envs/python
 
-Install MozDef python requirements::
+Install MozDef python requirements (as mozdef user)::
 
-  su mozdef
   source /opt/mozdef/envs/python/bin/activate
   cd /opt/mozdef/envs/mozdef
   PYCURL_SSL_LIBRARY=nss pip install -r requirements.txt
@@ -41,7 +40,7 @@ Install MozDef python requirements::
 Syslog Setup
 ************
 
-Copy over mozdef syslog file::
+Copy over mozdef syslog file (as root)::
 
   cp /opt/mozdef/envs/mozdef/config/50-mozdef-filter.conf /etc/rsyslog.d/50-mozdef-filter.conf
 

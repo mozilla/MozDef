@@ -3,6 +3,8 @@ MozDef Services
 
 MozDef services can be broken up into 3 different groups (Alert, Ingest, Web). Each group of services should be run on the same machine, with all of the Ingest services able to run on N number of machines, allowing for a more distrubuted environment.
 
+.. note:: It's recommended in a distributed environment, to have only 1 Alert Service node, 1 Web Service node, and N Ingest Service nodes.
+
 +------------------+------------------------+------------------------------------------+
 | MozDef Service   |     Service Type       |      Required Service(s)                 |
 +==================+========================+==========================================+
@@ -26,7 +28,6 @@ MozDef services can be broken up into 3 different groups (Alert, Ingest, Web). E
 .. toctree::
     :maxdepth: 2
 
-    mozdef_services/web
     mozdef_services/restapi
     mozdef_services/alerts
     mozdef_services/alertactions
@@ -34,3 +35,4 @@ MozDef services can be broken up into 3 different groups (Alert, Ingest, Web). E
     mozdef_services/cron
     mozdef_services/loginput
     mozdef_services/mq_workers
+    mozdef_services/web
