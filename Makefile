@@ -49,6 +49,7 @@ tests: build-tests run-tests  ## Run all tests (getting/building images as neede
 run-tests-resources-external: ## Just spin up external resources for tests and have them listen externally
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 9200:9200 -d elasticsearch
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 5672:5672 -d rabbitmq
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 3002:3002 -d mongodb
 
 .PHONY: run-tests-resources
 run-tests-resources:  ## Just run the external resources required for tests
