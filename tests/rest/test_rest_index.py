@@ -16,6 +16,35 @@ from dateutil.parser import parse
 from .rest_test_suite import RestTestSuite
 
 
+class TestMongoConnection(RestTestSuite):
+    routes = ['/test', '/test/']
+    status_code = 200
+
+    def setup(self):
+        super().setup()
+        self.mongoclient.test_database.tests.insert_one({
+            'name': 'test_item_1',
+            'value': 32
+        })
+
+    def teardown(self):
+        super().teardown()
+        self.mongoclient.test_database.tests.delete_one({
+            'name': 'test_item_1'
+        })
+
+    def test_route_endpoints(self):
+        db = self.mongoclient.test_database
+
+        db.tests.update_one(
+            {'name': 'test_item_1'},
+            {'$inc': {'value': 32}})
+
+        found = db.tests.find_one({'name': 'test_item_1'})
+
+        assert found.get('value') == 64
+
+
 class TestTestRoute(RestTestSuite):
     routes = ['/test', '/test/']
 
@@ -283,6 +312,7 @@ class TestLoginCountsRoute(RestTestSuite):
             assert parse(json_resp[2]['begin']).tzname() == 'UTC'
             assert type(json_resp[2]['end']) == str
             assert parse(json_resp[2]['begin']).tzname() == 'UTC'
+
 
 # Routes left need to have unit tests written for:
 # @route('/veris')

@@ -43,6 +43,9 @@ def parse_config_file():
         options.mqport = getConfig('mqport', 5672, options.configfile)
         options.mqack = getConfig('mqack', True, options.configfile)
 
+        options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
+        options.mongoport = getConfig('mongoport', 3002, options.configfile)
+
         CONFIG_FILE_CONTENTS = options
 
     return CONFIG_FILE_CONTENTS
