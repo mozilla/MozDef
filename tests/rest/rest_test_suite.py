@@ -3,6 +3,7 @@ import sys
 import mock
 import importlib
 from configlib import OptionParser
+from pymongo import MongoClient
 
 from mozdef_util.utilities.dot_dict import DotDict
 
@@ -30,4 +31,8 @@ class RestTestSuite(HTTPTestSuite):
         importlib.reload(plugins)
         from rest import index as rest_index
         self.application = rest_index.application
+
         super().setup()
+
+        self.mongoclient = MongoClient(
+            self.options.mongohost, self.options.mongoport)
