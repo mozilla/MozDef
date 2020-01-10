@@ -553,7 +553,7 @@ def update_alert_status():
     bad_request = 400
 
     mongo = MongoClient(options.mongohost, options.mongoport)
-    alerts = mongo['alerts']
+    alerts = mongo.meteor['alerts']
 
     response.content_type = 'appliation/json'
 
