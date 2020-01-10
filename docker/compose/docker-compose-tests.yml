@@ -33,6 +33,8 @@ services:
       - base
     restart: always
     command: ["bin/mongod", "--config", "/etc/mongod.conf"]
+    ports:
+      - 3002:3002
     networks:
       - default
   rabbitmq:
