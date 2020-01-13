@@ -528,7 +528,7 @@ def update_alert_status():
         we are to update.
         * `"status"` is one of "manual", "inProgress", "acknowledged"
         or "escalated".
-        * `confidence` is one of "highest", "high", "moderate", "low",
+        * `identityConfidence` is one of "highest", "high", "moderate", "low",
         or "lowest".
 
 
@@ -578,17 +578,20 @@ def update_alert_status():
 
     valid_confidences = ['highest', 'high', 'moderate', 'low', 'lowest']
 
-    if req['user']['confidence'] not in valid_confidences:
+    if req['identityConfidence'] not in valid_confidences:
         response.status = bad_request
         response.body = json.dumps({
-            'error': 'user.confidence not one of {}'.format(
+            'error': 'user.identityConfidence not one of {}'.format(
                 ' or '.join(valid_confidences))
         })
         return response
 
-    triage = {
-        'user': req['user'],
-        'response': req['response']
+    details = {
+        'triage': {
+            'user': req['user'],
+            'response': req['response']
+        },
+        'identityConfidence': req['identityConfidence']
     }
 
     modified_count = 0
@@ -600,7 +603,7 @@ def update_alert_status():
 
     modified_count += alerts.update_one(
         {'esmetadata': {'id': req['alert']}},
-        {'$set': {'details': {'triage': triage}}}
+        {'$set': {'details': details}}
     ).modified_count
 
     if modified_count < 2:
@@ -828,7 +831,7 @@ def initConfig():
 
     # mongo connectivity options
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
-    options.mongoport = getConfig('mongoport', 3001, options.configfile)
+    options.mongoport = getConfig('mongoport', 3002, options.configfile)
 
     options.listen_host = getConfig('listen_host', '127.0.0.1', options.configfile)
 
