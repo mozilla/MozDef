@@ -314,6 +314,56 @@ class TestLoginCountsRoute(RestTestSuite):
             assert parse(json_resp[2]['begin']).tzname() == 'UTC'
 
 
+class TestAlertStatus(RestTestSuite):
+    def setup(self):
+        super().setup()
+
+        # Testing both routes is superfluous.
+        self.route = '/alertstatus'
+        self.alert_id = 'testid123'
+
+        test_alert = {
+            'esmetadata': {
+                'id': self.alert_id
+            },
+            'status': 'manual'
+        }
+
+        self.alerts_db = self.mongoclient.meteor.alerts
+        self.alerts_db.insert_one(test_alert)
+
+    def teardown(self):
+        super().teardown()
+
+        self.alerts_db.delete_one({'esmetadata': {'id': self.alert_id}})
+
+    def test_route_endpoints(self):
+        req_params = {
+            'alert': self.alert_id,
+            'status': 'acknowledged',
+            'user': {
+                'email': 'tester@testing.com',
+                'slack': 'tester'
+            },
+            'identityConfidence': 'high',
+            'response': 'yes'
+        }
+
+        resp = self.app.post_json(self.route, req_params)
+
+        query = {'esmetadata': {'id': self.alert_id}}
+        alert = self.alerts_db.find_one(query)
+
+        assert 'error' in resp.json
+        assert resp.json['error'] is None
+
+        assert alert['status'] == 'acknowledged'
+        assert alert['details']['triage']['user']['slack'] == 'tester'
+        assert alert['details']['triage']['response'] == 'yes'
+
+        return
+
+
 # Routes left need to have unit tests written for:
 # @route('/veris')
 # @route('/veris/')
