@@ -19,10 +19,7 @@ from mozdef_util.utilities.logger import logger, initLogger
 
 def fetch_db_data(db_download_location):
     logger.debug('Fetching db data from ' + db_download_location)
-    auth_creds = None
-    if options.account_id != '' and options.license_key != '':
-        logger.debug('Using credentials for maxmind')
-        auth_creds = (options.account_id, options.license_key)
+    auth_creds = (options.account_id, options.license_key)
     response = requests.get(db_download_location, auth=auth_creds)
     if not response.ok:
         raise Exception("Received bad response from maxmind server: {0}".format(response.text))
