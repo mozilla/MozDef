@@ -42,6 +42,7 @@ RUN \
   install --owner mozdef --group mozdef --directory /opt/mozdef/envs /opt/mozdef/envs/mozdef
 
 COPY --chown=mozdef:mozdef meteor /opt/mozdef/envs/mozdef/meteor
+COPY --chown=mozdef:mozdef docker/compose/mozdef_meteor/files/settings.js /opt/mozdef/envs/mozdef/meteor/imports/settings.js
 
 USER mozdef
 

@@ -57,11 +57,9 @@ class AlertAuthSignRelengSSH(AlertTask):
                 sourceipaddress = x['details']['sourceipaddress']
 
         targetuser = 'unknown'
-        expr = re.compile(r'Accepted publickey for ([A-Za-z0-9]+) from')
-        m = expr.match(event['_source']['summary'])
-        groups = m.groups()
-        if len(groups) > 0:
-            targetuser = groups[0]
+        found_usernames = re.findall(r'Accepted publickey for ([A-Za-z0-9]+) from', event['_source']['summary'])
+        if len(found_usernames) > 0:
+            targetuser = found_usernames[0]
 
         summary = 'SSH login from {0} on {1} as user {2}'.format(sourceipaddress, targethost, targetuser)
         return self.createAlertDict(summary, category, tags, [event], severity, ircchannel=self.config['ircchannel'])
