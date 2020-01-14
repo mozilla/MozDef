@@ -1,0 +1,11 @@
+---
+version: '3.7'
+services:
+  docs:
+    image: dldl/sphinx-server
+    networks:
+      - default
+    volumes:
+        - ../../docs/source:/web
+    ports:
+      - 8000:8000

@@ -184,27 +184,6 @@ class TestLocality:
         assert len(update.state.localities) == 1
         assert update.state.localities[0].city == 'Toronto'
 
-    def test_update_flat_map(self):
-        original = locality.Update(
-            locality.State('locality', 'tester', []), False)
-
-        def _add_locality(state: locality.State) -> locality.Update:
-            state.localities.append(locality.Locality(
-                sourceipaddress='32.64.128.255',
-                city='Berlin',
-                country='DE',
-                lastaction=toUTC(datetime.now()) - timedelta(days=10),
-                latitude=52.520008,
-                longitude=13.404954,
-                radius=50))
-
-            return locality.Update(state, True)
-
-        new = locality.Update.flat_map(_add_locality, original)
-
-        assert len(new.state.localities) == 1
-        assert new.did_update
-
     def test_from_event_with_missing_data(self):
         bad_events = [
             {

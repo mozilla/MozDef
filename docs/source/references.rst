@@ -1,5 +1,9 @@
 References
 ==========
 
-* GeoModel
-    * `v0.1 Specification <geomodel/specifications/v0_1.html>`_
+.. toctree::
+    :maxdepth: 2
+
+    screenshots
+    geomodel/specifications/v0_1
+    reinvent_presentation

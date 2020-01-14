@@ -66,6 +66,15 @@ class TestAlertProxyDropIP(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
+        event["_source"]["details"]["host"] = "169.254.169.254"
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test with default negative event", events=events
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
         event["_source"]["details"]["host"] = "1.idonotexist.com"
     test_cases.append(
         NegativeAlertTestCase(

@@ -16,7 +16,6 @@ RUN \
      glibc-devel \
      gcc \
      libstdc++ \
-     libffi-devel \
      zlib-devel \
      libcurl-devel \
      openssl \
@@ -38,10 +37,6 @@ ENV PYCURL_SSL_LIBRARY=nss
 
 # Create python virtual environment and install dependencies
 COPY --chown=mozdef:mozdef requirements.txt /opt/mozdef/envs/mozdef/requirements.txt
-
-COPY --chown=mozdef:mozdef cron/update_geolite_db.py /opt/mozdef/envs/mozdef/cron/update_geolite_db.py
-COPY --chown=mozdef:mozdef cron/update_geolite_db.conf /opt/mozdef/envs/mozdef/cron/update_geolite_db.conf
-COPY --chown=mozdef:mozdef cron/update_geolite_db.sh /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
 
 COPY --chown=mozdef:mozdef mozdef_util /opt/mozdef/envs/mozdef/mozdef_util
 

@@ -40,7 +40,7 @@ parser.add_argument(
     nargs='?'
 )
 
-default_file = os.path.realpath(cron_dir_path + '/backup.json')
+default_file = os.path.realpath(cron_dir_path + '/backup.conf')
 parser.add_argument(
     'backup_conf_file',
     help='The relative path to backup.conf file (default: {0})'.format(default_file),
@@ -68,11 +68,6 @@ weekly_index_alias = 'events-weekly'
 alert_index_name = current_date.strftime("alerts-%Y%m")
 
 kibana_index_name = '.kibana_1'
-# For this version of kibana, they require specifying
-# the kibana version via the api for setting
-# the default index, seems weird, but it is what it is.
-kibana_version = '6.8.0'
-
 state_index_name = 'mozdefstate'
 
 index_settings_str = ''
@@ -169,8 +164,9 @@ if kibana_index_name in client.get_indices():
         print("Index patterns already exist, exiting script early")
         sys.exit(0)
 
-# Create index-patterns
 kibana_headers = {'content-type': 'application/json', 'kbn-xsrf': 'true'}
+
+# Create index-patterns
 index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
 listing = os.listdir(index_mappings_path)
 for infile in listing:
@@ -184,20 +180,12 @@ for infile in listing:
         if not resp.ok:
             print("Unable to create index mapping: " + resp.text)
 
-# Remove existing default index mapping if it exists
-resp = requests.delete(url=kibana_url + "/api/saved_objects/config/" + kibana_version, headers=kibana_headers)
-if not resp.ok:
-    print("Unable to delete existing default index mapping: {} {}".format(resp.status_code, resp.content))
-
 # Set default index mapping to events-*
 data = {
-    "attributes": {
-        "buildNum": "19548",
-        "defaultIndex": "events-*"
-    }
+    "value": "events-*"
 }
 print("Creating default index pattern for events-*")
-resp = requests.post(url=kibana_url + "/api/saved_objects/config/" + kibana_version, data=json.dumps(data), headers=kibana_headers)
+resp = requests.post(url=kibana_url + "/api/kibana/settings/defaultIndex", data=json.dumps(data), headers=kibana_headers)
 if not resp.ok:
     print("Failed to set default index: {} {}".format(resp.status_code, resp.content))
 

@@ -8,7 +8,7 @@
 import logging
 import sys
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def setup_logging():
     logger = logging.getLogger()
-    h = logging.StreamHandler(sys.stdout)
+    logging.StreamHandler(sys.stdout)
     logger.setLevel(logging.DEBUG)
     return logger
 

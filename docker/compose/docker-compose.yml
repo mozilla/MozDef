@@ -119,9 +119,6 @@ services:
       cache_from:
         - mozdef/mozdef_base
         - mozdef_base:latest
-    command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
-    volumes:
-      - geolite_db:/opt/mozdef/envs/mozdef/data
   bootstrap:
     image: mozdef/mozdef_bootstrap
     build:
