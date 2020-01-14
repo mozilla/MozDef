@@ -6,11 +6,9 @@ Table of Contents
 
   overview
   introduction
-  demo
   installation
   usage
   cloud_deployment
-  advanced_settings
   development
   references
   contributors

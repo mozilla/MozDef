@@ -64,9 +64,6 @@ services:
         max-size: "10m"
     env_file:
       - cloudy_mozdef.env
-    command: bash -c 'su - mozdef -c /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh'
-    volumes:
-      - geolite_db:/opt/mozdef/envs/mozdef/data
   alertactions:
     image: mozdef/mozdef_alertactions:latest
     logging:

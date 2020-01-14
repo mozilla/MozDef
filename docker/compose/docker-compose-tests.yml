@@ -19,6 +19,24 @@ services:
     #   - 9200:9200
     networks:
       - default
+  mongodb:
+    image: mozdef/mozdef_mongodb
+    build:
+      context: ../../
+      dockerfile: docker/compose/mongodb/Dockerfile
+      cache_from:
+        - mozdef_mongodb:latest
+        - mozdef_base:latest
+        - mozdef/mongodb
+        - mozdef/mozdef_base
+    depends_on:
+      - base
+    restart: always
+    command: ["bin/mongod", "--config", "/etc/mongod.conf"]
+    ports:
+      - 3002:3002
+    networks:
+      - default
   rabbitmq:
     image: mozdef/mozdef_rabbitmq
     build:

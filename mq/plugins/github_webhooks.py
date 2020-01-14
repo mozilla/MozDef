@@ -7,6 +7,7 @@ import os
 import jmespath
 import yaml
 from mozdef_util.utilities.toUTC import toUTC
+from mozdef_util.utilities.key_exists import key_exists
 
 
 class message(object):
@@ -38,11 +39,12 @@ class message(object):
         newmessage['category'] = 'github'
         newmessage['tags'] = ['github', 'webhook']
         newmessage['eventsource'] = 'githubeventsqs'
-        if 'event' in message['details']:
+
+        if key_exists('details.event', message):
             newmessage['source'] = message['details']['event']
         else:
             newmessage['source'] = 'UNKNOWN'
-        if 'request_id' in message['details']:
+        if key_exists('details.request_id', message):
             newmessage['details']['request_id'] = message['details']['request_id']
         else:
             newmessage['details']['request_id'] = 'UNKNOWN'
@@ -57,7 +59,45 @@ class message(object):
             if 'commit_ts' in newmessage['details']:
                 newmessage['timestamp'] = newmessage['details']['commit_ts']
                 newmessage['utctimestamp'] = toUTC(newmessage['details']['commit_ts']).isoformat()
+
         else:
             newmessage = None
+
+        if key_exists('source', newmessage) and newmessage.get('source') is not 'UNKNOWN':
+            newmessage['summary'] = "github: {0}: ".format(newmessage['source'])
+            if key_exists('source', newmessage) and newmessage.get('source') is 'installation':
+                newmessage['summary'] = "github app: {0} ".format(newmessage['source'])
+            if key_exists('source', newmessage) and newmessage.get('source') is 'public':
+                newmessage['summary'] = "github : change from private to {0} ".format(newmessage['source'])
+        if key_exists('details.status', newmessage):
+            action_status = "{0} ".format(newmessage['details']['status'])
+            newmessage['summary'] += action_status
+        if key_exists('details.action', newmessage):
+            github_action = "{0} ".format(newmessage['details']['action'])
+            newmessage['summary'] += github_action
+        if key_exists('details.ref_type', newmessage):
+            reference = "{0} ".format(newmessage['details']['ref_type'])
+            newmessage['summary'] += reference
+        if key_exists('details.repo_name', newmessage):
+            repository_name = "on repo: {0} ".format(newmessage['details']['repo_name'])
+            newmessage['summary'] += repository_name
+        if key_exists('details.alert_note', newmessage):
+            sec_advisory = "for: {0}".format(newmessage['details']['alert_note'])
+            newmessage['summary'] += sec_advisory
+        if key_exists('details.alert_package', newmessage):
+            vuln_package = "package: {0} ".format(newmessage['details']['alert_package'])
+            newmessage['summary'] += vuln_package
+        if key_exists('details.team_name', newmessage):
+            team_name = "team: {0} ".format(newmessage['details']['team_name'])
+            newmessage['summary'] += team_name
+        if key_exists('details.blocked_user_login', newmessage):
+            blocked_user = "user: {0} ".format(newmessage['details']['blocked_user_login'])
+            newmessage['summary'] += blocked_user
+        if key_exists('details.org_login', newmessage):
+            org_name = "in org: {0} ".format(newmessage['details']['org_login'])
+            newmessage['summary'] += org_name
+        if key_exists('details.username', newmessage):
+            github_user = "user: {0}".format(newmessage['details']['username'])
+            newmessage['summary'] += "triggered by " + github_user
 
         return (newmessage, metadata)

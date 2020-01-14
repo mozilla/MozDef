@@ -161,12 +161,16 @@ class AlertTestSuite(UnitTestSuite):
         rabbitmq_message = self.rabbitmq_alerts_consumer.channel.basic_get()
         rabbitmq_message.channel.basic_ack(rabbitmq_message.delivery_tag)
         document = json.loads(rabbitmq_message.body)
-        assert document['notify_mozdefbot'] is test_case.expected_alert['notify_mozdefbot'], 'Alert from rabbitmq has bad notify_mozdefbot field'
-        assert document['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert from rabbitmq has bad ircchannel field'
-        assert document['summary'] == found_alert['_source']['summary'], 'Alert from rabbitmq has bad summary field'
-        assert document['utctimestamp'] == found_alert['_source']['utctimestamp'], 'Alert from rabbitmq has bad utctimestamp field'
-        assert document['category'] == found_alert['_source']['category'], 'Alert from rabbitmq has bad category field'
-        assert len(document['events']) == len(found_alert['_source']['events']), 'Alert from rabbitmq has bad events field'
+        assert '_id' in document
+        assert '_source' in document
+        assert '_index' in document
+        alert_body = document['_source']
+        assert alert_body['notify_mozdefbot'] is test_case.expected_alert['notify_mozdefbot'], 'Alert from rabbitmq has bad notify_mozdefbot field'
+        assert alert_body['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert from rabbitmq has bad ircchannel field'
+        assert alert_body['summary'] == found_alert['_source']['summary'], 'Alert from rabbitmq has bad summary field'
+        assert alert_body['utctimestamp'] == found_alert['_source']['utctimestamp'], 'Alert from rabbitmq has bad utctimestamp field'
+        assert alert_body['category'] == found_alert['_source']['category'], 'Alert from rabbitmq has bad category field'
+        assert len(alert_body['events']) == len(found_alert['_source']['events']), 'Alert from rabbitmq has bad events field'
 
     def verify_saved_events(self, found_alert, test_case):
         """

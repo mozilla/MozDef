@@ -37,34 +37,3 @@ the incident which allows you to aggregate metrics about your incidents.
 
 
 .. image:: images/IncidentHandling.png
-
-d3 visualizations
------------------
-The d3.js library is included in MozDef to allow you custom visualizations of your data. The is a sample
-visualization of login counts (success vs failed) that you can integrate into your central authentication directory
-for quick context into user activity.
-
-.. image:: images/d3Visualizations.png
-
-Geo location of Attackers
--------------------------
-MozDef includes the WebGL globe as a three.js visualization that geolocates attackers to give you quick, interactive context about
-threat actors.
-
-.. image:: images/AttackerGlobe.png
-
-3D interactive Attacker visualization
--------------------------------------
-MozDef correlates alerts and events into a 3D visual representation of attackers as ogres. You can use this
-to quickly filter attackers by category or timeframe and get easy access to recent alerts and events from attackers in 3D.
-
-
-.. image:: images/AttackerOgres.png
-
-3D interactive Attack visualization via Landmass
-------------------------------------------------
-MozDef has a service-oriented visualization where you will get see various animations on a landmass service wise.
-There are also options for handling attacks, and a sidebar which gives you detailed info into the attacks
-
-
-.. image:: images/AttacksLandmass.png
