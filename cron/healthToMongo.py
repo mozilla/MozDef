@@ -144,7 +144,7 @@ def initConfig():
     options.esservers = list(getConfig('esservers', 'http://localhost:9200',
                                        options.configfile).split(','))
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
-    options.mongoport = getConfig('mongoport', 3001, options.configfile)
+    options.mongoport = getConfig('mongoport', 3002, options.configfile)
 
 
 if __name__ == '__main__':

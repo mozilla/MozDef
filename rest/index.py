@@ -596,6 +596,8 @@ def update_alert_status():
 
     modified_count = 0
 
+    import pdb; pdb.set_trace()
+
     modified_count += alerts.update_one(
         {'esmetadata': {'id': req['alert']}},
         {'$set': {'status': req['status']}}

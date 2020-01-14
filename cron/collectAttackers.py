@@ -432,7 +432,7 @@ def initConfig():
                                        'http://localhost:9200',
                                        options.configfile).split(','))
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
-    options.mongoport = getConfig('mongoport', 3001, options.configfile)
+    options.mongoport = getConfig('mongoport', 3002, options.configfile)
 
     # should we automatically categorize
     # new attackers based on their alerts?
