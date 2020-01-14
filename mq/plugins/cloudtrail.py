@@ -44,6 +44,7 @@ class message(object):
             'details.requestparameters.ebsoptimized',
             'details.requestparameters.filter',
             'details.requestparameters.iaminstanceprofile',
+            'details.requestparameters.invalidationbatch.callerreference',
             'details.requestparameters.imageid',
             'details.requestparameters.instancetype',
             'details.requestparameters.logstreamname',
