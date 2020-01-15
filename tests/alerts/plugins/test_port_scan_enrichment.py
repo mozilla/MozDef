@@ -56,7 +56,10 @@ class TestPortScanEnrichment(object):
                         },
                     }
                 }
-            ]
+            ],
+            'details': {
+                'something': 'original'
+            }
         }
 
         search_window = {
@@ -75,3 +78,4 @@ class TestPortScanEnrichment(object):
         assert enriched['details']['recentconnections'][0]['destinationipaddress'] in ['1.2.3.4', '4.3.2.1']
         assert enriched['details']['recentconnections'][0]['destinationport'] in [80, 443]
         assert enriched['details']['recentconnections'][0]['timestamp'] == EXAMPLE_TIMESTAMP
+        assert enriched['details']['something'] == 'original'
