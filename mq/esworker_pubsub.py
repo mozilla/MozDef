@@ -137,13 +137,6 @@ def initConfig():
 
     options.mqprotocol = getConfig("mqprotocol", "pubsub", options.configfile)
 
-    # plugin options
-    # secs to pass before checking for new/updated plugins
-    # seems to cause memory leaks..
-    # regular updates are disabled for now,
-    # though we set the frequency anyway.
-    options.plugincheckfrequency = getConfig("plugincheckfrequency", 120, options.configfile)
-
 
 def main():
     if hasUWSGI:
