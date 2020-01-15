@@ -108,7 +108,7 @@ def enrich(alert, search_window_hours, search_fn):
             hit.get('_source', {})
             for hit in search_fn(search_mac_assignment).get('hits', [])
         ],
-        lambda evt: evt['details']['ts'],
+        key=lambda evt: evt['details']['ts'],
         reverse=True)  # Sort into descending order from most recent to least.
 
     if len(assign_events) > 0:
@@ -129,7 +129,7 @@ def enrich(alert, search_window_hours, search_fn):
             hit.get('_source', {})
             for hit in search_fn(search_mac_owner).get('hits', [])
         ],
-        lambda evt: toUTC(evt['receivedtimestamp']),
+        key=lambda evt: toUTC(evt['receivedtimestamp']),
         reverse=True)  # Sort into descending order from most recent to least.
 
     if len(user_events) > 0:
@@ -148,3 +148,11 @@ def enrich(alert, search_window_hours, search_fn):
     alert['summary'] += '; IP assigned to {} ({})'.format(user, mac)
 
     return alert
+
+
+def _comma_eq_dict(s: str) -> typing.Dict[str, str]:
+    '''Parse a string formatted like `a=b,x=y z` into a dictionary such as
+    `{'a': 'b', 'x': 'y z'}`.  Note that all values are treated as strings.
+    '''
+
+    return dict([pair.split('=') for pair in s.split(',')])
