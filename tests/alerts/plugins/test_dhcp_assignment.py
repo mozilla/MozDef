@@ -28,7 +28,7 @@ class TestDHCPAssignment:
         self.orig_path = os.getcwd()
         self.alerts_path = os.path.join(os.path.dirname(__file__), "../../../alerts")
         sys.path.insert(0, self.alerts_path)
-    
+
     def teardown(self):
         os.chdir(self.orig_path)
         sys.path.remove(self.alerts_path)
