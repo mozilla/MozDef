@@ -1,0 +1,8 @@
+{
+  "person_api_client_id": "clientid",
+  "person_api_client_secret": "clientsecret",
+  "aws_access_key_id": "acecssid",
+  "aws_secret_access_key": "secret",
+  "aws_region": "us-west-2",
+  "aws_lambda_function": "test_fn"
+}

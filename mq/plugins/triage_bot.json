@@ -1,0 +1,4 @@
+{
+  "rest_api_url": "mozdef_rest_api",
+  "rest_api_token": "mozdef_rest_api_security_token"
+}
