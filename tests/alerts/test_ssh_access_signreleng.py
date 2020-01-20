@@ -142,3 +142,13 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
             events=[event],
         )
     )
+
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['summary'] = '[12345] Accepted publickey for ttesterson from 1.2.3.4 port 39190 ssh2'
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with processid at beginning of summary",
+            events=[event],
+            expected_alert=default_alert
+        )
+    )

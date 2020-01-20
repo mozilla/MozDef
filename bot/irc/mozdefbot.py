@@ -303,7 +303,10 @@ class alertConsumer(ConsumerMixin):
                     "alertworker exception: unknown body type received %r" % body)
                 return
 
-            body_dict = full_body['_source']
+            body_dict = full_body
+            # Handle messages that have full ES dict
+            if '_source' in full_body:
+                body_dict = full_body['_source']
 
             if 'notify_mozdefbot' in body_dict and body_dict['notify_mozdefbot'] is False:
                 # If the alert tells us to not notify, then don't post to IRC
