@@ -198,6 +198,8 @@ class message(object):
 
         if have_request:
             logger.error('Attempting to dispatch request')
+            logger.error('Alert {} triggered by {}'.format(
+                request.alert.value, request.user))
             result = dispatch(request, self._lambda_function_name)
 
             # In the case that dispatch fails, attempt to re-discover the name
