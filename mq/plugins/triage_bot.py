@@ -11,6 +11,8 @@ import typing as types
 import boto3
 import requests
 
+from mozdef_util.utilities.logger import logger
+
 
 _CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
 SLACK_BOT_FUNCTION_NAME_PREFIX = 'MozDefSlackTraigeBotAPI-SlackTriageBotApiFunction'
@@ -177,8 +179,10 @@ def update_alert_status(msg: UserResponseMessage, api: RESTConfig):
         headers['Authorization'] = 'Bearer {}'.format(api.token)
 
     try:
+        logger.error('Sending request to REST API')
         resp = requests.post(api.url, headers=headers, json=payload)
-    except:
+    except Exception as ex:
+        logger.exception('Request failed: {}'.format(ex))
         return False
 
     return resp.status_code < 300
@@ -202,6 +206,7 @@ def process(msg, meta, api_cfg):
     response = UserResponseMessage(
         ident, UserInfo(email, slack), confidence, resp)
 
+    logger.error('Updating status of alert {}'.format(repsonse.identifier)
     update_succeeded = update_alert_status(response, api_cfg)
 
     if not update_succeeded:
@@ -229,6 +234,7 @@ class message:
 
     def onMessage(self, message, metadata):
         if message['category'] == 'triagebot':
+            logger.error('Got a message to process')
             return process(message, metadata, self.api_cfg)
 
         return (message, metadata)
