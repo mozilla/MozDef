@@ -147,7 +147,11 @@ class AlertGeoModel(AlertTask):
             summary = alert.summary(new_alert)
 
             alert_dict = self.createAlertDict(
-                summary, 'geomodel', ['geomodel'], events, 'WARNING')
+                summary,
+                'geomodel',
+                ['geomodel'],
+                events,
+                new_alert.severity.value)
 
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict['details'] = {
