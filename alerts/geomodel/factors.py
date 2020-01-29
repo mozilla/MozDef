@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, NamedTuple
 from functools import reduce
 
 import maxminddb as mmdb
@@ -6,23 +6,41 @@ import maxminddb as mmdb
 from alerts.geomodel.alert import Alert, Severity
 
 
+class Enhancement(NamedTuple):
+    '''Information to enhance an `Alert` with, produced by an implementation of
+    a `FactorInterface`.  The `pipe` function handles constructing a modified
+    `Alert` with enhancements applied.
+    '''
+
+    extras: dict
+    severity: Severity
+
+
 # A factor is a sort of plugin intended to enrich a GeoModel alert with extra
 # information that may be useful to incident responders as well as to modify
 # the alert's severity.
-FactorInterface = Callable[[Alert], Alert]
+FactorInterface = Callable[[Alert], Enhancement]
 
 
 def pipe(alert: Alert, factors: List[FactorInterface]) -> Alert:
-    '''Run an alert through an ordered pipeline of factors.
+    '''Run an alert through an ordered pipeline of factors, applying the
+    `Enhancement`s produced by each in turn.
     '''
 
+    def _apply_enhancement(alert: Alert, enhance: Enhancement) -> Alert:
+        return Alert(
+            username=alert.username,
+            hops=alert.hops,
+            severity=enhance.severity,
+            factors=alert.factors + [enhance.extras])
+
     return reduce(
-        lambda a, fn: fn(a),
+        lambda alrt, fctr: _apply_enhancement(alrt, fctr(alrt)),
         factors,
         alert)
 
 
-def asn_movement(maxmind_db_path: str, escalate: Severity) -> FactorInterface:
+def asn_movement(db, escalate: Severity) -> FactorInterface:
     '''Enriches GeoModel alerts with information about the ASNs from which IPs
     in hops originate.  When movement from one ASN to another is detected, the
     alert's severity will be raised.
@@ -35,21 +53,17 @@ def asn_movement(maxmind_db_path: str, escalate: Severity) -> FactorInterface:
     '''
         
     # Keys in the dictionaries returned by MaxMind.
-    asn = 'autonomous_system_number'
+    # asn = 'autonomous_system_number'  # currently not used
     org = 'autonomous_system_organization'
 
-    def factor(alert: Alert) -> Alert:
-        # We want to manage the "connection" to the maxminddb correctly,
-        # closing it when we're finished. Since opening a connection isn't
-        # expensive, we prefer not to delegate handling the dependency to
-        # the GeoModel alert itself.
-        db = mmdb.open_database(maxmind_db_path)
-
+    def factor(alert: Alert) -> Enhancement:
         ips = [hop.origin.ip for hop in alert.hops]
         if len(alert.hops) > 0:
             ips.append(alert.hops[-1].destination.ip)
 
-        unique_ips = list(set(ips))
+        # Converting the list of IPs to a set to get the unique items can
+        # result in items being re-arranged.
+        unique_ips = list({ip: True for ip in ips}.keys())
 
         asn_info = [db.get(ip) for ip in unique_ips]
         asn_pairs = [
@@ -62,15 +76,8 @@ def asn_movement(maxmind_db_path: str, escalate: Severity) -> FactorInterface:
             if pair[0][org] != pair[1][org]
         ]
 
-        alert.factors.append({
-            'asn_hops': asn_hops
-        })
-
-        if len(asn_hops) > 0:
-            alert.severity = escalate
-
-        db.close()
-
-        return alert
+        return Enhancement(
+            extras={'asn_hops': asn_hops},
+            severity=escalate if len(asn_hops) > 0 else alert.severity)
 
     return factor

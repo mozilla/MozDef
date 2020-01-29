@@ -28,7 +28,7 @@ def null_origin(ip):
         latitude=0.0,
         longitude=0.0,
         observed=datetime.now(),
-        geopoint='0.0,0.0'),
+        geopoint='0.0,0.0')
 
 
 # A set of records for a mocked MaxMind database containing information about
@@ -48,14 +48,15 @@ asn_mvmt_records = {
     }
 }
 
-@patch('maxminddb.open_database', return_value=MockMMDB(asn_mvmt_records))
-def test_asn_movement():s
+
+def test_asn_movement():
     factor = factors.asn_movement(
-        '/ignored/path/db.mmdb', alert.Severity.WARNING)
+        MockMMDB(asn_mvmt_records),
+        alert.Severity.WARNING)
 
     test_hops = [
         alert.Hop(
-            origin=null_origin('1.2.3.4')
+            origin=null_origin('1.2.3.4'),
             destination=null_origin('4.3.2.1')),
         alert.Hop(
             origin=null_origin('4.3.2.1'),
@@ -78,7 +79,7 @@ def test_asn_movement():s
     assert 'asn_hops' in modified_alert.factors[0]
     assert len(modified_alert.factors[0]['asn_hops']) == 2
 
-    asn_key = 'autonomous_system_number'
+    asn_key = 'autonomous_system_organization'
     asn1 = modified_alert.factors[0]['asn_hops'][0][0][asn_key]
     asn2 = modified_alert.factors[0]['asn_hops'][0][1][asn_key]
     asn3 = modified_alert.factors[0]['asn_hops'][1][0][asn_key]
