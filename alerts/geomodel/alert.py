@@ -49,11 +49,17 @@ class Severity(Enum):
 
 class Alert(NamedTuple):
     '''A container for the data the alerts output by GeoModel contain.
+
     '''
 
     username: str
     hops: List[Hop]
     severity: Severity
+    # Because we cannot know ahead of time what factors (see factors.py) will
+    # have been implemented and registered for use, this container should be
+    # thought of as something of a black-box useful only for humans looking
+    # at the alert after it fires.
+    factors: List[dict]
 
 
 def _travel_possible(loc1: Locality, loc2: Locality) -> bool:

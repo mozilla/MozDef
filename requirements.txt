@@ -41,3 +41,4 @@ tzlocal==1.4
 uwsgi==2.0.17.1
 tldextract==2.2.0
 websocket-client==0.44.0
+maxmind==1.4.1
