@@ -1,8 +1,6 @@
 from typing import Callable, List, NamedTuple
 from functools import reduce
 
-import maxminddb as mmdb
-
 from alerts.geomodel.alert import Alert, Severity
 
 
