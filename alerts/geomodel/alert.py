@@ -111,7 +111,7 @@ def alert(
     if len(hops) == 0:
         return None
 
-    return Alert(username, hops, Severity.WARNING)
+    return Alert(username, hops, Severity.INFO)
 
 
 def summary(alert: Alert) -> str:
