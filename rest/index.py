@@ -32,6 +32,8 @@ from mozdef_util.utilities.toUTC import toUTC
 options = None
 pluginList = list()   # tuple of module,registration dict,priority
 
+DUP_CHAIN_DB = 'duplicatechains'
+
 
 def enable_cors(fn):
     ''' cors decorator for rest/ajax'''
@@ -596,8 +598,6 @@ def update_alert_status():
 
     modified_count = 0
 
-    import pdb; pdb.set_trace()
-
     modified_count += alerts.update_one(
         {'esmetadata': {'id': req['alert']}},
         {'$set': {'status': req['status']}}
@@ -612,6 +612,87 @@ def update_alert_status():
         response.status = bad_request
         response.body = json.dumps({
             'error': 'Alert not found'
+        })
+        return response
+
+    response.status = ok
+    response.body = json.dumps({'error': None})
+
+    return response
+
+
+@post('/alerttriagechain')
+@post('/alerttriagechain/')
+def create_duplicate_chain():
+    '''Create a 'Duplicate Chain', linking information about alerts being
+    handled by the Triage Bot so that a user's response to a message about
+    one alert can be replicated against duplicate alerts without sending
+    multiple messages.
+
+    Requests are expected to take the following (JSON) form:
+
+    ```
+    {
+        "alert": str,
+        "user": str,
+        "identifiers": List[str]
+    }
+    ```
+
+    Where:
+        * `"alert"` is the "label" for the alert, signifying which of the
+        supported alerts is being triaged.
+        * `"user"` is the email address of the user contacted.
+        * `"identifier"` is a list of ElasticSearch IDs of alerts of the
+        same kind triggered by the same user.
+
+    This function writes back a response containing the following JSON.
+
+    ```
+    {
+        "error": Optional[str]
+    }
+    ```
+
+    If an error occurs, a duplicate chain will not be created and an error
+    string will be returned.  Otherwise, the `error` field will be `null.`
+    '''
+
+    ok = 200
+    bad_request = 400
+    internal_error = 500
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    dupchains = mongo.meteor[DUP_CHAIN_DB]
+
+    try:
+        req = json.loads(request.body.read())
+        request.body.close()
+    except ValueError:
+        response.status = bad_request
+        response.body = json.dumps({
+            'error': 'Missing or invalid request body')
+        })
+        return response
+
+    chain = {
+        'alert': req.get('alert'),
+        'user': req.get('user'),
+        'identifiers': req.get('identifiers', [])
+    }
+
+    if chain['alert'] is not None and chain['user'] is not None:
+        response.status = bad_request
+        response.body = json.dumps({
+            'error': 'Request missing required key `alert` or `user`'
+        })
+        return response
+
+    result = dupchains.insert_one(chain)
+    if not result.acknowledged:
+        response.status = internal_error
+        response.body = json.dumps({
+            'error': 'Failed to store new duplicate chain'
         })
         return response
 
