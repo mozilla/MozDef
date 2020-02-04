@@ -1,4 +1,4 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
+#triage_bot This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
@@ -206,7 +206,7 @@ def process(msg, meta, api_cfg):
     response = UserResponseMessage(
         ident, UserInfo(email, slack), confidence, resp)
 
-    logger.error('Updating status of alert {}'.format(repsonse.identifier)
+    logger.error('Updating status of alert {}'.format(repsonse.identifier))
     update_succeeded = update_alert_status(response, api_cfg)
 
     if not update_succeeded:
