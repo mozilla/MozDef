@@ -67,7 +67,7 @@ class message(object):
                     newmessage["details"][key] = mappedvalue
 
         # This is redundant
-        newmessage["summary"] = "{0} called {1} on {2}".format(
+        newmessage["summary"] = "{0} executed {1} on {2}".format(
             newmessage["details"]["username"], newmessage["details"]["action"], newmessage["details"]["resourcename"]
         )
 

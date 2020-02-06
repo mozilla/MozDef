@@ -321,5 +321,6 @@ class TestStackDriverAudit(object):
         assert result["details"]["resourcetype"] == "gce_instance"
         assert result["details"]["service"] == "compute.googleapis.com"
         assert result["details"]["username"] == "onceuponatime@inagalaxynottoofaraway.com"
+        assert result["summary"] == "onceuponatime@inagalaxynottoofaraway.com executed v1.compute.instances.reset on projects/mcd-001-252615/zones/us-west2-a/instances/mozdefdevvm1"
 
         assert "protoPayload" not in result["details"]

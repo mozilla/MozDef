@@ -241,4 +241,5 @@ class TestStackDriverGCEActivity(object):
         assert result["utctimestamp"] == "2019-11-22T01:23:47.936931+00:00"
         assert result["details"]["username"] == "luke@or.not"
         assert result["details"]["service"] == "compute.googleapis.com"
+        assert result["summary"] == "luke@or.not executed compute.instances.reset on mozdefdevvm1"
         assert "jsonPayload" not in result["details"]
