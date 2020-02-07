@@ -597,12 +597,12 @@ def update_alert_status():
     modified_count = 0
 
     modified_count += alerts.update_one(
-        {'esmetadata': {'id': req['alert']}},
+        {'esmetadata.id': req['alert']},
         {'$set': {'status': req['status']}}
     ).modified_count
 
     modified_count += alerts.update_one(
-        {'esmetadata': {'id': req['alert']}},
+        {'esmetadata.id': req['alert']},
         {'$set': {'details': details}}
     ).modified_count
 
