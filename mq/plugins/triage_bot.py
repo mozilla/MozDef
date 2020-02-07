@@ -193,6 +193,7 @@ def process(msg, meta, api_cfg):
     the MozDef REST API to update the status of the identified alert.
     '''
 
+    msg = msg['details']
     ident = msg.get('identifier')
     user = msg.get('user', {})
     email = user.get('email')
@@ -206,7 +207,7 @@ def process(msg, meta, api_cfg):
     response = UserResponseMessage(
         ident, UserInfo(email, slack), confidence, resp)
 
-    logger.error('Updating status of alert {}'.format(repsonse.identifier))
+    logger.error('Updating status of alert {}'.format(response.identifier))
     update_succeeded = update_alert_status(response, api_cfg)
 
     if not update_succeeded:
@@ -220,7 +221,7 @@ class message:
     '''
 
     def __init__(self):
-        self.registration = 'triagebot'
+        self.registration = ['triagebot']
         self.priority = 5
     
         with open(_CONFIG_FILE) as cfg_file:
