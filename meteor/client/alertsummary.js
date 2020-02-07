@@ -113,7 +113,8 @@ if ( Meteor.isClient ) {
                 category: 1,
                 acknowledged: 1,
                 acknowledgedby: 1,
-                url: 1
+                url: 1,
+                'status': 1
             },
             sort: {
                 utcepoch: -1
@@ -268,7 +269,8 @@ if ( Meteor.isClient ) {
                             category: 1,
                             acknowledged: 1,
                             acknowledgedby: 1,
-                            url: 1
+                            url: 1,
+                            'status': 1
                         },
                         sort: { utcepoch: -1 },
                         reactive: false
