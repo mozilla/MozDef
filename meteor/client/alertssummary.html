@@ -72,6 +72,7 @@ Copyright (c) 2014 Mozilla Corporation
                 <td class="upperwhite">Timestamp</td>
                 <td class="upperwhite">Links</td>
                 <td class="upperwhite">Severity</td>
+                <td class="upperwhite">Status</td>
                 <td class="upperwhite">Category</td>
                 <td class="upperwhite">Summary</td>
                 <td></td>
@@ -99,6 +100,11 @@ Copyright (c) 2014 Mozilla Corporation
             {{/if}}
         </td>
         <td class="alert alert-{{severity}}">{{severity}}</td>
+        {{#if status}}
+            <td>{{status}}</td>
+        {{else}}
+            <td>manual<td>
+        {{/if}}
         <td>{{category}}</td>
         <td>{{{ipDecorate summary}}}</td>
         <td>
