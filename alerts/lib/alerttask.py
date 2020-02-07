@@ -27,7 +27,9 @@ from lib.config import RABBITMQ, ES, ALERT_PLUGINS
 from lib.alert_plugin_set import AlertPluginSet
 
 
-DEFAULT_STATUS = "manual"
+# Status set by the triage bot after a user, pinged on slack, indicates
+# whether their (known) activity triggered an alert.
+DEFAULT_STATUS = 'manual'
 
 # utility functions used by AlertTask.mostCommon
 # determine most common values
@@ -436,7 +438,7 @@ class AlertTask(Task):
             "tags": tags,
             "events": [],
             "ircchannel": ircchannel,
-            "status": DEFAULT_STATUS
+            "status": DEFAULT_STATUS,
         }
         if url:
             alert["url"] = url
