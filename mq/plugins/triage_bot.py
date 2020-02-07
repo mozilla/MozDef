@@ -10,6 +10,7 @@ import typing as types
 
 import boto3
 import requests
+from requests_jwt import JWTAuth
 
 from mozdef_util.utilities.logger import logger
 
@@ -173,14 +174,15 @@ def update_alert_status(msg: UserResponseMessage, api: RESTConfig):
         'response': msg.response.value
     }
 
-    headers = {}
+    jwt_auth = None
 
     if api.token is not None:
-        headers['Authorization'] = 'Bearer {}'.format(api.token)
+        jwt_auth = JWTAuth(api.token)
+        jwt_auth.set_header_format('Bearer %s')
 
     try:
         logger.error('Sending request to REST API')
-        resp = requests.post(api.url, headers=headers, json=payload)
+        resp = requests.post(api.url, json=payload, auth=jwt_auth)
     except Exception as ex:
         logger.exception('Request failed: {}'.format(ex))
         return False
