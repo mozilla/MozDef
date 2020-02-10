@@ -221,6 +221,9 @@ class AlertTestSuite(UnitTestSuite):
         # Verify ircchannel is set correctly
         assert found_alert['_source']['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert ircchannel field is bad'
 
+        # Verify classname is set correctly
+        assert found_alert['_source']['classname'] == self.alert_classname, 'Alert classname field is bad'
+
         # Verify the events are added onto the alert
         assert type(found_alert['_source']['events']) == list, 'Alert events field is not a list'
 
