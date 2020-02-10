@@ -16,16 +16,15 @@ class message(object):
 
         # this plugin inspects messages for whitelist stuff that
         # should be dropped and not processed any further.
-        rdict = dict()
-        rdict['type'] = 'auditd'
-        rdict['details'] = dict()
-        rdict['details']['http_user_agent'] = 'ELB-HealthChecker/1.0'
-        self.registration = rdict
+        self.registration = ['ELB-HealthChecker/1.0']
         self.priority = 1
 
     def onMessage(self, message, metadata):
         # criteria for dropping messages
         # early exit by setting message = None and return
+        if message['type'] != 'auditd':
+            return (message, metadata)
+
         if 'details' in message:
             # drop disabled for now
             # if 'signatureid' in message['details']:
