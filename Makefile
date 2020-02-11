@@ -63,6 +63,12 @@ run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make 
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 
+.PHONY: run-dev-meteor
+run-dev-meteor:  ## Run a local development meteor environment (useful for development)
+	docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-meteor.yml -p $(NAME) $(BUILD_MODE) $(PARALLEL) $(NO_CACHE) base
+	docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-meteor.yml -p $(NAME) $(BUILD_MODE) $(PARALLEL) $(NO_CACHE)
+	docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-meteor.yml -p $(NAME) up -d
+
 .PHONY: rebuild-run-tests
 rebuild-run-tests: build-tests run-tests
 
