@@ -197,7 +197,7 @@ class TestZoomFixupPlugin():
         assert retmessage == expected_message
         assert retmeta == {}
 
-    def differing_account_ids(self):
+    def test_differing_account_ids(self):
         msg = {
             'summary': 'zoom_event',
             'source': 'api_aws_lambda',
@@ -229,20 +229,19 @@ class TestZoomFixupPlugin():
             'severity': 'info',
             'eventsource': 'MozDef-EF-zoom',
             'tags': 'zoom',
+            'processname': 'zoom_webhook_api',
             'details': {
                 'event': 'meeting.created',
                 'account_id': 'ABCDEFG123456',
-                'meeting_account_id': 'HIJKLMN123456',
                 'id': '123456789',
                 'type': '2',
                 'uuid': 'aodij/OWIE9241048='
-
             }
         }
         assert retmessage == expected_message
         assert retmeta == {}
 
-    def multiple_tags_check(self):
+    def test_multiple_tags_check(self):
         msg = {
             'summary': 'zoom_event',
             'source': 'api_aws_lambda',
@@ -274,13 +273,63 @@ class TestZoomFixupPlugin():
             'severity': 'info',
             'eventsource': 'MozDef-EF-zoom',
             'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'processname': 'zoom_webhook_api',
             'details': {
-                'event': 'meeting.created',
                 'account_id': 'ABCDEFG123456',
-                'meeting_account_id': 'HIJKLMN123456',
+                'event': 'meeting.created',
                 'id': '123456789',
                 'type': '2',
                 'uuid': 'aodij/OWIE9241048='
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
+    def test_start_time_empty_string(self):
+        msg = {
+            'summary': 'zoom_event',
+            'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
+            'severity': 'info',
+            'eventsource': 'MozDef-EF-zoom',
+            'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'category': 'zoom',
+            'details': {
+                'event': 'meeting.created',
+                'payload': {
+                    'account_id': 'ABCDEFG123456',
+                    'object': {
+                        'account_id': 'HIJKLMN123456',
+                        'id': '123456789',
+                        'type': '2',
+                        'uuid': 'aodij/OWIE9241048=',
+                        'start_time': ''
+                    },
+                    'old_object': {
+                        'start_time': '2020-02-11T20:25:30Z'
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'summary': 'zoom: meeting.created',
+            'category': 'zoom',
+            'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
+            'severity': 'info',
+            'eventsource': 'MozDef-EF-zoom',
+            'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'processname': 'zoom_webhook_api',
+            'details': {
+                'account_id': 'ABCDEFG123456',
+                'event': 'meeting.created',
+                'id': '123456789',
+                'type': '2',
+                'uuid': 'aodij/OWIE9241048=',
+                'original_sched_start_time': '2020-02-11T20:25:30Z',
+                'start_time': '2020-02-11T20:25:30Z',
             }
         }
         assert retmessage == expected_message
