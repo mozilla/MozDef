@@ -160,7 +160,7 @@ if ( Meteor.isClient ) {
             //default selection criteria
             beginningtime = moment( 0 );
             timeperiod = Session.get( 'alertssearchtime' );
-            if ( timeperiod == 'none' ) {
+            if ( timeperiod == 'all' ) {
                 beginningtime = moment( 0 );
             } else {
                 //determine the utcepoch range

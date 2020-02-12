@@ -430,6 +430,14 @@ class AlertTask(Task):
         """
         Create an alert dict
         """
+
+        # Tag alert documents with alert classname
+        # that was triggered
+        classname = self.__name__
+        # Handle generic alerts
+        if classname == 'AlertGenericLoader':
+            classname = self.custom_alert_name
+
         alert = {
             "utctimestamp": toUTC(datetime.now()).isoformat(),
             "severity": severity,
@@ -439,6 +447,7 @@ class AlertTask(Task):
             "events": [],
             "ircchannel": ircchannel,
             "status": DEFAULT_STATUS,
+            "classname": classname
         }
         if url:
             alert["url"] = url
