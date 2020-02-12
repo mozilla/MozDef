@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 import json
 import os
@@ -16,14 +16,16 @@ import requests
 from mozdef_util.utilities.logger import logger
 
 
-CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
-OAUTH_URL = 'https://auth.mozilla.auth0.com/oauth/token'
-PERSON_API_BASE = 'https://person-api.sso.mozilla.com'
-PERSON_API_AUDIENCE = 'api.sso.mozilla.com'
-PERSON_API_SCOPE = 'classification:public display:all display:public display:none search:all'
-PERSON_API_GRANTS = 'client_credentials'
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), "triage_bot.json")
+OAUTH_URL = "https://auth.mozilla.auth0.com/oauth/token"
+PERSON_API_BASE = "https://person-api.sso.mozilla.com"
+PERSON_API_AUDIENCE = "api.sso.mozilla.com"
+PERSON_API_SCOPE = (
+    "classification:public display:all display:public display:none search:all"
+)
+PERSON_API_GRANTS = "client_credentials"
 TOKEN_VALIDITY_WINDOW_MINUTES = 18 * 60
-SLACK_BOT_FUNCTION_NAME_PREFIX = 'MozDefSlackTriageBotAPI-SlackTriageBotApiFunction'
+SLACK_BOT_FUNCTION_NAME_PREFIX = "MozDefSlackTriageBotAPI-SlackTriageBotApiFunction"
 L_FN_NAME_VALIDITY_WINDOW_SECONDS = 24 * 60 * 60
 
 Alert = types.Dict[types.Any, types.Any]
@@ -31,31 +33,33 @@ Email = str
 
 
 class AlertLabel(Enum):
-    '''Enumerates each of the alerts supported by the triage bot.
-    '''
+    """Enumerates each of the alerts supported by the triage bot.
+    """
 
-    SENSITIVE_HOST_SESSION = 'sensitive_host_session'
-    DUO_BYPASS_CODES_USED = 'duo_bypass_codes_used'
-    DUO_BYPASS_CODES_GENERATED = 'duo_bypass_codes_generated'
-    SSH_ACCESS_SIGN_RELENG = 'ssh_access_sign_releng'
+    SENSITIVE_HOST_SESSION = "sensitive_host_session"
+    DUO_BYPASS_CODES_USED = "duo_bypass_codes_used"
+    DUO_BYPASS_CODES_GENERATED = "duo_bypass_codes_generated"
+    SSH_ACCESS_SIGN_RELENG = "ssh_access_sign_releng"
 
 
 class Confidence(Enum):
-    '''Enumerates the levels of confidence that this action is in the
+    """Enumerates the levels of confidence that this action is in the
     correctness of the email address determined to belong to a user.
-    '''
+    """
 
-    HIGHEST = 'highest'
-    HIGH = 'high'
-    MODERATE = 'moderate'
-    LOW = 'low'
-    LOWEST = 'lowest'
+    HIGHEST = "highest"
+    HIGH = "high"
+    MODERATE = "moderate"
+    LOW = "low"
+    LOWEST = "lowest"
+
 
 # TODO: Change to a dataclass when Python 3.7+ is adopted.
 
+
 class AlertTriageRequest(types.NamedTuple):
-    '''A message bound for the AWS lambda function that interfaces with Slack.
-    '''
+    """A message bound for the AWS lambda function that interfaces with Slack.
+    """
 
     identifier: str
     alert: AlertLabel
@@ -65,9 +69,9 @@ class AlertTriageRequest(types.NamedTuple):
 
 
 class AuthParams(types.NamedTuple):
-    '''Configuration parameters required to authenticate using OAuth in order
+    """Configuration parameters required to authenticate using OAuth in order
     to retrieve credentials used to further authenticate to the Person API.
-    '''
+    """
 
     client_id: str
     client_secret: str
@@ -77,9 +81,9 @@ class AuthParams(types.NamedTuple):
 
 
 class User(types.NamedTuple):
-    '''A container for information describing a user profile that is not
+    """A container for information describing a user profile that is not
     security critical.
-    '''
+    """
 
     created: datetime
     first_name: str
@@ -90,9 +94,9 @@ class User(types.NamedTuple):
 
 
 class LambdaFunction(types.NamedTuple):
-    '''Contains information identifying lambda functions visible to the owner
+    """Contains information identifying lambda functions visible to the owner
     of a boto session that calls an implementation of a `DiscoveryInterface`.
-    '''
+    """
 
     name: str
     arn: str
@@ -100,32 +104,32 @@ class LambdaFunction(types.NamedTuple):
 
 
 class DispatchResult(Enum):
-    '''A ternary good / bad / unknown result type indicating whether a dispatch
+    """A ternary good / bad / unknown result type indicating whether a dispatch
     to AWS Lambda was successful.
-    '''
+    """
 
-    SUCCESS = 'success'
-    FAILURE = 'failure'
-    INDETERMINATE = 'indeterminate'
+    SUCCESS = "success"
+    FAILURE = "failure"
+    INDETERMINATE = "indeterminate"
 
 
 class AuthFailure(Exception):
-    '''Raised by the `message` class in the case that authentication to the
+    """Raised by the `message` class in the case that authentication to the
     Person API fails.
-    '''
+    """
 
     def __init__(self):
-        super().__init__('Failed to authenticate to the Person API')
+        super().__init__("Failed to authenticate to the Person API")
 
 
 class DiscoveryFailure(Exception):
-    '''Raised by the `message` class in the case that discovery of the
+    """Raised by the `message` class in the case that discovery of the
     appropriate Lambda function to invoke (whose name changes when it's
     updated) fails.
-    '''
+    """
 
     def __init__(self):
-        super().__init__('Failed to discover the correct Lambda function')
+        super().__init__("Failed to discover the correct Lambda function")
 
 
 # We define some types to serve as 'interfaces' that can be referenced for
@@ -136,44 +140,41 @@ Url = str
 Token = str
 Username = str
 AuthInterface = types.Callable[[Url, AuthParams], types.Optional[Token]]
-UserByNameInterface = types.Callable[
-    [Url, Token, Username],
-    types.Optional[User]]
+UserByNameInterface = types.Callable[[Url, Token, Username], types.Optional[User]]
 DiscoveryInterface = types.Callable[[], types.List[LambdaFunction]]
 DispatchInterface = types.Callable[[AlertTriageRequest, str], DispatchResult]
 
 
 class message(object):
-    '''The main interface to the alert action.
-    '''
+    """The main interface to the alert action.
+    """
 
     def __init__(self):
-        '''Loads the configuration for the action and announces which alerts
+        """Loads the configuration for the action and announces which alerts
         the action can be run against.
-        '''
+        """
 
         with open(CONFIG_FILE) as cfg_file:
             self._config = json.load(cfg_file)
 
         # The Boto session does not need to be renewed manually.
         self._boto_session = boto3.session.Session(
-            region_name=self._config['aws_region'],
-            aws_access_key_id=self._config['aws_access_key_id'],
-            aws_secret_access_key=self._config['aws_secret_access_key']
+            region_name=self._config["aws_region"],
+            aws_access_key_id=self._config["aws_access_key_id"],
+            aws_secret_access_key=self._config["aws_secret_access_key"],
         )
 
-        logger.error('Performing initial OAuth Handshake')
+        logger.error("Performing initial OAuth Handshake")
         self._oauth_handshake()
-        logger.error('Performing initial Lambda function discovery')
+        logger.error("Performing initial Lambda function discovery")
         self._discover_lambda_fn()
 
-        self.registration = '*'
+        self.registration = "*"
         self.priority = 1
 
-
     def onMessage(self, alert):
-        '''The main entrypoint to the alert action invoked with an alert.
-        '''
+        """The main entrypoint to the alert action invoked with an alert.
+        """
 
         request = try_make_outbound(alert, self._person_api_session)
 
@@ -186,47 +187,49 @@ class message(object):
 
         if have_request and should_refresh:
             self._oauth_handshake()
-            logger.error('Performed OAuth handshake')
-       
+            logger.error("Performed OAuth handshake")
+
         # Re-discover the lambda function name to invoke periodically.
         last_discovery = (datetime.now() - self._last_discovery).total_seconds()
         if last_discovery > L_FN_NAME_VALIDITY_WINDOW_SECONDS:
             self._discover_lambda_fn()
-            logger.error('Discovered Lambda function name')
+            logger.error("Discovered Lambda function name")
 
         dispatch = _dispatcher(self._boto_session)
 
         if have_request:
-            logger.error('Attempting to dispatch request')
-            logger.error('Alert {} triggered by {}'.format(
-                request.alert.value, request.user))
+            logger.error("Attempting to dispatch request")
+            logger.error(
+                "Alert {} triggered by {}".format(request.alert.value, request.user)
+            )
             result = dispatch(request, self._lambda_function_name)
 
             # In the case that dispatch fails, attempt to re-discover the name
             # of the lambda function to invoke in case it was replaced.
             if result != DispatchResult.SUCCESS:
-                logger.error('Failed to dispatch request')
+                logger.error("Failed to dispatch request")
                 reset = timedelta(seconds=L_FN_NAME_VALIDITY_WINDOW_SECONDS)
                 self._last_discovery = datetime.now() - reset
 
         return alert
 
-
     def _oauth_handshake(self):
-        self._person_api_session = authenticate(OAUTH_URL, AuthParams(
-            client_id=self._config['person_api_client_id'],
-            client_secret=self._config['person_api_client_secret'],
-            audience=PERSON_API_AUDIENCE,
-            scope=PERSON_API_SCOPE,
-            grants=PERSON_API_GRANTS
-        ))
+        self._person_api_session = authenticate(
+            OAUTH_URL,
+            AuthParams(
+                client_id=self._config["person_api_client_id"],
+                client_secret=self._config["person_api_client_secret"],
+                audience=PERSON_API_AUDIENCE,
+                scope=PERSON_API_SCOPE,
+                grants=PERSON_API_GRANTS,
+            ),
+        )
 
         if self._person_api_session is None:
-            logger.Exception('Failed to establish OAuth session')
+            logger.Exception("Failed to establish OAuth session")
             raise AuthFailure()
 
         self._last_authenticated = datetime.now()
-
 
     def _discover_lambda_fn(self):
         functions = [
@@ -236,7 +239,7 @@ class message(object):
         ]
 
         if len(functions) == 0:
-            logger.Exception('Failed to discover Lambda function')
+            logger.Exception("Failed to discover Lambda function")
             raise DiscoveryFailure()
 
         self._lambda_function_name = functions[0].name
@@ -245,26 +248,27 @@ class message(object):
 
 
 def try_make_outbound(
-    alert: Alert,
-    oauth_tkn: Token
-    ) -> types.Optional[AlertTriageRequest]:
-    '''Attempt to determine the kind of alert contained in `alert` in
+    alert: Alert, oauth_tkn: Token
+) -> types.Optional[AlertTriageRequest]:
+    """Attempt to determine the kind of alert contained in `alert` in
     order to produce an `AlertTriageRequest` destined for the web server comp.
-    '''
+    """
 
-    _source = alert.get('_source', {})
-    category = _source.get('category')
-    tags = _source.get('tags', [])
+    _source = alert.get("_source", {})
+    category = _source.get("category")
+    tags = _source.get("tags", [])
 
-    is_sensitive_host_access = 'session' in tags and category  == 'session'
+    is_sensitive_host_access = "session" in tags and category == "session"
 
-    is_duo_codes_generated = 'duosecurity' in tags and category == 'duo' and\
-        'codes generated' in _source.get('summary', '')
+    is_duo_codes_generated = "duosecurity" in tags and\
+        category == "duo" and\
+        "codes generated" in _source.get("summary", "")
 
-    is_duo_bypass_codes_used = 'duo_bypass_codes_used' in tags and\
-        category == 'bypassused'
+    is_duo_bypass_codes_used = (
+        "duo_bypass_codes_used" in tags and category == "bypassused"
+    )
 
-    is_ssh_access_releng = 'ssh' in tags and category == 'access'
+    is_ssh_access_releng = "ssh" in tags and category == "access"
 
     if is_sensitive_host_access:
         return _make_sensitive_host_access(alert, oauth_tkn)
@@ -282,32 +286,28 @@ def try_make_outbound(
 
 
 def authenticate(url: Url, params: AuthParams) -> types.Optional[Token]:
-    '''An `AuthInterface` that uses the `requests` library to make a POST
+    """An `AuthInterface` that uses the `requests` library to make a POST
     request to the Person API containing the required credentials formatted as
     JSON.
-    '''
+    """
 
     payload = {
-        'client_id': params.client_id,
-        'client_secret': params.client_secret,
-        'audience': params.audience,
-        'scope': params.scope,
-        'grant_type': params.grants
+        "client_id": params.client_id,
+        "client_secret": params.client_secret,
+        "audience": params.audience,
+        "scope": params.scope,
+        "grant_type": params.grants,
     }
 
     try:
         resp = requests.post(url, json=payload)
-        return resp.json().get('access_token')
+        return resp.json().get("access_token")
     except:
         return None
 
 
-def primary_username(
-    base: Url,
-    tkn: Token,
-    uname: Username
-    ) -> types.Optional[User]:
-    '''An `UserByNameInterface` that uses the `requests` library to make a GET
+def primary_username(base: Url, tkn: Token, uname: Username) -> types.Optional[User]:
+    """An `UserByNameInterface` that uses the `requests` library to make a GET
     request to the Person API in order to fetch a user profile given that
     user's primary username.
 
@@ -317,14 +317,12 @@ def primary_username(
     `tkn` must be an authenticated session token produced by an `AuthInterface`.
 
     `uname` is the string username of the user whose account to retrieve.
-    '''
+    """
 
-    route = '/v2/user/primary_username/{}'.format(uname)
+    route = "/v2/user/primary_username/{}".format(uname)
     full_url = urljoin(base, route)
 
-    headers = {
-        'Authorization': 'Bearer {}'.format(tkn)
-    }
+    headers = {"Authorization": "Bearer {}".format(tkn)}
 
     try:
         resp = requests.get(full_url, headers=headers)
@@ -335,30 +333,31 @@ def primary_username(
 
     try:
         created = datetime.strptime(
-            data.get('created', {}).get('value', ''),
-            '%Y-%m-%dT%H:%M:%S.%fZ')
+            data.get("created", {}).get("value", ""), "%Y-%m-%dT%H:%M:%S.%fZ"
+        )
     except ValueError:
         return None
 
-    ldap_email = data['identities']['mozilla_ldap_primary_email'].get('value')
+    ldap_email = data["identities"]["mozilla_ldap_primary_email"].get("value")
     if ldap_email is None:
         return None
 
     return User(
         created=created,
-        first_name=data['first_name'].get('value', 'N/A'),
-        last_name=data['last_name'].get('value', 'N/A'),
-        alternative_name=data['alternative_name'].get('value', 'N/A'),
-        primary_email=data['primary_email'].get('value', 'N/A'),
-        mozilla_ldap_primary_email=ldap_email)
+        first_name=data["first_name"].get("value", "N/A"),
+        last_name=data["last_name"].get("value", "N/A"),
+        alternative_name=data["alternative_name"].get("value", "N/A"),
+        primary_email=data["primary_email"].get("value", "N/A"),
+        mozilla_ldap_primary_email=ldap_email,
+    )
 
 
 def _discovery(boto_session) -> DiscoveryInterface:
-    '''Produces a function that, when called, retrieves a list of descriptions
+    """Produces a function that, when called, retrieves a list of descriptions
     of AWS Lambda functions visible to the owner of the session provided.
-    '''
+    """
 
-    lambda_ = boto_session.client('lambda')
+    lambda_ = boto_session.client("lambda")
 
     def discover() -> types.List[LambdaFunction]:
         payload = {}
@@ -369,18 +368,21 @@ def _discovery(boto_session) -> DiscoveryInterface:
         # Use a record of the last request's response as well as the
         # (updated) state of the payload to determine when we've paged
         # through all available results.
-        while len(resp) == 0 or payload.get('Marker') not in ['', None]:
+        while len(resp) == 0 or payload.get("Marker") not in ["", None]:
             resp = lambda_.list_functions(**payload)
 
-            funs.extend([
-                LambdaFunction(
-                    name=fn.get('FunctionName'),
-                    arn=fn.get('FunctionArn'),
-                    description=fn.get('Description'))
-                for fn in resp.get('Functions', [])
-            ])
+            funs.extend(
+                [
+                    LambdaFunction(
+                        name=fn.get("FunctionName"),
+                        arn=fn.get("FunctionArn"),
+                        description=fn.get("Description"),
+                    )
+                    for fn in resp.get("Functions", [])
+                ]
+            )
 
-            payload['Marker'] = resp.get('NextMarker')
+            payload["Marker"] = resp.get("NextMarker")
 
         return funs
 
@@ -388,25 +390,25 @@ def _discovery(boto_session) -> DiscoveryInterface:
 
 
 def _dispatcher(boto_session) -> DispatchInterface:
-    '''Produces a function that, when called, dispatches an
+    """Produces a function that, when called, dispatches an
     `AlertTriageRequest` to an AWS Lambda function identified by the provided
     function name.
-    '''
+    """
 
-    lambda_ = boto_session.client('lambda')
+    lambda_ = boto_session.client("lambda")
 
     def dispatch(req: AlertTriageRequest, fn_name: str) -> DispatchResult:
         payload_dict = dict(req._asdict())
-        payload_dict['alert'] = req.alert.value
-        payload_dict['identityConfidence'] = req.identityConfidence.value
+        payload_dict["alert"] = req.alert.value
+        payload_dict["identityConfidence"] = req.identityConfidence.value
 
-        payload = bytes(json.dumps(payload_dict), 'utf-8')
+        payload = bytes(json.dumps(payload_dict), "utf-8")
 
         status = 200
 
         try:
             resp = lambda_.invoke(FunctionName=fn_name, Payload=payload)
-            status = resp.get('StatusCode', 400)
+            status = resp.get("StatusCode", 400)
         except:
             status = 500
 
@@ -421,27 +423,24 @@ def _dispatcher(boto_session) -> DispatchInterface:
 
 
 def _make_sensitive_host_access(
-    alert: Alert,
-    tkn: Token
-    ) -> types.Optional[AlertTriageRequest]:
+    alert: Alert, tkn: Token
+) -> types.Optional[AlertTriageRequest]:
     null = {
-        'documentsource': {
-            'details': {
-                'username': None
-            },
+        "documentsource": {
+            "details": {"username": None},
             # This field will never be referenced.  We provide it
             # here for completeness.
-            'hostname': None
+            "hostname": None,
         }
     }
 
-    _source = alert.get('_source', {})
-    _events = _source.get('events', [null])
+    _source = alert.get("_source", {})
+    _events = _source.get("events", [null])
 
-    user = _events[0]['documentsource']['details']['username']
-    host = _events[0]['documentsource']['hostname']
+    user = _events[0]["documentsource"]["details"]["username"]
+    host = _events[0]["documentsource"]["hostname"]
 
-    if user is None or user == '':
+    if user is None or user == "":
         return None
 
     confidence = Confidence.HIGHEST
@@ -450,108 +449,92 @@ def _make_sensitive_host_access(
     if profile is None:
         profile = User(
             created=datetime.now(),
-            first_name='',
-            last_name='',
-            alternative_name='',
-            primary_email='{}@mozilla.com'.format(user),
-            mozilla_ldap_primary_email='')
+            first_name="",
+            last_name="",
+            alternative_name="",
+            primary_email="{}@mozilla.com".format(user),
+            mozilla_ldap_primary_email="",
+        )
 
         confidence = Confidence.LOW
 
-
-    summary = ('An SSH session to a potentially sensitive host {} was made '\
-    'by your user account.').format(host)
+    summary = (
+        "An SSH session to a potentially sensitive host {} was made "
+        "by your user account."
+    ).format(host)
 
     return AlertTriageRequest(
-        alert['_id'],
+        alert["_id"],
         AlertLabel.SENSITIVE_HOST_SESSION,
         summary,
         profile.primary_email,
-        confidence)
+        confidence,
+    )
 
 
-def _make_duo_code_gen(
-    alert: Alert,
-    tkn: Token
-    ) -> types.Optional[AlertTriageRequest]:
-    null = {
-        'documentsource': {
-            'details': {
-                'object': None
-            }
-        }
-    }
+def _make_duo_code_gen(alert: Alert, tkn: Token) -> types.Optional[AlertTriageRequest]:
+    null = {"documentsource": {"details": {"object": None}}}
 
-    _source = alert.get('_source', {})
-    _events = _source.get('events', [null])
+    _source = alert.get("_source", {})
+    _events = _source.get("events", [null])
 
-    email = _events[0]['documentsource']['details']['object']
+    email = _events[0]["documentsource"]["details"]["object"]
 
-    if email is None or email == '':
+    if email is None or email == "":
         return None
 
-    summary = 'DUO bypass codes have been generated for your account. '\
-    'These credentials should be secured carefully.'
+    summary = (
+        "DUO bypass codes have been generated for your account. "
+        "These credentials should be secured carefully."
+    )
 
     return AlertTriageRequest(
-        alert['_id'],
+        alert["_id"],
         AlertLabel.DUO_BYPASS_CODES_GENERATED,
         summary,
         email,
-        Confidence.HIGHEST)
+        Confidence.HIGHEST,
+    )
 
 
-def _make_duo_code_used(
-    alert: Alert,
-    tkn: Token
-    ) -> types.Optional[AlertTriageRequest]:
-    null = {
-        'documentsource': {
-            'details': {
-                'object': None
-            }
-        }
-    }
+def _make_duo_code_used(alert: Alert, tkn: Token) -> types.Optional[AlertTriageRequest]:
+    null = {"documentsource": {"details": {"object": None}}}
 
-    _source = alert.get('_source', {})
-    _events = _source.get('events', [null])
+    _source = alert.get("_source", {})
+    _events = _source.get("events", [null])
 
-    email = _events[0]['documentsource']['details']['object']
+    email = _events[0]["documentsource"]["details"]["object"]
 
-    if email is None or email == '':
+    if email is None or email == "":
         return None
 
-    summary = 'DUO bypass codes belonging to your account have been used to '\
-    'authenticate.  This should only happen in the case of the loss of other '\
-    'less secret credentials.'
+    summary = (
+        "DUO bypass codes belonging to your account have been used to "
+        "authenticate.  This should only happen in the case of the loss of other "
+        "less secret credentials."
+    )
 
     return AlertTriageRequest(
-        alert['_id'],
+        alert["_id"],
         AlertLabel.DUO_BYPASS_CODES_USED,
         summary,
         email,
-        Confidence.HIGHEST)
+        Confidence.HIGHEST,
+    )
 
 
 def _make_ssh_access_releng(
-    alert: Alert,
-    tkn: Token
-    ) -> types.Optional[AlertTriageRequest]:
-    null = {
-        'documentsource': {
-            'details': {
-                'hostname': None
-            }
-        }
-    }
+    alert: Alert, tkn: Token
+) -> types.Optional[AlertTriageRequest]:
+    null = {"documentsource": {"details": {"hostname": None}}}
 
-    _source = alert.get('_source', {})
-    _events = _source.get('events', [null])
+    _source = alert.get("_source", {})
+    _events = _source.get("events", [null])
 
-    user = _source.get('summary', '').split(' ')[-1]
-    host = _events[0]['documentsource']['details']['hostname']
+    user = _source.get("summary", "").split(" ")[-1]
+    host = _events[0]["documentsource"]["details"]["hostname"]
 
-    if user == '' or host is None or host == '':
+    if user == "" or host is None or host == "":
         return None
 
     confidence = Confidence.HIGH
@@ -560,20 +543,23 @@ def _make_ssh_access_releng(
     if profile is None:
         profile = User(
             created=datetime.now(),
-            first_name='',
-            last_name='',
-            alternative_name='',
-            primary_email='{}@mozilla.com'.format(user),
-            mozilla_ldap_primary_email='')
+            first_name="",
+            last_name="",
+            alternative_name="",
+            primary_email="{}@mozilla.com".format(user),
+            mozilla_ldap_primary_email="",
+        )
 
         confidence = Confidence.LOW
 
-    summary = ('An SSH session was established to host {} by your user '\
-    'account.').format(host)
+    summary = (
+        "An SSH session was established to host {} by your user " "account."
+    ).format(host)
 
     return AlertTriageRequest(
-        alert['_id'],
+        alert["_id"],
         AlertLabel.SSH_ACCESS_SIGN_RELENG,
         summary,
         profile.primary_email,
-        confidence)
+        confidence,
+    )
