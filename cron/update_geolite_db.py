@@ -5,13 +5,13 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import sys
-import os
-from configlib import getConfig, OptionParser
-
-import requests
-import tempfile
 import gzip
+import requests
+import sys
+import tempfile
+
+from configlib import getConfig, OptionParser
+from os import rename, fsync
 
 from mozdef_util.geo_ip import GeoIP
 from mozdef_util.utilities.logger import logger, initLogger
@@ -27,6 +27,7 @@ def fetch_db_data(db_download_location):
     with tempfile.NamedTemporaryFile(mode='wb') as temp:
         logger.debug('Writing compressed gzip to temp file: ' + temp.name)
         temp.write(db_raw_data)
+        fsync(temp.fileno())
         temp.flush()
         logger.debug('Extracting gzip data from ' + temp.name)
         gfile = gzip.GzipFile(temp.name, "rb")
@@ -39,12 +40,14 @@ def save_db_data(save_path, db_data):
     logger.debug("Saving db data to " + temp_save_path)
     with open(temp_save_path, "wb+") as text_file:
         text_file.write(db_data)
+        fsync(text_file.fileno())
+        text_file.flush()
     logger.debug("Testing temp geolite db file")
     geo_ip = GeoIP(temp_save_path)
     # Do a generic lookup to verify we don't get any errors (malformed data)
     geo_ip.lookup_ip('8.8.8.8')
     logger.debug("Moving temp file to " + save_path)
-    os.rename(temp_save_path, save_path)
+    rename(temp_save_path, save_path)
 
 
 def main():
