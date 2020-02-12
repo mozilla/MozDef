@@ -62,6 +62,7 @@ def keyMapping(aDict):
     returndict["category"] = "cloudtrail"
     returndict["processid"] = str(os.getpid())
     returndict["processname"] = sys.argv[0]
+    returndict["tags"] = [options.taskexchange]
     returndict["severity"] = "INFO"
     if "sourceIPAddress" in aDict and "eventName" in aDict and "eventSource" in aDict:
         summary_str = "{0} performed {1} in {2}".format(
