@@ -1,4 +1,4 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
+#triage_bot This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
@@ -10,6 +10,9 @@ import typing as types
 
 import boto3
 import requests
+from requests_jwt import JWTAuth
+
+from mozdef_util.utilities.logger import logger
 
 
 _CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
@@ -171,14 +174,17 @@ def update_alert_status(msg: UserResponseMessage, api: RESTConfig):
         'response': msg.response.value
     }
 
-    headers = {}
+    jwt_auth = None
 
     if api.token is not None:
-        headers['Authorization'] = 'Bearer {}'.format(api.token)
+        jwt_auth = JWTAuth(api.token)
+        jwt_auth.set_header_format('Bearer %s')
 
     try:
-        resp = requests.post(api.url, headers=headers, json=payload)
-    except:
+        logger.error('Sending request to REST API')
+        resp = requests.post(api.url, json=payload, auth=jwt_auth)
+    except Exception as ex:
+        logger.exception('Request failed: {}'.format(ex))
         return False
 
     return resp.status_code < 300
@@ -189,6 +195,7 @@ def process(msg, meta, api_cfg):
     the MozDef REST API to update the status of the identified alert.
     '''
 
+    msg = msg['details']
     ident = msg.get('identifier')
     user = msg.get('user', {})
     email = user.get('email')
@@ -202,6 +209,7 @@ def process(msg, meta, api_cfg):
     response = UserResponseMessage(
         ident, UserInfo(email, slack), confidence, resp)
 
+    logger.error('Updating status of alert {}'.format(response.identifier))
     update_succeeded = update_alert_status(response, api_cfg)
 
     if not update_succeeded:
@@ -215,7 +223,7 @@ class message:
     '''
 
     def __init__(self):
-        self.registration = 'triagebot'
+        self.registration = ['triagebot']
         self.priority = 5
     
         with open(_CONFIG_FILE) as cfg_file:
@@ -229,6 +237,7 @@ class message:
 
     def onMessage(self, message, metadata):
         if message['category'] == 'triagebot':
+            logger.error('Got a message to process')
             return process(message, metadata, self.api_cfg)
 
         return (message, metadata)

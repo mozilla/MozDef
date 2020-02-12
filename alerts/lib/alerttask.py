@@ -27,7 +27,9 @@ from lib.config import RABBITMQ, ES, ALERT_PLUGINS
 from lib.alert_plugin_set import AlertPluginSet
 
 
-DEFAULT_STATUS = "manual"
+# Status set by the triage bot after a user, pinged on slack, indicates
+# whether their (known) activity triggered an alert.
+DEFAULT_STATUS = 'manual'
 
 # utility functions used by AlertTask.mostCommon
 # determine most common values
@@ -428,6 +430,14 @@ class AlertTask(Task):
         """
         Create an alert dict
         """
+
+        # Tag alert documents with alert classname
+        # that was triggered
+        classname = self.__name__
+        # Handle generic alerts
+        if classname == 'AlertGenericLoader':
+            classname = self.custom_alert_name
+
         alert = {
             "utctimestamp": toUTC(datetime.now()).isoformat(),
             "severity": severity,
@@ -436,7 +446,8 @@ class AlertTask(Task):
             "tags": tags,
             "events": [],
             "ircchannel": ircchannel,
-            "status": DEFAULT_STATUS
+            "status": DEFAULT_STATUS,
+            "classname": classname
         }
         if url:
             alert["url"] = url

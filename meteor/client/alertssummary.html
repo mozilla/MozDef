@@ -8,7 +8,7 @@ Copyright (c) 2014 Mozilla Corporation
 <template name="alertssummary">
 <div class="container">
     <div class="row col-xs-10">
-        <div class="col-xs-1"><button class="btn btn-default btn-xs" data-toggle="collapse" data-target="#alertSearch">search</button></div>
+        <div class="col-xs-2"><button class="btn btn-default btn-xs" data-toggle="collapse" data-target="#alertSearch">advanced search</button></div>
         <div class="col-xs-9">
             <div id='alertSearch' class="collapse">
                 <form class="form-horizontal">
@@ -23,7 +23,6 @@ Copyright (c) 2014 Mozilla Corporation
                         <label class="control-label col-xs-2" for="searchTime">Time Period</label>
                         <div class="col-xs-8">
                             <select id="searchTime" name="searchTime" class="form-control" title="Time Period">
-                                <option value='tail'>Latest events</option>
                                 <option value='1 hours'>Last Hour</option>
                                 <option value='2 hours'>Last 2 Hours</option>
                                 <option value='6 hours'>Last 6 hours</option>
@@ -31,15 +30,8 @@ Copyright (c) 2014 Mozilla Corporation
                                 <option value='2 days'>Last 2 days</option>
                                 <option value='7 days'>Last 7 days</option>
                                 <option value='30 days'>Last 30 days</option>
-                                <option value='none'>None</option>
+                                <option value='all'>All</option>
                             </select>
-                        </div>
-
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-xs-2" for="recordLimit">Record Limit</label>
-                        <div class="col-xs-8">
-                            <input type="text" name="recordLimit" class="form-control" id="recordLimit" placeholder="# records">
                         </div>
 
                     </div>
@@ -62,6 +54,11 @@ Copyright (c) 2014 Mozilla Corporation
             <div id="ringChart-severity" class="col-xs-3 text-center"><h5 class="upperwhite" id="Severity">Severity: <span class="filter"></span></h5></div>
     </div>
     <div class="row col-xs-10">
+        <div class="col-xs-4 time-period">
+            <span id="displayTimePeriod"><h5 class="upperwhite">Time Period: {{currentTimePeriod}}</h5></span>
+        </div>
+    </div>
+    <div class="row col-xs-10">
         <div class="col-xs-1"><button class="btn btn-default btn-xs reset">reset filters</button></div>
         <div class="col-xs-4 record-count">
             <span id="displayCount"></span>{{displayedAlerts}} displayed/total: <span id="totalAlerts">{{totalAlerts}}</span>
@@ -75,6 +72,7 @@ Copyright (c) 2014 Mozilla Corporation
                 <td class="upperwhite">Timestamp</td>
                 <td class="upperwhite">Links</td>
                 <td class="upperwhite">Severity</td>
+                <td class="upperwhite">Status</td>
                 <td class="upperwhite">Category</td>
                 <td class="upperwhite">Summary</td>
                 <td></td>
@@ -102,6 +100,11 @@ Copyright (c) 2014 Mozilla Corporation
             {{/if}}
         </td>
         <td class="alert alert-{{severity}}">{{severity}}</td>
+        {{#if status}}
+            <td>{{status}}</td>
+        {{else}}
+            <td>manual<td>
+        {{/if}}
         <td>{{category}}</td>
         <td>{{{ipDecorate summary}}}</td>
         <td>

@@ -557,7 +557,7 @@ def update_alert_status():
     mongo = MongoClient(options.mongohost, options.mongoport)
     alerts = mongo.meteor['alerts']
 
-    response.content_type = 'appliation/json'
+    response.content_type = 'application/json'
 
     try:
         req = json.loads(request.body.read())
@@ -599,12 +599,12 @@ def update_alert_status():
     modified_count = 0
 
     modified_count += alerts.update_one(
-        {'esmetadata': {'id': req['alert']}},
+        {'esmetadata.id': req['alert']},
         {'$set': {'status': req['status']}}
     ).modified_count
 
     modified_count += alerts.update_one(
-        {'esmetadata': {'id': req['alert']}},
+        {'esmetadata.id': req['alert']},
         {'$set': {'details': details}}
     ).modified_count
 

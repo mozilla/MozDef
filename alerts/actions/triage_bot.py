@@ -13,6 +13,8 @@ from urllib.parse import urljoin
 import boto3
 import requests
 
+from mozdef_util.utilities.logger import logger
+
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'triage_bot.json')
 OAUTH_URL = 'https://auth.mozilla.auth0.com/oauth/token'
@@ -160,7 +162,9 @@ class message(object):
             aws_secret_access_key=self._config['aws_secret_access_key']
         )
 
+        logger.error('Performing initial OAuth Handshake')
         self._oauth_handshake()
+        logger.error('Performing initial Lambda function discovery')
         self._discover_lambda_fn()
 
         self.registration = '*'
@@ -182,20 +186,26 @@ class message(object):
 
         if have_request and should_refresh:
             self._oauth_handshake()
+            logger.error('Performed OAuth handshake')
        
         # Re-discover the lambda function name to invoke periodically.
         last_discovery = (datetime.now() - self._last_discovery).total_seconds()
         if last_discovery > L_FN_NAME_VALIDITY_WINDOW_SECONDS:
             self._discover_lambda_fn()
+            logger.error('Discovered Lambda function name')
 
         dispatch = _dispatcher(self._boto_session)
 
         if have_request:
+            logger.error('Attempting to dispatch request')
+            logger.error('Alert {} triggered by {}'.format(
+                request.alert.value, request.user))
             result = dispatch(request, self._lambda_function_name)
 
             # In the case that dispatch fails, attempt to re-discover the name
             # of the lambda function to invoke in case it was replaced.
             if result != DispatchResult.SUCCESS:
+                logger.error('Failed to dispatch request')
                 reset = timedelta(seconds=L_FN_NAME_VALIDITY_WINDOW_SECONDS)
                 self._last_discovery = datetime.now() - reset
 
@@ -212,6 +222,7 @@ class message(object):
         ))
 
         if self._person_api_session is None:
+            logger.Exception('Failed to establish OAuth session')
             raise AuthFailure()
 
         self._last_authenticated = datetime.now()
@@ -225,6 +236,7 @@ class message(object):
         ]
 
         if len(functions) == 0:
+            logger.Exception('Failed to discover Lambda function')
             raise DiscoveryFailure()
 
         self._lambda_function_name = functions[0].name
