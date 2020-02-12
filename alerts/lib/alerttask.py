@@ -31,6 +31,7 @@ from lib.alert_plugin_set import AlertPluginSet
 # whether their (known) activity triggered an alert.
 DEFAULT_STATUS = 'manual'
 
+
 # utility functions used by AlertTask.mostCommon
 # determine most common values
 # in a list of dicts
