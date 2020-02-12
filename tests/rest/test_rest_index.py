@@ -351,7 +351,7 @@ class TestAlertStatus(RestTestSuite):
 
         resp = self.app.post_json(self.route, req_params)
 
-        query = {'esmetadata': {'id': self.alert_id}}
+        query = {'esmetadata.id': self.alert_id}
         alert = self.alerts_db.find_one(query)
 
         assert 'error' in resp.json
@@ -362,6 +362,36 @@ class TestAlertStatus(RestTestSuite):
         assert alert['details']['triage']['response'] == 'yes'
 
         return
+
+
+class TestCreateDuplicateChain(RestTestSuite):
+    def setup(self):
+        super().setup()
+
+        self.route = '/alerttriagechain'
+        self.alert_label = 'test_alert_label'
+        self.alert_id = 'testid1234'
+        self.user_email = 'tester@mozilla.com'
+
+        self.chains_db = self.mongoclient.meteor['duplicatechains']
+
+    def test_route_endpoints(self):
+        req_params = {
+            'alert': self.alert_label,
+            'user': self.user_email,
+            'identifiers': [self.alert_id]
+        }
+
+        resp = self.app.post_json(self.route, req_params)
+
+        query = {'alert': self.alert_label, 'user': self.user_email}
+        chain = self.chains_db.find_one(query)
+
+        assert 'error' in resp.json
+        assert resp.json['error'] is None
+
+        assert len(chain['identifiers']) == 1
+        assert chain['identifiers'][0] == self.alert_id
 
 
 # Routes left need to have unit tests written for:
