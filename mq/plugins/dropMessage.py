@@ -22,7 +22,7 @@ class message(object):
     def onMessage(self, message, metadata):
         # criteria for dropping messages
         # early exit by setting message = None and return
-        if message['type'] != 'auditd':
+        if 'type' in message and message['type'] != 'auditd':
             return (message, metadata)
 
         if 'details' in message:
