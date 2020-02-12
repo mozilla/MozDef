@@ -50,8 +50,9 @@ def save_db_data(save_path, db_data):
 def main():
     logger.debug('Starting')
     logger.debug(options)
-    db_data = fetch_db_data(options.db_download_location)
-    save_db_data(options.db_location, db_data)
+    for dburl, dbstore in zip(options.db_download_locations.split(','), options.db_locations.split(',')):
+        db_data = fetch_db_data(dburl)
+        save_db_data(dbstore, db_data)
 
 
 def initConfig():
@@ -60,8 +61,8 @@ def initConfig():
     options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-    options.db_download_location = getConfig('db_download_location', '', options.configfile)
-    options.db_location = getConfig('db_location', '', options.configfile)
+    options.db_download_locations = getConfig('db_download_locations', '', options.configfile)
+    options.db_locations = getConfig('db_locations', '', options.configfile)
 
     options.account_id = getConfig('account_id', '', options.configfile)
     options.license_key = getConfig('license_key', '', options.configfile)
