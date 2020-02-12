@@ -9,65 +9,62 @@ import requests_mock
 
 import mq.plugins.triage_bot as bot
 
+
 class TestTriageBot:
     def test_update_alert_status_request_success(self):
         with requests_mock.mock() as mock:
-            url = 'http://mock.site/updatealert'
-            cfg = bot.RESTConfig(url, 'token')
+            url = "http://mock.site/updatealert"
+            cfg = bot.RESTConfig(url, "token")
             msg = bot.UserResponseMessage(
-                'id',
-                bot.UserInfo('test@site.com', 'tester'),
+                "id",
+                bot.UserInfo("test@site.com", "tester"),
                 bot.Confidence.HIGH,
-                bot.UserResponse.YES)
+                bot.UserResponse.YES,
+            )
 
-            mock.post(url, json={'error': None})
+            mock.post(url, json={"error": None})
             succeeded = bot.update_alert_status(msg, cfg)
 
             assert succeeded
-    
 
     def test_update_alert_status_request_failure(self):
         with requests_mock.mock() as mock:
-            url = 'http://mock.site/updatealert'
-            cfg = bot.RESTConfig(url, 'token')
+            url = "http://mock.site/updatealert"
+            cfg = bot.RESTConfig(url, "token")
             msg = bot.UserResponseMessage(
-                'id',
-                bot.UserInfo('test@site.com', 'tester'),
+                "id",
+                bot.UserInfo("test@site.com", "tester"),
                 bot.Confidence.HIGH,
-                bot.UserResponse.YES)
+                bot.UserResponse.YES,
+            )
 
-            mock.post(url, json={'error': None}, status_code=400)
+            mock.post(url, json={"error": None}, status_code=400)
             succeeded = bot.update_alert_status(msg, cfg)
 
             assert not succeeded
 
-
     def test_process_rejects_bad_messages(self):
-        msg = {
-            'identifier': 'test'
-        }
-        cfg = bot.RESTConfig('', '')
+        msg = {"details": {"identifier": "test"}}
+        cfg = bot.RESTConfig("", "")
 
         (new_msg, new_meta) = bot.process(msg, {}, cfg)
 
         assert new_msg is None
         assert new_meta is None
 
-
     def test_process_invokes_update_for_good_messages(self):
         msg = {
-            'identifier': 'id',
-            'user': {
-                'email': 'tester@site.com',
-                'slack': 'tester'
-            },
-            'identityConfidence': 'high',
-            'response': 'yes'
+            "details": {
+                "identifier": "id",
+                "user": {"email": "tester@site.com", "slack": "tester"},
+                "identityConfidence": "high",
+                "response": "yes",
+            }
         }
-        cfg = bot.RESTConfig('http://mock.site/updatealert', 'token')
+        cfg = bot.RESTConfig("http://mock.site/updatealert", "token")
 
         with requests_mock.mock() as mock:
-            mock.post(cfg.url, json={'error': None})
+            mock.post(cfg.url, json={"error": None})
             (new_msg, new_meta) = bot.process(msg, {}, cfg)
 
             assert new_msg == msg
@@ -81,46 +78,37 @@ class TestLambda:
         def read(self, _bytes=None):
             return self.payload
 
-
     class MockLambda:
         def __init__(self, sess):
             self.session = sess
 
         def list_functions(self, **kwargs):
-            self.session.calls['list_functions'].append(kwargs)
-            
+            self.session.calls["list_functions"].append(kwargs)
+
             dummy1 = {
-                'FunctionName': 'test1',
-                'FunctionArn': 'abc123',
-                'Description': 'First test function'
+                "FunctionName": "test1",
+                "FunctionArn": "abc123",
+                "Description": "First test function",
             }
             dummy2 = {
-                'FunctionName': 'MozDefSlackTraigeBotAPI-SlackTriageBotApiFunction-TEST',
-                'FunctionArn': 'def321',
-                'Description': 'Second test function'
+                "FunctionName": "MozDefSlackTraigeBotAPI-SlackTriageBotApiFunction-TEST",
+                "FunctionArn": "def321",
+                "Description": "Second test function",
             }
 
-            if len(self.session.calls['list_functions']) < 2:
-                return {'NextMarker': 'test', 'Functions': [dummy1]}
+            if len(self.session.calls["list_functions"]) < 2:
+                return {"NextMarker": "test", "Functions": [dummy1]}
 
-            return {'Functions': [dummy2]}
+            return {"Functions": [dummy2]}
 
         def invoke(self, **kwargs):
-            self.session.calls['invoke'].append(kwargs)
+            self.session.calls["invoke"].append(kwargs)
 
-            return {
-                'Payload': TestLambda.MockStream(json.dumps({
-                    'result': 'testurl'
-                }))
-            }
-
+            return {"Payload": TestLambda.MockStream(json.dumps({"result": "testurl"}))}
 
     class MockSession:
         def __init__(self):
-            self.calls = {
-                'list_functions': [],
-                'invoke': []
-            }
+            self.calls = {"list_functions": [], "invoke": []}
 
         def client(self, _service_name):
             return TestLambda.MockLambda(self)
@@ -130,6 +118,6 @@ class TestLambda:
         discover = bot._discovery(session)
         queue_url = discover()
 
-        assert queue_url == 'testurl'
-        assert len(session.calls['list_functions']) == 2
-        assert len(session.calls['invoke']) == 1
+        assert queue_url == "testurl"
+        assert len(session.calls["list_functions"]) == 2
+        assert len(session.calls["invoke"]) == 1
