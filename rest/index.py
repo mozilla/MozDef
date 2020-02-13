@@ -582,10 +582,10 @@ def update_alert_status():
     ok = 200
     bad_request = 400
 
+    response.content_type = "application/json"
+
     mongo = MongoClient(options.mongohost, options.mongoport)
     alerts = mongo.meteor["alerts"]
-
-    response.content_type = "application/json"
 
     try:
         req = json.loads(request.body.read())
@@ -683,6 +683,8 @@ def create_duplicate_chain():
     ok = 200
     bad_request = 400
     internal_error = 500
+
+    response.content_type = "application/json"
 
     mongo = MongoClient(options.mongohost, options.mongoport)
     dupchains = mongo.meteor[DUP_CHAIN_DB]
