@@ -364,6 +364,46 @@ class TestAlertStatus(RestTestSuite):
         return
 
 
+class TestRetrieveDuplicateChain(RestTestSuite):
+    def setup(self):
+        super().setup()
+
+        self.route = "/alerttriagechain"
+        self.alert_label = "test_alert_label"
+        self.alert_id = "testid4321"
+        self.user_email = "tester@mozilla.com"
+
+        self.chains_db = self.mongoclient.meteor["duplicatechains"]
+
+        self.chains_db.insert_one({
+            "alert": self.alert_label,
+            "user": self.user_email,
+            "identifiers": [self.alert_id],
+        })
+
+    def teardown(self):
+        super().setup()
+
+        self.chains_db.delete_one({
+            "alert": self.alert_label,
+            "user": self.user_email,
+        })
+
+    def test_route_endpoints(self):
+        req_params = {
+            "alert": self.alert_label,
+            "user": self.user_email,
+        }
+
+        resp = self.app.get(self.route, req_params)
+
+        assert "error" in resp.json
+        assert resp.json["error"] is None
+        assert "identifiers" in resp.json
+        assert len(resp.json["identifiers"]) == 1
+        assert resp.json["identifiers"][0] == self.alert_id
+
+
 class TestCreateDuplicateChain(RestTestSuite):
     def setup(self):
         super().setup()

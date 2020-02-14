@@ -15,7 +15,7 @@ import socket
 import importlib
 
 import bottle
-from bottle import route, run, response, request, default_app, post, put
+from bottle import route, run, response, request, default_app, post, put, get
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
@@ -647,6 +647,65 @@ def update_alert_status():
 
     response.status = StatusCode.OK
     response.body = json.dumps({"error": None})
+
+    return response
+
+
+@get("/alerttriagechain")
+@get("/alerttriagechain/")
+def retrieve_duplicate_chain():
+    """Search for a `Duplicate Chain` storing information about duplicate
+    alerts triggered by the same user's activity.  These chains track such
+    duplicate alerts so that the triage bot does not have to message a user
+    on Slack for each such alert within some period of time.
+
+    Requests are expected to include the following query parameters.
+
+        * `"alert": str` is the "label" for the alert, signifying which of the
+        supported alerts the user in question triggered.
+        * `"user": str` is the email address of the user contacted.
+
+    This function writes back a response containing the following JSON.
+
+    ```
+    {
+        "error": Optional[str],
+        "identifiers": List[str]
+    }
+    ```
+
+    Here,
+        * `"error"` will contain a string message if any error occurs performing
+        a lookup.  If such an error occurs, `"identifiers"` will be an empty
+        list.
+        * `"identifiers"` is a list of IDs of alerts stored under the chain.
+    """
+
+    response.content_type = "application/json"
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    dupchains = mongo.meteor[DUP_CHAIN_DB]
+
+    def _error(msg):
+        return json.dumps({"error": msg, "identifiers": []})
+
+    query = {
+        "alert": request.query.alert,
+        "user": request.query.user,
+    }
+
+    if query["alert"] is None or query["user"] is None:
+        response.status = StatusCode.BAD_REQUEST
+        response.body = _error("Request missing `alert` or `user` field")
+        return response
+
+    chain = dupchains.find_one(query)
+
+    response.status = StatusCode.OK
+    response.body = json.dumps({
+        "error": None,
+        "identifiers": chain["identifiers"],
+    })
 
     return response
 
