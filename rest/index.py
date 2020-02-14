@@ -15,7 +15,16 @@ import socket
 import importlib
 
 import bottle
-from bottle import route, run, response, request, default_app, post, put, get
+from bottle import\
+    default_app,\
+    delete,\
+    get,\
+    post,\
+    put,\
+    request,\
+    response,\
+    route,\
+    run
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
@@ -859,6 +868,78 @@ def update_duplicate_chain():
     if modified != 1:
         response.status = StatusCode.INTERNAL_ERROR
         response.body = json.dumps({"error": "Failed to update chain"})
+        return response
+
+    response.status = StatusCode.OK
+    response.body = json.dumps({"error": None})
+
+    return response
+
+
+@delete("/alerttriagechain")
+@delete("/alerttriagechain/")
+def delete_duplicate_chain():
+    """Deletes a Duplicate Chain tracking duplicate alerts triggered by the
+    same user.
+
+    Requests are expected to contain the following JSON data:
+
+    ```
+    {
+        "alert": str,
+        "user": str
+    }
+    ```
+
+    Where:
+        * `"alert"` is the label of an alert supported by the triage bot.
+        * `"user"` is the email address of the user the triage bot contacted.
+
+    Responses will contain the following JSON:
+
+    ```
+    {
+        "error": Optional[str]
+    }
+    ```
+
+    In the case that a duplicate chain identified by the request parameters does
+    not exist or an error occurs in deleting it, the `"error"` field will
+    contain a string describing the error.  Otherwise, it is `null`.
+    """
+
+    response.content_type = "application/json"
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    dupchains = mongo.meteor[DUP_CHAIN_DB]
+
+    try:
+        req = json.loads(request.body.read())
+        request.body.close()
+    except ValueError:
+        response.status = StatusCode.BAD_REQUEST
+        response.body = json.dumps({"error": "Missing or invalid request body"})
+        return response
+
+    query = {
+        "alert": req.get("alert"),
+        "user": req.get("user"),
+    }
+
+    if query["alert"] is None or query["user"] is None:
+        response.status = StatusCode.BAD_REQUEST
+        response.body = json.dumps({
+            "error": "Request missing required key `alert` or `user`"
+        })
+        return response
+
+    result = dupchains.delete_one(query)
+
+    if not result.acknowledged:
+        response.status = StatusCode.BAD_REQUEST
+        response.body = json.dumps({
+            "error": "No such duplicate chain exists"
+        })
         return response
 
     response.status = StatusCode.OK

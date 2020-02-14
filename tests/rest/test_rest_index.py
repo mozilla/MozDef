@@ -488,6 +488,39 @@ class TestUpdateDuplicateChain(RestTestSuite):
         assert self.new_id in chain["identifiers"]
 
 
+class TestDeleteDuplicateChain(RestTestSuite):
+    def setup(self):
+        super().setup()
+
+        self.route = "/alerttriagechain"
+        self.alert_label = "test_alert_label"
+        self.alert_id = "test312"
+        self.user_email = "tester@mozilla.com"
+
+        self.chains_db = self.mongoclient.meteor["duplicatechains"]
+
+        self.chains_db.insert_one({
+            "alert": self.alert_label,
+            "user": self.user_email,
+            "identifiers": [self.alert_id],
+        })
+
+    def test_route_endpoints(self):
+        req_params = {
+            "alert": self.alert_label,
+            "user": self.user_email,
+        }
+
+        resp = self.app.delete_json(self.route, req_params)
+
+        chain = self.chains_db.find_one(req_params)
+
+        assert "error" in resp.json
+        assert resp.json["error"] is None
+
+        assert chain is None  # Should no longer find the deleted chain
+
+
 # Routes left need to have unit tests written for:
 # @route('/veris')
 # @route('/veris/')
