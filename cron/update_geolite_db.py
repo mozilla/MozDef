@@ -5,29 +5,30 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import gzip
-import requests
 import sys
+import requests
 import tempfile
+import gzip
 
 from configlib import getConfig, OptionParser
-from os import rename, fsync
+from tempfile import mkstemp
+from os import close, fsync, path, rename, remove
 
 from mozdef_util.geo_ip import GeoIP
 from mozdef_util.utilities.logger import logger, initLogger
 
 
-def fetch_db_data(db_download_location):
+def fetch_db_data(db_file):
+    db_download_location = 'https://updates.maxmind.com/geoip/databases/' + db_file[:-5] + '/update'
     logger.debug('Fetching db data from ' + db_download_location)
     auth_creds = (options.account_id, options.license_key)
     response = requests.get(db_download_location, auth=auth_creds)
     if not response.ok:
         raise Exception("Received bad response from maxmind server: {0}".format(response.text))
     db_raw_data = response.content
-    with tempfile.NamedTemporaryFile(mode='wb') as temp:
+    with tempfile.NamedTemporaryFile(mode='wb', prefix=db_file + '.zip.', suffix='.tmp', dir=options.db_store_location) as temp:
         logger.debug('Writing compressed gzip to temp file: ' + temp.name)
         temp.write(db_raw_data)
-        fsync(temp.fileno())
         temp.flush()
         logger.debug('Extracting gzip data from ' + temp.name)
         gfile = gzip.GzipFile(temp.name, "rb")
@@ -35,27 +36,29 @@ def fetch_db_data(db_download_location):
         return data
 
 
-def save_db_data(save_path, db_data):
-    temp_save_path = save_path + ".tmp"
-    logger.debug("Saving db data to " + temp_save_path)
-    with open(temp_save_path, "wb+") as text_file:
-        text_file.write(db_data)
-        fsync(text_file.fileno())
-        text_file.flush()
-    logger.debug("Testing temp geolite db file")
-    geo_ip = GeoIP(temp_save_path)
-    # Do a generic lookup to verify we don't get any errors (malformed data)
-    geo_ip.lookup_ip('8.8.8.8')
-    logger.debug("Moving temp file to " + save_path)
-    rename(temp_save_path, save_path)
+def save_db_data(db_file, db_data):
+    save_path = path.join(options.db_store_location, db_file)
+    fd, temp_path = mkstemp(suffix='.tmp', prefix=db_file, dir=options.db_store_location)
+    with open(temp_path, 'wb') as temp:
+        logger.debug("Saving db data to " + temp_path)
+        temp.write(db_data)
+        fsync(temp.fileno())
+        temp.flush()
+        logger.debug("Testing temp geolite db file")
+        geo_ip = GeoIP(temp_path)
+        # Do a generic lookup to verify we don't get any errors (malformed data)
+        geo_ip.lookup_ip('8.8.8.8')
+        logger.debug("Moving temp file to " + save_path)
+    temp.close()
+    close(fd)
+    rename(temp_path, save_path)
 
 
 def main():
     logger.debug('Starting')
-    logger.debug(options)
-    for dburl, dbstore in zip(options.db_download_locations.split(','), options.db_locations.split(',')):
-        db_data = fetch_db_data(dburl)
-        save_db_data(dbstore, db_data)
+    for db_file in options.db_files.split(','):
+        db_data = fetch_db_data(db_file)
+        save_db_data(db_file, db_data)
 
 
 def initConfig():
@@ -64,9 +67,8 @@ def initConfig():
     options.sysloghostname = getConfig('sysloghostname', 'localhost', options.configfile)
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
-    options.db_download_locations = getConfig('db_download_locations', '', options.configfile)
-    options.db_locations = getConfig('db_locations', '', options.configfile)
-
+    options.db_store_location = getConfig('db_store_location', '', options.configfile)
+    options.db_files = getConfig('db_files', '', options.configfile)
     options.account_id = getConfig('account_id', '', options.configfile)
     options.license_key = getConfig('license_key', '', options.configfile)
 
