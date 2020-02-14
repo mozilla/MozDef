@@ -375,6 +375,14 @@ class TestCreateDuplicateChain(RestTestSuite):
 
         self.chains_db = self.mongoclient.meteor['duplicatechains']
 
+    def teardown(self):
+        super().teardown()
+
+        self.chains_db.delete_one({
+            "alert": self.alert_label,
+            "user": self.user_email,
+        })
+
     def test_route_endpoints(self):
         req_params = {
             'alert': self.alert_label,
@@ -392,6 +400,52 @@ class TestCreateDuplicateChain(RestTestSuite):
 
         assert len(chain['identifiers']) == 1
         assert chain['identifiers'][0] == self.alert_id
+
+
+class TestUpdateDuplicateChain(RestTestSuite):
+    def setup(self):
+        super().setup()
+
+        self.route = "/alerttriagechain"
+        self.alert_label = "test_alert_label"
+        self.alert_id = "testid12"
+        self.new_id = "testid21"
+        self.user_email = "tester@mozilla.com"
+
+        self.chains_db = self.mongoclient.meteor["duplicatechains"]
+
+        self.chains_db.insert_one({
+            "alert": self.alert_label,
+            "user": self.user_email,
+            "identifiers": [self.alert_id],
+        })
+
+    def teardown(self):
+        super().teardown()
+
+        self.chains_db.delete_one({
+            "alert": self.alert_label,
+            "user": self.user_email,
+        })
+
+    def test_route_endpoints(self):
+        req_params = {
+            "alert": self.alert_label,
+            "user": self.user_email,
+            "identifiers": [self.new_id],
+        }
+
+        resp = self.app.put_json(self.route, req_params)
+
+        query = {"alert": self.alert_label, "user": self.user_email}
+        chain = self.chains_db.find_one(query)
+
+        assert "error" in resp.json
+        assert resp.json["error"] is None
+
+        assert len(chain["identifiers"]) == 2
+        assert self.alert_id in chain["identifiers"]
+        assert self.new_id in chain["identifiers"]
 
 
 # Routes left need to have unit tests written for:

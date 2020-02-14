@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-import bottle
+import enum
 import json
 import netaddr
 import os
@@ -13,7 +13,9 @@ import re
 import requests
 import socket
 import importlib
-from bottle import route, run, response, request, default_app, post
+
+import bottle
+from bottle import route, run, response, request, default_app, post, put
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
@@ -36,6 +38,15 @@ options = None
 pluginList = list()  # tuple of module,registration dict,priority
 
 DUP_CHAIN_DB = "duplicatechains"
+
+
+class StatusCode(enum.IntEnum):
+    """A simple enumeration of common status codes.
+    """
+
+    OK = 200
+    BAD_REQUEST = 400
+    INTERNAL_ERROR = 500
 
 
 def enable_cors(fn):
@@ -579,9 +590,6 @@ def update_alert_status():
     Responses will also use status codes to indicate success / failure / error.
     """
 
-    ok = 200
-    bad_request = 400
-
     response.content_type = "application/json"
 
     mongo = MongoClient(options.mongohost, options.mongoport)
@@ -591,14 +599,14 @@ def update_alert_status():
         req = json.loads(request.body.read())
         request.body.close()
     except ValueError:
-        response.status = bad_request
+        response.status = StatusCode.BAD_REQUEST
         response.body = json.dumps({"error": "Missing or invalid request body"})
         return response
 
     valid_statuses = ["manual", "inProgress", "acknowledged", "escalated"]
 
     if req["status"] not in valid_statuses:
-        response.status = bad_request
+        response.status = StatusCode.BAD_REQUEST
         response.body = json.dumps(
             {"error": "Status not one of {}".format(" or ".join(valid_statuses))}
         )
@@ -607,7 +615,7 @@ def update_alert_status():
     valid_confidences = ["highest", "high", "moderate", "low", "lowest"]
 
     if req["identityConfidence"] not in valid_confidences:
-        response.status = bad_request
+        response.status = StatusCode.BAD_REQUEST
         response.body = json.dumps(
             {
                 "error": "user.identityConfidence not one of {}".format(
@@ -633,11 +641,11 @@ def update_alert_status():
     ).modified_count
 
     if modified_count < 2:
-        response.status = bad_request
+        response.status = StatusCode.BAD_REQUEST
         response.body = json.dumps({"error": "Alert not found"})
         return response
 
-    response.status = ok
+    response.status = StatusCode.OK
     response.body = json.dumps({"error": None})
 
     return response
@@ -680,10 +688,6 @@ def create_duplicate_chain():
     string will be returned.  Otherwise, the `error` field will be `null.`
     """
 
-    ok = 200
-    bad_request = 400
-    internal_error = 500
-
     response.content_type = "application/json"
 
     mongo = MongoClient(options.mongohost, options.mongoport)
@@ -693,7 +697,7 @@ def create_duplicate_chain():
         req = json.loads(request.body.read())
         request.body.close()
     except ValueError:
-        response.status = bad_request
+        response.status = StatusCode.BAD_REQUEST
         response.body = json.dumps({"error": "Missing or invalid request body"})
         return response
 
@@ -704,7 +708,7 @@ def create_duplicate_chain():
     }
 
     if chain["alert"] is None or chain["user"] is None:
-        response.status = bad_request
+        response.status = StatusCode.BAD_REQUEST
         response.body = json.dumps(
             {"error": "Request missing required key `alert` or `user`"}
         )
@@ -712,11 +716,93 @@ def create_duplicate_chain():
 
     result = dupchains.insert_one(chain)
     if not result.acknowledged:
-        response.status = internal_error
+        response.status = StatusCode.INTERNAL_ERROR
         response.body = json.dumps({"error": "Failed to store new duplicate chain"})
         return response
 
-    response.status = ok
+    response.status = StatusCode.OK
+    response.body = json.dumps({"error": None})
+
+    return response
+
+
+@put("/alerttriagechain")
+@put("/alerttriagechain/")
+def update_duplicate_chain():
+    """Update a `DuplicateChain`, appending information about a new alert
+    destined for a Slack user via the triage Bot.
+    See `create_duplicate_chain` for more information.
+
+    Requests are expected to take the following (JSON) form:
+
+    ```
+    {
+        "alert": str,
+        "user": str,
+        "identifiers": List[str]
+    }
+    ```
+
+    The parameters are the same as those of `create_duplicate_chain`.
+
+    This function writes back a response containing the following JSON.
+
+    ```
+    {
+        "error": Optional[str]
+    }
+    ```
+
+    If an error occurs, no duplicate chains will be updated.  This endpoint
+    does not create a new chain if one does not already exist.
+    """
+
+    response.content_type = "application/json"
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    dupchains = mongo.meteor[DUP_CHAIN_DB]
+
+    try:
+        req = json.loads(request.body.read())
+        request.body.close()
+    except ValueError:
+        response.status = StatusCode.BAD_REQUEST
+        response.body = json.dumps({"error": "Missing or invalid request body"})
+        return response
+
+    query = {
+        "alert": req.get("alert"),
+        "user": req.get("user"),
+    }
+
+    new_ids = req.get("identifiers")
+
+    if any([x is None for x in (query["alert"], query["user"], new_ids)]):
+        response.status = StatusCode.BAD_REQUEST
+        response.body = json.dumps({
+            "error": "Request missing required key `alert`, `user` or "\
+                    "`identifiers`"
+        })
+        return response
+
+    chain = dupchains.find_one(query)
+
+    if chain is None:
+        response.status = StatusCode.BAD_REQUEST
+        response.body = json.dumps({"error": "Duplicate chain does not exist"})
+        return response
+
+    modified = dupchains.update_one(
+        query,
+        {"$set": {"identifiers": chain["identifiers"] + new_ids}}
+    ).modified_count
+
+    if modified != 1:
+        response.status = StatusCode.INTERNAL_ERROR
+        response.body = json.dumps({"error": "Failed to update chain"})
+        return response
+
+    response.status = StatusCode.OK
     response.body = json.dumps({"error": None})
 
     return response
