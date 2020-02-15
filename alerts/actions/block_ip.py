@@ -40,10 +40,10 @@ class message(object):
         post_data = [
             {'ipaddress': "{0}/32".format(message['details']['sourceipaddress'])},
             {'duration': self.DEFAULT_BLOCK_LENGTH},
-            {'comment': 'MozDef Automatic Block'},
+            {'comment': 'Automatic Block'},
             {'referenceid': ''},
             {'IPBlockList': True},
-            {'userid': "mozdef@mozdef.local"}
+            {'userid': "MozDef"}
         ]
         headers = {'Content-type': 'application/json'}
         resp = requests.post(url=self.options.restapi_url + "/blockip", data=json.dumps(post_data), auth=self._restapi_jwt, headers=headers)
