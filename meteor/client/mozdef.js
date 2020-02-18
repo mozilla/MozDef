@@ -18,8 +18,6 @@ if ( Meteor.isClient ) {
         Session.set( 'alertssearchtext', '' );
         Session.set( 'alertssearchtime', '1 days' );
         Session.set( 'alertsfiltertext', '' );
-        Session.set( 'attackerlimit', '10' );
-        Session.set( 'attackersearchIP', '' );
         Session.set( 'blockIPipaddress', '' );
         Session.set( 'blockFQDN', '' );
         Session.set( 'watchItemwatchcontent', '' );
@@ -189,16 +187,6 @@ if ( Meteor.isClient ) {
         } else {
             return ( getSetting( 'rootURL' ) + '/alert/' + alertid );
         }
-    } );
-
-    UI.registerHelper( 'getAttackerURL', function( attackerid ) {
-        //return the router URL for a specific attacker
-        return ( getSetting( 'rootURL' ) + '/attacker/' + attackerid );
-    } );
-
-    UI.registerHelper( 'getAttackerIndicator', function( attackerid ) {
-        //return the first indicator from a specific attacker
-        return ( attackers.findOne( { '_id': attackerid } ).indicators[0].ipv4address );
     } );
 
     UI.registerHelper( 'isselected', function( optionvalue, datavalue ) {

@@ -23,10 +23,6 @@ import '/client/alertdetails.js';
 import '/client/alertssummary.html';
 import '/client/alertsummary.js';
 import '/client/alertTableItem.js'
-import '/client/attackerdetails.html';
-import '/client/attackerdetails.js';
-import '/client/attackers.html';
-import '/client/attackers.js';
 import '/client/blockFQDN.html';
 import '/client/blockFQDN.js';
 import '/client/blockIP.html';
@@ -60,8 +56,6 @@ import '/client/manageAlertsTable.html';
 import '/client/manageAlertsTable.js';
 import '/client/mozdefhealth.html';
 import '/client/mozdefhealth.js';
-import '/client/nameplate.html';
-import '/client/nameplate.js';
 import '/client/verisTags.html';
 import '/client/preferences.html';
 import '/client/preferences.js'

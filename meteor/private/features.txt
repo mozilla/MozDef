@@ -7,7 +7,6 @@ investigations /investigations
 incidents /incidents
 visualizations /visualizations
 logincounts /logincounts
-attackers /attackers
 globe /globe
 about /about
 blockip /blockip

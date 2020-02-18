@@ -142,26 +142,6 @@ Router.map(function() {
         layoutTemplate: 'layout'
     });
 
-
-    this.route('attackers', {
-        path: '/attackers',
-        template: 'attackers',
-        layoutTemplate: 'layout'
-    });
-
-    this.route('attackerdetails', {
-        path: '/attacker/:attackerid',
-        template: 'attackerdetails',
-        waitOn: function() {
-            Session.set('attackerID', this.params.attackerid);
-            return Meteor.subscribe('attacker-details', Session.get('attackerID'))
-        },
-        data: function() {
-            return attackers.findOne({ '_id': Session.get('attackerID') });
-        },
-        layoutTemplate: 'layout'
-    });
-
     this.route('globe', {
         path: '/globe',
         template: 'globe',

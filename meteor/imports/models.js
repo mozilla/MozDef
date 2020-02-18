@@ -138,27 +138,6 @@ models = {
             'lastModifier': ''
         };
     },
-    attacker: function() {
-        return {
-            '_id': uuid(),
-            'lastseentimestamp': today,
-            'firstseentimestamp': '',
-            'events': [],
-            'eventscount': 0,
-            'alerts': [],
-            'alertscount': 0,
-            'category': 'unknown',
-            'score': 0,
-            'geocoordinates': { 'countrycode': '', 'longitude': 0, 'lattitude': 0 },
-            'tags': [],
-            'notes': [],
-            'indicators': [],
-            'attackphase': 'unknown',
-            'datecreated': today,
-            'creator': '',
-            'lastModifier': ''
-        };
-    },
 
     credential: function() {
         return {

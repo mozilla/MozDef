@@ -241,9 +241,6 @@ Resources:
                 cookiename=sesmeteor
                 # Increase the AWS ES total fields limit from 1000 to 4000
                 OPTIONS_MAPPING_TOTAL_FIELDS_LIMIT=4000
-                # Set thresholds for attack dataviz lower means more ogres
-                OPTIONS_IPV4ATTACKERHITCOUNT=5
-                OPTIONS_IPV4ATTACKERPREFIXLENGTH=24
                 OPTIONS_ALERTSQSQUEUEURL=${AlertQueueUrl}
                 OPTIONS_MQPROTOCOL=sqs
                 DEFAULT_AWS_REGION=${AWS::Region}

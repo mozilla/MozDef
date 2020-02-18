@@ -265,50 +265,6 @@ caption, legend {
     border-radius: 6px 0 6px 6px;
 }
 
-.attackercallout {
-    width: 120px;
-    height: 160px;
-    box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
-    border: 1px solid rgba(127, 255, 255, 0.25);
-    text-align: center;
-    cursor: default;
-    z-index: 99;
-}
-
-.attackercallout .id {
-    font-size: 12px;
-    color: rgba(127, 255, 255, 0.75);
-}
-
-.attackercallout .details {
-    text-align: left;
-    left: 2px;
-    font-size: 12px;
-    color: rgba(127, 255, 255, 0.75);
-}
-
-.attackercallout .blockip {
-    color: var(--txt-primary-color);
-    text-transform: uppercase;
-    margin-top: 20px;
-}
-
-.attackercallout ul {
-    list-style: none;
-    float: left;
-    left: auto;
-    margin: 0px;
-    padding: 0px;
-}
-
-.attackercallout .indicator {
-    color: yellow;
-}
-
-.attackercallout a {
-    color: yellow;
-}
-
 .veris-wrapper td {
     color: black
 }
@@ -539,8 +495,6 @@ circle:hover {
     cursor: auto;
     margin: .5em;
 }
-
-/* attacker side nav pull out styling */
 
 /* http://www.sitepoint.com/css3-sliding-menu/ */
 
