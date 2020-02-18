@@ -30,8 +30,6 @@ import '/client/blockIP.js';
 import '/client/eventdetails.html';
 import '/client/fqdnBlocklistTable.html';
 import '/client/fqdnBlocklistTable.js';
-import '/client/globe.html';
-import '/client/globe.js';
 import '/client/incidentAdd.html';
 import '/client/incidentEdit.html';
 import '/client/incidentsveris.html';

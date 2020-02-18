@@ -142,12 +142,6 @@ Router.map(function() {
         layoutTemplate: 'layout'
     });
 
-    this.route('globe', {
-        path: '/globe',
-        template: 'globe',
-        layoutTemplate: 'layout'
-    });
-
     this.route('blockip', {
         path: '/blockip/:_ipaddr',
         template: 'blockIPform',
