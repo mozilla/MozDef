@@ -65,8 +65,6 @@ MozDef is based on open source technologies including:
 * MongoDB (scalable data store, tightly integrated to Meteor)
 * VERIS from verizon (open source taxonomy of security incident categorizations)
 * d3 (javascript library for data driven documents)
-* dc.js (javascript wrapper for d3 providing common charts, graphs)
-* three.js (javascript library for 3d visualizations)
 * Firefox (a snappy little web browser)
 
 Frontend processing

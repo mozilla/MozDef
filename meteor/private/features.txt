@@ -5,7 +5,6 @@ fqdnblocklist /fqdnblocklist
 watchlist /watchlist
 investigations /investigations
 incidents /incidents
-visualizations /visualizations
 about /about
 blockip /blockip
 manage-alerts /manage-alerts
