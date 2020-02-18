@@ -50,8 +50,6 @@ import '/client/ipintel.html';
 import '/client/ipintel.js';
 import '/client/ipwhois.html';
 import '/client/ipwhois.js';
-import '/client/logincounts.html';
-import '/client/logincounts.js';
 import '/client/manageAlertsTable.html';
 import '/client/manageAlertsTable.js';
 import '/client/mozdefhealth.html';

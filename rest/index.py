@@ -87,19 +87,6 @@ def status():
     return response
 
 
-@route('/logincounts')
-@route('/logincounts/')
-@enable_cors
-def index():
-    '''an endpoint to return success/failed login counts'''
-    if request.body:
-        request.body.read()
-        request.body.close()
-    response.content_type = "application/json"
-    sendMessgeToPlugins(request, response, 'logincounts')
-    return response
-
-
 @route('/veris')
 @route('/veris/')
 @enable_cors

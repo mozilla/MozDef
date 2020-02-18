@@ -22,7 +22,6 @@ if (Meteor.isServer) {
         'ipintel': ipintel,
         'ipsearch': ipsearch,
         'verisstats': verisstats,
-        'logincounts': logincounts,
         'getplugins': getplugins,
         'getserversetting': getserversetting
     });
@@ -158,19 +157,6 @@ if (Meteor.isServer) {
         } else {
             //console.log(verisstatsResponse);
             return verisstatsResponse;
-        }
-    }
-
-    function logincounts(){
-        //console.log('Calling ' + mozdef.rootAPI + '/logincounts/');
-        var logincountsResponse = HTTP.get(mozdef.rootAPI + '/logincounts/');
-
-        if ( typeof logincountsResponse == 'undefined') {
-            console.log("logincountsResponse: no response from server")
-            return "";
-        } else {
-            //console.log(logincountsResponse);
-            return logincountsResponse;
         }
     }
 

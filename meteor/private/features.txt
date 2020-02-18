@@ -6,7 +6,6 @@ watchlist /watchlist
 investigations /investigations
 incidents /incidents
 visualizations /visualizations
-logincounts /logincounts
 globe /globe
 about /about
 blockip /blockip

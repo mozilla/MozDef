@@ -148,12 +148,6 @@ Router.map(function() {
         layoutTemplate: 'layout'
     });
 
-    this.route('logincounts', {
-        path: '/logincounts',
-        template: 'logincounts',
-        layoutTemplate: 'layout'
-    });
-
     this.route('blockip', {
         path: '/blockip/:_ipaddr',
         template: 'blockIPform',

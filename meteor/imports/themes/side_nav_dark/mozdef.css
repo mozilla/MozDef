@@ -491,30 +491,6 @@ td {
 }
 
 
-/* d3 circle styles */
-
-.successcircle {
-    /*
-    fill: rgb(217,206,178);
-
-    fill: rgb(60,179,113);
-    */
-    /*fill: rgba(0,150,221,.8);*/
-    fill: rgba(0, 255, 0, .5);
-}
-
-.failurecircle {
-    /*fill: rgb(213,222,217);*/
-    /*fill: #BD2C00;*/
-    /*fill: #f93;*/
-    /*fill: rgba(193, 56, 50, .8);*/
-    fill: rgba(255, 0, 0, .5);
-}
-
-circle:hover {
-    fill: var(--txt-primary-color);
-}
-
 .node {
     stroke: var(--txt-secondary-color);
     stroke-width: 1.5px;
