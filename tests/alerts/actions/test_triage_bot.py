@@ -490,7 +490,9 @@ class TestDuplicateChainManagement:
             )
 
             ids = bot._retrieve_duplicate_chain(
-                bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                bot.RESTConfig(self.mock_api_base, self.mock_api_token),
+                "test_alert_label",
+                "tester@mozilla.com",
             )
 
             assert len(ids) == 1
@@ -508,7 +510,9 @@ class TestDuplicateChainManagement:
 
             try:
                 bot._retrieve_duplicate_chain(
-                    bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                    bot.RESTConfig(self.mock_api_base, self.mock_api_token),
+                    "test_alert_label",
+                    "tester@mozilla.com",
                 )
             except bot.APIError as err:
                 assert err.message == err_msg
@@ -525,7 +529,10 @@ class TestDuplicateChainManagement:
             )
 
             success = bot._create_duplicate_chain(
-                bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                bot.RESTConfig(self.mock_api_base, self.mock_api_token),
+                "test_alert_label",
+                "tester@mozilla.com",
+                ["testid123"],
             )
 
             assert success
@@ -542,7 +549,10 @@ class TestDuplicateChainManagement:
 
             try:
                 bot._create_duplicate_chain(
-                    bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                    bot.RESTConfig(self.mock_api_base, self.mock_api_token),
+                    "test_alert_label",
+                    "tester@mozilla.com",
+                    ["testid123"],
                 )
             except bot.APIError as err:
                 assert err.message == err_msg
@@ -559,7 +569,10 @@ class TestDuplicateChainManagement:
             )
 
             success = bot._update_duplicate_chain(
-                bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                bot.RESTConfig(self.mock_api_base, self.mock_api_token),
+                "test_alert_label",
+                "tester@mozilla.com",
+                ["testid123"],
             )
 
             assert success
@@ -576,7 +589,10 @@ class TestDuplicateChainManagement:
 
             try:
                 bot._update_duplicate_chain(
-                    bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                    bot.RESTConfig(self.mock_api_base, self.mock_api_token),
+                    "test_alert_label",
+                    "tester@mozilla.com",
+                    ["testid123"],
                 )
             except bot.APIError as err:
                 assert err.message == err_msg
