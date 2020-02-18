@@ -476,3 +476,110 @@ class TestLambda:
             "user": "test@user.com",
             "identityConfidence": "high",
         }
+
+class TestDuplicateChainManagement:
+    def __init__(self):
+        self.mock_api_base = "http://mozdef.restapi.com"
+        self.mock_api_token = "testtoken"
+
+    def test_chain_retrieval(self):
+        with requests_mock.mock() as mock_http:
+            mock_http.get(
+                "{}/alerttriagechain".format(self.mock_api_base),
+                json={"error": None, "identifiers": ["id123"]}
+            )
+
+            ids = bot._retrieve_duplicate_chain(
+                bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+            )
+
+            assert len(ids) == 1
+            assert ids[0] == "id123"
+    
+
+    def test_chain_retrieval_failure(self):
+        err_msg = "Chain does not exist"
+
+        with requests_mock.mock() as mock_http:
+            mock_http.get(
+                "{}/alerttriagechain".format(self.mock_api_base),
+                json={"error": err_msg, "identifiers": []}
+            )
+
+            try:
+                bot._retrieve_duplicate_chain(
+                    bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                )
+            except bot.APIError as err:
+                assert err.message == err_msg
+                return
+
+            assert False  # Shouldn't get here
+
+        
+    def test_chain_creation(self):
+        with requests_mock.mock() as mock_http:
+            mock_http.post(
+                "{}/alerttriagechain".format(self.mock_api_base),
+                json={"error": None}
+            )
+
+            success = bot._create_duplicate_chain(
+                bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+            )
+
+            assert success
+    
+
+    def test_chain_creation_failure(self):
+        err_msg = "Internal error"
+
+        with requests_mock.mock() as mock_http:
+            mock_http.post(
+                "{}/alerttriagechain".format(self.mock_api_base),
+                json={"error": err_msg}
+            )
+
+            try:
+                bot._create_duplicate_chain(
+                    bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                )
+            except bot.APIError as err:
+                assert err.message == err_msg
+                return
+
+            assert False  # shouldn't get here
+
+
+    def test_chain_update(self):
+        with requests_mock.mock() as mock_http:
+            mock_http.put(
+                "{}/alerttriagechain".format(self.mock_api_base),
+                json={"error": None}
+            )
+
+            success = bot._update_duplicate_chain(
+                bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+            )
+
+            assert success
+    
+
+    def test_chain_update_failure(self):
+        err_msg = "No such chain exists"
+
+        with requests_mock.mock() as mock_http:
+            mock_http.put(
+                "{}/alerttriagechain".format(self.mock_api_base),
+                json={"error": err_msg}
+            )
+
+            try:
+                bot._update_duplicate_chain(
+                    bot.RESTConfig(self.mock_api_base, self.mock_api_token)
+                )
+            except bot.APIError as err:
+                assert err.message == err_msg
+                return
+
+            assert False  # Shouldn't get here
