@@ -180,28 +180,6 @@ def index():
     return response
 
 
-@post('/ipintel', methods=['POST'])
-@post('/ipintel/', methods=['POST'])
-@enable_cors
-def ipintel():
-    '''send an IP address through plugins for intel enhancement'''
-    if request.body:
-        arequest = request.body.read()
-        # request.body.close()
-    # valid json?
-    try:
-        requestDict = json.loads(arequest)
-    except ValueError:
-        response.status = 500
-    if 'ipaddress' in requestDict and isIPv4(requestDict['ipaddress']):
-        response.content_type = "application/json"
-    else:
-        response.status = 500
-
-    sendMessgeToPlugins(request, response, 'ipintel')
-    return response
-
-
 @post('/ipdshieldquery', methods=['POST'])
 @post('/ipdshieldquery/', methods=['POST'])
 @enable_cors

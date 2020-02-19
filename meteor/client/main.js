@@ -50,8 +50,6 @@ import '/client/ipBlocklistTable.html';
 import '/client/ipBlocklistTable.js';
 import '/client/ipdshield.html';
 import '/client/ipdshield.js';
-import '/client/ipintel.html';
-import '/client/ipintel.js';
 import '/client/ipwhois.html';
 import '/client/ipwhois.js';
 import '/client/logincounts.html';

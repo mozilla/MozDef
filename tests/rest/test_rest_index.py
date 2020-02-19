@@ -321,8 +321,6 @@ class TestLoginCountsRoute(RestTestSuite):
 # @post('/blockip/', methods=['POST'])
 # @post('/ipwhois', methods=['POST'])
 # @post('/ipwhois/', methods=['POST'])
-# @post('/ipintel', methods=['POST'])
-# @post('/ipintel/', methods=['POST'])
 # @post('/ipdshieldquery', methods=['POST'])
 # @post('/ipdshieldquery/', methods=['POST'])
 # @route('/plugins', methods=['GET'])

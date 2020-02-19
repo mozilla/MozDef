@@ -48,10 +48,6 @@ if (Meteor.isClient) {
             Session.set('blockIPipaddress',($(e.target).attr('data-ipaddress')));
             $('#modalBlockIPWindow').modal()
         },
-        "click .ipmenu-intel": function(e,t){
-            Session.set('ipintelipaddress',($(e.target).attr('data-ipaddress')));
-            $('#modalintelwindow').modal()
-        },
         "click .ipmenu-search": function(e){
             Session.set('ipsearchipaddress',($(e.target).attr('data-ipaddress')));
             var ipText=$(e.target).attr('data-ipaddress');
