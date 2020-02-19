@@ -12,6 +12,7 @@ from urllib.parse import urljoin
 
 import boto3
 import requests
+from requests_jwt import JWTAuth
 
 from mozdef_util.utilities.logger import logger
 
@@ -103,6 +104,14 @@ class LambdaFunction(types.NamedTuple):
     description: str
 
 
+class RESTConfig(types.NamedTuple):
+    """Configuration parameters required to talk to the MozDef REST API.
+    """
+
+    url: str
+    token: types.Optional[str]
+
+
 class DispatchResult(Enum):
     """A ternary good / bad / unknown result type indicating whether a dispatch
     to AWS Lambda was successful.
@@ -130,6 +139,16 @@ class DiscoveryFailure(Exception):
 
     def __init__(self):
         super().__init__("Failed to discover the correct Lambda function")
+
+
+class APIError(Exception):
+    """Raised by functions that invoke the MozDef REST API.
+    """
+
+    def __init__(self, err_msg):
+        super().__init__(err_msg)
+
+        self.message = err_msg
 
 
 # We define some types to serve as 'interfaces' that can be referenced for
@@ -563,3 +582,93 @@ def _make_ssh_access_releng(
         profile.primary_email,
         confidence,
     )
+
+
+def _retrieve_duplicate_chain(
+    api: RESTConfig, label: str, email: str
+) -> types.List[str]:
+    url = "{}/alerttriagechain".format(api.url)
+
+    payload = {
+        "alert": label,
+        "user": email,
+    }
+
+    jwt_auth = None
+
+    if api.token is not None:
+        jwt_auth = JWTAuth(api.token)
+        jwt_auth.set_header_format("Bearer %s")
+
+    try:
+        resp = requests.get(url, json=payload, auth=jwt_auth)
+    except Exception as ex:
+        raise APIError("Failed to make request: {}".format(ex))
+
+    resp_data = resp.json()
+    error = resp_data.get("error")
+
+    if error is not None:
+        raise APIError(error)
+
+    return resp_data.get("identifiers", [])
+
+
+def _create_duplicate_chain(
+    api: RESTConfig, label: str, email: str, ids: types.List[str]
+) -> bool:
+    url = "{}/alerttriagechain".format(api.url)
+
+    payload = {
+        "alert": label,
+        "user": email,
+        "identifiers": ids,
+    }
+
+    jwt_auth = None
+
+    if api.token is not None:
+        jwt_auth = JWTAuth(api.token)
+        jwt_auth.set_header_format("Bearer %s")
+
+    try:
+        resp = requests.post(url, json=payload, auth=jwt_auth)
+    except Exception as ex:
+        raise APIError("Failed to make request: {}".format(ex))
+
+    error = resp.json().get("error")
+
+    if error is not None:
+        raise APIError(error)
+
+    return True
+
+
+def _update_duplicate_chain(
+    api: RESTConfig, label: str, email: str, ids: types.List[str]
+) -> bool:
+    url = "{}/alerttriagechain".format(api.url)
+
+    payload = {
+        "alert": label,
+        "user": email,
+        "identifiers": ids,
+    }
+
+    jwt_auth = None
+
+    if api.token is not None:
+        jwt_auth = JWTAuth(api.token)
+        jwt_auth.set_header_format("Bearer %s")
+
+    try:
+        resp = requests.put(url, json=payload, auth=jwt_auth)
+    except Exception as ex:
+        raise APIError("Failed to make request: {}".format(ex))
+
+    error = resp.json().get("error")
+
+    if error is not None:
+        raise APIError(error)
+
+    return True
