@@ -11,7 +11,6 @@ import json
 import time
 
 from operator import itemgetter
-from dateutil.parser import parse
 
 from .rest_test_suite import RestTestSuite
 
