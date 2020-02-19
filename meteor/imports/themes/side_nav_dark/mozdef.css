@@ -252,17 +252,6 @@ footer .footer__link:hover svg {
     border-radius: 6px 0 6px 6px;
 }
 
-.attackshoverboard {
-    /*width: 500px;*/
-    /*height: 500px;*/
-    /*background-color: green;*/
-    -moz-transform: scaleY(-1);
-    -webkit-transform: scaleY(-1);
-    -o-transform: scaleY(-1);
-    transform: scaleY(-1);
-    display: none;
-}
-
 .veris-wrapper td {
     color: black
 }
