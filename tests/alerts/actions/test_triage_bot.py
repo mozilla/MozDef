@@ -478,9 +478,8 @@ class TestLambda:
         }
 
 class TestDuplicateChainManagement:
-    def __init__(self):
-        self.mock_api_base = "http://mozdef.restapi.com"
-        self.mock_api_token = "testtoken"
+    mock_api_base = "http://mozdef.restapi.com"
+    mock_api_token = "testtoken"
 
     def test_chain_retrieval(self):
         with requests_mock.mock() as mock_http:
