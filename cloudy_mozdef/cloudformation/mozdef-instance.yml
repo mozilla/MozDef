@@ -220,7 +220,7 @@ Resources:
                 METEOR_BACKEND=meteor:3000
                 ESBACKEND=${KibanaDomainOnlyURL}
                 # Disable certain web ui features
-                OPTIONS_REMOVE_FEATURES=ipblocklist,fqdnblocklist,logincounts,globe
+                OPTIONS_REMOVE_FEATURES=ipblocklist,fqdnblocklist
                 # See https://github.com/mozilla-iam/mozilla.oidc.accessproxy/blob/master/README.md#setup
                 # Future support will be added for cognito backed authentication.
                 client_id=${OIDCClientId}
@@ -241,9 +241,6 @@ Resources:
                 cookiename=sesmeteor
                 # Increase the AWS ES total fields limit from 1000 to 4000
                 OPTIONS_MAPPING_TOTAL_FIELDS_LIMIT=4000
-                # Set thresholds for attack dataviz lower means more ogres
-                OPTIONS_IPV4ATTACKERHITCOUNT=5
-                OPTIONS_IPV4ATTACKERPREFIXLENGTH=24
                 OPTIONS_ALERTSQSQUEUEURL=${AlertQueueUrl}
                 OPTIONS_MQPROTOCOL=sqs
                 DEFAULT_AWS_REGION=${AWS::Region}

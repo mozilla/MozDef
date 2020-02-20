@@ -117,35 +117,6 @@ Copyright (c) 2014 Mozilla Corporation
           </ul>
         </li>
         {{/if}}
-        {{#if isFeature "visualizations"}}
-        <li class="has-subnav">
-          <a href="#">
-            <i class="fa fa-eye fa-lg"></i>
-            <span class="nav-text">
-              Visualizations
-            </span>
-          </a>
-          <ul>
-            <li class="has-subnav">
-              {{#if isFeature "logincounts"}}
-              <li>
-                <a href="/logincounts/">logincounts</a>
-              </li>
-              {{/if}}
-              {{#if isFeature "attackers"}}
-              <li>
-                <a href="/attackers">attackers</a>
-              </li>
-              {{/if}}
-              {{#if isFeature "globe"}}
-              <li>
-                <a href="/globe">globe</a>
-              </li>
-              {{/if}}
-            </li>
-          </ul>
-        </li>
-        {{/if}}
         {{#if isFeature "about"}}
         <li>
           <a href="/about">
