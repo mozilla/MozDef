@@ -191,15 +191,6 @@ Router.map(function() {
         }
     });
 
-    this.route('ipintel', {
-        path: '/ipintel/:_ipaddress',
-        template: 'ipintel',
-        data: function() {
-            Session.set('ipintelipaddress', this.params._ipaddress)
-        }
-
-    });
-
     this.route('veris', {
         path: '/veris',
         template: 'veristags',
