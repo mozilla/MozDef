@@ -18,6 +18,7 @@ ALERTS = {
 
 ALERT_PLUGINS = [
     # 'relative pythonfile name (exclude the .py) - EX: sso_dashboard',
+    'ipaddr',
 ]
 
 ALERT_ACTIONS = [
