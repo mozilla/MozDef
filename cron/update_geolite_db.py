@@ -12,7 +12,7 @@ import gzip
 
 from configlib import getConfig, OptionParser
 from tempfile import mkstemp
-from os import close, fsync, path, rename, remove
+from os import close, fsync, path, rename
 
 from mozdef_util.geo_ip import GeoIP
 from mozdef_util.utilities.logger import logger, initLogger
