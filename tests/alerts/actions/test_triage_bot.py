@@ -495,8 +495,8 @@ class TestDuplicateChainManagement:
 
             chain = bot._retrieve_duplicate_chain(
                 bot.RESTConfig(self.mock_api_base, self.mock_api_token),
-                "test_alert_label",
-                "tester@mozilla.com",
+                bot.AlertLabel.SENSITIVE_HOST_SESSION,
+                bot.Email("tester@mozilla.com"),
             )
 
             assert len(chain.identifiers) == 1
@@ -522,8 +522,8 @@ class TestDuplicateChainManagement:
             try:
                 bot._retrieve_duplicate_chain(
                     bot.RESTConfig(self.mock_api_base, self.mock_api_token),
-                    "test_alert_label",
-                    "tester@mozilla.com",
+                    bot.AlertLabel.SSH_ACCESS_SIGN_RELENG,
+                    bot.Email("tester@mozilla.com"),
                 )
             except bot.APIError as err:
                 assert err.message == err_msg
@@ -541,8 +541,8 @@ class TestDuplicateChainManagement:
 
             success = bot._create_duplicate_chain(
                 bot.RESTConfig(self.mock_api_base, self.mock_api_token),
-                "test_alert_label",
-                "tester@mozilla.com",
+                bot.AlertLabel.DUO_BYPASS_CODES_USED,
+                bot.Email("tester@mozilla.com"),
                 ["testid123"],
             )
 
@@ -561,8 +561,8 @@ class TestDuplicateChainManagement:
             try:
                 bot._create_duplicate_chain(
                     bot.RESTConfig(self.mock_api_base, self.mock_api_token),
-                    "test_alert_label",
-                    "tester@mozilla.com",
+                    bot.AlertLabel.SENSITIVE_HOST_SESSION,
+                    bot.Email("tester@mozilla.com"),
                     ["testid123"],
                 )
             except bot.APIError as err:
@@ -581,8 +581,8 @@ class TestDuplicateChainManagement:
 
             success = bot._update_duplicate_chain(
                 bot.RESTConfig(self.mock_api_base, self.mock_api_token),
-                "test_alert_label",
-                "tester@mozilla.com",
+                bot.AlertLabel.DUO_BYPASS_CODES_GENERATED,
+                bot.Email("tester@mozilla.com"),
                 ["testid123"],
             )
 
@@ -601,8 +601,8 @@ class TestDuplicateChainManagement:
             try:
                 bot._update_duplicate_chain(
                     bot.RESTConfig(self.mock_api_base, self.mock_api_token),
-                    "test_alert_label",
-                    "tester@mozilla.com",
+                    bot.AlertLabel.SENSITIVE_HOST_SESSION,
+                    bot.Email("tester@mozilla.com"),
                     ["testid123"],
                 )
             except bot.APIError as err:

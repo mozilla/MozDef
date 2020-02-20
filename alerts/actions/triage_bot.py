@@ -241,6 +241,7 @@ class message(object):
             logger.error(
                 "Alert {} triggered by {}".format(request.alert.value, request.user)
             )
+
             result = dispatch(request, self._lambda_function_name)
 
             # In the case that dispatch fails, attempt to re-discover the name
@@ -605,12 +606,12 @@ def _make_ssh_access_releng(
 
 
 def _retrieve_duplicate_chain(
-    api: RESTConfig, label: str, email: str
+    api: RESTConfig, label: AlertLabel, email: Email
 ) -> types.Optional[DuplicateChain]:
     url = "{}/alerttriagechain".format(api.url)
 
     payload = {
-        "alert": label,
+        "alert": label.value,
         "user": email,
     }
 
@@ -648,12 +649,12 @@ def _retrieve_duplicate_chain(
 
 
 def _create_duplicate_chain(
-    api: RESTConfig, label: str, email: str, ids: types.List[str]
+    api: RESTConfig, label: AlertLabel, email: Email, ids: types.List[str]
 ) -> bool:
     url = "{}/alerttriagechain".format(api.url)
 
     payload = {
-        "alert": label,
+        "alert": label.value,
         "user": email,
         "identifiers": ids,
     }
@@ -678,12 +679,12 @@ def _create_duplicate_chain(
 
 
 def _update_duplicate_chain(
-    api: RESTConfig, label: str, email: str, ids: types.List[str]
+    api: RESTConfig, label: AlertLabel, email: Email, ids: types.List[str]
 ) -> bool:
     url = "{}/alerttriagechain".format(api.url)
 
     payload = {
-        "alert": label,
+        "alert": label.value,
         "user": email,
         "identifiers": ids,
     }
