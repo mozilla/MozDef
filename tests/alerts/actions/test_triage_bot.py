@@ -485,17 +485,24 @@ class TestDuplicateChainManagement:
         with requests_mock.mock() as mock_http:
             mock_http.get(
                 "{}/alerttriagechain".format(self.mock_api_base),
-                json={"error": None, "identifiers": ["id123"]}
+                json={
+                    "error": None,
+                    "identifiers": ["id123"],
+                    "created": "2020/02/19 1:23:45",
+                    "modified": "2020/02/19 1:23:45",
+                }
             )
 
-            ids = bot._retrieve_duplicate_chain(
+            chain = bot._retrieve_duplicate_chain(
                 bot.RESTConfig(self.mock_api_base, self.mock_api_token),
                 "test_alert_label",
                 "tester@mozilla.com",
             )
 
-            assert len(ids) == 1
-            assert ids[0] == "id123"
+            assert len(chain.identifiers) == 1
+            assert chain.identifiers[0] == "id123"
+            assert chain.created.year == 2020
+            assert chain.modified.day == 19
     
 
     def test_chain_retrieval_failure(self):
@@ -504,7 +511,12 @@ class TestDuplicateChainManagement:
         with requests_mock.mock() as mock_http:
             mock_http.get(
                 "{}/alerttriagechain".format(self.mock_api_base),
-                json={"error": err_msg, "identifiers": []}
+                json={
+                    "error": err_msg,
+                    "identifiers": [],
+                    "created": "2020/02/19 1:23:45",
+                    "modified": "2020/02/19 1:23:45",
+                }
             )
 
             try:

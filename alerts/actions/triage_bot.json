@@ -4,5 +4,7 @@
   "aws_access_key_id": "acecssid",
   "aws_secret_access_key": "secret",
   "aws_region": "us-west-2",
-  "aws_lambda_function": "test_fn"
+  "aws_lambda_function": "test_fn",
+  "mozdef_restapi_url": "mozdef rest api url base",
+  "mozdef_restapi_token": "mozdef rest api auth token"
 }

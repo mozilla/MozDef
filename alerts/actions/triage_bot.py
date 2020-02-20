@@ -29,6 +29,9 @@ TOKEN_VALIDITY_WINDOW_MINUTES = 18 * 60
 SLACK_BOT_FUNCTION_NAME_PREFIX = "MozDefSlackTriageBotAPI-SlackTriageBotApiFunction"
 L_FN_NAME_VALIDITY_WINDOW_SECONDS = 24 * 60 * 60
 
+# The format string that UTC-based timestamps are encoded as.
+DUP_CHAIN_DATE_FMT = "%Y/%m/%d %H:%M:%S"
+
 Alert = types.Dict[types.Any, types.Any]
 Email = str
 
@@ -122,6 +125,18 @@ class DispatchResult(Enum):
     INDETERMINATE = "indeterminate"
 
 
+class DuplicateChain(types.NamedTuple):
+    """Contains information correlating identifiers for alerts of the same
+    kind triggered by the same user within a period of time.
+
+    The `created` and `modified` fields are both represented as UTC timestamps.
+    """
+
+    identifiers: types.List[str]
+    created: datetime
+    modified: datetime
+
+
 class AuthFailure(Exception):
     """Raised by the `message` class in the case that authentication to the
     Person API fails.
@@ -181,6 +196,11 @@ class message(object):
             region_name=self._config["aws_region"],
             aws_access_key_id=self._config["aws_access_key_id"],
             aws_secret_access_key=self._config["aws_secret_access_key"],
+        )
+
+        self._rest_api_cfg = RESTConfig(
+            url=self._config["mozdef_restapi_url"],
+            token=self._config["mozdef_restapi_token"],
         )
 
         logger.error("Performing initial OAuth Handshake")
@@ -586,7 +606,7 @@ def _make_ssh_access_releng(
 
 def _retrieve_duplicate_chain(
     api: RESTConfig, label: str, email: str
-) -> types.List[str]:
+) -> types.Optional[DuplicateChain]:
     url = "{}/alerttriagechain".format(api.url)
 
     payload = {
@@ -611,7 +631,20 @@ def _retrieve_duplicate_chain(
     if error is not None:
         raise APIError(error)
 
-    return resp_data.get("identifiers", [])
+    ids = resp_data.get("identifiers", [])
+
+    if len(ids) == 0:
+        return None
+
+    try:
+        created = datetime.strptime(resp_data["created"], DUP_CHAIN_DATE_FMT)
+        modified = datetime.strptime(resp_data["modified"], DUP_CHAIN_DATE_FMT)
+    except KeyError:
+        raise APIError("Duplicate chain data missing created or modified field")
+    except ValueError:
+        raise APIError("Duplicate chain data contains unexpected timestamps")
+
+    return DuplicateChain(ids, created, modified)
 
 
 def _create_duplicate_chain(
