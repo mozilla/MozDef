@@ -6,8 +6,9 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 
-import os
+from datetime import datetime
 import json
+import os
 import time
 
 from operator import itemgetter
@@ -379,6 +380,8 @@ class TestRetrieveDuplicateChain(RestTestSuite):
             "alert": self.alert_label,
             "user": self.user_email,
             "identifiers": [self.alert_id],
+            "created": datetime.utcnow(),
+            "modified": datetime.utcnow(),
         })
 
     def teardown(self):
@@ -402,6 +405,8 @@ class TestRetrieveDuplicateChain(RestTestSuite):
         assert "identifiers" in resp.json
         assert len(resp.json["identifiers"]) == 1
         assert resp.json["identifiers"][0] == self.alert_id
+        assert "created" in resp.json
+        assert "modified" in resp.json
 
 
 class TestCreateDuplicateChain(RestTestSuite):
@@ -440,6 +445,8 @@ class TestCreateDuplicateChain(RestTestSuite):
 
         assert len(chain['identifiers']) == 1
         assert chain['identifiers'][0] == self.alert_id
+        assert "created" in chain
+        assert "modified" in chain
 
 
 class TestUpdateDuplicateChain(RestTestSuite):
@@ -454,10 +461,14 @@ class TestUpdateDuplicateChain(RestTestSuite):
 
         self.chains_db = self.mongoclient.meteor["duplicatechains"]
 
+        self.created = datetime.utcnow()
+
         self.chains_db.insert_one({
             "alert": self.alert_label,
             "user": self.user_email,
             "identifiers": [self.alert_id],
+            "created": self.created,
+            "modified": self.created,
         })
 
     def teardown(self):
@@ -486,6 +497,7 @@ class TestUpdateDuplicateChain(RestTestSuite):
         assert len(chain["identifiers"]) == 2
         assert self.alert_id in chain["identifiers"]
         assert self.new_id in chain["identifiers"]
+        assert chain["modified"] != self.created
 
 
 class TestDeleteDuplicateChain(RestTestSuite):
@@ -503,6 +515,8 @@ class TestDeleteDuplicateChain(RestTestSuite):
             "alert": self.alert_label,
             "user": self.user_email,
             "identifiers": [self.alert_id],
+            "created": datetime.utcnow(),
+            "modified": datetime.utcnow(),
         })
 
     def test_route_endpoints(self):

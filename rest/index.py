@@ -46,7 +46,11 @@ from mozdef_util.utilities.toUTC import toUTC
 options = None
 pluginList = list()  # tuple of module,registration dict,priority
 
+# The name of the MongoDB database that stores duplicate chains.
 DUP_CHAIN_DB = "duplicatechains"
+
+# The format string that UTC-based timestamps are encoded as.
+DUP_CHAIN_DATE_FMT = "%Y/%m/%d %H:%M:%S"
 
 
 class StatusCode(enum.IntEnum):
@@ -679,7 +683,9 @@ def retrieve_duplicate_chain():
     ```
     {
         "error": Optional[str],
-        "identifiers": List[str]
+        "identifiers": List[str],
+        "created": str,
+        "modified": str
     }
     ```
 
@@ -688,6 +694,11 @@ def retrieve_duplicate_chain():
         a lookup.  If such an error occurs, `"identifiers"` will be an empty
         list.
         * `"identifiers"` is a list of IDs of alerts stored under the chain.
+        * `"created"` is the date & time at which the chain was created.
+        * `"modified"` is the date & time at which the chain was last modified.
+
+    Both the `"created"` and `"modified"` fields represent UTC timestamps and
+    are formatted like `YYYY/mm/dd HH:MM:SS`.
     """
 
     response.content_type = "application/json"
@@ -714,6 +725,8 @@ def retrieve_duplicate_chain():
     response.body = json.dumps({
         "error": None,
         "identifiers": chain["identifiers"],
+        "created": chain["created"].strftime(DUP_CHAIN_DATE_FMT),
+        "modified": chain["modified"].strftime(DUP_CHAIN_DATE_FMT),
     })
 
     return response
@@ -769,10 +782,14 @@ def create_duplicate_chain():
         response.body = json.dumps({"error": "Missing or invalid request body"})
         return response
 
+    now = datetime.utcnow()
+
     chain = {
         "alert": req.get("alert"),
         "user": req.get("user"),
         "identifiers": req.get("identifiers", []),
+        "created": now,
+        "modified": now,
     }
 
     if chain["alert"] is None or chain["user"] is None:
@@ -862,7 +879,12 @@ def update_duplicate_chain():
 
     modified = dupchains.update_one(
         query,
-        {"$set": {"identifiers": chain["identifiers"] + new_ids}}
+        {
+            "$set": {
+                "identifiers": chain["identifiers"] + new_ids,
+                "modified": datetime.utcnow(),
+            }
+        }
     ).modified_count
 
     if modified != 1:
