@@ -296,7 +296,6 @@ if ( Meteor.isClient ) {
             copyitem = $( "<li><a class='ipmenu-copy' data-ipaddress='" + iptext + "'href='#'>copy</a></li>" );
             whoisitem = $( "<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>" );
             dshielditem = $( "<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>" );
-            intelitem = $( "<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>" );
             searchitem = $( "<li><a class='ipmenu-search' data-ipaddress='" + iptext + "'href='#'>search kibana</a></li>" );
             if ( isFeature( 'watchItem' ) ) {
                 watchItemitem = $( "<li><a class='ipmenu-watchitem' data-ipaddress='" + iptext + "'href='#'>watch</a></li>" );
@@ -308,7 +307,7 @@ if ( Meteor.isClient ) {
             } else {
                 blockIPitem = $();
             }
-            ipmenu.append( copyitem, whoisitem, dshielditem, intelitem, searchitem, watchItemitem, blockIPitem );
+            ipmenu.append( copyitem, whoisitem, dshielditem, searchitem, watchItemitem, blockIPitem );
 
             $( this ).parent().parent().append( ipmenu );
         } );
