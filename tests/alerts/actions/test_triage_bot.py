@@ -477,6 +477,7 @@ class TestLambda:
             "identityConfidence": "high",
         }
 
+
 class TestDuplicateChainManagement:
     mock_api_base = "http://mozdef.restapi.com"
     mock_api_token = "testtoken"
@@ -490,7 +491,7 @@ class TestDuplicateChainManagement:
                     "identifiers": ["id123"],
                     "created": "2020/02/19 1:23:45",
                     "modified": "2020/02/19 1:23:45",
-                }
+                },
             )
 
             chain = bot._retrieve_duplicate_chain(
@@ -503,7 +504,6 @@ class TestDuplicateChainManagement:
             assert chain.identifiers[0] == "id123"
             assert chain.created.year == 2020
             assert chain.modified.day == 19
-    
 
     def test_chain_retrieval_failure(self):
         err_msg = "Chain does not exist"
@@ -516,7 +516,7 @@ class TestDuplicateChainManagement:
                     "identifiers": [],
                     "created": "2020/02/19 1:23:45",
                     "modified": "2020/02/19 1:23:45",
-                }
+                },
             )
 
             try:
@@ -531,12 +531,10 @@ class TestDuplicateChainManagement:
 
             assert False  # Shouldn't get here
 
-        
     def test_chain_creation(self):
         with requests_mock.mock() as mock_http:
             mock_http.post(
-                "{}/alerttriagechain".format(self.mock_api_base),
-                json={"error": None}
+                "{}/alerttriagechain".format(self.mock_api_base), json={"error": None}
             )
 
             success = bot._create_duplicate_chain(
@@ -547,7 +545,6 @@ class TestDuplicateChainManagement:
             )
 
             assert success
-    
 
     def test_chain_creation_failure(self):
         err_msg = "Internal error"
@@ -555,7 +552,7 @@ class TestDuplicateChainManagement:
         with requests_mock.mock() as mock_http:
             mock_http.post(
                 "{}/alerttriagechain".format(self.mock_api_base),
-                json={"error": err_msg}
+                json={"error": err_msg},
             )
 
             try:
@@ -571,12 +568,10 @@ class TestDuplicateChainManagement:
 
             assert False  # shouldn't get here
 
-
     def test_chain_update(self):
         with requests_mock.mock() as mock_http:
             mock_http.put(
-                "{}/alerttriagechain".format(self.mock_api_base),
-                json={"error": None}
+                "{}/alerttriagechain".format(self.mock_api_base), json={"error": None}
             )
 
             success = bot._update_duplicate_chain(
@@ -587,7 +582,6 @@ class TestDuplicateChainManagement:
             )
 
             assert success
-    
 
     def test_chain_update_failure(self):
         err_msg = "No such chain exists"
@@ -595,7 +589,7 @@ class TestDuplicateChainManagement:
         with requests_mock.mock() as mock_http:
             mock_http.put(
                 "{}/alerttriagechain".format(self.mock_api_base),
-                json={"error": err_msg}
+                json={"error": err_msg},
             )
 
             try:
