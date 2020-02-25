@@ -408,7 +408,6 @@ class TestRetrieveDuplicateChain(RestTestSuite):
         assert "created" in resp.json
         assert "modified" in resp.json
 
-
 class TestCreateDuplicateChain(RestTestSuite):
     def setup(self):
         super().setup()
@@ -533,7 +532,6 @@ class TestDeleteDuplicateChain(RestTestSuite):
         assert resp.json["error"] is None
 
         assert chain is None  # Should no longer find the deleted chain
-
 
 # Routes left need to have unit tests written for:
 # @route('/veris')

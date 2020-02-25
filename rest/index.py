@@ -15,16 +15,7 @@ import socket
 import importlib
 
 import bottle
-from bottle import\
-    default_app,\
-    delete,\
-    get,\
-    post,\
-    put,\
-    request,\
-    response,\
-    route,\
-    run
+from bottle import default_app, delete, get, post, put, request, response, route, run
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
@@ -477,8 +468,9 @@ def createIncident():
         return response
 
     # Validating Incident phase type
-    valid_phase = isinstance(incident["phase"], str) and\
-        incident["phase"] in validIncidentPhases
+    valid_phase = (
+        isinstance(incident["phase"], str) and incident["phase"] in validIncidentPhases
+    )
 
     if not valid_phase:
         response.status = 500
@@ -709,10 +701,7 @@ def retrieve_duplicate_chain():
     def _error(msg):
         return json.dumps({"error": msg, "identifiers": []})
 
-    query = {
-        "alert": request.query.alert,
-        "user": request.query.user,
-    }
+    query = {"alert": request.query.alert, "user": request.query.user}
 
     if query["alert"] is None or query["user"] is None:
         response.status = StatusCode.BAD_REQUEST
@@ -722,12 +711,14 @@ def retrieve_duplicate_chain():
     chain = dupchains.find_one(query)
 
     response.status = StatusCode.OK
-    response.body = json.dumps({
-        "error": None,
-        "identifiers": chain["identifiers"],
-        "created": chain["created"].strftime(DUP_CHAIN_DATE_FMT),
-        "modified": chain["modified"].strftime(DUP_CHAIN_DATE_FMT),
-    })
+    response.body = json.dumps(
+        {
+            "error": None,
+            "identifiers": chain["identifiers"],
+            "created": chain["created"].strftime(DUP_CHAIN_DATE_FMT),
+            "modified": chain["modified"].strftime(DUP_CHAIN_DATE_FMT),
+        }
+    )
 
     return response
 
@@ -855,19 +846,18 @@ def update_duplicate_chain():
         response.body = json.dumps({"error": "Missing or invalid request body"})
         return response
 
-    query = {
-        "alert": req.get("alert"),
-        "user": req.get("user"),
-    }
+    query = {"alert": req.get("alert"), "user": req.get("user")}
 
     new_ids = req.get("identifiers")
 
     if any([x is None for x in (query["alert"], query["user"], new_ids)]):
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({
-            "error": "Request missing required key `alert`, `user` or "\
-                    "`identifiers`"
-        })
+        response.body = json.dumps(
+            {
+                "error": "Request missing required key `alert`, `user` or "
+                "`identifiers`"
+            }
+        )
         return response
 
     chain = dupchains.find_one(query)
@@ -884,7 +874,7 @@ def update_duplicate_chain():
                 "identifiers": chain["identifiers"] + new_ids,
                 "modified": datetime.utcnow(),
             }
-        }
+        },
     ).modified_count
 
     if modified != 1:
@@ -943,25 +933,20 @@ def delete_duplicate_chain():
         response.body = json.dumps({"error": "Missing or invalid request body"})
         return response
 
-    query = {
-        "alert": req.get("alert"),
-        "user": req.get("user"),
-    }
+    query = {"alert": req.get("alert"), "user": req.get("user")}
 
     if query["alert"] is None or query["user"] is None:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({
-            "error": "Request missing required key `alert` or `user`"
-        })
+        response.body = json.dumps(
+            {"error": "Request missing required key `alert` or `user`"}
+        )
         return response
 
     result = dupchains.delete_one(query)
 
     if not result.acknowledged:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({
-            "error": "No such duplicate chain exists"
-        })
+        response.body = json.dumps({"error": "No such duplicate chain exists"})
         return response
 
     response.status = StatusCode.OK
