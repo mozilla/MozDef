@@ -242,6 +242,35 @@ class message(object):
                 "Alert {} triggered by {}".format(request.alert.value, request.user)
             )
 
+            try:
+                logger.error("Fetching duplicate chain")
+                chain = _retrieve_duplicate_chain(
+                    self._rest_api_cfg, request.alert, request.user
+                )
+                if chain is None:
+                    logger.error("Creating duplicate chain")
+                    _create_duplicate_chain(
+                        self._rest_api_cfg,
+                        request.alert,
+                        request.user,
+                        [request.identifier],
+                    )
+                else:
+                    logger.error("Updating duplicate chain")
+                    _update_duplicate_chain(
+                        self._rest_api_cfg,
+                        request.alert,
+                        request.user,
+                        [request.identifier],
+                    )
+            except APIError as err:
+                # In the case that we fail to maintain a duplicate chain,
+                # we should default to messaging users even at the risk of being
+                # noisy, as doing so is a useful indication of failure.
+                logger.exception(
+                    "Duplicate chain management error: {}".format(err.message),
+                )
+
             result = dispatch(request, self._lambda_function_name)
 
             # In the case that dispatch fails, attempt to re-discover the name
