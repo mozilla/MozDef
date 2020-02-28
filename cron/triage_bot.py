@@ -51,7 +51,6 @@ def delete_expired_chains(db: Collection, valid_hours: int) -> int:
     return result.deleted_count
 
 
-
 def updated_chains(
     chains: Collection,
     alerts: Collection,
