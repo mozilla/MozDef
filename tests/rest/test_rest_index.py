@@ -408,6 +408,7 @@ class TestRetrieveDuplicateChain(RestTestSuite):
         assert "created" in resp.json
         assert "modified" in resp.json
 
+
 class TestCreateDuplicateChain(RestTestSuite):
     def setup(self):
         super().setup()
