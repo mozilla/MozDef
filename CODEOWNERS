@@ -3,10 +3,10 @@
 # review when someone opens a pull request.
 *                @pwnbus @mpurzynski @Phrozyn @tristanweir
 
-# Allow review by Gene or Andrew for cloudy MozDef code
-/cloudy_mozdef/  @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
+# Allow review by Gene for cloudy MozDef code
+/cloudy_mozdef/  @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood
 
 # Entire set can review certain documentation files
-/README.md       @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
-/CHANGELOG.md    @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
-/docs/           @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood @andrewkrug
+/README.md       @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood
+/CHANGELOG.md    @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood
+/docs/           @pwnbus @mpurzynski @Phrozyn @tristanweir @gene1wood
