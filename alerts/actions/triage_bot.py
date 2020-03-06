@@ -249,20 +249,17 @@ class message(object):
                 )
                 if chain is None:
                     logger.error("Creating duplicate chain")
-                    _create_duplicate_chain(
-                        self._rest_api_cfg,
-                        request.alert,
-                        request.user,
-                        [request.identifier],
-                    )
+                    operation = _create_duplicate_chain
                 else:
                     logger.error("Updating duplicate chain")
-                    _update_duplicate_chain(
-                        self._rest_api_cfg,
-                        request.alert,
-                        request.user,
-                        [request.identifier],
-                    )
+                    operation = _update_duplicate_chain
+
+                operation(
+                    self._rest_api_cfg,
+                    request.alert,
+                    request.user,
+                    [request.identifier],
+                )
             except APIError as err:
                 # In the case that we fail to maintain a duplicate chain,
                 # we should default to messaging users even at the risk of being
