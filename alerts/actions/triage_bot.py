@@ -648,7 +648,7 @@ def _retrieve_duplicate_chain(
         jwt_auth.set_header_format("Bearer %s")
 
     try:
-        resp = requests.get(url, json=payload, auth=jwt_auth)
+        resp = requests.get(url, params=payload, auth=jwt_auth)
     except Exception as ex:
         raise APIError("Failed to make request: {}".format(ex))
 
