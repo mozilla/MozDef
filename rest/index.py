@@ -716,8 +716,7 @@ def retrieve_duplicate_chain():
     chain = dupchains.find_one(query)
 
     if chain is None:
-        # This is not actually an error, but we do want to write an empty
-        # response.
+        # This is not an error, but we do want to write an empty response.
         response.status = StatusCode.OK
         response.body = _error("Did not find requested duplicate chian")
         return response
