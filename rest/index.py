@@ -710,6 +710,11 @@ def retrieve_duplicate_chain():
 
     chain = dupchains.find_one(query)
 
+    if chain is None:
+        response.status = StatusCode.BAD_REQUEST
+        response.body = _error("Did not find requested duplicate chian")
+        return response
+
     response.status = StatusCode.OK
     response.body = json.dumps(
         {
