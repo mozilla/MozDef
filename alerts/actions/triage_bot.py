@@ -656,7 +656,10 @@ def _retrieve_duplicate_chain(
     error = resp_data.get("error")
 
     if error is not None:
-        raise APIError(error)
+        if resp.status_code != 200:
+            raise APIError(error)
+
+        return None  # No duplicate chain found
 
     ids = resp_data.get("identifiers", [])
 
