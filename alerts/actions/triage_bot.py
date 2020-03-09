@@ -649,10 +649,12 @@ def _retrieve_duplicate_chain(
 
     try:
         resp = requests.get(url, params=payload, auth=jwt_auth)
-    except Exception as ex:
+        resp_data = resp.json()
+    except json.JSONDecodeError as ex:
+        raise APIError("Did not receive JSON response: {}".format(ex))
+    except requests.exceptions.RequestException as ex:
         raise APIError("Failed to make request: {}".format(ex))
 
-    resp_data = resp.json()
     error = resp_data.get("error")
 
     if error is not None:
@@ -696,7 +698,7 @@ def _create_duplicate_chain(
 
     try:
         resp = requests.post(url, json=payload, auth=jwt_auth)
-    except Exception as ex:
+    except requests.exceptions.RequestException as ex:
         raise APIError("Failed to make request: {}".format(ex))
 
     error = resp.json().get("error")
@@ -726,7 +728,7 @@ def _update_duplicate_chain(
 
     try:
         resp = requests.put(url, json=payload, auth=jwt_auth)
-    except Exception as ex:
+    except requests.exceptions.RequestException as ex:
         raise APIError("Failed to make request: {}".format(ex))
 
     error = resp.json().get("error")
