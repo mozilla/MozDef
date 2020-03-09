@@ -151,6 +151,8 @@ def update_alert_status(msg: UserResponseMessage, api: RESTConfig):
     """Invoke the MozDef REST API to update the status of an alert.
     """
 
+    url = "{}/alertstatus".format(api.url)
+
     status = new_status(msg.response)
 
     payload = {
@@ -169,7 +171,7 @@ def update_alert_status(msg: UserResponseMessage, api: RESTConfig):
 
     try:
         logger.error("Sending request to REST API")
-        resp = requests.post(api.url, json=payload, auth=jwt_auth)
+        resp = requests.post(url, json=payload, auth=jwt_auth)
     except Exception as ex:
         logger.exception("Request failed: {}".format(ex))
         return False
