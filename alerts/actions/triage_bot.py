@@ -242,6 +242,10 @@ class message(object):
                 "Alert {} triggered by {}".format(request.alert.value, request.user)
             )
 
+            # Do not dispatch messages so that they go to a user on Slack if we
+            # end up appending to a duplicate chain.  This is how we avoid spam.
+            should_dispatch = True
+
             try:
                 logger.error("Fetching duplicate chain")
                 chain = _retrieve_duplicate_chain(
@@ -253,6 +257,7 @@ class message(object):
                 else:
                     logger.error("Updating duplicate chain")
                     operation = _update_duplicate_chain
+                    should_dispatch = False
 
                 operation(
                     self._rest_api_cfg,
@@ -267,15 +272,17 @@ class message(object):
                 logger.exception(
                     "Duplicate chain management error: {}".format(err.message),
                 )
+                should_dispatch = True
 
-            result = dispatch(request, self._lambda_function_name)
+            if should_dispatch:
+                result = dispatch(request, self._lambda_function_name)
 
-            # In the case that dispatch fails, attempt to re-discover the name
-            # of the lambda function to invoke in case it was replaced.
-            if result != DispatchResult.SUCCESS:
-                logger.error("Failed to dispatch request")
-                reset = timedelta(seconds=L_FN_NAME_VALIDITY_WINDOW_SECONDS)
-                self._last_discovery = datetime.now() - reset
+                # In the case that dispatch fails, attempt to re-discover the name
+                # of the lambda function to invoke in case it was replaced.
+                if result != DispatchResult.SUCCESS:
+                    logger.error("Failed to dispatch request")
+                    reset = timedelta(seconds=L_FN_NAME_VALIDITY_WINDOW_SECONDS)
+                    self._last_discovery = datetime.now() - reset
 
         return alert
 
