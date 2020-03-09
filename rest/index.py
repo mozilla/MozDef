@@ -699,7 +699,12 @@ def retrieve_duplicate_chain():
     dupchains = mongo.meteor[DUP_CHAIN_DB]
 
     def _error(msg):
-        return json.dumps({"error": msg, "identifiers": []})
+        return json.dumps({
+            "error": msg,
+            "identifiers": [],
+            "created": datetime.utcnow().strftime(DUP_CHAIN_DATE_FMT),
+            "modified": datetime.utcnow().strftime(DUP_CHAIN_DATE_FMT),
+        })
 
     query = {"alert": request.query.alert, "user": request.query.user}
 
@@ -711,7 +716,9 @@ def retrieve_duplicate_chain():
     chain = dupchains.find_one(query)
 
     if chain is None:
-        response.status = StatusCode.BAD_REQUEST
+        # This is not actually an error, but we do want to write an empty
+        # response.
+        response.status = StatusCode.OK
         response.body = _error("Did not find requested duplicate chian")
         return response
 
