@@ -89,7 +89,7 @@ def replay_response(
         {"$set": {"status": status}},
     )
 
-    return result.updated_count
+    return result.matched_count
 
 
 def main():
