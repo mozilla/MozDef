@@ -346,14 +346,14 @@ def try_make_outbound(
     if is_sensitive_host_access:
         return _make_sensitive_host_access(alert, oauth_tkn)
 
-    if is_duo_codes_generated:
-        return _make_duo_code_gen(alert, oauth_tkn)
-
-    if is_duo_bypass_codes_used:
-        return _make_duo_code_used(alert, oauth_tkn)
-
-    if is_ssh_access_releng:
-        return _make_ssh_access_releng(alert, oauth_tkn)
+#    if is_duo_codes_generated:
+#        return _make_duo_code_gen(alert, oauth_tkn)
+#
+#    if is_duo_bypass_codes_used:
+#        return _make_duo_code_used(alert, oauth_tkn)
+#
+#    if is_ssh_access_releng:
+#        return _make_ssh_access_releng(alert, oauth_tkn)
 
     return None
 
