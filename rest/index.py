@@ -123,8 +123,8 @@ def index():
     return response
 
 
-@route("/veris")
-@route("/veris/")
+@route('/veris')
+@route('/veris/')
 @enable_cors
 def index():
     """returns a count of veris tags"""
@@ -225,8 +225,8 @@ def ipintel():
     return response
 
 
-@post("/ipdshieldquery", methods=["POST"])
-@post("/ipdshieldquery/", methods=["POST"])
+@post('/ipdshieldquery', methods=['POST'])
+@post('/ipdshieldquery/', methods=['POST'])
 @enable_cors
 def index():
     """

@@ -12,7 +12,6 @@ import os
 import time
 
 from operator import itemgetter
-from dateutil.parser import parse
 
 from .rest_test_suite import RestTestSuite
 
@@ -132,7 +131,6 @@ class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
 
             assert response.status_code == self.status_code
             assert json_resp == []
-
 
 class TestLoginCountsRoute(RestTestSuite):
 
@@ -541,8 +539,6 @@ class TestDeleteDuplicateChain(RestTestSuite):
 # @post('/blockip/', methods=['POST'])
 # @post('/ipwhois', methods=['POST'])
 # @post('/ipwhois/', methods=['POST'])
-# @post('/ipintel', methods=['POST'])
-# @post('/ipintel/', methods=['POST'])
 # @post('/ipdshieldquery', methods=['POST'])
 # @post('/ipdshieldquery/', methods=['POST'])
 # @route('/plugins', methods=['GET'])

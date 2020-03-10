@@ -25,7 +25,6 @@ Meteor.startup( () => {
     healthescluster = new Mongo.Collection( "healthescluster" );
     healthesnodes = new Mongo.Collection( "healthesnodes" );
     healtheshotthreads = new Mongo.Collection( "healtheshotthreads" );
-    attackers = new Mongo.Collection( "attackers" );
     actions = new Mongo.Collection( "actions" );
     userActivity = new Mongo.Collection( "userActivity" );
     ipblocklist = new Mongo.Collection( "ipblocklist" );
@@ -221,33 +220,6 @@ Meteor.startup( () => {
             } );
         } );
 
-        Meteor.publish( "attacker-details", function( attackerid ) {
-            return attackers.find( { '_id': attackerid },
-                {
-                    fields: {
-                        events: { $slice: -20 },
-                        alerts: { $slice: -10 }
-                    },
-                    sort: { 'events.documentsource.utctimestamp': -1 },
-                    reactive: false
-                }
-            );
-        } );
-
-        Meteor.publish( "attackers-summary", function() {
-            //limit to the last 100 records by default
-            //to ease the sync transfer to dc.js/crossfilter
-            return attackers.find( {},
-                {
-                    fields: {
-                        events: 0,
-                        alerts: 0,
-                    },
-                    sort: { lastseentimestamp: -1 },
-                    limit: 100
-                } );
-        } );
-
         Meteor.publish( "investigation-details", function( investigationid ) {
             return investigations.find( { '_id': investigationid } );
         } );
@@ -321,13 +293,6 @@ Meteor.startup( () => {
                 return doc.creator === Meteor.user().profile.email;
             },
             fetch: ['creator']
-        } );
-
-        attackers.allow( {
-            update: function( userId, doc, fields, modifier ) {
-                // the user must be logged in
-                return ( userId );
-            }
         } );
 
         alerts.allow( {

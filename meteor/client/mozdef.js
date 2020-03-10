@@ -18,8 +18,6 @@ if ( Meteor.isClient ) {
         Session.set( 'alertssearchtext', '' );
         Session.set( 'alertssearchtime', '1 days' );
         Session.set( 'alertsfiltertext', '' );
-        Session.set( 'attackerlimit', '10' );
-        Session.set( 'attackersearchIP', '' );
         Session.set( 'blockIPipaddress', '' );
         Session.set( 'blockFQDN', '' );
         Session.set( 'watchItemwatchcontent', '' );
@@ -191,16 +189,6 @@ if ( Meteor.isClient ) {
         }
     } );
 
-    UI.registerHelper( 'getAttackerURL', function( attackerid ) {
-        //return the router URL for a specific attacker
-        return ( getSetting( 'rootURL' ) + '/attacker/' + attackerid );
-    } );
-
-    UI.registerHelper( 'getAttackerIndicator', function( attackerid ) {
-        //return the first indicator from a specific attacker
-        return ( attackers.findOne( { '_id': attackerid } ).indicators[0].ipv4address );
-    } );
-
     UI.registerHelper( 'isselected', function( optionvalue, datavalue ) {
         if ( optionvalue == datavalue ) {
             return 'selected'
@@ -308,7 +296,6 @@ if ( Meteor.isClient ) {
             copyitem = $( "<li><a class='ipmenu-copy' data-ipaddress='" + iptext + "'href='#'>copy</a></li>" );
             whoisitem = $( "<li><a class='ipmenu-whois' data-ipaddress='" + iptext + "'href='#'>whois</a></li>" );
             dshielditem = $( "<li><a class='ipmenu-dshield' data-ipaddress='" + iptext + "'href='#'>dshield</a></li>" );
-            intelitem = $( "<li><a class='ipmenu-intel' data-ipaddress='" + iptext + "'href='#'>ip intel</a></li>" );
             searchitem = $( "<li><a class='ipmenu-search' data-ipaddress='" + iptext + "'href='#'>search kibana</a></li>" );
             if ( isFeature( 'watchItem' ) ) {
                 watchItemitem = $( "<li><a class='ipmenu-watchitem' data-ipaddress='" + iptext + "'href='#'>watch</a></li>" );
@@ -320,7 +307,7 @@ if ( Meteor.isClient ) {
             } else {
                 blockIPitem = $();
             }
-            ipmenu.append( copyitem, whoisitem, dshielditem, intelitem, searchitem, watchItemitem, blockIPitem );
+            ipmenu.append( copyitem, whoisitem, dshielditem, searchitem, watchItemitem, blockIPitem );
 
             $( this ).parent().parent().append( ipmenu );
         } );
