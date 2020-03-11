@@ -511,6 +511,7 @@ class TestDuplicateChainManagement:
         with requests_mock.mock() as mock_http:
             mock_http.get(
                 "{}/alerttriagechain".format(self.mock_api_base),
+                status_code=500,
                 json={
                     "error": err_msg,
                     "identifiers": [],
