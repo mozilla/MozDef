@@ -132,6 +132,7 @@ class TestKibanaDashboardsRouteWithoutDashboards(RestTestSuite):
             assert response.status_code == self.status_code
             assert json_resp == []
 
+
 class TestAlertStatus(RestTestSuite):
     def setup(self):
         super().setup()

@@ -333,15 +333,15 @@ def try_make_outbound(
 
     is_sensitive_host_access = "session" in tags and category == "session"
 
-    is_duo_codes_generated = "duosecurity" in tags and\
-        category == "duo" and\
-        "codes generated" in _source.get("summary", "")
-
-    is_duo_bypass_codes_used = (
-        "duo_bypass_codes_used" in tags and category == "bypassused"
-    )
-
-    is_ssh_access_releng = "ssh" in tags and category == "access"
+#    is_duo_codes_generated = "duosecurity" in tags and\
+#        category == "duo" and\
+#        "codes generated" in _source.get("summary", "")
+#
+#    is_duo_bypass_codes_used = (
+#        "duo_bypass_codes_used" in tags and category == "bypassused"
+#    )
+#
+#    is_ssh_access_releng = "ssh" in tags and category == "access"
 
     if is_sensitive_host_access:
         return _make_sensitive_host_access(alert, oauth_tkn)
