@@ -1,5 +1,4 @@
 from datetime import datetime
-from unittest.mock import patch
 
 import alerts.geomodel.alert as alert
 import alerts.geomodel.factors as factors

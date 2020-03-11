@@ -49,7 +49,7 @@ def asn_movement(db, escalate: Severity) -> FactorInterface:
     `escalate` is the severity to (de-)escalate the alert to/from in the case
     that movement from one ASN to another is detected in the alert.
     '''
-        
+
     # Keys in the dictionaries returned by MaxMind.
     # asn = 'autonomous_system_number'  # currently not used
     org = 'autonomous_system_organization'

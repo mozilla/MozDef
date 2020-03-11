@@ -187,6 +187,6 @@ class AlertGeoModel(AlertTask):
             asn_mvmt = config.ASNMovement(**cfg['factors']['asn_movement'])
 
             cfg['factors'] = config.Factors(
-                asn_movement=asn_movement)
+                asn_movement=asn_mvmt)
 
             return config.Config(**cfg)
