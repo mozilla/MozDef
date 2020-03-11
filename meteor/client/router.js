@@ -142,38 +142,6 @@ Router.map(function() {
         layoutTemplate: 'layout'
     });
 
-
-    this.route('attackers', {
-        path: '/attackers',
-        template: 'attackers',
-        layoutTemplate: 'layout'
-    });
-
-    this.route('attackerdetails', {
-        path: '/attacker/:attackerid',
-        template: 'attackerdetails',
-        waitOn: function() {
-            Session.set('attackerID', this.params.attackerid);
-            return Meteor.subscribe('attacker-details', Session.get('attackerID'))
-        },
-        data: function() {
-            return attackers.findOne({ '_id': Session.get('attackerID') });
-        },
-        layoutTemplate: 'layout'
-    });
-
-    this.route('globe', {
-        path: '/globe',
-        template: 'globe',
-        layoutTemplate: 'layout'
-    });
-
-    this.route('logincounts', {
-        path: '/logincounts',
-        template: 'logincounts',
-        layoutTemplate: 'layout'
-    });
-
     this.route('blockip', {
         path: '/blockip/:_ipaddr',
         template: 'blockIPform',
@@ -221,15 +189,6 @@ Router.map(function() {
         data: function() {
             Session.set('ipdshieldipaddress', this.params._ipaddress);
         }
-    });
-
-    this.route('ipintel', {
-        path: '/ipintel/:_ipaddress',
-        template: 'ipintel',
-        data: function() {
-            Session.set('ipintelipaddress', this.params._ipaddress)
-        }
-
     });
 
     this.route('veris', {

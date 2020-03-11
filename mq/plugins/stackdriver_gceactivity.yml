@@ -1,0 +1,11 @@
+---
+  gceactivity:
+    username: details.gceactivity.actor.user
+    action: details.gceactivity.event_subtype
+    actiongroup: details.gceactivity.event_type
+    resourcename: details.gceactivity.resource.name
+    resourcetype: details.gceactivity.resource.type
+    resourceid: details.gceactivity.resource.id
+    projectid: details.resource.labels.project_id
+    logname: details.logName
+    sdreceivetimestamp: details.receiveTimestamp

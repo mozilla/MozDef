@@ -87,19 +87,6 @@ def status():
     return response
 
 
-@route('/logincounts')
-@route('/logincounts/')
-@enable_cors
-def index():
-    '''an endpoint to return success/failed login counts'''
-    if request.body:
-        request.body.read()
-        request.body.close()
-    response.content_type = "application/json"
-    sendMessgeToPlugins(request, response, 'logincounts')
-    return response
-
-
 @route('/veris')
 @route('/veris/')
 @enable_cors
@@ -177,28 +164,6 @@ def index():
         response.status = 500
 
     sendMessgeToPlugins(request, response, 'ipwhois')
-    return response
-
-
-@post('/ipintel', methods=['POST'])
-@post('/ipintel/', methods=['POST'])
-@enable_cors
-def ipintel():
-    '''send an IP address through plugins for intel enhancement'''
-    if request.body:
-        arequest = request.body.read()
-        # request.body.close()
-    # valid json?
-    try:
-        requestDict = json.loads(arequest)
-    except ValueError:
-        response.status = 500
-    if 'ipaddress' in requestDict and isIPv4(requestDict['ipaddress']):
-        response.content_type = "application/json"
-    else:
-        response.status = 500
-
-    sendMessgeToPlugins(request, response, 'ipintel')
     return response
 
 

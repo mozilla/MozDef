@@ -247,61 +247,6 @@ legend {
     border-radius: 6px 0 6px 6px;
 }
 
-.attackshoverboard {
-    /*width: 500px;*/
-    /*height: 500px;*/
-    /*background-color: green;*/
-    -moz-transform: scaleY(-1);
-    -webkit-transform: scaleY(-1);
-    -o-transform: scaleY(-1);
-    transform: scaleY(-1);
-    display: none;
-}
-
-.attackercallout {
-    width: 120px;
-    height: 160px;
-    box-shadow: 0px 0px 12px rgba(0, 255, 255, 0.5);
-    border: 1px solid rgba(127, 255, 255, 0.25);
-    text-align: center;
-    cursor: default;
-    z-index: 99;
-}
-
-.attackercallout .id {
-    font-size: 12px;
-    color: rgba(127, 255, 255, 0.75);
-}
-
-.attackercallout .details {
-    text-align: left;
-    left: 2px;
-    font-size: 12px;
-    color: rgba(127, 255, 255, 0.75);
-}
-
-.attackercallout .blockip {
-    color: #FFF;
-    text-transform: uppercase;
-    margin-top: 20px;
-}
-
-.attackercallout ul {
-    list-style: none;
-    float: left;
-    left: auto;
-    margin: 0px;
-    padding: 0px;
-}
-
-.attackercallout .indicator {
-    color: yellow;
-}
-
-.attackercallout a {
-    color: yellow;
-}
-
 .veris-wrapper td {
     color: black
 }
@@ -483,30 +428,6 @@ td {
 }
 
 
-/* d3 circle styles */
-
-.successcircle {
-    /*
-  fill: rgb(217,206,178);
-
-  fill: rgb(60,179,113);
-  */
-    /*fill: rgba(0,150,221,.8);*/
-    fill: rgba(0, 255, 0, .5);
-}
-
-.failurecircle {
-    /*fill: rgb(213,222,217);*/
-    /*fill: #BD2C00;*/
-    /*fill: #f93;*/
-    /*fill: rgba(193, 56, 50, .8);*/
-    fill: rgba(255, 0, 0, .5);
-}
-
-circle:hover {
-    fill: white;
-}
-
 .node {
     stroke: black;
     stroke-width: 1.5px;
@@ -676,101 +597,6 @@ sidenav .reset-filter {
         float: none;
     }
 }
-
-
-/* globe styling */
-
-.globe-container {
-    background: #000000;
-    color: #ffffff;
-}
-
-.globe-info {
-    font-size: 11px;
-    position: absolute;
-    bottom: 5px;
-    background-color: rgba(0, 0, 0, 0.8);
-    border-radius: 3px;
-    right: 10px;
-    padding: 10px;
-    color: var(--ack-edit-color);
-}
-
-.globe-container a {
-    color: #aaa;
-    text-decoration: none;
-}
-
-.globe-container a:hover {
-    text-decoration: underline;
-}
-
-.globe-campaigns {
-    width: 270px;
-    position: absolute;
-    left: 10px;
-    top: 125px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.4);
-    padding: 10px;
-}
-
-.globe-time {
-    width: 400px;
-    position: absolute;
-    left: 10px;
-    top: 180px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.4);
-    padding: 5px;
-}
-
-.globe-facts {
-    width: 300px;
-    position: absolute;
-    left: 10px;
-    bottom: 0px;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.4);
-    border-right: 1px solid rgba(255, 255, 255, 0.4);
-    padding: 10px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.9);
-    display: none;
-}
-
-.globe-campaigns .campaign {
-    font-size: 12px;
-    line-height: 26px;
-    height: 30px;
-    text-align: center;
-    float: left;
-    width: 60px;
-    color: rgba(255, 255, 255, 0.4);
-    cursor: pointer;
-    transition: all 0.1s ease-out;
-}
-
-.globe-time .time {
-    font-size: 12px;
-    line-height: 26px;
-    height: 30px;
-    text-align: center;
-    float: left;
-    width: 90px;
-    color: rgba(255, 255, 255, 0.4);
-    cursor: pointer;
-    transition: all 0.1s ease-out;
-}
-
-.globe-campaigns .campaign:hover,
-.globe-campaigns .campaign.active,
-.globe-time .time:hover,
-.globe-time .time.active {
-    font-size: 14px;
-    color: #fff;
-}
-
 
 /*menu styling*/
 

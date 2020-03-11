@@ -133,7 +133,8 @@ def process_msg(mozmsg, msg):
         # but not for logins and other events
         # check and prefer them if present.
         details["username"] = msg.details.request.auth.user.name
-        details["action"] = msg.details.response.body.name
+        if type(msg.details.response.body) is not list:
+            details["action"] = msg.details.response.body.name
     except KeyError:
         pass
 

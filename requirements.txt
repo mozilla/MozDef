@@ -31,6 +31,7 @@ pymongo==3.6.1
 pynsive==0.2.6
 python-dateutil==2.6.1
 pytz==2017.3
+PyYAML==5.1.1
 requests-jwt==0.5.3
 requests==2.22.0
 rsa==3.1.4
