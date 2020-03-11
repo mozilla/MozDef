@@ -14,7 +14,7 @@ class TestTriageBot:
     def test_update_alert_status_request_success(self):
         with requests_mock.mock() as mock:
             url = "http://mock.site"
-            cfg = bot.RESTConfig(url + "/alertstatus", "token")
+            cfg = bot.RESTConfig(url, "token")
             msg = bot.UserResponseMessage(
                 "id",
                 bot.UserInfo("test@site.com", "tester"),
@@ -22,7 +22,7 @@ class TestTriageBot:
                 bot.UserResponse.YES,
             )
 
-            mock.post(url, json={"error": None})
+            mock.post(url + "/alertstatus", json={"error": None})
             succeeded = bot.update_alert_status(msg, cfg)
 
             assert succeeded
@@ -38,7 +38,7 @@ class TestTriageBot:
                 bot.UserResponse.YES,
             )
 
-            mock.post(url, json={"error": None}, status_code=400)
+            mock.post(url + "/alertstatus", json={"error": None}, status_code=400)
             succeeded = bot.update_alert_status(msg, cfg)
 
             assert not succeeded
@@ -64,7 +64,7 @@ class TestTriageBot:
         cfg = bot.RESTConfig("http://mock.site", "token")
 
         with requests_mock.mock() as mock:
-            mock.post(cfg.url, json={"error": None})
+            mock.post(cfg.url + "/alertstatus", json={"error": None})
             (new_msg, new_meta) = bot.process(msg, {}, cfg)
 
             assert new_msg == msg
