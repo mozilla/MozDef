@@ -13,8 +13,8 @@ import mq.plugins.triage_bot as bot
 class TestTriageBot:
     def test_update_alert_status_request_success(self):
         with requests_mock.mock() as mock:
-            url = "http://mock.site/updatealert"
-            cfg = bot.RESTConfig(url, "token")
+            url = "http://mock.site"
+            cfg = bot.RESTConfig(url + "/alertstatus", "token")
             msg = bot.UserResponseMessage(
                 "id",
                 bot.UserInfo("test@site.com", "tester"),
@@ -29,7 +29,7 @@ class TestTriageBot:
 
     def test_update_alert_status_request_failure(self):
         with requests_mock.mock() as mock:
-            url = "http://mock.site/updatealert"
+            url = "http://mock.site"
             cfg = bot.RESTConfig(url, "token")
             msg = bot.UserResponseMessage(
                 "id",
@@ -61,7 +61,7 @@ class TestTriageBot:
                 "response": "yes",
             }
         }
-        cfg = bot.RESTConfig("http://mock.site/updatealert", "token")
+        cfg = bot.RESTConfig("http://mock.site", "token")
 
         with requests_mock.mock() as mock:
             mock.post(cfg.url, json={"error": None})
