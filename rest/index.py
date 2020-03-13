@@ -1204,7 +1204,7 @@ parser = OptionParser()
 parser.add_option(
     "-c",
     dest="configfile",
-    default=os.path.join(os.path.dirname(__file__), __file__).replace(".py", ".conf"),
+    default=__file__.replace(".py", ".conf"),
     help="configuration file to use",
 )
 (options, args) = parser.parse_args()
