@@ -194,6 +194,8 @@ class TestRetrieveDuplicateChain(RestTestSuite):
 
         self.chains_db = self.mongoclient.meteor["duplicatechains"]
 
+        self.chains_db.delete_many({"user": self.user_email})
+
         self.chains_db.insert_one({
             "alert": self.alert_label,
             "user": self.user_email,
@@ -238,6 +240,8 @@ class TestCreateDuplicateChain(RestTestSuite):
 
         self.chains_db = self.mongoclient.meteor['duplicatechains']
 
+        self.chains_db.delete_many({"user": self.user_email})
+
     def teardown(self):
         super().teardown()
 
@@ -278,6 +282,8 @@ class TestUpdateDuplicateChain(RestTestSuite):
         self.user_email = "tester@mozilla.com"
 
         self.chains_db = self.mongoclient.meteor["duplicatechains"]
+
+        self.chains_db.delete_many({"user": self.user_email})
 
         self.created = datetime.utcnow()
 
@@ -328,6 +334,8 @@ class TestDeleteDuplicateChain(RestTestSuite):
         self.user_email = "tester@mozilla.com"
 
         self.chains_db = self.mongoclient.meteor["duplicatechains"]
+
+        self.chains_db.delete_many({"user": self.user_email})
 
         self.chains_db.insert_one({
             "alert": self.alert_label,
