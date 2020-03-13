@@ -23,4 +23,5 @@ install:
   # Use BUILD_MODE=pull if you prefer pulling existing images
   - make build-tests
 script:
+  - docker-compose -f docker/compose/docker-compose-tests.yml -p test-mozdef_mongodb run -p 3002:3002 -d mongodb
   - make tests
