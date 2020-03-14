@@ -374,5 +374,3 @@ class TestDeleteDuplicateChain(RestTestSuite):
 # @route('/plugins/<endpoint>', methods=['GET'])
 # @post('/incident', methods=['POST'])
 # @post('/incident/', methods=['POST'])
-# @post('/alertstatus')
-# @post('/alertstatus/')
