@@ -597,6 +597,8 @@ def update_alert_status():
 
     response.content_type = "application/json"
 
+    initConfig()
+
     mongo = MongoClient(options.mongohost, options.mongoport)
     alerts = mongo.meteor["alerts"]
 
@@ -695,6 +697,8 @@ def retrieve_duplicate_chain():
 
     response.content_type = "application/json"
 
+    initConfig()
+
     mongo = MongoClient(options.mongohost, options.mongoport)
     dupchains = mongo.meteor[DUP_CHAIN_DB]
 
@@ -773,6 +777,8 @@ def create_duplicate_chain():
 
     response.content_type = "application/json"
 
+    initConfig()
+
     mongo = MongoClient(options.mongohost, options.mongoport)
     dupchains = mongo.meteor[DUP_CHAIN_DB]
 
@@ -845,6 +851,8 @@ def update_duplicate_chain():
     """
 
     response.content_type = "application/json"
+
+    initConfig()
 
     mongo = MongoClient(options.mongohost, options.mongoport)
     dupchains = mongo.meteor[DUP_CHAIN_DB]
@@ -932,6 +940,8 @@ def delete_duplicate_chain():
     """
 
     response.content_type = "application/json"
+
+    initConfig()
 
     mongo = MongoClient(options.mongohost, options.mongoport)
     dupchains = mongo.meteor[DUP_CHAIN_DB]
