@@ -5,8 +5,9 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import time
+from datetime import datetime, timedelta
 import json
+import time
 
 import pytest
 
@@ -412,8 +413,30 @@ class TestGetIndices(ElasticsearchClientTest):
         open_indices = self.es_client.get_open_indices()
         open_indices.sort()
         expected_indices = [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
-        assert all_indices == expected_indices
-        assert open_indices == expected_indices
+
+        # Either both of all_indices and open_indices are the same as
+        # expected_indices OR both of the former sets contain an additional
+        # index in case the day changed while testing.
+        current_name = self.event_index_name.split('-')[1]  # eg events-20200312
+        current_day = datetime(
+            int(current_name[0:4]),  # Year
+            int(current_name[4:6]),  # Month
+            int(current_name[6:8]),  # Day
+        )
+        next_day = current_day + timedelta(days=1)
+        next_name = "{}{}{}".format(
+            next_day.year, next_day.month, next_day.day
+
+        next_index_name = "events-{}".format(next_name)
+
+        assert all([expected in all_indices for expected in expected_indices])
+        assert all([expected in open_indices for expected in expected_indices])
+        assert (len(expected_indices) == len(all_indices)) or\
+            (len(expected_indices) + 1 == len(all_indices) and\
+             next_index_name in all_indices)
+        assert (len(expected_indices) == len(open_indices)) or\
+            (len(expected_indices) + 1 == len(open_indices) and\
+             next_index_name in open_indices)
 
     def test_closed_get_indices(self):
         if self.config_delete_indexes:
