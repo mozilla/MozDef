@@ -15,8 +15,8 @@ services:
       - base
     restart: always
     command: bin/elasticsearch
-    ports:
-      - 9200:9200
+    #ports:
+    #  - 9200:9200
     networks:
       - default
   mongodb:
