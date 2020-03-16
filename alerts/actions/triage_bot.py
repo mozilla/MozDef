@@ -245,7 +245,7 @@ class message(object):
 
         # Re-discover the lambda function name to invoke periodically.
         last_discovery = (datetime.now() - self._last_discovery).total_seconds()
-        if last_discovery > L_FN_NAME_VALIDITY_WINDOW_SECONDS:
+        if last_discovery > self._config.l_fn_name_validity_window_seconds:
             self._discover_lambda_fn()
             logger.error("Discovered Lambda function name")
 
