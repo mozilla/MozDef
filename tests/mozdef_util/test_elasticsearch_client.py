@@ -412,8 +412,8 @@ class TestGetIndices(ElasticsearchClientTest):
         open_indices = self.es_client.get_open_indices()
         open_indices.sort()
         expected_indices = [self.alert_index_name, self.previous_event_index_name, self.event_index_name, 'test_index']
-        assert all([expected in all_indices for expected in expected_indices])
-        assert all([expected in open_indices for expected in expected_indices])
+        assert all_indices == expected_indices
+        assert open_indices == expected_indices
 
     def test_closed_get_indices(self):
         if self.config_delete_indexes:
