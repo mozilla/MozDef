@@ -841,7 +841,7 @@ def update_duplicate_chain():
 
     return response
 
- 
+
 @delete("/alerttriagechain")
 @delete("/alerttriagechain/")
 def delete_duplicate_chain():
