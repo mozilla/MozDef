@@ -426,17 +426,18 @@ class TestGetIndices(ElasticsearchClientTest):
         next_day = current_day + timedelta(days=1)
         next_name = "{}{}{}".format(
             next_day.year, next_day.month, next_day.day
+        )
 
         next_index_name = "events-{}".format(next_name)
 
         assert all([expected in all_indices for expected in expected_indices])
         assert all([expected in open_indices for expected in expected_indices])
-        assert (len(expected_indices) == len(all_indices)) or\
-            (len(expected_indices) + 1 == len(all_indices) and\
-             next_index_name in all_indices)
-        assert (len(expected_indices) == len(open_indices)) or\
-            (len(expected_indices) + 1 == len(open_indices) and\
-             next_index_name in open_indices)
+        assert ((len(expected_indices) == len(all_indices)) or
+                (len(expected_indices) + 1 == len(all_indices) and
+                 next_index_name in all_indices))
+        assert ((len(expected_indices) == len(open_indices)) or
+                (len(expected_indices) + 1 == len(open_indices) and
+                 next_index_name in open_indices))
 
     def test_closed_get_indices(self):
         if self.config_delete_indexes:
