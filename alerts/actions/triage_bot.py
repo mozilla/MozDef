@@ -18,16 +18,6 @@ from mozdef_util.utilities.logger import logger
 
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "triage_bot.json")
-OAUTH_URL = "https://auth.mozilla.auth0.com/oauth/token"
-PERSON_API_BASE = "https://person-api.sso.mozilla.com"
-PERSON_API_AUDIENCE = "api.sso.mozilla.com"
-PERSON_API_SCOPE = (
-    "classification:public display:all display:public display:none search:all"
-)
-PERSON_API_GRANTS = "client_credentials"
-TOKEN_VALIDITY_WINDOW_MINUTES = 18 * 60
-SLACK_BOT_FUNCTION_NAME_PREFIX = "MozDefSlackTriageBotAPI-SlackTriageBotApiFunction"
-L_FN_NAME_VALIDITY_WINDOW_SECONDS = 24 * 60 * 60
 
 # The format string that UTC-based timestamps are encoded as.
 DUP_CHAIN_DATE_FMT = "%Y/%m/%d %H:%M:%S"
@@ -59,6 +49,28 @@ class Confidence(Enum):
 
 
 # TODO: Change to a dataclass when Python 3.7+ is adopted.
+
+
+class Config(types.NamedTuple):
+    """Container type for the configuration parameters required by the
+    alert action.
+    """
+    oauth_url: str
+    person_api_base: str
+    person_api_audience: str
+    person_api_scope: str
+    person_api_grants: str
+    token_validity_window_minutes: int
+    person_api_client_id: str
+    person_api_client_secret: str
+    slack_bot_function_name_prefix: str
+    l_fn_name_validity_window_seconds: int
+    aws_access_key_id: str
+    aws_secret_access_key: str
+    aws_region: str
+    aws_lambda_function: str
+    mozdef_restapi_url: str
+    mozdef_restapi_token: str
 
 
 class AlertTriageRequest(types.NamedTuple):
@@ -189,18 +201,18 @@ class message(object):
         """
 
         with open(CONFIG_FILE) as cfg_file:
-            self._config = json.load(cfg_file)
+            self._config = Config(**json.load(cfg_file))
 
         # The Boto session does not need to be renewed manually.
         self._boto_session = boto3.session.Session(
-            region_name=self._config["aws_region"],
-            aws_access_key_id=self._config["aws_access_key_id"],
-            aws_secret_access_key=self._config["aws_secret_access_key"],
+            region_name=self._config.aws_region,
+            aws_access_key_id=self._config.aws_access_key_id,
+            aws_secret_access_key=self._config.aws_secret_access_key,
         )
 
         self._rest_api_cfg = RESTConfig(
-            url=self._config["mozdef_restapi_url"],
-            token=self._config["mozdef_restapi_token"],
+            url=self._config.mozdef_restapi_url,
+            token=self._config.mozdef_restapi_token,
         )
 
         logger.error("Performing initial OAuth Handshake")
@@ -215,14 +227,17 @@ class message(object):
         """The main entrypoint to the alert action invoked with an alert.
         """
 
-        request = try_make_outbound(alert, self._person_api_session)
+        request = try_make_outbound(
+            alert, self._config, self._person_api_session
+        )
 
         # Refresh our oauth token periodically.
         delta = datetime.now() - self._last_authenticated
         mins_since_auth = delta.total_seconds() / 60.0
 
         have_request = request is not None
-        should_refresh = mins_since_auth > TOKEN_VALIDITY_WINDOW_MINUTES
+        should_refresh = mins_since_auth >\
+            self._config.token_validity_window_minutes
 
         if have_request and should_refresh:
             self._oauth_handshake()
@@ -281,20 +296,22 @@ class message(object):
                 # of the lambda function to invoke in case it was replaced.
                 if result != DispatchResult.SUCCESS:
                     logger.error("Failed to dispatch request")
-                    reset = timedelta(seconds=L_FN_NAME_VALIDITY_WINDOW_SECONDS)
+                    reset = timedelta(
+                        seconds=self._config.l_fn_name_validity_window_seconds,
+                    )
                     self._last_discovery = datetime.now() - reset
 
         return alert
 
     def _oauth_handshake(self):
         self._person_api_session = authenticate(
-            OAUTH_URL,
+            self._config.oauth_url,
             AuthParams(
-                client_id=self._config["person_api_client_id"],
-                client_secret=self._config["person_api_client_secret"],
-                audience=PERSON_API_AUDIENCE,
-                scope=PERSON_API_SCOPE,
-                grants=PERSON_API_GRANTS,
+                client_id=self._config.person_api_client_id,
+                client_secret=self._config.person_api_client_secret,
+                audience=self._config.person_api_audience,
+                scope=self._config.person_api_scope,
+                grants=self._config.person_api_grants,
             ),
         )
 
@@ -308,7 +325,9 @@ class message(object):
         functions = [
             function
             for function in _discovery(self._boto_session)()
-            if function.name.startswith(SLACK_BOT_FUNCTION_NAME_PREFIX)
+            if function.name.startswith(
+                self._config.slack_bot_function_name_prefix
+            )
         ]
 
         if len(functions) == 0:
@@ -321,7 +340,7 @@ class message(object):
 
 
 def try_make_outbound(
-    alert: Alert, oauth_tkn: Token
+    alert: Alert, cfg: Config, oauth_tkn: Token
 ) -> types.Optional[AlertTriageRequest]:
     """Attempt to determine the kind of alert contained in `alert` in
     order to produce an `AlertTriageRequest` destined for the web server comp.
@@ -344,16 +363,16 @@ def try_make_outbound(
 #    is_ssh_access_releng = "ssh" in tags and category == "access"
 
     if is_sensitive_host_access:
-        return _make_sensitive_host_access(alert, oauth_tkn)
+        return _make_sensitive_host_access(alert, cfg, oauth_tkn)
 
 #    if is_duo_codes_generated:
-#        return _make_duo_code_gen(alert, oauth_tkn)
+#        return _make_duo_code_gen(alert, cfg, oauth_tkn)
 #
 #    if is_duo_bypass_codes_used:
-#        return _make_duo_code_used(alert, oauth_tkn)
+#        return _make_duo_code_used(alert, cfg, oauth_tkn)
 #
 #    if is_ssh_access_releng:
-#        return _make_ssh_access_releng(alert, oauth_tkn)
+#        return _make_ssh_access_releng(alert, cfg, oauth_tkn)
 
     return None
 
@@ -496,7 +515,7 @@ def _dispatcher(boto_session) -> DispatchInterface:
 
 
 def _make_sensitive_host_access(
-    alert: Alert, tkn: Token
+    alert: Alert, cfg: Config, tkn: Token
 ) -> types.Optional[AlertTriageRequest]:
     null = {
         "documentsource": {
@@ -517,7 +536,7 @@ def _make_sensitive_host_access(
         return None
 
     confidence = Confidence.HIGHEST
-    profile = primary_username(PERSON_API_BASE, tkn, user)
+    profile = primary_username(cfg.person_api_base, tkn, user)
 
     if profile is None:
         profile = User(
@@ -545,7 +564,9 @@ def _make_sensitive_host_access(
     )
 
 
-def _make_duo_code_gen(alert: Alert, tkn: Token) -> types.Optional[AlertTriageRequest]:
+def _make_duo_code_gen(
+    alert: Alert, cfg: Config, tkn: Token
+) -> types.Optional[AlertTriageRequest]:
     null = {"documentsource": {"details": {"object": None}}}
 
     _source = alert.get("_source", {})
@@ -570,7 +591,9 @@ def _make_duo_code_gen(alert: Alert, tkn: Token) -> types.Optional[AlertTriageRe
     )
 
 
-def _make_duo_code_used(alert: Alert, tkn: Token) -> types.Optional[AlertTriageRequest]:
+def _make_duo_code_used(
+    alert: Alert, cfg: Config, tkn: Token
+) -> types.Optional[AlertTriageRequest]:
     null = {"documentsource": {"details": {"object": None}}}
 
     _source = alert.get("_source", {})
@@ -597,7 +620,7 @@ def _make_duo_code_used(alert: Alert, tkn: Token) -> types.Optional[AlertTriageR
 
 
 def _make_ssh_access_releng(
-    alert: Alert, tkn: Token
+    alert: Alert, cfg: Config, tkn: Token
 ) -> types.Optional[AlertTriageRequest]:
     null = {"documentsource": {"details": {"hostname": None}}}
 
@@ -611,7 +634,7 @@ def _make_ssh_access_releng(
         return None
 
     confidence = Confidence.HIGH
-    profile = primary_username(PERSON_API_BASE, tkn, user)
+    profile = primary_username(cfg.person_api_base, tkn, user)
 
     if profile is None:
         profile = User(
