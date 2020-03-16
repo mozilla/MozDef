@@ -33,6 +33,23 @@ null = None
 # Fill in with events you want to write to elasticsearch
 # NEED TO MODIFY
 events = [
+    {
+        "category": "testcategory",
+        "details": {
+            "program": "sshd",
+            "type": "Success Login",
+            "username": "ttesterson",
+            "sourceipaddress": random_ip(),
+        },
+        "hostname": "i-99999999",
+        "mozdefhostname": socket.gethostname(),
+        "processid": "1337",
+        "processname": "auth0_cron",
+        "severity": "INFO",
+        "source": "auth0",
+        "summary": "login invalid ldap_count_entries failed",
+        "tags": ["auth0"],
+    }
 ]
 
 es_client = ElasticsearchClient(options.elasticsearch_host)
