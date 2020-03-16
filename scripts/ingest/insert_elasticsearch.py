@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import optparse
+import socket
 
 import random
 import time
