@@ -121,7 +121,7 @@ def initConfig():
 
     # mongo instance
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
-    options.mongoport = getConfig('mongoport', 3002, options.configfile)
+    options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
     # FQDN whitelist as a \n separted file of example.com or foo.bar.com style names
     options.fqdn_whitelist_file = getConfig('fqdn_whitelist_file', '/dev/null', options.configfile)

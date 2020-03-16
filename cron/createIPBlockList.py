@@ -103,7 +103,7 @@ def initConfig():
 
     # mongo instance
     options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
-    options.mongoport = getConfig('mongoport', 3002, options.configfile)
+    options.mongoport = getConfig('mongoport', 3001, options.configfile)
 
     # CIDR whitelist as a line separted list of 8.8.8.0/24 style masks
     options.network_list_file = getConfig('network_whitelist_file', '', options.configfile)
