@@ -13,7 +13,7 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 # A utility function to generate random ips to fill into event
 def random_ip():
-    return ".".join([random.randint(1, 255) for _ in range(4)])
+    return ".".join([str(random.randint(1, 255)) for _ in range(4)])
 
 
 parser = optparse.OptionParser()
