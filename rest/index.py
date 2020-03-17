@@ -36,6 +36,9 @@ pluginList = list()   # tuple of module,registration dict,priority
 # The name of the MongoDB database that stores duplicate chains.
 DUP_CHAIN_DB = "duplicatechains"
 
+# The format string that UTC-based timestamps are encoded as.
+DUP_CHAIN_DATE_FMT = "%Y/%m/%d %H:%M:%S"
+
 
 class StatusCode(enum.IntEnum):
     """A simple enumeration of common status codes.
@@ -638,8 +641,8 @@ def retrieve_duplicate_chain():
         return json.dumps({
             "error": msg,
             "identifiers": [],
-            "created": toUTC(datetime.utcnow()),
-            "modified": toUTC(datetime.utcnow()),
+            "created": datetime.utcnow().strftime(DUP_CHAIN_DATE_FMT),
+            "modified": datetime.utcnow().strftime(DUP_CHAIN_DATE_FMT),
         })
 
     query = {"alert": request.query.alert, "user": request.query.user}
@@ -662,8 +665,8 @@ def retrieve_duplicate_chain():
         {
             "error": None,
             "identifiers": chain["identifiers"],
-            "created": toUTC(chain["created"]),
-            "modified": toUTC(chain["modified"]),
+            "created": chain["created"].strftime(DUP_CHAIN_DATE_FMT),
+            "modified": chain["modified"].strftime(DUP_CHAIN_DATE_FMT),
         }
     )
 
@@ -722,7 +725,7 @@ def create_duplicate_chain():
         response.body = json.dumps({"error": "Missing or invalid request body"})
         return response
 
-    now = toUTC(datetime.utcnow())
+    now = datetime.utcnow()
 
     chain = {
         "alert": req.get("alert"),
