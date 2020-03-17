@@ -11,5 +11,5 @@
             "doc": "https://example_docs1.com"
         }
     ],
-    "web_url": "https://a.link.to.your.siem.com/alert"
+    "web_url": "https://a.link.to.your.siem.com"
 }

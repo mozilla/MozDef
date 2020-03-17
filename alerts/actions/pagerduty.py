@@ -51,24 +51,33 @@ class message(object):
             headers = {
                 'Content-type': 'application/json',
             }
-            payload = hjson.dumps({
+
+            payload = hjson.dumpsJSON({
                 "service_key": "{0}".format(selected_option['service_key']),
                 "event_type": "trigger",
-                "description": "{0}".format(source['summary']),
+                "description": source['summary'],
                 "client": "MozDef",
-                "client_url": "https://" + self.options['web_url'] + "/{0}".format(alert['_id']),
+                "client_url": "{0}/alert/{1}".format(self.options['web_url'], alert['_id']),
                 "contexts": [
                     {
                         "type": "link",
-                        "href": "https://" + "{0}".format(selected_option['doc']),
+                        "href": "{0}".format(selected_option['doc']),
                         "text": "View runbook on mana"
                     }
                 ]
             })
-            requests.post(
+
+            headers = {
+                'Content-type': 'application/json',
+            }
+            resp = requests.post(
                 'https://events.pagerduty.com/generic/2010-04-15/create_event.json',
                 headers=headers,
                 data=payload,
             )
+            if not resp.ok:
+                logger.exception("Received invalid response from pagerduty: {0} - {1}".format(resp.status_code, resp.text))
+            else:
+                logger.info("Triggered pagerduty notification for alert - {0}".format(alert['_id']))
 
         return message
