@@ -94,7 +94,7 @@ class message(object):
             self.configfile)
         self.options.mongoport = getConfig(
             'mongoport',
-            3002,
+            3001,
             self.configfile)
 
         # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks

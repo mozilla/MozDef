@@ -84,7 +84,7 @@ class message(object):
             self.configfile)
         self.options.mongoport = getConfig(
             'mongoport',
-            3002,
+            3001,
             self.configfile)
 
         # FQDN whitelist as a comma separted list of example.com or foo.bar.com style names

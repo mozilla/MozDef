@@ -15,8 +15,8 @@ services:
       - base
     restart: always
     command: bin/elasticsearch
-    #ports:
-    #  - 9200:9200
+    # ports:
+    #   - 9200:9200
     networks:
       - default
   mongodb:
@@ -51,8 +51,8 @@ services:
       - base
     restart: always
     command: rabbitmq-server
-    ports:
-      - 5672:5672
+    # ports:
+    #   - 5672:5672
     networks:
       - default
   base:

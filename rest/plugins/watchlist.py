@@ -59,7 +59,7 @@ class message(object):
             self.configfile)
         self.options.mongoport = getConfig(
             'mongoport',
-            3002,
+            3001,
             self.configfile)
 
     def watchItem(self,

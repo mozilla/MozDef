@@ -13,15 +13,12 @@ from mozdef_util.elasticsearch_client import ElasticsearchClient
 
 # A utility function to generate random ips to fill into event
 def random_ip():
-    return ".".join([str(random.randint(1, 255)) for _ in range(4)])
+    return str(random.randint(1, 255)) + "." + str(random.randint(1, 255)) + \
+        "." + str(random.randint(1, 255)) + "." + str(random.randint(1, 255))
 
 
 parser = optparse.OptionParser()
-parser.add_option(
-    "--elasticsearch_host",
-    help="Elasticsearch host (default: http://localhost:9200)",
-    default="http://localhost:9200",
-)
+parser.add_option("--elasticsearch_host", help="Elasticsearch host (default: http://localhost:9200)", default="http://localhost:9200")
 options, arguments = parser.parse_args()
 
 
@@ -57,9 +54,9 @@ es_client = ElasticsearchClient(options.elasticsearch_host)
 
 for event in events:
     timestamp = toUTC(datetime.now()).isoformat()
-    event["utctimestamp"] = timestamp
-    event["timestamp"] = timestamp
-    event["receivedtimestamp"] = timestamp
+    event['utctimestamp'] = timestamp
+    event['timestamp'] = timestamp
+    event['receivedtimestamp'] = timestamp
     es_client.save_event(body=event)
     print("Wrote event to elasticsearch")
     time.sleep(0.2)
