@@ -2,9 +2,9 @@
 
 from datetime import datetime
 import optparse
-import socket
 
 import random
+import socket
 import time
 
 from mozdef_util.utilities.toUTC import toUTC
@@ -18,7 +18,7 @@ def random_ip():
 
 
 parser = optparse.OptionParser()
-parser.add_option("--elasticsearch_host", help="Elasticsearch host (default: http://localhost:9200)", default="http://localhost:9200")
+parser.add_option('--elasticsearch_host', help='Elasticsearch host (default: http://localhost:9200)', default='http://localhost:9200')
 options, arguments = parser.parse_args()
 
 
