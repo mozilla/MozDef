@@ -218,7 +218,6 @@ def process_msg(mozmsg, msg):
         pass
 
     mozmsg.details = details
-    mozmsg.details["raw"] = str(msg)
 
     return mozmsg
 
@@ -305,8 +304,14 @@ def fetch_auth0_logs(config, headers, fromid):
             mozmsg.details["error"] = "true"
             mozmsg.details["errormsg"] = '"' + str(e) + '"'
             mozmsg.summary = "Failed to parse auth0 message"
-            if config.DEBUG == "True":
-                traceback.print_exc()
+            traceback.print_exc()
+
+        # Save raw initial message in final message
+        # in case we ran into parsing errors
+        if "details" not in mozmsg:
+            mozmsg.details = {}
+        mozmsg.details["raw"] = str(msg)
+
         mozmsg.send()
 
     if have_totals:
