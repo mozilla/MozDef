@@ -56,9 +56,12 @@ def save_db_data(db_file, db_data):
 
 def main():
     logger.debug('Starting')
-    for db_file in options.db_files.split(','):
-        db_data = fetch_db_data(db_file)
-        save_db_data(db_file, db_data)
+
+    db_data = fetch_db_data(options.db_file)
+    asn_db_data = fetch_db_data(options.asn_db_file)
+
+    save_db_data(options.db_file, db_data)
+    save_db_data(options.asn_db_file, asn_db_data)
 
 
 def initConfig():
@@ -68,7 +71,8 @@ def initConfig():
     options.syslogport = getConfig('syslogport', 514, options.configfile)
 
     options.db_store_location = getConfig('db_store_location', '', options.configfile)
-    options.db_files = getConfig('db_files', '', options.configfile)
+    options.db_file = getConfig('db_file', '', options.configfile)
+    options.asn_db_file = getConfig('asn_db_file', '', options.configfile)
     options.account_id = getConfig('account_id', '', options.configfile)
     options.license_key = getConfig('license_key', '', options.configfile)
 
