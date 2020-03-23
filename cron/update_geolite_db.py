@@ -49,7 +49,6 @@ def save_db_data(db_file, db_data):
         # Do a generic lookup to verify we don't get any errors (malformed data)
         geo_ip.lookup_ip('8.8.8.8')
         logger.debug("Moving temp file to " + save_path)
-    temp.close()
     close(fd)
     rename(temp_path, save_path)
 
