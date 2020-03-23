@@ -50,11 +50,7 @@ class AlertGeoModel(AlertTask):
     def main(self):
         cfg = self._load_config()
 
-        self.factor_pipeline = [
-            factors.asn_movement(
-                mmdb.open_database(cfg.factors.asn_movement.maxmind_db_path),
-                alert.Severity.WARNING)
-        ]
+        self.factor_pipeline = self._prepare_factor_pipeline(cfg)
 
         if not self.es.index_exists('localities'):
             settings = {
@@ -184,9 +180,24 @@ class AlertGeoModel(AlertTask):
 
             cfg['whitelist'] = config.Whitelist(**cfg['whitelist'])
 
-            asn_mvmt = config.ASNMovement(**cfg['factors']['asn_movement'])
+            asn_mvmt = None
+            if cfg['factors']['asn_movement'] is not None:
+                asn_mvmt = config.ASNMovement(**cfg['factors']['asn_movement'])
 
             cfg['factors'] = config.Factors(
                 asn_movement=asn_mvmt)
 
             return config.Config(**cfg)
+
+    def _prepare_factor_pipeline(self, cfg):
+        pipeline = []
+
+        if cfg.factors.asn_movement is not None:
+            pipeline.append(
+                factors.asn_movement(
+                    mmdb.open_database(cfg.factors.asn_movement.maxmind_db_path),
+                    alert.Severity.WARNING
+                )
+            )
+
+        return pipeline
