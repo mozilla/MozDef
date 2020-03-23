@@ -15,8 +15,6 @@
     "cidrs": []
   },
   "factors": {
-    "asn_movement": {
-      "maxmind_db_path": "/usr/local/var/GeoIP/GeoLite2-ASN.mmdb"
-    }
+    "asn_movement": null
   }
 }
