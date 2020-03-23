@@ -354,8 +354,6 @@ def fetch_auth0_logs(config, headers, fromid):
 
         # Save raw initial message in final message
         # in case we ran into parsing errors
-        if "details" not in mozmsg:
-            mozmsg.details = {}
         mozmsg.details["raw"] = str(msg)
 
         mozmsg.send()
