@@ -4,9 +4,10 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import requests
-import json
+import hjson
 import os
-from configlib import getConfig, OptionParser
+
+from mozdef_util.utilities.logger import logger
 
 
 class message(object):
@@ -17,65 +18,66 @@ class message(object):
         the pager duty event api
         '''
 
-        # set my own conf file
-        # relative path to the rest index.py file
-        self.configfile = os.path.join(os.path.dirname(__file__), 'pagerDutyTriggerEvent.conf')
+        self.configfile = os.path.join(os.path.dirname(__file__), 'pagerduty.json')
         self.options = None
         if os.path.exists(self.configfile):
             self.initConfiguration()
 
-        self.registration = self.options.keywords.split(" ")
+        self.registration = [integration['tag'] for integration in self.options['integrations']]
         self.priority = 1
 
     def initConfiguration(self):
-        myparser = OptionParser()
-        # setup self.options by sending empty list [] to parse_args
-        (self.options, args) = myparser.parse_args([])
+        with open(self.configfile, "r") as fd:
+            try:
+                self.options = hjson.load(fd)
+            except ValueError:
+                logger.error("FAILED to open the configuration file\n")
 
-        # fill self.options with plugin-specific options
-        # change this to your default zone for when it's not specified
-        self.options.serviceKey = getConfig('serviceKey', 'APIKEYHERE', self.configfile)
-        self.options.keywords = getConfig('keywords', 'KEYWORDS', self.configfile)
-        self.options.clienturl = getConfig('clienturl', 'CLIENTURL', self.configfile)
-        try:
-            self.options.docs = json.loads(getConfig('docs', {}, self.configfile))
-        except:
-            self.options.docs = {}
+    def identify_option(self, tags):
+        for integration_option in self.options['integrations']:
+            for tag in tags:
+                if tag == integration_option['tag']:
+                    return integration_option
 
     def onMessage(self, alert):
-        # As of Dec. 3, 2019, alert actions are given entire alerts rather
-        # than just their source
-        message = alert['_source']
+        source = alert['_source']
 
-        # here is where you do something with the incoming alert message
-        doclink = 'unknown'
-        if message['category'] in self.options.docs:
-            doclink = self.options.docs[message['category']]
-        if 'summary' in message:
+        # Find the self.option that contains one of the message tags
+        selected_option = self.identify_option(source['tags'])
+        if selected_option is None:
+            logger.error("Unable to find config option for alert tags: {0}".format(source['tags']))
+
+        if 'summary' in source:
             headers = {
                 'Content-type': 'application/json',
             }
-            payload = json.dumps({
-                "service_key": "{0}".format(self.options.serviceKey),
+
+            payload = hjson.dumpsJSON({
+                "service_key": "{0}".format(selected_option['service_key']),
                 "event_type": "trigger",
-                "description": "{0}".format(message['summary']),
+                "description": source['summary'],
                 "client": "MozDef",
-                "client_url": "https://" + self.options.clienturl + "/{0}".format(message['events'][0]['documentsource']['alerts'][0]['id']),
+                "client_url": "{0}/alert/{1}".format(self.options['web_url'], alert['_id']),
                 "contexts": [
                     {
                         "type": "link",
-                        "href": "https://" + "{0}".format(doclink),
+                        "href": "{0}".format(selected_option['doc']),
                         "text": "View runbook on mana"
                     }
                 ]
             })
-            requests.post(
+
+            headers = {
+                'Content-type': 'application/json',
+            }
+            resp = requests.post(
                 'https://events.pagerduty.com/generic/2010-04-15/create_event.json',
                 headers=headers,
                 data=payload,
             )
-        # you can modify the message if needed
-        # plugins registered with lower (>2) priority
-        # will receive the message and can also act on it
-        # but even if not modified, you must return it
+            if not resp.ok:
+                logger.exception("Received invalid response from pagerduty: {0} - {1}".format(resp.status_code, resp.text))
+            else:
+                logger.info("Triggered pagerduty notification for alert - {0}".format(alert['_id']))
+
         return message
