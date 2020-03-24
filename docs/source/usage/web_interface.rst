@@ -7,9 +7,3 @@ Meteor (the underlying UI framework) supports `many authentication options`_ inc
 
 .. _Meteor framework: https://www.meteor.com/
 .. _many authentication options: https://docs.meteor.com/#accounts_api
-
-Events visualizations
-*********************
-
-Since the backend of MozDef is Elastic Search, you get all the goodness of Kibana with little configuration.
-The MozDef UI is focused on incident handling and adding security-specific visualizations of SIEM data to help you weed through the noise.

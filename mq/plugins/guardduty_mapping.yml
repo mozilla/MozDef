@@ -834,7 +834,7 @@
     proto: details.finding.action.networkConnectionAction.protocol
     evidence: details.finding.evidence
     miscinfo: details.finding.additionalInfo
-    details.query: details.finding.action.dnsrequestaction.domain
+    details.query: details.service.action.dnsRequestAction.domain
     details.platform: details.resource.instanceDetails.platform
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt
@@ -873,7 +873,7 @@
     proto: details.finding.action.networkConnectionAction.protocol
     evidence: details.finding.evidence
     miscinfo: details.finding.additionalInfo
-    details.query: details.finding.additionalInfo.domain
+    details.query: details.service.action.dnsRequestAction.domain
     details.platform: details.resource.instanceDetails.platform
     gdeventcreatedts: details.createdAt
     gdeventupdatedts: details.updatedAt

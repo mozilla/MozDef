@@ -8,7 +8,7 @@ services:
       args:
         METEOR_BUILD: 'NO'
     restart: always
-    command: bash -c 'node -i'
+    command: bash -c 'cd /opt/mozdef/envs/mozdef/meteor;meteor npm install --save @babel/runtime;meteor'
     depends_on:
       - mongodb
       - rest
@@ -16,5 +16,3 @@ services:
       - default
     volumes:
         - ../../meteor:/opt/mozdef/envs/mozdef/meteor
-    stdin_open: true
-    tty: true

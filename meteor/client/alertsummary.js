@@ -29,6 +29,9 @@ if ( Meteor.isClient ) {
             }
         },
 
+        currentTimePeriod: function() {
+            return Session.get( 'alertssearchtime' )
+        },
         displayedAlerts: function() {
             //how many alerts displayed in the paginator
             return Template.instance().pagination.totalItems()
@@ -93,12 +96,6 @@ if ( Meteor.isClient ) {
             e.preventDefault();
             Session.set( 'alertssearchtext', $( '#alertssearchtext' ).val() );
             Session.set( 'alertssearchtime', $( '#searchTime' ).val() );
-            try {
-                Session.set( 'alertsrecordlimit', parseInt( $( '#recordLimit' ).val() ) );
-            } catch ( e ) {
-                debugLog( "Error parsing recordLimit, setting to default value" );
-                Session.set( 'alertsrecordlimit', 100 );
-            }
             refreshAlertsData();
         }
 
@@ -136,7 +133,7 @@ if ( Meteor.isClient ) {
             }
             //subscribe to the number of alerts
             //and to the summary of alerts
-            Meteor.subscribe( "alerts-summary", Session.get( 'alertssearchtext' ), Session.get( 'alertssearchtime' ), Session.get( 'alertsrecordlimit' ), onReady = function() {
+            Meteor.subscribe( "alerts-summary", Session.get( 'alertssearchtext' ), Session.get( 'alertssearchtime' ), onReady = function() {
                 //console.log('alerts-summary ready');
                 drawAlertsCharts();
                 hookAlertsCount();
@@ -146,7 +143,6 @@ if ( Meteor.isClient ) {
             $( '#searchTime' ).val( Session.get( 'alertssearchtime' ) );
             $( '#alertsfiltertext' ).val( Session.get( 'alertsfiltertext' ) );
             $( '#alertssearchtext' ).val( Session.get( 'alertssearchtext' ) );
-            $( '#recordLimit' ).val( Session.get( 'alertsrecordlimit' ) );
         } );
     } );
 
@@ -163,7 +159,7 @@ if ( Meteor.isClient ) {
             //default selection criteria
             beginningtime = moment( 0 );
             timeperiod = Session.get( 'alertssearchtime' );
-            if ( timeperiod === 'tail' || timeperiod == 'none' ) {
+            if ( timeperiod == 'all' ) {
                 beginningtime = moment( 0 );
             } else {
                 //determine the utcepoch range
@@ -275,7 +271,6 @@ if ( Meteor.isClient ) {
                             url: 1
                         },
                         sort: { utcepoch: -1 },
-                        limit: Session.get( 'alertsrecordlimit' ),
                         reactive: false
                     } )
                     .fetch();
@@ -556,7 +551,6 @@ if ( Meteor.isClient ) {
                     fields: {},
                     reactive: true,
                     sort: { utcepoch: -1 },
-                    limit: Session.get( 'alertsrecordlimit' )
                 } )
                 .observe(
                     {
