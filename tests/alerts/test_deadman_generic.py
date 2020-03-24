@@ -50,7 +50,7 @@ class TestDeadmanGeneric(AlertTestSuite):
     }
     unmatched_second_alert = {
         "category": "deadman",
-        "tags": ['deadman'],
+        "tags": ['deadman', 'generic_deadman'],
         "severity": "ERROR",
         "summary": 'Deadman check failed for \'Sample Alert 2\' the past 20 hours',
     }
