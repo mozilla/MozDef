@@ -42,7 +42,7 @@ class AlertDeadmanGeneric(DeadmanAlertTask):
     # if no events found
     def onNoEvent(self, description):
         category = 'deadman'
-        tags = ['deadman']
+        tags = ['deadman', 'generic_deadman']
         severity = 'ERROR'
 
         summary = "Deadman check failed for '{0}' the past {1} {2}".format(
