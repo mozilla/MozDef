@@ -37,7 +37,7 @@ class broNSM(DeadmanAlertTask):
     # if no events found
     def onNoEvent(self, hostname):
         category = 'deadman'
-        tags = ['bro']
+        tags = ['bro', 'bro_deadman']
         severity = 'ERROR'
 
         summary = ('No {0} bro healthcheck events found the past 20 minutes'.format(hostname))
