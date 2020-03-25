@@ -67,7 +67,7 @@ class message(object):
     becomes
 
     > "Port scan from 1.2.3.4; IP assigned to user@mozilla.com (ab12ce34de56f)
-    
+
     Finally, the plugin also sets `details.username` to the user found.
     '''
 
