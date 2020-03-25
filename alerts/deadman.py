@@ -14,7 +14,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 class broNSM(DeadmanAlertTask):
     def main(self):
-        self.parse_config('deadman.conf', ['url', 'hosts'])
+        self.parse_config('deadman.conf', ['url', 'hosts', 'severity'])
 
         for host in self.config.hosts.split(","):
             self.log.debug('Checking deadman for host: {0}'.format(host))
@@ -38,7 +38,7 @@ class broNSM(DeadmanAlertTask):
     def onNoEvent(self, hostname):
         category = 'deadman'
         tags = ['bro', 'bro_deadman']
-        severity = 'ERROR'
+        severity = self.config.severity
 
         summary = ('No {0} bro healthcheck events found the past 20 minutes'.format(hostname))
         url = self.config.url

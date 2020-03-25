@@ -43,7 +43,7 @@ class AlertDeadmanGeneric(DeadmanAlertTask):
     def onNoEvent(self, description):
         category = 'deadman'
         tags = ['deadman', 'generic_deadman']
-        severity = 'ERROR'
+        severity = self._config['severity']
 
         summary = "Deadman check failed for '{0}' the past {1} {2}".format(
             description,
