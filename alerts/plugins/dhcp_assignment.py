@@ -122,6 +122,8 @@ def enrich(alert, search_window_hours, search_fn):
     # in question.  When we cannot find a user, we substitute the string
     # "(no user found)"
 
+    no_user_found = '(no user found)'
+
     search_mac_owner = SearchQuery({'hours': search_window_hours})
     query = 'source:local1 AND "{}"'.format(mac)
     search_mac_owner.add_must(QueryStringMatch(query))
@@ -136,7 +138,7 @@ def enrich(alert, search_window_hours, search_fn):
 
     if len(user_events) > 0:
         summary_dict = _comma_eq_dict(user_events[0]['summary'])
-        user = summary_dict.get('user_name', '(no user found)')
+        user = summary_dict.get('user_name', no_user_found)
     else:
         return alert
 
@@ -150,7 +152,8 @@ def enrich(alert, search_window_hours, search_fn):
         'user': user
     }
 
-    alert['details']['username'] = user
+    if user != no_user_found:
+        alert['details']['username'] = user
 
     alert['summary'] += '; IP assigned to {} ({})'.format(user, mac)
 
