@@ -145,6 +145,8 @@ def enrich(alert, search_window_hours, search_fn):
         'user': user
     }
 
+    alert['details']['username'] = user
+
     alert['summary'] += '; IP assigned to {} ({})'.format(user, mac)
 
     return alert
