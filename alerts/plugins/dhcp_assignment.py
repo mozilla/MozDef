@@ -155,4 +155,8 @@ def _comma_eq_dict(s: str) -> typing.Dict[str, str]:
     `{'a': 'b', 'x': 'y z'}`.  Note that all values are treated as strings.
     '''
 
-    return dict([pair.split('=') for pair in s.split(',')])
+    return dict([
+        pair.split('=')
+        for pair in s.split(',')
+        if '=' in pair
+    ])
