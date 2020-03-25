@@ -140,6 +140,9 @@ def enrich(alert, search_window_hours, search_fn):
 
     # Finally, add the details.ipassignment fields and append to the summary.
 
+    if 'details' not in alert:
+        alert['details'] = {}
+
     alert['details']['ipassignment'] = {
         'mac': mac,
         'user': user
