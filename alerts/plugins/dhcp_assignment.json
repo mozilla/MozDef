@@ -1,4 +1,4 @@
 {
-  "indices_to_search": "events-*",
+  "indices_to_search": ["events-*"],
   "search_window_hours": 48
 }
