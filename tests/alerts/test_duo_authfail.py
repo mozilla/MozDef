@@ -29,7 +29,7 @@ class TestAlertDuoAuthFail(AlertTestSuite):
     # This alert is the expected result from running this task
     default_alert = {
         "category": "duosecurity",
-        "tags": ['duosecurity', 'duosecuritypagerduty'],
+        "tags": ['duosecurity', 'duosecurity_auth_fail'],
         "severity": "WARNING",
         "url": "https://www.mozilla.org",
         "summary": "Duo Authentication Failure: user you@somewhere.com rejected and marked a Duo Authentication attempt from 1.2.3.4 as fraud",

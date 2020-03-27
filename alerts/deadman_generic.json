@@ -1,4 +1,5 @@
 {
+    "severity": "ERROR",
     "alerts": [
         {
             "description": "Sample Alert 1",
