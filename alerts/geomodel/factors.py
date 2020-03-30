@@ -1,7 +1,7 @@
 from typing import Callable, List, NamedTuple
 from functools import reduce
 
-from alerts.geomodel.alert import Alert, Severity
+from geomodel.alert import Alert, Severity
 
 
 class Enhancement(NamedTuple):
