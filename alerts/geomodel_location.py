@@ -150,7 +150,7 @@ class AlertGeoModel(AlertTask):
         if new_alert is not None:
             modded_alert = factors.pipe(new_alert, self.factor_pipeline)
 
-            summary = alert.summary(new_alert)
+            summary = alert.summary(modded_alert)
 
             alert_dict = self.createAlertDict(
                 summary,
