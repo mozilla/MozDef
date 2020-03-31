@@ -121,11 +121,10 @@ class AlertGeoModel(AlertTask):
 
         entry_from_es = locality.find(query, username, cfg.localities.es_index)
 
-        new_state = locality.State('locality', username, locs_from_evts)
+        new_state = locality.State.new(username, locs_from_evts)
 
         if entry_from_es is None:
-            entry_from_es = locality.Entry(
-                '', locality.State('locality', username, []))
+            entry_from_es = locality.Entry.new(locality.State.new(username, []))
 
         cleaned = locality.remove_outdated(
             entry_from_es.state, cfg.localities.valid_duration_days)
@@ -139,7 +138,9 @@ class AlertGeoModel(AlertTask):
         updated = locality.update(cleaned.state, new_state)
 
         if updated.did_update:
-            entry_from_es = locality.Entry(entry_from_es.identifier, updated.state)
+            entry_from_es = locality.Entry(
+                entry_from_es.identifier,
+                updated.state)
 
             journal(entry_from_es, cfg.localities.es_index)
 
