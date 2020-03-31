@@ -185,7 +185,7 @@ def find(qes: QueryInterface, username: str, index: str) -> Optional[Entry]:
 
     search = SearchQuery()
     search.add_must([
-        TermMatch('type_', 'locality'),
+        TermMatch('type_', Locality.index_name()),
         TermMatch('username', username)
     ])
 
