@@ -40,7 +40,7 @@ else
 endif
 
 .PHONY: test
-test: clean build-tests run-tests
+test: build-tests run-tests
 
 .PHONY: tests
 tests: build-tests run-tests  ## Run all tests (getting/building images as needed)
@@ -61,7 +61,6 @@ run-test: run-tests
 .PHONY: run-tests
 run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
-	#docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
 
 .PHONY: run-dev-meteor
