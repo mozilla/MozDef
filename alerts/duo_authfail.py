@@ -26,7 +26,7 @@ class AlertDuoAuthFail(AlertTask):
     # Set alert properties
     def onEvent(self, event):
         category = 'duosecurity'
-        tags = ['duosecurity', 'duosecuritypagerduty']
+        tags = ['duosecurity', 'duosecurity_auth_fail']
         severity = 'WARNING'
         url = self.config.url
 

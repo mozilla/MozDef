@@ -1,0 +1,15 @@
+{
+    "integrations": [
+        {
+            "service_key": "<yourapiservicekey1>",
+            "tag":"keyword1",
+            "doc": "https://example_docs.com"
+        },
+        {
+            "service_key": "<yourapiservicekey2>",
+            "tag":"keyword2",
+            "doc": "https://example_docs1.com"
+        }
+    ],
+    "web_url": "https://a.link.to.your.siem.com"
+}

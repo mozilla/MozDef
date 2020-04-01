@@ -11,7 +11,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
 
 class AlertHTTPErrors(AlertTask):
     def main(self):
-        self.parse_config('http_errors.conf', ['url'])
+        self.parse_config('http_errors.conf', ['url', 'severity'])
 
         search_query = SearchQuery(minutes=15)
 
@@ -31,7 +31,7 @@ class AlertHTTPErrors(AlertTask):
     def onEvent(self, event):
         category = 'httperrors'
         tags = ['http']
-        severity = 'WARNING'
+        severity = self.config.severity
         hostname = event['_source']['hostname']
         url = self.config.url
 

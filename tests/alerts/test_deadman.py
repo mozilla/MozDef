@@ -24,7 +24,7 @@ class TestAlertDeadman(AlertTestSuite):
         "category": "deadman",
         "severity": "ERROR",
         "summary": 'No host1 bro healthcheck events found the past 20 minutes',
-        "tags": ['bro'],
+        "tags": ['bro', 'bro_deadman'],
     }
 
     test_cases = []

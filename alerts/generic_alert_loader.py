@@ -53,6 +53,12 @@ from os.path import basename
 
         // This is the alert documentation
         'alert_url': 'https://mozilla.org'
+
+        // Optional field to include other fields (if they exist in each event) in summary
+        'additional_summary_fields': [
+            'field1',
+            'field2'
+        ]
     }
 '''
 
@@ -143,6 +149,23 @@ class AlertGenericLoader(AlertTask):
             aggreg['count'],
             aggreg['value'],
         )
+
+        # If additional summary fields is defined, loop through each
+        # and pull out the value from each event (if it exists)
+        # and append key=value(s) to the summary field
+        if 'additional_summary_fields' in aggreg['config']:
+            for additional_field in aggreg['config']['additional_summary_fields']:
+                values_found = []
+                # If the field exists in each EVENT, include it in alert summary
+                for event in aggreg['events']:
+                    dot_event = DotDict(event['_source'])
+                    value = dot_event.get(additional_field)
+                    if value:
+                        values_found.append(value)
+                # Let's add the key=value(s) to summary
+                if len(values_found) != 0:
+                    values_str = '{}'.format(', '.join(set(values_found)))
+                    summary += " ({0}={1})".format(additional_field, values_str)
 
         if hostnames:
             summary += ' [{}]'.format(', '.join(set(hostnames)))
