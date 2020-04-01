@@ -101,11 +101,14 @@ def enrich(alert, intel):
     for ip in ips:
         if ip in intel:
             for _class in intel[ip]:
-                ip_intel.append({
+                new_entry = {
                     'ip': ip,
                     'classification': _class,
                     'threatscore': intel[ip][_class],
-                })
+                }
+
+                if new_entry not in ip_intel:
+                    ip_intel.append(new_entry)
 
     details['ipintel'] = ip_intel
 
