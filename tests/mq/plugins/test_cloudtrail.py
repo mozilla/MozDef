@@ -64,7 +64,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'attribute':  {'afieldname': 'astringvalue'},
+                    'attribute': {'afieldname': 'astringvalue'},
                 }
             }
         }
