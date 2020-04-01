@@ -40,7 +40,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'iaminstanceprofile': 'astringvalue',
+                    'iaminstanceprofile': {'afieldname': 'astringvalue'},
                 }
             }
         }
@@ -51,7 +51,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'iaminstanceprofile': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '{"afieldname": "astringvalue"}',
                     }
                 }
             }
@@ -64,7 +64,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'attribute': 'astringvalue',
+                    'attribute':  {'afieldname': 'astringvalue'},
                 }
             }
         }
@@ -75,7 +75,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'attribute': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '{"afieldname": "astringvalue"}',
                     }
                 }
             }
@@ -88,7 +88,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'description': 'astringvalue',
+                    'description': {'afieldname': 'astringvalue'},
                 }
             }
         }
@@ -99,7 +99,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'description': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '{"afieldname": "astringvalue"}',
                     }
                 }
             }
@@ -112,7 +112,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'filter': 'astringvalue',
+                    'filter': {'afieldname': 'astringvalue'},
                 }
             }
         }
@@ -123,7 +123,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'filter': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '{"afieldname": "astringvalue"}',
                     }
                 }
             }
@@ -136,7 +136,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'responseelements': {
-                    'role': 'astringvalue',
+                    'role': {'afieldname': 'astringvalue'},
                 }
             }
         }
@@ -147,7 +147,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'responseelements': {
                     'role': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '{"afieldname": "astringvalue"}',
                     }
                 }
             }
@@ -159,7 +159,7 @@ class TestCloudtrailPlugin():
         msg = {
             'source': 'cloudtrail',
             'details': {
-                'additionaleventdata': 'astringvalue',
+                'additionaleventdata': {'afieldname': 'astringvalue'},
             }
         }
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
@@ -168,7 +168,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'additionaleventdata': {
-                    'raw_value': 'astringvalue',
+                    'raw_value': '{"afieldname": "astringvalue"}',
                 }
             }
         }
@@ -199,7 +199,7 @@ class TestCloudtrailPlugin():
         msg = {
             'source': 'cloudtrail',
             'details': {
-                'serviceeventdetails': 'astringvalue',
+                'serviceeventdetails': {'afieldname': 'astringvalue'},
             }
         }
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
@@ -208,7 +208,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'serviceeventdetails': {
-                    'raw_value': 'astringvalue',
+                    'raw_value': '{"afieldname": "astringvalue"}',
                 }
             }
         }
@@ -231,7 +231,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'rule': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '"astringvalue"',
                     }
                 }
             }
@@ -244,7 +244,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'responseelements': {
-                    'subnets': 'astringvalue',
+                    'subnets': {'afieldname': 'astringvalue'},
                 }
             }
         }
@@ -255,7 +255,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'responseelements': {
                     'subnets': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '{"afieldname": "astringvalue"}',
                     }
                 }
             }
@@ -279,7 +279,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'responseelements': {
                     'endpoint': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '"astringvalue"',
                     }
                 }
             }
@@ -292,7 +292,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'ebsoptimized': 'astringvalue',
+                    'ebsoptimized': False,
                 }
             }
         }
@@ -303,7 +303,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'ebsoptimized': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': 'false',
                     }
                 }
             }
@@ -316,7 +316,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'responseelements': {
-                    'securitygroups': 'astringvalue',
+                    'securitygroups': ['astringvalue','anotherstringvalue']
                 }
             }
         }
@@ -327,7 +327,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'responseelements': {
                     'securitygroups': {
-                        'raw_value': 'astringvalue',
+                        'raw_value': '["astringvalue", "anotherstringvalue"]',
                     }
                 }
             }
@@ -340,7 +340,7 @@ class TestCloudtrailPlugin():
             'source': 'cloudtrail',
             'details': {
                 'requestparameters': {
-                    'disableapitermination': 'astringvalue'
+                    'disableapitermination': False
                 }
             }
         }
@@ -351,7 +351,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'requestparameters': {
                     'disableapitermination': {
-                        'raw_value': 'astringvalue'
+                        'raw_value': 'false'
                     }
                 }
             }
@@ -375,7 +375,7 @@ class TestCloudtrailPlugin():
             'details': {
                 'responseelements': {
                     'lastmodified': {
-                        'raw_value': 'astringvalue'
+                        'raw_value': '"astringvalue"'
                     }
                 }
             }
@@ -408,7 +408,7 @@ class TestCloudtrailPlugin():
                         'service': {
                             'additionalinfo': {
                                 'unusual': {
-                                    'raw_value': 'astringvalue'
+                                    'raw_value': '"astringvalue"'
                                 }
                             }
                         }
