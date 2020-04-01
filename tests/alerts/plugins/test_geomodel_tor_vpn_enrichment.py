@@ -13,13 +13,28 @@ class TestGeoModelEnrichment:
             'details': {
                 'hops': [
                     {
-                        'ip': '1.2.3.4'
+                        'origin': {
+                            'ip': '1.2.3.4'
+                        },
+                        'destination': {
+                            'ip': '4.3.2.1'
+                        }
                     },
                     {
-                        'ip': '4.3.2.1'
+                        'origin': {
+                            'ip': '4.3.2.1'
+                        },
+                        'destination': {
+                            'ip': '1.4.2.3'
+                        }
                     },
                     {
-                        'ip': '1.4.2.3'
+                        'origin': {
+                            'ip': '1.4.2.3'
+                        },
+                        'destination': {
+                            'ip': '1.2.3.4'
+                        }
                     }
                 ]
             }
@@ -44,19 +59,19 @@ class TestGeoModelEnrichment:
 
         # Make sure info for the known IPs was added.
         assert 'ipintel' in test_alert['details']
-        assert len(alert['details']['ipintel']) == 3
+        assert len(test_alert['details']['ipintel']) == 3
         assert {
             'ip': '1.2.3.4',
-            'classificiation': 'TorNode',
+            'classification': 'TorNode',
             'threatscore': 127
-        } in alert['details']['ipintel']
+        } in test_alert['details']['ipintel']
         assert {
             'ip': '4.3.2.1',
-            'classificiation': 'Spam',
+            'classification': 'Spam',
             'threatscore': 32
-        } in alert['details']['ipintel']
+        } in test_alert['details']['ipintel']
         assert {
             'ip': '4.3.2.1',
-            'classificiation': 'CnC',
+            'classification': 'CnC',
             'threatscore': 80
-        } in alert['details']['ipintel']
+        } in test_alert['details']['ipintel']
