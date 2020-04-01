@@ -12,6 +12,7 @@ from mozdef_util.query_models import SearchQuery, TermMatch
 
 class AlertCloudtrailDeadman(DeadmanAlertTask):
     def main(self):
+        self.parse_config('cloudtrail_deadman.conf', ['severity'])
         search_query = SearchQuery(hours=1)
 
         search_query.add_must([
@@ -27,7 +28,7 @@ class AlertCloudtrailDeadman(DeadmanAlertTask):
     def onNoEvent(self):
         category = 'deadman'
         tags = ['cloudtrail_deadman']
-        severity = 'ERROR'
+        severity = self.config.severity
 
         summary = 'No cloudtrail events found the last hour'
 
