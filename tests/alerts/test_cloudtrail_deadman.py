@@ -22,7 +22,7 @@ class TestAlertCloudtrailDeadman(AlertTestSuite):
         "category": "deadman",
         "severity": "ERROR",
         "summary": 'No cloudtrail events found the last hour',
-        "tags": ['cloudtrail', 'aws'],
+        "tags": ['cloudtrail_deadman'],
     }
 
     test_cases = []

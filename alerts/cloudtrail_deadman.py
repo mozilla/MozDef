@@ -26,7 +26,7 @@ class AlertCloudtrailDeadman(DeadmanAlertTask):
     # if no events found
     def onNoEvent(self):
         category = 'deadman'
-        tags = ['cloudtrail', 'aws']
+        tags = ['cloudtrail_deadman']
         severity = 'ERROR'
 
         summary = 'No cloudtrail events found the last hour'
