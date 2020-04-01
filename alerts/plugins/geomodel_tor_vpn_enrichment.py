@@ -51,35 +51,6 @@ class Config(types.NamedTuple):
             return Config(**json.load(cfg_file))
 
 
-class TorExitNode(types.NamedTuple):
-    '''Container for informatuon describing a Tor exit node.
-    '''
-
-    placeholder: str
-
-
-class VPNMember(types.NamedTuple):
-    '''Container for information describing an IP belonging to a VPN.
-    '''
-
-    placeholder: str
-
-
-# The intel provided is _one of_ the following types.
-Classification = types.Union[
-    TorExitNode,
-    VPNMember
-]
-
-class IPIntel(types.NamedTuple):
-    '''A container for intel about IP addresses present in a GeoModel alert that
-    either are known to be Tor exit nodes or to belong to a VPN.
-    '''
-
-    ip: str
-    classification: Classification
-
-
 class message:
     '''Alert plugin that handles messages (alerts) tagged as geomodel alerts
     produced by `geomodel_location.AlertGeoModel`.  This plugin will enrich such
@@ -91,23 +62,53 @@ class message:
     '''
 
     def __init__(self):
-        self.config = Config.load(CONFIG_FILE)
+        config = Config.load(CONFIG_FILE)
 
-        self.registration = self.config.match_tag
+        self.registration = config.match_tag
+
+        with open(config.intel_file_path) as intel_file:
+            self._intel = json.load(intel_file)
 
 
     def onMessage(self, message):
         alert_tags = message.get('tags', [])
 
         if self.config.match_tag in alert_tags:
-            return enrich(message, self.config.intel_file_path)
+            return enrich(message, self._intel)
 
         return message
 
 
-def enrich(alert, intel_file_path):
+def enrich(alert, intel):
     '''Enrich a geomodel alert with intel about IPs that are known Tor exit
     nodes or members of a VPN.
     '''
+
+    details = alert.get('details', {})
+
+    hops = details.get('hops', [])
+
+    ips = [
+        hop['origin']['ip']
+        for hop in hops
+    ]
+
+    if len(hops) > 0:
+        ips.append(hops[-1]['destination']['ip'])
+
+    ip_intel = []
+
+    for ip in ips:
+        if ip in intel:
+            for _class in intel[ip]:
+                ip_intel.append({
+                    'ip': ip,
+                    'classification': _class,
+                    'threatscore': intel[ip][_class],
+                })
+
+    details['ipintel'] = ip_intel
+
+    alert['details'] = details
 
     return alert
