@@ -111,7 +111,7 @@ def enrich(alert, intel):
 
     ip_intel = []
 
-    for ip in ips:
+    for ip in set(ips):
         if ip in intel:
             for _class in intel[ip]:
                 new_entry = {
@@ -120,8 +120,7 @@ def enrich(alert, intel):
                     'threatscore': intel[ip][_class],
                 }
 
-                if new_entry not in ip_intel:
-                    ip_intel.append(new_entry)
+                ip_intel.append(new_entry)
 
     tor_nodes = [
         entry['ip']
