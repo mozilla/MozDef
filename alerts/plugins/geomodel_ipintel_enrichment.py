@@ -10,7 +10,7 @@ import typing as types
 
 CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
-    'geomodel_tor_vpn_enrichment.json')
+    'geomodel_ipintel_enrichment.json')
 
 
 class InvalidConfigException(Exception):
