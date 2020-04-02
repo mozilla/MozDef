@@ -103,18 +103,19 @@ def enrich(alert, intel):
     if len(hops) > 0:
         ips.append(hops[-1]['destination']['ip'])
 
+    relevant_intel = {
+        ip: intel[ip]
+        for ip in set(ips)
+        if ip in intel
+    }
+
     ip_intel = []
 
-    for ip in set(ips):
-        if ip in intel:
-            for _class in intel[ip]:
-                new_entry = {
-                    'ip': ip,
-                    'classification': _class,
-                    'threatscore': intel[ip][_class],
-                }
-
-                ip_intel.append(new_entry)
+    for ip, records in relevant_intel.items():
+        ip_intel.extend([
+            {'ip': ip, 'classification': _class, 'threatscore': records[_class]}
+            for _class in records
+        ])
 
     tor_nodes = [
         entry['ip']
