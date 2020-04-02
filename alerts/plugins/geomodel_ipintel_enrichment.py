@@ -75,7 +75,7 @@ class message:
     def onMessage(self, message):
         alert_tags = message.get('tags', [])
 
-        if self.config.match_tag in alert_tags:
+        if self.registration[0] in alert_tags:
             return enrich(message, self._intel)
 
         return message
