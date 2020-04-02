@@ -25,6 +25,7 @@ class InvalidConfigException(Exception):
 
 # TODO: Switch to dataclasses when we move to Python 3.7+
 
+
 class Config(types.NamedTuple):
     '''Container for the configuration of the plugin.
 
@@ -70,7 +71,6 @@ class message:
 
         with open(config.intel_file_path) as intel_file:
             self._intel = json.load(intel_file)
-
 
     def onMessage(self, message):
         alert_tags = message.get('tags', [])

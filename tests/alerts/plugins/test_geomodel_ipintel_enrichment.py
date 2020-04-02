@@ -54,29 +54,29 @@ class TestGeoModelEnrichment:
         enriched = enrich(test_alert, test_intel)
 
         # Make sure nothing previously present was changed.
-        assert 'details' in test_alert
-        assert 'hops' in test_alert['details']
-        assert len(test_alert['details']['hops']) == 3
+        assert 'details' in enriched
+        assert 'hops' in enriched['details']
+        assert len(enriched['details']['hops']) == 3
 
         # Make sure info for the known IPs was added.
-        assert 'ipintel' in test_alert['details']
-        assert len(test_alert['details']['ipintel']) == 3
+        assert 'ipintel' in enriched['details']
+        assert len(enriched['details']['ipintel']) == 3
         assert {
             'ip': '1.2.3.4',
             'classification': 'TorNode',
             'threatscore': 127
-        } in test_alert['details']['ipintel']
+        } in enriched['details']['ipintel']
         assert {
             'ip': '4.3.2.1',
             'classification': 'Spam',
             'threatscore': 32
-        } in test_alert['details']['ipintel']
+        } in enriched['details']['ipintel']
         assert {
             'ip': '4.3.2.1',
             'classification': 'VPN',
             'threatscore': 80
-        } in test_alert['details']['ipintel']
+        } in enriched['details']['ipintel']
 
         # Make sure that the alert summary was appended to.
-        assert 'Tor nodes detected: 1.2.3.4' in test_alert['summary']
-        assert 'VPNs detected: 4.3.2.1' in test_alert['summary']
+        assert 'Tor nodes detected: 1.2.3.4' in enriched['summary']
+        assert 'VPNs detected: 4.3.2.1' in enriched['summary']
