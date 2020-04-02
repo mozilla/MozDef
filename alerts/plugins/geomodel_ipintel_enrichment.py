@@ -96,12 +96,12 @@ def enrich(alert, intel):
     hops = details.get('hops', [])
 
     ips = [
-        hop['origin']['ip']
+        hop['origin'].ip
         for hop in hops
     ]
 
     if len(hops) > 0:
-        ips.append(hops[-1]['destination']['ip'])
+        ips.append(hops[-1]['destination'].ip)
 
     relevant_intel = {
         ip: intel[ip]
