@@ -4,12 +4,13 @@
 # Copyright (c) 2017 Mozilla Corporation
 
 
-from alerts.plugins.geomodel_tor_vpn_enrichment import enrich
+from alerts.plugins.geomodel_ipintel_enrichment import enrich
 
 
 class TestGeoModelEnrichment:
     def test_enrichment(self):
         test_alert = {
+            'summary': 'test alert',
             'details': {
                 'hops': [
                     {
@@ -46,7 +47,7 @@ class TestGeoModelEnrichment:
             },
             '4.3.2.1': {
                 'Spam': 32,
-                'CnC': 80,
+                'VPN': 80,
             }
         }
 
@@ -72,6 +73,10 @@ class TestGeoModelEnrichment:
         } in test_alert['details']['ipintel']
         assert {
             'ip': '4.3.2.1',
-            'classification': 'CnC',
+            'classification': 'VPN',
             'threatscore': 80
         } in test_alert['details']['ipintel']
+
+        # Make sure that the alert summary was appended to.
+        assert 'Tor nodes detected: 1.2.3.4' in test_alert['summary']
+        assert 'VPNs detected: 4.3.2.1' in test_alert['summary']

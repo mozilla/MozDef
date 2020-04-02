@@ -59,6 +59,14 @@ class message:
 
     Specifically, the alert's `details` dict will have a new field `ipintel`
     appended containing the contents of an `IPIntel`.
+
+    The alert's summary is also appended with notes about IPs belonging to Tor
+    nodes and VPNs when they are detected.  For example, a summary may take the
+    form
+
+    > user@mozilla.com seen in Dallas,US then Dumbravita,RO
+    > (9293.00 KM in 150.87 minutes); Tor nodes detected: 1.2.3.4, 5.6.7.8
+    > ; VPNs detected: 10.11.12.13
     '''
 
     def __init__(self):
@@ -83,6 +91,11 @@ def enrich(alert, intel):
     '''Enrich a geomodel alert with intel about IPs that are known Tor exit
     nodes or members of a VPN.
     '''
+
+    # The names of classifications present in the intel source that we want to
+    # specifically detect and enrich the alert summary with when detected.
+    tor_class = 'TorNode'
+    vpn_class = 'VPN'
 
     details = alert.get('details', {})
 
@@ -109,6 +122,26 @@ def enrich(alert, intel):
 
                 if new_entry not in ip_intel:
                     ip_intel.append(new_entry)
+
+    tor_nodes = [
+        entry['ip']
+        for entry in ip_intel
+        if entry['classification'] == tor_class
+    ]
+
+    vpn_nodes = [
+        entry['ip']
+        for entry in ip_intel
+        if entry['classification'] == vpn_class
+    ]
+
+    if len(tor_nodes) > 0:
+        alert['summary'] += '; Tor nodes detected: {}'.format(
+            ', '.join(tor_nodes))
+
+    if len(vpn_nodes) > 0:
+        alert['summary'] += '; VPNs detected: {}'.format(
+            ', '.join(vpn_nodes))
 
     details['ipintel'] = ip_intel
 
