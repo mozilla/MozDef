@@ -38,13 +38,7 @@ class Config(types.NamedTuple):
     match_tag: str
 
     def load(file_path: str) -> 'Config':
-        '''Attempt to load a `Config` from a file containing JSON of the
-        format required by the plugin.  If the file cannot be read or contains
-        improperly-formatted or missing data, this function throws either a:
-
-        * `FileNotFoundException`
-        * `json.decoder.JSONDecodeError`
-        * `InvalidConfigException`
+        '''Attempt to load a `Config` from a JSON file.
         '''
 
         with open(file_path) as cfg_file:
