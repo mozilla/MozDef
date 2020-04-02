@@ -97,8 +97,12 @@ class message(object):
             3001,
             self.configfile)
 
-        # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
+        # CIDR whitelist filename formatted comma separted list of 8.8.8.0/24 style masks
         self.options.network_whitelist_file = getConfig('network_whitelist_file', '/dev/null', self.configfile)
+
+        # CIDR whitelist as comma separated list
+        whitelist_networks = getConfig('whitelist_networks', '', self.configfile)
+        self.options.whitelist_networks = whitelist_networks.split(',')
 
         # optional statuspage.io integration
         self.options.statuspage_api_key = getConfig(
@@ -212,6 +216,8 @@ class message(object):
 
         # Refresh the ip network list each time we get a message
         self.options.ipwhitelist = self.parse_network_whitelist(self.options.network_whitelist_file)
+        for whitelist_value in self.options.whitelist_networks:
+            self.options.ipwhitelist.append(whitelist_value)
 
         ipaddress = None
         comment = None
