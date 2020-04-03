@@ -3,16 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-from typing import NamedTuple
-
 from alerts.plugins.geomodel_ipintel_enrichment import enrich
-
-
-class MockOrigin(NamedTuple):
-    '''Mocks the `geomodel.locality.Origin` type.
-    '''
-
-    ip: str
 
 
 class TestGeoModelEnrichment:
@@ -22,16 +13,28 @@ class TestGeoModelEnrichment:
             'details': {
                 'hops': [
                     {
-                        'origin': MockOrigin('1.2.3.4'),
-                        'destination': MockOrigin('4.3.2.1'),
+                        'origin': {
+                            'ip': '1.2.3.4',
+                        },
+                        'destination': {
+                            'ip': '4.3.2.1',
+                        }
                     },
                     {
-                        'origin': MockOrigin('4.3.2.1'),
-                        'destination': MockOrigin('1.4.2.3'),
+                        'origin': {
+                            'ip': '4.3.2.1',
+                        },
+                        'destination': {
+                            'ip': '1.4.2.3',
+                        }
                     },
                     {
-                        'origin': MockOrigin('1.4.2.3'),
-                        'destination': MockOrigin('1.2.3.4'),
+                        'origin': {
+                            'ip': '1.4.2.3',
+                        },
+                        'destination': {
+                            'ip': '1.2.3.4',
+                        }
                     }
                 ]
             }
