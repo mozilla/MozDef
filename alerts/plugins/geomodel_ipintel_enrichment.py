@@ -56,7 +56,7 @@ class message:
     def __init__(self):
         config = Config.load(CONFIG_FILE)
 
-        self.registration = config.match_tag
+        self.registration = [config.match_tag]
 
         with open(config.intel_file_path) as intel_file:
             self._intel = json.load(intel_file)
