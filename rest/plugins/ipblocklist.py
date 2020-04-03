@@ -141,7 +141,22 @@ class message(object):
                 ipcidr = netaddr.IPNetwork(ipaddress)
 
                 # already in the table?
-                ipblock = ipblocklist.find_one({'ipaddress': str(ipcidr)})
+                ipblock = ipblocklist.find_one({'address': str(ipcidr)})
+                # Compute end dates
+                end_date = datetime.utcnow() + timedelta(hours=1)
+                if duration == '12hr':
+                    end_date = datetime.utcnow() + timedelta(hours=12)
+                elif duration == '1d':
+                    end_date = datetime.utcnow() + timedelta(days=1)
+                elif duration == '2d':
+                    end_date = datetime.utcnow() + timedelta(days=2)
+                elif duration == '3d':
+                    end_date = datetime.utcnow() + timedelta(days=3)
+                elif duration == '1w':
+                    end_date = datetime.utcnow() + timedelta(days=7)
+                elif duration == '30d':
+                    end_date = datetime.utcnow() + timedelta(days=30)
+
                 if ipblock is None:
                     # insert
                     ipblock = dict()
@@ -150,21 +165,6 @@ class message(object):
                     # i.e. '1.2.3.4/24' not '1.2.3.0/24'
                     ipblock['address'] = str(ipcidr)
                     ipblock['dateAdded'] = datetime.utcnow()
-                    # Compute start and end dates
-                    # default
-                    end_date = datetime.utcnow() + timedelta(hours=1)
-                    if duration == '12hr':
-                        end_date = datetime.utcnow() + timedelta(hours=12)
-                    elif duration == '1d':
-                        end_date = datetime.utcnow() + timedelta(days=1)
-                    elif duration == '2d':
-                        end_date = datetime.utcnow() + timedelta(days=2)
-                    elif duration == '3d':
-                        end_date = datetime.utcnow() + timedelta(days=3)
-                    elif duration == '1w':
-                        end_date = datetime.utcnow() + timedelta(days=7)
-                    elif duration == '30d':
-                        end_date = datetime.utcnow() + timedelta(days=30)
                     ipblock['dateExpiring'] = end_date
                     ipblock['comment'] = comment
                     ipblock['creator'] = userID
@@ -200,7 +200,11 @@ class message(object):
                         except Exception as e:
                             logger.error('Error while notifying statuspage.io for %s: %s\n' % (str(ipcidr), e))
                 else:
-                    logger.error('%s: is already present in the ipblocklist table\n' % (str(ipcidr)))
+                    logger.debug('%s: is already present in the ipblocklist table...updating\n' % (str(ipcidr)))
+                    # Update the document's expiration time and comments
+                    ipblock['dateExpiring'] = end_date
+                    ipblock['comment'] = comment
+                    ipblocklist.replace_one({'_id': ipblock['_id']}, ipblock)
             else:
                 logger.error('%s: is not a valid ip address\n' % (ipaddress))
         except Exception as e:
