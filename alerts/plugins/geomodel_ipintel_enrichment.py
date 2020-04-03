@@ -12,17 +12,6 @@ CONFIG_FILE = os.path.join(
     os.path.dirname(__file__),
     'geomodel_ipintel_enrichment.json')
 
-
-class InvalidConfigException(Exception):
-    '''An exception raised if a configuration file contains missing or
-    unexpected data.
-    '''
-
-    def __init__(self, msg):
-        super().__init__()
-
-        self.message = msg
-
 # TODO: Switch to dataclasses when we move to Python 3.7+
 
 
