@@ -33,6 +33,15 @@ class Hop(NamedTuple):
     origin: Origin
     destination: Origin
 
+    def to_json(self):
+        '''Convert a `Hop` to a fully JSON (`dict`) representation.
+        '''
+
+        return {
+            'origin': dict(self.origin._asdict()),
+            'destination': dict(self.destination._asdict()),
+        }
+
 
 class Alert(NamedTuple):
     '''A container for the data the alerts output by GeoModel contain.
