@@ -50,12 +50,22 @@ class message:
         self._es_client = ElasticsearchClient(ES['servers'])
 
     def onMessage(self, message):
+        summary_parts = message['summary'].split(' ')
+
+        # We expect the summary to be formatted like:
+        # "Promiscuous mode enabled on HOSTNAME [X]"
+        if len(summary_parts) < 2:
+            return message
+
+        hostname = summary_parts[-2]
+
         query = SearchQuery(hours=self._config.search_window_hours)
 
         query.add_must([
             TermMatch('category', 'syslog'),
+            TermMatch('hostname', hostname),
             TermMatch('details.program', 'sshd'),
-            PhraseMatch('summary', 'Accepted public key for '),
+            PhraseMatch('summary', 'Accepted publickey for '),
         ])
 
         results = query.execute(
