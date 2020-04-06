@@ -553,7 +553,7 @@ def update_alert_status():
         })
         return response
 
-    expected_fields = ["user", "response", "identityConfidence"]
+    expected_fields = ["alert", "user", "response", "identityConfidence"]
 
     if any([req.get(field) is None for field in expected_fields]):
         required = ", ".join(expected_fields)
