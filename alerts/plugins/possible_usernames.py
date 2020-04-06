@@ -7,7 +7,7 @@ import json
 import os
 import typing as types
 
-from alerts.lib.config import ES
+from lib.config import ES
 from mozdef_util.query_models import PhraseMatch, SearchQuery, TermMatch
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 
