@@ -544,39 +544,53 @@ def update_alert_status():
 
     valid_statuses = ["manual", "inProgress", "acknowledged", "escalated"]
 
-    if req["status"] not in valid_statuses:
+    if req.get("status") not in valid_statuses:
+        required = " or ".join(valid_statuses)
+
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps(
-            {"error": "Status not one of {}".format(" or ".join(valid_statuses))}
-        )
+        response.body = json.dumps({
+            "error": "Status not one of {}".format(required),
+        })
         return response
 
+    expected_fields = ["user", "response", "identityConfidence"]
+
+    if any([req.get(field) is None for field in expected_fields]):
+        required = ", ".join(expected_fields)
+
+        response.status = StatusCode.BAD_REQUEST
+        response.body = json.dumps({
+            "error": "Missing a required field, one of {}".format(required),
+        })
+        return response
+    
     valid_confidences = ["highest", "high", "moderate", "low", "lowest"]
 
-    if req["identityConfidence"] not in valid_confidences:
+    if req.get("identityConfidence") not in valid_confidences:
+        required = " or ".join(valid_confidences)
+
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps(
-            {
-                "error": "user.identityConfidence not one of {}".format(
-                    " or ".join(valid_confidences)
-                )
-            }
-        )
+        response.body = json.dumps({
+            "error": "identityConfidence not one of {}".format(required),
+        })
         return response
 
     details = {
-        "triage": {"user": req["user"], "response": req["response"]},
-        "identityConfidence": req["identityConfidence"],
+        "triage": {
+            "user": req.get("user"),
+            "response": req.get("response"),
+        },
+        "identityConfidence": req.get("identityConfidence"),
     }
-
+    
     modified_count = 0
 
     modified_count += alerts.update_one(
-        {"esmetadata.id": req["alert"]}, {"$set": {"status": req["status"]}}
+        {"esmetadata.id": req.get("alert")}, {"$set": {"status": req.get("status")}}
     ).modified_count
 
     modified_count += alerts.update_one(
-        {"esmetadata.id": req["alert"]}, {"$set": {"details": details}}
+        {"esmetadata.id": req.get("alert")}, {"$set": {"details": details}}
     ).modified_count
 
     if modified_count < 2:
