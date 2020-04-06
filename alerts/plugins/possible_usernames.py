@@ -43,7 +43,7 @@ class message:
     '''
 
     def __init__(self):
-        self.registration = ['PromiscKernel']
+        self.registration = ['promisckernel']
 
         self._config = Config.load(CONFIG_FILE)
 
