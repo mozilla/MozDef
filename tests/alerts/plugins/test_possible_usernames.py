@@ -6,8 +6,6 @@
 import os
 import sys
 
-from alerts.plugins.possible_usernames import enrich
-
 
 class TestPossibleUsernames:
     def setup(self):
@@ -28,6 +26,8 @@ class TestPossibleUsernames:
             del sys.modules['lib']
 
     def test_enrichment(self):
+        from alerts.plugins.possible_usernames import enrich
+
         events = [
             {
                 # Expected event
