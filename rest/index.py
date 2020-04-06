@@ -729,9 +729,8 @@ def create_duplicate_chain():
     dupchains = mongo.meteor[DUP_CHAIN_DB]
 
     try:
-        req = json.loads(request.body.read())
-        request.body.close()
-    except ValueError:
+        req = request.json
+    except bottle.HTTPError:
         response.status = StatusCode.BAD_REQUEST
         response.body = json.dumps({"error": "Missing or invalid request body"})
         return response
@@ -804,9 +803,8 @@ def update_duplicate_chain():
     dupchains = mongo.meteor[DUP_CHAIN_DB]
 
     try:
-        req = json.loads(request.body.read())
-        request.body.close()
-    except ValueError:
+        req = request.json
+    except bottle.HTTPError:
         response.status = StatusCode.BAD_REQUEST
         response.body = json.dumps({"error": "Missing or invalid request body"})
         return response
