@@ -152,7 +152,7 @@ class AlertGeoModel(AlertTask):
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict['details'] = {
                 'username': new_alert.username,
-                'hops': [dict(hop._asdict()) for hop in new_alert.hops]
+                'hops': [hop.to_json() for hop in new_alert.hops],
             }
 
             return alert_dict
