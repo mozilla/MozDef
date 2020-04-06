@@ -539,7 +539,7 @@ def update_alert_status():
         request.body.close()
     except ValueError:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({"error": "Missing or invalid request body"})
+        response.body = {"error": "Missing or invalid request body"}
         return response
 
     valid_statuses = ["manual", "inProgress", "acknowledged", "escalated"]
@@ -548,9 +548,9 @@ def update_alert_status():
         required = " or ".join(valid_statuses)
 
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({
+        response.body = {
             "error": "Status not one of {}".format(required),
-        })
+        }
         return response
 
     expected_fields = ["alert", "user", "response", "identityConfidence"]
@@ -559,9 +559,9 @@ def update_alert_status():
         required = ", ".join(expected_fields)
 
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({
+        response.body = {
             "error": "Missing a required field, one of {}".format(required),
-        })
+        }
         return response
     
     valid_confidences = ["highest", "high", "moderate", "low", "lowest"]
@@ -570,9 +570,9 @@ def update_alert_status():
         required = " or ".join(valid_confidences)
 
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({
+        response.body = {
             "error": "identityConfidence not one of {}".format(required),
-        })
+        }
         return response
 
     details = {
@@ -595,11 +595,11 @@ def update_alert_status():
 
     if modified_count < 2:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({"error": "Alert not found"})
+        response.body = {"error": "Alert not found"}
         return response
 
     response.status = StatusCode.OK
-    response.body = json.dumps({"error": None})
+    response.body = {"error": None}
 
     return response
 
@@ -672,14 +672,12 @@ def retrieve_duplicate_chain():
         return response
 
     response.status = StatusCode.OK
-    response.body = json.dumps(
-        {
-            "error": None,
-            "identifiers": chain["identifiers"],
-            "created": toUTC(chain["created"]).isoformat(),
-            "modified": toUTC(chain["modified"]).isoformat(),
-        }
-    )
+    response.body = {
+        "error": None,
+        "identifiers": chain["identifiers"],
+        "created": toUTC(chain["created"]).isoformat(),
+        "modified": toUTC(chain["modified"]).isoformat(),
+    }
 
     return response
 
@@ -732,7 +730,7 @@ def create_duplicate_chain():
         req = request.json
     except bottle.HTTPError:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({"error": "Missing or invalid request body"})
+        response.body = {"error": "Missing or invalid request body"}
         return response
 
     now = datetime.utcnow()
@@ -747,19 +745,19 @@ def create_duplicate_chain():
 
     if chain["alert"] is None or chain["user"] is None:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps(
-            {"error": "Request missing required key `alert` or `user`"}
-        )
+        response.body = {
+            "error": "Request missing required key `alert` or `user`"
+        }
         return response
 
     result = dupchains.insert_one(chain)
     if not result.acknowledged:
         response.status = StatusCode.INTERNAL_ERROR
-        response.body = json.dumps({"error": "Failed to store new duplicate chain"})
+        response.body = {"error": "Failed to store new duplicate chain"}
         return response
 
     response.status = StatusCode.OK
-    response.body = json.dumps({"error": None})
+    response.body = {"error": None}
 
     return response
 
@@ -806,7 +804,7 @@ def update_duplicate_chain():
         req = request.json
     except bottle.HTTPError:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({"error": "Missing or invalid request body"})
+        response.body = {"error": "Missing or invalid request body"}
         return response
 
     query = {"alert": req.get("alert"), "user": req.get("user")}
@@ -815,19 +813,17 @@ def update_duplicate_chain():
 
     if any([x is None for x in (query["alert"], query["user"], new_ids)]):
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps(
-            {
-                "error": "Request missing required key `alert`, `user` or "
-                "`identifiers`"
-            }
-        )
+        response.body = {
+            "error": "Request missing required key `alert`, `user` or "
+            "`identifiers`"
+        }
         return response
 
     chain = dupchains.find_one(query)
 
     if chain is None:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({"error": "Duplicate chain does not exist"})
+        response.body = {"error": "Duplicate chain does not exist"}
         return response
 
     modified = dupchains.update_one(
@@ -842,11 +838,11 @@ def update_duplicate_chain():
 
     if modified != 1:
         response.status = StatusCode.INTERNAL_ERROR
-        response.body = json.dumps({"error": "Failed to update chain"})
+        response.body = {"error": "Failed to update chain"}
         return response
 
     response.status = StatusCode.OK
-    response.body = json.dumps({"error": None})
+    response.body = {"error": None}
 
     return response
 
@@ -894,27 +890,27 @@ def delete_duplicate_chain():
         req = request.json
     except bottle.HTTPError:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({"error": "Missing or invalid request body"})
+        response.body = {"error": "Missing or invalid request body"}
         return response
 
     query = {"alert": req.get("alert"), "user": req.get("user")}
 
     if query["alert"] is None or query["user"] is None:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps(
-            {"error": "Request missing required key `alert` or `user`"}
-        )
+        response.body = {
+            "error": "Request missing required key `alert` or `user`"
+        }
         return response
 
     result = dupchains.delete_one(query)
 
     if not result.acknowledged:
         response.status = StatusCode.BAD_REQUEST
-        response.body = json.dumps({"error": "No such duplicate chain exists"})
+        response.body = {"error": "No such duplicate chain exists"}
         return response
 
     response.status = StatusCode.OK
-    response.body = json.dumps({"error": None})
+    response.body = {"error": None}
 
     return response
 
