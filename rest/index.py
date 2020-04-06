@@ -658,7 +658,7 @@ def retrieve_duplicate_chain():
 
     query = {"alert": request.query.alert, "user": request.query.user}
 
-    if query["alert"] is None or query["user"] is None:
+    if query.get("alert", "") == "" or query.get("user", "") == "":
         response.status = StatusCode.BAD_REQUEST
         response.body = _error("Request missing `alert` or `user` field")
         return response
