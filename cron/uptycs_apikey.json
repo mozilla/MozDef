@@ -1,0 +1,11 @@
+{
+  "id": "abcdefg",
+  "userId": "000000000000000",
+  "customerId": "12345",
+  "active": true,
+  "key": "ABCDEFGHI1235ABCD",
+  "secret": "1234/ABCDEF/sample",
+  "updatedAt": "2019-09-01T12:09:10.720Z",
+  "createdAt": "2019-09-01T12:09:10.720Z",
+  "domain": "example"
+}

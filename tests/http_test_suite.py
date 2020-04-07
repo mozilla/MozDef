@@ -1,13 +1,13 @@
 from webtest import TestApp
 
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
 
 
 class HTTPTestSuite(UnitTestSuite):
 
     def setup(self):
         self.app = TestApp(self.application)
-        super(HTTPTestSuite, self).setup()
+        super().setup()
 
     def response_per_route(self, route):
         return self.app.get(route)

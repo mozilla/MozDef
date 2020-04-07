@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 from mozdef_util.utilities.key_exists import key_exists
@@ -27,7 +27,16 @@ class message(object):
             'details.requestparameters.bucketpolicy.statement.principal.aws',
             'details.requestparameters.callerreference',
             'details.requestparameters.description',
+            'details.requestparameters.describeegressonlyinternetgatewaysrequest',
+            'details.requestparameters.describehostsrequest',
+            'details.requestparameters.describeflowlogsrequest',
             'details.requestparameters.describeflowlogsrequest.filter.value',
+            'details.requestparameters.describenatgatewaysrequest',
+            'details.requestparameters.describevpcendpointsrequest',
+            'details.requestparameters.describevpcendpointsrequest.filter',
+            'details.requestparameters.describevpcendpointsrequest.filter.value',
+            'details.requestparameters.describevpcendpointsrequest.vpcendpointid',
+            'details.requestparameters.describevpcendpointserviceconfigurationsrequest',
             'details.requestparameters.disableapitermination',
             'details.requestparameters.distributionconfig.callerreference',
             'details.requestparameters.domainname',
@@ -35,15 +44,20 @@ class message(object):
             'details.requestparameters.ebsoptimized',
             'details.requestparameters.filter',
             'details.requestparameters.iaminstanceprofile',
+            'details.requestparameters.invalidationbatch.callerreference',
+            'details.requestparameters.imageid',
             'details.requestparameters.instancetype',
             'details.requestparameters.logstreamname',
+            'details.requestparameters.metrics',
             'details.requestparameters.source',
             'details.requestparameters.tagging',
             'details.requestparameters.logging',
             'details.responseelements.role',
             'details.responseelements.policy',
             'details.requestparameters.rule',
+            'details.responseelements.createddate',
             'details.responseelements.credentials',
+            'details.responseelements.dbsubnetgroup',
             'details.responseelements.subnets',
             'details.responseelements.endpoint',
             'details.responseelements.securitygroups',

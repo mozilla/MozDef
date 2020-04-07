@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
 
@@ -13,6 +13,8 @@ import netaddr
 
 class AlertProxyDropIP(AlertTask):
     def main(self):
+        self.parse_config("proxy_drop_ip.conf", ["ip_whitelist"])
+
         search_query = SearchQuery(minutes=20)
 
         search_query.add_must(
@@ -27,6 +29,9 @@ class AlertProxyDropIP(AlertTask):
         ip_regex = "/[0-9a-fA-F]{1,4}.*/"
 
         search_query.add_must([QueryStringMatch("details.host: {}".format(ip_regex))])
+
+        for ip in self.config.ip_whitelist.split(","):
+            search_query.add_must_not([TermMatch("details.host", ip)])
 
         self.filtersManual(search_query)
         self.searchEventsAggregated("details.sourceipaddress", samplesLimit=10)

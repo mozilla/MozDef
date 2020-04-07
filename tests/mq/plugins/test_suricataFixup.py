@@ -1,13 +1,10 @@
-import os
-import sys
-from mozdef_util.utilities.toUTC import toUTC
-
 import json
 import random
 import string
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from suricataFixup import message
+from mozdef_util.utilities.toUTC import toUTC
+
+from mq.plugins.suricataFixup import message
 
 
 class TestSuricataFixup(object):
@@ -576,3 +573,30 @@ class TestSuricataFixup(object):
         assert result['details']['suricata_alert']['signature'] == MESSAGE['alert']['signature']
         assert result['details']['suricata_alert']['category'] == MESSAGE['alert']['category']
         assert result['details']['suricata_alert']['severity'] == MESSAGE['alert']['severity']
+
+    def test_smtp_alert(self):
+        event = {
+            'customendpoint': '',
+            'category': 'suricata',
+            'source': 'eve-log',
+            'event_type': 'alert'
+        }
+        MESSAGE = {
+            "event_type": "alert",
+            'smtp': {
+                'helo': 'example.com',
+                'mail_from': '<ttesterson@example.com',
+                'rcpt_to': ['<abc.example.com>']
+            },
+            'email': {
+                'status': 'BODY_STARTED',
+                'from': '"Test Email List"<ttesterson@example.com>'
+            }
+        }
+        event['message'] = json.dumps(MESSAGE)
+
+        result, metadata = self.plugin.onMessage(event, self.metadata)
+        self.verify_defaults(result)
+        self.verify_metadata(metadata)
+        assert result['details']['smtp'] == MESSAGE['smtp']
+        assert 'email' not in result['details']

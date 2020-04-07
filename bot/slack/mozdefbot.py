@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
 """ mozdef bot using slack
@@ -48,17 +48,22 @@ class AlertConsumer(ConsumerMixin):
         try:
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
-                body_dict = body
+                full_body = body
             elif isinstance(body, str):
                 try:
-                    body_dict = json.loads(body)  # lets assume it's json
-                except ValueError as e:
+                    full_body = json.loads(body)
+                except ValueError:
                     # not json..ack but log the message
                     logger.exception("mozdefbot_slack exception: unknown body type received %r" % body)
                     return
             else:
                 logger.exception("mozdefbot_slack exception: unknown body type received %r" % body)
                 return
+
+            body_dict = full_body
+            # Handle messages that have full ES dict
+            if '_source' in full_body:
+                body_dict = full_body['_source']
 
             if 'notify_mozdefbot' in body_dict and body_dict['notify_mozdefbot'] is False:
                 # If the alert tells us to not notify, then don't post message

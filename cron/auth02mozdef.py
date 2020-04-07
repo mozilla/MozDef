@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2016 Mozilla Corporation
-# Author: gdestuynder@mozilla.com
 
 # Imports auth0.com logs into MozDef
 
@@ -29,7 +28,7 @@ def fatal(msg):
 # The logs have the acronym, but not the description
 # but do include a 'description' field that is additional detailed words
 # about what happened.
-# See also: https://github.com/auth0/auth0-logs-to-logentries/blob/master/index.js (MIT)
+# See also: https://auth0.com/docs/logs#log-data-event-listing
 # levels
 #     0 = Debug
 #     1 = Info
@@ -38,57 +37,104 @@ def fatal(msg):
 #     4 = Critical
 log_types = DotDict(
     {
-        "s": {"event": "Success Login", "level": 1},
-        "slo": {"event": "Success Logout", "level": 1},
-        "flo": {"event": "Failed Logout", "level": 3},
-        "seacft": {"event": "Success Exchange (Authorization Code for Access Token)", "level": 1},
-        "feacft": {"event": "Failed Exchange (Authorization Code for Access Token)", "level": 3},
-        "f": {"event": "Failed Login", "level": 3},
-        "w": {"event": "Warnings During Login", "level": 2},
-        "du": {"event": "Deleted User", "level": 1},
-        "fu": {"event": "Failed Login (invalid email/username)", "level": 3},
-        "fp": {"event": "Failed Login (wrong password)", "level": 3},
-        "fc": {"event": "Failed by Connector", "level": 3},
-        "fco": {"event": "Failed by CORS", "level": 3},
-        "con": {"event": "Connector Online", "level": 1},
-        "coff": {"event": "Connector Offline", "level": 3},
-        "fcpro": {"event": "Failed Connector Provisioning", "level": 4},
-        "ss": {"event": "Success Signup", "level": 1},
-        "fs": {"event": "Failed Signup", "level": 3},
-        "cs": {"event": "Code Sent", "level": 0},
-        "cls": {"event": "Code/Link Sent", "level": 0},
-        "sv": {"event": "Success Verification Email", "level": 0},
-        "fv": {"event": "Failed Verification Email", "level": 0},
-        "scp": {"event": "Success Change Password", "level": 1},
-        "fcp": {"event": "Failed Change Password", "level": 3},
-        "sce": {"event": "Success Change Email", "level": 1},
-        "fce": {"event": "Failed Change Email", "level": 3},
-        "scu": {"event": "Success Change Username", "level": 1},
-        "fcu": {"event": "Failed Change Username", "level": 3},
-        "scpn": {"event": "Success Change Phone Number", "level": 1},
-        "fcpn": {"event": "Failed Change Phone Number", "level": 3},
-        "svr": {"event": "Success Verification Email Request", "level": 0},
-        "fvr": {"event": "Failed Verification Email Request", "level": 3},
-        "scpr": {"event": "Success Change Password Request", "level": 0},
-        "fcpr": {"event": "Failed Change Password Request", "level": 3},
-        "fn": {"event": "Failed Sending Notification", "level": 3},
-        "sapi": {"event": "API Operation", "level": 1},
-        "fapi": {"event": "Failed API Operation", "level": 3},
-        "limit_wc": {"event": "Blocked Account", "level": 4},
-        "limit_ui": {"event": "Too Many Calls to /userinfo", "level": 4},
+        "admin_update_launch": {"event": "Auth0 Update Launched", "level": 1},
         "api_limit": {"event": "Rate Limit On API", "level": 4},
-        "sdu": {"event": "Successful User Deletion", "level": 1},
-        "fdu": {"event": "Failed User Deletion", "level": 3},
-        "sd": {"event": "Success Delegation", "level": 3},
-        "fd": {"event": "Failed Delegation", "level": 3},
-        "seccft": {"event": "Success Exchange (Client Credentials for Access Token)", "level": 1},
-        "feccft": {"event": "Failed Exchange (Client Credentials for Access Token)", "level": 1},
-        "fsa": {"event": "Failed Silent Auth", "level": 3},
-        "ssa": {"event": "Success Silent Auth", "level": 1},
-        "fepft": {"event": "Failed Exchange (Password for Access Token)", "level": 3},
-        "limit_mu": {"event": "Blocked IP Address", "level": 3},
-        "sepft": {"event": "Success Exchange (Password for Access Token)", "level": 1},
+        "cls": {"event": "Code/Link Sent", "level": 0},
+        "coff": {"event": "Connector Offline", "level": 3},
+        "con": {"event": "Connector Online", "level": 1},
+        "cs": {"event": "Code Sent", "level": 0},
+        "depnote": {"event": "Deprecation Note", "level": 1},
+        "du": {"event": "Deleted User", "level": 1},
+        "f": {"event": "Failed Login", "level": 3},
+        "fapi": {"event": "Failed API Operation", "level": 3},
+        "fc": {"event": "Failed by Connector", "level": 3},
+        "fce": {"event": "Failed Change Email", "level": 3},
+        "fco": {"event": "Failed by CORS", "level": 3},
         "fcoa": {"event": "Failed Cross Origin Authentication", "level": 3},
+        "fcp": {"event": "Failed Change Password", "level": 3},
+        "fcph": {"event": "Failed Post Change Password Hook", "level": 3},
+        "fcpn": {"event": "Failed Change Phone Number", "level": 3},
+        "fcpr": {"event": "Failed Change Password Request", "level": 3},
+        "fcpro": {"event": "Failed Connector Provisioning", "level": 4},
+        "fcu": {"event": "Failed Change Username", "level": 3},
+        "fd": {"event": "Failed Delegation", "level": 3},
+        "fdeac": {"event": "Failed Device Activation", "level": 3},
+        "fdeaz": {"event": "Failed Device Authorization Request", "level": 3},
+        "fdecc": {"event": "User Canceled Device Confirmation", "level": 2},
+        "fdu": {"event": "Failed User Deletion", "level": 3},
+        "feacft": {"event": "Failed Exchange (Authorization Code for Access Token)", "level": 3},
+        "feccft": {"event": "Failed Exchange (Client Credentials for Access Token)", "level": 1},
+        "fede": {"event": "Failed Exchange (Device Code for Access Token)", "level": 3},
+        "fens": {"event": "Failed Exchange (Native Social Login)", "level": 3},
+        "feoobft": {"event": "Failed Exchange (Password and OOB Challenge for Access Token)", "level": 3},
+        "feotpft": {"event": "Failed Exchange (Password and OTP Challenge for Access Token)", "level": 3},
+        "fepft": {"event": "Failed Exchange (Password for Access Token)", "level": 3},
+        "fercft": {"event": "Failed Exchange (Password and MFA Recovery code for Access Token)", "level": 3},
+        "fertft": {"event": "Failed Exchange (Refresh Token for Access Token)", "level": 3},
+        "flo": {"event": "Failed Logout", "level": 3},
+        "fn": {"event": "Failed Sending Notification", "level": 3},
+        "fp": {"event": "Failed Login (wrong password)", "level": 3},
+        "fs": {"event": "Failed Signup", "level": 3},
+        "fsa": {"event": "Failed Silent Auth", "level": 3},
+        "fu": {"event": "Failed Login (invalid email/username)", "level": 3},
+        "fui": {"event": "Failed users import", "level": 4},
+        "fv": {"event": "Failed Verification Email", "level": 0},
+        "fvr": {"event": "Failed Verification Email Request", "level": 3},
+        "gd_auth_failed": {"event": "OTP Auth failed", "level": 3},
+        "gd_auth_rejected": {"event": "OTP Auth rejected", "level": 3},
+        "gd_auth_succeed": {"event": "OTP Auth success", "level": 1},
+        "gd_enrollment_complete": {"event": "Guardian enrollment complete", "level": 1},
+        "gd_module_switch": {"event": "Module switch", "level": 1},
+        "gd_otp_rate_limit_exceed": {"event": "Too many OTP failures", "level": 4},
+        "gd_recovery_failed": {"event": "Multi-factor recovery code failed.", "level": 3},
+        "gd_recovery_rate_limit_exceed": {"event": "Multi-factor recovery code has failed too many times", "level": 4},
+        "gd_recovery_succeed": {"event": "Multi-factor recovery code succeeded authorization", "level": 1},
+        "gd_send_pn": {"event": "Push notification for MFA sent successfully sent", "level": 1},
+        "gd_send_sms": {"event": "SMS for MFA sent successfully", "level": 1},
+        "gd_send_sms_failure": {"event": "SMS for MFA sent failed", "level": 3},
+        "gd_start_auth": {"event": "Second factor authentication event started for MFA", "level": 1},
+        "gd_start_enroll": {"event": "Multi-factor authentication enroll has started", "level": 1},
+        "gd_tenant_update": {"event": "Guardian tenant update", "level": 3},
+        "gd_unenroll": {"event": "Device used for second factor authentication has been unenrolled", "level": 2},
+        "gd_update_device_account": {"event": "Device used for second factor authentication has been updated", "level": 2},
+        "gd_user_delete": {"event": "Deleted multi-factor user account", "level": 1},
+        "limit_delegation": {"event": "Rate limit exceeded to /delegation endpoint", "level": 4},
+        "limit_mu": {"event": "Blocked IP Address", "level": 3},
+        "limit_ui": {"event": "Too Many Calls to /userinfo", "level": 4},
+        "limit_wc": {"event": "Blocked Account", "level": 4},
+        "pwd_leak": {"event": "User attempted to login with a leaked password", "level": 4},
+        "s": {"event": "Success Login", "level": 1},
+        "sapi": {"event": "API Operation", "level": 1},
+        "sce": {"event": "Success Change Email", "level": 1},
+        "scoa": {"event": "Success cross-origin authentication", "level": 1},
+        "scp": {"event": "Success Change Password", "level": 1},
+        "scph": {"event": "Success Post Change Password Hook", "level": 1},
+        "scpn": {"event": "Success Change Phone Number", "level": 1},
+        "scpr": {"event": "Success Change Password Request", "level": 0},
+        "scu": {"event": "Success Change Username", "level": 1},
+        "sd": {"event": "Success Delegation", "level": 3},
+        "sdu": {"event": "Successful User Deletion", "level": 1},
+        "seacft": {"event": "Success Exchange (Authorization Code for Access Token)", "level": 1},
+        "seccft": {"event": "Success Exchange (Client Credentials for Access Token)", "level": 1},
+        "sede": {"event": "Successful Exchange (Device Code for Access Token)", "level": 1},
+        "sens": {"event": "Success Exchange (Native Social Login)", "level": 1},
+        "seoobft": {"event": "Success Exchange (Password and OOB Challenge for Access Token)", "level": 1},
+        "seotpft": {"event": "Success Exchange (Password and OTP Challenge for Access Token)", "level": 1},
+        "sepft": {"event": "Success Exchange (Password for Access Token)", "level": 1},
+        "sercft": {"event": "Success Exchange (Password and MFA Recovery code for Access Token)", "level": 1},
+        "sertft": {"event": "Success Exchange (Refresh Token for Access Token)", "level": 1},
+        "slo": {"event": "Success Logout", "level": 1},
+        "ss": {"event": "Success Signup", "level": 1},
+        "ssa": {"event": "Success Silent Auth", "level": 1},
+        "sui": {"event": "Successfully imported users", "level": 1},
+        "sv": {"event": "Success Verification Email", "level": 0},
+        "svr": {"event": "Success Verification Email Request", "level": 0},
+        "sys_os_update_end": {"event": "Auth0 OS Update Ended", "level": 1},
+        "sys_os_update_start": {"event": "Auth0 OS Update Started", "level": 1},
+        "sys_update_end": {"event": "Auth0 Update Ended", "level": 1},
+        "sys_update_start": {"event": "Auth0 Update Started", "level": 1},
+        "ublkdu": {"event": "User block setup by anomaly detection has been released", "level": 3},
+        "w": {"event": "Warnings During Login", "level": 2},
     }
 )
 
@@ -103,9 +149,6 @@ def process_msg(mozmsg, msg):
     See also https://auth0.com/docs/api/management/v2#!/Logs/get_logs
     """
     details = DotDict({})
-    # defaults
-    details.username = "UNKNOWN"
-    details.userid = "UNKNOWN"
 
     # key words used to set category and success/failure markers
     authentication_words = ["Login", "Logout", "Auth"]
@@ -136,7 +179,8 @@ def process_msg(mozmsg, msg):
         # but not for logins and other events
         # check and prefer them if present.
         details["username"] = msg.details.request.auth.user.name
-        details["action"] = msg.details.response.body.name
+        if type(msg.details.response.body) is not list:
+            details["action"] = msg.details.response.body.name
     except KeyError:
         pass
 
@@ -182,8 +226,12 @@ def process_msg(mozmsg, msg):
     # set the summary
     if "auth" in mozmsg._category:
         # make summary be action/username (success login user@place.com)
-        mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.username)
-
+        # include UNKNOWN as username value in summary
+        # if no details.username field exists
+        tmp_username = "UNKNOWN"
+        if 'username' in details:
+            tmp_username = details.username
+        mozmsg.summary = "{event} {username}".format(event=details.eventname, username=tmp_username)
     else:
         # default summary as action and description (if it exists)
         mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.description)
@@ -216,7 +264,6 @@ def process_msg(mozmsg, msg):
         pass
 
     mozmsg.details = details
-    mozmsg.details["raw"] = str(msg)
 
     return mozmsg
 
@@ -303,8 +350,12 @@ def fetch_auth0_logs(config, headers, fromid):
             mozmsg.details["error"] = "true"
             mozmsg.details["errormsg"] = '"' + str(e) + '"'
             mozmsg.summary = "Failed to parse auth0 message"
-            if config.DEBUG == "True":
-                traceback.print_exc()
+            traceback.print_exc()
+
+        # Save raw initial message in final message
+        # in case we ran into parsing errors
+        mozmsg.details["raw"] = str(msg)
+
         mozmsg.send()
 
     if have_totals:

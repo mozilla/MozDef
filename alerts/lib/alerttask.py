@@ -2,14 +2,13 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import collections
 import json
 import kombu
 import os
-import sys
 import socket
 import netaddr
 
@@ -24,10 +23,7 @@ from mozdef_util.utilities.logger import logger
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import TermMatch, ExistsMatch
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
 from lib.config import RABBITMQ, ES, ALERT_PLUGINS
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../lib"))
 from lib.alert_plugin_set import AlertPluginSet
 
 
@@ -110,6 +106,8 @@ class AlertTask(Task):
         self._configureES()
 
         self.event_indices = ['events', 'events-previous']
+        plugin_dir = os.path.join(os.path.dirname(__file__), "../plugins")
+        self.plugin_set = AlertPluginSet(plugin_dir, ALERT_PLUGINS)
 
     def classname(self):
         return self.__class__.__name__
@@ -122,8 +120,9 @@ class AlertTask(Task):
         myparser = OptionParser()
         self.config = None
         (self.config, args) = myparser.parse_args([])
+        full_config_filename = os.path.join(os.path.dirname(__file__), "../", config_filename)
         for config_key in config_keys:
-            temp_value = getConfig(config_key, "", config_filename)
+            temp_value = getConfig(config_key, "", full_config_filename)
             setattr(self.config, config_key, temp_value)
 
     def close_connections(self):
@@ -217,18 +216,7 @@ class AlertTask(Task):
         Send alert to the kombu based message queue.  The default is rabbitmq.
         """
         try:
-            # cherry pick items from the alertDict to send to the alerts messageQueue
-            mqAlert = dict(severity="INFO", category="")
-            if "severity" in alertDict:
-                mqAlert["severity"] = alertDict["severity"]
-            if "category" in alertDict:
-                mqAlert["category"] = alertDict["category"]
-            if "utctimestamp" in alertDict:
-                mqAlert["utctimestamp"] = alertDict["utctimestamp"]
-            if "eventtimestamp" in alertDict:
-                mqAlert["eventtimestamp"] = alertDict["eventtimestamp"]
-            mqAlert["summary"] = alertDict["summary"]
-            self.log.debug(mqAlert)
+            self.log.debug(alertDict)
             ensurePublish = self.mqConn.ensure(
                 self.mqproducer, self.mqproducer.publish, max_retries=10
             )
@@ -378,7 +366,8 @@ class AlertTask(Task):
                     alert = self.alertPlugins(alert)
                     alertResultES = self.alertToES(alert)
                     self.tagEventsAlert([i], alertResultES)
-                    self.alertToMessageQueue(alert)
+                    full_alert_doc = self.generate_full_doc(alert, alertResultES)
+                    self.alertToMessageQueue(full_alert_doc)
                     self.hookAfterInsertion(alert)
                     self.saveAlertID(alertResultES)
         # did we not match anything?
@@ -389,7 +378,8 @@ class AlertTask(Task):
                 alert = self.tagBotNotify(alert)
                 self.log.debug(alert)
                 alertResultES = self.alertToES(alert)
-                self.alertToMessageQueue(alert)
+                full_alert_doc = self.generate_full_doc(alert, alertResultES)
+                self.alertToMessageQueue(full_alert_doc)
                 self.hookAfterInsertion(alert)
                 self.saveAlertID(alertResultES)
 
@@ -407,21 +397,19 @@ class AlertTask(Task):
                         self.log.debug(alert)
                         alert = self.alertPlugins(alert)
                         alertResultES = self.alertToES(alert)
+                        full_alert_doc = self.generate_full_doc(alert, alertResultES)
                         # even though we only sample events in the alert
                         # tag all events as alerted to avoid re-alerting
                         # on events we've already processed.
                         self.tagEventsAlert(aggregation["allevents"], alertResultES)
-                        self.alertToMessageQueue(alert)
+                        self.alertToMessageQueue(full_alert_doc)
                         self.saveAlertID(alertResultES)
 
     def alertPlugins(self, alert):
         """
         Send alerts through a plugin system
         """
-
-        plugin_dir = os.path.join(os.path.dirname(__file__), "../plugins")
-        plugin_set = AlertPluginSet(plugin_dir, ALERT_PLUGINS)
-        alertDict = plugin_set.run_plugins(alert)[0]
+        alertDict = self.plugin_set.run_plugins(alert)[0]
 
         return alertDict
 
@@ -438,6 +426,14 @@ class AlertTask(Task):
         """
         Create an alert dict
         """
+
+        # Tag alert documents with alert classname
+        # that was triggered
+        classname = self.__name__
+        # Handle generic alerts
+        if classname == 'AlertGenericLoader':
+            classname = self.custom_alert_name
+
         alert = {
             "utctimestamp": toUTC(datetime.now()).isoformat(),
             "severity": severity,
@@ -446,6 +442,7 @@ class AlertTask(Task):
             "tags": tags,
             "events": [],
             "ircchannel": ircchannel,
+            "classname": classname
         }
         if url:
             alert["url"] = url
@@ -533,6 +530,7 @@ class AlertTask(Task):
             self.main(*args, **kwargs)
             self.log.debug("finished")
         except Exception as e:
+            self.error_thrown = e
             self.log.exception("Exception in main() method: {0}".format(e))
 
     def parse_json_alert_config(self, config_file):
@@ -549,3 +547,10 @@ class AlertTask(Task):
                 logger.error("FAILED to open the configuration file\n")
 
         return json_obj
+
+    def generate_full_doc(self, alert_body, alert_es):
+        return {
+            '_id': alert_es['_id'],
+            '_index': alert_es['_index'],
+            '_source': alert_body
+        }

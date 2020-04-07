@@ -2,12 +2,11 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
 import boto3
 import netaddr
-import random
 import sys
 from datetime import datetime
 from datetime import timedelta
@@ -15,10 +14,6 @@ from configlib import getConfig, OptionParser
 from pymongo import MongoClient
 
 from mozdef_util.utilities.logger import logger
-
-
-def genMeteorID():
-    return('%024x' % random.randrange(16**24))
 
 
 def isIPv4(ip):
@@ -43,43 +38,6 @@ def isIPv6(ip):
         return False
 
 
-def aggregateAttackerIPs(attackers):
-    iplist = []
-
-    # Set the attacker age timestamp
-    attackerage = datetime.now() - timedelta(days=options.attackerage)
-
-    ips = attackers.aggregate([
-        {"$sort": {"lastseentimestamp": -1}},
-        {"$match": {"category": options.category}},
-        {"$match": {"lastseentimestamp": {"$gte": attackerage}}},
-        {"$match": {"indicators.ipv4address": {"$exists": True}}},
-        {"$group": {"_id": {"ipv4address": "$indicators.ipv4address"}}},
-        {"$unwind": "$_id.ipv4address"},
-        {"$limit": options.iplimit}
-    ])
-
-    for i in ips:
-        whitelisted = False
-        logger.debug('working {0}'.format(i))
-        ip = i['_id']['ipv4address']
-        ipcidr = netaddr.IPNetwork(ip)
-        if not ipcidr.ip.is_loopback() and not ipcidr.ip.is_private() and not ipcidr.ip.is_reserved():
-            for whitelist_range in options.ipwhitelist:
-                whitelist_network = netaddr.IPNetwork(whitelist_range)
-                if ipcidr in whitelist_network:
-                    logger.debug(str(ipcidr) + " is whitelisted as part of " + str(whitelist_network))
-                    whitelisted = True
-
-            # strip any host bits 192.168.10/24 -> 192.168.0/24
-            ipcidrnet = str(ipcidr.cidr)
-            if ipcidrnet not in iplist and not whitelisted:
-                iplist.append(ipcidrnet)
-        else:
-            logger.debug('invalid:' + ip)
-    return iplist
-
-
 def parse_network_whitelist(network_whitelist_location):
     networks = []
     with open(network_whitelist_location, "r") as text_file:
@@ -98,32 +56,12 @@ def main():
         client = MongoClient(options.mongohost, options.mongoport)
         mozdefdb = client.meteor
         ipblocklist = mozdefdb['ipblocklist']
-        attackers = mozdefdb['attackers']
         # ensure indexes
         ipblocklist.create_index([('dateExpiring', -1)])
-        attackers.create_index([('lastseentimestamp', -1)])
-        attackers.create_index([('category', 1)])
-
-        # First, gather IP addresses from recent attackers and add to the block list
-        attackerIPList = aggregateAttackerIPs(attackers)
-
-        # add attacker IPs to the blocklist
-        # first delete ones we've created from an attacker
-        ipblocklist.delete_many({'creator': 'mozdef', 'reference': 'attacker'})
-
         # delete any that expired
         ipblocklist.delete_many({'dateExpiring': {"$lte": datetime.utcnow() - timedelta(days=options.expireage)}})
 
-        # add the aggregations we've found recently
-        for ip in attackerIPList:
-            ipblocklist.insert_one(
-                {'_id': genMeteorID(),
-                 'address': ip,
-                 'reference': 'attacker',
-                 'creator': 'mozdef',
-                 'dateAdded': datetime.utcnow()})
-
-        # Lastly, export the combined blocklist
+        # Export the blocklist
         ipCursor = mozdefdb['ipblocklist'].aggregate([
             {"$sort": {"dateAdded": -1}},
             {"$match": {"address": {"$exists": True}}},
@@ -173,12 +111,6 @@ def initConfig():
 
     # Output File Name
     options.outputfile = getConfig('outputfile', 'ipblocklist.txt', options.configfile)
-
-    # Category to choose
-    options.category = getConfig('category', 'bruteforcer', options.configfile)
-
-    # Max days to look back for attackers
-    options.attackerage = getConfig('attackerage', 90, options.configfile)
 
     # Days after expiration that we purge an ipblocklist entry (from the ui, they don't end up in the export after expiring)
     options.expireage = getConfig('expireage', 1, options.configfile)

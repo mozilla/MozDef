@@ -1,14 +1,14 @@
 <!--
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at http://mozilla.org/MPL/2.0/.
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 -->
 
 <template name="alertssummary">
 <div class="container">
     <div class="row col-xs-10">
-        <div class="col-xs-1"><button class="btn btn-default btn-xs" data-toggle="collapse" data-target="#alertSearch">search</button></div>
+        <div class="col-xs-2"><button class="btn btn-default btn-xs" data-toggle="collapse" data-target="#alertSearch">advanced search</button></div>
         <div class="col-xs-9">
             <div id='alertSearch' class="collapse">
                 <form class="form-horizontal">
@@ -23,7 +23,6 @@ Copyright (c) 2014 Mozilla Corporation
                         <label class="control-label col-xs-2" for="searchTime">Time Period</label>
                         <div class="col-xs-8">
                             <select id="searchTime" name="searchTime" class="form-control" title="Time Period">
-                                <option value='tail'>Latest events</option>
                                 <option value='1 hours'>Last Hour</option>
                                 <option value='2 hours'>Last 2 Hours</option>
                                 <option value='6 hours'>Last 6 hours</option>
@@ -31,15 +30,8 @@ Copyright (c) 2014 Mozilla Corporation
                                 <option value='2 days'>Last 2 days</option>
                                 <option value='7 days'>Last 7 days</option>
                                 <option value='30 days'>Last 30 days</option>
-                                <option value='none'>None</option>
+                                <option value='all'>All</option>
                             </select>
-                        </div>
-
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-xs-2" for="recordLimit">Record Limit</label>
-                        <div class="col-xs-8">
-                            <input type="text" name="recordLimit" class="form-control" id="recordLimit" placeholder="# records">
                         </div>
 
                     </div>
@@ -60,6 +52,11 @@ Copyright (c) 2014 Mozilla Corporation
             <div id="ringChart-category" class="col-xs-3 text-center"><h5 class="upperwhite" id="Categories">Categories: <span class="filter"></span></h5></div>
             <div id="volumeChart" class="col-xs-6 text-center"><h5 class="upperwhite">Volume <span class="filter"></span></h5></div>
             <div id="ringChart-severity" class="col-xs-3 text-center"><h5 class="upperwhite" id="Severity">Severity: <span class="filter"></span></h5></div>
+    </div>
+    <div class="row col-xs-10">
+        <div class="col-xs-4 time-period">
+            <span id="displayTimePeriod"><h5 class="upperwhite">Time Period: {{currentTimePeriod}}</h5></span>
+        </div>
     </div>
     <div class="row col-xs-10">
         <div class="col-xs-1"><button class="btn btn-default btn-xs reset">reset filters</button></div>

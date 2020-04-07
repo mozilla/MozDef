@@ -1,0 +1,9 @@
+:orphan:
+
+############################
+GeoModel Version 0.2 Changes
+############################
+
+* Add an ``observed`` field to the ``Origin`` type to indicate the time at
+  which activity was recorded.
+* Change alert summary to specify distance and time between active locations.

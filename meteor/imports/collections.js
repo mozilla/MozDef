@@ -1,7 +1,7 @@
 /*
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at http://mozilla.org/MPL/2.0/.
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor'
@@ -25,13 +25,13 @@ Meteor.startup( () => {
     healthescluster = new Mongo.Collection( "healthescluster" );
     healthesnodes = new Mongo.Collection( "healthesnodes" );
     healtheshotthreads = new Mongo.Collection( "healtheshotthreads" );
-    attackers = new Mongo.Collection( "attackers" );
     actions = new Mongo.Collection( "actions" );
     userActivity = new Mongo.Collection( "userActivity" );
     ipblocklist = new Mongo.Collection( "ipblocklist" );
     fqdnblocklist = new Mongo.Collection( "fqdnblocklist" );
     watchlist = new Mongo.Collection( "watchlist" );
     preferences = new Mongo.Collection( "preferences" );
+    alertschedules = new Mongo.Collection( "alertschedules" );
 
 
     if ( Meteor.isServer ) {
@@ -218,33 +218,6 @@ Meteor.startup( () => {
             } );
         } );
 
-        Meteor.publish( "attacker-details", function( attackerid ) {
-            return attackers.find( { '_id': attackerid },
-                {
-                    fields: {
-                        events: { $slice: -20 },
-                        alerts: { $slice: -10 }
-                    },
-                    sort: { 'events.documentsource.utctimestamp': -1 },
-                    reactive: false
-                }
-            );
-        } );
-
-        Meteor.publish( "attackers-summary", function() {
-            //limit to the last 100 records by default
-            //to ease the sync transfer to dc.js/crossfilter
-            return attackers.find( {},
-                {
-                    fields: {
-                        events: 0,
-                        alerts: 0,
-                    },
-                    sort: { lastseentimestamp: -1 },
-                    limit: 100
-                } );
-        } );
-
         Meteor.publish( "investigation-details", function( investigationid ) {
             return investigations.find( { '_id': investigationid } );
         } );
@@ -291,10 +264,15 @@ Meteor.startup( () => {
         publishPagination( fqdnblocklist );
         publishPagination( watchlist );
         publishPagination( alerts );
+        publishPagination( alertschedules );
 
         Meteor.publish( "preferences", function() {
             return preferences.find( {}, { limit: 0 } );
         } )
+
+        Meteor.publish( "alertschedules", function() {
+            return alertschedules.find( {}, { limit: 0 } );
+        } );
 
         //access rules from clients
         //barebones to allow you to specify rules
@@ -313,13 +291,6 @@ Meteor.startup( () => {
                 return doc.creator === Meteor.user().profile.email;
             },
             fetch: ['creator']
-        } );
-
-        attackers.allow( {
-            update: function( userId, doc, fields, modifier ) {
-                // the user must be logged in
-                return ( userId );
-            }
         } );
 
         alerts.allow( {
@@ -402,6 +373,12 @@ Meteor.startup( () => {
                 return ( userId );
             },
             fetch: ['creator']
+        } );
+
+        alertschedules.allow( {
+            update: function( docId, doc, fields, modifier ) {
+                return ( docId );
+            }
         } );
 
         // since we store email from oidc calls in the profile

@@ -2,16 +2,14 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import os.path
 import sys
 import logging
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
-
-from unit_test_suite import UnitTestSuite
+from tests.unit_test_suite import UnitTestSuite
 
 from freezegun import freeze_time
 import mock
@@ -19,9 +17,6 @@ import mock
 import copy
 import re
 import json
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../alerts/lib"))
-from lib import alerttask
 
 
 def mock_add_hostname_to_ip(ip):
@@ -34,11 +29,20 @@ def mock_add_hostname_to_ip(ip):
 class AlertTestSuite(UnitTestSuite):
     def teardown(self):
         os.chdir(self.orig_path)
-        super(AlertTestSuite, self).teardown()
+        super().teardown()
+        sys.path.remove(self.alerts_path)
+        sys.path.remove(self.alerts_lib_path)
+        if 'lib' in sys.modules:
+            del sys.modules['lib']
 
     def setup(self):
         self.orig_path = os.getcwd()
-        super(AlertTestSuite, self).setup()
+        super().setup()
+        self.alerts_path = os.path.join(os.path.dirname(__file__), "../../alerts")
+        self.alerts_lib_path = os.path.join(os.path.dirname(__file__), "../../alerts/lib")
+        sys.path.insert(0, self.alerts_path)
+        sys.path.insert(0, self.alerts_lib_path)
+        from lib import alerttask
 
         # Overwrite the ES and RABBITMQ configs for alerts
         # since it pulls it from alerts/lib/config.py
@@ -157,12 +161,16 @@ class AlertTestSuite(UnitTestSuite):
         rabbitmq_message = self.rabbitmq_alerts_consumer.channel.basic_get()
         rabbitmq_message.channel.basic_ack(rabbitmq_message.delivery_tag)
         document = json.loads(rabbitmq_message.body)
-        assert document['notify_mozdefbot'] is test_case.expected_alert['notify_mozdefbot'], 'Alert from rabbitmq has bad notify_mozdefbot field'
-        assert document['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert from rabbitmq has bad ircchannel field'
-        assert document['summary'] == found_alert['_source']['summary'], 'Alert from rabbitmq has bad summary field'
-        assert document['utctimestamp'] == found_alert['_source']['utctimestamp'], 'Alert from rabbitmq has bad utctimestamp field'
-        assert document['category'] == found_alert['_source']['category'], 'Alert from rabbitmq has bad category field'
-        assert len(document['events']) == len(found_alert['_source']['events']), 'Alert from rabbitmq has bad events field'
+        assert '_id' in document
+        assert '_source' in document
+        assert '_index' in document
+        alert_body = document['_source']
+        assert alert_body['notify_mozdefbot'] is test_case.expected_alert['notify_mozdefbot'], 'Alert from rabbitmq has bad notify_mozdefbot field'
+        assert alert_body['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert from rabbitmq has bad ircchannel field'
+        assert alert_body['summary'] == found_alert['_source']['summary'], 'Alert from rabbitmq has bad summary field'
+        assert alert_body['utctimestamp'] == found_alert['_source']['utctimestamp'], 'Alert from rabbitmq has bad utctimestamp field'
+        assert alert_body['category'] == found_alert['_source']['category'], 'Alert from rabbitmq has bad category field'
+        assert len(alert_body['events']) == len(found_alert['_source']['events']), 'Alert from rabbitmq has bad events field'
 
     def verify_saved_events(self, found_alert, test_case):
         """
@@ -212,6 +220,9 @@ class AlertTestSuite(UnitTestSuite):
 
         # Verify ircchannel is set correctly
         assert found_alert['_source']['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert ircchannel field is bad'
+
+        # Verify classname is set correctly
+        assert found_alert['_source']['classname'] == self.alert_classname, 'Alert classname field is bad'
 
         # Verify the events are added onto the alert
         assert type(found_alert['_source']['events']) == list, 'Alert events field is not a list'

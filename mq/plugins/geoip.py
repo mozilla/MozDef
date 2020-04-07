@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
 import netaddr
@@ -43,42 +43,30 @@ class message(object):
 
     def onMessage(self, message, metadata):
         if 'details' in message:
-            if 'sourceipaddress' in message['details']:
-                ipText = message['details']['sourceipaddress']
-                if isIP(ipText):
-                    ip = netaddr.IPNetwork(ipText)[0]
-                    if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
-                        '''lookup geoip info'''
-                        message['details']['sourceipgeolocation'] = self.ipLocation(ipText)
-                        # Add a geo_point coordinates if latitude and longitude exist
-                        if 'latitude' in message['details']['sourceipgeolocation'] and 'longitude' in message['details']['sourceipgeolocation']:
-                            message['details']['sourceipgeopoint'] = '{0},{1}'.format(
-                                message['details']['sourceipgeolocation']['latitude'],
-                                message['details']['sourceipgeolocation']['longitude']
-                            )
+            keys = ['source', 'destination']
+            for key in keys:
+                ip_key = '{0}ipaddress'.format(key)
+                if ip_key in message['details']:
+                    ipText = message['details'][ip_key]
+                    if isIP(ipText):
+                        ip = netaddr.IPNetwork(ipText)[0]
+                        if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
+                            '''lookup geoip info'''
+                            geo_key = '{0}ipgeolocation'.format(key)
+                            message['details'][geo_key] = self.ipLocation(ipText)
+                            # Add a geo_point coordinates if latitude and longitude exist
+                            if 'latitude' in message['details'][geo_key] and 'longitude' in message['details'][geo_key]:
+                                if message['details'][geo_key]['latitude'] and message['details'][geo_key]['latitude'] != '' and \
+                                   message['details'][geo_key]['longitude'] and message['details'][geo_key]['longitude'] != '':
+                                    geopoint_key = '{0}ipgeopoint'.format(key)
+                                    message['details'][geopoint_key] = '{0},{1}'.format(
+                                        message['details'][geo_key]['latitude'],
+                                        message['details'][geo_key]['longitude']
+                                    )
 
-                else:
-                    # invalid ip sent in the field
-                    # if we send on, elastic search will error, so set it
-                    # to a valid, yet meaningless value
-                    message['details']['sourceipaddress'] = '0.0.0.0'
-
-            if 'destinationipaddress' in message['details']:
-                ipText = message['details']['destinationipaddress']
-                if isIP(ipText):
-                    ip = netaddr.IPNetwork(ipText)[0]
-                    if (not ip.is_loopback() and not ip.is_private() and not ip.is_reserved()):
-                        '''lookup geoip info'''
-                        message['details']['destinationipgeolocation'] = self.ipLocation(ipText)
-                        # Add a geo_point coordinates if latitude and longitude exist
-                        if 'latitude' in message['details']['destinationipgeolocation'] and 'longitude' in message['details']['destinationipgeolocation']:
-                            message['details']['destinationipgeopoint'] = '{0},{1}'.format(
-                                message['details']['destinationipgeolocation']['latitude'],
-                                message['details']['destinationipgeolocation']['longitude']
-                            )
-                else:
-                    # invalid ip sent in the field
-                    # if we send on, elastic search will error, so set it
-                    # to a valid, yet meaningless value
-                    message['details']['destinationipaddress'] = '0.0.0.0'
+                    else:
+                        # invalid ip sent in the field
+                        # if we send on, elastic search will error, so set it
+                        # to a valid, yet meaningless value
+                        message['details'][ip_key] = '0.0.0.0'
         return (message, metadata)

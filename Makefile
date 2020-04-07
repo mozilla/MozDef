@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 #
 
@@ -22,6 +22,10 @@ TMPDIR      := $(shell mktemp -d )
 all:
 	@echo 'Available make targets:'
 	@grep '^[^#[:space:]^\.PHONY.*].*:' Makefile
+
+.PHONY: lint
+lint: ## Run the flake8 linter over the entire codebase
+	flake8 --config .flake8 ./
 
 .PHONY: run
 run: build ## Run all MozDef containers
@@ -45,6 +49,7 @@ tests: build-tests run-tests  ## Run all tests (getting/building images as neede
 run-tests-resources-external: ## Just spin up external resources for tests and have them listen externally
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 9200:9200 -d elasticsearch
 	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 5672:5672 -d rabbitmq
+	docker-compose -f docker/compose/docker-compose-tests.yml -p test-$(NAME) run -p 3002:3002 -d mongodb
 
 .PHONY: run-tests-resources
 run-tests-resources:  ## Just run the external resources required for tests
@@ -57,6 +62,12 @@ run-test: run-tests
 run-tests: run-tests-resources  ## Just run the tests (no build/get). Use `make TEST_CASE=tests/...` for specific tests only
 	docker run -it --rm mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && flake8 --config .flake8 ./"
 	docker run -it --rm --network=test-mozdef_default mozdef/mozdef_tester bash -c "source /opt/mozdef/envs/python/bin/activate && py.test --delete_indexes --delete_queues $(TEST_CASE)"
+
+.PHONY: run-dev-meteor
+run-dev-meteor:  ## Run a local development meteor environment (useful for development)
+	docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-meteor.yml -p $(NAME) $(BUILD_MODE) $(PARALLEL) $(NO_CACHE) base
+	docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-meteor.yml -p $(NAME) $(BUILD_MODE) $(PARALLEL) $(NO_CACHE)
+	docker-compose -f docker/compose/docker-compose.yml -f docker/compose/dev-meteor.yml -p $(NAME) up -d
 
 .PHONY: rebuild-run-tests
 rebuild-run-tests: build-tests run-tests
@@ -135,3 +146,12 @@ rebuild: clean build-from-cwd
 .PHONY: new-alert
 new-alert: ## Create an example alert and working alert unit test
 	python tests/alert_templater.py
+
+.PHONY: run-docs
+run-docs: stop-docs ## Start container to serve up documentation for development
+	docker-compose -f docker/compose/dev-docs.yml up -d
+	@echo "Visit http://localhost:8000 - Feel free to update source code and then refresh webpage!"
+
+.PHONY: stop-docs
+stop-docs: ## Stop the docs development container if running
+	-docker-compose -f docker/compose/dev-docs.yml stop

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
 """mozdef bot using KitnIRC."""
@@ -289,11 +289,11 @@ class alertConsumer(ConsumerMixin):
         try:
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
-                bodyDict = body
+                full_body = body
             elif isinstance(body, str):
                 try:
-                    bodyDict = json.loads(body)  # lets assume it's json
-                except ValueError as e:
+                    full_body = json.loads(body)  # lets assume it's json
+                except ValueError:
                     # not json..ack but log the message
                     logger.exception(
                         "alertworker exception: unknown body type received %r" % body)
@@ -303,7 +303,12 @@ class alertConsumer(ConsumerMixin):
                     "alertworker exception: unknown body type received %r" % body)
                 return
 
-            if 'notify_mozdefbot' in bodyDict and bodyDict['notify_mozdefbot'] is False:
+            body_dict = full_body
+            # Handle messages that have full ES dict
+            if '_source' in full_body:
+                body_dict = full_body['_source']
+
+            if 'notify_mozdefbot' in body_dict and body_dict['notify_mozdefbot'] is False:
                 # If the alert tells us to not notify, then don't post to IRC
                 message.ack()
                 return
@@ -311,9 +316,9 @@ class alertConsumer(ConsumerMixin):
             # process valid message
             # see where we send this alert
             ircchannel = options.alertircchannel
-            if 'ircchannel' in bodyDict:
-                if bodyDict['ircchannel'] in options.join.split(","):
-                    ircchannel = bodyDict['ircchannel']
+            if 'ircchannel' in body_dict:
+                if body_dict['ircchannel'] in options.join.split(","):
+                    ircchannel = body_dict['ircchannel']
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
@@ -324,11 +329,11 @@ class alertConsumer(ConsumerMixin):
                     sys.stdout.write('throttling before writing next alert\n')
                     time.sleep(1)
             self.lastalert = toUTC(datetime.now())
-            if len(bodyDict['summary']) > 450:
+            if len(body_dict['summary']) > 450:
                 sys.stdout.write('alert is more than 450 bytes, truncating\n')
-                bodyDict['summary'] = bodyDict['summary'][:450] + ' truncated...'
+                body_dict['summary'] = body_dict['summary'][:450] + ' truncated...'
 
-            self.ircBot.client.msg(ircchannel, formatAlert(bodyDict))
+            self.ircBot.client.msg(ircchannel, formatAlert(body_dict))
 
             message.ack()
         except ValueError as e:

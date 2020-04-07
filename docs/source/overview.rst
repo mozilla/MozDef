@@ -65,8 +65,6 @@ MozDef is based on open source technologies including:
 * MongoDB (scalable data store, tightly integrated to Meteor)
 * VERIS from verizon (open source taxonomy of security incident categorizations)
 * d3 (javascript library for data driven documents)
-* dc.js (javascript wrapper for d3 providing common charts, graphs)
-* three.js (javascript library for 3d visualizations)
 * Firefox (a snappy little web browser)
 
 Frontend processing
@@ -86,30 +84,3 @@ Status
 ------
 
 MozDef has been in production at Mozilla since 2014 where we are using it to process over 300 million events per day.
-
-Roadmap
--------
-
-Initial Release:
-
-* Facilitate replacing base SIEM functionality including log input, event management, search, alerts, basic correlations
-* Enhance the incident workflow UI to enable realtime collaboration
-* Enable basic plug-ins to the event input stream for meta data, additional parsing, categorization and basic machine learning
-* Support as many common event/log shippers as possible with repeatable recipes
-* Base integration into Mozilla's defense mechanisms for automation
-* 3D visualizations of threat actors
-* Fine tuning of interactions between meteor, mongo, dc.js
-
-Recently implemented:
-
-* Support for OIDC authentication/authorization
-* Docker containers for each service
-* Updates to support recent (breaking) versions of Elasticsearch
-
-Future (join us!):
-
-* Correlation through machine learning, AI
-* Enhanced search for alerts, events, attackers within the MozDef UI
-* Integration into common defense mechanisms used outside Mozilla
-
-

@@ -1,7 +1,7 @@
 /*
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at http://mozilla.org/MPL/2.0/.
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor';
@@ -78,7 +78,7 @@ Router.map(function() {
         path: '/watchlist',
         template: 'watchlist',
         layoutTemplate: 'layout'
-    }); 
+    });
 
     this.route('investigations', {
         path: '/investigations',
@@ -142,38 +142,6 @@ Router.map(function() {
         layoutTemplate: 'layout'
     });
 
-
-    this.route('attackers', {
-        path: '/attackers',
-        template: 'attackers',
-        layoutTemplate: 'layout'
-    });
-
-    this.route('attackerdetails', {
-        path: '/attacker/:attackerid',
-        template: 'attackerdetails',
-        waitOn: function() {
-            Session.set('attackerID', this.params.attackerid);
-            return Meteor.subscribe('attacker-details', Session.get('attackerID'))
-        },
-        data: function() {
-            return attackers.findOne({ '_id': Session.get('attackerID') });
-        },
-        layoutTemplate: 'layout'
-    });
-
-    this.route('globe', {
-        path: '/globe',
-        template: 'globe',
-        layoutTemplate: 'layout'
-    });
-
-    this.route('logincounts', {
-        path: '/logincounts',
-        template: 'logincounts',
-        layoutTemplate: 'layout'
-    });
-
     this.route('blockip', {
         path: '/blockip/:_ipaddr',
         template: 'blockIPform',
@@ -201,6 +169,12 @@ Router.map(function() {
         layoutTemplate: 'layout'
     });
 
+    this.route('manage-alerts', {
+        path: '/manage-alerts',
+        template: 'alertschedules',
+        layoutTemplate: 'layout'
+    });
+
     this.route('ipwhois', {
         path: '/ipwhois/:_ipaddress',
         template: 'ipwhois',
@@ -215,15 +189,6 @@ Router.map(function() {
         data: function() {
             Session.set('ipdshieldipaddress', this.params._ipaddress);
         }
-    });
-
-    this.route('ipintel', {
-        path: '/ipintel/:_ipaddress',
-        template: 'ipintel',
-        data: function() {
-            Session.set('ipintelipaddress', this.params._ipaddress)
-        }
-
     });
 
     this.route('veris', {

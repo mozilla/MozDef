@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 
@@ -69,6 +69,8 @@ def registerPlugins():
                 if 'message' in dir(module):
                     mclass = module.message()
                     mreg = mclass.registration
+                    if type(mreg) != list:
+                        raise ImportError('Plugin {0} registration needs to be a list'.format(mname))
                     if 'priority' in dir(mclass):
                         mpriority = mclass.priority
                     else:

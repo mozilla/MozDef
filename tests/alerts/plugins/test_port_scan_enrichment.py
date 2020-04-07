@@ -1,16 +1,10 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import os
 import sys
-
-plugin_path = os.path.join(os.path.dirname(__file__), '../../../alerts/plugins')
-sys.path.append(plugin_path)
-
-from port_scan_enrichment import enrich
-
 
 EXAMPLE_TIMESTAMP = '2016-07-13 22:33:31.625443+00:00'
 
@@ -22,8 +16,20 @@ def mock_search_fn(results):
     return search_fn
 
 
-class TestPortScanEnrichment(object):
+class TestPortScanEnrichment():
+    def teardown(self):
+        os.chdir(self.orig_path)
+        sys.path.remove(self.alerts_path)
+        if 'lib' in sys.modules:
+            del sys.modules['lib']
+
+    def setup(self):
+        self.orig_path = os.getcwd()
+        self.alerts_path = os.path.join(os.path.dirname(__file__), "../../../alerts")
+        sys.path.insert(0, self.alerts_path)
+
     def test_alert_enriched(self):
+        from alerts.plugins.port_scan_enrichment import enrich
         results = {
             'hits': [
                 {

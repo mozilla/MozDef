@@ -1,12 +1,9 @@
-import os
-import sys
 from mozdef_util.utilities.toUTC import toUTC
 
 import mock
 import json
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../../mq/plugins"))
-from broFixup import message
+from mq.plugins.broFixup import message
 
 
 class TestBroFixup(object):
@@ -73,7 +70,7 @@ class TestBroFixup(object):
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
         assert sorted(result['details'].keys()) == sorted(MESSAGE.keys())
 
-    @mock.patch('broFixup.node')
+    @mock.patch('mq.plugins.broFixup.node')
     def test_mozdefhostname_mock_string(self, mock_path):
         mock_path.return_value = 'samplehostname'
         event = {
@@ -85,7 +82,7 @@ class TestBroFixup(object):
         result, metadata = plugin.onMessage(event, self.metadata)
         assert result['mozdefhostname'] == 'samplehostname'
 
-    @mock.patch('broFixup.node')
+    @mock.patch('mq.plugins.broFixup.node')
     def test_mozdefhostname_mock_exception(self, mock_path):
         mock_path.side_effect = ValueError
         event = {
@@ -782,6 +779,8 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'tls' not in result['details']
+        assert result['details']['tls_encrypted'] == 'false'
         assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
 
     def test_smtp_log2(self):
@@ -821,6 +820,8 @@ class TestBroFixup(object):
         assert 'from' not in result['details']
         assert 'to' not in result['details']
         assert 'msg_id' not in result['details']
+        assert 'tls' not in result['details']
+        assert result['details']['tls_encrypted'] == 'false'
         assert result['summary'] == 'SMTP: 63.245.214.155 -> 128.199.139.6:25'
 
     def test_smtp_unicode(self):
@@ -1853,10 +1854,10 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert 'success' not in result['details']
         for key in MESSAGE.keys():
             if not key.startswith('id.'):
                 assert key in result['details']
-                assert MESSAGE[key] == result['details'][key]
         assert result['summary'] == '10.26.40.121 -> 10.22.69.21:88 request TGS success unknown'
 
     def test_kerberos_log2(self):
@@ -1875,7 +1876,7 @@ class TestBroFixup(object):
             "request_type":"AS",
             "client":"valid_client_principal/VLADG.NET",
             "service":"krbtgt/VLADG.NET",
-            "success":'true',
+            "success":'True',
             "till":1421708111.0,
             "cipher":"aes256-cts-hmac-sha1-96",
             "forwardable":'false',
@@ -1888,11 +1889,12 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert MESSAGE['success'] == result['details']['success']
         for key in MESSAGE.keys():
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
-        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 request AS success true'
+        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 request AS success True'
 
     def test_kerberos_log3(self):
         event = {
@@ -1910,7 +1912,7 @@ class TestBroFixup(object):
             "request_type":"TGS",
             "client":"valid_client_principal/VLADG.NET",
             "service":"krbtgt/VLADG.NET",
-            "success":'false',
+            "success":'False',
             "error_msg":"TICKET NOT RENEWABLE",
             "till":1421708111.0,
             "forwardable":'false',
@@ -1923,11 +1925,12 @@ class TestBroFixup(object):
         self.verify_metadata(metadata)
         assert toUTC(MESSAGE['ts']).isoformat() == result['utctimestamp']
         assert toUTC(MESSAGE['ts']).isoformat() == result['timestamp']
+        assert MESSAGE['success'] == result['details']['success']
         for key in MESSAGE.keys():
             if not key.startswith('id.'):
                 assert key in result['details']
                 assert MESSAGE[key] == result['details'][key]
-        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 request TGS success false'
+        assert result['summary'] == '192.168.1.31 -> 192.168.1.32:88 request TGS success False'
 
     def test_ntlm_log(self):
         event = {
@@ -1945,7 +1948,7 @@ class TestBroFixup(object):
             "username":"T-W864-IX-018$",
             "hostname":"T-W864-IX-018",
             "domainname":"RELENG",
-            "success":'true',
+            "success":'True',
             "status":"SUCCESS",
         }
         event['MESSAGE'] = json.dumps(MESSAGE)
@@ -1960,7 +1963,7 @@ class TestBroFixup(object):
         assert MESSAGE['domainname'] == result['details']['ntlm']['domainname']
         assert MESSAGE['success'] == result['details']['success']
         assert MESSAGE['status'] == result['details']['status']
-        assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 success true status SUCCESS'
+        assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 success True status SUCCESS'
 
     def test_ntlm_log2(self):
         event = {
@@ -1986,7 +1989,7 @@ class TestBroFixup(object):
         assert 'username' in result['details']['ntlm']
         assert 'hostname' in result['details']['ntlm']
         assert 'domainname' in result['details']['ntlm']
-        assert 'success' in result['details']
+        assert 'success' not in result['details']
         assert 'status' in result['details']
         assert result['summary'] == 'NTLM: 10.26.40.48 -> 10.22.69.18:445 success unknown status unknown'
 

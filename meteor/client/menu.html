@@ -1,7 +1,7 @@
 <!--
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at http://mozilla.org/MPL/2.0/.
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 -->
 
@@ -35,6 +35,9 @@ Copyright (c) 2014 Mozilla Corporation
                                 {{#if isFeature "fqdnblocklist"}}
                                     <li><a href="/fqdnblocklist">fqdn blocklist</a></li>
                                 {{/if}}
+                                {{#if isFeature "manage-alerts"}}
+                                    <li><a href="/manage-alerts">manage alerts</a></li>
+                                {{/if}}
                             </ul>
                         </li>
                     {{/if}}
@@ -50,21 +53,6 @@ Copyright (c) 2014 Mozilla Corporation
                             <ul>
                                 <li><a href="/incident/new/">new incident</a></li>
                                 <li><a href="/incidents/veris/">veris stats</a></li>
-                            </ul>
-                        </li>
-                    {{/if}}
-                    {{#if isFeature "visualizations"}}
-                        <li><a href="#">Visualizations</a>
-                            <ul>
-                                {{#if isFeature "logincounts"}}
-                                    <li><a href="/logincounts/">logincounts</a></li>
-                                {{/if}}
-                                {{#if isFeature "attackers"}}
-                                    <li><a href="/attackers">attackers</a></li>
-                                {{/if}}
-                                {{#if isFeature "globe"}}
-                                    <li><a href="/globe">globe</a></li>
-                                {{/if}}
                             </ul>
                         </li>
                     {{/if}}

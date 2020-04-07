@@ -1,7 +1,7 @@
 /*
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
-file, You can obtain one at http://mozilla.org/MPL/2.0/.
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 Copyright (c) 2014 Mozilla Corporation
 */
 import { Meteor } from 'meteor/meteor';
@@ -19,10 +19,8 @@ if (Meteor.isServer) {
         'watchitem': watchItem,
         'ipwhois': ipwhois,
         'ipdshield': ipdshield,
-        'ipintel': ipintel,
         'ipsearch': ipsearch,
         'verisstats': verisstats,
-        'logincounts': logincounts,
         'getplugins': getplugins,
         'getserversetting': getserversetting
     });
@@ -135,19 +133,6 @@ if (Meteor.isServer) {
         }
     }
 
-    function ipintel(ipaddress){
-        //console.log('Posting ' + ipaddress + 'to ' + mozdef.rootAPI + '/ipintel/');
-        var ipintelResponse = HTTP.post(mozdef.rootAPI + '/ipintel/',{data: {'ipaddress':ipaddress}});
-
-        if ( typeof ipintelResponse == 'undefined') {
-            console.log("ipintel: no response from server")
-            return "";
-        } else {
-            //console.log(ipdshieldResponse);
-            return ipintelResponse;
-        }
-    }
-
     function verisstats(){
         //console.log('Calling ' + mozdef.rootAPI + '/veris/');
         var verisstatsResponse = HTTP.get(mozdef.rootAPI + '/veris/');
@@ -158,19 +143,6 @@ if (Meteor.isServer) {
         } else {
             //console.log(verisstatsResponse);
             return verisstatsResponse;
-        }
-    }
-
-    function logincounts(){
-        //console.log('Calling ' + mozdef.rootAPI + '/logincounts/');
-        var logincountsResponse = HTTP.get(mozdef.rootAPI + '/logincounts/');
-
-        if ( typeof logincountsResponse == 'undefined') {
-            console.log("logincountsResponse: no response from server")
-            return "";
-        } else {
-            //console.log(logincountsResponse);
-            return logincountsResponse;
         }
     }
 

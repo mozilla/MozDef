@@ -2,7 +2,7 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 from configlib import getConfig
@@ -42,6 +42,10 @@ def parse_config_file():
         options.mqpassword = getConfig('mqpassword', 'guest', options.configfile)
         options.mqport = getConfig('mqport', 5672, options.configfile)
         options.mqack = getConfig('mqack', True, options.configfile)
+
+        options.mongohost = getConfig('mongohost', 'localhost', options.configfile)
+        options.mongoport = getConfig('mongoport', 3002, options.configfile)
+
         CONFIG_FILE_CONTENTS = options
 
     return CONFIG_FILE_CONTENTS

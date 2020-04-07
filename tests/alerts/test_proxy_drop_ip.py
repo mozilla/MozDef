@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 from .positive_alert_test_case import PositiveAlertTestCase
 from .negative_alert_test_case import NegativeAlertTestCase
@@ -58,6 +58,15 @@ class TestAlertProxyDropIP(AlertTestSuite):
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
         event["_source"]["details"]["host"] = "idonotexist.com"
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test with default negative event", events=events
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
+        event["_source"]["details"]["host"] = "169.254.169.254"
     test_cases.append(
         NegativeAlertTestCase(
             description="Negative test with default negative event", events=events

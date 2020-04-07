@@ -2,13 +2,13 @@
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 import logging
 import sys
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery
 
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def setup_logging():
     logger = logging.getLogger()
-    h = logging.StreamHandler(sys.stdout)
+    logging.StreamHandler(sys.stdout)
     logger.setLevel(logging.DEBUG)
     return logger
 

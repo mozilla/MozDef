@@ -104,3 +104,8 @@ Add is_ip utility function
 ------------------
 
 * Added ElasticsearchClient.get_open_indices()
+
+3.0.4 (2019-09-19)
+------------------
+
+* Added SubnetMatch query model

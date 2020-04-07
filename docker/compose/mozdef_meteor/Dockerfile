@@ -31,7 +31,6 @@ RUN \
      gcc \
      gcc-c++ \
      libstdc++ \
-     libffi-devel \
      zlib-devel \
      nodejs && \
   yum clean all && \
@@ -43,15 +42,16 @@ RUN \
   install --owner mozdef --group mozdef --directory /opt/mozdef/envs /opt/mozdef/envs/mozdef
 
 COPY --chown=mozdef:mozdef meteor /opt/mozdef/envs/mozdef/meteor
+COPY --chown=mozdef:mozdef docker/compose/mozdef_meteor/files/settings.js /opt/mozdef/envs/mozdef/meteor/imports/settings.js
 
 USER mozdef
 
 # build meteor runtime if asked, if set to NO, only create the dir created above to mount to do live development
 RUN \
+  mkdir -p /opt/mozdef/envs/meteor/mozdef && \
+  cd /opt/mozdef/envs/mozdef/meteor && \
+  meteor npm install && \
   if [ "${METEOR_BUILD}" = "YES" ]; then \
-    mkdir -p /opt/mozdef/envs/meteor/mozdef && \
-    cd /opt/mozdef/envs/mozdef/meteor && \
-    meteor npm install && \
     echo "Starting meteor build" && \
     time meteor build --server localhost:3002 --directory /opt/mozdef/envs/meteor/mozdef && \
     ln --symbolic /opt/mozdef/envs/meteor/mozdef/node_modules /opt/mozdef/envs/mozdef/meteor/node_modules && \

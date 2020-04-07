@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
 from .positive_alert_test_case import PositiveAlertTestCase
@@ -29,7 +29,7 @@ class TestAlertDuoAuthFail(AlertTestSuite):
     # This alert is the expected result from running this task
     default_alert = {
         "category": "duosecurity",
-        "tags": ['duosecurity', 'duosecuritypagerduty'],
+        "tags": ['duosecurity', 'duosecurity_auth_fail'],
         "severity": "WARNING",
         "url": "https://www.mozilla.org",
         "summary": "Duo Authentication Failure: user you@somewhere.com rejected and marked a Duo Authentication attempt from 1.2.3.4 as fraud",
