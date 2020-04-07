@@ -59,15 +59,13 @@ class UptycsClient(object):
     def get(self, path, params={}):
         final_url = ("%s/public/api/customers/%s%s" %
                      (self.url, self.customer_id, path))
-        try:
-            response = requests.get(url=final_url,
-                                    headers=self.auth_headers(),
-                                    verify=self.verify_ssl)
-            if (response and response.status_code in
-                    [requests.codes.ok, requests.codes.bad]):
-                return response.json()
-        except requests.exceptions.RequestException as e:
-            logger.exception(e)
+        response = requests.get(url=final_url,
+                                headers=self.auth_headers(),
+                                verify=self.verify_ssl)
+        if response.ok:
+            return response.json()
+        else:
+            raise Exception("Received bad response from uptycs: {0} - {1}".format(response.status_code, response.reason))
 
     def alerts(self, uptycs_filter, sort='alertTime:desc&limit'):
         path = '/alerts?filters=' + uptycs_filter.filter_string() + "&sort=" + sort
