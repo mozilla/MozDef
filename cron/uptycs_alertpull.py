@@ -8,7 +8,6 @@ import sys
 from datetime import datetime, timedelta
 
 from mozdef_util.utilities.toUTC import toUTC
-from mozdef_util.utilities.logger import logger
 from configlib import getConfig, OptionParser
 import json
 import mozdef_client as mozdef
