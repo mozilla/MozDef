@@ -15,7 +15,7 @@ class message(object):
         '''
         takes an incoming alert
         and uses it to trigger an event using
-        the pager duty event api
+        the pagerduty event api
         '''
 
         self.configfile = os.path.join(os.path.dirname(__file__), 'pagerduty.json')
