@@ -527,8 +527,6 @@ def update_alert_status():
     Responses will also use status codes to indicate success / failure / error.
     """
 
-    response.content_type = "application/json"
-
     initConfig()
 
     mongo = MongoClient(options.mongohost, options.mongoport)
@@ -539,8 +537,9 @@ def update_alert_status():
         request.body.close()
     except ValueError:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {"error": "Missing or invalid request body"}
-        return response
+        return {
+            "error": "Missing or invalid request body"
+        }
 
     valid_statuses = ["manual", "inProgress", "acknowledged", "escalated"]
 
@@ -548,10 +547,9 @@ def update_alert_status():
         required = " or ".join(valid_statuses)
 
         response.status = StatusCode.BAD_REQUEST
-        response.body = {
+        return {
             "error": "Status not one of {}".format(required),
         }
-        return response
 
     expected_fields = ["alert", "user", "response", "identityConfidence"]
 
@@ -559,21 +557,19 @@ def update_alert_status():
         required = ", ".join(expected_fields)
 
         response.status = StatusCode.BAD_REQUEST
-        response.body = {
+        return {
             "error": "Missing a required field, one of {}".format(required),
         }
-        return response
-    
+
     valid_confidences = ["highest", "high", "moderate", "low", "lowest"]
 
     if req.get("identityConfidence") not in valid_confidences:
         required = " or ".join(valid_confidences)
 
         response.status = StatusCode.BAD_REQUEST
-        response.body = {
+        return {
             "error": "identityConfidence not one of {}".format(required),
         }
-        return response
 
     details = {
         "triage": {
@@ -582,7 +578,7 @@ def update_alert_status():
         },
         "identityConfidence": req.get("identityConfidence"),
     }
-    
+
     modified_count = 0
 
     modified_count += alerts.update_one(
@@ -595,11 +591,10 @@ def update_alert_status():
 
     if modified_count < 2:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {"error": "Alert not found"}
-        return response
+        return {"error": "Alert not found"}
 
     response.status = StatusCode.OK
-    response.body = {"error": None}
+    return {"error": None}
 
     return response
 
@@ -641,8 +636,6 @@ def retrieve_duplicate_chain():
     are formatted like `YYYY/mm/dd HH:MM:SS`.
     """
 
-    response.content_type = "application/json"
-
     initConfig()
 
     mongo = MongoClient(options.mongohost, options.mongoport)
@@ -672,14 +665,12 @@ def retrieve_duplicate_chain():
         return response
 
     response.status = StatusCode.OK
-    response.body = {
+    return {
         "error": None,
         "identifiers": chain["identifiers"],
         "created": toUTC(chain["created"]).isoformat(),
         "modified": toUTC(chain["modified"]).isoformat(),
     }
-
-    return response
 
 
 @post("/alerttriagechain")
@@ -719,8 +710,6 @@ def create_duplicate_chain():
     string will be returned.  Otherwise, the `error` field will be `null.`
     """
 
-    response.content_type = "application/json"
-
     initConfig()
 
     mongo = MongoClient(options.mongohost, options.mongoport)
@@ -730,8 +719,7 @@ def create_duplicate_chain():
         req = request.json
     except bottle.HTTPError:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {"error": "Missing or invalid request body"}
-        return response
+        return {"error": "Missing or invalid request body"}
 
     now = datetime.utcnow()
 
@@ -745,21 +733,17 @@ def create_duplicate_chain():
 
     if chain["alert"] is None or chain["user"] is None:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {
+        return {
             "error": "Request missing required key `alert` or `user`"
         }
-        return response
 
     result = dupchains.insert_one(chain)
     if not result.acknowledged:
         response.status = StatusCode.INTERNAL_ERROR
-        response.body = {"error": "Failed to store new duplicate chain"}
-        return response
+        return {"error": "Failed to store new duplicate chain"}
 
     response.status = StatusCode.OK
-    response.body = {"error": None}
-
-    return response
+    return {"error": None}
 
 
 @put("/alerttriagechain")
@@ -793,8 +777,6 @@ def update_duplicate_chain():
     does not create a new chain if one does not already exist.
     """
 
-    response.content_type = "application/json"
-
     initConfig()
 
     mongo = MongoClient(options.mongohost, options.mongoport)
@@ -804,8 +786,7 @@ def update_duplicate_chain():
         req = request.json
     except bottle.HTTPError:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {"error": "Missing or invalid request body"}
-        return response
+        return {"error": "Missing or invalid request body"}
 
     query = {"alert": req.get("alert"), "user": req.get("user")}
 
@@ -813,18 +794,16 @@ def update_duplicate_chain():
 
     if any([x is None for x in (query["alert"], query["user"], new_ids)]):
         response.status = StatusCode.BAD_REQUEST
-        response.body = {
+        return {
             "error": "Request missing required key `alert`, `user` or "
             "`identifiers`"
         }
-        return response
 
     chain = dupchains.find_one(query)
 
     if chain is None:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {"error": "Duplicate chain does not exist"}
-        return response
+        return {"error": "Duplicate chain does not exist"}
 
     modified = dupchains.update_one(
         query,
@@ -838,13 +817,11 @@ def update_duplicate_chain():
 
     if modified != 1:
         response.status = StatusCode.INTERNAL_ERROR
-        response.body = {"error": "Failed to update chain"}
+        return {"error": "Failed to update chain"}
         return response
 
     response.status = StatusCode.OK
-    response.body = {"error": None}
-
-    return response
+    return {"error": None}
 
 
 @delete("/alerttriagechain")
@@ -879,8 +856,6 @@ def delete_duplicate_chain():
     contain a string describing the error.  Otherwise, it is `null`.
     """
 
-    response.content_type = "application/json"
-
     initConfig()
 
     mongo = MongoClient(options.mongohost, options.mongoport)
@@ -890,29 +865,24 @@ def delete_duplicate_chain():
         req = request.json
     except bottle.HTTPError:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {"error": "Missing or invalid request body"}
-        return response
+        return {"error": "Missing or invalid request body"}
 
     query = {"alert": req.get("alert"), "user": req.get("user")}
 
     if query["alert"] is None or query["user"] is None:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {
+        return {
             "error": "Request missing required key `alert` or `user`"
         }
-        return response
 
     result = dupchains.delete_one(query)
 
     if not result.acknowledged:
         response.status = StatusCode.BAD_REQUEST
-        response.body = {"error": "No such duplicate chain exists"}
-        return response
+        return {"error": "No such duplicate chain exists"}
 
     response.status = StatusCode.OK
-    response.body = {"error": None}
-
-    return response
+    return {"error": None}
 
 
 def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
