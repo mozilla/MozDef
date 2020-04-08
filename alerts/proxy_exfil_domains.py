@@ -44,7 +44,7 @@ class AlertProxyExfilDomains(AlertTask):
             domain = event["_source"]["details"]["host"]
             exfil_domains.add(domain)
 
-        summary = "Suspicious Proxy event(s) detected from {0} to the following exfil domain(s): {1}".format(
+        summary = "Proxy drop events detected from {0} to the following domain(s) that are known for exfiltrating data: {1}".format(
             aggreg["value"], ",".join(sorted(exfil_domains))
         )
 
