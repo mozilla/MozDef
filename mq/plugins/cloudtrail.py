@@ -3,6 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
+import json
 from mozdef_util.utilities.key_exists import key_exists
 
 
@@ -74,7 +75,7 @@ class message(object):
         for updated_key in num_levels:
             if updated_key == num_levels[-1]:
                 current_pointer[updated_key] = {
-                    'raw_value': str(current_pointer[updated_key])
+                    'raw_value': json.dumps(current_pointer[updated_key])
                 }
                 return haystack
             if updated_key in current_pointer:
