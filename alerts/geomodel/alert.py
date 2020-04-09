@@ -34,6 +34,15 @@ class Hop(NamedTuple):
     origin: Origin
     destination: Origin
 
+    def to_json(self):
+        '''Convert a `Hop` to a fully JSON (`dict`) representation.
+        '''
+
+        return {
+            'origin': dict(self.origin._asdict()),
+            'destination': dict(self.destination._asdict()),
+        }
+
 
 class Severity(Enum):
     '''A representation of the different levels of severity that an alert can
