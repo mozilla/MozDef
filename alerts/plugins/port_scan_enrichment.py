@@ -185,13 +185,17 @@ def enrich(alert, search_fn, search_window, max_connections):
         for hit in results.get('hits', [])
     ]
 
-    alert['details']['recentconnections'] = []
+    details = alert.get('details', {})
 
-    for event in take(events, max_connections):
-        alert['details']['recentconnections'].append({
+    details['recentconnections'] = [
+        {
             'destinationipaddress': event['details']['destinationipaddress'],
             'destinationport': event['details']['destinationport'],
             'timestamp': event['timestamp']
-        })
+        }
+        for event in take(events, max_connections)
+    ]
+
+    alert['details'] = details
 
     return alert
