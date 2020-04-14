@@ -15,12 +15,10 @@ import requests
 from requests_jwt import JWTAuth
 
 from mozdef_util.utilities.logger import logger
+from mozdef_util.utilities.toUTC import toUTC
 
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "triage_bot.json")
-
-# The format string that UTC-based timestamps are encoded as.
-DUP_CHAIN_DATE_FMT = "%Y/%m/%d %H:%M:%S"
 
 Alert = types.Dict[types.Any, types.Any]
 Email = str
@@ -699,8 +697,8 @@ def _retrieve_duplicate_chain(
         return None
 
     try:
-        created = datetime.strptime(resp_data["created"], DUP_CHAIN_DATE_FMT)
-        modified = datetime.strptime(resp_data["modified"], DUP_CHAIN_DATE_FMT)
+        created = toUTC(resp_data["created"])
+        modified = toUTC(resp_data["modified"])
     except KeyError:
         raise APIError("Duplicate chain data missing created or modified field")
     except ValueError:
