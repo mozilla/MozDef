@@ -4,3 +4,4 @@ flake8-per-file-ignores==0.6
 mock==2.0.0
 pytest==4.6.4
 WebTest==2.0.27
+requests-mock==1.7.0
