@@ -213,9 +213,9 @@ class message(object):
             token=self._config.mozdef_restapi_token,
         )
 
-        logger.error("Performing initial OAuth Handshake")
+        logger.info("Performing initial OAuth Handshake")
         self._oauth_handshake()
-        logger.error("Performing initial Lambda function discovery")
+        logger.info("Performing initial Lambda function discovery")
         self._discover_lambda_fn()
 
         self.registration = "*"
@@ -239,19 +239,19 @@ class message(object):
 
         if have_request and should_refresh:
             self._oauth_handshake()
-            logger.error("Performed OAuth handshake")
+            logger.info("Performed OAuth handshake")
 
         # Re-discover the lambda function name to invoke periodically.
         last_discovery = (datetime.now() - self._last_discovery).total_seconds()
         if last_discovery > self._config.l_fn_name_validity_window_seconds:
             self._discover_lambda_fn()
-            logger.error("Discovered Lambda function name")
+            logger.info("Discovered Lambda function name")
 
         dispatch = _dispatcher(self._boto_session)
 
         if have_request:
-            logger.error("Attempting to dispatch request")
-            logger.error(
+            logger.info("Attempting to dispatch request")
+            logger.info(
                 "Alert {} triggered by {}".format(request.alert.value, request.user)
             )
 
@@ -260,15 +260,15 @@ class message(object):
             should_dispatch = True
 
             try:
-                logger.error("Fetching duplicate chain")
+                logger.info("Fetching duplicate chain")
                 chain = _retrieve_duplicate_chain(
                     self._rest_api_cfg, request.alert, request.user
                 )
                 if chain is None:
-                    logger.error("Creating duplicate chain")
+                    logger.info("Creating duplicate chain")
                     operation = _create_duplicate_chain
                 else:
-                    logger.error("Updating duplicate chain")
+                    logger.info("Updating duplicate chain")
                     operation = _update_duplicate_chain
                     should_dispatch = False
 
@@ -314,7 +314,7 @@ class message(object):
         )
 
         if self._person_api_session is None:
-            logger.Exception("Failed to establish OAuth session")
+            logger.error("Failed to establish OAuth session")
             raise AuthFailure()
 
         self._last_authenticated = datetime.now()
@@ -329,7 +329,7 @@ class message(object):
         ]
 
         if len(functions) == 0:
-            logger.Exception("Failed to discover Lambda function")
+            logger.error("Failed to discover Lambda function")
             raise DiscoveryFailure()
 
         self._lambda_function_name = functions[0].name
