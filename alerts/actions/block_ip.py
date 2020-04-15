@@ -16,13 +16,13 @@ class message(object):
         self.options = None
         if os.path.exists(self.configfile):
             self.initConfiguration()
-        if self.options.jwt_token is not None:
-            self._restapi_jwt = JWTAuth(self.options.jwt_token)
+        if self.options.restapi_jwt_token is not None:
+            self._restapi_jwt = JWTAuth(self.options.restapi_jwt_token)
             self._restapi_jwt.set_header_format('Bearer %s')
         else:
             self._restapi_jwt = None
 
-        self.registration = self.options.keywords.split(" ")
+        self.registration = self.options.alert_names.split(" ")
         # Block for 1 day
         self.DEFAULT_BLOCK_LENGTH = "1d"
         self.priority = 1
@@ -31,9 +31,9 @@ class message(object):
         myparser = OptionParser()
         (self.options, args) = myparser.parse_args([])
 
-        self.options.keywords = getConfig('alert_names', [], self.configfile)
+        self.options.alert_names = getConfig('alert_names', [], self.configfile)
         self.options.restapi_url = getConfig('restapi_url', '', self.configfile)
-        self.options.jwt_token = getConfig('jwt_token', None, self.configfile)
+        self.options.restapi_jwt_token = getConfig('restapi_jwt_token', None, self.configfile)
 
     def onMessage(self, alert):
         message = alert['_source']

@@ -35,6 +35,13 @@ class Locality(NamedTuple):
     longitude: float
     radius: int
 
+    def index_name():
+        '''Locality state is stored in an index called "locality" that used to
+        be stored in a magic string.
+        '''
+
+        return 'locality'
+
 
 class State(NamedTuple):
     '''Represents the state tracked for each user regarding their localities.
@@ -43,6 +50,12 @@ class State(NamedTuple):
     type_: str  # Not used here, but we want it in ES.
     username: str
     localities: List[Locality]
+
+    def new(username: str, localities: List[Locality]) -> 'State':
+        '''Construct a new State with all fields populated.
+        '''
+
+        return State(Locality.index_name(), username, localities)
 
 
 class Entry(NamedTuple):
@@ -89,10 +102,12 @@ def wrap_journal(client: ESClient) -> JournalInterface:
     def wrapper(entry: Entry, esindex: str):
         document = dict(entry.state._asdict())
 
+        _id = '' if entry.identifier is None else entry.identifier
+
         client.save_object(
             index=esindex,
             body=document,
-            doc_id=entry.identifier)
+            doc_id=_id)
 
     return wrapper
 
@@ -120,7 +135,7 @@ def wrap_query(client: ESClient) -> QueryInterface:
             ]
 
             eid = results[0]['_id']
-            state = State(**_dict_take(state_dict, State._fields))
+            state = State.new(state_dict['username'], state_dict['localities'])
 
             return Entry(eid, state)
         except TypeError:
@@ -170,7 +185,7 @@ def find(qes: QueryInterface, username: str, index: str) -> Optional[Entry]:
 
     search = SearchQuery()
     search.add_must([
-        TermMatch('type_', 'locality'),
+        TermMatch('type_', Locality.index_name()),
         TermMatch('username', username)
     ])
 
@@ -230,7 +245,7 @@ def remove_outdated(state: State, days_valid: int) -> Update:
     ]
 
     return Update(
-        state=State(state.type_, state.username, new_localities),
+        state=State.new(state.username, new_localities),
         did_update=len(new_localities) != len(state.localities))
 
 

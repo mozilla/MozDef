@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 import math
 from operator import attrgetter
 from typing import List, NamedTuple, Optional
@@ -33,13 +34,41 @@ class Hop(NamedTuple):
     origin: Origin
     destination: Origin
 
+    def to_json(self):
+        '''Convert a `Hop` to a fully JSON (`dict`) representation.
+        '''
+
+        return {
+            'origin': dict(self.origin._asdict()),
+            'destination': dict(self.destination._asdict()),
+        }
+
+
+class Severity(Enum):
+    '''A representation of the different levels of severity that an alert can
+    be raised to.
+    '''
+
+    STATUS = 'STATUS'
+    INFO = 'INFO'
+    WARNING = 'WARNING'
+    CRITICAL = 'CRITICAL'
+    ERROR = 'ERROR'
+
 
 class Alert(NamedTuple):
     '''A container for the data the alerts output by GeoModel contain.
+
     '''
 
     username: str
     hops: List[Hop]
+    severity: Severity
+    # Because we cannot know ahead of time what factors (see factors.py) will
+    # have been implemented and registered for use, this container should be
+    # thought of as something of a black-box useful only for humans looking
+    # at the alert after it fires.
+    factors: List[dict]
 
 
 def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
@@ -91,7 +120,7 @@ def alert(
     if len(hops) == 0:
         return None
 
-    return Alert(username, hops)
+    return Alert(username, hops, Severity.INFO, [])
 
 
 def summary(alert: Alert) -> str:

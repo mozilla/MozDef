@@ -1,0 +1,18 @@
+{
+  "oauth_url": "https://auth.mozilla.auth0.com/oauth/token",
+  "person_api_base": "https://person-api.sso.mozilla.com",
+  "person_api_audience": "api.sso.mozilla.com",
+  "person_api_scope": "classification:public display:all display:public display:none search:all",
+  "person_api_grants": "client_credentials",
+  "token_validity_window_minutes": 1080,
+  "person_api_client_id": "clientid",
+  "person_api_client_secret": "clientsecret",
+  "slack_bot_function_name_prefix": "MozDefSlackTriageBotAPI-SlackTriageBotApiFunction",
+  "l_fn_name_validity_window_seconds": 86400,
+  "aws_access_key_id": "acecssid",
+  "aws_secret_access_key": "secret",
+  "aws_region": "us-west-2",
+  "aws_lambda_function": "test_fn",
+  "mozdef_restapi_url": "mozdef rest api url base",
+  "mozdef_restapi_token": "mozdef rest api auth token"
+}

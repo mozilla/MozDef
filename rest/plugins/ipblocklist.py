@@ -97,8 +97,12 @@ class message(object):
             3001,
             self.configfile)
 
-        # CIDR whitelist as a comma separted list of 8.8.8.0/24 style masks
+        # CIDR whitelist filename formatted comma separted list of 8.8.8.0/24 style masks
         self.options.network_whitelist_file = getConfig('network_whitelist_file', '/dev/null', self.configfile)
+
+        # CIDR whitelist as comma separated list
+        whitelist_networks = getConfig('whitelist_networks', '', self.configfile)
+        self.options.whitelist_networks = whitelist_networks.split(',')
 
         # optional statuspage.io integration
         self.options.statuspage_api_key = getConfig(
@@ -137,7 +141,22 @@ class message(object):
                 ipcidr = netaddr.IPNetwork(ipaddress)
 
                 # already in the table?
-                ipblock = ipblocklist.find_one({'ipaddress': str(ipcidr)})
+                ipblock = ipblocklist.find_one({'address': str(ipcidr)})
+                # Compute end dates
+                end_date = datetime.utcnow() + timedelta(hours=1)
+                if duration == '12hr':
+                    end_date = datetime.utcnow() + timedelta(hours=12)
+                elif duration == '1d':
+                    end_date = datetime.utcnow() + timedelta(days=1)
+                elif duration == '2d':
+                    end_date = datetime.utcnow() + timedelta(days=2)
+                elif duration == '3d':
+                    end_date = datetime.utcnow() + timedelta(days=3)
+                elif duration == '1w':
+                    end_date = datetime.utcnow() + timedelta(days=7)
+                elif duration == '30d':
+                    end_date = datetime.utcnow() + timedelta(days=30)
+
                 if ipblock is None:
                     # insert
                     ipblock = dict()
@@ -146,21 +165,6 @@ class message(object):
                     # i.e. '1.2.3.4/24' not '1.2.3.0/24'
                     ipblock['address'] = str(ipcidr)
                     ipblock['dateAdded'] = datetime.utcnow()
-                    # Compute start and end dates
-                    # default
-                    end_date = datetime.utcnow() + timedelta(hours=1)
-                    if duration == '12hr':
-                        end_date = datetime.utcnow() + timedelta(hours=12)
-                    elif duration == '1d':
-                        end_date = datetime.utcnow() + timedelta(days=1)
-                    elif duration == '2d':
-                        end_date = datetime.utcnow() + timedelta(days=2)
-                    elif duration == '3d':
-                        end_date = datetime.utcnow() + timedelta(days=3)
-                    elif duration == '1w':
-                        end_date = datetime.utcnow() + timedelta(days=7)
-                    elif duration == '30d':
-                        end_date = datetime.utcnow() + timedelta(days=30)
                     ipblock['dateExpiring'] = end_date
                     ipblock['comment'] = comment
                     ipblock['creator'] = userID
@@ -196,7 +200,11 @@ class message(object):
                         except Exception as e:
                             logger.error('Error while notifying statuspage.io for %s: %s\n' % (str(ipcidr), e))
                 else:
-                    logger.error('%s: is already present in the ipblocklist table\n' % (str(ipcidr)))
+                    logger.debug('%s: is already present in the ipblocklist table...updating\n' % (str(ipcidr)))
+                    # Update the document's expiration time and comments
+                    ipblock['dateExpiring'] = end_date
+                    ipblock['comment'] = comment
+                    ipblocklist.replace_one({'_id': ipblock['_id']}, ipblock)
             else:
                 logger.error('%s: is not a valid ip address\n' % (ipaddress))
         except Exception as e:
@@ -212,6 +220,8 @@ class message(object):
 
         # Refresh the ip network list each time we get a message
         self.options.ipwhitelist = self.parse_network_whitelist(self.options.network_whitelist_file)
+        for whitelist_value in self.options.whitelist_networks:
+            self.options.ipwhitelist.append(whitelist_value)
 
         ipaddress = None
         comment = None

@@ -26,7 +26,7 @@ class TestAlertCloudtrailLoggingDisabled(AlertTestSuite):
         "category": "AWSCloudtrail",
         "severity": "CRITICAL",
         "summary": "Cloudtrail Logging Disabled: cloudtrail_example_name",
-        "tags": ['cloudtrail', 'aws', 'cloudtrailpagerduty'],
+        "tags": ['cloudtrail', 'aws', 'cloudtrail_logging_disabled'],
     }
 
     test_cases = []

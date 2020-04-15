@@ -35,21 +35,21 @@ class TestProxyExfilDomains(AlertTestSuite):
         "category": "squid",
         "tags": ["squid", "proxy"],
         "severity": "WARNING",
-        "summary": "Suspicious Proxy event(s) detected from 1.2.3.4 to the following exfil domain(s): pastebin.com",
+        "summary": "Proxy drop events detected from 1.2.3.4 to the following domain(s) that are known for exfiltrating data: pastebin.com",
     }
 
     default_alert2 = {
         "category": "squid",
         "tags": ["squid", "proxy"],
         "severity": "WARNING",
-        "summary": "Suspicious Proxy event(s) detected from 1.2.3.4 to the following exfil domain(s): www.sendspace.com",
+        "summary": "Proxy drop events detected from 1.2.3.4 to the following domain(s) that are known for exfiltrating data: www.sendspace.com",
     }
 
     # This alert is the expected result from this task against multiple matching events
     default_alert_aggregated = AlertTestSuite.copy(default_alert)
     default_alert_aggregated[
         "summary"
-    ] = "Suspicious Proxy event(s) detected from 1.2.3.4 to the following exfil domain(s): pastebin.com,www.sendspace.com"
+    ] = "Proxy drop events detected from 1.2.3.4 to the following domain(s) that are known for exfiltrating data: pastebin.com,www.sendspace.com"
 
     test_cases = []
 
