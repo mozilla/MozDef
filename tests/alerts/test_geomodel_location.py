@@ -262,7 +262,7 @@ class TestEventOrdering(GeoModelTest):
             ],
             'factors': [],
         },
-        'severity': 'WARNING',
+        'severity': 'INFO',
         'tags': ['geomodel'],
     }
 
