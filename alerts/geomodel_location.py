@@ -5,11 +5,11 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2015 Mozilla Corporation
 
+from datetime import datetime, timedelta
 import json
 import os
 
-from mozdef_util.utilities.toUTC import toUTC
-from datetime import datetime, timedelta
+import maxminddb as mmdb
 
 from lib.alerttask import AlertTask
 from mozdef_util.query_models import\
@@ -18,10 +18,12 @@ from mozdef_util.query_models import\
     RangeMatch,\
     SubnetMatch,\
     QueryStringMatch as QSMatch
+from mozdef_util.utilities.toUTC import toUTC
 
 import geomodel.alert as alert
 import geomodel.config as config
 import geomodel.execution as execution
+import geomodel.factors as factors
 import geomodel.locality as locality
 
 
@@ -47,6 +49,8 @@ class AlertGeoModel(AlertTask):
 
     def main(self):
         cfg = self._load_config()
+
+        self.factor_pipeline = self._prepare_factor_pipeline(cfg)
 
         if not self.es.index_exists('localities'):
             settings = {
@@ -152,19 +156,26 @@ class AlertGeoModel(AlertTask):
             journal(entry_from_es, cfg.localities.es_index)
 
         if new_alert is not None:
-            summary = alert.summary(new_alert)
+            modded_alert = factors.pipe(new_alert, self.factor_pipeline)
+
+            summary = alert.summary(modded_alert)
 
             alert_dict = self.createAlertDict(
-                summary, 'geomodel', ['geomodel'], events, 'WARNING')
+                summary,
+                'geomodel',
+                ['geomodel'],
+                events,
+                modded_alert.severity.value)
 
             # The IP that the user is acting from is the one they hopped to.
 
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict['details'] = {
-                'username': new_alert.username,
+                'username': modded_alert.username,
                 'hops': [hop.to_json() for hop in new_alert.hops],
                 'sourceipaddress': new_alert.hops[-1].destination.ip,
                 'sourceipv4address': new_alert.hops[-1].destination.ip,
+                'factors': modded_alert.factors
             }
 
             return alert_dict
@@ -181,4 +192,24 @@ class AlertGeoModel(AlertTask):
 
             cfg['whitelist'] = config.Whitelist(**cfg['whitelist'])
 
+            asn_mvmt = None
+            if cfg['factors']['asn_movement'] is not None:
+                asn_mvmt = config.ASNMovement(**cfg['factors']['asn_movement'])
+
+            cfg['factors'] = config.Factors(
+                asn_movement=asn_mvmt)
+
             return config.Config(**cfg)
+
+    def _prepare_factor_pipeline(self, cfg):
+        pipeline = []
+
+        if cfg.factors.asn_movement is not None:
+            pipeline.append(
+                factors.asn_movement(
+                    mmdb.open_database(cfg.factors.asn_movement.maxmind_db_path),
+                    alert.Severity.WARNING
+                )
+            )
+
+        return pipeline
