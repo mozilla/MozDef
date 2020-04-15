@@ -31,6 +31,7 @@ class AlertDeadmanGeneric(DeadmanAlertTask):
     def process_alert(self, alert_config):
         self.current_alert_time_window = int(alert_config['time_window'])
         self.current_alert_time_type = alert_config['time_window_type']
+        self.custom_tags = alert_config['tags']
         search_query_time_window = {self.current_alert_time_type: self.current_alert_time_window}
         search_query = SearchQuery(**search_query_time_window)
         search_query.add_must(QueryStringMatch(str(alert_config['search_query'])))
@@ -42,7 +43,11 @@ class AlertDeadmanGeneric(DeadmanAlertTask):
     # if no events found
     def onNoEvent(self, description):
         category = 'deadman'
-        tags = ['deadman', 'generic_deadman']
+        tags = ['deadman']
+        # Allow each definition to specify custom tags
+        for custom_tag in self.custom_tags:
+            tags.append(custom_tag)
+
         severity = self._config['severity']
 
         summary = "Deadman check failed for '{0}' the past {1} {2}".format(

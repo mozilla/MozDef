@@ -5,13 +5,15 @@
             "description": "Sample Alert 1",
             "search_query": "ABC12345436",
             "time_window": "5",
-            "time_window_type": "minutes"
+            "time_window_type": "minutes",
+            "tags": ["generic_deadman"]
         },
         {
             "description": "Sample Alert 2",
             "search_query": "anotherterm",
             "time_window": "20",
-            "time_window_type": "hours"
+            "time_window_type": "hours",
+            "tags": ["someothertag"]
         }
     ]
 }

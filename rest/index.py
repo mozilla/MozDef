@@ -4,6 +4,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import bottle
+import enum
 import json
 import netaddr
 import os
@@ -13,7 +14,7 @@ import re
 import requests
 import socket
 import importlib
-from bottle import route, run, response, request, default_app, post
+from bottle import route, run, response, request, default_app, post, put, delete, get
 from datetime import datetime, timedelta
 from configlib import getConfig, OptionParser
 from ipwhois import IPWhois
@@ -31,6 +32,18 @@ from mozdef_util.utilities.toUTC import toUTC
 
 options = None
 pluginList = list()   # tuple of module,registration dict,priority
+
+# The name of the MongoDB database that stores duplicate chains.
+DUP_CHAIN_DB = "duplicatechains"
+
+
+class StatusCode(enum.IntEnum):
+    """A simple enumeration of common status codes.
+    """
+
+    OK = 200
+    BAD_REQUEST = 400
+    INTERNAL_ERROR = 500
 
 
 def enable_cors(fn):
@@ -468,6 +481,410 @@ def createIncident():
     return response
 
 
+@post("/alertstatus")
+@post("/alertstatus/")
+def update_alert_status():
+    """Update the status of an alert.
+
+    Requests are expected to take the following (JSON) form:
+
+    ```
+    {
+        "alert": str,
+        "status": str,
+        "user": {
+            "email": str,
+            "slack": str
+        },
+        "identityConfidence": str
+        "response": str
+    }
+    ```
+
+    Where:
+        * `"alert"` is the unique identifier fo the alert whose status
+        we are to update.
+        * `"status"` is one of "manual", "inProgress", "acknowledged"
+        or "escalated".
+        * `identityConfidence` is one of "highest", "high", "moderate", "low",
+        or "lowest".
+
+
+    This function writes back a response containing the following JSON.
+
+    ```
+    {
+        "error": Optional[str]
+    }
+    ```
+
+    If an error occurs and the alert is not able to be updated, then
+    the "error" field will contain a string message describing the issue.
+    Otherwise, this field will simply be `null`.  This function will,
+    along with updating the alert's status, append information about the
+    user and their response to `alert['details']['triage']`.
+
+    Responses will also use status codes to indicate success / failure / error.
+    """
+
+    initConfig()
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    alerts = mongo.meteor["alerts"]
+
+    try:
+        req = json.loads(request.body.read())
+        request.body.close()
+    except ValueError:
+        response.status = StatusCode.BAD_REQUEST
+        return {
+            "error": "Missing or invalid request body"
+        }
+
+    valid_statuses = ["manual", "inProgress", "acknowledged", "escalated"]
+
+    if req.get("status") not in valid_statuses:
+        required = " or ".join(valid_statuses)
+
+        response.status = StatusCode.BAD_REQUEST
+        return {
+            "error": "Status not one of {}".format(required),
+        }
+
+    expected_fields = ["alert", "user", "response", "identityConfidence"]
+
+    if any([req.get(field) is None for field in expected_fields]):
+        required = ", ".join(expected_fields)
+
+        response.status = StatusCode.BAD_REQUEST
+        return {
+            "error": "Missing a required field, one of {}".format(required),
+        }
+
+    valid_confidences = ["highest", "high", "moderate", "low", "lowest"]
+
+    if req.get("identityConfidence") not in valid_confidences:
+        required = " or ".join(valid_confidences)
+
+        response.status = StatusCode.BAD_REQUEST
+        return {
+            "error": "identityConfidence not one of {}".format(required),
+        }
+
+    details = {
+        "triage": {
+            "user": req.get("user"),
+            "response": req.get("response"),
+        },
+        "identityConfidence": req.get("identityConfidence"),
+    }
+
+    modified_count = 0
+
+    modified_count += alerts.update_one(
+        {"esmetadata.id": req.get("alert")}, {"$set": {"status": req.get("status")}}
+    ).modified_count
+
+    modified_count += alerts.update_one(
+        {"esmetadata.id": req.get("alert")}, {"$set": {"details": details}}
+    ).modified_count
+
+    if modified_count < 2:
+        response.status = StatusCode.BAD_REQUEST
+        return {"error": "Alert not found"}
+
+    response.status = StatusCode.OK
+    return {"error": None}
+
+    return response
+
+
+@get("/alerttriagechain")
+@get("/alerttriagechain/")
+def retrieve_duplicate_chain():
+    """Search for a `Duplicate Chain` storing information about duplicate
+    alerts triggered by the same user's activity.  These chains track such
+    duplicate alerts so that the triage bot does not have to message a user
+    on Slack for each such alert within some period of time.
+
+    Requests are expected to include the following query parameters.
+
+        * `"alert": str` is the "label" for the alert, signifying which of the
+        supported alerts the user in question triggered.
+        * `"user": str` is the email address of the user contacted.
+
+    This function writes back a response containing the following JSON.
+
+    ```
+    {
+        "error": Optional[str],
+        "identifiers": List[str],
+        "created": str,
+        "modified": str
+    }
+    ```
+
+    Here,
+        * `"error"` will contain a string message if any error occurs performing
+        a lookup.  If such an error occurs, `"identifiers"` will be an empty
+        list.
+        * `"identifiers"` is a list of IDs of alerts stored under the chain.
+        * `"created"` is the date & time at which the chain was created.
+        * `"modified"` is the date & time at which the chain was last modified.
+
+    Both the `"created"` and `"modified"` fields represent UTC timestamps and
+    are formatted like `YYYY/mm/dd HH:MM:SS`.
+    """
+
+    initConfig()
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    dupchains = mongo.meteor[DUP_CHAIN_DB]
+
+    def _error(msg):
+        return json.dumps({
+            "error": msg,
+            "identifiers": [],
+            "created": toUTC(datetime.utcnow()).isoformat(),
+            "modified": toUTC(datetime.utcnow()).isoformat(),
+        })
+
+    query = {"alert": request.query.alert, "user": request.query.user}
+
+    if query.get("alert", "") == "" or query.get("user", "") == "":
+        response.status = StatusCode.BAD_REQUEST
+        response.body = _error("Request missing `alert` or `user` field")
+        return response
+
+    chain = dupchains.find_one(query)
+
+    if chain is None:
+        # This is not an error, but we do want to write an empty response.
+        response.status = StatusCode.OK
+        response.body = _error("Did not find requested duplicate chian")
+        return response
+
+    response.status = StatusCode.OK
+    return {
+        "error": None,
+        "identifiers": chain["identifiers"],
+        "created": toUTC(chain["created"]).isoformat(),
+        "modified": toUTC(chain["modified"]).isoformat(),
+    }
+
+
+@post("/alerttriagechain")
+@post("/alerttriagechain/")
+def create_duplicate_chain():
+    """Create a 'Duplicate Chain', linking information about alerts being
+    handled by the Triage Bot so that a user's response to a message about
+    one alert can be replicated against duplicate alerts without sending
+    multiple messages.
+
+    Requests are expected to take the following (JSON) form:
+
+    ```
+    {
+        "alert": str,
+        "user": str,
+        "identifiers": List[str]
+    }
+    ```
+
+    Where:
+        * `"alert"` is the "label" for the alert, signifying which of the
+        supported alerts is being triaged.
+        * `"user"` is the email address of the user contacted.
+        * `"identifier"` is a list of ElasticSearch IDs of alerts of the
+        same kind triggered by the same user.
+
+    This function writes back a response containing the following JSON.
+
+    ```
+    {
+        "error": Optional[str]
+    }
+    ```
+
+    If an error occurs, a duplicate chain will not be created and an error
+    string will be returned.  Otherwise, the `error` field will be `null.`
+    """
+
+    initConfig()
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    dupchains = mongo.meteor[DUP_CHAIN_DB]
+
+    try:
+        req = request.json
+    except bottle.HTTPError:
+        response.status = StatusCode.BAD_REQUEST
+        return {"error": "Missing or invalid request body"}
+
+    now = datetime.utcnow()
+
+    chain = {
+        "alert": req.get("alert"),
+        "user": req.get("user"),
+        "identifiers": req.get("identifiers", []),
+        "created": now,
+        "modified": now,
+    }
+
+    if chain["alert"] is None or chain["user"] is None:
+        response.status = StatusCode.BAD_REQUEST
+        return {
+            "error": "Request missing required key `alert` or `user`"
+        }
+
+    result = dupchains.insert_one(chain)
+    if not result.acknowledged:
+        response.status = StatusCode.INTERNAL_ERROR
+        return {"error": "Failed to store new duplicate chain"}
+
+    response.status = StatusCode.OK
+    return {"error": None}
+
+
+@put("/alerttriagechain")
+@put("/alerttriagechain/")
+def update_duplicate_chain():
+    """Update a `DuplicateChain`, appending information about a new alert
+    destined for a Slack user via the triage Bot.
+    See `create_duplicate_chain` for more information.
+
+    Requests are expected to take the following (JSON) form:
+
+    ```
+    {
+        "alert": str,
+        "user": str,
+        "identifiers": List[str]
+    }
+    ```
+
+    The parameters are the same as those of `create_duplicate_chain`.
+
+    This function writes back a response containing the following JSON.
+
+    ```
+    {
+        "error": Optional[str]
+    }
+    ```
+
+    If an error occurs, no duplicate chains will be updated.  This endpoint
+    does not create a new chain if one does not already exist.
+    """
+
+    initConfig()
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    dupchains = mongo.meteor[DUP_CHAIN_DB]
+
+    try:
+        req = request.json
+    except bottle.HTTPError:
+        response.status = StatusCode.BAD_REQUEST
+        return {"error": "Missing or invalid request body"}
+
+    query = {"alert": req.get("alert"), "user": req.get("user")}
+
+    new_ids = req.get("identifiers")
+
+    if any([x is None for x in (query["alert"], query["user"], new_ids)]):
+        response.status = StatusCode.BAD_REQUEST
+        return {
+            "error": "Request missing required key `alert`, `user` or "
+            "`identifiers`"
+        }
+
+    chain = dupchains.find_one(query)
+
+    if chain is None:
+        response.status = StatusCode.BAD_REQUEST
+        return {"error": "Duplicate chain does not exist"}
+
+    modified = dupchains.update_one(
+        query,
+        {
+            "$set": {
+                "identifiers": chain["identifiers"] + new_ids,
+                "modified": datetime.utcnow(),
+            }
+        },
+    ).modified_count
+
+    if modified != 1:
+        response.status = StatusCode.INTERNAL_ERROR
+        return {"error": "Failed to update chain"}
+        return response
+
+    response.status = StatusCode.OK
+    return {"error": None}
+
+
+@delete("/alerttriagechain")
+@delete("/alerttriagechain/")
+def delete_duplicate_chain():
+    """Deletes a Duplicate Chain tracking duplicate alerts triggered by the
+    same user.
+
+    Requests are expected to contain the following JSON data:
+
+    ```
+    {
+        "alert": str,
+        "user": str
+    }
+    ```
+
+    Where:
+        * `"alert"` is the label of an alert supported by the triage bot.
+        * `"user"` is the email address of the user the triage bot contacted.
+
+    Responses will contain the following JSON:
+
+    ```
+    {
+        "error": Optional[str]
+    }
+    ```
+
+    In the case that a duplicate chain identified by the request parameters does
+    not exist or an error occurs in deleting it, the `"error"` field will
+    contain a string describing the error.  Otherwise, it is `null`.
+    """
+
+    initConfig()
+
+    mongo = MongoClient(options.mongohost, options.mongoport)
+    dupchains = mongo.meteor[DUP_CHAIN_DB]
+
+    try:
+        req = request.json
+    except bottle.HTTPError:
+        response.status = StatusCode.BAD_REQUEST
+        return {"error": "Missing or invalid request body"}
+
+    query = {"alert": req.get("alert"), "user": req.get("user")}
+
+    if query["alert"] is None or query["user"] is None:
+        response.status = StatusCode.BAD_REQUEST
+        return {
+            "error": "Request missing required key `alert` or `user`"
+        }
+
+    result = dupchains.delete_one(query)
+
+    if not result.acknowledged:
+        response.status = StatusCode.BAD_REQUEST
+        return {"error": "No such duplicate chain exists"}
+
+    response.status = StatusCode.OK
+    return {"error": None}
+
+
 def validateDate(date, dateFormat='%Y-%m-%d %I:%M %p'):
     '''
     Converts a date string into a datetime object based
@@ -692,7 +1109,7 @@ parser = OptionParser()
 parser.add_option(
     "-c",
     dest='configfile',
-    default=os.path.join(os.path.dirname(__file__), __file__).replace('.py', '.conf'),
+    default=__file__.replace(".py", ".conf"),
     help="configuration file to use")
 (options, args) = parser.parse_args()
 initConfig()

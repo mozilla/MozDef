@@ -1,0 +1,5 @@
+{
+  "chainValidityWindowHours": 12,
+  "mongoHost": "127.0.0.1",
+  "mongoPort": 3002
+}
