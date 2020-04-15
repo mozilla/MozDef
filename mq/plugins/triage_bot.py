@@ -170,7 +170,7 @@ def update_alert_status(msg: UserResponseMessage, api: RESTConfig):
         jwt_auth.set_header_format("Bearer %s")
 
     try:
-        logger.info("Sending request to REST API")
+        logger.debug("Sending request to REST API")
         resp = requests.post(url, json=payload, auth=jwt_auth)
     except Exception as ex:
         logger.exception("Request failed: {}".format(ex))
@@ -197,7 +197,7 @@ def process(msg, meta, api_cfg):
 
     response = UserResponseMessage(ident, UserInfo(email, slack), confidence, resp)
 
-    logger.info("Updating status of alert {}".format(response.identifier))
+    logger.debug("Updating status of alert {}".format(response.identifier))
     update_succeeded = update_alert_status(response, api_cfg)
 
     if not update_succeeded:
@@ -221,7 +221,7 @@ class message:
 
     def onMessage(self, message, metadata):
         if message["category"] == "triagebot":
-            logger.info("Got a message to process")
+            logger.debug("Got a message to process")
             return process(message, metadata, self.api_cfg)
 
         return (message, metadata)

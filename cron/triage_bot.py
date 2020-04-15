@@ -113,10 +113,10 @@ def main():
     dupchains = mongo.meteor[DUP_CHAIN_DB]
     alerts = mongo.meteor.alerts
 
-    logger.info("Deleting expired duplicate chains")
+    logger.debug("Deleting expired duplicate chains")
     delete_expired_chains(dupchains, cfg["chainValidityWindowHours"])
 
-    logger.info("Replaying user responses across valid duplicate chains")
+    logger.debug("Replaying user responses across valid duplicate chains")
     for (chain, status) in updated_chains(dupchains, alerts):
         replay_response(alerts, chain, status)
 
