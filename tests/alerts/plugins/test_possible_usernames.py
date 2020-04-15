@@ -88,7 +88,7 @@ class TestPossibleUsernames:
                 },
             },
             {
-                # Missing hostname 
+                # Missing hostname
                 'documentsource': {
                     'nothostname': 'notahost',
                 },
