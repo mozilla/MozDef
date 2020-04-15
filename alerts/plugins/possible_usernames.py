@@ -50,14 +50,7 @@ class message:
         self._es_client = ElasticsearchClient(ES['servers'])
 
     def onMessage(self, message):
-        summary_parts = message['summary'].split(' ')
-
-        # We expect the summary to be formatted like:
-        # "Promiscuous mode enabled on HOSTNAME [X]"
-        if len(summary_parts) < 2:
-            return message
-
-        hostname = summary_parts[-2]
+        hostname = _most_common_hostname(message.get('events', []))
 
         query = SearchQuery(hours=self._config.search_window_hours)
 
@@ -102,3 +95,25 @@ def enrich(alert: dict, syslog_evts: types.List[dict]) -> dict:
     alert['details'] = details
 
     return alert
+
+
+def _most_common_hostname(events: types.List[dict]) -> types.Optional[str]:
+    findings = {}
+
+    for event in events:
+        host = event.get('documentsource', {}).get('hostname')
+
+        if host is None:
+            continue
+
+        findings[host] = (findings[host] + 1) if host in findings else 1
+
+    # Sorting a list of (int, str) pairs results in a sort on the int.
+    sorted_findings = sorted(
+        [(count, hostname) for hostname, count in findings.items()],
+        reverse=True)
+
+    if len(sorted_findings) == 0:
+        return None
+
+    return sorted_findings[0][1]

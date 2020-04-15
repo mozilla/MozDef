@@ -69,3 +69,45 @@ class TestPossibleUsernames:
         # Ensure possible users found and duplicates removed.
         assert len(enriched['details']['possible_usernames']) == 1
         assert enriched['details']['possible_usernames'][0] == 'tester1'
+
+    def test_hostname_detection(self):
+        from alerts.plugins.possible_usernames import _most_common_hostname
+
+        # Stripped down version of events expected to be in alert['events'].
+        events = [
+            {
+                # First hostname
+                'documentsource': {
+                    'hostname': 'host1',
+                },
+            },
+            {
+                # Missing documentsource
+                'notdocsource': {
+                    'hostname': 'host1',
+                },
+            },
+            {
+                # Missing hostname 
+                'documentsource': {
+                    'nothostname': 'notahost',
+                },
+            },
+            {
+                # Duplicate hostname
+                'documentsource': {
+                    'hostname': 'host1',
+                },
+            },
+            {
+                # Alternative hostname
+                'documentsource': {
+                    'hostname': 'host2',
+                },
+            },
+        ]
+
+        hostname = _most_common_hostname(events)
+
+        # host1 appears twice, host2 appears once.
+        assert hostname == 'host1'
