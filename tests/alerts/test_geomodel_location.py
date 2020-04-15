@@ -103,6 +103,8 @@ class TestAlertGeoModel(GeoModelTest):
         '(3645.78 KM in 16.00 minutes)',
         'details': {
             'username': 'tester1',
+            'sourceipaddress': '1.2.3.4',
+            'sourceipv4address': '1.2.3.4',
             'hops': [
                 {
                     'origin': {
@@ -189,7 +191,7 @@ class TestEventOrdering(GeoModelTest):
     alert_filename = 'geomodel_location'
     alert_classname = 'AlertGeoModel'
 
-    default_event = {
+    default_event = AlertTestSuite.create_event({
         '_source': {
             'details': {
                 'sourceipaddress': '1.2.3.4',
@@ -201,12 +203,14 @@ class TestEventOrdering(GeoModelTest):
                 },
                 'username': 'tester1',
             },
-            'utctimestmap': lambda: _NOW.isoformat(),
             'tags': ['auth0'],
-        }
-    }
+        },
+    })
 
-    change_location_event = {
+    default_event['_source']['utctimestamp'] =\
+        AlertTestSuite.subtract_from_timestamp_lambda({'minutes': 0})
+
+    change_location_event = AlertTestSuite.create_event({
         '_source': {
             'details': {
                 'sourceipaddress': '4.3.2.1',
@@ -218,9 +222,12 @@ class TestEventOrdering(GeoModelTest):
                 },
                 'username': 'tester1',
             },
-            'utctimestamp': lambda: (_NOW + timedelta(minutes=1)).isoformat()
-        }
-    }
+            'tags': ['auth0'],
+        },
+    })
+
+    change_location_event['_source']['utctimestamp'] =\
+        AlertTestSuite.subtract_from_timestamp_lambda({'minutes': -1})
 
     default_alert = {
         'category': 'geomodel',
@@ -229,6 +236,7 @@ class TestEventOrdering(GeoModelTest):
         'details': {
             'username': 'tester1',
             'sourceipaddress': '4.3.2.1',
+            'sourceipv4address': '4.3.2.1',
             'hops': [
                 {
                     'origin': {
@@ -246,7 +254,7 @@ class TestEventOrdering(GeoModelTest):
                         'country': 'US',
                         'latitude': 37.773972,
                         'longitude': -122.431297,
-                        'observed': (_NOW - timedelta(minutes=1)).isoformat(),
+                        'observed': (_NOW + timedelta(minutes=1)).isoformat(),
                         'geopoint': '37.773972,-122.431297',
                     },
                 },
@@ -354,6 +362,8 @@ class TestOnePreviousLocality(GeoModelTest):
         '(3645.78 KM in 5.00 minutes)',
         'details': {
             'username': 'tester1',
+            'sourceipaddress': '1.2.3.4',
+            'sourceipv4address': '1.2.3.4',
             'hops': [
                 {
                     'origin': {
@@ -435,6 +445,8 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
         '(3645.78 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
+            'sourceipaddress': '5.6.7.8',
+            'sourceipv4address': '5.6.7.8',
             'hops': [
                 {
                     'origin': {
@@ -596,6 +608,8 @@ class TestMultipleEventsInWindow(GeoModelTest):
         '(3645.78 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
+            'sourceipaddress': '1.2.3.4',
+            'sourceipv4address': '1.2.3.4',
             'hops': [
                 {
                     'origin': {
@@ -738,6 +752,8 @@ class TestSameCitiesFarAway(GeoModelTest):
         '(4082.65 KM in 3.00 minutes)',
         'details': {
             'username': 'tester1',
+            'sourceipaddress': '1.2.3.4',
+            'sourceipv4address': '1.2.3.4',
             'hops': [
                 {
                     'origin': {
@@ -865,6 +881,8 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
         'Petersburg,RU (6855.53 KM in 2.00 minutes)',
         'details': {
             'username': 'tester1',
+            'sourceipaddress': '12.34.45.56',
+            'sourceipv4address': '12.34.45.56',
             'hops': [
                 {
                     'origin': {

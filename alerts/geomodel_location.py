@@ -158,13 +158,13 @@ class AlertGeoModel(AlertTask):
                 summary, 'geomodel', ['geomodel'], events, 'WARNING')
 
             # The IP that the user is acting from is the one they hopped to.
-            alert_dict['sourceipaddress'] = new_alert.hops[-1].destination.ip
-            alert_dict['sourceipv4address'] = new_alert.hops[-1].destination.ip
 
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict['details'] = {
                 'username': new_alert.username,
                 'hops': [hop.to_json() for hop in new_alert.hops],
+                'sourceipaddress': new_alert.hops[-1].destination.ip,
+                'sourceipv4address': new_alert.hops[-1].destination.ip,
             }
 
             return alert_dict
