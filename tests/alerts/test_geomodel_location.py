@@ -179,6 +179,92 @@ class TestAlertGeoModel(GeoModelTest):
     ]
 
 
+class TestEventOrdering(GeoModelTest):
+    '''When events come in indicating geolocation movement has occurred, those
+    events will contain a `utctimestamp` field that we want to ensure we sort
+    on so that localities are both ordered correctly and so that GeoModel alerts
+    correctly identify the IP from which a user is acting.
+    '''
+
+    alert_filename = 'geomodel_location'
+    alert_classname = 'AlertGeoModel'
+
+    default_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '1.2.3.4',
+                'sourceipgeolocation': {
+                    'city': 'Toronto',
+                    'country_code': 'CA',
+                    'latitude': 43.6529,
+                    'longitude': -79.3849,
+                },
+                'username': 'tester1',
+            },
+            'utctimestmap': lambda: _NOW.isoformat(),
+            'tags': ['auth0'],
+        }
+    }
+
+    change_location_event = {
+        '_source': {
+            'details': {
+                'sourceipaddress': '4.3.2.1',
+                'sourceipgeolocation': {
+                    'city': 'San Francisco',
+                    'country_code': 'US',
+                    'latitude': 37.773972,
+                    'longitude': -122.431297,
+                },
+                'username': 'tester1',
+            },
+            'utctimestamp': lambda: (_NOW + timedelta(minutes=1)).isoformat()
+        }
+    }
+
+    default_alert = {
+        'category': 'geomodel',
+        'summary': 'tester1 seen in Toronto,CA then San Francisco,US '
+        '(3645.78 KM in 1.00 minutes)',
+        'details': {
+            'username': 'tester1',
+            'sourceipaddress': '4.3.2.1',
+            'hops': [
+                {
+                    'origin': {
+                        'ip': '1.2.3.4',
+                        'city': 'Toronto',
+                        'country': 'CA',
+                        'latitude': 43.6529,
+                        'longitude': -79.3849,
+                        'observed': _NOW.isoformat(),
+                        'geopoint': '43.6529,-79.3849',
+                    },
+                    'destination': {
+                        'ip': '4.3.2.1',
+                        'city': 'San Francisco',
+                        'country': 'US',
+                        'latitude': 37.773972,
+                        'longitude': -122.431297,
+                        'observed': (_NOW - timedelta(minutes=1)).isoformat(),
+                        'geopoint': '37.773972,-122.431297',
+                    },
+                },
+            ],
+        },
+        'severity': 'WARNING',
+        'tags': ['geomodel'],
+    }
+
+    test_cases = [
+        PositiveAlertTestCase(
+            description='Alert fires with events sorted into the correct order',
+            events=[change_location_event, default_event],
+            expected_alert=default_alert,
+        ),
+    ]
+
+
 class TestUpdateOrdering(GeoModelTest):
     '''Alerts will trigger unexpectedly if locality state updates are applied
     before determining whether a user's location has changed by comparing

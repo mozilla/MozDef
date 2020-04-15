@@ -115,9 +115,16 @@ class AlertGeoModel(AlertTask):
         query = locality.wrap_query(self.es)
         journal = locality.wrap_journal(self.es)
 
+        def _utctimestamp(event):
+            source = event.get('_source', {})
+            utctimestamp = source.get('utctimestamp', datetime.utcnow())
+            return toUTC(utctimestamp)
+
+        sorted_events = sorted(events, key=_utctimestamp, reverse=True)
+
         locs_from_evts = list(filter(
             lambda state: state is not None,
-            map(locality.from_event, events)))
+            map(locality.from_event, sorted_events)))
 
         entry_from_es = locality.find(query, username, cfg.localities.es_index)
 
@@ -149,6 +156,10 @@ class AlertGeoModel(AlertTask):
 
             alert_dict = self.createAlertDict(
                 summary, 'geomodel', ['geomodel'], events, 'WARNING')
+
+            # The IP that the user is acting from is the one they hopped to.
+            alert_dict['sourceipaddress'] = new_alert.hops[-1].destination.ip
+            alert_dict['sourceipv4address'] = new_alert.hops[-1].destination.ip
 
             # TODO: When we update to Python 3.7+, change to asdict(alert_produced)
             alert_dict['details'] = {
