@@ -362,7 +362,7 @@ class TestZoomFixupPlugin():
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
 
         expected_message = {
-            'summary': 'zoom: meeting.created',
+            'summary': 'zoom: meeting.updated',
             'category': 'zoom',
             'source': 'api_aws_lambda',
             'hostname': 'zoom_host',
