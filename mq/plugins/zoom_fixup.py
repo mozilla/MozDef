@@ -74,11 +74,16 @@ class message(object):
                 # JMESPath likes to silently return a None object
                 if mappedvalue is not None:
                     newmessage['details'][key] = mappedvalue
-            # Some zoom messages don't contain details.start_time
-            # so we set it to original start time
+            # Some zoom messages don't contain details.start_time or details.original_sched_start_time.
+            # so we set it to original start time, if there is no time data, we remove the key from the message.
             if key_exists('details.start_time', newmessage) and key_exists('details.original_sched_start_time', newmessage):
-                if newmessage['details']['start_time'] == '':
+                if newmessage['details']['start_time'] == '' and newmessage['details']['original_sched_start_time'] == '':
+                    del newmessage['details']['start_time']
+                    del newmessage['details']['original_sched_start_time']
+                elif newmessage['details']['start_time'] == '':
                     newmessage['details']['start_time'] = newmessage['details']['original_sched_start_time']
+                elif newmessage['details']['original_sched_start_time'] == '':
+                    newmessage['details']['original_sched_start_time'] = newmessage['details']['start_time']
 
         else:
             newmessage = None
