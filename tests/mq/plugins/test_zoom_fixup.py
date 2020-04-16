@@ -74,7 +74,7 @@ class TestZoomFixupPlugin():
                         'uuid': 'aodij/OWIE9241048=',
                         "participant": {
                             'user_id': '12039103',
-                            'user_name': 'Random User',
+                            'user_name': 'Random User'
                         }
                     }
                 }
@@ -98,7 +98,7 @@ class TestZoomFixupPlugin():
                 'type': '4',
                 'uuid': 'aodij/OWIE9241048=',
                 'participant_username': 'Random User',
-                'participant_user_id': '12039103',
+                'participant_user_id': '12039103'
             }
         }
         assert retmessage == expected_message
@@ -122,7 +122,7 @@ class TestZoomFixupPlugin():
                     'object': {
                         'id': '123456789',
                         'type': '2',
-                        'uuid': 'aodij/OWIE9241048=',
+                        'uuid': 'aodij/OWIE9241048='
                     }
                 }
             }
@@ -145,7 +145,7 @@ class TestZoomFixupPlugin():
                 'type': '2',
                 'user_id': '12o3i-294jo24jad',
                 'username': 'randomuser@randomco.com',
-                'uuid': 'aodij/OWIE9241048=',
+                'uuid': 'aodij/OWIE9241048='
             }
         }
         assert retmessage == expected_message
@@ -329,7 +329,53 @@ class TestZoomFixupPlugin():
                 'type': '2',
                 'uuid': 'aodij/OWIE9241048=',
                 'original_sched_start_time': '2020-02-11T20:25:30Z',
-                'start_time': '2020-02-11T20:25:30Z',
+                'start_time': '2020-02-11T20:25:30Z'
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
+    def test_multiple_empty_start_time_strings(self):
+        msg = {
+            'summary': 'zoom_event',
+            'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
+            'severity': 'info',
+            'eventsource': 'MozDef-EF-zoom',
+            'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'category': 'zoom',
+            'details': {
+                'event': 'meeting.updated',
+                'payload': {
+                    'account_id': 'ABCDEFG123456',
+                    'object': {
+                        'account_id': 'HIJKLMN123456',
+                        'id': '123456789',
+                        'type': '2',
+                        'uuid': 'aodij/OWIE9241048=',
+                        'original_sched_start_time': '',
+                        'start_time': ''
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'summary': 'zoom: meeting.created',
+            'category': 'zoom',
+            'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
+            'severity': 'info',
+            'eventsource': 'MozDef-EF-zoom',
+            'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'processname': 'zoom_webhook_api',
+            'details': {
+                'account_id': 'ABCDEFG123456',
+                'event': 'meeting.updated',
+                'id': '123456789',
+                'type': '2',
+                'uuid': 'aodij/OWIE9241048='
             }
         }
         assert retmessage == expected_message
