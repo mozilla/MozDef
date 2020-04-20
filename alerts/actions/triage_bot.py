@@ -222,9 +222,9 @@ class message(object):
             token=self._config.mozdef_restapi_token,
         )
 
-        logger.info("Performing initial OAuth Handshake")
+        logger.debug("Performing initial OAuth Handshake")
         self._oauth_handshake()
-        logger.info("Performing initial Lambda function discovery")
+        logger.debug("Performing initial Lambda function discovery")
         self._discover_lambda_fn()
 
         self.registration = [
@@ -252,19 +252,19 @@ class message(object):
 
         if have_request and should_refresh:
             self._oauth_handshake()
-            logger.info("Performed OAuth handshake")
+            logger.debug("Performed OAuth handshake")
 
         # Re-discover the lambda function name to invoke periodically.
         last_discovery = (datetime.now() - self._last_discovery).total_seconds()
         if last_discovery > self._config.l_fn_name_validity_window_seconds:
             self._discover_lambda_fn()
-            logger.info("Discovered Lambda function name")
+            logger.debug("Discovered Lambda function name")
 
         dispatch = _dispatcher(self._boto_session)
 
         if have_request:
-            logger.info("Attempting to dispatch request")
-            logger.info(
+            logger.debug("Attempting to dispatch request")
+            logger.debug(
                 "Alert {} triggered by {}".format(request.alert.value, request.user)
             )
 
@@ -273,15 +273,15 @@ class message(object):
             should_dispatch = True
 
             try:
-                logger.info("Fetching duplicate chain")
+                logger.debug("Fetching duplicate chain")
                 chain = _retrieve_duplicate_chain(
                     self._rest_api_cfg, request.alert, request.user
                 )
                 if chain is None:
-                    logger.info("Creating duplicate chain")
+                    logger.debug("Creating duplicate chain")
                     operation = _create_duplicate_chain
                 else:
-                    logger.info("Updating duplicate chain")
+                    logger.debug("Updating duplicate chain")
                     operation = _update_duplicate_chain
                     should_dispatch = False
 
