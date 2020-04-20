@@ -335,26 +335,26 @@ class TestAlertRecognition(object):
 
         assert result is not None
 
-#    def test_recognizes_duo_bypass_codes_generated(self):
-#        msg = _duo_bypass_code_gen_alert()
-#
-#        result = bot.try_make_outbound(msg, self.mock_config, "")
-#
-#        assert result is not None
-#
-#    def test_recognizes_duo_bypass_codes_used(self):
-#        msg = _duo_bypass_code_used_alert()
-#
-#        result = bot.try_make_outbound(msg, self.mock_config, "")
-#
-#        assert result is not None
-#
-#    def test_recognizes_ssh_access_releng(self):
-#        msg = _ssh_access_releng_alert()
-#
-#        result = bot.try_make_outbound(msg, self.mock_config, "")
-#
-#        assert result is not None
+    def test_recognizes_duo_bypass_codes_generated(self):
+        msg = _duo_bypass_code_gen_alert()
+
+        result = bot.try_make_outbound(msg, self.mock_config, "")
+
+        assert result is not None
+
+    def test_recognizes_duo_bypass_codes_used(self):
+        msg = _duo_bypass_code_used_alert()
+
+        result = bot.try_make_outbound(msg, self.mock_config, "")
+
+        assert result is not None
+
+    def test_recognizes_ssh_access_releng(self):
+        msg = _ssh_access_releng_alert()
+
+        result = bot.try_make_outbound(msg, self.mock_config, "")
+
+        assert result is not None
 
 
 class TestPersonAPI:
