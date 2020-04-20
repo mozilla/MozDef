@@ -1,4 +1,10 @@
 {
+  "enabled_alert_classnames": [
+    "AlertGenericLoader:ssh_open_crit",
+    "AlertAuthSignRelengSSH",
+    "AlertGenericLoader:duosecurity_bypass_generated",
+    "AlertGenericLoader:duosecurity_bypass_used"
+  ],
   "oauth_url": "https://auth.mozilla.auth0.com/oauth/token",
   "person_api_base": "https://person-api.sso.mozilla.com",
   "person_api_audience": "api.sso.mozilla.com",

@@ -20,6 +20,7 @@ from mozdef_util.utilities.toUTC import toUTC
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "triage_bot.json")
 
+
 Alert = types.Dict[types.Any, types.Any]
 Email = str
 
@@ -53,6 +54,8 @@ class Config(types.NamedTuple):
     """Container type for the configuration parameters required by the
     alert action.
     """
+
+    enabled_alert_classnames: types.List[str]
     oauth_url: str
     person_api_base: str
     person_api_audience: str
@@ -188,6 +191,12 @@ UserByNameInterface = types.Callable[[Url, Token, Username], types.Optional[User
 DiscoveryInterface = types.Callable[[], types.List[LambdaFunction]]
 DispatchInterface = types.Callable[[AlertTriageRequest, str], DispatchResult]
 
+# Supported alerts have functions that can process those alerts along with a
+# configuration and OAuth token to produce an `AlertTriageRequest`.
+RequestBuilderInterface = types.Callable[
+    [dict, Config, str],
+    types.Optional[AlertTriageRequest]]
+
 
 class message(object):
     """The main interface to the alert action.
@@ -218,7 +227,11 @@ class message(object):
         logger.info("Performing initial Lambda function discovery")
         self._discover_lambda_fn()
 
-        self.registration = "*"
+        self.registration = [
+            classname.lower()
+            for classname in self._config.enabled_alert_classnames
+        ]
+
         self.priority = 1
 
     def onMessage(self, alert):
@@ -345,32 +358,16 @@ def try_make_outbound(
     """
 
     _source = alert.get("_source", {})
-    category = _source.get("category")
-    tags = _source.get("tags", [])
 
-    is_sensitive_host_access = "session" in tags and category == "session"
+    alert_class_name = _source.get('classname')
 
-#    is_duo_codes_generated = "duosecurity" in tags and\
-#        category == "duo" and\
-#        "codes generated" in _source.get("summary", "")
-#
-#    is_duo_bypass_codes_used = (
-#        "duo_bypass_codes_used" in tags and category == "bypassused"
-#    )
-#
-#    is_ssh_access_releng = "ssh" in tags and category == "access"
+    if alert_class_name is None:
+        return None
 
-    if is_sensitive_host_access:
-        return _make_sensitive_host_access(alert, cfg, oauth_tkn)
+    builder = _request_builder(alert_class_name)
 
-#    if is_duo_codes_generated:
-#        return _make_duo_code_gen(alert, cfg, oauth_tkn)
-#
-#    if is_duo_bypass_codes_used:
-#        return _make_duo_code_used(alert, cfg, oauth_tkn)
-#
-#    if is_ssh_access_releng:
-#        return _make_ssh_access_releng(alert, cfg, oauth_tkn)
+    if alert_class_name in cfg.enabled_alert_classnames:
+        return builder(alert, cfg, oauth_tkn)
 
     return None
 
@@ -765,3 +762,22 @@ def _update_duplicate_chain(
         raise APIError(error)
 
     return True
+
+
+def _request_builder(alert_classname: str) -> RequestBuilderInterface:
+    # Note that the alert action will convert classnames to lowercase, so
+    # classnames in a config's `enabled_alert_classnames` must be provided
+    # as they appear below.
+    SUPPORTED_ALERTS = {
+        'AlertGenericLoader:ssh_open_crit': _make_sensitive_host_access,
+        'AlertAuthSignRelengSSH': _make_ssh_access_releng,
+        'AlertGenericLoader:duosecurity_bypass_generated': _make_duo_code_gen,
+        'AlertGenericLoader:duosecurity_bypass_used': _make_duo_code_used,
+    }
+
+    # A `RequestBuilderInterface` can return `None` to indicate that it failed
+    # to process a request, so having this function return `None` directly
+    # actually creates unnecessary error handling.
+    return SUPPORTED_ALERTS.get(
+        alert_classname,
+        lambda _alert, _config, _token: None)
