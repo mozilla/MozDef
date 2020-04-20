@@ -765,15 +765,9 @@ def _update_duplicate_chain(
 
 
 def _request_builder(alert_classname: str) -> RequestBuilderInterface:
-    '''Maps the classnames of alerts to functions used to handle alerts of these
-    kind in order to produce an `AlertTriageRequest`.
-
-    This alert action's configuration also supports a list of classnames that can
-    be used to narrow the list of alerts that the action will handle.
-    Note that the alert action will convert classnames to lowercase, so classnames
-    must be provided as they appear below.
-    '''
-
+    # Note that the alert action will convert classnames to lowercase, so
+    # classnames in a config's `enabled_alert_classnames` must be provided
+    # as they appear below.
     SUPPORTED_ALERTS = {
         'AlertGenericLoader:ssh_open_crit': _make_sensitive_host_access,
         'AlertAuthSignRelengSSH': _make_ssh_access_releng,
