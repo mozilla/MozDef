@@ -299,14 +299,15 @@ class TestZoomFixupPlugin():
                 'payload': {
                     'account_id': 'ABCDEFG123456',
                     'object': {
-                        'account_id': 'HIJKLMN123456',
+                        'account_id': 'ABCDEFG123456',
                         'id': '123456789',
                         'type': '2',
                         'uuid': 'aodij/OWIE9241048=',
                         'start_time': ''
                     },
                     'old_object': {
-                        'start_time': '2020-02-11T20:25:30Z'
+                        'start_time': '2020-02-11T20:25:30Z',
+                        'duration': '60'
                     }
                 }
             }
@@ -329,13 +330,13 @@ class TestZoomFixupPlugin():
                 'type': '2',
                 'uuid': 'aodij/OWIE9241048=',
                 'original_sched_start_time': '2020-02-11T20:25:30Z',
-                'start_time': '2020-02-11T20:25:30Z'
+                'original_sched_duration': '60'
             }
         }
         assert retmessage == expected_message
         assert retmeta == {}
 
-    def test_multiple_empty_start_time_strings(self):
+    def test_empty_original_sched_start_time_strings(self):
         msg = {
             'summary': 'zoom_event',
             'source': 'api_aws_lambda',
@@ -349,12 +350,17 @@ class TestZoomFixupPlugin():
                 'payload': {
                     'account_id': 'ABCDEFG123456',
                     'object': {
-                        'account_id': 'HIJKLMN123456',
+                        'account_id': 'ABCDEFG123456',
                         'id': '123456789',
                         'type': '2',
                         'uuid': 'aodij/OWIE9241048=',
-                        'original_sched_start_time': '',
                         'start_time': ''
+                    },
+                    'old_object': {
+                        'id': '123456789',
+                        'type': '2',
+                        'start_time': '',
+                        'duration': '60'
                     }
                 }
             }
@@ -375,7 +381,8 @@ class TestZoomFixupPlugin():
                 'event': 'meeting.updated',
                 'id': '123456789',
                 'type': '2',
-                'uuid': 'aodij/OWIE9241048='
+                'uuid': 'aodij/OWIE9241048=',
+                'original_sched_duration': '60'
             }
         }
         assert retmessage == expected_message
