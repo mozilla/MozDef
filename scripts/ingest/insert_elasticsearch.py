@@ -60,4 +60,3 @@ for event in events:
     es_client.save_event(body=event)
     print("Wrote event to elasticsearch")
     time.sleep(0.2)
-
