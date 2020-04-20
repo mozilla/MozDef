@@ -24,6 +24,7 @@ CONFIG_FILE = os.path.join(os.path.dirname(__file__), "triage_bot.json")
 Alert = types.Dict[types.Any, types.Any]
 Email = str
 
+
 class AlertLabel(Enum):
     """Enumerates each of the alerts supported by the triage bot.
     """
@@ -355,7 +356,7 @@ def try_make_outbound(
     """Attempt to determine the kind of alert contained in `alert` in
     order to produce an `AlertTriageRequest` destined for the web server comp.
     """
-    
+
     _source = alert.get("_source", {})
 
     alert_class_name = _source.get('classname')
