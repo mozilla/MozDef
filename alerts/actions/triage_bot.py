@@ -21,21 +21,6 @@ from mozdef_util.utilities.toUTC import toUTC
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "triage_bot.json")
 
 
-# Maps the classnames of alerts to functions used to handle alerts of these kind
-# in order to produce an `AlertTriageRequest`.
-#
-# This alert action's configuration also supports a list of classnames that can
-# be used to narrow the list of alerts that the action will handle.
-# Note that the alert action will convert classnames to lowercase, so classnames
-# must be provided as they appear below.
-SUPPORTED_ALERTS = {
-    'AlertGenericLoader:ssh_open_crit': _make_sensitive_host_access,
-    'AlertAuthSignRelengSSH': _make_ssh_access_releng,
-    'AlertGenericLoader:duosecurity_bypass_generated': _make_duo_code_gen,
-    'AlertGenericLoader:duosecurity_bypass_used': _make_duo_code_used,
-}
-
-
 Alert = types.Dict[types.Any, types.Any]
 Email = str
 
@@ -205,6 +190,12 @@ UserByNameInterface = types.Callable[[Url, Token, Username], types.Optional[User
 DiscoveryInterface = types.Callable[[], types.List[LambdaFunction]]
 DispatchInterface = types.Callable[[AlertTriageRequest, str], DispatchResult]
 
+# Supported alerts have functions that can process those alerts along with a
+# configuration and OAuth token to produce an `AlertTriageRequest`.
+RequestBuilderInterface = types.Callable[
+    [dict, Config, str],
+    types.Optional[AlertTriageRequest]]
+
 
 class message(object):
     """The main interface to the alert action.
@@ -372,12 +363,10 @@ def try_make_outbound(
     if alert_class_name is None:
         return None
 
-    request_builder = SUPPORTED_ALERTS.get(
-        alert_class_name,
-        lambda _alrt, _cfg, _tkn: None)
+    builder = _request_builder(alert_class_name)
 
     if alert_class_name in cfg.enabled_alert_classnames:
-        return request_builder(alert, cfg, oauth_tkn)
+        return builder(alert, cfg, oauth_tkn)
 
     return None
 
@@ -772,3 +761,28 @@ def _update_duplicate_chain(
         raise APIError(error)
 
     return True
+
+
+def _request_builder(alert_classname: str) -> RequestBuilderInterface:
+    '''Maps the classnames of alerts to functions used to handle alerts of these
+    kind in order to produce an `AlertTriageRequest`.
+
+    This alert action's configuration also supports a list of classnames that can
+    be used to narrow the list of alerts that the action will handle.
+    Note that the alert action will convert classnames to lowercase, so classnames
+    must be provided as they appear below.
+    '''
+
+    SUPPORTED_ALERTS = {
+        'AlertGenericLoader:ssh_open_crit': _make_sensitive_host_access,
+        'AlertAuthSignRelengSSH': _make_ssh_access_releng,
+        'AlertGenericLoader:duosecurity_bypass_generated': _make_duo_code_gen,
+        'AlertGenericLoader:duosecurity_bypass_used': _make_duo_code_used,
+    }
+
+    # A `RequestBuilderInterface` can return `None` to indicate that it failed
+    # to process a request, so having this function return `None` directly
+    # actually creates unnecessary error handling.
+    return SUPPORTED_ALERTS.get(
+        alert_classname,
+        lambda _alert, _config, _token: None)
