@@ -16,6 +16,7 @@ def _ssh_sensitive_host_alert():
             "utctimestamp": "2019-11-04T23:04:36.351726+00:00",
             "severity": "WARNING",
             "summary": "Session opened on sensitive host by (1): tester [test@website.com]",
+            "classname": "AlertGenericLoader:ssh_open_crit",
             "category": "session",
             "tags": ["session", "successful"],
             "events": [
@@ -78,6 +79,7 @@ def _duo_bypass_code_gen_alert():
             "utctimestamp": "2019-11-04T23:36:36.966791+00:00",
             "severity": "NOTICE",
             "summary": "DuoSecurity MFA Bypass codes generated (1): tester@website.com [a.website.com]",
+            "classname": "AlertGenericLoader:duosecurity_bypass_generated",
             "category": "duo",
             "tags": ["duosecurity"],
             "events": [
@@ -146,6 +148,7 @@ def _duo_bypass_code_used_alert():
             "utctimestamp": "2019-10-21T15:55:46.033838+00:00",
             "severity": "NOTICE",
             "summary": "DuoSecurity MFA Bypass codes used to log in (1): tester@website.com [website.com]",
+            "classname": "AlertGenericLoader:duosecurity_bypass_used",
             "category": "bypassused",
             "tags": ["duosecurity", "used", "duo_bypass_codes_used"],
             "events": [
@@ -219,6 +222,7 @@ def _ssh_access_releng_alert():
             "utctimestamp": "2019-11-05T01:14:57.912292+00:00",
             "severity": "NOTICE",
             "summary": "SSH login from 10.49.48.100 on releng.website.com as user tester",
+            "classname": "AlertAuthSignRelengSSH",
             "category": "access",
             "tags": ["ssh"],
             "events": [
@@ -305,6 +309,12 @@ class TestAlertRecognition(object):
     """
 
     mock_config = bot.Config(
+        [
+            "AlertGenericLoader:ssh_open_crit",
+            "AlertAuthSignRelengSSH",
+            "AlertGenericLoader:duosecurity_bypass_generated",
+            "AlertGenericLoader:duosecurity_bypass_used"
+        ],
         "", "", "", "", "", 0, "", "", "", 0, "", "", "", "", "", ""
     )
 
@@ -312,7 +322,7 @@ class TestAlertRecognition(object):
         msg = _ssh_sensitive_host_alert()
 
         # Without the `session` tag, the alert should not fire.
-        msg["_source"]["tags"] = ["test"]
+        msg["_source"]["classname"] = "test"
 
         result = bot.try_make_outbound(msg, self.mock_config, "")
 
