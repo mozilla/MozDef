@@ -28,50 +28,26 @@ true = True
 false = False
 null = None
 
-SSH_ACCESS_EVENT = {
-    "receivedtimestamp": "2020-04-15T22:01:33.799290+00:00",
-    "mozdefhostname": "mozdef1.private.mdc1.mozilla.com",
-    "details": {
-        "program": "sshd",
-        "eventsourceipaddress": "10.48.75.211",
-        "username": "emrose",
-    },
-    "tags": [".source.moz_net"],
-    "source": "authpriv",
-    "processname": "sshd",
-    "severity": "INFO",
-    "processid": "31365",
-    "summary": "pam_unix(sshd:session): session opened for user emrose by (uid=0)",
-    "hostname": "mozdefalert.private.mdc1.mozilla.com",
-    "facility": "authpriv",
-    "utctimestamp": "2020-04-15T22:01:33+00:00",
-    "timestamp": "2020-04-15T22:01:33+00:00",
-    "category": "syslog",
-    "type": "event",
-    "plugins": ["parse_sshd", "parse_su", "sshdFindIP"],
-}
-
 # Fill in with events you want to write to elasticsearch
 # NEED TO MODIFY
 events = [
-#    {
-#        "category": "testcategory",
-#        "details": {
-#            "program": "sshd",
-#            "type": "Success Login",
-#            "username": "ttesterson",
-#            "sourceipaddress": random_ip(),
-#        },
-#        "hostname": "i-99999999",
-#        "mozdefhostname": socket.gethostname(),
-#        "processid": "1337",
-#        "processname": "auth0_cron",
-#        "severity": "INFO",
-#        "source": "auth0",
-#        "summary": "login invalid ldap_count_entries failed",
-#        "tags": ["auth0"],
-#    }
-    SSH_ACCESS_EVENT,
+    {
+        "category": "testcategory",
+        "details": {
+            "program": "sshd",
+            "type": "Success Login",
+            "username": "ttesterson",
+            "sourceipaddress": random_ip(),
+        },
+        "hostname": "i-99999999",
+        "mozdefhostname": socket.gethostname(),
+        "processid": "1337",
+        "processname": "auth0_cron",
+        "severity": "INFO",
+        "source": "auth0",
+        "summary": "login invalid ldap_count_entries failed",
+        "tags": ["auth0"],
+    }
 ]
 
 es_client = ElasticsearchClient(options.elasticsearch_host)
@@ -84,3 +60,4 @@ for event in events:
     es_client.save_event(body=event)
     print("Wrote event to elasticsearch")
     time.sleep(0.2)
+
