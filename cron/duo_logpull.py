@@ -180,7 +180,7 @@ def main():
     mozmsg.source = "DuoSecurityAPI"
     if options.DEBUG:
         mozmsg.debug = options.DEBUG
-        mozmsg.set_send_to_file(True)
+        mozmsg.set_send_to_syslog(True, only_syslog=True)
 
     # This will process events for all 3 log types and send them to MozDef. the state stores the last position in the
     # log when this script was last called.
