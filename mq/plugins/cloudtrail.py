@@ -38,6 +38,7 @@ class message(object):
             'details.requestparameters.describevpcendpointsrequest.filter.value',
             'details.requestparameters.describevpcendpointsrequest.vpcendpointid',
             'details.requestparameters.describevpcendpointserviceconfigurationsrequest',
+            'details.requestparameters.describecapacityreservationsrequest',
             'details.requestparameters.disableapitermination',
             'details.requestparameters.distributionconfig.callerreference',
             'details.requestparameters.domainname',
@@ -63,8 +64,11 @@ class message(object):
             'details.responseelements.endpoint',
             'details.responseelements.securitygroups',
             'details.responseelements.lastmodified',
+            'details.responseelements.lastmodifieddate',
             'details.responseelements.findings.service.additionalinfo.unusual',
-            'details.responseelements.distribution.distributionconfig.callerreference'
+            'details.responseelements.distribution.distributionconfig.callerreference',
+            'details.responseelements.invalidation.invalidationbatch.callerreference',
+            'details.responseelements.responseparameters.method.response.header.access-control-allow-methods',
         ]
 
     def convert_key_raw_str(self, needle, haystack):
