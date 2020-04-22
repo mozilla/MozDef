@@ -6,7 +6,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, WildcardMatch
 
 
 class ldapGroupModify(AlertTask):
@@ -17,6 +17,11 @@ class ldapGroupModify(AlertTask):
             TermMatch('category', 'ldapChange'),
             TermMatch('details.changetype', 'modify'),
             PhraseMatch("summary", "groups")
+        ])
+
+        # ignore test accounts and attempts to create accounts that already exist.
+        search_query.add_must_not([
+            WildcardMatch('details.actor', '*bind*'),
         ])
 
         self.filtersManual(search_query)
