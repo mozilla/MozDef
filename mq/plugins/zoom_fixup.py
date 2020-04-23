@@ -74,11 +74,23 @@ class message(object):
                 # JMESPath likes to silently return a None object
                 if mappedvalue is not None:
                     newmessage['details'][key] = mappedvalue
-            # Some zoom messages don't contain details.start_time
-            # so we set it to original start time
-            if key_exists('details.start_time', newmessage) and key_exists('details.original_sched_start_time', newmessage):
-                if newmessage['details']['start_time'] == '':
-                    newmessage['details']['start_time'] = newmessage['details']['original_sched_start_time']
+            # Some zoom messages don't contain values within details.payload.object.start_time or details.payload.old_object.start_time.
+            # so we set it to original start time, if there is no time data, we remove the key from the message.
+            if key_exists('details.payload.object.start_time', message):
+                if message['details']['payload']['object']['start_time'] != '':
+                    newmessage['details']['start_time'] = message['details']['payload']['object']['start_time']
+                else:
+                    del newmessage['details']['start_time']
+            if key_exists('details.payload.old_object.start_time', message):
+                if message['details']['payload']['old_object']['start_time'] != '':
+                    newmessage['details']['original_sched_start_time'] = message['details']['payload']['old_object']['start_time']
+                else:
+                    del newmessage['details']['original_sched_start_time']
+            # Duration can exist in details.payload.object and details.payload.old_object, let's ensure we are capturing these correctly for updated meetings.
+            if key_exists('details.payload.object.duration', message):
+                newmessage['details']['duration'] = message['details']['payload']['object']['duration']
+            if key_exists('details.payload.old_object.duration', message):
+                newmessage['details']['original_sched_duration'] = message['details']['payload']['old_object']['duration']
 
         else:
             newmessage = None
