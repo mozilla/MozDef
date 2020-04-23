@@ -67,7 +67,7 @@ def asn_movement(db, escalate: Severity) -> FactorInterface:
         asn_pairs = [
             (asn_info[i], asn_info[i + 1])
             for i in range(len(asn_info) - 1)
-            if asn_info[i] is not None and  asn_info[i + 1] is not None
+            if asn_info[i] is not None and asn_info[i + 1] is not None
         ]
         asn_hops = [
             pair
