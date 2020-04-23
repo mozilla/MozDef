@@ -5,30 +5,12 @@
 #
 
 import sys
-from datetime import datetime, timedelta, tzinfo
-
-try:
-    from datetime import timezone
-
-    utc = timezone.utc
-except ImportError:
-    # Hi there python2 user
-    class UTC(tzinfo):
-        def utcoffset(self, dt):
-            return timedelta(0)
-
-        def tzname(self, dt):
-            return "UTC"
-
-        def dst(self, dt):
-            return timedelta(0)
-
-    utc = UTC()
-from configlib import getConfig, OptionParser
 import json
 import duo_client
 import mozdef_client as mozdef
 import pickle
+from configlib import getConfig, OptionParser
+from mozdef_util.utilities.toUTC import toUTC
 
 
 def normalize(details):
@@ -40,6 +22,12 @@ def normalize(details):
     for f in details:
         if f in ("ip", "ip_address", "client_ip"):
             normalized["sourceipaddress"] = details[f]
+            continue
+        if f in ("eventtype", "event_type"):
+            normalized["eventtype"] = details[f]
+            continue
+        if f in ("host", "hostname"):
+            normalized["hostname"] = details[f]
             continue
         if f == "result":
             if details[f].lower() == "success":
@@ -77,7 +65,7 @@ def process_events(mozmsg, duo_events, etype, state):
     elif etype == "telephony":
         noconsume = ["timestamp", "host", "context"]
     elif etype == "authentication":
-        noconsume = ["timestamp", "host", "eventtype"]
+        noconsume = ["timestamp", "host", "event_type"]
     else:
         return
 
@@ -95,9 +83,14 @@ def process_events(mozmsg, duo_events, etype, state):
         details = {}
         # Timestamp format: http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
         # Duo logs come as a UTC timestamp
-        dt = datetime.utcfromtimestamp(e["timestamp"])
-        mozmsg.timestamp = dt.replace(tzinfo=utc).isoformat()
-        mozmsg.log["hostname"] = e["host"]
+        if 'timestamp' in e:
+            mozmsg.timestamp = toUTC(e['timestamp']).isoformat()
+        # mozdef_client sets hostname to the host that the client runs on,
+        # so we'll set the clientname in this cron to be the host we pulled from.
+        if 'host' in e and not None:
+            mozmsg.log["hostname"] = e["host"]
+        if 'hostname' in e and not None:
+            mozmsg.log["hostname"] = e["hostname"]
         for i in e:
             if i in noconsume:
                 continue
@@ -115,10 +108,21 @@ def process_events(mozmsg, duo_events, etype, state):
         if "access_device" in localdetails:
             if "ip" in localdetails["access_device"]:
                 localdetails["sourceipaddress"] = localdetails["access_device"]["ip"]
+            if "hostname" in localdetails["access_device"]:
+                if localdetails["access_device"]["hostname"] is None:
+                    del localdetails["access_device"]["hostname"]
         mozmsg.details = localdetails
         del(localdetails)
+        mozmsg.hostname = options.URL
         if etype == "administration":
-            mozmsg.summary = e["action"]
+            if 'error' in e:
+                mozmsg.summary = (
+                    e["action"] + " because of " + e["error"] + " by " + e["username"]
+                )
+            else:
+                mozmsg.summary = (
+                    e["action"] + " by " + e["username"]
+                )
         elif etype == "telephony":
             mozmsg.summary = e["context"]
         elif etype == "authentication":
@@ -127,9 +131,14 @@ def process_events(mozmsg, duo_events, etype, state):
                     e["eventtype"] + " " + e["result"] + " for " + e["username"]
                 )
             else:
-                mozmsg.summary = (
-                    e["eventtype"] + " " + e["result"] + " for " + e["user"]["name"]
-                )
+                if 'reason' in e and e['reason'] is not None:
+                    mozmsg.summary = (
+                        e["eventtype"] + " " + e["result"] + " for " + e["user"]["name"] + " due to " + e["reason"]
+                    )
+                else:
+                    mozmsg.summary = (
+                        e["eventtype"] + " " + e["result"] + " for " + e["user"]["name"]
+                    )
 
         mozmsg.send()
 
