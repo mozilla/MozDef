@@ -6,7 +6,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch
+from mozdef_util.query_models import SearchQuery, TermMatch, WildcardMatch
 
 
 class ldapDelete(AlertTask):
@@ -16,6 +16,11 @@ class ldapDelete(AlertTask):
         search_query.add_must([
             TermMatch('category', 'ldapChange'),
             TermMatch('details.changetype', 'delete')
+        ])
+
+        # ignore test accounts and attempts to create accounts that already exist.
+        search_query.add_must_not([
+            WildcardMatch('details.actor', '*bind*'),
         ])
 
         self.filtersManual(search_query)
