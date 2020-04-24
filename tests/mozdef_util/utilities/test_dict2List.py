@@ -478,11 +478,42 @@ TEST_ALERT = {
 
 
 class TestDict2List(UnitTestSuite):
-    def test_flatten_geomodel_alert(self):
-        flattened = list(dict2List(TEST_ALERT))
+    def test_simple_input(self):
+        test_input = {
+            'test': {
+                'values': [
+                    {
+                        'thing': ('value1', 32),
+                        'other': ('value2', 100),
+                    },
+                    {
+                        'thing': ('value1', -10),
+                        'other': ('value2', 1),
+                    }
+                ],
+            },
+            ('complex', 'key'): True,
+            'count': 100,
+            'time': datetime.datetime.utcnow(),
+            'error': None,
+        }
 
-        assert isinstance(flattened, list)
+        flattened = list(dict2List(test_input))
+
+        # We can't guarantee the order that keys and values will be pulled out
+        # in so instead of doing a comparison to the list we might expect,
+        # we test the interface of the function.
         assert all([
-            isinstance(value, (str, int, float, bool))
+            isinstance(value, (str, int, float, bool, type(None)))
             for value in flattened
         ])
+        assert len(set(flattened)) > 0
+
+    def test_geomodel_alert(self):
+        flattened = list(dict2List(TEST_ALERT))
+
+        assert all([
+            isinstance(value, (str, int, float, bool, type(None)))
+            for value in flattened
+        ])
+        assert len(set(flattened)) > 0
