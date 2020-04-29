@@ -108,4 +108,9 @@ Add is_ip utility function
 3.0.4 (2019-09-19)
 ------------------
 
-* Added SubnetMatch query model
+* Added SubnetMatch query models
+
+3.0.5 (2020-04-29)
+------------------
+
+* Rewrite dict2List to improve correctness and generality
