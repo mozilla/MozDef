@@ -5,8 +5,6 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2017 Mozilla Corporation
 
-import json
-
 from mozdef_util.utilities.dot_dict import DotDict
 from mozdef_util.query_models import SearchQuery, ExistsMatch
 
