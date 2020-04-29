@@ -114,3 +114,8 @@ Add is_ip utility function
 ------------------
 
 * Rewrite dict2List to improve correctness and generality
+
+3.0.6 (2020-04-29)
+------------------
+
+* Ensure dict2List changes are included
