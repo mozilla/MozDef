@@ -13,8 +13,5 @@
   "whitelist": {
     "users": [],
     "cidrs": []
-  },
-  "factors": {
-    "asn_movement": null
   }
 }

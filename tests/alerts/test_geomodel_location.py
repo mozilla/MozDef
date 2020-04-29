@@ -125,9 +125,8 @@ class TestAlertGeoModel(GeoModelTest):
                     },
                 }
             ],
-            'factors': [],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -291,9 +290,8 @@ class TestOnePreviousLocality(GeoModelTest):
                     },
                 }
             ],
-            'factors': [],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -373,9 +371,8 @@ class TestInitialLocalityPositiveAlert(GeoModelTest):
                     },
                 }
             ],
-            'factors': [],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -457,7 +454,7 @@ class TestSameCitiesOutsideRange(GeoModelTest):
         'category': 'geomodel',
         'summary': 'tester1 seen in Sherbrooke,CA then Sherbrooke,CA',
         'details': {'username': 'tester1'},
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -535,9 +532,8 @@ class TestMultipleEventsInWindow(GeoModelTest):
                     },
                 }
             ],
-            'factors': [],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -678,9 +674,8 @@ class TestSameCitiesFarAway(GeoModelTest):
                     },
                 }
             ],
-            'factors': [],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 
@@ -826,9 +821,8 @@ class TestMultipleImpossibleJourneys(GeoModelTest):
                     },
                 },
             ],
-            'factors': [],
         },
-        'severity': 'INFO',
+        'severity': 'WARNING',
         'tags': ['geomodel'],
     }
 

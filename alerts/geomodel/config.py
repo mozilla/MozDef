@@ -32,20 +32,6 @@ class Whitelist(NamedTuple):
     cidrs: List[str]
 
 
-class ASNMovement(NamedTuple):
-    '''Configuration for the `asn_movement` factor.
-    '''
-
-    maxmind_db_path: str
-
-
-class Factors(NamedTuple):
-    '''Configuration for factors.
-    '''
-
-    asn_movement: ASNMovement
-
-
 class Config(NamedTuple):
     '''The top-level configuration type.
     '''
@@ -53,4 +39,3 @@ class Config(NamedTuple):
     localities: Localities
     events: Events
     whitelist: Whitelist
-    factors: Factors
