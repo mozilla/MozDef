@@ -69,6 +69,7 @@ class message(object):
             'details.responseelements.distribution.distributionconfig.callerreference',
             'details.responseelements.invalidation.invalidationbatch.callerreference',
             'details.responseelements.responseparameters.method.response.header.access-control-allow-methods',
+            'details.responseelements.state',
         ]
 
     def convert_key_raw_str(self, needle, haystack):
