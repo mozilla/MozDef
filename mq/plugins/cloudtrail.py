@@ -54,6 +54,7 @@ class message(object):
             'details.requestparameters.source',
             'details.requestparameters.tagging',
             'details.requestparameters.logging',
+            'details.requestparameters.vpc',
             'details.responseelements.role',
             'details.responseelements.policy',
             'details.requestparameters.rule',
