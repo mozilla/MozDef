@@ -69,6 +69,7 @@ class TestPossibleUsernames:
         # Ensure possible users found and duplicates removed.
         assert len(enriched['details']['possible_usernames']) == 1
         assert enriched['details']['possible_usernames'][0] == 'tester1'
+        assert 'tester1' in enriched['summary']
 
     def test_hostname_detection(self):
         from alerts.plugins.possible_usernames import _most_common_hostname

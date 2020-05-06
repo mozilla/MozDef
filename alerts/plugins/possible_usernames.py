@@ -77,6 +77,8 @@ def enrich(alert: dict, syslog_evts: types.List[dict]) -> dict:
     new `details.possible_usernames` field.
     '''
 
+    summary = alert.get('summary', '')
+
     details = alert.get('details', {})
 
     scan_results = [
@@ -93,6 +95,12 @@ def enrich(alert: dict, syslog_evts: types.List[dict]) -> dict:
     details['possible_usernames'] = possible_usernames
 
     alert['details'] = details
+
+    if len(possible_usernames) > 0:
+        alert['summary'] = '{}; Possible users: {}'.format(
+            summary,
+            ', '.join(possible_usernames),
+        )
 
     return alert
 
