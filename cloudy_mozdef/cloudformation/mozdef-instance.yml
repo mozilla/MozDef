@@ -267,7 +267,6 @@ Resources:
                 # XXX TBD find a way to make this configurable outside of deploys.
                 ALERTS = {
                     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
-                    'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
                     'get_watchlist.AlertWatchList': {'schedule': timedelta(minutes=1)},
                     'guard_duty_probe.AlertGuardDutyProbe': {'schedule': crontab(minute='*/1')},
                     'cloudtrail_logging_disabled.AlertCloudtrailLoggingDisabled': {'schedule': timedelta(minutes=1)},

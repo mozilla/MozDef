@@ -124,7 +124,6 @@ and add your new foo alert to the others with a crontab style schedule
   ALERTS = {
     'foo.AlertFoo': {'schedule': crontab(minute='*/1')},
     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
-    'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
   }
 
 The format is `'pythonfilename.classname': {'schedule': crontab(timeunit='*/x')}` and you can use any celery time unit (minute, hour) along with any schedule that makes sense for your environment.
