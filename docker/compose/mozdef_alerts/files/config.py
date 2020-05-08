@@ -12,7 +12,6 @@ import os
 
 ALERTS = {
     'bruteforce_ssh.AlertBruteforceSsh': {'schedule': crontab(minute='*/1')},
-    'unauth_ssh.AlertUnauthSSH': {'schedule': crontab(minute='*/1')},
     'get_watchlist.AlertWatchList': {'schedule': crontab(minute='*/1')},
 }
 
