@@ -67,7 +67,33 @@ class TestTriageBot:
             mock.post(cfg.url + "/alertstatus", json={"error": None})
             (new_msg, new_meta) = bot.process(msg, {}, cfg)
 
-            assert new_msg == msg
+    def test_process_reformats_messages_for_elasticsearch(self):
+        msg = {
+            "details": {
+                "identifier": "id",
+                "user": {
+                    "email": "tester@site.com",
+                    "slack": "tester",
+                },
+                "identityConfidence": "high",
+                "response": "yes",
+            },
+        }
+
+        cfg = bot.RESTConfig("http://mock.site", "token")
+
+        with requests_mock.mock() as mock:
+            mock.post(cfg.url + "/alertstatus", json={"error": None})
+            (new_msg, new_meta) = bot.process(msg, {}, cfg)
+
+            assert "user" not in msg["details"]
+            assert msg["details"] == {
+                "identifier": "id",
+                "email": "tester@site.com",
+                "slack": "tester",
+                "identityConfidence": "high",
+                "response": "yes",
+            }
 
 
 class TestLambda:
