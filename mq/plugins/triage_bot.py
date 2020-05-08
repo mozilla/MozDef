@@ -203,6 +203,12 @@ def process(msg, meta, api_cfg):
     if not update_succeeded:
         return (None, None)
 
+    # Transform the message before sending it back to ES.  The `user` field
+    # in particular is reserved, so we will expand ours' contents out.
+    del msg["details"]["user"]
+    msg["details"]["email"] = email
+    msg["details"]["slack"] = slack
+
     return (msg, meta)
 
 
