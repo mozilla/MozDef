@@ -67,7 +67,20 @@ class TestTriageBot:
             mock.post(cfg.url + "/alertstatus", json={"error": None})
             (new_msg, new_meta) = bot.process(msg, {}, cfg)
 
-            assert new_msg == msg
+            assert len(mock.request_history) == 1
+
+            req_json = mock.request_history[0].json()
+
+            assert req_json == {
+                "alert": "id",
+                "status": "acknowledged",
+                "user": {
+                    "email": "tester@site.com",
+                    "slack": "tester",
+                },
+                "identityConfidence": "high",
+                "response": "yes",
+            }
 
 
 class TestLambda:
