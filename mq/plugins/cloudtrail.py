@@ -54,11 +54,13 @@ class message(object):
             'details.requestparameters.source',
             'details.requestparameters.tagging',
             'details.requestparameters.logging',
+            'details.requestparameters.notificationconfiguration',
             'details.requestparameters.vpc',
             'details.responseelements.role',
             'details.responseelements.policy',
             'details.requestparameters.rule',
             'details.responseelements.createddate',
+            'details.responseelements.creationtime'
             'details.responseelements.credentials',
             'details.responseelements.dbsubnetgroup',
             'details.responseelements.subnets',
