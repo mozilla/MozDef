@@ -86,6 +86,12 @@ class message(object):
                     newmessage['details']['original_sched_start_time'] = message['details']['payload']['old_object']['start_time']
                 else:
                     del newmessage['details']['original_sched_start_time']
+            # Some zoom messages do not contain values in details.recording_file_end, so we'll remove the key from the message if it's empty
+            if key_exists('details.payload.object.recording_files.recording_end', message):
+                if message['details']['payload']['object']['recording_files']['recording_end'] != '':
+                    newmessage['details']['recording_file_end'] = message['details']['payload']['object']['recording_file']['recording_end']
+                else:
+                    del newmessage['details']['recording_file_end']
             # Duration can exist in details.payload.object and details.payload.old_object, let's ensure we are capturing these correctly for updated meetings.
             if key_exists('details.payload.object.duration', message):
                 newmessage['details']['duration'] = message['details']['payload']['object']['duration']
