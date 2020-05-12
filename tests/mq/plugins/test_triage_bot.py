@@ -67,6 +67,21 @@ class TestTriageBot:
             mock.post(cfg.url + "/alertstatus", json={"error": None})
             (new_msg, new_meta) = bot.process(msg, {}, cfg)
 
+            assert len(mock.request_history) == 1
+
+            req_json = mock.request_history[0].json()
+
+            assert req_json == {
+                "alert": "id",
+                "status": "acknowledged",
+                "user": {
+                    "email": "tester@site.com",
+                    "slack": "tester",
+                },
+                "identityConfidence": "high",
+                "response": "yes",
+            }
+
     def test_process_reformats_messages_for_elasticsearch(self):
         msg = {
             "details": {
