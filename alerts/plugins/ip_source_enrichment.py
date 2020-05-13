@@ -143,7 +143,7 @@ class message(object):
 
     def __init__(self):
         # Run plugin on all alerts
-        self.registration = '*'
+        self.registration = ['*']
         self._config = _load_config(CONFIG_FILE)
 
     def onMessage(self, message):
