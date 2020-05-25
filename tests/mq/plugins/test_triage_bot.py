@@ -107,7 +107,7 @@ class TestTriageBot:
                 "email": "tester@site.com",
                 "slack": "tester",
                 "identityConfidence": "high",
-                "response": "yes",
+                "userresponse": "yes",
             }
 
 
