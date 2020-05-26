@@ -33,7 +33,6 @@ api_aws_lambda:
   original_sched_duration: details.payload.old_object.duration
   original_sched_duration: details.payload.old_object.id
   original_sched_start_time: details.payload.old_object.start_time
-  original_sched_topic: details.payload.old_object.topic
   username: details.payload.operator
   user_id: details.payload.operator_id
   ts: details.payload.time_stamp
