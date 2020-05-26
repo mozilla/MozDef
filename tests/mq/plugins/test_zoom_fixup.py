@@ -387,3 +387,52 @@ class TestZoomFixupPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_remove_old_topic_string(self):
+        msg = {
+            'summary': 'zoom_event',
+            'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
+            'severity': 'info',
+            'eventsource': 'MozDef-EF-zoom',
+            'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'category': 'zoom',
+            'details': {
+                'event': 'meeting.updated',
+                'payload': {
+                    'account_id': 'ABCDEFG123456',
+                    'object': {
+                        'account_id': 'ABCDEFG123456',
+                        'id': '123456789',
+                        'type': '2',
+                        'uuid': 'aodij/OWIE9241048='
+                    },
+                    'old_object': {
+                        'topic': 'my secret meeting',
+                        'duration': '60'
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'summary': 'zoom: meeting.updated',
+            'category': 'zoom',
+            'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
+            'severity': 'info',
+            'eventsource': 'MozDef-EF-zoom',
+            'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'processname': 'zoom_webhook_api',
+            'details': {
+                'account_id': 'ABCDEFG123456',
+                'event': 'meeting.updated',
+                'id': '123456789',
+                'type': '2',
+                'uuid': 'aodij/OWIE9241048=',
+                'original_sched_duration': '60'
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
