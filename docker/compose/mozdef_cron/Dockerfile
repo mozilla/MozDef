@@ -13,6 +13,7 @@ COPY docker/compose/mozdef_cron/files/cron_entries.txt /cron_entries.txt
 
 # Copy config files for crons
 COPY --chown=mozdef:mozdef docker/compose/mozdef_cron/files/backup.conf /opt/mozdef/envs/mozdef/cron/backup.conf
+COPY --chown=mozdef:mozdef docker/compose/mozdef_cron/files/rotateIndexes.conf /opt/mozdef/envs/mozdef/cron/rotateIndexes.conf
 COPY --chown=mozdef:mozdef docker/compose/mozdef_cron/files/eventStats.conf /opt/mozdef/envs/mozdef/cron/eventStats.conf
 COPY --chown=mozdef:mozdef docker/compose/mozdef_cron/files/healthAndStatus.conf /opt/mozdef/envs/mozdef/cron/healthAndStatus.conf
 COPY --chown=mozdef:mozdef docker/compose/mozdef_cron/files/healthToMongo.conf /opt/mozdef/envs/mozdef/cron/healthToMongo.conf
