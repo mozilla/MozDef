@@ -206,8 +206,10 @@ def process(msg, meta, api_cfg):
     # Transform the message before sending it back to ES.  The `user` field
     # in particular is reserved, so we will expand ours' contents out.
     del msg["details"]["user"]
+    del msg["details"]["response"]
     msg["details"]["email"] = email
     msg["details"]["slack"] = slack
+    msg["details"]["userresponse"] = resp.value
 
     return (msg, meta)
 
