@@ -40,10 +40,10 @@ parser.add_argument(
     nargs='?'
 )
 
-default_file = os.path.realpath(cron_dir_path + '/backup.conf')
+default_file = os.path.realpath(cron_dir_path + '/rotateIndexes.conf')
 parser.add_argument(
     'backup_conf_file',
-    help='The relative path to backup.conf file (default: {0})'.format(default_file),
+    help='The relative path to rotateIndexes.conf file (default: {0})'.format(default_file),
     default=default_file,
     nargs='?'
 )

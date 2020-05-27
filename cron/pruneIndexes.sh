@@ -6,5 +6,5 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 source  /opt/mozdef/envs/python/bin/activate
-/opt/mozdef/envs/mozdef/cron/pruneIndexes.py -c /opt/mozdef/envs/mozdef/cron/backup.conf
+/opt/mozdef/envs/mozdef/cron/pruneIndexes.py -c /opt/mozdef/envs/mozdef/cron/pruneIndexes.conf
 
