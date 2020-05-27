@@ -388,6 +388,59 @@ class TestZoomFixupPlugin():
         assert retmessage == expected_message
         assert retmeta == {}
 
+    def test_recording_file_end_empty_string(self):
+        msg = {
+            'summary': 'zoom_event',
+            'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
+            'severity': 'info',
+            'eventsource': 'MozDef-EF-zoom',
+            'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'category': 'zoom',
+            'details': {
+                'event': 'recording.paused',
+                'payload': {
+                    'account_id': 'ABCDEFG123456',
+                    'object': {
+                        'account_id': 'ABCDEFG123456',
+                        'id': '123456789',
+                        'type': '2',
+                        'uuid': 'aodij/OWIE9241048=',
+                        'recording_file': {
+                            'recording_end': ''
+                        }
+                    },
+                    'old_object': {
+                        'start_time': '2020-02-11T20:25:30Z',
+                        'duration': '60'
+                    }
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'summary': 'zoom: recording.paused',
+            'category': 'zoom',
+            'source': 'api_aws_lambda',
+            'hostname': 'zoom_host',
+            'severity': 'info',
+            'eventsource': 'MozDef-EF-zoom',
+            'tags': ['zoom', 'MozDef-EF-zoom-dev'],
+            'processname': 'zoom_webhook_api',
+            'details': {
+                'account_id': 'ABCDEFG123456',
+                'event': 'recording.paused',
+                'id': '123456789',
+                'type': '2',
+                'uuid': 'aodij/OWIE9241048=',
+                'original_sched_start_time': '2020-02-11T20:25:30Z',
+                'original_sched_duration': '60'
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
     def test_remove_old_topic_string(self):
         msg = {
             'summary': 'zoom_event',
