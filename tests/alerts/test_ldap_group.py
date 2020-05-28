@@ -90,3 +90,17 @@ class TestldapGroupModify(AlertTestSuite):
             events=[event],
         )
     )
+
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['details']['changepairs'] = [
+        [
+            'delete:member',
+            'cn=test@mozilla.com,ou=distribution_lists,dc=mozilla'
+        ]
+    ]
+    test_cases.append(
+        NegativeAlertTestCase(
+            description='Negative test case that describes a user being deleted from a group',
+            events=[event],
+        )
+    )
