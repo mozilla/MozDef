@@ -17,8 +17,8 @@ With the following contents::
 
   ## Alert Related Tasks ##
   */15 * * * * /opt/mozdef/envs/mozdef/cron/cronic /opt/mozdef/envs/mozdef/cron/eventStats.sh
-  0 0 * * * /opt/mozdef/envs/mozdef/cron/cronic /opt/mozdef/envs/mozdef/cron/esMaint.sh
-  0 8 * * * /opt/mozdef/envs/mozdef/cron/cronic /opt/mozdef/envs/mozdef/cron/pruneES.sh
+  0 0 * * * /opt/mozdef/envs/mozdef/cron/cronic /opt/mozdef/envs/mozdef/cron/rotateIndexes.sh
+  0 8 * * * /opt/mozdef/envs/mozdef/cron/cronic /opt/mozdef/envs/mozdef/cron/pruneIndexes.sh
   0 0 * * * /opt/mozdef/envs/mozdef/cron/cronic /opt/mozdef/envs/mozdef/cron/update_geolite_db.sh
   0 1 * * 0 /opt/mozdef/envs/mozdef/cron/cronic /opt/mozdef/envs/mozdef/cron/closeIndices.sh
 
