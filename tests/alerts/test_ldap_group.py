@@ -17,7 +17,9 @@ class TestldapGroupModify(AlertTestSuite):
             "details": {
                 "dn": "cn=example_cn,ou=groups,dc=example",
                 "changetype": "modify",
-                "actor": "mail=user_la@example.com,o=com,dc=example"
+                "actor": "mail=user_la@example.com,o=com,dc=example",
+                "email": "user_la@example.com",
+                "username": "user_la"
             },
             "category": "ldapChange",
             "processid": "1697",
@@ -30,7 +32,7 @@ class TestldapGroupModify(AlertTestSuite):
         "category": "ldap",
         "tags": ["ldap"],
         "severity": "INFO",
-        "summary": "mail=user_la@example.com,o=com,dc=example modify cn=example_cn,ou=groups,dc=example add:memberUid: anotheruser@example.com",
+        "summary": "LDAP group change initiated by user_la@example.com",
     }
 
     test_cases = []
