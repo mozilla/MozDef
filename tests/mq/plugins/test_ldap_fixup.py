@@ -52,5 +52,5 @@ class TestLdapFixupPlugin():
 
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
 
-        assert 'email' not in retmessage['details']
-        assert 'username' not in retmessage['details']
+        assert retmessage['details'].get('email') is None
+        assert retmessage['details'].get('username') is None

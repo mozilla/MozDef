@@ -35,6 +35,11 @@ class message(object):
         actor_email = _parse_email_from_actor(actor_str)
 
         if actor_email is None:
+            details['email'] = None
+            details['username'] = None
+
+            message['details'] = details
+
             return (message, metadata)
 
         username = actor_email.split('@')[0]
