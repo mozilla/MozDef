@@ -6,6 +6,7 @@
   "settings": {},
   "mappings": {
     "_doc": {
+      "date_detection": false,
       "dynamic_templates": [
         {
           "string_fields": {
@@ -116,6 +117,10 @@
           }
         },
         "receivedtimestamp": {
+          "format": "dateOptionalTime",
+          "type": "date"
+        },
+        "timestamp": {
           "format": "dateOptionalTime",
           "type": "date"
         },
