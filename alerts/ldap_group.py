@@ -22,6 +22,7 @@ class ldapGroupModify(AlertTask):
         # ignore test accounts and attempts to create accounts that already exist.
         search_query.add_must_not([
             WildcardMatch('details.actor', '*bind*'),
+            WildcardMatch('details.changepairs', '*delete:member*')
         ])
 
         self.filtersManual(search_query)
