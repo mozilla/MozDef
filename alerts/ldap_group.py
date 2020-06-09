@@ -6,7 +6,11 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, WildcardMatch
+from mozdef_util.query_models import
+    PhraseMatch,\
+    SearchQuery,\
+    TermMatch,\
+    WildcardMatch
 
 
 class ldapGroupModify(AlertTask):
