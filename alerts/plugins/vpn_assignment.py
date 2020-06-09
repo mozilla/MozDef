@@ -74,7 +74,12 @@ class message(object):
         self.search = search_fn
 
     def onMessage(self, msg):
-        return enrich(msg, self.config.search_window_hours, self.search)
+        return enrich(
+            msg,
+            self.config.search_window_hours,
+            self.config.vpn_ip_cidrs,
+            self.search,
+        )
 
 
 def enrich(
