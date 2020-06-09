@@ -6,7 +6,7 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import
+from mozdef_util.query_models import\
     PhraseMatch,\
     SearchQuery,\
     TermMatch,\
