@@ -12,6 +12,7 @@ import netaddr
 from lib.config import ES
 from mozdef_util.elasticsearch_client import ElasticsearchClient
 from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch
+from mozdef_util.utilities.toUTC import toUTC
 
 
 CONFIG_FILE = os.path.join(
@@ -115,7 +116,7 @@ def enrich(
 
     assign_events = sorted(
         [hit.get('_source', {}) for hit in search_fn(search_vpn_assignment)],
-        key=lambda evt: evt['details']['ts'],
+        key=lambda evt: toUTC(evt['details']['utctimestamp']),
         reverse=True,  # Sort into descending order from most recent to least.
     )
 
