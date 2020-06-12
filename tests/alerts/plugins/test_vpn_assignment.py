@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import sys
 
@@ -36,8 +37,8 @@ class TestVPNAssignment:
             'hits': [
                 {
                     '_source': {
+                        'utctimestamp': datetime.utcnow(),
                         'details': {
-                            'ts': 1,
                             'username': 'tester@mozilla.com',
                             'sourceipaddress': '1.2.3.4',
                         }

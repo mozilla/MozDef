@@ -116,7 +116,7 @@ def enrich(
 
     assign_events = sorted(
         [hit.get('_source', {}) for hit in search_fn(search_vpn_assignment)],
-        key=lambda evt: toUTC(evt['details']['utctimestamp']),
+        key=lambda evt: toUTC(evt['utctimestamp']),
         reverse=True,  # Sort into descending order from most recent to least.
     )
 
