@@ -9,6 +9,7 @@ from tests.alerts.alert_test_suite import AlertTestSuite
 from tests.alerts.negative_alert_test_case import NegativeAlertTestCase
 from tests.alerts.positive_alert_test_case import PositiveAlertTestCase
 
+
 class TestAlertSessionInvalidation(AlertTestSuite):
     alert_filename = 'session_invalidation'
 
