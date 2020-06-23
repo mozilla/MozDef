@@ -46,6 +46,9 @@ class AlertSessionInvalidation(AlertTask):
             if event.get('details', {}).get('invalidateduser') is not None
         ]
 
+        if len(terminations) == 0:
+            return None
+
         affected_users = [
             t['invalidateduser']
             for t in terminations
