@@ -62,6 +62,8 @@ class AlertSessionInvalidation(AlertTask):
         alert = self.createAlertDict(summary, category, tags, events)
 
         alert['details'].update({
+            'actor': actor,
+            'username': actor,
             'terminations': terminations,
         })
 
