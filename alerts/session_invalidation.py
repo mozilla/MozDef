@@ -26,7 +26,7 @@ class AlertSessionInvalidation(AlertTask):
         ])
 
         self.filtersManual(query)
-        self.searchEventsAggregated('details.actor', samplesLimit=2000)
+        self.searchEventsAggregated('details.actor', samplesLimit=1000)
         self.walkAggregations(threshold=1, config=None)
 
     def onAggregation(self, agg):
@@ -42,7 +42,7 @@ class AlertSessionInvalidation(AlertTask):
                 'invalidateduser': event['details']['invalidateduser'],
                 'invalidatedsessions': event['details']['invalidatedsessions'],
             }
-            for event in events
+            for event in [evt['_source'] for evt in events]
             if event.get('details', {}).get('invalidateduser') is not None
         ]
 
@@ -59,12 +59,22 @@ class AlertSessionInvalidation(AlertTask):
             ', '.join(affected_users),
         )
 
-        alert = self.createAlertDict(summary, category, tags, events)
+        alert = self.createAlertDict(
+            summary,
+            category,
+            tags,
+            events,
+            severity=severity,
+        )
 
-        alert['details'].update({
+        details = alert.get('details', {})
+
+        details.update({
             'actor': actor,
             'username': actor,
             'terminations': terminations,
         })
+
+        alert['details'] = details
 
         return alert
