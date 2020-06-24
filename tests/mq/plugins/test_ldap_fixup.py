@@ -18,6 +18,7 @@ class TestLdapFixupPlugin():
             'details': {
                 'tls': 'true',
                 'authenticated': 'true',
+                'actor': 'o=com,mail=tester@mozilla.com,dc=mozilla'
             }
         }
         (retmessage, retmeta) = self.plugin.onMessage(msg, {})
@@ -30,7 +31,26 @@ class TestLdapFixupPlugin():
             'details': {
                 'tls_encrypted': 'true',
                 'authenticated': 'true',
+                'email': 'tester@mozilla.com',
+                'username': 'tester',
+                'actor': 'o=com,mail=tester@mozilla.com,dc=mozilla'
             }
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_ldap_fixup_missing_actor(self):
+        msg = {
+            'summary': 'LDAP-Humanizer:45582:1.1.1.1',
+            'hostname': 'random.host.com',
+            'category': 'ldap',
+            'details': {
+                'tls': 'true',
+                'authenticated': 'true',
+            }
+        }
+
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        assert retmessage['details'].get('email') is None
+        assert retmessage['details'].get('username') is None

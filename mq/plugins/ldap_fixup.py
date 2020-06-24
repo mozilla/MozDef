@@ -3,6 +3,8 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
+import typing as types
+
 from mozdef_util.utilities.key_exists import key_exists
 
 
@@ -28,4 +30,37 @@ class message(object):
         if 'source' not in message:
             message['source'] = 'ldap'
 
+        details = message.get('details', {})
+        actor_str = details.get('actor', '')
+        actor_email = _parse_email_from_actor(actor_str)
+
+        if actor_email is None:
+            details['email'] = None
+            details['username'] = None
+
+            message['details'] = details
+
+            return (message, metadata)
+
+        username = actor_email.split('@')[0]
+
+        details['email'] = actor_email
+        details['username'] = username
+
+        message['details'] = details
+
         return (message, metadata)
+
+
+def _parse_email_from_actor(actor_str: str) -> types.Optional[str]:
+    '''Parse the email from a string like
+    `"mail=username@mozilla.com,o=com,dc=mozilla"`
+    '''
+
+    mapping = dict([
+        pair.split('=')
+        for pair in actor_str.split(',')
+        if '=' in pair
+    ])
+
+    return mapping.get('mail')

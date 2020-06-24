@@ -6,7 +6,11 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 from lib.alerttask import AlertTask
-from mozdef_util.query_models import SearchQuery, TermMatch, PhraseMatch, WildcardMatch
+from mozdef_util.query_models import\
+    PhraseMatch,\
+    SearchQuery,\
+    TermMatch,\
+    WildcardMatch
 
 
 class ldapGroupModify(AlertTask):
@@ -22,20 +26,26 @@ class ldapGroupModify(AlertTask):
         # ignore test accounts and attempts to create accounts that already exist.
         search_query.add_must_not([
             WildcardMatch('details.actor', '*bind*'),
-            WildcardMatch('details.changepairs', '*delete:member*')
+            WildcardMatch('details.changepairs', 'delete:*member*')
         ])
 
         self.filtersManual(search_query)
-        # Search events
-        self.searchEventsSimple()
-        self.walkEvents()
+        self.searchEventsAggregated('details.email', samplesLimit=50)
+        self.walkAggregations(threshold=1, config={})
 
     # Set alert properties
-    def onEvent(self, event):
+    def onAggregation(self, agg):
+        email = agg['value']
+        events = agg['events']
+
         category = 'ldap'
         tags = ['ldap']
         severity = 'INFO'
-        summary = '{0}'.format(event['_source']['summary'])
+
+        if email is None:
+            summary = 'LDAP group change detected'
+        else:
+            summary = 'LDAP group change initiated by {0}'.format(email)
 
         # Create the alert object based on these properties
-        return self.createAlertDict(summary, category, tags, [event], severity)
+        return self.createAlertDict(summary, category, tags, events, severity)
