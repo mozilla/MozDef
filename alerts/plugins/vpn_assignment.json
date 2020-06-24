@@ -1,0 +1,5 @@
+{
+  "indices_to_search": ["events"],
+  "search_window_hours": 6,
+  "vpn_ip_cidrs": []
+}
