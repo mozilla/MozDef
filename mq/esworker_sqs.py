@@ -200,16 +200,6 @@ class taskConsumer(object):
                     event = dict()
                     event = msgbody
 
-                    # Was this message sent by fluentd-sqs
-                    fluentd_sqs_specific_fields = {"az", "instance_id", "__tag"}
-                    if fluentd_sqs_specific_fields.issubset(set(msgbody.keys())):
-                        # Until we can influence fluentd-sqs to set the
-                        # 'customendpoint' key before submitting to SQS, we'll
-                        # need to do it here
-                        # TODO : Change nubis fluentd output to include
-                        # 'customendpoint'
-                        event["customendpoint"] = True
-
                     if "tags" in event:
                         event["tags"].extend([options.taskexchange])
                     else:

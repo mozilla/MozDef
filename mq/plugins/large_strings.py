@@ -6,7 +6,7 @@
 
 class message(object):
     def __init__(self):
-        self.registration = ['nubis_events_prod', 'githubeventsqs']
+        self.registration = ['githubeventsqs']
         self.priority = 20
         self.MAX_STRING_LENGTH = 3000
 
