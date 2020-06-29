@@ -38,6 +38,7 @@ class message(object):
             'details.requestparameters.describeinstancetypeofferingsrequest',
             'details.requestparameters.describeinstancetypesrequest',
             'details.requestparameters.describeipv6poolsrequest',
+            'details.requestparameters.describelaunchtemplatesrequest',
             'details.requestparameters.describenatgatewaysrequest',
             'details.requestparameters.describepublicipv4poolsrequest',
             'details.requestparameters.describescheduledinstancesrequest',
