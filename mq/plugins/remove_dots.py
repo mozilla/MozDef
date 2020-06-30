@@ -11,7 +11,9 @@ class message(object):
     def __init__(self):
         '''
         takes an incoming message
-        and sets the keys to lowercase
+        and checks for dots at the
+        start or end of the key and
+        removes them
         '''
 
         self.registration = ['cloudtrail']
