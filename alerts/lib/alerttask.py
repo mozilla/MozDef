@@ -251,15 +251,15 @@ class AlertTask(Task):
     def tagBotNotify(self, alert):
         """
             Tag alert to be excluded based on severity
-            If 'ircchannel' is set in an alert, we automatically notify mozdefbot
+            If 'channel' is set in an alert, we automatically set notify_mozdefbot to True
         """
         alert["notify_mozdefbot"] = True
         if alert["severity"] == "NOTICE" or alert["severity"] == "INFO":
             alert["notify_mozdefbot"] = False
 
-        # If an alert sets specific ircchannel, then we should probably always notify in mozdefbot
+        # If an alert sets specific channel, then we should probably always notify in mozdefbot
         if (
-            "ircchannel" in alert and alert["ircchannel"] != "" and alert["ircchannel"] is not None
+            "channel" in alert and alert["channel"] != "" and alert["channel"] is not None
         ):
             alert["notify_mozdefbot"] = True
         return alert
@@ -426,7 +426,7 @@ class AlertTask(Task):
         events,
         severity="NOTICE",
         url=None,
-        ircchannel=None,
+        channel=None,
     ):
         """
         Create an alert dict
@@ -446,7 +446,7 @@ class AlertTask(Task):
             "category": category,
             "tags": tags,
             "events": [],
-            "ircchannel": ircchannel,
+            "channel": channel,
             "status": DEFAULT_STATUS,
             "classname": classname
         }

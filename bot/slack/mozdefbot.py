@@ -73,9 +73,9 @@ class AlertConsumer(ConsumerMixin):
             # process valid message
             # see where we send this alert
             channel = options.default_alert_channel
-            if 'ircchannel' in body_dict:
-                if body_dict['ircchannel'] in options.channels:
-                    channel = body_dict['ircchannel']
+            if 'channel' in body_dict:
+                if body_dict['channel'] in options.channels:
+                    channel = body_dict['channel']
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel

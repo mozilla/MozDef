@@ -407,7 +407,7 @@ TEST_ALERT = {
             "documentid": "Jd7Ro3EBh9xp2NOItEXH",
         },
     ],
-    "ircchannel": None,
+    "channel": None,
     "status": "manual",
     "classname": "AlertGeoModel",
     "details": {

@@ -28,7 +28,7 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
         "severity": "NOTICE",
         "summary": "SSH login from 1.2.3.4 on host1 as user ttesterson",
         "tags": ['ssh'],
-        'ircchannel': '#somechannel',
+        'channel': '#somechannel',
     }
 
     test_cases = []

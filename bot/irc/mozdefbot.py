@@ -315,10 +315,10 @@ class alertConsumer(ConsumerMixin):
 
             # process valid message
             # see where we send this alert
-            ircchannel = options.alertircchannel
-            if 'ircchannel' in body_dict:
-                if body_dict['ircchannel'] in options.join.split(","):
-                    ircchannel = body_dict['ircchannel']
+            channel = options.alertchannel
+            if 'channel' in body_dict:
+                if body_dict['channel'] in options.join.split(","):
+                    channel = body_dict['channel']
 
             # see if we need to delay a bit before sending the alert, to avoid
             # flooding the channel
@@ -333,7 +333,7 @@ class alertConsumer(ConsumerMixin):
                 sys.stdout.write('alert is more than 450 bytes, truncating\n')
                 body_dict['summary'] = body_dict['summary'][:450] + ' truncated...'
 
-            self.ircBot.client.msg(ircchannel, formatAlert(body_dict))
+            self.ircBot.client.msg(channel, formatAlert(body_dict))
 
             message.ack()
         except ValueError as e:
@@ -395,8 +395,8 @@ def initConfig():
         channels.append(channel)
     options.join = ','.join(channels)
 
-    options.alertircchannel = getConfig(
-        'alertircchannel',
+    options.alertchannel = getConfig(
+        'alertchannel',
         '',
         options.configfile)
 
@@ -446,8 +446,8 @@ def initConfig():
     # mqack=True sets persistant delivery, False sets transient delivery
     options.mqack = getConfig('mqack', True, options.configfile)
 
-    if options.alertircchannel == '':
-        options.alertircchannel = options.join.split(",")[0]
+    if options.alertchannel == '':
+        options.alertchannel = options.join.split(",")[0]
 
 
 if __name__ == "__main__":

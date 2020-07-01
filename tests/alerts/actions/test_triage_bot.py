@@ -47,7 +47,7 @@ def _ssh_sensitive_host_alert():
                     "documentid": "X8-tOG4B-YuPuGRRXQta",
                 }
             ],
-            "ircchannel": None,
+            "channel": None,
             "url": "website.com",
             "notify_mozdefbot": True,
             "details": {"sites": []},
@@ -116,7 +116,7 @@ def _duo_bypass_code_gen_alert():
                     "documentid": "wPPKOG4B-YuPuGRRc2s7",
                 }
             ],
-            "ircchannel": None,
+            "channel": None,
             "url": "website.com",
             "notify_mozdefbot": False,
             "details": {"sites": []},
@@ -191,7 +191,7 @@ def _duo_bypass_code_used_alert():
                     "documentid": "8iMaT3vSO0ddbCe7eaNQ",
                 }
             ],
-            "ircchannel": None,
+            "channel": None,
             "url": "website.com",
             "notify_mozdefbot": False,
             "details": {"sites": []},
@@ -269,7 +269,7 @@ def _ssh_access_releng_alert():
                     "documentid": "hsudfg92123ASDf234rm",
                 }
             ],
-            "ircchannel": "infosec-releng-alerts",
+            "channel": "infosec-releng-alerts",
             "notify_mozdefbot": True,
             "details": {
                 "sourceipv4address": "4.3.2.1",
