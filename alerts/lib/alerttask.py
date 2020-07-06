@@ -251,17 +251,19 @@ class AlertTask(Task):
     def tagBotNotify(self, alert):
         """
             Tag alert to be excluded based on severity
-            If 'channel' is set in an alert, we automatically set notify_mozdefbot to True
+            If 'channel' is set in an alert, we automatically notify mozdefbot
         """
-        alert["notify_mozdefbot"] = True
-        if alert["severity"] == "NOTICE" or alert["severity"] == "INFO":
-            alert["notify_mozdefbot"] = False
-
-        # If an alert sets specific channel, then we should probably always notify in mozdefbot
-        if (
-            "channel" in alert and alert["channel"] != "" and alert["channel"] is not None
-        ):
+        # If an alert code hasn't explicitly set notify_mozdefbot field
+        if 'notify_mozdefbot' not in alert or alert['notify_mozdefbot'] is None:
             alert["notify_mozdefbot"] = True
+            if alert["severity"] == "NOTICE" or alert["severity"] == "INFO":
+                alert["notify_mozdefbot"] = False
+
+            # If an alert sets specific channel, then we should probably always notify in mozdefbot
+            if (
+                "channel" in alert and alert["channel"] != "" and alert["channel"] is not None
+            ):
+                alert["notify_mozdefbot"] = True
         return alert
 
     def saveAlertID(self, saved_alert):
@@ -427,6 +429,7 @@ class AlertTask(Task):
         severity="NOTICE",
         url=None,
         channel=None,
+        notify_mozdefbot=None,
     ):
         """
         Create an alert dict
@@ -447,6 +450,7 @@ class AlertTask(Task):
             "tags": tags,
             "events": [],
             "channel": channel,
+            "notify_mozdefbot": notify_mozdefbot,
             "status": DEFAULT_STATUS,
             "classname": classname
         }

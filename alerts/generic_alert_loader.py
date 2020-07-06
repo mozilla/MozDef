@@ -54,6 +54,14 @@ from os.path import basename
         // This is the alert documentation
         'alert_url': 'https://mozilla.org'
 
+        // Optional string field to define which channel the alert goes to (mozdefbot)
+        //   Default - set to main channel set in lib/config.py
+        'channel': 'testchannel',
+
+        // Optional boolean field if mozdefbot should notify the alert
+        //   Default - is determined via severity and if channel is defined
+        'notify_mozdefbot': true,
+
         // Optional field to include other fields (if they exist in each event) in summary
         'additional_summary_fields': [
             'field1',
@@ -150,6 +158,16 @@ class AlertGenericLoader(AlertTask):
             aggreg['value'],
         )
 
+        channel = None
+        # If our generic alert contains channel, use that
+        if 'channel' in aggreg['config']:
+            channel = aggreg['config']['channel']
+
+        notify_mozdefbot = None
+        # If our generic alert explicitly sets if we should notify mozdefbot
+        if 'notify_mozdefbot' in aggreg['config']:
+            notify_mozdefbot = aggreg['config']['notify_mozdefbot']
+
         # If additional summary fields is defined, loop through each
         # and pull out the value from each event (if it exists)
         # and append key=value(s) to the summary field
@@ -170,4 +188,4 @@ class AlertGenericLoader(AlertTask):
         if hostnames:
             summary += ' [{}]'.format(', '.join(set(hostnames)))
 
-        return self.createAlertDict(summary, category, tags, aggreg['events'], severity, url)
+        return self.createAlertDict(summary, category, tags, aggreg['events'], severity, url, channel=channel, notify_mozdefbot=notify_mozdefbot)
