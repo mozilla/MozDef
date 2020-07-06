@@ -166,7 +166,7 @@ class AlertTestSuite(UnitTestSuite):
         assert '_index' in document
         alert_body = document['_source']
         assert alert_body['notify_mozdefbot'] is test_case.expected_alert['notify_mozdefbot'], 'Alert from rabbitmq has bad notify_mozdefbot field'
-        assert alert_body['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert from rabbitmq has bad ircchannel field'
+        assert alert_body['channel'] == test_case.expected_alert['channel'], 'Alert from rabbitmq has bad channel field'
         assert alert_body['summary'] == found_alert['_source']['summary'], 'Alert from rabbitmq has bad summary field'
         assert alert_body['utctimestamp'] == found_alert['_source']['utctimestamp'], 'Alert from rabbitmq has bad utctimestamp field'
         assert alert_body['category'] == found_alert['_source']['category'], 'Alert from rabbitmq has bad category field'
@@ -209,17 +209,17 @@ class AlertTestSuite(UnitTestSuite):
         # Verify there is a utctimestamp field
         assert 'utctimestamp' in found_alert['_source'], 'Alert does not have utctimestamp specified'
 
-        if 'ircchannel' not in test_case.expected_alert:
-            test_case.expected_alert['ircchannel'] = None
+        if 'channel' not in test_case.expected_alert:
+            test_case.expected_alert['channel'] = None
 
         # Verify notify_mozdefbot is set correctly based on severity
         expected_notify_mozdefbot = True
-        if (test_case.expected_alert['severity'] == 'NOTICE' or test_case.expected_alert['severity'] == 'INFO') and test_case.expected_alert['ircchannel'] is None:
+        if (test_case.expected_alert['severity'] == 'NOTICE' or test_case.expected_alert['severity'] == 'INFO') and test_case.expected_alert['channel'] is None:
             expected_notify_mozdefbot = False
         test_case.expected_alert['notify_mozdefbot'] = expected_notify_mozdefbot
 
-        # Verify ircchannel is set correctly
-        assert found_alert['_source']['ircchannel'] == test_case.expected_alert['ircchannel'], 'Alert ircchannel field is bad'
+        # Verify channel is set correctly
+        assert found_alert['_source']['channel'] == test_case.expected_alert['channel'], 'Alert channel field is bad'
 
         # Verify classname is set correctly
         assert found_alert['_source']['classname'] == self.alert_classname, 'Alert classname field is bad'

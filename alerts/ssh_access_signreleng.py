@@ -16,8 +16,8 @@ class AlertAuthSignRelengSSH(AlertTask):
 
         self.config = self.parse_json_alert_config('ssh_access_signreleng.json')
 
-        if self.config['ircchannel'] == '':
-            self.config['ircchannel'] = None
+        if self.config['channel'] == '':
+            self.config['channel'] = None
 
         search_query.add_must([
             TermMatch('tags', 'releng'),
@@ -62,4 +62,4 @@ class AlertAuthSignRelengSSH(AlertTask):
             targetuser = found_usernames[0]
 
         summary = 'SSH login from {0} on {1} as user {2}'.format(sourceipaddress, targethost, targetuser)
-        return self.createAlertDict(summary, category, tags, [event], severity, ircchannel=self.config['ircchannel'])
+        return self.createAlertDict(summary, category, tags, [event], severity, channel=self.config['channel'])
