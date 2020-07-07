@@ -3,8 +3,6 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Copyright (c) 2014 Mozilla Corporation
 
-import json
-
 
 class message(object):
 
@@ -20,16 +18,21 @@ class message(object):
         self.priority = 5
 
     def onMessage(self, message, metadata):
-        def remove_dots(obj):
-            for key in obj.keys():
-                if key[0] == '.' or key[-1] == '.':
-                    new_key = key.replace(".","")
-                    if new_key != key:
-                        obj[new_key] = obj[key]
-                        del obj[key]
-            return obj
+        def renameKeysToRemoveDots(message):
+            if isinstance(message, dict):
+                message_keys = list(message.keys())
+                for key in message_keys:
+                    print(key)
+                    if key[0] == '.' or key[-1] == '.':
+                        new_key = key.replace(".","")
+                        if new_key != key:
+                            message[new_key] = message.pop(key)
+                    if isinstance(message.get(key), dict) or isinstance(message.get(key), list):
+                        message[key] = renameKeysToRemoveDots(message[key])
+            elif isinstance(message, list):
+                for item in message:
+                    item = renameKeysToRemoveDots(item)
+            return message
 
-        new_json = json.loads(json.dumps(message), object_hook=remove_dots)
-        message = new_json
-
+        message = renameKeysToRemoveDots(message)
         return (message, metadata)
