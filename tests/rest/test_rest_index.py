@@ -179,6 +179,8 @@ class TestAlertStatus(RestTestSuite):
         assert alert['status'] == 'acknowledged'
         assert alert['details']['triage']['user']['slack'] == 'tester'
         assert alert['details']['triage']['response'] == 'yes'
+        assert 'acknowledged' in alert
+        assert alert['acknowledgedby'] == 'triagebot'
 
         return
 

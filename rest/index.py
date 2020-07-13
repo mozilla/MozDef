@@ -579,17 +579,22 @@ def update_alert_status():
         "identityConfidence": req.get("identityConfidence"),
     }
 
-    modified_count = 0
+    fields_to_update = {
+        "status": req.get("status"),
+        "details": details,
+    }
 
-    modified_count += alerts.update_one(
-        {"esmetadata.id": req.get("alert")}, {"$set": {"status": req.get("status")}}
+    if req.get("status") == "acknowledged":
+        fields_to_update.update({
+            "acknowledged": toUTC(datetime.utcnow()),
+            "acknowledgedby": "triagebot",
+        })
+
+    modified_count = alerts.update_one(
+        {"esmetadata.id": req.get("alert")}, {"$set": fields_to_update}
     ).modified_count
 
-    modified_count += alerts.update_one(
-        {"esmetadata.id": req.get("alert")}, {"$set": {"details": details}}
-    ).modified_count
-
-    if modified_count < 2:
+    if modified_count != 1:
         response.status = StatusCode.BAD_REQUEST
         return {"error": "Alert not found"}
 
