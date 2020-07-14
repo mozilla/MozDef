@@ -64,7 +64,7 @@ class TestLdapFixupPlugin():
                 'details': {
                     'tls': 'true',
                     'authenticated': 'true',
-                    'actor': 'o=com=extra,mail=tester@mozilla.com',
+                    'actor': 'o=com=extra,mail=tester@mozilla.com=extra2',
                 }
             },
             {
@@ -84,7 +84,7 @@ class TestLdapFixupPlugin():
                 'details': {
                     'tls': 'true',
                     'authenticated': 'true',
-                    'actor': 'o,mail=test@mozilla.com',
+                    'actor': 'o,mail',
                 }
             }
         ]
