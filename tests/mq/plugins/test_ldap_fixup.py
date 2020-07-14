@@ -54,3 +54,43 @@ class TestLdapFixupPlugin():
 
         assert retmessage['details'].get('email') is None
         assert retmessage['details'].get('username') is None
+
+    def test_ldap_fixup_poorly_formatted_actor(self):
+        msgs = [
+            {
+                'summary': 'LDAP-Humanizer:45582:1.1.1.1',
+                'hostname': 'random.host.com',
+                'category': 'ldap',
+                'details': {
+                    'tls': 'true',
+                    'authenticated': 'true',
+                    'actor': 'o=com=extra,mail=tester@mozilla.com',
+                }
+            },
+            {
+                'summary': 'LDAP-Humanizer:45582:1.1.1.1',
+                'hostname': 'random.host.com',
+                'category': 'ldap',
+                'details': {
+                    'tls': 'true',
+                    'authenticated': 'true',
+                    'actor': 'o=com,',
+                }
+            },
+            {
+                'summary': 'LDAP-Humanizer:45582:1.1.1.1',
+                'hostname': 'random.host.com',
+                'category': 'ldap',
+                'details': {
+                    'tls': 'true',
+                    'authenticated': 'true',
+                    'actor': 'o,mail=test@mozilla.com',
+                }
+            }
+        ]
+
+        for msg in msgs:
+            (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+            assert retmessage['details'].get('email') is None
+            assert retmessage['details'].get('username') is None
