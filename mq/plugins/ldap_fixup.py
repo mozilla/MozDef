@@ -59,7 +59,12 @@ def _parse_email_from_actor(actor_str: str) -> types.Optional[str]:
 
     mapping = {}
 
-    for item in actor_str.split(','):
+    pairs = []
+
+    for section in actor_str.split(' '):
+        pairs.extend(section.split(','))
+
+    for item in pairs:
         pair = item.split('=')
 
         if len(pair) == 2:
