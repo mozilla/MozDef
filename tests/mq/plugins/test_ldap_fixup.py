@@ -39,6 +39,39 @@ class TestLdapFixupPlugin():
         assert retmessage == expected_message
         assert retmeta == {}
 
+    def test_ldap_fixup_complex_actor_format(self):
+        msg = {
+            'summary': 'LDAP-Humanizer:45582:1.1.1.1',
+            'hostname': 'random.host.com',
+            'category': 'ldap',
+            'details': {
+                'tls': 'true',
+                'authenticated': 'true',
+                'actor': 'dc=mozilla mail=tester@mozilla.com,o=com,dc=mozilla '
+                'IP=123.45.67.89:46740 conn=180255',
+            }
+        }
+
+        expected = {
+            'summary': 'LDAP-Humanizer:45582:1.1.1.1',
+            'hostname': 'random.host.com',
+            'category': 'ldap',
+            'source': 'ldap',
+            'details': {
+                'tls_encrypted': 'true',
+                'authenticated': 'true',
+                'email': 'tester@mozilla.com',
+                'username': 'tester',
+                'actor': 'dc=mozilla mail=tester@mozilla.com,o=com,dc=mozilla '
+                'IP=123.45.67.89:46740 conn=180255',
+            }
+        }
+
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        assert retmessage == expected
+        assert retmeta == {}
+
     def test_ldap_fixup_missing_actor(self):
         msg = {
             'summary': 'LDAP-Humanizer:45582:1.1.1.1',
