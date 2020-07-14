@@ -57,10 +57,12 @@ def _parse_email_from_actor(actor_str: str) -> types.Optional[str]:
     `"mail=username@mozilla.com,o=com,dc=mozilla"`
     '''
 
-    mapping = dict([
-        pair.split('=')
-        for pair in actor_str.split(',')
-        if '=' in pair
-    ])
+    mapping = {}
+
+    for item in actor_str.split(','):
+        pair = item.split('=')
+
+        if len(pair) == 2:
+            mapping[pair[0]] = pair[1]
 
     return mapping.get('mail')
