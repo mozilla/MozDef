@@ -65,3 +65,39 @@ class TestRemoveDotsPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_list_dot_removal(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'fileuploadurls': {
+                        'ds_store.': 'astringvalue',
+                        'js/app.js': 'astringvalue'
+                    },
+                    '.randomlist.': [
+                        'weird_case',
+                        'random_case',
+                    ],
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'responseelements': {
+                    'fileuploadurls': {
+                        'ds_store': 'astringvalue',
+                        'js/app.js': 'astringvalue'
+                    },
+                    'randomlist': [
+                        'weird_case',
+                        'random_case',
+                    ],
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}

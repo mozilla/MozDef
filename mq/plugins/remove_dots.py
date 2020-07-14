@@ -8,10 +8,8 @@ class message(object):
 
     def __init__(self):
         '''
-        takes an incoming message
-        and checks for dots at the
-        start or end of the key and
-        removes them
+        takes an incoming message and checks for dots at the
+        start or end of the key and removes them
         '''
 
         self.registration = ['cloudtrail']
@@ -22,12 +20,11 @@ class message(object):
             if isinstance(message, dict):
                 message_keys = list(message.keys())
                 for key in message_keys:
-                    print(key)
                     if key[0] == '.' or key[-1] == '.':
-                        new_key = key.replace(".","")
+                        new_key = key.replace(".", "")
                         if new_key != key:
                             message[new_key] = message.pop(key)
-                    if isinstance(message.get(key), dict) or isinstance(message.get(key), list):
+                    if isinstance(message.get(key), (dict, list)):
                         message[key] = renameKeysToRemoveDots(message[key])
             elif isinstance(message, list):
                 for item in message:
