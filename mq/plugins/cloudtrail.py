@@ -112,14 +112,20 @@ class message(object):
                 return haystack
 
     def onMessage(self, message, metadata):
+        '''
+        Check if source is in the message, if not then add cloudtrail as the source.
+        '''
         if 'source' not in message:
             return (message, metadata)
 
         if not message['source'] == 'cloudtrail':
             return (message, metadata)
 
-        if 'requestparameters' in message['details']:
-            if 'htmlpart' in message['details']['requestparameters']:
+        '''
+        Check if details.requestparameters.htmlpart exists, if it does truncate it to
+        4095 characters so that ES will ingest it.
+        '''    
+        if message.get('details', {}).get('requestparameters', {}).get('htmlpart') is not None:
                 message['details']['requestparameters']['htmlpart'] = message['details']['requestparameters']['htmlpart'][0:4095]
 
         for modified_key in self.modify_keys:
