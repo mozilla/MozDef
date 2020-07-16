@@ -20,7 +20,7 @@ class message(object):
             if isinstance(message, dict):
                 message_keys = list(message.keys())
                 for key in message_keys:
-                    if key[0] == '.' or key[-1] == '.':
+                    if len(key) > 0 and (key[0] == '.' or key[-1] == '.'):
                         new_key = key.replace(".", "")
                         if new_key != key:
                             message[new_key] = message.pop(key)
