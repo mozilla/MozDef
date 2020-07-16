@@ -122,11 +122,13 @@ class message(object):
             return (message, metadata)
 
         '''
-        Check if details.requestparameters.htmlpart exists, if it does truncate it to
-        4095 characters so that ES will ingest it.
+        Check if details.requestparameters.htmlpart exists, if it does it's generally longer than 32000 bytes,
+        so we'll truncate it to 4096 characters using the constant ES_FIELD_VALUE_LIMIT so that ES will ingest it,
+        leaving us with knowledge of what the field contains without the overkill of storing the entire page.
         '''
+        ES_FIELD_VALUE_LIMIT = 4095
         if message.get('details', {}).get('requestparameters', {}).get('htmlpart') is not None:
-                message['details']['requestparameters']['htmlpart'] = message['details']['requestparameters']['htmlpart'][0:4095]
+                message['details']['requestparameters']['htmlpart'] = message['details']['requestparameters']['htmlpart'][0:ES_FIELD_VALUE_LIMIT]
 
         for modified_key in self.modify_keys:
             if key_exists(modified_key, message):
