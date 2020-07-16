@@ -24,6 +24,7 @@ class message(object):
             'details.apiversion',
             'details.serviceeventdetails',
             'details.requestparameters.attribute',
+            'details.requestparameters.authparameters',
             'details.requestparameters.bucketpolicy.statement.principal.service',
             'details.requestparameters.bucketpolicy.statement.principal.aws',
             'details.requestparameters.callerreference',
@@ -116,6 +117,10 @@ class message(object):
 
         if not message['source'] == 'cloudtrail':
             return (message, metadata)
+
+        if 'requestparameters' in message['details']:
+            if 'htmlpart' in message['details']['requestparameters']:
+                message['details']['requestparameters']['htmlpart'] = message['details']['requestparameters']['htmlpart'][0:4095]
 
         for modified_key in self.modify_keys:
             if key_exists(modified_key, message):
