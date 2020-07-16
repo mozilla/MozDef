@@ -51,7 +51,9 @@ def sendEventToPlugins(anevent, metadata, pluginList):
             plugin_name = plugin[0].__module__.replace('plugins.', '')
             executed_plugins.append(plugin_name)
     # Tag all events with what plugins ran on it
-    anevent['plugins'] = executed_plugins
+    if 'mozdef' not in anevent:
+        anevent['mozdef'] = {}
+        anevent['mozdef']['plugins'] = executed_plugins
 
     return (anevent, metadata)
 

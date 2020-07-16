@@ -75,7 +75,7 @@ class TestEsworkerSNSSQS(UnitTestSuite):
             'tags': ['example-logs-mozdef'],
             'timestamp': '2017-05-25T07:14:15+00:00',
             'utctimestamp': '2017-05-25T07:14:15+00:00',
-            'plugins': [],
+            'mozdef': {'plugins': []},
             'type': 'event'
         }
         self.search_and_verify_event(expected_event)

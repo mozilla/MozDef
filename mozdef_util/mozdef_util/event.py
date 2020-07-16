@@ -39,7 +39,9 @@ class Event(dict):
             self['source'] = self.DEFAULT_STRING
         if 'summary' not in self:
             self['summary'] = self.DEFAULT_STRING
-        if 'plugins' not in self:
-            self['plugins'] = []
+        if 'mozdef' not in self:
+            self['mozdef'] = {}
+        if 'plugins' not in self['mozdef']:
+            self['mozdef']['plugins'] = []
         if 'details' not in self:
             self['details'] = {}
