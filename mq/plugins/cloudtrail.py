@@ -124,7 +124,7 @@ class message(object):
         '''
         Check if details.requestparameters.htmlpart exists, if it does truncate it to
         4095 characters so that ES will ingest it.
-        '''    
+        '''
         if message.get('details', {}).get('requestparameters', {}).get('htmlpart') is not None:
                 message['details']['requestparameters']['htmlpart'] = message['details']['requestparameters']['htmlpart'][0:4095]
 
