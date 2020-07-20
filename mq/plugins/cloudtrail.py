@@ -128,7 +128,7 @@ class message(object):
         '''
 
         ES_FIELD_VALUE_LIMIT = 4095
-        
+
         if 'requestparameters' in message['details']:
             if 'htmlpart' in message['details']['requestparameters']:
                 message['details']['requestparameters']['htmlpart'] = message['details']['requestparameters']['htmlpart'][0:ES_FIELD_VALUE_LIMIT]
