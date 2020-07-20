@@ -129,8 +129,8 @@ class message(object):
 
         ES_FIELD_VALUE_LIMIT = 4095
 
-        if 'requestparameters' in message['details']:
-            if 'htmlpart' in message['details']['requestparameters']:
+        if 'requestparameters' in message['details'] and message['details']['requestparameters']:
+            if 'htmlpart' in message['details']['requestparameters'] and message['details']['requestparameters']['htmlpart']:
                 message['details']['requestparameters']['htmlpart'] = message['details']['requestparameters']['htmlpart'][0:ES_FIELD_VALUE_LIMIT]
 
         for modified_key in self.modify_keys:
