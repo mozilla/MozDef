@@ -440,3 +440,45 @@ class TestCloudtrailPlugin():
         }
         assert retmessage == expected_message
         assert retmeta == {}
+
+    def test_htmlpart_none(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'randomkey': 'astringvalue'
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                    'randomkey': 'astringvalue'
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
+
+    def test_reqparam_none(self):
+        msg = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                }
+            }
+        }
+        (retmessage, retmeta) = self.plugin.onMessage(msg, {})
+
+        expected_message = {
+            'source': 'cloudtrail',
+            'details': {
+                'requestparameters': {
+                }
+            }
+        }
+        assert retmessage == expected_message
+        assert retmeta == {}
