@@ -167,7 +167,7 @@ def process_msg(mozmsg, msg):
     details = DotDict({})
 
     # key words used to set category and success/failure markers
-    authentication_words = ["Login", "Logout", "Silent", "CORS", "Enrollment", "OTP", "Recovery", "Authentication", "Code"]
+    authentication_words = ["Login", "Logout", "Silent", "Enrollment", "OTP", "Recovery", "Authentication", "Code"]
     authorization_words = ["Authorization", "Access", "Delegation"]
     administration_words = ["API", "Operation", "Change", "Signup", "Update", "Deleted", "unenrolled", "updated", "CORS", "Connector", "Blocked", "Breached", "Deletion", "block", "User", "released"]
     success_words = ["Success"]
