@@ -84,15 +84,15 @@ log_types = DotDict(
         "gd_auth_failed": {"event": "OTP Auth failed", "level": 3},
         "gd_auth_rejected": {"event": "OTP Auth rejected", "level": 3},
         "gd_auth_succeed": {"event": "OTP Auth success", "level": 1},
-        "gd_enrollment_complete": {"event": "Guardian enrollment complete", "level": 1},
+        "gd_enrollment_complete": {"event": "MFA Enrollment Complete", "level": 1},
         "gd_module_switch": {"event": "Module switch", "level": 1},
         "gd_otp_rate_limit_exceed": {"event": "Too many OTP failures", "level": 4},
-        "gd_recovery_failed": {"event": "Multi-factor recovery code failed.", "level": 3},
-        "gd_recovery_rate_limit_exceed": {"event": "Multi-factor recovery code has failed too many times", "level": 4},
-        "gd_recovery_succeed": {"event": "Multi-factor recovery code succeeded authorization", "level": 1},
-        "gd_send_pn": {"event": "Push notification for MFA sent successfully sent", "level": 1},
-        "gd_send_sms": {"event": "SMS for MFA sent successfully", "level": 1},
-        "gd_send_sms_failure": {"event": "SMS for MFA sent failed", "level": 3},
+        "gd_recovery_failed": {"event": "Failed Authentication using Recovery code.", "level": 3},
+        "gd_recovery_rate_limit_exceed": {"event": "Failed Authentication using Recovery code too many times", "level": 4},
+        "gd_recovery_succeed": {"event": "Success Authentication using Recovery code", "level": 1},
+        "gd_send_pn": {"event": "Success Push notification for MFA sent", "level": 1},
+        "gd_send_sms": {"event": "Success SMS for MFA sent", "level": 1},
+        "gd_send_sms_failure": {"event": "Failed sending SMS for MFA", "level": 3},
         "gd_start_auth": {"event": "Second factor authentication event started for MFA", "level": 1},
         "gd_start_enroll": {"event": "Multi-factor authentication enroll has started", "level": 1},
         "gd_tenant_update": {"event": "Guardian tenant update", "level": 3},
@@ -114,7 +114,7 @@ log_types = DotDict(
         "scpr": {"event": "Success Change Password Request", "level": 0},
         "scu": {"event": "Success Change Username", "level": 1},
         "sd": {"event": "Success Delegation", "level": 3},
-        "sdu": {"event": "Successful User Deletion", "level": 1},
+        "sdu": {"event": "Success User Deletion", "level": 1},
         "seacft": {"event": "Success Exchange (Authorization Code for Access Token)", "level": 1},
         "seccft": {"event": "Success Exchange (Client Credentials for Access Token)", "level": 1},
         "sede": {"event": "Successful Exchange (Device Code for Access Token)", "level": 1},
@@ -127,7 +127,7 @@ log_types = DotDict(
         "slo": {"event": "Success Logout", "level": 1},
         "ss": {"event": "Success Signup", "level": 1},
         "ssa": {"event": "Success Silent Auth", "level": 1},
-        "sui": {"event": "Successfully imported users", "level": 1},
+        "sui": {"event": "Success User Import", "level": 1},
         "sv": {"event": "Success Verification Email", "level": 0},
         "svr": {"event": "Success Verification Email Request", "level": 0},
         "sys_os_update_end": {"event": "Auth0 OS Update Ended", "level": 1},
@@ -152,13 +152,13 @@ def process_msg(mozmsg, msg):
     details = DotDict({})
 
     # key words used to set category and success/failure markers
-    authentication_words = ["Login", "Logout", "Auth"]
+    authentication_words = ["Login", "Logout", "Silent", "Enrollment", "OTP", "Recovery", "Authentication", "Code", "Signup", "Push"]
     authorization_words = ["Authorization", "Access", "Delegation"]
+    administration_words = ["API", "Operation", "Change", "Update", "Deleted", "unenrolled", "updated", "CORS", "Connector", "Blocked", "Breached", "Deletion", "block", "User", "released"]
     success_words = ["Success"]
     failed_words = ["Failed"]
 
-    # default category (might be modified below to be more specific)
-    mozmsg.set_category("iam")
+    # Set source to Auth0
     mozmsg.source = "auth0"
     # fields that should always exist
     mozmsg.timestamp = msg.date
@@ -204,6 +204,8 @@ def process_msg(mozmsg, msg):
             mozmsg.set_category("authentication")
         if any(authword in details["eventname"] for authword in authorization_words):
             mozmsg.set_category("authorization")
+        if any(adminword in details["eventname"] for adminword in administration_words):
+            mozmsg.set_category("administration")
         # determine success/failure
         if any(failword in details["eventname"] for failword in failed_words):
             details.success = False
