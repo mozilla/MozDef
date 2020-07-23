@@ -241,28 +241,47 @@ def process_msg(mozmsg, msg):
         mozmsg.summary = "{event} {username}".format(event=details.eventname, username=tmp_username)
     else:
         # default summary as action and description (if it exists)
+        tmp_email = "UNKNOWN"
         if 'email' in details:
             tmp_email = details.email
-        mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.description, email=tmp_email)
+        mozmsg.summary = "{event} {desc} {email}".format(event=details.eventname, desc=details.description, email=tmp_email)
 
     # Get user data if present in response body
     try:
-        if "last_ip" in msg.response.body.identities and msg.response.body.identities.last_ip is not None:
-            details.last_known_user_ip = msg.response.body.identities.last_ip
+        if "identities" in msg.details.response.body and type(msg.details.response.body.identities) is list:
+            details.identities = msg.details.response.body.identities
     except KeyError:
-        details.last_known_user_ip = ""
-    
-    try:
-        if "last_login" in msg.response.body.identities and msg.response.body.identities.last_login is not None:
-            details.last_user_login = msg.response.body.identities.last_login
-    except KeyError:
-        details.last_user_login = ""
+        pass
 
     try:
-        if "multifactor" in msg.response.body and msg.response.body.multifactor is not None:
-            details.mfa_provider = msg.response.body.multifactor
+        if "multifactor" in msg.details.response.body and type(msg.details.response.body.multifactor) is list:
+            details.mfa_provider = msg.details.response.body.multifactor
     except KeyError:
-        details.mfa_provider = []
+        pass
+
+    try:
+        if "_HRData" in msg.details.response.body and type(msg.details.response.body._HRData) is dict:
+            details.user_metadata = [msg.details.response.body._HRData]
+    except KeyError:
+        pass
+
+    try:
+        if "ldap_groups" in msg.details.response.body and type(msg.details.response.body.ldap_groups) is list:
+            details.ldap_groups = msg.details.response.body.ldap_groups
+    except KeyError:
+        pass
+
+    try:
+        if "last_ip" in msg.details.response.body and msg.details.response.body.last_ip is not None:
+            details.user_last_known_ip = msg.details.response.body.last_ip
+    except KeyError:
+        pass
+
+    try:
+        if "last_login" in msg.details.response.body and msg.details.response.body.last_login is not None:
+            details.user_last_login = msg.details.response.body.last_login
+    except KeyError:
+        pass
 
     try:
         details["clientname"] = msg.client_name
