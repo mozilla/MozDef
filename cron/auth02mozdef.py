@@ -186,6 +186,12 @@ def process_msg(mozmsg, msg):
         pass
 
     try:
+        if "email" in msg.details.response.body and msg.details.response.body.email is not None:
+            details["email"] = msg.details.response.body.email
+    except KeyError:
+        pass
+
+    try:
         details["useragent"] = msg.user_agent
     except KeyError:
         pass
@@ -235,7 +241,28 @@ def process_msg(mozmsg, msg):
         mozmsg.summary = "{event} {username}".format(event=details.eventname, username=tmp_username)
     else:
         # default summary as action and description (if it exists)
-        mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.description)
+        if 'email' in details:
+            tmp_email = details.email
+        mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.description, email=tmp_email)
+
+    # Get user data if present in response body
+    try:
+        if "last_ip" in msg.response.body.identities and msg.response.body.identities.last_ip is not None:
+            details.last_known_user_ip = msg.response.body.identities.last_ip
+    except KeyError:
+        details.last_known_user_ip = ""
+    
+    try:
+        if "last_login" in msg.response.body.identities and msg.response.body.identities.last_login is not None:
+            details.last_user_login = msg.response.body.identities.last_login
+    except KeyError:
+        details.last_user_login = ""
+
+    try:
+        if "multifactor" in msg.response.body and msg.response.body.multifactor is not None:
+            details.mfa_provider = msg.response.body.multifactor
+    except KeyError:
+        details.mfa_provider = []
 
     try:
         details["clientname"] = msg.client_name
@@ -252,7 +279,7 @@ def process_msg(mozmsg, msg):
     except KeyError:
         pass
 
-    # Differenciate auto login (session cookie check validated) from logged in and had password verified
+    # Differentiate auto login (session cookie check validated) from logged in and had password verified
 
     try:
         for i in msg.details.prompt:
