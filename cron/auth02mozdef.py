@@ -90,7 +90,7 @@ log_types = DotDict(
         "gd_recovery_failed": {"event": "Failed Authentication using Recovery code.", "level": 3},
         "gd_recovery_rate_limit_exceed": {"event": "Failed Authentication using Recovery code too many times", "level": 4},
         "gd_recovery_succeed": {"event": "Success Authentication using Recovery code", "level": 1},
-        "gd_send_pn": {"event": "Push notification for MFA sent successfully sent", "level": 1},
+        "gd_send_pn": {"event": "Success Push notification for MFA sent", "level": 1},
         "gd_send_sms": {"event": "SMS for MFA sent successfully", "level": 1},
         "gd_send_sms_failure": {"event": "SMS for MFA sent failed", "level": 3},
         "gd_start_auth": {"event": "Second factor authentication event started for MFA", "level": 1},
@@ -152,7 +152,7 @@ def process_msg(mozmsg, msg):
     details = DotDict({})
 
     # key words used to set category and success/failure markers
-    authentication_words = ["Login", "Logout", "Silent", "Enrollment", "OTP", "Recovery", "Authentication", "Code", "Signup"]
+    authentication_words = ["Login", "Logout", "Silent", "Enrollment", "OTP", "Recovery", "Authentication", "Code", "Signup", "Push"]
     authorization_words = ["Authorization", "Access", "Delegation"]
     administration_words = ["API", "Operation", "Change", "Update", "Deleted", "unenrolled", "updated", "CORS", "Connector", "Blocked", "Breached", "Deletion", "block", "User", "released"]
     success_words = ["Success"]
