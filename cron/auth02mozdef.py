@@ -178,7 +178,6 @@ def process_msg(mozmsg, msg):
         # the details.request/response exist for api calls
         # but not for logins and other events
         # check and prefer them if present.
-        details["username"] = msg.details.request.auth.user.name
         if type(msg.details.response.body) is not list:
             details["action"] = msg.details.response.body.name
     except KeyError:
@@ -235,17 +234,16 @@ def process_msg(mozmsg, msg):
     # make summary be action/username (success login user@place.com)
     # if no details.username field exists we don't add it.
     if 'username' in details:
-        mozmsg.summary = "{event} {username}".format(event=details.eventname, username=details.username)
+        mozmsg.summary = "{event} {username}".format(event=details.eventname, username=details.username.strip())
 
     # Build summary as action and description and email (if it exists)
     # if details.email doesn't exist, we do not add it.
     elif 'email' in details:
-        mozmsg.summary = "{event} {desc} {email}".format(event=details.eventname, desc=details.description, email=details.email)
+        mozmsg.summary = "{event}: {desc} for account: {email}".format(event=details.eventname, desc=details.description, email=details.email)
 
     # Build summary if neither email nor username exists
     elif 'email' not in details and 'username' not in details:
-        mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.description)
-
+        mozmsg.summary = "{event}: {desc} : user/account UNKNOWN".format(event=details.eventname, desc=details.description)
     # Get user data if present in response body
     try:
         if "multifactor" in msg.details.response.body and type(msg.details.response.body.multifactor) is list:
