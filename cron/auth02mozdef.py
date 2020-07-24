@@ -105,7 +105,7 @@ log_types = DotDict(
         "limit_wc": {"event": "Blocked Account", "level": 4},
         "pwd_leak": {"event": "User attempted to login with a leaked password", "level": 4},
         "s": {"event": "Success Login", "level": 1},
-        "sapi": {"event": "API Operation", "level": 1},
+        "sapi": {"event": "Success API Operation", "level": 1},
         "sce": {"event": "Success Change Email", "level": 1},
         "scoa": {"event": "Success cross-origin authentication", "level": 1},
         "scp": {"event": "Success Change Password", "level": 1},
@@ -233,19 +233,18 @@ def process_msg(mozmsg, msg):
         details["description"] = ""
 
     # set the summary
-    if "auth" in mozmsg._category:
-        # make summary be action/username (success login user@place.com)
-        # include UNKNOWN as username value in summary
-        # if no details.username field exists
-        tmp_username = "UNKNOWN"
-        if 'username' in details:
-            tmp_username = details.username
+    # make summary be action/username (success login user@place.com)
+    # include UNKNOWN as username value in summary
+    # if no details.username field exists
+    tmp_username = "UNKNOWN"
+    if 'username' in details:
+        tmp_username = details.username
         mozmsg.summary = "{event} {username}".format(event=details.eventname, username=tmp_username)
-    else:
-        # default summary as action and description (if it exists)
-        tmp_email = "UNKNOWN"
-        if 'email' in details:
-            tmp_email = details.email
+
+    # default summary as action and description (if it exists)
+    tmp_email = "UNKNOWN"
+    if 'email' in details:
+        tmp_email = details.email
         mozmsg.summary = "{event} {desc} {email}".format(event=details.eventname, desc=details.description, email=tmp_email)
 
     # Get user data if present in response body
