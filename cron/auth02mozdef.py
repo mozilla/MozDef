@@ -233,12 +233,12 @@ def process_msg(mozmsg, msg):
 
     # set the summary
     # make summary be action/username (success login user@place.com)
-    # include UNKNOWN as username value in summary
-    # if no details.username field exists
+    # if no details.username field exists we don't add it.
     if 'username' in details:
         mozmsg.summary = "{event} {username}".format(event=details.eventname, username=details.username)
 
     # Build summary as action and description and email (if it exists)
+    # if details.email doesn't exist, we do not add it.
     elif 'email' in details:
         mozmsg.summary = "{event} {desc} {email}".format(event=details.eventname, desc=details.description, email=details.email)
 
