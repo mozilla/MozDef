@@ -9,7 +9,6 @@
 import hjson
 import sys
 import os
-import json
 import requests
 import traceback
 
