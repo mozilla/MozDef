@@ -157,8 +157,6 @@ def process_msg(mozmsg, msg):
     success_words = ["Success"]
     failed_words = ["Failed"]
 
-    # Set source to Auth0
-    mozmsg.source = "auth0"
     # fields that should always exist
     mozmsg.timestamp = msg.date
     details["messageid"] = msg._id
@@ -371,6 +369,8 @@ def fetch_auth0_logs(config, headers, fromid):
             mozmsg.set_send_to_syslog(True, only_syslog=True)
         mozmsg.hostname = config.auth0.url
         mozmsg.tags = ["auth0"]
+        # Because MozDef_Client doesn't support source, this will always be UNKNOWN as of 7/2020
+        mozmsg.source = "auth0"
         msg = byteify(msg)
         msg = DotDict(msg)
         lastid = msg._id
