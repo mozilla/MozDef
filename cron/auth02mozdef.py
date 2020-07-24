@@ -235,16 +235,16 @@ def process_msg(mozmsg, msg):
     # make summary be action/username (success login user@place.com)
     # include UNKNOWN as username value in summary
     # if no details.username field exists
-    tmp_username = "UNKNOWN"
     if 'username' in details:
-        tmp_username = details.username
-        mozmsg.summary = "{event} {username}".format(event=details.eventname, username=tmp_username)
+        mozmsg.summary = "{event} {username}".format(event=details.eventname, username=details.username)
 
-    # default summary as action and description (if it exists)
-    tmp_email = "UNKNOWN"
-    if 'email' in details:
-        tmp_email = details.email
-        mozmsg.summary = "{event} {desc} {email}".format(event=details.eventname, desc=details.description, email=tmp_email)
+    # Build summary as action and description and email (if it exists)
+    elif 'email' in details:
+        mozmsg.summary = "{event} {desc} {email}".format(event=details.eventname, desc=details.description, email=details.email)
+
+    # Build summary if neither email nor username exists
+    elif 'email' not in details and 'username' not in details:
+        mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.description)
 
     # Get user data if present in response body
     try:
