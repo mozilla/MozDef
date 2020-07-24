@@ -250,20 +250,8 @@ def process_msg(mozmsg, msg):
 
     # Get user data if present in response body
     try:
-        if "identities" in msg.details.response.body and type(msg.details.response.body.identities) is list:
-            details.identities = msg.details.response.body.identities
-    except KeyError:
-        pass
-
-    try:
         if "multifactor" in msg.details.response.body and type(msg.details.response.body.multifactor) is list:
             details.mfa_provider = msg.details.response.body.multifactor
-    except KeyError:
-        pass
-
-    try:
-        if "_HRData" in msg.details.response.body and type(msg.details.response.body._HRData) is dict:
-            details.user_metadata = [msg.details.response.body._HRData]
     except KeyError:
         pass
 
