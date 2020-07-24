@@ -168,7 +168,8 @@ def process_msg(mozmsg, msg):
         pass
 
     try:
-        details["username"] = msg.user_name
+        if msg.user_name:
+            details["username"] = msg.user_name
     except KeyError:
         pass
 
@@ -193,17 +194,20 @@ def process_msg(mozmsg, msg):
         pass
 
     try:
-        details["clientname"] = msg.client_name
+        if msg.client_name:
+            details["clientname"] = msg.client_name
     except KeyError:
         pass
 
     try:
-        details["connection"] = msg.connection
+        if msg.connection:
+            details["connection"] = msg.connection
     except KeyError:
         pass
 
     try:
-        details["clientid"] = msg.client_id
+        if msg.client_id:
+            details["clientid"] = msg.client_id
     except KeyError:
         pass
 
@@ -241,22 +245,24 @@ def process_msg(mozmsg, msg):
             # Update a rule, add a site, update a site, etc
             details["description"] = msg.description
     except KeyError:
-        details["description"] = ""
+        pass
 
     # set the summary
     # make summary be action/username (success login user@place.com)
     # if no details.username field exists we don't add it.
-    if 'username' in details and 'clientname' in details:
-        mozmsg.summary = "{event} {username} to {clientname}".format(event=details.eventname, username=details.username.strip(), clientname=details.clientname)
 
-    # Build summary as action and description and email (if it exists)
-    # if details.email doesn't exist, we do not add it.
-    elif 'email' in details:
-        mozmsg.summary = "{event}: {desc} for account: {email}".format(event=details.eventname, desc=details.description, email=details.email)
+    # Build summary if neither email, description, nor username exists
+    if 'eventname' in details:
+        mozmsg.summary = "{event}".format(event=details.eventname)
+        if 'description' in details and details['description'] != "None":
+            mozmsg.summary += " {description}".format(event=details.eventname, description=details.description)
+        if 'username' in details and details['username'] != "None":
+            mozmsg.summary += " by {username}".format(username=details.username)
+        if 'email' in details and details['email'] != "None":
+            mozmsg.summary += " account: {email}".format(email=details.email)
+        if 'clientname' in details and details['clientname'] != "None":
+            mozmsg.summary += " to: {clientname}".format(clientname=details.clientname)
 
-    # Build summary if neither email nor username exists
-    elif 'email' not in details and 'username' not in details:
-        mozmsg.summary = "{event}: {desc} : user/account UNKNOWN".format(event=details.eventname, desc=details.description)
     # Get user data if present in response body
     try:
         if "multifactor" in msg.details.response.body and type(msg.details.response.body.multifactor) is list:
