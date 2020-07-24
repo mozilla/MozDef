@@ -193,6 +193,21 @@ def process_msg(mozmsg, msg):
         pass
 
     try:
+        details["clientname"] = msg.client_name
+    except KeyError:
+        pass
+
+    try:
+        details["connection"] = msg.connection
+    except KeyError:
+        pass
+
+    try:
+        details["clientid"] = msg.client_id
+    except KeyError:
+        pass
+
+    try:
         # auth0 calls these events with an acronym and name
         details["eventname"] = log_types[msg.type].event
         # determine the event category
@@ -231,8 +246,8 @@ def process_msg(mozmsg, msg):
     # set the summary
     # make summary be action/username (success login user@place.com)
     # if no details.username field exists we don't add it.
-    if 'username' in details:
-        mozmsg.summary = "{event} {username}".format(event=details.eventname, username=details.username.strip())
+    if 'username' in details and 'clientname' in details:
+        mozmsg.summary = "{event} {username} to {clientname}".format(event=details.eventname, username=details.username.strip(), clientname=details.clientname)
 
     # Build summary as action and description and email (if it exists)
     # if details.email doesn't exist, we do not add it.
@@ -264,21 +279,6 @@ def process_msg(mozmsg, msg):
     try:
         if "last_login" in msg.details.response.body and msg.details.response.body.last_login is not None:
             details.user_last_login = msg.details.response.body.last_login
-    except KeyError:
-        pass
-
-    try:
-        details["clientname"] = msg.client_name
-    except KeyError:
-        pass
-
-    try:
-        details["connection"] = msg.connection
-    except KeyError:
-        pass
-
-    try:
-        details["clientid"] = msg.client_id
     except KeyError:
         pass
 
