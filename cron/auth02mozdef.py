@@ -9,7 +9,6 @@
 import hjson
 import sys
 import os
-import json
 import requests
 import traceback
 
@@ -105,7 +104,7 @@ log_types = DotDict(
         "limit_wc": {"event": "Blocked Account", "level": 4},
         "pwd_leak": {"event": "User attempted to login with a leaked password", "level": 4},
         "s": {"event": "Success Login", "level": 1},
-        "sapi": {"event": "API Operation", "level": 1},
+        "sapi": {"event": "Success API Operation", "level": 1},
         "sce": {"event": "Success Change Email", "level": 1},
         "scoa": {"event": "Success cross-origin authentication", "level": 1},
         "scp": {"event": "Success Change Password", "level": 1},
@@ -158,8 +157,6 @@ def process_msg(mozmsg, msg):
     success_words = ["Success"]
     failed_words = ["Failed"]
 
-    # Set source to Auth0
-    mozmsg.source = "auth0"
     # fields that should always exist
     mozmsg.timestamp = msg.date
     details["messageid"] = msg._id
@@ -171,7 +168,8 @@ def process_msg(mozmsg, msg):
         pass
 
     try:
-        details["username"] = msg.user_name
+        if msg.user_name:
+            details["username"] = msg.user_name
     except KeyError:
         pass
 
@@ -179,14 +177,37 @@ def process_msg(mozmsg, msg):
         # the details.request/response exist for api calls
         # but not for logins and other events
         # check and prefer them if present.
-        details["username"] = msg.details.request.auth.user.name
         if type(msg.details.response.body) is not list:
             details["action"] = msg.details.response.body.name
     except KeyError:
         pass
 
     try:
+        if "email" in msg.details.response.body and msg.details.response.body.email is not None:
+            details["email"] = msg.details.response.body.email
+    except KeyError:
+        pass
+
+    try:
         details["useragent"] = msg.user_agent
+    except KeyError:
+        pass
+
+    try:
+        if msg.client_name:
+            details["clientname"] = msg.client_name
+    except KeyError:
+        pass
+
+    try:
+        if msg.connection:
+            details["connection"] = msg.connection
+    except KeyError:
+        pass
+
+    try:
+        if msg.client_id:
+            details["clientid"] = msg.client_id
     except KeyError:
         pass
 
@@ -224,37 +245,50 @@ def process_msg(mozmsg, msg):
             # Update a rule, add a site, update a site, etc
             details["description"] = msg.description
     except KeyError:
-        details["description"] = ""
+        pass
 
     # set the summary
-    if "auth" in mozmsg._category:
-        # make summary be action/username (success login user@place.com)
-        # include UNKNOWN as username value in summary
-        # if no details.username field exists
-        tmp_username = "UNKNOWN"
-        if 'username' in details:
-            tmp_username = details.username
-        mozmsg.summary = "{event} {username}".format(event=details.eventname, username=tmp_username)
-    else:
-        # default summary as action and description (if it exists)
-        mozmsg.summary = "{event} {desc}".format(event=details.eventname, desc=details.description)
+    # make summary be action/username (success login user@place.com)
+    # if no details.username field exists we don't add it.
 
+    # Build summary if neither email, description, nor username exists
+    if 'eventname' in details:
+        mozmsg.summary = "{event}".format(event=details.eventname)
+        if 'description' in details and details['description'] != "None":
+            mozmsg.summary += " {description}".format(event=details.eventname, description=details.description)
+        if 'username' in details and details['username'] != "None":
+            mozmsg.summary += " by {username}".format(username=details.username)
+        if 'email' in details and details['email'] != "None":
+            mozmsg.summary += " account: {email}".format(email=details.email)
+        if 'clientname' in details and details['clientname'] != "None":
+            mozmsg.summary += " to: {clientname}".format(clientname=details.clientname)
+
+    # Get user data if present in response body
     try:
-        details["clientname"] = msg.client_name
+        if "multifactor" in msg.details.response.body and type(msg.details.response.body.multifactor) is list:
+            details.mfa_provider = msg.details.response.body.multifactor
     except KeyError:
         pass
 
     try:
-        details["connection"] = msg.connection
+        if "ldap_groups" in msg.details.response.body and type(msg.details.response.body.ldap_groups) is list:
+            details.ldap_groups = msg.details.response.body.ldap_groups
     except KeyError:
         pass
 
     try:
-        details["clientid"] = msg.client_id
+        if "last_ip" in msg.details.response.body and msg.details.response.body.last_ip is not None:
+            details.user_last_known_ip = msg.details.response.body.last_ip
     except KeyError:
         pass
 
-    # Differenciate auto login (session cookie check validated) from logged in and had password verified
+    try:
+        if "last_login" in msg.details.response.body and msg.details.response.body.last_login is not None:
+            details.user_last_login = msg.details.response.body.last_login
+    except KeyError:
+        pass
+
+    # Differentiate auto login (session cookie check validated) from logged in and had password verified
 
     try:
         for i in msg.details.prompt:
@@ -341,6 +375,8 @@ def fetch_auth0_logs(config, headers, fromid):
             mozmsg.set_send_to_syslog(True, only_syslog=True)
         mozmsg.hostname = config.auth0.url
         mozmsg.tags = ["auth0"]
+        # Because MozDef_Client doesn't support source, this will always be UNKNOWN as of 7/2020
+        mozmsg.source = "auth0"
         msg = byteify(msg)
         msg = DotDict(msg)
         lastid = msg._id
@@ -357,7 +393,7 @@ def fetch_auth0_logs(config, headers, fromid):
 
         # Save raw initial message in final message
         # in case we ran into parsing errors
-        mozmsg.details["raw_value"] = json.dumps(msg)
+        mozmsg.details["raw_value"] = [msg]
 
         mozmsg.send()
 

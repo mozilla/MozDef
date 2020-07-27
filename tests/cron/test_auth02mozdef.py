@@ -39,7 +39,7 @@ class TestAuth0Messages():
         process_msg(mozmsg, self.sample_event)
         assert mozmsg.details.username == 'ttesterson@mozilla.com'
         assert mozmsg.details.userid == 'ad|Test-Connection|ttesterson'
-        assert mozmsg.summary == 'Success Silent Auth ttesterson@mozilla.com'
+        assert mozmsg.summary == 'Success Silent Auth by ttesterson@mozilla.com to: example.mozilla.org'
 
     def test_sample_event_username_nonexistent(self):
         mozmsg = mozdef.MozDefEvent('http://localhost:9090')
