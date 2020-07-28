@@ -207,9 +207,11 @@ def process(msg, meta, api_cfg):
     # in particular is reserved, so we will expand ours' contents out.
     del msg["details"]["user"]
     del msg["details"]["response"]
+    msg["category"] = "triagebot"
     msg["details"]["email"] = email
     msg["details"]["slack"] = slack
     msg["details"]["userresponse"] = resp.value
+    msg["summary"] = "TriageBot Response: {0} from: {1}".format(resp.value, email)
 
     return (msg, meta)
 
