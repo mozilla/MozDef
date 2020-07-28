@@ -33,7 +33,7 @@ class TestAlertTriageBotEscalation(AlertTestSuite):
     # This alert is the expected result from running this task
     default_alert = {
         "category": "access",
-        "severity": "CRITICAL",
+        "severity": "INFO",
         "summary": "TriageBot Escalation for event: UdEkkIEJFXEy54grVnfy sent to PagerDuty per 'NO' response from User: test@testerson.com",
         "tags": ['ssh_critical_host_login_escalation', 'pagerduty', 'triagebot'],
     }
