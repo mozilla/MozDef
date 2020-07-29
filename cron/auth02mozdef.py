@@ -393,7 +393,7 @@ def fetch_auth0_logs(config, headers, fromid):
 
         # Save raw initial message in final message
         # in case we ran into parsing errors
-        mozmsg.details["raw_value"] = [msg]
+        mozmsg.details["raw_value"] = str(msg)
 
         mozmsg.send()
 
