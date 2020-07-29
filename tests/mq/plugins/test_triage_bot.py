@@ -102,6 +102,8 @@ class TestTriageBot:
             (new_msg, new_meta) = bot.process(msg, {}, cfg)
 
             assert "user" not in msg["details"]
+            assert msg["category"] == "triagebot"
+            assert msg["summary"] == "TriageBot Response: yes from: tester@site.com"
             assert msg["details"] == {
                 "identifier": "id",
                 "email": "tester@site.com",
