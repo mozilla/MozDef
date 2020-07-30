@@ -32,7 +32,7 @@ class AlertTriageBotEscalation(AlertTask):
     def onEvent(self, event):
         msg = event['_source']
         category = 'access'
-        tags = ['ssh_critical_host_login_escalation', 'pagerduty', 'triagebot']
+        tags = ['triagebot_escalation']
         severity = self.config.severity
         url = self.config.url
 
