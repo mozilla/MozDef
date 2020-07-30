@@ -35,7 +35,7 @@ class TestAlertTriageBotEscalation(AlertTestSuite):
         "category": "access",
         "severity": "INFO",
         "summary": "TriageBot Escalation for event: UdEkkIEJFXEy54grVnfy sent to PagerDuty per 'NO' response from User: test@testerson.com",
-        "tags": ['ssh_critical_host_login_escalation', 'pagerduty', 'triagebot'],
+        "tags": ['triagebot_escalation'],
     }
 
     test_cases = []
