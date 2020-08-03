@@ -42,7 +42,11 @@ def _ssh_sensitive_host_alert():
                         "timestamp": "2019-11-04T23:03:17+00:00",
                         "category": "syslog",
                         "type": "event",
-                        "plugins": ["parse_sshd", "parse_su", "sshdFindIP"],
+                        "mozdef": {
+                            "plugins": [
+                                "parse_sshd", "parse_su", "sshdFindIP"
+                            ]
+                        },
                     },
                     "documentid": "X8-tOG4B-YuPuGRRXQta",
                 }
@@ -110,7 +114,9 @@ def _duo_bypass_code_gen_alert():
                         "utctimestamp": "2019-11-04T23:31:32+00:00",
                         "timestamp": "2019-11-04T23:31:32+00:00",
                         "type": "event",
-                        "plugins": [],
+                        "mozdef": {
+                            "plugins": []
+                        },
                         "source": "UNKNOWN",
                     },
                     "documentid": "wPPKOG4B-YuPuGRRc2s7",
@@ -179,7 +185,9 @@ def _duo_bypass_code_used_alert():
                         "utctimestamp": "2019-10-21T15:48:43+00:00",
                         "timestamp": "2019-10-21T15:48:43+00:00",
                         "type": "event",
-                        "plugins": [],
+                        "mozdef": {
+                            "plugins": []
+                        },
                         "source": "UNKNOWN",
                         "alerts": [
                             {"index": "alerts-201910", "id": "J8b2dR63-kMa62bd-92E"}
@@ -255,13 +263,15 @@ def _ssh_access_releng_alert():
                         "severity": "INFO",
                         "category": "syslog",
                         "type": "event",
-                        "plugins": [
-                            "parse_sshd",
-                            "parse_su",
-                            "sshdFindIP",
-                            "ipFixup",
-                            "geoip",
-                        ],
+                        "mozdef": {
+                            "plugins": [
+                                "parse_sshd",
+                                "parse_su",
+                                "sshdFindIP",
+                                "ipFixup",
+                                "geoip",
+                            ]
+                        },
                         "processid": "UNKNOWN",
                         "processname": "UNKNOWN",
                         "source": "UNKNOWN",
