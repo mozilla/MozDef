@@ -119,3 +119,11 @@ Add is_ip utility function
 ------------------
 
 * Ensure dict2List changes are included
+
+3.0.7 (2020-08-03)
+------------------
+
+* Replaces plugin structure in event with mozdef data class structure
+* Updates wheel version in requirements.txt
+* Adds comments to Make file
+* Updates Readme with release instructions

@@ -20,7 +20,7 @@ ipwhois==0.15.0
 jmespath==0.9.3
 kombu==4.1.0
 mozdef-client==1.0.11
-mozdef-util==3.0.6
+mozdef-util==3.0.7
 netaddr==0.7.19
 oauth2client==1.4.12
 pyOpenSSL==18.0.0
