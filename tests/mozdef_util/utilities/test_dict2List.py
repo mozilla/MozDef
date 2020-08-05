@@ -85,7 +85,11 @@ TEST_ALERT = {
                 "utctimestamp": "2020-04-22T21:31:35.274785+00:00",
                 "timestamp": "2020-04-22T21:31:35.274785+00:00",
                 "type": "event",
-                "plugins": ["ipFixup", "geoip"],
+                "mozdef": {
+                    "plugins": [
+                        "ipFixup", "geoip"
+                    ]
+                },
                 "source": "UNKNOWN",
             },
             "documentid": "JN7No3EBh9xp2NOIpD4Q",
@@ -134,7 +138,11 @@ TEST_ALERT = {
                 "utctimestamp": "2020-04-22T21:31:35.564107+00:00",
                 "timestamp": "2020-04-22T21:31:35.564107+00:00",
                 "type": "event",
-                "plugins": ["ipFixup", "geoip"],
+                "mozdef": {
+                    "plugins": [
+                        "ipFixup", "geoip"
+                    ]
+                },
                 "source": "UNKNOWN",
             },
             "documentid": "Jd7No3EBh9xp2NOIpT40",
@@ -183,7 +191,11 @@ TEST_ALERT = {
                 "utctimestamp": "2020-04-22T21:31:35.852684+00:00",
                 "timestamp": "2020-04-22T21:31:35.852684+00:00",
                 "type": "event",
-                "plugins": ["ipFixup", "geoip"],
+                "mozdef": {
+                    "plugins": [
+                        "ipFixup", "geoip"
+                    ]
+                },
                 "source": "UNKNOWN",
             },
             "documentid": "Jt7No3EBh9xp2NOIpj5T",
@@ -232,7 +244,11 @@ TEST_ALERT = {
                 "utctimestamp": "2020-04-22T21:31:36.427461+00:00",
                 "timestamp": "2020-04-22T21:31:36.427461+00:00",
                 "type": "event",
-                "plugins": ["ipFixup", "geoip"],
+                "mozdef": {
+                    "plugins": [
+                        "ipFixup", "geoip"
+                    ]
+                },
                 "source": "UNKNOWN",
             },
             "documentid": "KN7No3EBh9xp2NOIqD6R",
@@ -281,7 +297,11 @@ TEST_ALERT = {
                 "utctimestamp": "2020-04-22T21:31:36.713494+00:00",
                 "timestamp": "2020-04-22T21:31:36.713494+00:00",
                 "type": "event",
-                "plugins": ["ipFixup", "geoip"],
+                "mozdef": {
+                    "plugins": [
+                        "ipFixup", "geoip"
+                    ]
+                },
                 "source": "UNKNOWN",
             },
             "documentid": "Kd7No3EBh9xp2NOIqT6x",
@@ -352,7 +372,11 @@ TEST_ALERT = {
                 "utctimestamp": "2020-04-22T21:36:01.405116+00:00",
                 "timestamp": "2020-04-22T21:36:01.405116+00:00",
                 "type": "event",
-                "plugins": ["ipFixup", "geoip"],
+                "mozdef": {
+                    "plugins": [
+                        "ipFixup", "geoip"
+                    ]
+                },
                 "source": "UNKNOWN",
             },
             "documentid": "497Ro3EBh9xp2NOIs0Sk",
@@ -401,7 +425,11 @@ TEST_ALERT = {
                 "utctimestamp": "2020-04-22T21:36:01.689772+00:00",
                 "timestamp": "2020-04-22T21:36:01.689772+00:00",
                 "type": "event",
-                "plugins": ["ipFixup", "geoip"],
+                "mozdef": {
+                    "plugins": [
+                        "ipFixup", "geoip"
+                    ]
+                },
                 "source": "UNKNOWN",
             },
             "documentid": "Jd7Ro3EBh9xp2NOItEXH",
