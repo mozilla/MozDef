@@ -384,7 +384,7 @@ def process_msg(mozmsg, msg):
 
     # set the summary
     # make summary be action/username (success login user@place.com)
-    # if no details.username field exists we don"t add it.
+    # if no details.username field exists we don't add it.
 
     # Build summary if neither email, description, nor username exists
     if "eventname" in details:
