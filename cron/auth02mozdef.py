@@ -158,56 +158,201 @@ def process_msg(mozmsg, msg):
     failed_words = ["Failed"]
 
     # fields that should always exist
-    mozmsg.timestamp = msg.date
-    details["messageid"] = msg._id
-    details["sourceipaddress"] = msg.ip
+    if msg.date:
+        mozmsg.timestamp = msg.date
+    if msg._id:
+        details.messageid = msg._id
+    if msg.ip:
+        details.sourceipaddress = msg.ip
 
+    # These fields generally exist at the top level of the auth0
+    # event but are often not filled in for specific events that
+    # contain api calls, so we'll default with the top level,
+    #  and prefer the request/response body values when present.
+    # Auth0 literally adds values of "None" to some fields, so
+    # we check for that too.
     try:
-        details["userid"] = msg.user_id
+        if "description" in msg and msg["description"] != "None":
+            details["description"] = msg["description"]
+        if "audience" in msg and msg["audience"] != "None":
+            details["token_recipient"] = msg["audience"]
+        if "user_id" in msg and msg["user_id"] != "None":
+            details["userid"] = msg["user_id"]
+        if "user_name" in msg:
+            details["username"] = msg["user_name"]
+        if "user_agent" in msg:
+            details["useragent"] = msg["user_agent"]
+        if "client_id" in msg:
+            details["clientid"] = msg["client_id"]
+        if "client_name" in msg:
+            details["clientname"] = msg["client_name"]
+        if "connection" in msg and msg["connection"] != "None":
+            details["connection"] = msg["connection"]
+        if "scope" in msg:
+            details["scope"] = msg["scope"]
+        if "session_connection" in msg:
+            details["session_connection"] = msg["session_connection"]
+        if "session_connection_id" in msg and msg["session_connection_id"] != "None":
+            details["session_connection_id"] = msg["session_connection_id"]
+        if "auth0_client" in msg:
+            details["auth0_client"] = {}
+            details["auth0_client"] = msg.get("auth0_client")
+        if msg["isMobile"]:
+            details["mobile"] = msg["isMobile"]
+    except KeyError:
+        pass
+
+    # capture data from details not present in a request/response body
+    try:
+        if "details" in msg:
+            if "initiatedAt" in msg.details and msg.details.initiatedAt != "None":
+                details.start_time = msg.details.initiatedAt
+            if "completedAt" in msg.details and msg.details.completedAt != "None":
+                details.end_time = msg.details.completedAt
+            if "elapsedTime" in msg.details and msg.details.elapsedTime != "None":
+                details.elapsed_time = msg.details.elapsedTime
+            if "session_id" in msg.details:
+                details.session_id = msg.details.session_id
+            if "code" in msg.details:
+                details.auth_code = msg.details.code
+            if "error" in msg.details:
+                details["auth_error"] = {}
+                details["auth_error"] = msg["details"].get("error")
+            if "stats" in msg.details:
+                details["stats"] = {}
+                details["stats"] = msg["details"].get("stats")
+            if "qs" in msg.details and type(msg.details.qs) is not list:
+                details["querystring"] = {}
+                details["querystring"] = msg["details"].get("qs")
     except KeyError:
         pass
 
     try:
-        if msg.user_name:
-            details["username"] = msg.user_name
-    except KeyError:
-        pass
-
-    try:
-        # the details.request/response exist for api calls
+        # the details.response exist for api calls
         # but not for logins and other events
         # check and prefer them if present.
-        if type(msg.details.response.body) is not list:
-            details["action"] = msg.details.response.body.name
+        if "response" in msg.details:
+            if "body" in msg.details.response and type(msg.details.response.body) is not list:
+                if "name" in msg.details.response.body:
+                    details.action = msg.details.response.body.name
+                if "email" in msg.details.response.body:
+                    details.email = msg.details.response.body.email
+                if "family_name" in msg.details.response.body:
+                    details.user_family_name = msg.details.response.body.family_name
+                if "given_name" in msg.details.response.body:
+                    details.user_given_name = msg.details.response.body.given_name
+                if "nickname" in msg.details.response.body:
+                    details.user_nickname = msg.details.response.body.nickname
+                if "emails" in msg.details.response.body:
+                    details.emails = msg.details.response.body.emails
+                if "userid" not in details:
+                    if "user_id" in msg.details.response.body and msg.details.response.body.user_id is not None:
+                        details.userid = details.response.body.user_id
+                if "identities" in msg.details.response.body and type(msg.details.response.body.identities) is list:
+                    details["identities"] = {}
+                    ident_list = msg.details.response.body.identities
+                    for dic in ident_list:
+                        provider = dic.get("provider")
+                        details["identities"][provider] = {}
+                        details["identities"][provider]["userid"] = dic.get("user_id")
+                        details["identities"][provider]["connection"] = dic.get("connection")
+                        details["identities"][provider]["social"] = dic.get("isSocial")
+                if "ldap_groups" in msg.details.response.body:
+                    details.ldap_groups = msg.details.response.body.ldap_groups
+                if "last_ip" in msg.details.response.body and msg.details.response.body.last_ip is not None:
+                    details.user_last_known_ip = msg.details.response.body.last_ip
+                if "last_login" in msg.details.response.body and msg.details.response.body.last_login is not None:
+                    details.user_last_login = msg.details.response.body.last_login
+                if "multifactor" in msg.details.response.body:
+                    details.multifactor_provider = msg.details.response.body.multifactor
+                if "_HRData" in msg.details.response.body:
+                    details["user_hrdata"] = {}
+                    details["user_hrdata"] = msg.get("details.response.body._HRData")
+        if "response" in msg.details:
+            if "body" in msg.details.response and type(msg.details.response.body) is list:
+                details["identities"] = {}
+                body_list = msg.details.response.body
+                for dic in body_list:
+                    if "connection" in dic:
+                        provider = dic.get("connection")
+                        details["identities"][provider] = {}
+                    if "isSocial" in dic:
+                        details["identities"][provider]["social"] = dic.get("isSocial")
+                    if "profileData" in dic:
+                        details["identities"][provider]["profile_data"] = dic.get("profileData")
+                    if "user_id" in dic:
+                        details["identities"][provider]["user_id"] = dic.get("user_id")
     except KeyError:
         pass
 
     try:
-        if "email" in msg.details.response.body and msg.details.response.body.email is not None:
-            details["email"] = msg.details.response.body.email
+        # the details.request exist for api calls
+        # but not for logins and other events
+        # check and prefer them if present.
+        if "request" in msg.details:
+            if "channel" in msg.details.request and msg.details.request.channel is not None:
+                details.channel = msg.details.request.channel
+            if "method" in msg.details.request:
+                details.method = msg.details.request.method
+            if "path" in msg.details.request:
+                details.uri = msg.details.request.path
+            if "userAgent" in msg.details.request:
+                details.request_useragent = msg.details.request.userAgent
+            if "auth" in msg.details.request and type(msg.details.request.auth) is not list:
+                details["request_auth"] = {}
+                details["request_auth"] = msg.get("details.request.auth")
+            # check that details.request.body is not a list
+            if "body" in msg.details.request and type(msg.details.request.body) is not list:
+                # truncates enabled_clients as this field is incredibly lengthy and causes ES
+                # to error out.
+                if "enabled_clients" in msg.details.request.body and type(msg.details.request.body.enabled_clients) is list:
+                    ES_FIELD_VALUE_LIMIT = 4095
+                    details.enabled_clients = msg.details.request.body.enabled_clients[0:ES_FIELD_VALUE_LIMIT]
+                if "provider" in msg.details.request.body and msg.details.request.body.provider is not None:
+                    details.provider = msg.details.request.body.provider
+                if "userid" not in details:
+                    if msg.details.request.body.user_id and msg.details.request.body.user_id is not None:
+                        details.userid = msg.details.request.body.user_id
+                if "channel" in msg.details.request.body and "channel" not in details:
+                    details.channel = msg.details.request.body.channel
+                if "auth" in msg.details.request.body and "request_auth" not in details:
+                    details["request_auth"] = {}
+                    details["request_auth"] = msg.get("details.request.body.auth")
     except KeyError:
         pass
 
+    # Differentiate authtype and associated data
     try:
-        details["useragent"] = msg.user_agent
-    except KeyError:
-        pass
-
-    try:
-        if msg.client_name:
-            details["clientname"] = msg.client_name
-    except KeyError:
-        pass
-
-    try:
-        if msg.connection:
-            details["connection"] = msg.connection
-    except KeyError:
-        pass
-
-    try:
-        if msg.client_id:
-            details["clientid"] = msg.client_id
+        if "prompts" in msg.details and type(msg.details.prompts) is list:
+            prompts_list = msg.details.prompts
+            details["prompt"] = {}
+            for dic in prompts_list:
+                authtype = dic.get("name")
+                details["prompt"][authtype] = {}
+                if "initiatedAt" in dic:
+                    details["prompt"][authtype]["start_time"] = dic.get("initiatedAt")
+                if "completedAt" in dic:
+                    details["prompt"][authtype]["end_time"] = dic.get("completedAt")
+                if "connection" in dic:
+                    details["prompt"][authtype]["connection"] = dic.get("connection")
+                if "connection_id" in dic:
+                    details["prompt"][authtype]["connection_id"] = dic.get("connection_id")
+                if "strategy" in dic:
+                    details["prompt"][authtype]["strategy"] = dic.get("strategy")
+                if "identity" in dic:
+                    details["prompt"][authtype]["identity"] = dic.get("identity")
+                if "session_user" in dic:
+                    details["prompt"][authtype]["session_user"] = dic.get("session_user")
+                if "elapsedTime" in dic:
+                    details["prompt"][authtype]["elapsed_time"] = dic.get("elapsedTime")
+                if "flow" in dic:
+                    details["prompt"][authtype]["flow"] = dic.get("flow")
+                if "timers" in dic:
+                    details["prompt"][authtype]["timers"] = dic.get("timers")
+                if "user_id" in dic:
+                    details["prompt"][authtype]["userid"] = dic.get("user_id")
+                if "user_name" in dic:
+                    details["prompt"][authtype]["username"] = dic.get("user_name")
     except KeyError:
         pass
 
@@ -237,68 +382,21 @@ def process_msg(mozmsg, msg):
     elif log_types[msg.type].level > 3:
         mozmsg.set_severity(mozdef.MozDefEvent.SEVERITY_CRITICAL)
 
-    # default description
-    details["description"] = ""
-    try:
-        if "description" in msg and msg.description is not None:
-            # use the detailed description of the operation sent from auth0
-            # Update a rule, add a site, update a site, etc
-            details["description"] = msg.description
-    except KeyError:
-        pass
-
     # set the summary
     # make summary be action/username (success login user@place.com)
-    # if no details.username field exists we don't add it.
+    # if no details.username field exists we don"t add it.
 
     # Build summary if neither email, description, nor username exists
-    if 'eventname' in details:
+    if "eventname" in details:
         mozmsg.summary = "{event}".format(event=details.eventname)
-        if 'description' in details and details['description'] != "None":
+        if "description" in details and details["description"] != "None":
             mozmsg.summary += " {description}".format(event=details.eventname, description=details.description)
-        if 'username' in details and details['username'] != "None":
+        if "username" in details and details["username"] != "None":
             mozmsg.summary += " by {username}".format(username=details.username)
-        if 'email' in details and details['email'] != "None":
+        if "email" in details and details["email"] != "None":
             mozmsg.summary += " account: {email}".format(email=details.email)
-        if 'clientname' in details and details['clientname'] != "None":
+        if "clientname" in details and details["clientname"] != "None":
             mozmsg.summary += " to: {clientname}".format(clientname=details.clientname)
-
-    # Get user data if present in response body
-    try:
-        if "multifactor" in msg.details.response.body and type(msg.details.response.body.multifactor) is list:
-            details.mfa_provider = msg.details.response.body.multifactor
-    except KeyError:
-        pass
-
-    try:
-        if "ldap_groups" in msg.details.response.body and type(msg.details.response.body.ldap_groups) is list:
-            details.ldap_groups = msg.details.response.body.ldap_groups
-    except KeyError:
-        pass
-
-    try:
-        if "last_ip" in msg.details.response.body and msg.details.response.body.last_ip is not None:
-            details.user_last_known_ip = msg.details.response.body.last_ip
-    except KeyError:
-        pass
-
-    try:
-        if "last_login" in msg.details.response.body and msg.details.response.body.last_login is not None:
-            details.user_last_login = msg.details.response.body.last_login
-    except KeyError:
-        pass
-
-    # Differentiate auto login (session cookie check validated) from logged in and had password verified
-
-    try:
-        for i in msg.details.prompt:
-            # Session cookie check
-            if i.get("name") == "authenticate":
-                details["authtype"] = "Login succeeded due to a valid session cookie being supplied"
-            elif i.get("name") == "lock-password-authenticate":
-                details["authtype"] = "Login succeeded due to a valid plaintext password being supplied"
-    except KeyError:
-        pass
 
     mozmsg.details = details
 
