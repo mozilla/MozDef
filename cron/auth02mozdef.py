@@ -11,6 +11,9 @@ import sys
 import os
 import requests
 import traceback
+import pickle
+from jose import jwt, exceptions
+from datetime import datetime, timedelta
 
 import mozdef_client as mozdef
 
@@ -309,22 +312,23 @@ def load_state(fpath):
     """Load last msg id we've read from auth0 (log index).
     @fpath string (path to state file)
     """
-    state = 0
     try:
-        with open(fpath) as fd:
-            state = fd.read().split("\n")[0]
+        state = pickle.load(open(fpath, "rb"))
     except IOError:
-        pass
+        # Oh, you're new.
+        state = {
+            'fromid': 0,
+            'bearer': None,
+        }
     return state
 
 
 def save_state(fpath, state):
     """Saves last msg id we've read from auth0 (log index).
     @fpath string (path to state file)
-    @state int (state value)
+    @state dict (state value)
     """
-    with open(fpath, mode="w") as fd:
-        fd.write(str(state) + "\n")
+    pickle.dump(state, open(fpath, "wb"))
 
 
 def byteify(input):
@@ -343,7 +347,7 @@ def fetch_auth0_logs(config, headers, fromid):
     lastid = fromid
 
     r = requests.get(
-        "{url}?take={reqnr}&sort=date:1&per_page={reqnr}&from={fromid}&include_totals=true".format(
+        "{url}/api/v2/logs?take={reqnr}&sort=date:1&per_page={reqnr}&from={fromid}&include_totals=true".format(
             url=config.auth0.url, reqnr=config.auth0.reqnr, fromid=fromid
         ),
         headers=headers,
@@ -403,6 +407,37 @@ def fetch_auth0_logs(config, headers, fromid):
         return (-1, -1, -1, lastid)
 
 
+def fetch_new_bearer(config):
+    data = {
+        "client_id": config.auth0.client_id,
+        "client_secret": config.auth0.client_secret,
+        "audience": "{}/api/v2/".format(config.auth0.url),
+        "grant_type": "client_credentials",
+    }
+    headers = {
+        "content-type": "application/json"
+    }
+    resp = requests.post("{}/oauth/token".format(config.auth0.url), json=data, headers=headers)
+    if not resp.ok:
+        raise Exception(resp.text)
+
+    resp_data = hjson.loads(resp.text)
+    return resp_data['access_token']
+
+
+def verify_bearer(bearer):
+    # Verify the bearer token is not expired
+    try:
+        id_token = jwt.get_unverified_claims(token=bearer)
+        token_expiry = datetime.fromtimestamp(id_token['exp'])
+        # To ensure the bearer token doesn't run out during execution
+        # we pad the time comparision with 30 minutes
+        return (datetime.now() + timedelta(minutes=30)) < token_expiry
+    except exceptions.JOSEError as e:
+        logger.error("Unable to parse token : {} : {}".format(bearer, e))
+        return False
+
+
 def main():
     # Configuration loading
     config_location = os.path.dirname(sys.argv[0]) + "/" + "auth02mozdef.json"
@@ -413,9 +448,18 @@ def main():
         logger.error("No configuration file 'auth02mozdef.json' found.")
         sys.exit(1)
 
-    headers = {"Authorization": "Bearer {}".format(config.auth0.token), "Accept": "application/json"}
+    state = load_state(config.state_file)
+    # If bearer isn't set, reach out to auth0 for it
+    if state['bearer'] is None:
+        state['bearer'] = fetch_new_bearer(config)
+    else:
+        # Verify bearer token is still valid
+        if not verify_bearer(state['bearer']):
+            state['bearer'] = fetch_new_bearer(config)
 
-    fromid = load_state(config.state_file)
+    headers = {"Authorization": "Bearer {}".format(state['bearer']), "Accept": "application/json"}
+
+    fromid = state['fromid']
     # Auth0 will interpret a 0 state as an error on our hosted instance, but will accept an empty parameter "as if it was 0"
     if fromid == 0 or fromid == "0":
         fromid = ""
@@ -433,7 +477,8 @@ def main():
                 break
         fromid = lastid
 
-    save_state(config.state_file, lastid)
+    state['fromid'] = lastid
+    save_state(config.state_file, state)
 
 
 if __name__ == "__main__":
