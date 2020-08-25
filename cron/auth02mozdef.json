@@ -2,11 +2,11 @@
   "mozdef": {
     "url": "http://localhost:8080/events"
   },
-  // Generate the token on https://manage{-dev}.{mozilla.}auth0.com/#/apis (Management API)
-  // url should be in the form of ttps://auth.{mozilla.}auth0.com/api/v2/logs
+  // Url should be in the form of https://auth.{mozilla.}auth0.com
   "auth0": {
     "reqnr": 100,
-    "token": "<add_token>",
+    "client_id": "<add_client_id>",
+    "client_secret": "<add_client_secret>",
     "url": "<add_url>"
   },
   "state_file": "/opt/mozdef/envs/mozdef/cron/auth02mozdef.state",
