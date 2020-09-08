@@ -30,7 +30,7 @@ class TestAlert:
                 radius=50)
         ]
 
-        alert_produced = alert('tester1', evts, [])
+        alert_produced = alert('tester1', evts, [], 'INFO')
 
         assert alert_produced is None
 
@@ -54,7 +54,7 @@ class TestAlert:
                 radius=50)
         ]
 
-        alert_produced = alert('testuser', evts, [])
+        alert_produced = alert('testuser', evts, [], 'INFO')
 
         assert alert_produced is not None
         assert alert_produced.username == 'testuser'
@@ -89,7 +89,7 @@ class TestAlert:
                 radius=50)
         ]
 
-        alert_produced = alert('tester', evts, [])
+        alert_produced = alert('tester', evts, [], 'INFO')
 
         assert alert_produced is not None
         assert len(alert_produced.hops) == 2

@@ -51,7 +51,7 @@ asn_mvmt_records = {
 def test_asn_movement():
     factor = factors.asn_movement(
         MockMMDB(asn_mvmt_records),
-        alert.Severity.WARNING)
+        'WARNING')
 
     test_hops = [
         alert.Hop(
@@ -65,7 +65,7 @@ def test_asn_movement():
     test_alert = alert.Alert(
         username='tester',
         hops=test_hops,
-        severity=alert.Severity.INFO,
+        severity='INFO',
         factors=[])
 
     pipeline = [factor]
@@ -73,7 +73,7 @@ def test_asn_movement():
     modified_alert = factors.pipe(test_alert, pipeline)
 
     assert modified_alert.username == test_alert.username
-    assert modified_alert.severity == alert.Severity.WARNING
+    assert modified_alert.severity == 'WARNING'
     assert len(modified_alert.factors) == 1
     assert 'asn_hops' in modified_alert.factors[0]
     assert len(modified_alert.factors[0]['asn_hops']) == 2
