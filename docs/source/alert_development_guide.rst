@@ -36,8 +36,7 @@ This test should pass and you will have confirmed you have a working environment
 
 At this point, begin development and periodically run your unit-tests locally with the following commands::
 
-  make build-tests
-  make run-tests TEST_CASE=tests/alerts/[YOUR ALERT TEST FILE].py
+  make build-tests && make run-tests TEST_CASE=tests/alerts/[YOUR ALERT TEST FILE].py
 
 
 Background on concepts
