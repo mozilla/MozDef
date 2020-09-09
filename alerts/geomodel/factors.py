@@ -1,7 +1,7 @@
 from typing import Callable, List, NamedTuple
 from functools import reduce
 
-from .alert import Alert, Severity
+from .alert import Alert
 
 
 class Enhancement(NamedTuple):
@@ -11,7 +11,7 @@ class Enhancement(NamedTuple):
     '''
 
     extras: dict
-    severity: Severity
+    severity: str
 
 
 # A factor is a sort of plugin intended to enrich a GeoModel alert with extra
@@ -38,7 +38,7 @@ def pipe(alert: Alert, factors: List[FactorInterface]) -> Alert:
         alert)
 
 
-def asn_movement(db, escalate: Severity) -> FactorInterface:
+def asn_movement(db, escalate: str) -> FactorInterface:
     '''Enriches GeoModel alerts with information about the ASNs from which IPs
     in hops originate.  When movement from one ASN to another is detected, the
     alert's severity will be raised.

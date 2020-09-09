@@ -1,5 +1,4 @@
 from datetime import datetime
-from enum import Enum
 import math
 from operator import attrgetter
 from typing import List, NamedTuple, Optional
@@ -44,18 +43,6 @@ class Hop(NamedTuple):
         }
 
 
-class Severity(Enum):
-    '''A representation of the different levels of severity that an alert can
-    be raised to.
-    '''
-
-    STATUS = 'STATUS'
-    INFO = 'INFO'
-    WARNING = 'WARNING'
-    CRITICAL = 'CRITICAL'
-    ERROR = 'ERROR'
-
-
 class Alert(NamedTuple):
     '''A container for the data the alerts output by GeoModel contain.
 
@@ -63,7 +50,7 @@ class Alert(NamedTuple):
 
     username: str
     hops: List[Hop]
-    severity: Severity
+    severity: str
     # Because we cannot know ahead of time what factors (see factors.py) will
     # have been implemented and registered for use, this container should be
     # thought of as something of a black-box useful only for humans looking
@@ -92,7 +79,8 @@ def _travel_possible(loc1: Locality, loc2: Locality) -> bool:
 def alert(
         username: str,
         from_evts: List[Locality],
-        from_es: List[Locality]
+        from_es: List[Locality],
+        severity: str
 ) -> Optional[Alert]:
     '''Determine whether an alert should fire given a particular user's
     locality state.  If an alert should fire, an `Alert` is returned, otherwise
@@ -120,7 +108,7 @@ def alert(
     if len(hops) == 0:
         return None
 
-    return Alert(username, hops, Severity.INFO, [])
+    return Alert(username, hops, severity, [])
 
 
 def summary(alert: Alert) -> str:
