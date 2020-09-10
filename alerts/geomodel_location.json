@@ -1,4 +1,9 @@
 {
+  // severity to (de-)escalate the alert to/from in the case
+  // that movement from one ASN to another is detected in the alert.
+  "asn_movement_severity": "DEBUG",
+  // Default severity of alert
+  "severity": "INFO",
   "localities": {
     "es_index": "localities",
     "valid_duration_days": 1,

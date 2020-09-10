@@ -50,6 +50,8 @@ class Config(NamedTuple):
     '''The top-level configuration type.
     '''
 
+    asn_movement_severity: str
+    severity: str
     localities: Localities
     events: Events
     whitelist: Whitelist

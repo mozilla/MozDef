@@ -6,7 +6,7 @@
 # Copyright (c) 2015 Mozilla Corporation
 
 from datetime import datetime, timedelta
-import json
+import hjson
 import os
 
 import maxminddb as mmdb
@@ -144,7 +144,8 @@ class AlertGeoModel(AlertTask):
         new_alert = alert.alert(
             cleaned.state.username,
             new_state.localities,
-            cleaned.state.localities)
+            cleaned.state.localities,
+            cfg.severity)
 
         updated = locality.update(cleaned.state, new_state)
 
@@ -165,7 +166,7 @@ class AlertGeoModel(AlertTask):
                 'geomodel',
                 ['geomodel'],
                 events,
-                modded_alert.severity.value)
+                modded_alert.severity)
 
             # The IP that the user is acting from is the one they hopped to.
 
@@ -184,7 +185,7 @@ class AlertGeoModel(AlertTask):
 
     def _load_config(self):
         with open(_CONFIG_FILE) as cfg_file:
-            cfg = json.load(cfg_file)
+            cfg = hjson.load(cfg_file)
 
             cfg['localities'] = config.Localities(**cfg['localities'])
 
@@ -208,7 +209,7 @@ class AlertGeoModel(AlertTask):
             pipeline.append(
                 factors.asn_movement(
                     mmdb.open_database(cfg.factors.asn_movement.maxmind_db_path),
-                    alert.Severity.WARNING
+                    cfg.asn_movement_severity
                 )
             )
 
