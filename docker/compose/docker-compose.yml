@@ -203,7 +203,6 @@ services:
     restart: always
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && crond -n'
     volumes:
-      - cron:/opt/mozdef/envs/mozdef/cron
       - geolite_db:/opt/mozdef/envs/mozdef/data/
     depends_on:
       - base
@@ -346,7 +345,6 @@ volumes:
   elasticsearch:
   rabbitmq:
   mongodb:
-  cron:
   geolite_db:
 
 networks:
