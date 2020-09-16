@@ -22,6 +22,7 @@ class AlertAuth0VerticalPasswordGuessing(AlertTask):
         search_query.add_must([
             TermMatch('tags', 'auth0'),
             TermMatch('details.eventname', 'Failed Login (wrong password)'),
+            TermMatch('details.description', 'Wrong email or password.'),
         ])
 
         self.filtersManual(search_query)
