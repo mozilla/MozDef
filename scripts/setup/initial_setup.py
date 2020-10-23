@@ -8,6 +8,7 @@
 import argparse
 
 from datetime import datetime, timedelta
+from pathlib import Path
 from time import sleep
 from configlib import getConfig
 import json
@@ -167,13 +168,13 @@ if kibana_index_name in client.get_indices():
 kibana_headers = {'content-type': 'application/json', 'kbn-xsrf': 'true'}
 
 # Create index-patterns
-index_mappings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index_mappings')
-listing = os.listdir(index_mappings_path)
-for infile in listing:
-    json_file_path = os.path.join(index_mappings_path, infile)
-    with open(json_file_path) as json_data:
-        mapping_data = json.load(json_data)
+current_dir_path = Path(__file__).resolve().parent
+for file in current_dir_path.joinpath("index_mappings").glob("*.json"):
+    with open(file, "r") as f:
+        mapping_data = json.load(f)
         index_name = mapping_data['attributes']['title']
+        # Transform data["attributes"]["field"] to a string
+        mapping_data["attributes"]["fields"] = json.dumps(mapping_data["attributes"]["fields"])
         print("Creating {0} index mapping".format(index_name))
         mapping_url = kibana_url + "/api/saved_objects/index-pattern/" + index_name
         resp = requests.post(url=mapping_url, data=json.dumps(mapping_data), headers=kibana_headers)

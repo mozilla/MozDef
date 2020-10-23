@@ -143,6 +143,11 @@ services:
       cache_from:
         - mozdef/mozdef_alertactions
         - mozdef_alertactions:latest
+    healthcheck:
+      test: "[[ $$(pgrep python | wc -l) -ge 1 ]]"
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && python alert_actions_worker.py -c alert_actions_worker.conf'
     depends_on:
@@ -161,6 +166,11 @@ services:
       cache_from:
         - mozdef/mozdef_alerts
         - mozdef_alerts:latest
+    healthcheck:
+      test: "celery inspect ping -A lib.tasks"
+      interval: 30s
+      timeout: 6s
+      retries: 10
     restart: always
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && celery -A lib.tasks worker --loglevel=info --beat'
     depends_on:
@@ -200,6 +210,11 @@ services:
       cache_from:
         - mozdef/mozdef_cron
         - mozdef_cron:latest
+    healthcheck:
+      test: "[[ $$(pgrep crond | wc -l) -eq 1 ]]"
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && crond -n'
     volumes:
@@ -242,6 +257,11 @@ services:
       cache_from:
         - mozdef/mozdef_mq_worker
         - mozdef_mq_worker:latest
+    healthcheck:
+      test: "[[ $$(pgrep python | wc -l) -ge 1 ]]"
+      interval: 30s
+      timeout: 3s
+      retries: 10
     restart: always
     command: bash -c 'while ! timeout 1 bash -c "echo > /dev/tcp/elasticsearch/9200";do sleep 1;done && python esworker_eventtask.py -c esworker_eventtask.conf'
     depends_on:
