@@ -287,7 +287,7 @@ class taskConsumer(object):
         # print("RECEIVED MESSAGE: %r" % (body, ))
         try:
             # default elastic search metadata for an event
-            metadata = {"index": "events", "id": None}
+            metadata = {"index": "events-default-current", "id": None}
             # just to be safe..check what we were sent.
             if isinstance(body, dict):
                 bodyDict = body

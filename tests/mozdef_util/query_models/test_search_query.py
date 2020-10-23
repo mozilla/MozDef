@@ -149,7 +149,7 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted(sorted_hits[0].keys()) == ['_id', '_index', '_score', '_source']
         assert type(sorted_hits[0]['_id']) == str
 
-        assert sorted_hits[0]['_index'] == datetime.now().strftime("events-%Y%m%d")
+        assert sorted_hits[0]['_index'] == datetime.now().strftime("events-default-%Y%m%d")
 
         assert sorted_hits[0]['_source']['ip'] == '1.2.3.4'
         assert sorted_hits[0]['_source']['summary'] == 'Test Summary'
@@ -161,7 +161,7 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted(sorted_hits[1].keys()) == ['_id', '_index', '_score', '_source']
         assert type(sorted_hits[1]['_id']) == str
 
-        assert sorted_hits[1]['_index'] == datetime.now().strftime("events-%Y%m%d")
+        assert sorted_hits[1]['_index'] == datetime.now().strftime("events-default-%Y%m%d")
 
         assert sorted_hits[1]['_source']['ip'] == '1.2.3.4'
         assert sorted_hits[1]['_source']['summary'] == 'Test Summary'
@@ -172,7 +172,7 @@ class TestExecute(SearchQueryUnitTest):
 
         assert type(sorted_hits[2]['_id']) == str
 
-        assert sorted_hits[2]['_index'] == datetime.now().strftime("events-%Y%m%d")
+        assert sorted_hits[2]['_index'] == datetime.now().strftime("events-default-%Y%m%d")
 
         assert sorted_hits[2]['_source']['ip'] == '127.0.0.1'
         assert sorted_hits[2]['_source']['summary'] == 'Test Summary'
@@ -226,7 +226,7 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         assert type(results['hits'][0]['_id']) == str
 
-        assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
+        assert results['hits'][0]['_index'] == datetime.now().strftime("events-default-%Y%m%d")
 
         assert results['hits'][0]['_source']['note'] == 'Example note'
         assert results['hits'][0]['_source']['summary'] == 'Test Summary'
@@ -238,7 +238,7 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted(results['hits'][1].keys()) == ['_id', '_index', '_score', '_source']
         assert type(results['hits'][1]['_id']) == str
 
-        assert results['hits'][1]['_index'] == datetime.now().strftime("events-%Y%m%d")
+        assert results['hits'][1]['_index'] == datetime.now().strftime("events-default-%Y%m%d")
 
         assert results['hits'][1]['_source']['note'] == 'Example note'
         assert results['hits'][1]['_source']['summary'] == 'Test Summary'
@@ -275,7 +275,7 @@ class TestExecute(SearchQueryUnitTest):
         assert sorted(results['hits'][0].keys()) == ['_id', '_index', '_score', '_source']
         assert type(results['hits'][0]['_id']) == str
 
-        assert results['hits'][0]['_index'] == datetime.now().strftime("events-%Y%m%d")
+        assert results['hits'][0]['_index'] == datetime.now().strftime("events-default-%Y%m%d")
 
         assert results['hits'][0]['_source']['note'] == 'Example note'
         assert results['hits'][0]['_source']['summary'] == 'Test Summary'

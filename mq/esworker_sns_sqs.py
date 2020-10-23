@@ -75,7 +75,7 @@ class taskConsumer(object):
     def on_message(self, message):
         try:
             # default elastic search metadata for an event
-            metadata = {"index": "events", "id": None}
+            metadata = {"index": "events-default-current", "id": None}
             event = {}
 
             event["receivedtimestamp"] = toUTC(datetime.now()).isoformat()

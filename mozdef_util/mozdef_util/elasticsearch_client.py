@@ -164,7 +164,7 @@ class ElasticsearchClient():
         doc_body = self.__parse_document(body)
         return self.__save_document(index=index, body=doc_body, doc_id=doc_id, bulk=bulk)
 
-    def save_event(self, body, index='events', doc_id=None, bulk=False):
+    def save_event(self, body, index='events-default-current', doc_id=None, bulk=False):
         doc_body = self.__parse_document(body)
         event = Event(doc_body)
         event.add_required_fields()

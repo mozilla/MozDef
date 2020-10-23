@@ -5,11 +5,11 @@ from mq.plugins.guardDuty import message
 class TestGuardDuty(object):
     def setup(self):
         self.plugin = message()
-        self.metadata = {"index": "events"}
+        self.metadata = {"index": "events-default-current"}
 
     # Should never match and be modified by the plugin
     def test_nosource_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {"tags": "guardduty"}
         event["details"] = []
 
@@ -19,7 +19,7 @@ class TestGuardDuty(object):
 
     # Should never match and be modified by the plugin
     def test_wrongsource_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {"tags": "guardduty", "source": "stackdriver"}
         event["details"] = []
 
@@ -29,7 +29,7 @@ class TestGuardDuty(object):
 
     # Should never match and be modified by the plugin
     def test_nodetails_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {"key1": "syslog", "source": "guardduty"}
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -37,7 +37,7 @@ class TestGuardDuty(object):
         assert result == event
 
     def verify_metadata(self, metadata):
-        assert metadata["index"] == "events"
+        assert metadata["index"] == "events-default-current"
 
     def verify_defaults(self, result):
         assert result["source"] == "guardduty"

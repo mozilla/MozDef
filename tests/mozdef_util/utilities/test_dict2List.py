@@ -20,7 +20,7 @@ TEST_ALERT = {
     "tags": ["geomodel"],
     "events": [
         {
-            "documentindex": "events-20200422",
+            "documentindex": "events-default-20200422",
             "documentsource": {
                 "receivedtimestamp": "2020-04-22T21:31:35.274785+00:00",
                 "mozdefhostname": "mozdef.website.com",
@@ -95,7 +95,7 @@ TEST_ALERT = {
             "documentid": "JN7No3EBh9xp2NOIpD4Q",
         },
         {
-            "documentindex": "events-20200422",
+            "documentindex": "events-default-20200422",
             "documentsource": {
                 "receivedtimestamp": "2020-04-22T21:31:35.564107+00:00",
                 "mozdefhostname": "mozdef.website.com",
@@ -148,7 +148,7 @@ TEST_ALERT = {
             "documentid": "Jd7No3EBh9xp2NOIpT40",
         },
         {
-            "documentindex": "events-20200422",
+            "documentindex": "events-default-20200422",
             "documentsource": {
                 "receivedtimestamp": "2020-04-22T21:31:35.852684+00:00",
                 "mozdefhostname": "mozdef.website.com",
@@ -201,7 +201,7 @@ TEST_ALERT = {
             "documentid": "Jt7No3EBh9xp2NOIpj5T",
         },
         {
-            "documentindex": "events-20200422",
+            "documentindex": "events-default-20200422",
             "documentsource": {
                 "receivedtimestamp": "2020-04-22T21:31:36.427461+00:00",
                 "mozdefhostname": "mozdef.website.com",
@@ -254,7 +254,7 @@ TEST_ALERT = {
             "documentid": "KN7No3EBh9xp2NOIqD6R",
         },
         {
-            "documentindex": "events-20200422",
+            "documentindex": "events-default-20200422",
             "documentsource": {
                 "receivedtimestamp": "2020-04-22T21:31:36.713494+00:00",
                 "mozdefhostname": "mozdef.website.com",
@@ -307,7 +307,7 @@ TEST_ALERT = {
             "documentid": "Kd7No3EBh9xp2NOIqT6x",
         },
         {
-            "documentindex": "events-20200422",
+            "documentindex": "events-default-20200422",
             "documentsource": {
                 "receivedtimestamp": "2020-04-22T21:36:01.405116+00:00",
                 "mozdefhostname": "mozdef.website.com",
@@ -382,7 +382,7 @@ TEST_ALERT = {
             "documentid": "497Ro3EBh9xp2NOIs0Sk",
         },
         {
-            "documentindex": "events-20200422",
+            "documentindex": "events-default-20200422",
             "documentsource": {
                 "receivedtimestamp": "2020-04-22T21:36:01.689772+00:00",
                 "mozdefhostname": "mozdef.website.com",

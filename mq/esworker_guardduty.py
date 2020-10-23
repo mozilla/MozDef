@@ -33,7 +33,7 @@ except ImportError as e:
 class GDtaskConsumer(taskConsumer):
     def build_submit_message(self, message):
         # default elastic search metadata for an event
-        metadata = {"index": "events", "id": None}
+        metadata = {"index": "events-default-current", "id": None}
 
         event = {}
 

@@ -21,7 +21,7 @@ def _ssh_sensitive_host_alert():
             "tags": ["session", "successful"],
             "events": [
                 {
-                    "documentindex": "events-20191104",
+                    "documentindex": "events-default-20191104",
                     "documentsource": {
                         "receivedtimestamp": "2019-11-04T23:03:17.740981+00:00",
                         "mozdefhostname": "website.com",
@@ -88,7 +88,7 @@ def _duo_bypass_code_gen_alert():
             "tags": ["duosecurity"],
             "events": [
                 {
-                    "documentindex": "events-20191104",
+                    "documentindex": "events-default-20191104",
                     "documentsource": {
                         "receivedtimestamp": "2019-11-04T23:35:02.313328+00:00",
                         "mozdefhostname": "mozdef.website.com",
@@ -159,7 +159,7 @@ def _duo_bypass_code_used_alert():
             "tags": ["duosecurity", "used", "duo_bypass_codes_used"],
             "events": [
                 {
-                    "documentindex": "events-20191021",
+                    "documentindex": "events-default-20191021",
                     "documentsource": {
                         "receivedtimestamp": "2019-10-21T15:50:02.339453+00:00",
                         "mozdefhostname": "mozdef.website.com",
@@ -235,7 +235,7 @@ def _ssh_access_releng_alert():
             "tags": ["ssh"],
             "events": [
                 {
-                    "documentindex": "events-20191105",
+                    "documentindex": "events-default-20191105",
                     "documentsource": {
                         "receivedtimestamp": "2019-11-05T01:13:25.818826+00:00",
                         "mozdefhostname": "mozdef4.private.mdc1.mozilla.com",

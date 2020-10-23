@@ -5,10 +5,10 @@ from mq.plugins.stackdriver_gceactivity import message
 class TestStackDriverGCEActivity(object):
     def setup(self):
         self.plugin = message()
-        self.metadata = {"index": "events"}
+        self.metadata = {"index": "events-default-current"}
 
     def test_notags_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {"category": "gceactivity"}
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -16,7 +16,7 @@ class TestStackDriverGCEActivity(object):
         assert result == event
 
     def test_nocategory_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {"tags": "audit"}
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -25,7 +25,7 @@ class TestStackDriverGCEActivity(object):
 
     # Should never match and be modified by the plugin
     def test_wrongtags_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {"tags": "audit", "category": "gceactivity"}
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -33,7 +33,7 @@ class TestStackDriverGCEActivity(object):
         assert result == event
 
     def verify_metadata(self, metadata):
-        assert metadata["index"] == "events"
+        assert metadata["index"] == "events-default-current"
 
     def verify_defaults(self, result):
         assert result["category"] == "gceactivity"

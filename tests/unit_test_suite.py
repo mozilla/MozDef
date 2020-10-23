@@ -27,8 +27,8 @@ class UnitTestSuite(object):
         self.rabbitmq_alerts_consumer = setup_rabbitmq_client(self.options)
 
         current_date = datetime.now()
-        self.event_index_name = current_date.strftime("events-%Y%m%d")
-        self.previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-%Y%m%d")
+        self.event_index_name = current_date.strftime("events-default-%Y%m%d")
+        self.previous_event_index_name = (current_date - timedelta(days=1)).strftime("events-default-%Y%m%d")
         self.alert_index_name = current_date.strftime("alerts-%Y%m")
 
         if self.config_delete_indexes:
@@ -54,12 +54,14 @@ class UnitTestSuite(object):
         self.es_client.save_event(body=event)
 
     def populate_test_object(self, event):
-        self.es_client.save_object(index='events', body=event)
+        self.es_client.save_object(index='events-default-current', body=event)
 
     def setup_elasticsearch(self):
         self.es_client.create_index(self.event_index_name, index_config=self.mapping_options)
+        self.es_client.create_alias('events-default-current', self.event_index_name)
         self.es_client.create_alias('events', self.event_index_name)
         self.es_client.create_index(self.previous_event_index_name, index_config=self.mapping_options)
+        self.es_client.create_alias('events-default-previous', self.previous_event_index_name)
         self.es_client.create_alias('events-previous', self.previous_event_index_name)
         self.es_client.create_alias_multiple_indices('events-weekly', [self.event_index_name, self.previous_event_index_name])
         self.es_client.create_index(self.alert_index_name, index_config=self.mapping_options)
@@ -67,8 +69,10 @@ class UnitTestSuite(object):
 
     def reset_elasticsearch(self):
         self.es_client.delete_index(self.event_index_name, True)
+        self.es_client.delete_index('events-default-current', True)
         self.es_client.delete_index('events', True)
         self.es_client.delete_index(self.previous_event_index_name, True)
+        self.es_client.delete_index('events-default-previous', True)
         self.es_client.delete_index('events-previous', True)
         self.es_client.delete_index(self.alert_index_name, True)
         self.es_client.delete_index('alerts', True)

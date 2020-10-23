@@ -5,11 +5,11 @@ from mq.plugins.stackdriver_audit import message
 class TestStackDriverAudit(object):
     def setup(self):
         self.plugin = message()
-        self.metadata = {"index": "events"}
+        self.metadata = {"index": "events-default-current"}
 
     # Should never match and be modified by the plugin
     def test_notags_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {
             "source": "stackdriver",
             "details": {"logName": "projects/mcd-001-252615/logs/cloudaudit.googleapis.com%2Fdata_access"},
@@ -20,7 +20,7 @@ class TestStackDriverAudit(object):
         assert result == event
 
     def test_wrongtags_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {
             "tags": "audit",
             "source": "stackdriver",
@@ -32,7 +32,7 @@ class TestStackDriverAudit(object):
         assert result == event
 
     def verify_metadata(self, metadata):
-        assert metadata["index"] == "events"
+        assert metadata["index"] == "events-default-current"
 
     def verify_defaults(self, result):
         assert result["category"] == "data_access"

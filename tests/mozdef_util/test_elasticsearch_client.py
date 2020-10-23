@@ -23,7 +23,7 @@ class ElasticsearchClientTest(UnitTestSuite):
         self.es_client = ElasticsearchClient(self.options.esservers, bulk_refresh_time=3)
 
     def get_num_events(self):
-        self.refresh('events')
+        self.refresh('events-default-current')
         search_query = SearchQuery()
         search_query.add_must(TermMatch('_type', DOCUMENT_TYPE))
         search_query.add_aggregation(Aggregation('_type'))
@@ -44,7 +44,7 @@ class MockTransportClass:
         self.original_function = orig_function
 
     def perform_request(self, method, url, headers=None, params=None, body=None):
-        if url == '/_bulk' or url == '/events/_doc':
+        if url == '/_bulk' or url == '/events-default-current/_doc':
             self.request_counts += 1
         return self.original_function(method, url, params=params, body=body)
 
@@ -58,7 +58,7 @@ class TestWriteWithRead(ElasticsearchClientTest):
             'events': [
                 {
                     'documentid': 'l-a3V5mbQl-C91RDzjpNig',
-                    'documentindex': 'events-20160819',
+                    'documentindex': 'events-default-20160819',
                     'documentsource': {
                         'category': 'bronotice',
                         'details': {
@@ -337,7 +337,7 @@ class TestBulkWritesWithMoreThanThreshold(BulkTest):
             events.append({"key": "value" + str(num)})
 
         for event in events:
-            self.es_client.save_object(index='events', body=event, bulk=True)
+            self.es_client.save_object(index='events-default-current', body=event, bulk=True)
 
         self.refresh(self.event_index_name)
 
@@ -417,7 +417,7 @@ class TestGetIndices(ElasticsearchClientTest):
         # Either both of all_indices and open_indices are the same as
         # expected_indices OR both of the former sets contain an additional
         # index in case the day changed while testing.
-        current_name = self.event_index_name.split('-')[1]  # eg events-20200312
+        current_name = self.event_index_name.split('-')[2]  # eg events-default-20200312
         current_day = datetime(
             int(current_name[0:4]),  # Year
             int(current_name[4:6]),  # Month
@@ -428,7 +428,7 @@ class TestGetIndices(ElasticsearchClientTest):
             next_day.year, next_day.month, next_day.day
         )
 
-        next_index_name = "events-{}".format(next_name)
+        next_index_name = "events-default-{}".format(next_name)
 
         assert all([expected in all_indices for expected in expected_indices])
         assert all([expected in open_indices for expected in expected_indices])
@@ -554,11 +554,12 @@ class TestBulkInvalidFormatProblem(BulkTest):
         # Recreate the test indexes with a custom mapping to throw
         # parsing errors
         if self.config_delete_indexes:
-            self.es_client.delete_index("events", True)
+            self.es_client.delete_index("events-default-current", True)
+            self.es_client.delete_index("events-default-previous", True)
             self.es_client.delete_index(self.event_index_name, True)
             self.es_client.create_index(self.event_index_name, index_config=mapping)
-            self.es_client.create_alias('events', self.event_index_name)
-            self.es_client.create_alias('events-previous', self.event_index_name)
+            self.es_client.create_alias('events-default-current', self.event_index_name)
+            self.es_client.create_alias('events-default-previous', self.event_index_name)
 
     def test_bulk_problems(self):
         event = {
@@ -568,8 +569,8 @@ class TestBulkInvalidFormatProblem(BulkTest):
             "utcstamp": "abc",
         }
 
-        self.es_client.save_object(index='events', body=event, bulk=True)
-        self.es_client.save_object(index='events', body=malformed_event, bulk=True)
+        self.es_client.save_object(index='events-default-current', body=event, bulk=True)
+        self.es_client.save_object(index='events-default-current', body=malformed_event, bulk=True)
         self.refresh(self.event_index_name)
         time.sleep(5)
         assert self.get_num_events() == 1

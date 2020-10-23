@@ -5,11 +5,11 @@ from mq.plugins.stackdriver_syslog import message
 class TestStackDriverSyslog(object):
     def setup(self):
         self.plugin = message()
-        self.metadata = {"index": "events"}
+        self.metadata = {"index": "events-default-current"}
 
     # Should never match and be modified by the plugin
     def test_notags_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {
             "source": "stackdriver",
         }
@@ -19,7 +19,7 @@ class TestStackDriverSyslog(object):
         assert result == event
 
     def test_wrongtags_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {
             "tags": "audit",
             "source": "stackdriver",
@@ -30,7 +30,7 @@ class TestStackDriverSyslog(object):
         assert result == event
 
     def test_wrongcategory_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {
             "tags": "audit",
             "source": "stackdriver",
@@ -41,7 +41,7 @@ class TestStackDriverSyslog(object):
         assert result == event
 
     def verify_metadata(self, metadata):
-        assert metadata["index"] == "events"
+        assert metadata["index"] == "events-default-current"
 
     def verify_defaults(self, result):
         assert result["category"] == "syslog"

@@ -5,11 +5,11 @@ from mq.plugins.stackdriver import message
 class TestStackDriver(object):
     def setup(self):
         self.plugin = message()
-        self.metadata = {"index": "events"}
+        self.metadata = {"index": "events-default-current"}
 
     # Should never match and be modified by the plugin
     def test_nodetails_log(self):
-        metadata = {"index": "events"}
+        metadata = {"index": "events-default-current"}
         event = {"tags": "pubsub"}
 
         result, metadata = self.plugin.onMessage(event, metadata)
@@ -17,7 +17,7 @@ class TestStackDriver(object):
         assert result == event
 
     def verify_metadata(self, metadata):
-        assert metadata["index"] == "events"
+        assert metadata["index"] == "events-default-current"
 
     def verify_defaults(self, result):
         assert result["category"] == "data_access"
