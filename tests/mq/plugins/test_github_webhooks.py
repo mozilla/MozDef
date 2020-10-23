@@ -5,11 +5,11 @@ class TestGithubWebhooksFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
 
     def verify_metadata(self, metadata):
-        assert metadata['index'] == 'events'
+        assert metadata['index'] == 'events-default-current'
 
     def test_defaults(self):
         event = {

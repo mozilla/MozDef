@@ -10,13 +10,13 @@ class TestBroFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
 
     # Should never match and be modified by the plugin
     def test_notbro_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'key1': 'bro'
@@ -29,7 +29,7 @@ class TestBroFixup(object):
     # Should never match and be modified by the plugin
     def test_notbro_log2(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'bro': 'value1'
@@ -42,7 +42,7 @@ class TestBroFixup(object):
     # Should never match and be modified by the plugin
     def test_bro_notype_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'category': 'bro'
@@ -95,7 +95,7 @@ class TestBroFixup(object):
         assert result['mozdefhostname'] == 'failed to fetch mozdefhostname'
 
     def verify_metadata(self, metadata):
-        assert metadata['index'] == 'events'
+        assert metadata['index'] == 'events-default-current'
 
     def test_defaults(self):
         event = {

@@ -11,13 +11,13 @@ class TestSuricataFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
 
     # Should never match and be modified by the plugin
     def test_notsuri_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'key1': 'suricata'
@@ -30,7 +30,7 @@ class TestSuricataFixup(object):
     # Should never match and be modified by the plugin
     def test_notsuri_log2(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'suricata': 'value1'
@@ -43,7 +43,7 @@ class TestSuricataFixup(object):
     # Should never match and be modified by the plugin
     def test_suricata_nocustomendpoint_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'category': 'suricata',
@@ -57,7 +57,7 @@ class TestSuricataFixup(object):
 
     def test_suricata_nocategory_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'customendpoint': '',
@@ -71,7 +71,7 @@ class TestSuricataFixup(object):
 
     def test_suricata_wrongcategory_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'customendpoint': '',
@@ -87,7 +87,7 @@ class TestSuricataFixup(object):
     # Should never match and be modified by the plugin
     def test_suricata_notype_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'category': 'suricata',
@@ -104,7 +104,7 @@ class TestSuricataFixup(object):
 
     def test_suricata_wrongtype_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'customendpoint': '',
@@ -150,7 +150,7 @@ class TestSuricataFixup(object):
         assert result['source'] == 'alamakota'
 
     def verify_metadata(self, metadata):
-        assert metadata['index'] == 'events'
+        assert metadata['index'] == 'events-default-current'
 
     def test_defaults(self):
         event = {

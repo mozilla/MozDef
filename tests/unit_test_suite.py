@@ -89,7 +89,7 @@ class UnitTestSuite(object):
         source_ip = self.random_ip()
 
         event = {
-            "_index": "events",
+            "_index": "events-default-current",
             "_source": {
                 "category": "excategory",
                 "utctimestamp": current_timestamp,

@@ -9,13 +9,13 @@ class TestSquidFixup(object):
     def setup(self):
         self.plugin = message()
         self.metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
 
     # Should never match and be modified by the plugin
     def test_notsquid_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'key1': 'squid'
@@ -28,7 +28,7 @@ class TestSquidFixup(object):
     # Should never match and be modified by the plugin
     def test_notsquid_log2(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'squid': 'value1'
@@ -41,7 +41,7 @@ class TestSquidFixup(object):
     # Should never match and be modified by the plugin
     def test_squid_notype_log(self):
         metadata = {
-            'index': 'events'
+            'index': 'events-default-current'
         }
         event = {
             'category': 'proxy'
@@ -88,7 +88,7 @@ class TestSquidFixup(object):
         assert result['mozdefhostname'] == 'failed to fetch mozdefhostname'
 
     def verify_metadata(self, metadata):
-        assert metadata['index'] == 'events'
+        assert metadata['index'] == 'events-default-current'
 
     def test_defaults(self):
         event = {

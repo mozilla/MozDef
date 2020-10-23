@@ -49,27 +49,27 @@ class TestAdd(BulkQueueTest):
 
     def test_basic_add(self):
         assert self.queue.size() == 0
-        self.queue.add(index='events', body={'keyname', 'valuename'})
+        self.queue.add(index='events-default-current', body={'keyname', 'valuename'})
         assert self.queue.size() == 1
         assert self.queue.started() is False
 
     def test_add_exact_threshold(self):
         for num in range(0, 20):
-            self.queue.add(index='events', body={'keyname': 'value' + str(num)})
+            self.queue.add(index='events-default-current', body={'keyname': 'value' + str(num)})
         assert self.queue.size() == 0
         assert self.num_objects_saved() == 20
         assert self.queue.started() is False
 
     def test_add_over_threshold(self):
         for num in range(0, 21):
-            self.queue.add(index='events', body={'keyname': 'value' + str(num)})
+            self.queue.add(index='events-default-current', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 20
         assert self.queue.size() == 1
         assert self.queue.started() is False
 
     def test_add_multiple_thresholds(self):
         for num in range(0, 201):
-            self.queue.add(index='events', body={'keyname': 'value' + str(num)})
+            self.queue.add(index='events-default-current', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 200
         assert self.queue.size() == 1
         assert self.queue.started() is False
@@ -82,7 +82,7 @@ class TestTimer(BulkQueueTest):
         assert queue.started() is False
         queue.start_thread()
         assert queue.started() is True
-        queue.add(index='events', body={'keyname': 'valuename'})
+        queue.add(index='events-default-current', body={'keyname': 'valuename'})
         assert queue.size() == 1
         time.sleep(3)
         assert queue.size() == 0
@@ -93,7 +93,7 @@ class TestTimer(BulkQueueTest):
         queue = BulkQueue(self.es_client, flush_time=3, threshold=10)
         queue.start_thread()
         for num in range(0, 201):
-            queue.add(index='events', body={'keyname': 'value' + str(num)})
+            queue.add(index='events-default-current', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 200
         assert queue.size() == 1
         time.sleep(4)
@@ -105,14 +105,14 @@ class TestTimer(BulkQueueTest):
         queue = BulkQueue(self.es_client, flush_time=3, threshold=10)
         queue.start_thread()
         for num in range(0, 201):
-            queue.add(index='events', body={'keyname': 'value' + str(num)})
+            queue.add(index='events-default-current', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 200
         assert queue.size() == 1
         time.sleep(3)
         assert self.num_objects_saved() == 201
         assert queue.size() == 0
         for num in range(0, 201):
-            queue.add(index='events', body={'keyname': 'value' + str(num)})
+            queue.add(index='events-default-current', body={'keyname': 'value' + str(num)})
         assert self.num_objects_saved() == 401
         time.sleep(3)
         assert self.num_objects_saved() == 402
@@ -125,7 +125,7 @@ class TestTimer(BulkQueueTest):
         for num_rounds in range(0, 10):
             for num in range(0, 20):
                 total_events += 1
-                queue.add(index='events', body={'keyname': 'value' + str(num)})
+                queue.add(index='events-default-current', body={'keyname': 'value' + str(num)})
             assert self.num_objects_saved() == total_events
         assert queue.size() == 0
         queue.stop_thread()
