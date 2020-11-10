@@ -22,7 +22,6 @@ kombu==4.1.0
 mozdef-client==1.0.11
 mozdef-util==3.0.7
 netaddr==0.7.19
-oauth2client==1.4.12
 pyOpenSSL==18.0.0
 pycurl==7.43.0.2
 pycparser==2.17
@@ -33,7 +32,7 @@ python-jose==3.2.0
 pytz==2017.3
 PyYAML==5.1.1
 requests-jwt==0.5.3
-requests==2.22.0
+requests==2.24.0
 rsa==3.1.4
 simplejson==3.13.2
 slackclient==1.0.9
@@ -41,10 +40,10 @@ supervisor==4.0.3
 tzlocal==1.4
 uwsgi==2.0.17.1
 tldextract==2.2.0
-google-auth==1.6.3
-google-api-core==1.14.2
-google-api-python-client==1.4.0
-googleapis-common-protos==1.6.0
+google-auth==1.23.0
+google-api-core==1.23.0
+google-api-python-client==1.12.5
+googleapis-common-protos==1.52.0
 google-cloud-pubsub==1.0.0
 grpc-google-iam-v1==0.12.3
 websocket-client==0.44.0
