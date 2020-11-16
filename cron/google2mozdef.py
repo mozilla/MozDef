@@ -6,14 +6,12 @@
 # Copyright (c) 2014 Mozilla Corporation
 
 import sys
-import requests
 import json
 from configlib import getConfig, OptionParser
 from datetime import datetime
-from httplib2 import Http
-from oauth2client.client import SignedJwtAssertionCredentials
-from apiclient.discovery import build
-
+from google.oauth2 import service_account
+import googleapiclient.discovery
+import mozdef_client as mozdef
 from mozdef_util.utilities.toUTC import toUTC
 from mozdef_util.utilities.logger import logger
 
@@ -89,31 +87,20 @@ def main():
         # created while we run.
         lastrun=toUTC(datetime.now()).isoformat()
 
-        # get our credentials
-        mozdefClient=json.loads(open(options.jsoncredentialfile).read())
-        client_email = mozdefClient['client_email']
-        private_key=mozdefClient['private_key']
-
-        # set the oauth scope we will request
         scope=[
             'https://www.googleapis.com/auth/admin.reports.audit.readonly',
             'https://www.googleapis.com/auth/admin.reports.usage.readonly'
         ]
 
-        # authorize our http object
-        # we do this as a 'service account' so it's important
-        # to specify the correct 'sub' option
-        # or you will get access denied even with correct delegations/scope
-
-        credentials = SignedJwtAssertionCredentials(client_email,
-                                                    private_key.encode(),
-                                                    scope=scope,
-                                                    sub=options.impersonate)
-        http = Http()
-        credentials.authorize(http)
+        # get our credentials
+        credentials = service_account.Credentials.from_service_account_file(
+            options.jsoncredentialfile,
+            scopes=scope,
+            subject=options.impersonate
+        )
 
         # build a request to the admin sdk
-        api = build('admin', 'reports_v1', http=http)
+        api = googleapiclient.discovery.build('admin', 'reports_v1', credentials=credentials)
         response = api.activities().list(userKey='all',
                                          applicationName='login',
                                          startTime=toUTC(state.data['lastrun']).strftime('%Y-%m-%dT%H:%M:%S.000Z'),
@@ -124,10 +111,11 @@ def main():
         if 'items' in response:
             for i in response['items']:
                 # flatten the sub dict/lists to pull out the good parts
-                event=dict(category='google')
-                event['tags']=['google','authentication']
-                event['severity']='INFO'
-                event['summary']='google authentication: '
+                mozmsg = mozdef.MozDefEvent(options.url)
+                mozmsg.category = 'google'
+                mozmsg.tags = ['google','authentication']
+                mozmsg.severity = 'INFO'
+                mozmsg.summary = 'google authentication: '
 
                 details=dict()
                 for keyValue in flattenDict(i):
@@ -149,20 +137,20 @@ def main():
                     del details['ipaddress']
 
                 if 'id_time' in details:
-                    event['timestamp']=details['id_time']
-                    event['utctimestamp']=details['id_time']
+                    mozmsg.timestamp = details['id_time']
+                    mozmsg.utctimestamp = details['id_time']
                 if 'events_name' in details:
-                    event['summary']+= details['events_name'] + ' '
+                    mozmsg.summary += details['events_name'] + ' '
                 if 'actor_email' in details:
-                    event['summary']+= details['actor_email'] + ' '
+                    mozmsg.summary += details['actor_email'] + ' '
 
-                event['details']=details
-                events.append(event)
+                mozmsg.details = details
+                events.append(mozmsg)
 
         # post events to mozdef
         logger.debug('posting {0} google events to mozdef'.format(len(events)))
         for e in events:
-            requests.post(options.url,data=json.dumps(e))
+            e.send()
 
         # record the time we started as
         # the start time for next time.
