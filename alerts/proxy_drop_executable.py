@@ -40,9 +40,6 @@ class AlertProxyDropExecutable(AlertTask):
 
     # Set alert properties
     def onAggregation(self, aggreg):
-        # aggreg['count']: number of items in the aggregation, ex: number of failed login attempts
-        # aggreg['value']: value of the aggregation field, ex: toto@example.com
-        # aggreg['events']: list of events in the aggregation
         category = "squid"
         tags = ["squid", "proxy"]
         severity = "WARNING"
