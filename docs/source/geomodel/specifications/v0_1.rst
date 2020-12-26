@@ -275,7 +275,7 @@ in another that an alert will be emitted by GeoModel.
 Realistic Travel Excluded
 -------------------------
 
-As an investigator, I expect that if someone starts working somehwere, gets
+As an investigator, I expect that if someone starts working somewhere, gets
 on a plane and continues working after arriving in their destination that an
 alert will **not** be emitted by GeoModel.
 
