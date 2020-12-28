@@ -11,9 +11,6 @@ per-file-ignores =
   # Ignore any import statements in __init__ files
   mozdef_util/mozdef_util/query_models/__init__.py: F401
 
-  # Ignore redefinition of index name
-  rest/index.py: F811
-
 ignore =
   E225 # missing whitespace around operator
   E231 # missing whitespace after ','
