@@ -1,7 +1,7 @@
 Plugins
 =======
 
-Plugins are supported in several places: Event Processing and the REST api.
+Plugins are supported in several places: Event Processing, Alert Processing and the REST api.
 
 Event Processing
 ----------------
@@ -15,11 +15,14 @@ To create a plugin, make a python class that presents a registration dictionary 
 
     class message(object):
         def __init__(self):
-            '''register our criteria for being passed a message
-               as a list of lower case strings or values to match with an event's dictionary of keys or values
-               set the priority if you have a preference for order of plugins to run.
-               0 goes first, 100 is assumed/default if not sent
-            '''
+            """
+            Register our criteria for being passed a message.
+            Registration is either a list of lower case strings or values to match with an event's dictionary of keys or values,
+            or a dict representing a sub-dict of the matching events (eg. `self.registration = {"tags": ["atag"]}` for matching
+            events with the value "atag" in their tags list).
+            Set the priority if you have a preference for plugins run order.
+            0 goes first, 100 is assumed/default if not sent.
+            """
             self.registration = ['sourceipaddress', 'destinationipaddress']
             self.priority = 20
 
