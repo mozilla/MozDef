@@ -30,6 +30,7 @@ pynsive==0.2.6
 python-dateutil==2.6.1
 python-jose==3.2.0
 pytz==2017.3
+PyJWT==1.7.1
 PyYAML==5.1.1
 requests-jwt==0.5.3
 requests==2.24.0
