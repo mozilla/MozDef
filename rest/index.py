@@ -89,7 +89,7 @@ def status():
 
 @route('/getwatchlist')
 @route('/getwatchlist/')
-def status():
+def get_watchlist():
     '''endpoint for grabbing watchlist contents'''
     if request.body:
         request.body.read()
@@ -103,7 +103,7 @@ def status():
 @route('/veris')
 @route('/veris/')
 @enable_cors
-def index():
+def veris():
     '''returns a count of veris tags'''
     if request.body:
         request.body.read()
@@ -117,7 +117,7 @@ def index():
 @route('/kibanadashboards')
 @route('/kibanadashboards/')
 @enable_cors
-def index():
+def kibana_dashboards():
     '''returns a list of dashboards to show on the UI'''
     if request.body:
         request.body.read()
@@ -132,7 +132,7 @@ def index():
 @post('/blockip', methods=['POST'])
 @post('/blockip/', methods=['POST'])
 @enable_cors
-def index():
+def block_ip():
     '''will receive a call to block an ip address'''
     sendMessgeToPlugins(request, response, 'blockip')
     return response
@@ -141,7 +141,7 @@ def index():
 @post('/blockfqdn', methods=['POST'])
 @post('/blockfqdn/', methods=['POST'])
 @enable_cors
-def index():
+def block_fqdn():
     '''will receive a call to block an ip address'''
     sendMessgeToPlugins(request, response, 'blockfqdn')
     return response
@@ -150,7 +150,7 @@ def index():
 @post('/watchitem', methods=['POST'])
 @post('/watchitem/', methods=['POST'])
 @enable_cors
-def index():
+def watch_item():
     '''will receive a call to watchlist a specific term'''
     sendMessgeToPlugins(request, response, 'watchitem')
     return response
@@ -159,7 +159,7 @@ def index():
 @post('/ipwhois', methods=['POST'])
 @post('/ipwhois/', methods=['POST'])
 @enable_cors
-def index():
+def ip_whois():
     '''return a json version of whois for an ip address'''
     if request.body:
         arequest = request.body.read()
@@ -183,7 +183,7 @@ def index():
 @post('/ipdshieldquery', methods=['POST'])
 @post('/ipdshieldquery/', methods=['POST'])
 @enable_cors
-def index():
+def ip_dshield_query():
     '''
     return a json version of dshield query for an ip address
     https://isc.sans.edu/api/index.html
@@ -221,7 +221,7 @@ def index():
 @route('/alertschedules')
 @route('/alertschedules/')
 @enable_cors
-def index():
+def alert_schedules():
     '''an endpoint to return alert schedules'''
     if request.body:
         request.body.read()
