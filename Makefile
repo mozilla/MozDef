@@ -17,6 +17,7 @@ PARALLEL	:= --parallel
 GITHASH		:= latest  ## Pass `$(git rev-parse --short HEAD`) to tag docker hub images as latest git-hash instead
 TEST_CASE	:= tests  ## Run all (`tests`) or a specific test case (ex `tests/alerts/tests/alerts/test_proxy_drop_exfil_domains.py`)
 TMPDIR      := $(shell mktemp -d )
+SERVICES    :=
 
 .PHONY:all
 all:
@@ -38,6 +39,10 @@ ifneq ("$(wildcard $(ENV))","") #Check for existence of ENV
 else
 	@echo $(ENV) not found.
 endif
+
+.PHONY: restart
+restart: ## Build $(SERVICES) and their dependencies and (re)start them if needed (useful for development)
+	docker-compose -f docker/compose/docker-compose.yml -p $(NAME) up -d --build $(SERVICES)
 
 .PHONY: test
 test: build-tests run-tests
