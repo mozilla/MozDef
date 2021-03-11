@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mozilla/MozDef.svg?branch=master)](https://travis-ci.org/mozilla/MozDef)
+![Tests](https://github.com/mozilla/mozdef/workflows/Tests/badge.svg?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/mozdef/badge/?version=latest)](https://mozdef.readthedocs.io/en/latest/?badge=latest)
 
 # MozDef: ![LOGO](docs/source/images/moz_defense-platform_01.png)
@@ -12,7 +12,7 @@ https://mozdef.readthedocs.org/en/latest/
 
 The following button will launch the Mozilla Enterprise Defense Platform in your AWS account.
 
-**Warning:** Pressing the "Launch Stack" button and following through with the deployment will incur charges to your AWS account. 
+**Warning:** Pressing the "Launch Stack" button and following through with the deployment will incur charges to your AWS account.
 
 [![Launch MozDef](docs/source/images/cloudformation-launch-stack.png)][1]
 
