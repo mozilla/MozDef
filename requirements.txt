@@ -1,6 +1,6 @@
 amqp==2.2.2
 boto3==1.7.67
-bottle==0.12.4
+bottle==0.12.19
 celery==4.1.0
 celery[sqs]==4.1.0
 configlib==2.0.4
