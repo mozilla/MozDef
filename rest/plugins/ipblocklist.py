@@ -97,6 +97,8 @@ class message(object):
             3001,
             self.configfile)
 
+        self.options.contact = getConfig('contact','',self.configfile)
+
         # CIDR whitelist filename formatted comma separted list of 8.8.8.0/24 style masks
         self.options.network_whitelist_file = getConfig('network_whitelist_file', '/dev/null', self.configfile)
 
@@ -183,10 +185,11 @@ class message(object):
                                 'incident[name]': 'block IP {}'.format(str(ipcidr)),
                                 'incident[status]': 'resolved',
                                 'incident[impact_override]': 'none',
-                                'incident[body]': '{} initiated a block of IP {} until {}'.format(
+                                'incident[body]': '{} initiated a block of IP {} until {}{}'.format(
                                     userID,
                                     str(ipcidr),
-                                    end_date.isoformat()),
+                                    end_date.isoformat(),
+                                    self.options.contact),
                                 'incident[component_ids][]': self.options.statuspage_sub_component_id,
                                 'incident[components][{0}]'.format(self.options.statuspage_component_id): "operational"
                             }
