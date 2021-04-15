@@ -14,13 +14,16 @@ class AlertAuth0BruteforceUser(AlertTask):
     def main(self):
         self.parse_config('auth0_bruteforce_user.conf', ['threshold_count',
                                                          'search_depth_min',
-                                                         'severity'])
+                                                         'severity',
+                                                         'email_patterns'])
         search_query = SearchQuery(minutes=int(self.config.search_depth_min))
         search_query.add_must_not(TermMatch('details.username', ''))
         search_query.add_must([
             TermMatch('tags', 'auth0'),
             TermMatch('details.eventname', 'Failed Login (wrong password)'),
         ])
+        for email_pattern in self.config.email_patterns.split(","):
+            search_query.add_should([TermMatch("details.username", email_pattern)])
 
         self.filtersManual(search_query)
         self.searchEventsAggregated('details.username', samplesLimit=10)

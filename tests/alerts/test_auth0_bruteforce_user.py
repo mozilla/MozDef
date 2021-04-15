@@ -80,6 +80,15 @@ class TestAuth0BruteforceUser(AlertTestSuite):
 
     events = AlertTestSuite.create_events(default_event, 10)
     for event in events:
+        event["_source"]["details"]["username"] = "foo@example.com"
+    test_cases.append(
+        NegativeAlertTestCase(
+            description="Negative test with default negative event", events=events
+        )
+    )
+
+    events = AlertTestSuite.create_events(default_event, 10)
+    for event in events:
         event["_source"]["tags"] = ["bad"]
     test_cases.append(
         NegativeAlertTestCase(
