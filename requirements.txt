@@ -33,7 +33,7 @@ pytz==2017.3
 PyYAML==5.1.1
 requests-jwt==0.5.3
 requests==2.24.0
-rsa==3.1.4
+rsa==4.7
 simplejson==3.13.2
 slackclient==1.0.9
 supervisor==4.0.3
