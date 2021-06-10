@@ -19,11 +19,14 @@ class AlertAuthSignRelengSSH(AlertTask):
         if self.config['channel'] == '':
             self.config['channel'] = None
 
+        summary_query = PhraseMatch('summary', 'Accepted publickey for ')
+        summary_query |= PhraseMatch('summary', 'Accepted keyboard-interactive/pam for ')
+
         search_query.add_must([
             TermMatch('tags', 'releng'),
             TermMatch('details.program', 'sshd'),
             QueryStringMatch('hostname: /{}/'.format(self.config['hostfilter'])),
-            PhraseMatch('summary', 'Accepted publickey for ')
+            summary_query,
         ])
 
         for exclusion in self.config['exclusions']:
@@ -57,9 +60,14 @@ class AlertAuthSignRelengSSH(AlertTask):
                 sourceipaddress = x['details']['sourceipaddress']
 
         targetuser = 'unknown'
-        found_usernames = re.findall(r'Accepted publickey for ([A-Za-z0-9]+) from', event['_source']['summary'])
-        if len(found_usernames) > 0:
-            targetuser = found_usernames[0]
+        if 'Accepted publickey for' in event['_source']['summary']:
+            found_usernames = re.findall(r'Accepted publickey for ([A-Za-z0-9]+) from', event['_source']['summary'])
+            if len(found_usernames) > 0:
+                targetuser = found_usernames[0]
+        elif 'Accepted keyboard-interactive/pam' in event['_source']['summary']:
+            found_usernames = re.findall(r'Accepted keyboard-interactive/pam for ([A-Za-z0-9]+) from', event['_source']['summary'])
+            if len(found_usernames) > 0:
+                targetuser = found_usernames[0]
 
         summary = 'SSH login from {0} on {1} as user {2}'.format(sourceipaddress, targethost, targetuser)
         return self.createAlertDict(summary, category, tags, [event], severity, channel=self.config['channel'])

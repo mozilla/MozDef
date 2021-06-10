@@ -152,3 +152,15 @@ class TestAlertSSHAccessSignReleng(AlertTestSuite):
             expected_alert=default_alert
         )
     )
+
+    event = AlertTestSuite.create_event(default_event)
+    event['_source']['summary'] = '[68208]: Accepted keyboard-interactive/pam for ttesterson from 1.2.3.4 port 50942 ssh2'
+    alert = AlertTestSuite.create_alert(default_alert)
+    alert['summary'] = 'SSH login from 1.2.3.4 on host1 as user ttesterson'
+    test_cases.append(
+        PositiveAlertTestCase(
+            description="Positive test case with good keyboard/pam event",
+            events=[event],
+            expected_alert=alert
+        )
+    )
