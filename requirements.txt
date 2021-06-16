@@ -5,7 +5,7 @@ celery==4.1.0
 celery[sqs]==4.1.0
 configlib==2.0.4
 configparser==3.5.0b2
-cryptography==2.3.1
+cryptography==3.2
 dnspython==1.15.0
 duo-client==4.1
 elasticsearch==6.3.1
