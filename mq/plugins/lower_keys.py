@@ -12,7 +12,7 @@ class message(object):
         and sets the keys to lowercase
         '''
 
-        self.registration = ['cloudtrail', 'vidyo', 'suricata', 'guardduty', 'uptycs']
+        self.registration = ['cloudtrail', 'suricata', 'guardduty']
         self.priority = 4
 
     def onMessage(self, message, metadata):
