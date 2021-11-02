@@ -3,6 +3,14 @@
 
 # MozDef: ![LOGO](docs/source/images/moz_defense-platform_01.png)
 
+⚠️ Deprecation Notice ⚠️
+-------------------------
+
+Mozilla is no longer maintaining the Mozilla Enterprise Defense Platform (MozDef) project.
+
+Please fork it to continue development.
+
+
 ## Documentation:
 
 https://mozdef.readthedocs.org/en/latest/
